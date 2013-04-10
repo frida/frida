@@ -37,7 +37,6 @@ export CFLAGS="-ffunction-sections -fdata-sections"
 export LDFLAGS="-Wl,--gc-sections"
 export CFLAGS="-fPIC $CFLAGS"
 export CXXFLAGS="$CFLAGS $CXXFLAGS"
-export OBJCFLAGS="$CFLAGS"
 export CPPFLAGS="$CFLAGS"
 
 export ACLOCAL_FLAGS="-I ${FRIDA_PREFIX}/share/aclocal -I ${FRIDA_SDKROOT}/share/aclocal -I ${FRIDA_TOOLROOT}/share/aclocal"
@@ -78,9 +77,15 @@ done
   echo "export LD=\"$LD\""
   echo "export LDFLAGS=\"$LDFLAGS\""
   echo "export CXXFLAGS=\"$CXXFLAGS\""
-  echo "export OBJCFLAGS=\"$OBJCFLAGS\""
   echo "export CPPFLAGS=\"$CPPFLAGS\""
-) > frida-env.rc
+  echo "export ACLOCAL_FLAGS=\"$ACLOCAL_FLAGS\""
+  echo "export ACLOCAL=\"$ACLOCAL\""
+  echo "export CONFIG_SITE=\"$CONFIG_SITE\""
+  echo "export FRIDA_PREFIX=\"$FRIDA_PREFIX\""
+  echo "export FRIDA_TARGET=\"$FRIDA_TARGET\"" # FIXME remove; subst directly in config.site
+) > build/frida-env.rc
+
+cp config.site build/
 
 echo "Environment created. To enter:"
-echo "# source $(pwd)/frida-env.rc"
+echo "# source $(pwd)/build/frida-env.rc"
