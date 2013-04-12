@@ -155,8 +155,6 @@ done
   echo "export ACLOCAL_FLAGS=\"$ACLOCAL_FLAGS\""
   echo "export ACLOCAL=\"$ACLOCAL\""
   echo "export CONFIG_SITE=\"$CONFIG_SITE\""
-  echo "export FRIDA_PREFIX=\"$FRIDA_PREFIX\""
-  echo "export FRIDA_TARGET=\"$FRIDA_TARGET\"" # FIXME remove; subst directly in config.site
 ) > build/frida-env.rc
 
 case $FRIDA_TARGET in
@@ -171,7 +169,7 @@ esac
 sed \
   -e "s,@frida_target@,$FRIDA_TARGET,g" \
   -e "s,@frida_prefix@,$FRIDA_PREFIX,g" \
-  config.site > build/config.site
+  config.site.in > build/config.site
 
 echo "Environment created. To enter:"
 echo "# source $FRIDA_ROOT/build/frida-env.rc"
