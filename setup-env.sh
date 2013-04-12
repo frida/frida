@@ -1,6 +1,7 @@
 #!/bin/bash
 
 build_os=$(uname -s | tr '[A-Z]' '[a-z]')
+prompt_color=33
 
 case $build_os in
   linux)
@@ -55,16 +56,6 @@ FRIDA_PREFIX="$FRIDA_BUILD/frida-$FRIDA_TARGET"
 FRIDA_PREFIX_LIB="$FRIDA_PREFIX/lib"
 FRIDA_TOOLROOT="$FRIDA_BUILD/toolchain"
 FRIDA_SDKROOT="$FRIDA_BUILD/sdk-$FRIDA_TARGET"
-PATH="$FRIDA_TOOLROOT/bin:$FRIDA_PREFIX/bin:$PATH"
-
-if [ -d "$FRIDA_BUILD" ]; then
-  if [ "$1" = "-f" ]; then
-    rm -rf "$FRIDA_BUILD"
-  else
-    echo "ERROR: $FRIDA_BUILD already exists. Re-run with -f to wipe it." > /dev/stderr
-    exit 1
-  fi
-fi
 
 case $FRIDA_TARGET in
   linux-*)
@@ -116,7 +107,7 @@ CPPFLAGS="$CFLAGS"
 
 ACLOCAL_FLAGS="-I $FRIDA_PREFIX/share/aclocal -I $FRIDA_SDKROOT/share/aclocal -I $FRIDA_TOOLROOT/share/aclocal"
 ACLOCAL="aclocal $ACLOCAL_FLAGS"
-CONFIG_SITE="$FRIDA_BUILD/config.site"
+CONFIG_SITE="$FRIDA_BUILD/config-${FRIDA_TARGET}.site"
 
 PKG_CONFIG="$FRIDA_TOOLROOT/bin/pkg-config --define-variable=frida_sdk_prefix=$FRIDA_SDKROOT"
 PKG_CONFIG_PATH="$FRIDA_PREFIX_LIB/pkgconfig:$FRIDA_SDKROOT/lib/pkgconfig"
@@ -127,22 +118,28 @@ VALAC="$VALAC --vapidir=\"$FRIDA_SDKROOT/share/vala/vapi\" --vapidir=\"$FRIDA_PR
 [ ! -d "$FRIDA_PREFIX/share/aclocal}" ] && mkdir -p "$FRIDA_PREFIX/share/aclocal"
 [ ! -d "$FRIDA_PREFIX/lib}" ] && mkdir -p "$FRIDA_PREFIX/lib"
 
-echo "Downloading and deploying toolchain..."
-$download_command "http://ospy.org/toolchain-$build_os-$toolchain_version.tar.bz2" | tar -C "$FRIDA_BUILD" -xj $tar_stdin || exit 1
+if [ ! -d "$FRIDA_BUILD/toolchain" ]; then
+  echo "Downloading and deploying toolchain..."
+  $download_command "http://ospy.org/toolchain-$build_os-$toolchain_version.tar.bz2" | tar -C "$FRIDA_BUILD" -xj $tar_stdin || exit 1
+fi
 
-echo "Downloading and deploying SDK for $FRIDA_TARGET..."
-$download_command "http://frida-ire.googlecode.com/files/sdk-$FRIDA_TARGET-$sdk_version.tar.bz2" | tar -C "$FRIDA_BUILD" -xj $tar_stdin || exit 1
+if [ ! -d "$FRIDA_BUILD/sdk-$FRIDA_TARGET" ]; then
+  echo "Downloading and deploying SDK for $FRIDA_TARGET..."
+  $download_command "http://frida-ire.googlecode.com/files/sdk-$FRIDA_TARGET-$sdk_version.tar.bz2" | tar -C "$FRIDA_BUILD" -xj $tar_stdin || exit 1
+fi
 
 for template in $(find $FRIDA_TOOLROOT $FRIDA_SDKROOT -name "*.frida.in"); do
   target=$(echo $template | sed 's,\.frida\.in$,,')
+  cp -a "$template" "$target"
   sed \
     -e "s,@FRIDA_TOOLROOT@,$FRIDA_TOOLROOT,g" \
     -e "s,@FRIDA_SDKROOT@,$FRIDA_SDKROOT,g" \
     "$template" > "$target"
-  rm "$template"
 done
 
 (
+  echo "export PATH=\"$FRIDA_TOOLROOT/bin:\$PATH\""
+  echo "export PS1=\"\e[0;${prompt_color}m[\u@\h \w \e[m\e[1;${prompt_color}mfrida-$FRIDA_TARGET\e[m\e[0;${prompt_color}m]\e[m\n\$ \""
   echo "export PKG_CONFIG=\"$PKG_CONFIG\""
   echo "export PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\""
   echo "export VALAC=\"$VALAC\""
@@ -155,21 +152,21 @@ done
   echo "export ACLOCAL_FLAGS=\"$ACLOCAL_FLAGS\""
   echo "export ACLOCAL=\"$ACLOCAL\""
   echo "export CONFIG_SITE=\"$CONFIG_SITE\""
-) > build/frida-env.rc
+) > build/frida-env-${FRIDA_TARGET}.rc
 
 case $FRIDA_TARGET in
   mac32|mac64|ios)
     (
       echo "export OBJCFLAGS=\"$CFLAGS\""
       echo "export MACOSX_DEPLOYMENT_TARGET=10.6"
-    ) >> build/frida-env.rc
+    ) >> build/frida-env-${FRIDA_TARGET}.rc
     ;;
 esac
 
 sed \
   -e "s,@frida_target@,$FRIDA_TARGET,g" \
   -e "s,@frida_prefix@,$FRIDA_PREFIX,g" \
-  config.site.in > build/config.site
+  config.site.in > $CONFIG_SITE
 
 echo "Environment created. To enter:"
-echo "# source $FRIDA_ROOT/build/frida-env.rc"
+echo "# source $FRIDA_ROOT/build/frida-env-${FRIDA_TARGET}.rc"
