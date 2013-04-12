@@ -1,6 +1,9 @@
 # config.site for configure
 
-test "$prefix" = NONE && prefix="$FRIDA_PREFIX"
+frida_target=@frida_target@
+frida_prefix=@frida_prefix@
+
+test "$prefix" = NONE && prefix="$frida_prefix"
 
 enable_nls=no
 
@@ -8,7 +11,7 @@ frida_warning_flags="-Wall"
 
 frida_flags="-Os -pipe -gdwarf-2 -g3"
 
-case $FRIDA_TARGET in
+case $frida_target in
   linux-x86_32)
     host_alias="i686-linux-gnu"
     cross_compiling=yes
@@ -16,18 +19,6 @@ case $FRIDA_TARGET in
   linux-x86_64)
     host_alias="x86_64-linux-gnu"
     cross_compiling=no
-  ;;
-  linux-arm)
-    host_alias="arm-linux-gnueabi"
-    cross_compiling=yes
-
-    ac_tool_prefix="arm-linux-gnueabi-"
-  ;;
-  android)
-    host_alias="arm-linux-androideabi"
-    cross_compiling=yes
-
-    ac_tool_prefix="arm-linux-androideabi-"
   ;;
   mac32)
     host_alias="i686-apple-darwin"
@@ -38,15 +29,6 @@ case $FRIDA_TARGET in
     cross_compiling=yes
 
     frida_flags="$frida_flags -mthumb"
-  ;;
-  ps3)
-    host_alias="ppu"
-    cross_compiling=yes
-
-    ac_tool_prefix="ppu-"
-
-    enable_shared=no
-    enable_static=yes
   ;;
 esac
 
@@ -69,49 +51,33 @@ case "$PACKAGE_TARNAME" in
     glib_cv_stack_grows=no
     glib_cv_uscore=no
 
-    case $FRIDA_TARGET in
-      android|ps3)
-        ac_cv_func_posix_getgrgid_r=no
-        ac_cv_func_posix_getpwuid_r=no
-      ;;
-      *)
-        ac_cv_func_posix_getgrgid_r=yes
-        ac_cv_func_posix_getpwuid_r=yes
-      ;;
-    esac
+    ac_cv_func_posix_getgrgid_r=yes
+    ac_cv_func_posix_getpwuid_r=yes
 
-    case $FRIDA_TARGET in
+    case $frida_target in
       linux-*)
         glib_cv_have_qsort_r=yes
       ;;
-      mac32|mac64|ios|android)
+      mac32|mac64|ios)
         glib_cv_have_qsort_r=no
       ;;
     esac
 
-    case $FRIDA_TARGET in
-      linux-*|mac32|mac64|ios|android|ps3)
+    case $frida_target in
+      linux-*|mac32|mac64|ios)
         enable_proxy_libintl=yes
       ;;
     esac
 
-    CFLAGS="$CFLAGS -I$FRIDA_PREFIX/include"
-    LDFLAGS="$LDFLAGS -L$FRIDA_PREFIX/lib"
+    CFLAGS="$CFLAGS -I$frida_prefix/include"
+    LDFLAGS="$LDFLAGS -L$frida_prefix/lib"
   ;;
   'libffi'|'vala'|'libgee'|'json-glib')
     enable_shared=no
     enable_static=yes
   ;;
-  'libgum')
-    if [ "$FRIDA_TARGET" = "android" ]; then
-      LDFLAGS="$LDFLAGS -lz"
-    fi
+  frida-*)
     enable_maintainer_mode=yes
-    frida_flags="$frida_warning_flags $frida_flags"
-  ;;
-  'zed')
-    enable_maintainer_mode=yes
-    prefix="/Library/Frida"
     frida_flags="$frida_warning_flags $frida_flags"
   ;;
   *)
@@ -120,9 +86,9 @@ case "$PACKAGE_TARNAME" in
 esac
 
 CFLAGS="$CFLAGS $frida_flags"
-OBJCFLAGS="$OBJCFLAGS $frida_flags"
 CXXFLAGS="$CXXFLAGS $frida_flags"
+OBJCFLAGS="$OBJCFLAGS $frida_flags"
 
 if test "$cache_file" = /dev/null; then
-  cache_file="${FRIDA_PREFIX}/config.cache"
+  cache_file="$frida_prefix/config.cache"
 fi
