@@ -31,7 +31,7 @@ udis86-mac64: env-mac64 udis86-autogen udis86-mac64-makefile
 	source build/frida-env-mac64.rc && cd $(mac64)/udis86 && make install
 
 udis86-autogen: build/udis86-autogen.stamp
-build/udis86-autogen.stamp: udis86/configure.ac env-mac64
+build/udis86-autogen.stamp: env-mac64
 	source build/frida-env-mac64.rc && cd udis86 && ./autogen.sh
 	@touch $@
 
@@ -91,3 +91,11 @@ build/frida-env-ios.stamp:
 	FRIDA_TARGET=ios ./setup-env.sh
 	mkdir -p $(ios)
 	touch build/frida-env-ios.stamp
+
+
+.PHONY: \
+	distclean clean
+.INTERMEDIATE: \
+	udis86 udis86-mac32 udis86-mac64 udis86-autogen udis86-mac32-makefile udis86-mac64-makefile \
+	frida-gum frida-gum-mac32 frida-gum-mac64 frida-gum-autogen frida-gum-mac32-makefile frida-gum-mac64-makefile \
+	env-mac32 env-mac64 env-ios
