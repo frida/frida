@@ -19,6 +19,8 @@ clean:
 	cd frida-gum && git clean -xfd
 	cd frida-core && git clean -xfd
 
+check: check-gum check-core
+
 
 udis86: \
 	build/frida-mac32/lib/pkgconfig/udis86.pc \
@@ -60,6 +62,12 @@ build/frida-ios/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-ios/frida-gum/Makefile
 	source build/frida-env-ios.rc && cd build/tmp-ios/frida-gum && make install
 	touch $@
 
+check-gum: check-gum-mac32 check-gum-mac64
+check-gum-mac32: build/frida-mac32/lib/pkgconfig/frida-gum-1.0.pc
+	build/tmp-mac32/frida-gum/tests/gum-tests
+check-gum-mac64: build/frida-mac64/lib/pkgconfig/frida-gum-1.0.pc
+	build/tmp-mac64/frida-gum/tests/gum-tests
+
 
 frida-core: \
 	build/frida-mac32/lib/pkgconfig/frida-core-1.0.pc \
@@ -81,10 +89,16 @@ build/frida-ios/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios/frida-core/Makefi
 	source build/frida-env-ios.rc && cd build/tmp-ios/frida-core && make install RESOURCE_COMPILER=../../../frida-mac64/bin/frida-resource-compiler
 	touch $@
 
+check-core: check-core-mac32 check-core-mac64
+check-core-mac32: build/frida-mac32/lib/pkgconfig/frida-core-1.0.pc
+	build/tmp-mac32/frida-core/tests/frida-tests
+check-core-mac64: build/frida-mac64/lib/pkgconfig/frida-core-1.0.pc
+	build/tmp-mac64/frida-core/tests/frida-tests
+
 
 .PHONY: \
-	distclean clean git-submodules git-submodule-stamps \
+	distclean clean check git-submodules git-submodule-stamps \
 	udis86 udis86-update-submodule-stamp \
-	frida-gum frida-gum-update-submodule-stamp \
-	frida-core frida-core-update-submodule-stamp
+	frida-gum frida-gum-update-submodule-stamp check-gum check-gum-mac32 check-gum-mac64 \
+	frida-core frida-core-update-submodule-stamp check-core check-core-mac32 check-core-mac64
 .SECONDARY:
