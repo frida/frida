@@ -1,7 +1,6 @@
-include common.mk
-
-
 all: udis86 frida-gum
+
+include common.mk
 
 distclean:
 	rm -rf build/
