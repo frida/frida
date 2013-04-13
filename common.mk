@@ -25,5 +25,5 @@ $(foreach m,$(modules),$(eval $(call make-update-submodule-stamp,$m)))
 git-submodule-stamps: $(foreach m,$(modules),$m-update-submodule-stamp)
 -include git-submodule-stamps
 
-build/frida-env-%.rc:
+build/frida-env-%.rc: setup-env.sh
 	FRIDA_TARGET=$* ./setup-env.sh
