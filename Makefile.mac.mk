@@ -1,8 +1,7 @@
+modules = udis86 frida-gum
 mac32 = build/tmp-mac32
 mac64 = build/tmp-mac64
 ios = build/tmp-ios
-udis86 = ../../../udis86
-frida_gum = ../../../frida-gum
 
 
 all: udis86 frida-gum
@@ -34,24 +33,44 @@ udis86/configure: env-mac64 udis86/configure.ac
 
 build/tmp-%/udis86/Makefile: udis86/configure
 	mkdir -p $(@D)
-	source build/frida-env-$*.rc && cd $(@D) && $(udis86)/configure
+	source build/frida-env-$*.rc && cd $(@D) && ../../../udis86/configure
 
 build/frida-%/lib/pkgconfig/udis86.pc: env-% udis86/configure build/tmp-%/udis86/Makefile build/udis86-repo-stamp
 	source build/frida-env-$*.rc && cd build/tmp-$*/udis86 && make install
 	touch $@
 
 
-udis86-update-repo-stamp:
-	@cd udis86 && git log -1 --format=%H > ../build/udis86-repo-stamp.tmp && git status >> ../build/udis86-repo-stamp.tmp
-	@if [ -f build/udis86-repo-stamp ]; then \
-		if cmp -s build/udis86-repo-stamp build/udis86-repo-stamp.tmp; then \
-			rm build/udis86-repo-stamp.tmp; \
+frida-gum: \
+	frida-gum-update-repo-stamp \
+	build/frida-mac32/lib/pkgconfig/frida-gum-1.0.pc \
+	build/frida-mac64/lib/pkgconfig/frida-gum-1.0.pc
+
+frida-gum/configure: env-mac64 frida-gum/configure.ac
+	source build/frida-env-mac64.rc && cd frida-gum && ./autogen.sh
+
+build/tmp-%/frida-gum/Makefile: frida-gum/configure build/frida-%/lib/pkgconfig/udis86.pc
+	mkdir -p $(@D)
+	source build/frida-env-$*.rc && cd $(@D) && ../../../frida-gum/configure
+
+build/frida-%/lib/pkgconfig/frida-gum-1.0.pc: env-% frida-gum/configure build/tmp-%/frida-gum/Makefile build/frida-gum-repo-stamp
+	source build/frida-env-$*.rc && cd build/tmp-$*/frida-gum && make install
+	touch $@
+
+
+define make-update-repo-stamp
+$1-update-repo-stamp:
+	@cd $1 && git log -1 --format=%H > ../build/$1-repo-stamp.tmp && git status >> ../build/$1-repo-stamp.tmp
+	@if [ -f build/$1-repo-stamp ]; then \
+		if cmp -s build/$1-repo-stamp build/$1-repo-stamp.tmp; then \
+			rm build/$1-repo-stamp.tmp; \
 		else \
-			mv build/udis86-repo-stamp.tmp build/udis86-repo-stamp; \
+			mv build/$1-repo-stamp.tmp build/$1-repo-stamp; \
 		fi \
 	else \
-		mv build/udis86-repo-stamp.tmp build/udis86-repo-stamp; \
+		mv build/$1-repo-stamp.tmp build/$1-repo-stamp; \
 	fi
+endef
+$(foreach m,$(modules),$(eval $(call make-update-repo-stamp,$m)))
 
 
 env-mac32: build/frida-env-mac32-stamp
@@ -75,7 +94,8 @@ build/frida-env-ios-stamp:
 
 .PHONY: \
 	distclean clean \
-	udis86 udis86-update-repo-stamp
+	udis86 udis86-update-repo-stamp \
+	frida-gum frida-gum-update-repo-stamp
 .INTERMEDIATE: \
 	env-mac32 env-mac64 env-ios
 .SECONDARY:
