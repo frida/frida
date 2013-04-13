@@ -17,6 +17,7 @@ clean:
 	rm -rf build/tmp-ios
 	cd udis86 && git clean -xfd
 	cd frida-gum && git clean -xfd
+	cd frida-core && git clean -xfd
 
 
 udis86: \
