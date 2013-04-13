@@ -77,6 +77,10 @@ build/frida-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-%/frida-core/Makefile b
 	source build/frida-env-$*.rc && cd build/tmp-$*/frida-core && make install
 	touch $@
 
+build/frida-ios/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios/frida-core/Makefile build/frida-core-submodule-stamp build/frida-mac64/lib/pkgconfig/frida-core-1.0.pc
+	source build/frida-env-ios.rc && cd build/tmp-ios/frida-core && make install RESOURCE_COMPILER=../../../frida-mac64/bin/frida-resource-compiler
+	touch $@
+
 
 .PHONY: \
 	distclean clean git-submodules git-submodule-stamps \
