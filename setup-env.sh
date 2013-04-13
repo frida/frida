@@ -162,6 +162,7 @@ done
 case $FRIDA_TARGET in
   mac32|mac64|ios)
     (
+      echo "export OBJC=\"$OBJC\""
       echo "export OBJCFLAGS=\"$CFLAGS\""
       echo "export MACOSX_DEPLOYMENT_TARGET=10.6"
     ) >> build/frida-env-${FRIDA_TARGET}.rc
