@@ -59,6 +59,7 @@ FRIDA_SDKROOT="$FRIDA_BUILD/sdk-$FRIDA_TARGET"
 
 case $FRIDA_TARGET in
   linux-*)
+    CPP="/usr/bin/cpp"
     CC="/usr/bin/gcc-4.6"
     CXX="/usr/bin/g++-4.6"
     OBJC=""
@@ -68,6 +69,7 @@ case $FRIDA_TARGET in
     LDFLAGS="-Wl,--gc-sections"
     ;;
   mac32|mac64)
+    CPP="/usr/bin/cpp"
     CC="/usr/bin/clang"
     CXX="/usr/bin/clang++"
     OBJC="/usr/bin/clang"
@@ -88,6 +90,7 @@ case $FRIDA_TARGET in
     ios_sdk="iphoneos$ios_sdkver"
     ios_minver="6.0"
 
+    CPP="$(xcrun --sdk $ios_sdk -f cpp)"
     CC="$(xcrun --sdk $ios_sdk -f clang)"
     CXX="$(xcrun --sdk $ios_sdk -f clang++)"
     OBJC="$(xcrun --sdk $ios_sdk -f clang)"
@@ -103,7 +106,7 @@ esac
 
 CFLAGS="-fPIC $CFLAGS"
 CXXFLAGS="$CFLAGS"
-CPPFLAGS="$CFLAGS"
+CPPFLAGS=""
 
 ACLOCAL_FLAGS="-I $FRIDA_PREFIX/share/aclocal -I $FRIDA_SDKROOT/share/aclocal -I $FRIDA_TOOLROOT/share/aclocal"
 ACLOCAL="aclocal $ACLOCAL_FLAGS"
@@ -143,9 +146,11 @@ done
   echo "export PKG_CONFIG=\"$PKG_CONFIG\""
   echo "export PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\""
   echo "export VALAC=\"$VALAC\""
+  echo "export CPP=\"$CPP\""
   echo "export CPPFLAGS=\"$CPPFLAGS\""
   echo "export CC=\"$CC\""
   echo "export CFLAGS=\"$CFLAGS\""
+  echo "export CXX=\"$CXX\""
   echo "export CXXFLAGS=\"$CXXFLAGS\""
   echo "export LD=\"$LD\""
   echo "export LDFLAGS=\"$LDFLAGS\""
