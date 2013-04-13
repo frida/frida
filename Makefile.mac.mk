@@ -38,7 +38,8 @@ build/frida-%/lib/pkgconfig/udis86.pc: build/tmp-%/udis86/Makefile build/udis86-
 
 frida-gum: \
 	build/frida-mac32/lib/pkgconfig/frida-gum-1.0.pc \
-	build/frida-mac64/lib/pkgconfig/frida-gum-1.0.pc
+	build/frida-mac64/lib/pkgconfig/frida-gum-1.0.pc \
+	build/frida-ios/lib/pkgconfig/frida-gum-1.0.pc
 
 frida-gum/configure: build/frida-env-mac64.rc frida-gum/configure.ac
 	source build/frida-env-mac64.rc && cd frida-gum && ./autogen.sh
@@ -51,10 +52,19 @@ build/frida-%/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-%/frida-gum/Makefile bui
 	source build/frida-env-$*.rc && cd build/tmp-$*/frida-gum && make install
 	touch $@
 
+build/tmp-ios/frida-gum/Makefile: build/frida-env-ios.rc frida-gum/configure
+	mkdir -p $(@D)
+	source build/frida-env-ios.rc && cd $(@D) && ../../../frida-gum/configure
+
+build/frida-ios/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-ios/frida-gum/Makefile build/frida-gum-submodule-stamp
+	source build/frida-env-ios.rc && cd build/tmp-ios/frida-gum && make install
+	touch $@
+
 
 frida-core: \
 	build/frida-mac32/lib/pkgconfig/frida-core-1.0.pc \
-	build/frida-mac64/lib/pkgconfig/frida-core-1.0.pc
+	build/frida-mac64/lib/pkgconfig/frida-core-1.0.pc \
+	build/frida-ios/lib/pkgconfig/frida-core-1.0.pc
 
 frida-core/configure: build/frida-env-mac64.rc frida-core/configure.ac
 	source build/frida-env-mac64.rc && cd frida-core && ./autogen.sh
