@@ -9,7 +9,8 @@ git-submodules:
 
 define make-update-submodule-stamp
 $1-update-submodule-stamp: git-submodules
-	cd $1 && git log -1 --format=%H > ../build/$1-submodule-stamp.tmp && git status >> ../build/$1-submodule-stamp.tmp
+	@mkdir -p build
+	@cd $1 && git log -1 --format=%H > ../build/$1-submodule-stamp.tmp && git status >> ../build/$1-submodule-stamp.tmp
 	@if [ -f build/$1-submodule-stamp ]; then \
 		if cmp -s build/$1-submodule-stamp build/$1-submodule-stamp.tmp; then \
 			rm build/$1-submodule-stamp.tmp; \
