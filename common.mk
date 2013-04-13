@@ -1,7 +1,7 @@
 modules = udis86 frida-gum
 
 git-submodules:
-	@if [ ! -d udis86 ]; then \
+	@if [ ! -f udis86/configure.ac ]; then \
 		git submodule init; \
 		git submodule update; \
 	fi
