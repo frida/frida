@@ -1,4 +1,4 @@
-modules = udis86 frida-gum
+include common.mk
 
 
 all: udis86 frida-gum
@@ -31,7 +31,7 @@ build/tmp-%/udis86/Makefile: build/frida-env-%.rc udis86/configure
 	mkdir -p $(@D)
 	source build/frida-env-$*.rc && cd $(@D) && ../../../udis86/configure
 
-build/frida-%/lib/pkgconfig/udis86.pc: build/tmp-%/udis86/Makefile build/udis86-repo-stamp
+build/frida-%/lib/pkgconfig/udis86.pc: build/tmp-%/udis86/Makefile build/udis86-submodule-stamp
 	source build/frida-env-$*.rc && cd build/tmp-$*/udis86 && make install
 	touch $@
 
@@ -48,35 +48,13 @@ build/tmp-%/frida-gum/Makefile: build/frida-env-%.rc frida-gum/configure
 	mkdir -p $(@D)
 	source build/frida-env-$*.rc && cd $(@D) && ../../../frida-gum/configure
 
-build/frida-%/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-%/frida-gum/Makefile build/udis86-repo-stamp build/frida-gum-repo-stamp
+build/frida-%/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-%/frida-gum/Makefile build/udis86-submodule-stamp build/frida-gum-submodule-stamp
 	source build/frida-env-$*.rc && cd build/tmp-$*/frida-gum && make install
 	touch $@
 
 
-build/frida-env-%.rc:
-	FRIDA_TARGET=$* ./setup-env.sh
-
-
-define make-update-repo-stamp
-$1-update-repo-stamp:
-	@cd $1 && git log -1 --format=%H > ../build/$1-repo-stamp.tmp && git status >> ../build/$1-repo-stamp.tmp
-	@if [ -f build/$1-repo-stamp ]; then \
-		if cmp -s build/$1-repo-stamp build/$1-repo-stamp.tmp; then \
-			rm build/$1-repo-stamp.tmp; \
-		else \
-			mv build/$1-repo-stamp.tmp build/$1-repo-stamp; \
-		fi \
-	else \
-		mv build/$1-repo-stamp.tmp build/$1-repo-stamp; \
-	fi
-endef
-$(foreach m,$(modules),$(eval $(call make-update-repo-stamp,$m)))
-module-stamps: $(foreach m,$(modules),$m-update-repo-stamp)
--include module-stamps
-
-
 .PHONY: \
-	distclean clean module-stamps \
-	udis86 udis86-update-repo-stamp \
-	frida-gum frida-gum-update-repo-stamp
+	distclean clean git-submodules git-submodule-stamps \
+	udis86 udis86-update-submodule-stamp \
+	frida-gum frida-gum-update-submodule-stamp
 .SECONDARY:
