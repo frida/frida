@@ -112,7 +112,7 @@ ACLOCAL_FLAGS="-I $FRIDA_PREFIX/share/aclocal -I $FRIDA_SDKROOT/share/aclocal -I
 ACLOCAL="aclocal $ACLOCAL_FLAGS"
 CONFIG_SITE="$FRIDA_BUILD/config-${FRIDA_TARGET}.site"
 
-PKG_CONFIG="$FRIDA_TOOLROOT/bin/pkg-config --define-variable=frida_sdk_prefix=$FRIDA_SDKROOT"
+PKG_CONFIG="$FRIDA_TOOLROOT/bin/pkg-config --define-variable=frida_sdk_prefix=$FRIDA_SDKROOT --static"
 PKG_CONFIG_PATH="$FRIDA_PREFIX_LIB/pkgconfig:$FRIDA_SDKROOT/lib/pkgconfig"
 
 VALAC="$FRIDA_TOOLROOT/bin/valac-0.14 --vapidir=\"$FRIDA_TOOLROOT/share/vala-0.14/vapi\""
