@@ -7,3 +7,6 @@
 [submodule "frida-core"]
 	path = frida-core
 	url = git://github.com/frida/frida-core.git
+[submodule "frida-python"]
+	path = frida-python
+	url = git://github.com/frida/frida-python.git

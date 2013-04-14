@@ -1,4 +1,4 @@
-modules = udis86 frida-gum frida-core
+modules = udis86 frida-gum frida-core frida-python
 
 git-submodules:
 	@if [ ! -f udis86/configure.ac ]; then \

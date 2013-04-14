@@ -1,4 +1,4 @@
-all: frida-core
+all: frida-core frida-python
 
 include common.mk
 
@@ -94,6 +94,22 @@ check-core-mac32: build/frida-mac32/lib/pkgconfig/frida-core-1.0.pc
 	build/tmp-mac32/frida-core/tests/frida-tests
 check-core-mac64: build/frida-mac64/lib/pkgconfig/frida-core-1.0.pc
 	build/tmp-mac64/frida-core/tests/frida-tests
+
+
+frida-python: \
+	build/tmp-mac32/frida-python/src/_frida.la \
+	build/tmp-mac64/frida-python/src/_frida.la
+
+frida-python/configure: build/frida-env-mac64.rc frida-python/configure.ac
+	source build/frida-env-mac64.rc && cd frida-python && ./autogen.sh
+
+build/tmp-%/frida-python/Makefile: build/frida-env-%.rc frida-python/configure build/frida-%/lib/pkgconfig/frida-core-1.0.pc
+	mkdir -p $(@D)
+	source build/frida-env-$*.rc && cd $(@D) && ../../../frida-python/configure
+
+build/tmp-%/frida-python/src/_frida.la: build/tmp-%/frida-python/Makefile build/frida-python-submodule-stamp
+	source build/frida-env-$*.rc && cd build/tmp-$*/frida-python && make install
+	touch $@
 
 
 .PHONY: \
