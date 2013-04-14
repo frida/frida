@@ -1,4 +1,4 @@
-all: frida-core frida-python
+all: frida-core frida-python frida-npapi
 
 include common.mk
 
@@ -19,6 +19,7 @@ clean:
 	cd frida-gum && git clean -xfd
 	cd frida-core && git clean -xfd
 	cd frida-python && git clean -xfd
+	cd frida-npapi && git clean -xfd
 
 check: check-gum check-core
 
@@ -118,9 +119,28 @@ build/tmp-%/frida-python/src/_frida.la: build/tmp-%/frida-python/Makefile build/
 	touch $@
 
 
+frida-npapi: \
+	build/tmp-mac32/frida-npapi/src/libnpfrida.la \
+	build/tmp-mac64/frida-npapi/src/libnpfrida.la
+
+frida-npapi/configure: build/frida-env-mac64.rc frida-npapi/configure.ac
+	source build/frida-env-mac64.rc && cd frida-npapi && ./autogen.sh
+
+build/tmp-%/frida-npapi/Makefile: build/frida-env-%.rc frida-npapi/configure build/frida-%/lib/pkgconfig/frida-core-1.0.pc
+	mkdir -p $(@D)
+	source build/frida-env-$*.rc && cd $(@D) && ../../../frida-npapi/configure
+
+build/tmp-%/frida-npapi/src/libnpfrida.la: build/tmp-%/frida-npapi/Makefile build/frida-npapi-submodule-stamp
+	touch frida-npapi/src/plugin.cpp
+	source build/frida-env-$*.rc && cd build/tmp-$*/frida-npapi && make install
+	touch $@
+
+
 .PHONY: \
 	distclean clean check git-submodules git-submodule-stamps \
 	udis86 udis86-update-submodule-stamp \
 	frida-gum frida-gum-update-submodule-stamp check-gum check-gum-mac32 check-gum-mac64 \
-	frida-core frida-core-update-submodule-stamp check-core check-core-mac32 check-core-mac64
+	frida-core frida-core-update-submodule-stamp check-core check-core-mac32 check-core-mac64 \
+	frida-python frida-python-update-submodule-stamp \
+	frida-npapi frida-npapi-update-submodule-stamp
 .SECONDARY:
