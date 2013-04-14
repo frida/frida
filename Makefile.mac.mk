@@ -52,6 +52,7 @@ build/tmp-%/frida-gum/Makefile: build/frida-env-%.rc frida-gum/configure build/f
 	source build/frida-env-$*.rc && cd $(@D) && ../../../frida-gum/configure
 
 build/frida-%/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-%/frida-gum/Makefile build/frida-gum-submodule-stamp
+	find build/tmp-$*/frida-gum -type f -name "*.o" -exec touch {} \;
 	source build/frida-env-$*.rc && cd build/tmp-$*/frida-gum && make install
 	touch $@
 
@@ -60,6 +61,7 @@ build/tmp-ios/frida-gum/Makefile: build/frida-env-ios.rc frida-gum/configure
 	source build/frida-env-ios.rc && cd $(@D) && ../../../frida-gum/configure
 
 build/frida-ios/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-ios/frida-gum/Makefile build/frida-gum-submodule-stamp
+	find build/tmp-ios/frida-gum -type f -name "*.o" -exec touch {} \;
 	source build/frida-env-ios.rc && cd build/tmp-ios/frida-gum && make install
 	touch $@
 
@@ -83,10 +85,12 @@ build/tmp-%/frida-core/Makefile: build/frida-env-%.rc frida-core/configure build
 	source build/frida-env-$*.rc && cd $(@D) && ../../../frida-core/configure
 
 build/frida-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
+	find build/tmp-$*/frida-core -type f -name "*.o" -exec touch {} \;
 	source build/frida-env-$*.rc && cd build/tmp-$*/frida-core && make install
 	touch $@
 
 build/frida-ios/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios/frida-core/Makefile build/frida-core-submodule-stamp build/frida-mac64/lib/pkgconfig/frida-core-1.0.pc
+	find build/tmp-ios/frida-core -type f -name "*.o" -exec touch {} \;
 	source build/frida-env-ios.rc && cd build/tmp-ios/frida-core && make install RESOURCE_COMPILER=../../../frida-mac64/bin/frida-resource-compiler
 	touch $@
 
@@ -109,6 +113,7 @@ build/tmp-%/frida-python/Makefile: build/frida-env-%.rc frida-python/configure b
 	source build/frida-env-$*.rc && cd $(@D) && ../../../frida-python/configure
 
 build/tmp-%/frida-python/src/_frida.la: build/tmp-%/frida-python/Makefile build/frida-python-submodule-stamp
+	touch frida-python/src/_frida.c
 	source build/frida-env-$*.rc && cd build/tmp-$*/frida-python && make install
 	touch $@
 
