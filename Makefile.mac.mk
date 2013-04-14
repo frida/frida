@@ -131,7 +131,7 @@ build/tmp-%/frida-npapi/Makefile: build/frida-env-%.rc frida-npapi/configure bui
 	source build/frida-env-$*.rc && cd $(@D) && ../../../frida-npapi/configure
 
 build/tmp-%/frida-npapi/src/libnpfrida.la: build/tmp-%/frida-npapi/Makefile build/frida-npapi-submodule-stamp
-	touch frida-npapi/src/plugin.cpp
+	touch frida-npapi/src/npfrida-plugin.cpp
 	source build/frida-env-$*.rc && cd build/tmp-$*/frida-npapi && make install
 	touch $@
 
