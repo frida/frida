@@ -108,7 +108,12 @@ build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib: build/t
 	strip -Sx $(@D)/libfrida-agent-32.dylib $(@D)/libfrida-agent-64.dylib
 	lipo $(@D)/libfrida-agent-32.dylib $(@D)/libfrida-agent-64.dylib -create -output $@
 
-build/tmp-%-stripped/frida-core/src/frida-fruitjector-helper: build/tmp-%/frida-core/src/frida-fruitjector-helper
+build/tmp-%/frida-core/src/frida-fruitjector-helper: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
+	find build/tmp-$*/frida-core/src -type f -name "fruitjector-helper*.o" -exec touch {} \;
+	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/src frida-fruitjector-helper
+	touch $@
+
+build/tmp-mac64-stripped/frida-core/src/frida-fruitjector-helper: build/tmp-mac64/frida-core/src/frida-fruitjector-helper
 	mkdir -p $(@D)
 	cp $< $@.tmp
 	strip -Sx $@.tmp
