@@ -88,7 +88,3 @@ esac
 CFLAGS="$CFLAGS $frida_flags"
 CXXFLAGS="$CXXFLAGS $frida_flags"
 OBJCFLAGS="$OBJCFLAGS $frida_flags"
-
-if test "$cache_file" = /dev/null; then
-  cache_file="$frida_prefix/config.cache"
-fi
