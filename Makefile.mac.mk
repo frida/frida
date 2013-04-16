@@ -1,4 +1,5 @@
 all: \
+	frida-server \
 	frida-python \
 	frida-npapi
 
@@ -166,6 +167,15 @@ check-core-mac64: build/tmp-mac64/frida-core/tests/frida-tests
 	$<
 
 
+frida-server: \
+	build/frida-ios/bin/frida-server
+
+build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
+	find build/tmp-$*/frida-core/server -type f -name "*.o" -exec touch {} \;
+	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/server install
+	touch $@
+
+
 frida-python: \
 	build/frida-mac-universal/lib/python2.6/site-packages/frida.py \
 	build/frida-mac-universal/lib/python2.6/site-packages/_frida.so \
@@ -236,6 +246,7 @@ build/frida-mac-universal/lib/browser/plugins/libnpfrida.dylib: build/tmp-mac32/
 	udis86 udis86-update-submodule-stamp \
 	frida-gum frida-gum-update-submodule-stamp check-gum check-gum-mac32 check-gum-mac64 \
 	frida-core frida-core-update-submodule-stamp check-core check-core-mac32 check-core-mac64 \
+	frida-server \
 	frida-python frida-python-update-submodule-stamp \
 	frida-npapi frida-npapi-update-submodule-stamp
 .SECONDARY:
