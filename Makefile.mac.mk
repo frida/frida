@@ -44,7 +44,7 @@ build/tmp-%/udis86/Makefile: build/frida-env-%.rc udis86/configure
 
 build/frida-%/lib/pkgconfig/udis86.pc: build/tmp-%/udis86/Makefile build/udis86-submodule-stamp
 	source build/frida-env-$*.rc && make -C build/tmp-$*/udis86 install
-	touch $@
+	@touch -c $@
 
 
 frida-gum: \
@@ -60,18 +60,18 @@ build/tmp-%/frida-gum/Makefile: build/frida-env-%.rc frida-gum/configure build/f
 	source build/frida-env-$*.rc && cd $(@D) && ../../../frida-gum/configure
 
 build/frida-%/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-%/frida-gum/Makefile build/frida-gum-submodule-stamp
-	find build/tmp-$*/frida-gum -type f -name "*.o" -exec touch {} \;
+	@touch -c build/tmp-$*/frida-gum/gum/libfrida_gum_la-gum.o
 	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-gum install
-	touch $@
+	@touch -c $@
 
 build/tmp-ios/frida-gum/Makefile: build/frida-env-ios.rc frida-gum/configure
 	mkdir -p $(@D)
 	source build/frida-env-ios.rc && cd $(@D) && ../../../frida-gum/configure
 
 build/frida-ios/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-ios/frida-gum/Makefile build/frida-gum-submodule-stamp
-	find build/tmp-ios/frida-gum -type f -name "*.o" -exec touch {} \;
+	@touch -c build/tmp-ios/frida-gum/gum/libfrida_gum_la-gum.o
 	source build/frida-env-ios.rc && make -C build/tmp-ios/frida-gum install
-	touch $@
+	@touch -c $@
 
 check-gum: check-gum-mac32 check-gum-mac64
 check-gum-mac32: build/frida-mac32/lib/pkgconfig/frida-gum-1.0.pc
@@ -93,14 +93,14 @@ build/tmp-%/frida-core/Makefile: build/frida-env-%.rc frida-core/configure build
 	source build/frida-env-$*.rc && cd $(@D) && ../../../frida-core/configure
 
 build/tmp-%/frida-core/tools/frida-resource-compiler: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
-	find build/tmp-$*/frida-core/tools -type f -name "*.o" -exec touch {} \;
+	@touch -c build/tmp-$*/frida-core/tools/frida_resource_compiler-resource-compiler.o
 	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/tools
-	touch $@
+	@touch -c $@
 
 build/tmp-%/frida-core/lib/agent/libfrida-agent.la: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
-	find build/tmp-$*/frida-core/lib -type f -name "*.o" -exec touch {} \;
+	@touch -c build/tmp-$*/frida-core/lib/agent/libfrida_agent_la-agent.o
 	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/lib
-	touch $@
+	@touch -c $@
 
 build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib: build/tmp-mac32/frida-core/lib/agent/libfrida-agent.la build/tmp-mac64/frida-core/lib/agent/libfrida-agent.la
 	mkdir -p $(@D)
@@ -110,9 +110,9 @@ build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib: build/t
 	lipo $(@D)/libfrida-agent-32.dylib $(@D)/libfrida-agent-64.dylib -create -output $@
 
 build/tmp-%/frida-core/src/frida-fruitjector-helper: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
-	find build/tmp-$*/frida-core/src -type f -name "fruitjector-helper*.o" -exec touch {} \;
+	@touch -c build/tmp-$*/frida-core/src/fruitjector-helper-core.o
 	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/src libfruitjector-types.la frida-fruitjector-helper
-	touch $@
+	@touch -c $@
 
 build/tmp-mac64-stripped/frida-core/src/frida-fruitjector-helper: build/tmp-mac64/frida-core/src/frida-fruitjector-helper
 	mkdir -p $(@D)
@@ -129,14 +129,14 @@ build/tmp-ios-stripped/frida-core/src/frida-fruitjector-helper: build/tmp-ios/fr
 	mv $@.tmp $@
 
 build/frida-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib build/tmp-mac64-stripped/frida-core/src/frida-fruitjector-helper build/tmp-%/frida-core/tools/frida-resource-compiler
-	find build/tmp-$*/frida-core/src -type f -name "*.o" -exec touch {} \;
+	@touch -c build/tmp-$*/frida-core/src/libfrida_core_la-frida.o
 	source build/frida-env-$*.rc \
 		&& cd build/tmp-$*/frida-core \
 		&& make -C src install \
 			AGENT=../../../../build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib \
 			FRUITJECTOR_HELPER=../../../../build/tmp-mac64-stripped/frida-core/src/frida-fruitjector-helper \
 		&& make install-data-am
-	touch $@
+	@touch -c $@
 
 build/tmp-ios-stripped/frida-core/lib/agent/.libs/libfrida-agent.dylib: build/tmp-ios/frida-core/lib/agent/libfrida-agent.la
 	mkdir -p $(@D)
@@ -145,7 +145,7 @@ build/tmp-ios-stripped/frida-core/lib/agent/.libs/libfrida-agent.dylib: build/tm
 	mv $@.tmp $@
 
 build/frida-ios/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-stripped/frida-core/lib/agent/.libs/libfrida-agent.dylib build/tmp-ios-stripped/frida-core/src/frida-fruitjector-helper build/tmp-mac64/frida-core/tools/frida-resource-compiler
-	find build/tmp-ios/frida-core/src -type f -name "*.o" -exec touch {} \;
+	@touch -c build/tmp-ios/frida-core/src/libfrida_core_la-frida.o
 	source build/frida-env-ios.rc \
 		&& cd build/tmp-ios/frida-core \
 		&& make -C src install \
@@ -153,12 +153,14 @@ build/frida-ios/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-stripped/frida-co
 			AGENT=../../../../build/tmp-ios-stripped/frida-core/lib/agent/.libs/libfrida-agent.dylib \
 			FRUITJECTOR_HELPER=../../../../build/tmp-ios-stripped/frida-core/src/frida-fruitjector-helper \
 		&& make install-data-am
-	touch $@
+	@touch -c $@
 
 build/tmp-%/frida-core/tests/frida-tests: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
-	find build/tmp-$*/frida-core/tests -type f -name "*.o" -exec touch {} \;
+	@touch -c build/tmp-$*/frida-core/tests/main.o
+	@touch -c build/tmp-$*/frida-core/tests/inject-victim.o
+	@touch -c build/tmp-$*/frida-core/tests/inject-attacker.o
 	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/tests
-	touch $@
+	@touch -c $@
 
 check-core: check-core-mac32 check-core-mac64
 check-core-mac32: build/tmp-mac32/frida-core/tests/frida-tests
@@ -171,9 +173,9 @@ frida-server: \
 	build/frida-ios/bin/frida-server
 
 build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
-	find build/tmp-$*/frida-core/server -type f -name "*.o" -exec touch {} \;
+	@touch -c build/tmp-$*/frida-core/server/frida_server-server.o
 	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/server install
-	touch $@
+	@touch -c $@
 
 
 frida-python: \
@@ -190,23 +192,23 @@ build/tmp-%/frida-python2.6/Makefile: build/frida-env-%.rc frida-python/configur
 	source build/frida-env-$*.rc && cd $(@D) && PYTHON=/usr/bin/python2.6 ../../../frida-python/configure
 
 build/tmp-%/frida-python2.6/src/_frida.la: build/tmp-%/frida-python2.6/Makefile build/frida-python-submodule-stamp
-	touch frida-python/src/_frida.c
+	@touch frida-python/src/_frida.c
 	source build/frida-env-$*.rc && cd build/tmp-$*/frida-python2.6 && make install
-	touch $@
+	@touch -c $@
 
 build/tmp-%/frida-python2.7/Makefile: build/frida-env-%.rc frida-python/configure build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	mkdir -p $(@D)
 	source build/frida-env-$*.rc && cd $(@D) && PYTHON=/usr/bin/python2.7 ../../../frida-python/configure
 
 build/tmp-%/frida-python2.7/src/_frida.la: build/tmp-%/frida-python2.7/Makefile build/frida-python-submodule-stamp
-	touch frida-python/src/_frida.c
+	@touch frida-python/src/_frida.c
 	source build/frida-env-$*.rc && cd build/tmp-$*/frida-python2.7 && make install
-	touch $@
+	@touch -c $@
 
 build/frida-mac-universal/lib/python%/site-packages/frida.py: build/tmp-mac64/frida-python%/src/_frida.la
 	mkdir -p $(@D)
 	cp -a build/frida-mac64/lib/python$*/site-packages/frida.py $@
-	touch $@
+	@touch $@
 
 build/frida-mac-universal/lib/python%/site-packages/_frida.so: build/tmp-mac32/frida-python%/src/_frida.la build/tmp-mac64/frida-python%/src/_frida.la
 	mkdir -p $(@D)
@@ -228,9 +230,9 @@ build/tmp-%/frida-npapi/Makefile: build/frida-env-%.rc frida-npapi/configure bui
 	source build/frida-env-$*.rc && cd $(@D) && ../../../frida-npapi/configure
 
 build/tmp-%/frida-npapi/src/libnpfrida.la: build/tmp-%/frida-npapi/Makefile build/frida-npapi-submodule-stamp
-	touch frida-npapi/src/npfrida-plugin.cpp
+	@touch frida-npapi/src/npfrida-plugin.cpp
 	source build/frida-env-$*.rc && cd build/tmp-$*/frida-npapi && make install
-	touch $@
+	@touch -c $@
 
 build/frida-mac-universal/lib/browser/plugins/libnpfrida.dylib: build/tmp-mac32/frida-npapi/src/libnpfrida.la build/tmp-mac64/frida-npapi/src/libnpfrida.la
 	mkdir -p $(@D)
