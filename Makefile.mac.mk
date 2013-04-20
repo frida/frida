@@ -111,7 +111,7 @@ build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib: build/t
 
 build/tmp-%/frida-core/src/frida-fruitjector-helper: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
 	@touch -c build/tmp-$*/frida-core/src/fruitjector-helper-core.lo
-	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/src libfruitjector-types.la frida-fruitjector-helper
+	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/src libfruitjector-types.la frida-fruitjector-helper.stamp
 	@touch -c $@
 
 build/tmp-mac64-stripped/frida-core/src/frida-fruitjector-helper: build/tmp-mac64/frida-core/src/frida-fruitjector-helper
