@@ -1,0 +1,209 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4AFCE7C4-6D9A-4663-B43C-D2E518486910}</ProjectGuid>
+    <RootNamespace>frida</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)frida-$(Configuration).props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)frida-$(Configuration).props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)frida-$(Configuration).props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)frida-$(Configuration).props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="windows-sdk.txt">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Checking SDK</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">if exist "$(ProjectDir)build\sdk-windows\" goto warn
+
+"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)build\sdk-windows.exe" || exit 1
+"$(ProjectDir)build\sdk-windows.exe" -o"$(ProjectDir)build\" || exit 1
+del "$(ProjectDir)build\sdk-windows.exe"
+goto done
+
+:warn
+echo Assuming SDK is up to date - delete build\sdk-windows if in doubt
+
+:done
+echo &gt; "$(IntDir)windows-sdk.stamp"
+</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)windows-sdk.stamp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Checking SDK</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">if exist "$(ProjectDir)build\sdk-windows\" goto warn
+
+"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)build\sdk-windows.exe" || exit 1
+"$(ProjectDir)build\sdk-windows.exe" -o"$(ProjectDir)build\" || exit 1
+del "$(ProjectDir)build\sdk-windows.exe"
+goto done
+
+:warn
+echo Assuming SDK is up to date - delete build\sdk-windows if in doubt
+
+:done
+echo &gt; "$(IntDir)windows-sdk.stamp"
+</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)windows-sdk.stamp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Checking SDK</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">if exist "$(ProjectDir)build\sdk-windows\" goto warn
+
+"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)build\sdk-windows.exe" || exit 1
+"$(ProjectDir)build\sdk-windows.exe" -o"$(ProjectDir)build\" || exit 1
+del "$(ProjectDir)build\sdk-windows.exe"
+goto done
+
+:warn
+echo Assuming SDK is up to date - delete build\sdk-windows if in doubt
+
+:done
+echo &gt; "$(IntDir)windows-sdk.stamp"
+</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)windows-sdk.stamp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Checking SDK</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">if exist "$(ProjectDir)build\sdk-windows\" goto warn
+
+"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)build\sdk-windows.exe" || exit 1
+"$(ProjectDir)build\sdk-windows.exe" -o"$(ProjectDir)build\" || exit 1
+del "$(ProjectDir)build\sdk-windows.exe"
+goto done
+
+:warn
+echo Assuming SDK is up to date - delete build\sdk-windows if in doubt
+
+:done
+echo &gt; "$(IntDir)windows-sdk.stamp"
+</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)windows-sdk.stamp;%(Outputs)</Outputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="windows-toolchain.txt">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">if exist "$(ProjectDir)build\toolchain\" goto warn
+
+"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)build\toolchain.exe" || exit 1
+"$(ProjectDir)build\toolchain.exe" -o"$(ProjectDir)build\" || exit 1
+del "$(ProjectDir)build\toolchain.exe"
+goto done
+
+:warn
+echo Assuming toolchain is up to date - delete build\toolchain if in doubt
+
+:done
+echo &gt; "$(IntDir)windows-toolchain.stamp"
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">if exist "$(ProjectDir)build\toolchain\" goto warn
+
+"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)build\toolchain.exe" || exit 1
+"$(ProjectDir)build\toolchain.exe" -o"$(ProjectDir)build\" || exit 1
+del "$(ProjectDir)build\toolchain.exe"
+goto done
+
+:warn
+echo Assuming toolchain is up to date - delete build\toolchain if in doubt
+
+:done
+echo &gt; "$(IntDir)windows-toolchain.stamp"
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">if exist "$(ProjectDir)build\toolchain\" goto warn
+
+"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)build\toolchain.exe" || exit 1
+"$(ProjectDir)build\toolchain.exe" -o"$(ProjectDir)build\" || exit 1
+del "$(ProjectDir)build\toolchain.exe"
+goto done
+
+:warn
+echo Assuming toolchain is up to date - delete build\toolchain if in doubt
+
+:done
+echo &gt; "$(IntDir)windows-toolchain.stamp"
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">if exist "$(ProjectDir)build\toolchain\" goto warn
+
+"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)build\toolchain.exe" || exit 1
+"$(ProjectDir)build\toolchain.exe" -o"$(ProjectDir)build\" || exit 1
+del "$(ProjectDir)build\toolchain.exe"
+goto done
+
+:warn
+echo Assuming toolchain is up to date - delete build\toolchain if in doubt
+
+:done
+echo &gt; "$(IntDir)windows-toolchain.stamp"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)windows-toolchain.stamp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)windows-toolchain.stamp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)windows-toolchain.stamp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)windows-toolchain.stamp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Checking toolchain</Message>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Checking toolchain</Message>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Checking toolchain</Message>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Checking toolchain</Message>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
+    </CustomBuild>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

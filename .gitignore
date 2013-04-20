@@ -1,3 +1,8 @@
+*.opensdf
+*.sdf
+*.suo
 *.swp
+*.user
 *~
 /build
+/ipch
