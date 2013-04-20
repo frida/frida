@@ -92,7 +92,7 @@ build/tmp-%/frida-core/Makefile: build/frida-env-%.rc frida-core/configure build
 	mkdir -p $(@D)
 	source build/frida-env-$*.rc && cd $(@D) && ../../../frida-core/configure
 
-build/tmp-%/frida-core/tools/frida-resource-compiler: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
+build/tmp-%/frida-core/tools/resource-compiler: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
 	@touch -c build/tmp-$*/frida-core/tools/frida_resource_compiler-resource-compiler.o
 	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/tools
 	@touch -c $@
@@ -128,7 +128,7 @@ build/tmp-ios-stripped/frida-core/src/frida-fruitjector-helper: build/tmp-ios/fr
 	codesign -f -s "$$IOS_CERTID" --entitlements frida-core/src/darwin/fruitjector-helper.xcent $@.tmp
 	mv $@.tmp $@
 
-build/frida-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib build/tmp-mac64-stripped/frida-core/src/frida-fruitjector-helper build/tmp-%/frida-core/tools/frida-resource-compiler
+build/frida-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib build/tmp-mac64-stripped/frida-core/src/frida-fruitjector-helper build/tmp-%/frida-core/tools/resource-compiler
 	@touch -c build/tmp-$*/frida-core/src/libfrida_core_la-frida.lo
 	source build/frida-env-$*.rc \
 		&& cd build/tmp-$*/frida-core \
@@ -144,12 +144,12 @@ build/tmp-ios-stripped/frida-core/lib/agent/.libs/libfrida-agent.dylib: build/tm
 	strip -Sx $@.tmp
 	mv $@.tmp $@
 
-build/frida-ios/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-stripped/frida-core/lib/agent/.libs/libfrida-agent.dylib build/tmp-ios-stripped/frida-core/src/frida-fruitjector-helper build/tmp-mac64/frida-core/tools/frida-resource-compiler
+build/frida-ios/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-stripped/frida-core/lib/agent/.libs/libfrida-agent.dylib build/tmp-ios-stripped/frida-core/src/frida-fruitjector-helper build/tmp-mac64/frida-core/tools/resource-compiler
 	@touch -c build/tmp-ios/frida-core/src/libfrida_core_la-frida.lo
 	source build/frida-env-ios.rc \
 		&& cd build/tmp-ios/frida-core \
 		&& make -C src install \
-			RESOURCE_COMPILER=../../../../build/tmp-mac64/frida-core/tools/frida-resource-compiler \
+			RESOURCE_COMPILER=../../../../build/tmp-mac64/frida-core/tools/resource-compiler \
 			AGENT=../../../../build/tmp-ios-stripped/frida-core/lib/agent/.libs/libfrida-agent.dylib \
 			FRUITJECTOR_HELPER=../../../../build/tmp-ios-stripped/frida-core/src/frida-fruitjector-helper \
 		&& make install-data-am
