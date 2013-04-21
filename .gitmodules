@@ -13,3 +13,6 @@
 [submodule "frida-npapi"]
 	path = frida-npapi
 	url = git://github.com/frida/frida-npapi.git
+[submodule "frida-clr"]
+	path = frida-clr
+	url = git://github.com/frida/frida-clr.git
