@@ -37,7 +37,7 @@ if [ -z $FRIDA_TARGET ] ; then
   echo "Assuming target is $FRIDA_TARGET. Set FRIDA_TARGET to override."
 fi
 
-toolchain_version=20130406
+toolchain_version=20130423
 case $FRIDA_TARGET in
   linux-*)
     sdk_version=20130212
