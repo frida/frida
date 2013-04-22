@@ -1,6 +1,7 @@
 #!/bin/bash
 
 build_os=$(uname -s | tr '[A-Z]' '[a-z]')
+[ "$build_os" = 'darwin' ] && build_os=mac
 prompt_color=33
 
 case $build_os in
@@ -11,11 +12,9 @@ case $build_os in
   darwin)
     download_command="curl -sS"
     tar_stdin="-"
-
-    build_os=mac
     ;;
   *)
-    echo "Could not determine build OS"
+    echo "Could not determine build OS" > /dev/stderr
     exit 1
 esac
 
