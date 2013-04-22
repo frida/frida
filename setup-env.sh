@@ -9,7 +9,7 @@ case $build_os in
     download_command="wget -O - -nv"
     tar_stdin=""
     ;;
-  darwin)
+  mac)
     download_command="curl -sS"
     tar_stdin="-"
     ;;
