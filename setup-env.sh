@@ -59,8 +59,8 @@ FRIDA_SDKROOT="$FRIDA_BUILD/sdk-$FRIDA_TARGET"
 case $FRIDA_TARGET in
   linux-*)
     CPP="/usr/bin/cpp"
-    CC="/usr/bin/gcc-4.6"
-    CXX="/usr/bin/g++-4.6"
+    CC="/usr/bin/gcc-4.7"
+    CXX="/usr/bin/g++-4.7"
     OBJC=""
     LD="/usr/bin/ld"
 
