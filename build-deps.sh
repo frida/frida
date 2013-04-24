@@ -50,7 +50,7 @@ FRIDA_PREFIX="$FRIDA_BUILD/frida-$FRIDA_TARGET"
 
 BUILDROOT="$FRIDA_BUILD/tmp-$FRIDA_TARGET/deps"
 
-REPO_BASE_URL="git@gitorious.org:frida"
+REPO_BASE_URL="git://gitorious.org/frida"
 REPO_SUFFIX=".git"
 
 function sed_inplace ()
