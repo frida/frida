@@ -222,8 +222,17 @@ build/frida-mac-universal/lib/python%/site-packages/_frida.so: build/tmp-mac32/f
 frida-npapi: \
 	build/frida-mac-universal/lib/browser/plugins/libnpfrida.dylib
 
-frida-npapi/configure: build/frida-env-mac64.rc frida-npapi/configure.ac
-	source build/frida-env-mac64.rc && cd frida-npapi && ./autogen.sh
+frida-npapi/configure: build/frida-env-mac64.rc frida-npapi/configure.ac build/frida-mac64/lib/pkgconfig/frida-core-1.0.pc
+	source build/frida-env-mac64.rc \
+		&& pushd frida-npapi >/dev/null \
+		&& ./autogen.sh \
+		&& popd >/dev/null \
+		&& mkdir -p build/tmp-mac64/frida-npapi \
+		&& pushd build/tmp-mac64/frida-npapi >/dev/null \
+		&& ../../../frida-npapi/configure \
+		&& rm -f ../../../frida-npapi/src/libnpfrida_codegen_la_vala.stamp \
+		&& make -C src ../../../../frida-npapi/src/libnpfrida_codegen_la_vala.stamp \
+		&& popd >/dev/null
 
 build/tmp-%/frida-npapi/Makefile: build/frida-env-%.rc frida-npapi/configure build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	mkdir -p $(@D)

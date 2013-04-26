@@ -135,8 +135,17 @@ build/frida-%-stripped/lib/python2.7/site-packages/_frida.so: build/tmp-linux-x8
 frida-npapi: \
 	build/frida-linux-x86_64-stripped/lib/browser/plugins/libnpfrida.so
 
-frida-npapi/configure: build/frida-env-linux-x86_64.rc frida-npapi/configure.ac
-	. build/frida-env-linux-x86_64.rc && cd frida-npapi && ./autogen.sh
+frida-npapi/configure: build/frida-env-linux-x86_64.rc frida-npapi/configure.ac build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc
+	. build/frida-env-linux-x86_64.rc \
+		&& pushd frida-npapi >/dev/null \
+		&& ./autogen.sh \
+		&& popd >/dev/null \
+		&& mkdir -p build/tmp-linux-x86_64/frida-npapi \
+		&& pushd build/tmp-linux-x86_64/frida-npapi >/dev/null \
+		&& ../../../frida-npapi/configure \
+		&& rm -f ../../../frida-npapi/src/libnpfrida_codegen_la_vala.stamp \
+		&& make -C src ../../../../frida-npapi/src/libnpfrida_codegen_la_vala.stamp \
+		&& popd >/dev/null
 
 build/tmp-%/frida-npapi/Makefile: build/frida-env-%.rc frida-npapi/configure build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	mkdir -p $(@D)
