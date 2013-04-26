@@ -156,6 +156,7 @@ done
   echo "export ACLOCAL_FLAGS=\"$ACLOCAL_FLAGS\""
   echo "export ACLOCAL=\"$ACLOCAL\""
   echo "export CONFIG_SITE=\"$CONFIG_SITE\""
+  echo "unset LANG LC_COLLATE LC_CTYPE LC_MESSAGES LC_NUMERIC LC_TIME"
 ) > build/frida-env-${FRIDA_TARGET}.rc
 
 case $FRIDA_TARGET in
