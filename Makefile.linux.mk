@@ -137,15 +137,14 @@ frida-npapi: \
 
 frida-npapi/configure: build/frida-env-linux-x86_64.rc frida-npapi/configure.ac build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc
 	. build/frida-env-linux-x86_64.rc \
-		&& pushd frida-npapi >/dev/null \
+		&& cd frida-npapi \
 		&& ./autogen.sh \
-		&& popd >/dev/null \
+		&& cd .. \
 		&& mkdir -p build/tmp-linux-x86_64/frida-npapi \
-		&& pushd build/tmp-linux-x86_64/frida-npapi >/dev/null \
+		&& cd build/tmp-linux-x86_64/frida-npapi \
 		&& ../../../frida-npapi/configure \
 		&& rm -f ../../../frida-npapi/src/libnpfrida_codegen_la_vala.stamp \
-		&& make -C src ../../../../frida-npapi/src/libnpfrida_codegen_la_vala.stamp \
-		&& popd >/dev/null
+		&& make -C src ../../../../frida-npapi/src/libnpfrida_codegen_la_vala.stamp
 
 build/tmp-%/frida-npapi/Makefile: build/frida-env-%.rc frida-npapi/configure build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	mkdir -p $(@D)
