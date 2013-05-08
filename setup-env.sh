@@ -40,7 +40,8 @@ fi
 toolchain_version=20130423
 case $FRIDA_TARGET in
   linux-*)
-    sdk_version=20130212
+    toolchain_version=20130508
+    sdk_version=20130508
     ;;
   mac32|mac64|ios)
     sdk_version=20130309
@@ -127,7 +128,7 @@ fi
 
 if [ ! -d "$FRIDA_BUILD/sdk-$FRIDA_TARGET" ]; then
   echo "Downloading and deploying SDK for $FRIDA_TARGET..."
-  $download_command "http://frida-ire.googlecode.com/files/sdk-$FRIDA_TARGET-$sdk_version.tar.bz2" | tar -C "$FRIDA_BUILD" -xj $tar_stdin || exit 1
+  $download_command "http://ospy.org/sdk-$FRIDA_TARGET-$sdk_version.tar.bz2" | tar -C "$FRIDA_BUILD" -xj $tar_stdin || exit 1
 fi
 
 for template in $(find $FRIDA_TOOLROOT $FRIDA_SDKROOT -name "*.frida.in"); do
