@@ -106,29 +106,29 @@ check-core-linux-x86_64: build/tmp-linux-x86_64/frida-core/tests/frida-tests
 
 
 frida-python: \
-	build/frida-linux-x86_64-stripped/lib/python2.6/site-packages/frida.py \
-	build/frida-linux-x86_64-stripped/lib/python2.6/site-packages/_frida.so
+	build/frida-linux-x86_64-stripped/lib/python2.7/site-packages/frida.py \
+	build/frida-linux-x86_64-stripped/lib/python2.7/site-packages/_frida.so
 
 frida-python/configure: build/frida-env-linux-x86_64.rc frida-python/configure.ac
 	. build/frida-env-linux-x86_64.rc && cd frida-python && ./autogen.sh
 
-build/tmp-%/frida-python2.6/Makefile: build/frida-env-%.rc frida-python/configure build/frida-%/lib/pkgconfig/frida-core-1.0.pc
+build/tmp-%/frida-python2.7/Makefile: build/frida-env-%.rc frida-python/configure build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	mkdir -p $(@D)
-	. build/frida-env-$*.rc && cd $(@D) && PYTHON=/usr/bin/python2.6 ../../../frida-python/configure
+	. build/frida-env-$*.rc && cd $(@D) && PYTHON=/usr/bin/python2.7 ../../../frida-python/configure
 
-build/tmp-%/frida-python2.6/src/_frida.la: build/tmp-%/frida-python2.6/Makefile build/frida-python-submodule-stamp
-	@touch -c build/tmp-$*/frida-python2.6/src/_frida.lo
-	. build/frida-env-$*.rc && cd build/tmp-$*/frida-python2.6 && make install
+build/tmp-%/frida-python2.7/src/_frida.la: build/tmp-%/frida-python2.7/Makefile build/frida-python-submodule-stamp
+	@touch -c build/tmp-$*/frida-python2.7/src/_frida.lo
+	. build/frida-env-$*.rc && cd build/tmp-$*/frida-python2.7 && make install
 	@touch -c $@
 
-build/frida-%-stripped/lib/python2.6/site-packages/frida.py: build/tmp-linux-x86_64/frida-python2.6/src/_frida.la
+build/frida-%-stripped/lib/python2.7/site-packages/frida.py: build/tmp-linux-x86_64/frida-python2.7/src/_frida.la
 	mkdir -p $(@D)
-	cp -a build/frida-$*/lib/python2.6/site-packages/frida.py $@
+	cp -a build/frida-$*/lib/python2.7/site-packages/frida.py $@
 	@touch $@
 
-build/frida-%-stripped/lib/python2.6/site-packages/_frida.so: build/tmp-linux-x86_64/frida-python2.6/src/_frida.la
+build/frida-%-stripped/lib/python2.7/site-packages/_frida.so: build/tmp-linux-x86_64/frida-python2.7/src/_frida.la
 	mkdir -p $(@D)
-	cp build/tmp-$*/frida-python2.6/src/.libs/_frida.so $@
+	cp build/tmp-$*/frida-python2.7/src/.libs/_frida.so $@
 	strip --strip-all $@
 
 
