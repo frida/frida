@@ -117,6 +117,7 @@ build/tmp-%/frida-python2.7/Makefile: build/frida-env-%.rc frida-python/configur
 	. build/frida-env-$*.rc && cd $(@D) && PYTHON=/usr/bin/python2.7 ../../../frida-python/configure
 
 build/tmp-%/frida-python2.7/src/_frida.la: build/tmp-%/frida-python2.7/Makefile build/frida-python-submodule-stamp
+	. build/frida-env-$*.rc && cd build/tmp-$*/frida-python2.7 && make
 	@touch -c build/tmp-$*/frida-python2.7/src/_frida.lo
 	. build/frida-env-$*.rc && cd build/tmp-$*/frida-python2.7 && make install
 	@touch -c $@
