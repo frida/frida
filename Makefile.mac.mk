@@ -50,7 +50,8 @@ build/frida-%/lib/pkgconfig/udis86.pc: build/tmp-%/udis86/Makefile build/udis86-
 frida-gum: \
 	build/frida-mac32/lib/pkgconfig/frida-gum-1.0.pc \
 	build/frida-mac64/lib/pkgconfig/frida-gum-1.0.pc \
-	build/frida-ios/lib/pkgconfig/frida-gum-1.0.pc
+	build/frida-ios/lib/pkgconfig/frida-gum-1.0.pc \
+	build/frida-android/lib/pkgconfig/frida-gum-1.0.pc
 
 frida-gum/configure: build/frida-env-mac64.rc frida-gum/configure.ac
 	source build/frida-env-mac64.rc && cd frida-gum && ./autogen.sh
@@ -71,6 +72,15 @@ build/tmp-ios/frida-gum/Makefile: build/frida-env-ios.rc frida-gum/configure
 build/frida-ios/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-ios/frida-gum/Makefile build/frida-gum-submodule-stamp
 	@touch -c build/tmp-ios/frida-gum/gum/libfrida_gum_la-gum.lo
 	source build/frida-env-ios.rc && make -C build/tmp-ios/frida-gum install
+	@touch -c $@
+
+build/tmp-android/frida-gum/Makefile: build/frida-env-android.rc frida-gum/configure
+	mkdir -p $(@D)
+	source build/frida-env-android.rc && cd $(@D) && ../../../frida-gum/configure
+
+build/frida-android/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-android/frida-gum/Makefile build/frida-gum-submodule-stamp
+	@touch -c build/tmp-android/frida-gum/gum/libfrida_gum_la-gum.lo
+	source build/frida-env-android.rc && make -C build/tmp-android/frida-gum install
 	@touch -c $@
 
 check-gum: check-gum-mac32 check-gum-mac64
