@@ -37,20 +37,33 @@ if [ -z $FRIDA_TARGET ] ; then
   echo "Assuming target is $FRIDA_TARGET. Set FRIDA_TARGET to override."
 fi
 
-toolchain_version=20130423
 case $FRIDA_TARGET in
-  linux-*)
-    toolchain_version=20130508
-    sdk_version=20130508
-    ;;
-  mac32|mac64|ios)
-    sdk_version=20130309
-    ;;
   android)
     if [ -z "$ANDROID_NDK_ROOT" ]; then
       echo "ANDROID_NDK_ROOT must be set" > /dev/stderr
       exit 1
     fi
+    ;;
+esac
+
+case $build_os in
+  linux)
+    toolchain_version=20130508
+    ;;
+  mac)
+    toolchain_version=20130423
+    ;;
+esac
+
+case $FRIDA_TARGET in
+  linux-*)
+    sdk_version=20130508
+    ;;
+  android)
+    sdk_version=20131022
+    ;;
+  mac32|mac64|ios)
+    sdk_version=20130309
     ;;
 esac
 
