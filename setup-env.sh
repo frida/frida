@@ -46,6 +46,12 @@ case $FRIDA_TARGET in
   mac32|mac64|ios)
     sdk_version=20130309
     ;;
+  android)
+    if [ -z "$ANDROID_NDK_ROOT" ]; then
+      echo "ANDROID_NDK_ROOT must be set" > /dev/stderr
+      exit 1
+    fi
+    ;;
 esac
 
 pushd `dirname $0` > /dev/null
@@ -56,6 +62,10 @@ FRIDA_PREFIX="$FRIDA_BUILD/frida-$FRIDA_TARGET"
 FRIDA_PREFIX_LIB="$FRIDA_PREFIX/lib"
 FRIDA_TOOLROOT="$FRIDA_BUILD/toolchain"
 FRIDA_SDKROOT="$FRIDA_BUILD/sdk-$FRIDA_TARGET"
+
+CFLAGS=""
+CXXFLAGS=""
+CPPFLAGS=""
 
 case $FRIDA_TARGET in
   linux-*)
@@ -96,17 +106,57 @@ case $FRIDA_TARGET in
     OBJC="$(xcrun --sdk $ios_sdk -f clang)"
     LD="$(xcrun --sdk $ios_sdk -f ld)"
 
-    IOS_DEVROOT="$(dirname $(dirname $(dirname $(xcrun --sdk iphoneos6.1 -f iphoneos-optimize))))"
-    IOS_SDKROOT="$IOS_DEVROOT/SDKs/iPhoneOS$ios_sdkver.sdk"
+    ios_dev="$(dirname $(dirname $(dirname $(xcrun --sdk $ios_sdk -f iphoneos-optimize))))"
+    ios_sdk="$ios_dev/SDKs/iPhoneOS$ios_sdkver.sdk"
 
-    CFLAGS="-isysroot $IOS_SDKROOT -miphoneos-version-min=$ios_minver -arch armv7"
-    LDFLAGS="-isysroot $IOS_SDKROOT -Wl,-iphoneos_version_min,$ios_minver -arch armv7 -no-undefined"
+    CFLAGS="-isysroot $ios_sdk -miphoneos-version-min=$ios_minver -arch armv7"
+    LDFLAGS="-isysroot $ios_sdk -Wl,-iphoneos_version_min,$ios_minver -arch armv7 -no-undefined"
+    ;;
+  android)
+    android_clang_prefix="$ANDROID_NDK_ROOT/toolchains/llvm-3.3/prebuilt/darwin-x86_64"
+    android_gcc_toolchain="$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64"
+    android_sysroot="$ANDROID_NDK_ROOT/platforms/android-14/arch-arm"
+
+    CPP="$android_gcc_toolchain/bin/arm-linux-androideabi-cpp"
+    CC="$android_clang_prefix/bin/clang"
+    CXX="$android_clang_prefix/bin/clang++"
+    LD="$android_clang_prefix/bin/clang"
+    AR="$android_gcc_toolchain/bin/arm-linux-androideabi-ar"
+    OBJDUMP="$android_gcc_toolchain/bin/arm-linux-androideabi-objdump"
+    RANLIB="$android_gcc_toolchain/bin/arm-linux-androideabi-ranlib"
+    STRIP="$android_gcc_toolchain/bin/arm-linux-androideabi-strip"
+
+    CFLAGS="--sysroot=$android_sysroot \
+-gcc-toolchain $android_gcc_toolchain \
+-target armv7-none-linux-androideabi \
+-no-canonical-prefixes \
+-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16 \
+-ffunction-sections -funwind-tables -fno-exceptions -fno-rtti \
+-DANDROID -DUSE_STLPORT=1 -D_STLP_USE_PTR_SPECIALIZATIONS=1 \
+-I$android_sysroot/usr/include \
+-I$ANDROID_NDK_ROOT/sources/cxx-stl/stlport/stlport"
+    CPPFLAGS="--sysroot=$android_sysroot \
+-DANDROID -DUSE_STLPORT=1 -D_STLP_USE_PTR_SPECIALIZATIONS=1 \
+-I$android_sysroot/usr/include \
+-I$ANDROID_NDK_ROOT/sources/cxx-stl/stlport/stlport"
+    LDFLAGS="--sysroot=$android_sysroot \
+-gcc-toolchain $android_gcc_toolchain \
+-target armv7-none-linux-androideabi \
+-no-canonical-prefixes \
+-Wl,--fix-cortex-a8 \
+-Wl,--no-undefined \
+-Wl,-z,noexecstack \
+-Wl,-z,relro \
+-Wl,-z,now \
+-L$android_sysroot/usr/lib \
+-L$ANDROID_NDK_ROOT/sources/cxx-stl/stlport/libs/armeabi-v7a \
+-lgcc -lc -lm -lstlport_static"
     ;;
 esac
 
 CFLAGS="-fPIC $CFLAGS"
-CXXFLAGS="$CFLAGS"
-CPPFLAGS=""
+CXXFLAGS="$CFLAGS $CXXFLAGS"
+CPPFLAGS="$CPPFLAGS"
 
 ACLOCAL_FLAGS="-I $FRIDA_PREFIX/share/aclocal -I $FRIDA_SDKROOT/share/aclocal -I $FRIDA_TOOLROOT/share/aclocal"
 ACLOCAL="aclocal $ACLOCAL_FLAGS"
@@ -161,6 +211,14 @@ done
 ) > build/frida-env-${FRIDA_TARGET}.rc
 
 case $FRIDA_TARGET in
+  android)
+    (
+      echo "export AR=\"$AR\""
+      echo "export OBJDUMP=\"$OBJDUMP\""
+      echo "export RANLIB=\"$RANLIB\""
+      echo "export STRIP=\"$STRIP\""
+    ) >> build/frida-env-${FRIDA_TARGET}.rc
+    ;;
   mac32|mac64|ios)
     (
       echo "export OBJC=\"$OBJC\""
