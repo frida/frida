@@ -79,6 +79,7 @@ FRIDA_SDKROOT="$FRIDA_BUILD/sdk-$FRIDA_TARGET"
 CFLAGS=""
 CXXFLAGS=""
 CPPFLAGS=""
+LDFLAGS=""
 
 case $FRIDA_TARGET in
   linux-*)
@@ -89,7 +90,8 @@ case $FRIDA_TARGET in
     LD="/usr/bin/ld"
 
     CFLAGS="-ffunction-sections -fdata-sections"
-    LDFLAGS="-Wl,--gc-sections"
+    CPPFLAGS="-I$FRIDA_SDKROOT/include"
+    LDFLAGS="-Wl,--gc-sections -L$FRIDA_SDKROOT/lib -lz"
     ;;
   mac32|mac64)
     CPP="/usr/bin/cpp"
@@ -151,7 +153,8 @@ case $FRIDA_TARGET in
     CPPFLAGS="--sysroot=$android_sysroot \
 -DANDROID -DUSE_STLPORT=1 -D_STLP_USE_PTR_SPECIALIZATIONS=1 \
 -I$android_sysroot/usr/include \
--I$ANDROID_NDK_ROOT/sources/cxx-stl/stlport/stlport"
+-I$ANDROID_NDK_ROOT/sources/cxx-stl/stlport/stlport \
+-I$FRIDA_SDKROOT/include"
     LDFLAGS="--sysroot=$android_sysroot \
 -gcc-toolchain $android_gcc_toolchain \
 -target armv7-none-linux-androideabi \
@@ -163,13 +166,13 @@ case $FRIDA_TARGET in
 -Wl,-z,now \
 -L$android_sysroot/usr/lib \
 -L$ANDROID_NDK_ROOT/sources/cxx-stl/stlport/libs/armeabi-v7a \
--lgcc -lc -lm -lstlport_static"
+-L$FRIDA_SDKROOT/lib \
+-lgcc -lc -lm -lstlport_static -lz"
     ;;
 esac
 
 CFLAGS="-fPIC $CFLAGS"
 CXXFLAGS="$CFLAGS $CXXFLAGS"
-CPPFLAGS="$CPPFLAGS"
 
 ACLOCAL_FLAGS="-I $FRIDA_PREFIX/share/aclocal -I $FRIDA_SDKROOT/share/aclocal -I $FRIDA_TOOLROOT/share/aclocal"
 ACLOCAL="aclocal $ACLOCAL_FLAGS"
