@@ -51,6 +51,11 @@ if [ -x /usr/bin/install ]; then
 fi
 
 case "$PACKAGE_TARNAME" in
+  'libffi')
+    CFLAGS="$CFLAGS -DFFI_MMAP_EXEC_WRIT=1 -DFFI_MMAP_EXEC_SELINUX=0"
+    enable_shared=no
+    enable_static=yes
+  ;;
   'glib')
     enable_dtrace=no
     enable_tests=no
@@ -90,7 +95,7 @@ case "$PACKAGE_TARNAME" in
     CFLAGS="$CFLAGS -I$frida_prefix/include"
     LDFLAGS="$LDFLAGS -L$frida_prefix/lib"
   ;;
-  'libffi'|'vala'|'libgee'|'json-glib')
+  'vala'|'libgee'|'json-glib')
     enable_shared=no
     enable_static=yes
   ;;
