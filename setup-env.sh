@@ -114,7 +114,7 @@ case $FRIDA_TARGET in
     LDFLAGS="-no-undefined"
     ;;
   ios)
-    ios_sdkver="6.1"
+    ios_sdkver="7.0"
     ios_sdk="iphoneos$ios_sdkver"
     ios_minver="6.0"
 
