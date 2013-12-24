@@ -239,7 +239,7 @@ case $FRIDA_TARGET in
     (
       echo "export OBJC=\"$OBJC\""
       echo "export OBJCFLAGS=\"$CFLAGS\""
-      echo "export MACOSX_DEPLOYMENT_TARGET=10.6"
+      echo "export MACOSX_DEPLOYMENT_TARGET=10.7"
     ) >> build/frida-env-${FRIDA_TARGET}.rc
     ;;
 esac
