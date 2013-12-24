@@ -61,7 +61,7 @@ build/tmp-%/frida-gum/Makefile: build/frida-env-%.rc frida-gum/configure build/f
 	source build/frida-env-$*.rc && cd $(@D) && ../../../frida-gum/configure
 
 build/frida-%/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-%/frida-gum/Makefile build/frida-gum-submodule-stamp
-	@touch -c build/tmp-$*/frida-gum/gum/libfrida_gum_la-gum.lo
+	@$(call ensure_relink,frida-gum/gum/gum.c,build/tmp-$*/frida-gum/gum/libfrida_gum_la-gum.lo)
 	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-gum install
 	@touch -c $@
 
@@ -70,7 +70,7 @@ build/tmp-ios/frida-gum/Makefile: build/frida-env-ios.rc frida-gum/configure
 	source build/frida-env-ios.rc && cd $(@D) && ../../../frida-gum/configure
 
 build/frida-ios/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-ios/frida-gum/Makefile build/frida-gum-submodule-stamp
-	@touch -c build/tmp-ios/frida-gum/gum/libfrida_gum_la-gum.lo
+	@$(call ensure_relink,frida-gum/gum/gum.c,build/tmp-ios/frida-gum/gum/libfrida_gum_la-gum.lo)
 	source build/frida-env-ios.rc && make -C build/tmp-ios/frida-gum install
 	@touch -c $@
 
@@ -79,7 +79,7 @@ build/tmp-android/frida-gum/Makefile: build/frida-env-android.rc frida-gum/confi
 	source build/frida-env-android.rc && cd $(@D) && ../../../frida-gum/configure
 
 build/frida-android/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-android/frida-gum/Makefile build/frida-gum-submodule-stamp
-	@touch -c build/tmp-android/frida-gum/gum/libfrida_gum_la-gum.lo
+	@$(call ensure_relink,frida-gum/gum/gum.c,build/tmp-android/frida-gum/gum/libfrida_gum_la-gum.lo)
 	source build/frida-env-android.rc && make -C build/tmp-android/frida-gum install
 	@touch -c $@
 
@@ -103,12 +103,12 @@ build/tmp-%/frida-core/Makefile: build/frida-env-%.rc frida-core/configure build
 	source build/frida-env-$*.rc && cd $(@D) && ../../../frida-core/configure
 
 build/tmp-%/frida-core/tools/resource-compiler: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
-	@touch -c build/tmp-$*/frida-core/tools/frida_resource_compiler-resource-compiler.o
+	@$(call ensure_relink,frida-core/tools/resource-compiler.c,build/tmp-$*/frida-core/tools/frida_resource_compiler-resource-compiler.o)
 	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/tools
 	@touch -c $@
 
 build/tmp-%/frida-core/lib/agent/libfrida-agent.la: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
-	@touch -c build/tmp-$*/frida-core/lib/agent/libfrida_agent_la-agent.lo
+	@$(call ensure_relink,frida-core/lib/agent/agent.c,build/tmp-$*/frida-core/lib/agent/libfrida_agent_la-agent.lo)
 	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/lib
 	@touch -c $@
 
@@ -116,11 +116,10 @@ build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib: build/t
 	mkdir -p $(@D)
 	cp build/tmp-mac32/frida-core/lib/agent/.libs/libfrida-agent.dylib $(@D)/libfrida-agent-32.dylib
 	cp build/tmp-mac64/frida-core/lib/agent/.libs/libfrida-agent.dylib $(@D)/libfrida-agent-64.dylib
-	strip -Sx $(@D)/libfrida-agent-32.dylib $(@D)/libfrida-agent-64.dylib
 	lipo $(@D)/libfrida-agent-32.dylib $(@D)/libfrida-agent-64.dylib -create -output $@
 
 build/tmp-%/frida-core/src/frida-fruitjector-helper: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
-	@touch -c build/tmp-$*/frida-core/src/fruitjector-helper-core.lo
+	@$(call ensure_relink,frida-core/src/darwin/fruitjector-helper-core.c,build/tmp-$*/frida-core/src/fruitjector-helper-core.lo)
 	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/src libfruitjector-types.la frida-fruitjector-helper.stamp
 	@touch -c $@
 
@@ -139,7 +138,7 @@ build/tmp-ios-stripped/frida-core/src/frida-fruitjector-helper: build/tmp-ios/fr
 	mv $@.tmp $@
 
 build/frida-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib build/tmp-mac64-stripped/frida-core/src/frida-fruitjector-helper build/tmp-%/frida-core/tools/resource-compiler
-	@touch -c build/tmp-$*/frida-core/src/libfrida_core_la-frida.lo
+	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-$*/frida-core/src/libfrida_core_la-frida.lo)
 	source build/frida-env-$*.rc \
 		&& cd build/tmp-$*/frida-core \
 		&& make -C src install \
@@ -151,11 +150,10 @@ build/frida-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-mac-universal/frida-cor
 build/tmp-ios-stripped/frida-core/lib/agent/.libs/libfrida-agent.dylib: build/tmp-ios/frida-core/lib/agent/libfrida-agent.la
 	mkdir -p $(@D)
 	cp $(<D)/.libs/$(@F) $@.tmp
-	strip -Sx $@.tmp
 	mv $@.tmp $@
 
 build/frida-ios/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-stripped/frida-core/lib/agent/.libs/libfrida-agent.dylib build/tmp-ios-stripped/frida-core/src/frida-fruitjector-helper build/tmp-mac64/frida-core/tools/resource-compiler
-	@touch -c build/tmp-ios/frida-core/src/libfrida_core_la-frida.lo
+	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-ios/frida-core/src/libfrida_core_la-frida.lo)
 	source build/frida-env-ios.rc \
 		&& cd build/tmp-ios/frida-core \
 		&& make -C src install \
@@ -166,9 +164,9 @@ build/frida-ios/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-stripped/frida-co
 	@touch -c $@
 
 build/tmp-%/frida-core/tests/frida-tests: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
-	@touch -c build/tmp-$*/frida-core/tests/main.o
-	@touch -c build/tmp-$*/frida-core/tests/inject-victim.o
-	@touch -c build/tmp-$*/frida-core/tests/inject-attacker.o
+	@$(call ensure_relink,frida-core/tests/main.c,build/tmp-$*/frida-core/tests/main.o)
+	@$(call ensure_relink,frida-core/tests/inject-victim.c,build/tmp-$*/frida-core/tests/inject-victim.o)
+	@$(call ensure_relink,frida-core/tests/inject-attacker.c,build/tmp-$*/frida-core/tests/inject-attacker.o)
 	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/tests
 	@touch -c $@
 
@@ -183,7 +181,7 @@ frida-server: \
 	build/frida-ios/bin/frida-server
 
 build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
-	@touch -c build/tmp-$*/frida-core/server/frida_server-server.o
+	@$(call ensure_relink,frida-core/server/server.c,build/tmp-$*/frida-core/server/frida_server-server.o)
 	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/server install
 	@touch -c $@
 
@@ -203,7 +201,7 @@ build/tmp-%/frida-python2.6/Makefile: build/frida-env-%.rc frida-python/configur
 
 build/tmp-%/frida-python2.6/src/_frida.la: build/tmp-%/frida-python2.6/Makefile build/frida-python-submodule-stamp
 	source build/frida-env-$*.rc && cd build/tmp-$*/frida-python2.6 && make
-	@touch -c build/tmp-$*/frida-python2.6/src/_frida.lo
+	@$(call ensure_relink,frida-python/src/_frida.c,build/tmp-$*/frida-python2.6/src/_frida.lo)
 	source build/frida-env-$*.rc && cd build/tmp-$*/frida-python2.6 && make install
 	@touch -c $@
 
@@ -213,7 +211,7 @@ build/tmp-%/frida-python2.7/Makefile: build/frida-env-%.rc frida-python/configur
 
 build/tmp-%/frida-python2.7/src/_frida.la: build/tmp-%/frida-python2.7/Makefile build/frida-python-submodule-stamp
 	source build/frida-env-$*.rc && cd build/tmp-$*/frida-python2.7 && make
-	@touch -c build/tmp-$*/frida-python2.7/src/_frida.lo
+	@$(call ensure_relink,frida-python/src/_frida.c,build/tmp-$*/frida-python2.7/src/_frida.lo)
 	source build/frida-env-$*.rc && cd build/tmp-$*/frida-python2.7 && make install
 	@touch -c $@
 
@@ -251,7 +249,7 @@ build/tmp-%/frida-npapi/Makefile: build/frida-env-%.rc frida-npapi/configure bui
 	source build/frida-env-$*.rc && cd $(@D) && ../../../frida-npapi/configure
 
 build/tmp-%/frida-npapi/src/libnpfrida.la: build/tmp-%/frida-npapi/Makefile build/frida-npapi-submodule-stamp
-	@touch -c build/tmp-$*/frida-npapi/src/npfrida-plugin.lo
+	@$(call ensure_relink,frida-npapi/src/npfrida-plugin.cpp,build/tmp-$*/frida-npapi/src/npfrida-plugin.lo)
 	source build/frida-env-$*.rc && cd build/tmp-$*/frida-npapi && make install
 	@touch -c $@
 
