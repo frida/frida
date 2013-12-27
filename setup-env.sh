@@ -111,7 +111,7 @@ case $FRIDA_TARGET in
         CFLAGS="-m64"
         ;;
     esac
-    LDFLAGS="-no-undefined"
+    LDFLAGS="-no-undefined -Wl,-no_compact_unwind"
     ;;
   ios)
     ios_sdkver="7.0"
@@ -128,7 +128,7 @@ case $FRIDA_TARGET in
     ios_sdk="$ios_dev/SDKs/iPhoneOS$ios_sdkver.sdk"
 
     CFLAGS="-isysroot $ios_sdk -miphoneos-version-min=$ios_minver -arch armv7"
-    LDFLAGS="-isysroot $ios_sdk -Wl,-iphoneos_version_min,$ios_minver -arch armv7 -no-undefined"
+    LDFLAGS="-isysroot $ios_sdk -Wl,-iphoneos_version_min,$ios_minver -arch armv7 -no-undefined -Wl,-no_compact_unwind"
     ;;
   android)
     android_clang_prefix="$ANDROID_NDK_ROOT/toolchains/llvm-3.3/prebuilt/darwin-x86_64"
