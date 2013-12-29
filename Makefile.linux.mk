@@ -106,7 +106,7 @@ check-core-linux-x86_64: build/tmp-linux-x86_64/frida-core/tests/frida-tests
 
 
 frida-python: \
-	build/frida-linux-x86_64-stripped/lib/python2.7/site-packages/frida.py \
+	build/frida-linux-x86_64-stripped/lib/python2.7/site-packages/frida \
 	build/frida-linux-x86_64-stripped/lib/python2.7/site-packages/_frida.so
 
 frida-python/configure: build/frida-env-linux-x86_64.rc frida-python/configure.ac
@@ -122,10 +122,10 @@ build/tmp-%/frida-python2.7/src/_frida.la: build/tmp-%/frida-python2.7/Makefile 
 	. build/frida-env-$*.rc && cd build/tmp-$*/frida-python2.7 && make install
 	@touch -c $@
 
-build/frida-%-stripped/lib/python2.7/site-packages/frida.py: build/tmp-linux-x86_64/frida-python2.7/src/_frida.la
+build/frida-%-stripped/lib/python2.7/site-packages/frida: build/tmp-linux-x86_64/frida-python2.7/src/_frida.la
+	rm -rf $@
 	mkdir -p $(@D)
-	cp -a build/frida-$*/lib/python2.7/site-packages/frida.py $@
-	@touch $@
+	cp -a build/frida-$*/lib/python2.7/site-packages/frida $@
 
 build/frida-%-stripped/lib/python2.7/site-packages/_frida.so: build/tmp-linux-x86_64/frida-python2.7/src/_frida.la
 	mkdir -p $(@D)

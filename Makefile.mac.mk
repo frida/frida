@@ -187,9 +187,9 @@ build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 
 
 frida-python: \
-	build/frida-mac-universal/lib/python2.6/site-packages/frida.py \
+	build/frida-mac-universal/lib/python2.6/site-packages/frida \
 	build/frida-mac-universal/lib/python2.6/site-packages/_frida.so \
-	build/frida-mac-universal/lib/python2.7/site-packages/frida.py \
+	build/frida-mac-universal/lib/python2.7/site-packages/frida \
 	build/frida-mac-universal/lib/python2.7/site-packages/_frida.so
 
 frida-python/configure: build/frida-env-mac64.rc frida-python/configure.ac
@@ -215,10 +215,10 @@ build/tmp-%/frida-python2.7/src/_frida.la: build/tmp-%/frida-python2.7/Makefile 
 	source build/frida-env-$*.rc && cd build/tmp-$*/frida-python2.7 && make install
 	@touch -c $@
 
-build/frida-mac-universal/lib/python%/site-packages/frida.py: build/tmp-mac64/frida-python%/src/_frida.la
+build/frida-mac-universal/lib/python%/site-packages/frida: build/tmp-mac64/frida-python%/src/_frida.la
+	rm -rf $@
 	mkdir -p $(@D)
-	cp -a build/frida-mac64/lib/python$*/site-packages/frida.py $@
-	@touch $@
+	cp -a build/frida-mac64/lib/python$*/site-packages/frida $@
 
 build/frida-mac-universal/lib/python%/site-packages/_frida.so: build/tmp-mac32/frida-python%/src/_frida.la build/tmp-mac64/frida-python%/src/_frida.la
 	mkdir -p $(@D)
