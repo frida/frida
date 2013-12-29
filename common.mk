@@ -1,3 +1,5 @@
+FRIDA_VERSION := $(shell git describe --tags --always --long | sed 's,-,.,g' | cut -f1-3 -d'.')
+
 modules = udis86 frida-gum frida-core frida-python frida-npapi
 
 git-submodules:
