@@ -229,15 +229,6 @@ build/frida-mac-universal/lib/python%/site-packages/_frida.so: build/tmp-mac32/f
 	rm $(@D)/_frida-32.so $(@D)/_frida-64.so
 
 
-frida-pypi: frida-python
-	export FRIDA_VERSION=$(FRIDA_VERSION) FRIDA_EXTENSION=$$(pwd)/build/frida-mac-universal/lib/python2.6/site-packages/_frida.so \
-		&& pushd frida-python/src >/dev/null \
-		&& python2.6 setup.py bdist_egg upload
-	export FRIDA_VERSION=$(FRIDA_VERSION) FRIDA_EXTENSION=$$(pwd)/build/frida-mac-universal/lib/python2.7/site-packages/_frida.so \
-		&& pushd frida-python/src >/dev/null \
-		&& python2.7 setup.py bdist_egg upload
-
-
 frida-npapi: \
 	build/frida-mac-universal/lib/browser/plugins/libnpfrida.dylib
 
