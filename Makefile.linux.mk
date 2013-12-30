@@ -126,6 +126,7 @@ build/frida-%-stripped/lib/python2.7/site-packages/frida: build/tmp-linux-x86_64
 	rm -rf $@
 	mkdir -p $(@D)
 	cp -a build/frida-$*/lib/python2.7/site-packages/frida $@
+	@touch $@
 
 build/frida-%-stripped/lib/python2.7/site-packages/_frida.so: build/tmp-linux-x86_64/frida-python2.7/src/_frida.la
 	mkdir -p $(@D)

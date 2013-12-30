@@ -219,6 +219,7 @@ build/frida-mac-universal/lib/python%/site-packages/frida: build/tmp-mac64/frida
 	rm -rf $@
 	mkdir -p $(@D)
 	cp -a build/frida-mac64/lib/python$*/site-packages/frida $@
+	@touch $@
 
 build/frida-mac-universal/lib/python%/site-packages/_frida.so: build/tmp-mac32/frida-python%/src/_frida.la build/tmp-mac64/frida-python%/src/_frida.la
 	mkdir -p $(@D)
