@@ -51,7 +51,7 @@ case $build_os in
     toolchain_version=20130508
     ;;
   mac)
-    toolchain_version=20130423
+    toolchain_version=20131231
     ;;
 esac
 
