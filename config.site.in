@@ -95,7 +95,7 @@ case "$PACKAGE_TARNAME" in
     CFLAGS="$CFLAGS -I$frida_prefix/include"
     LDFLAGS="$LDFLAGS -L$frida_prefix/lib"
   ;;
-  'vala'|'libgee'|'json-glib')
+  'vala'|'libgee'|'json-glib'|'udis86')
     enable_shared=no
     enable_static=yes
   ;;
