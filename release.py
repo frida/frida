@@ -46,6 +46,8 @@ if __name__ == '__main__':
                 os.path.join(build_dir, "build", "frida-mac-universal", "lib", "python2.6", "site-packages", "_frida.so"))
             upload_to_pypi("python2.7",
                 os.path.join(build_dir, "build", "frida-mac-universal", "lib", "python2.7", "site-packages", "_frida.so"))
+            upload_to_pypi("python3.3",
+                os.path.join(build_dir, "build", "frida-mac-universal", "lib", "python3.3", "site-packages", "_frida.so"))
             upload_ios_deb(os.path.join(build_dir, "build", "frida-ios", "bin", "frida-server"))
         elif system == 'Linux':
             upload_to_pypi("python2.7",

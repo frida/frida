@@ -1,6 +1,6 @@
 all: \
 	frida-server \
-	frida-python \
+	frida-python2 \
 	frida-npapi
 
 include common.mk
@@ -186,11 +186,17 @@ build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	@touch -c $@
 
 
-frida-python: \
+frida-python: frida-python2 frida-python3
+
+frida-python2: \
 	build/frida-mac-universal/lib/python2.6/site-packages/frida \
 	build/frida-mac-universal/lib/python2.6/site-packages/_frida.so \
 	build/frida-mac-universal/lib/python2.7/site-packages/frida \
 	build/frida-mac-universal/lib/python2.7/site-packages/_frida.so
+
+frida-python3: \
+	build/frida-mac-universal/lib/python3.3/site-packages/frida \
+	build/frida-mac-universal/lib/python3.3/site-packages/_frida.so
 
 frida-python/configure: build/frida-env-mac64.rc frida-python/configure.ac
 	source build/frida-env-mac64.rc && cd frida-python && ./autogen.sh
@@ -215,6 +221,16 @@ build/tmp-%/frida-python2.7/src/_frida.la: build/tmp-%/frida-python2.7/Makefile 
 	source build/frida-env-$*.rc && cd build/tmp-$*/frida-python2.7 && make install
 	@touch -c $@
 
+build/tmp-%/frida-python3.3/Makefile: build/frida-env-%.rc frida-python/configure build/frida-%/lib/pkgconfig/frida-core-1.0.pc
+	mkdir -p $(@D)
+	source build/frida-env-$*.rc && cd $(@D) && PYTHON=/usr/local/bin/python3.3 ../../../frida-python/configure
+
+build/tmp-%/frida-python3.3/src/_frida.la: build/tmp-%/frida-python3.3/Makefile build/frida-python-submodule-stamp
+	source build/frida-env-$*.rc && cd build/tmp-$*/frida-python3.3 && make
+	@$(call ensure_relink,frida-python/src/_frida.c,build/tmp-$*/frida-python3.3/src/_frida.lo)
+	source build/frida-env-$*.rc && cd build/tmp-$*/frida-python3.3 && make install
+	@touch -c $@
+
 build/frida-mac-universal/lib/python%/site-packages/frida: build/tmp-mac64/frida-python%/src/_frida.la
 	rm -rf $@
 	mkdir -p $(@D)
@@ -228,6 +244,21 @@ build/frida-mac-universal/lib/python%/site-packages/_frida.so: build/tmp-mac32/f
 	strip -Sx $(@D)/_frida-32.so $(@D)/_frida-64.so
 	lipo $(@D)/_frida-32.so $(@D)/_frida-64.so -create -output $@
 	rm $(@D)/_frida-32.so $(@D)/_frida-64.so
+
+check-python: check-python2 check-python3
+
+check-python2: frida-python2
+	export PYTHONPATH="$(shell pwd)/build/frida-mac-universal/lib/python2.6/site-packages" \
+		&& pushd frida-python >/dev/null \
+		&& unit2 discover
+	export PYTHONPATH="$(shell pwd)/build/frida-mac-universal/lib/python2.7/site-packages" \
+		&& pushd frida-python >/dev/null \
+		&& python2.7 -m unittest discover
+
+check-python3: frida-python3
+	export PYTHONPATH="$(shell pwd)/build/frida-mac-universal/lib/python3.3/site-packages" \
+		&& pushd frida-python >/dev/null \
+		&& python3.3 -m unittest discover
 
 
 frida-npapi: \
@@ -269,6 +300,6 @@ build/frida-mac-universal/lib/browser/plugins/libnpfrida.dylib: build/tmp-mac32/
 	frida-gum frida-gum-update-submodule-stamp check-gum check-gum-mac32 check-gum-mac64 \
 	frida-core frida-core-update-submodule-stamp check-core check-core-mac32 check-core-mac64 \
 	frida-server \
-	frida-python frida-python-update-submodule-stamp \
+	frida-python frida-python2 frida-python3 frida-python-update-submodule-stamp check-python check-python2 check-python3 \
 	frida-npapi frida-npapi-update-submodule-stamp
 .SECONDARY:
