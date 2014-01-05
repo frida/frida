@@ -105,9 +105,15 @@ check-core-linux-x86_64: build/tmp-linux-x86_64/frida-core/tests/frida-tests
 	$<
 
 
-frida-python: \
+frida-python: frida-python2 frida-python3
+
+frida-python2: \
 	build/frida-linux-x86_64-stripped/lib/python2.7/site-packages/frida \
 	build/frida-linux-x86_64-stripped/lib/python2.7/site-packages/_frida.so
+
+frida-python3: \
+	build/frida-linux-x86_64-stripped/lib/python3.3/site-packages/frida \
+	build/frida-linux-x86_64-stripped/lib/python3.3/site-packages/_frida.so
 
 frida-python/configure: build/frida-env-linux-x86_64.rc frida-python/configure.ac
 	. build/frida-env-linux-x86_64.rc && cd frida-python && ./autogen.sh
@@ -132,6 +138,18 @@ build/frida-%-stripped/lib/python2.7/site-packages/_frida.so: build/tmp-linux-x8
 	mkdir -p $(@D)
 	cp build/tmp-$*/frida-python2.7/src/.libs/_frida.so $@
 	strip --strip-all $@
+
+check-python: check-python2 check-python3
+
+check-python2: frida-python2
+	export PYTHONPATH="$(shell pwd)/build/frida-linux-x86_64-stripped/lib/python2.7/site-packages" \
+		&& pushd frida-python >/dev/null \
+		&& python2.7 -m unittest discover
+
+check-python3: frida-python3
+	export PYTHONPATH="$(shell pwd)/build/frida-linux-x86_64-stripped/lib/python3.3/site-packages" \
+		&& pushd frida-python >/dev/null \
+		&& python3.3 -m unittest discover
 
 
 frida-npapi: \
@@ -168,6 +186,6 @@ build/frida-%-stripped/lib/browser/plugins/libnpfrida.so: build/tmp-%/frida-npap
 	udis86 udis86-update-submodule-stamp \
 	frida-gum frida-gum-update-submodule-stamp check-gum check-gum-linux-x86_64 \
 	frida-core frida-core-update-submodule-stamp check-core check-core-linux-x86_64 \
-	frida-python frida-python-update-submodule-stamp \
+	frida-python frida-python2 frida-python3 frida-python-update-submodule-stamp check-python check-python2 check-python3 \
 	frida-npapi frida-npapi-update-submodule-stamp
 .SECONDARY:
