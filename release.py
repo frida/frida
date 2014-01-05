@@ -41,6 +41,10 @@ if __name__ == '__main__':
                 os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "lib", "python2.7", "site-packages", "_frida.pyd"))
             upload_to_pypi(r"C:\Program Files\Python27\python.exe",
                 os.path.join(build_dir, "build", "frida-windows", "x64-Release", "lib", "python2.7", "site-packages", "_frida.pyd"))
+            upload_to_pypi(r"C:\Program Files (x86)\Python33\python.exe",
+                os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "lib", "python3.3", "site-packages", "_frida.pyd"))
+            upload_to_pypi(r"C:\Program Files\Python33\python.exe",
+                os.path.join(build_dir, "build", "frida-windows", "x64-Release", "lib", "python3.3", "site-packages", "_frida.pyd"))
         elif system == 'Darwin':
             upload_to_pypi("python2.6",
                 os.path.join(build_dir, "build", "frida-mac-universal", "lib", "python2.6", "site-packages", "_frida.so"))
@@ -52,3 +56,5 @@ if __name__ == '__main__':
         elif system == 'Linux':
             upload_to_pypi("python2.7",
                 os.path.join(build_dir, "build", "frida-linux-x86_64-stripped", "lib", "python2.7", "site-packages", "_frida.so"))
+            upload_to_pypi("python3.3",
+                os.path.join(build_dir, "build", "frida-linux-x86_64-stripped", "lib", "python3.3", "site-packages", "_frida.so"))
