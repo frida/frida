@@ -249,15 +249,15 @@ check-python: check-python2 check-python3
 
 check-python2: frida-python2
 	export PYTHONPATH="$(shell pwd)/build/frida-mac-universal/lib/python2.6/site-packages" \
-		&& pushd frida-python >/dev/null \
+		&& cd frida-python \
 		&& unit2 discover
 	export PYTHONPATH="$(shell pwd)/build/frida-mac-universal/lib/python2.7/site-packages" \
-		&& pushd frida-python >/dev/null \
+		&& cd frida-python \
 		&& python2.7 -m unittest discover
 
 check-python3: frida-python3
 	export PYTHONPATH="$(shell pwd)/build/frida-mac-universal/lib/python3.3/site-packages" \
-		&& pushd frida-python >/dev/null \
+		&& cd frida-python \
 		&& python3.3 -m unittest discover
 
 
