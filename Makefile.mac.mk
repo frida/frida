@@ -1,6 +1,6 @@
 all: \
 	frida-server \
-	frida-python2 \
+	frida-python \
 	frida-npapi
 
 include common.mk
