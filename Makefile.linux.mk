@@ -1,3 +1,5 @@
+python3=python3.3
+
 all: \
 	frida-python \
 	frida-npapi
@@ -112,8 +114,8 @@ frida-python2: \
 	build/frida-linux-x86_64-stripped/lib/python2.7/site-packages/_frida.so
 
 frida-python3: \
-	build/frida-linux-x86_64-stripped/lib/python3.3/site-packages/frida \
-	build/frida-linux-x86_64-stripped/lib/python3.3/site-packages/_frida.so
+	build/frida-linux-x86_64-stripped/lib/${python3}/site-packages/frida \
+	build/frida-linux-x86_64-stripped/lib/${python3}/site-packages/_frida.so
 
 frida-python/configure: build/frida-env-linux-x86_64.rc frida-python/configure.ac
 	. build/frida-env-linux-x86_64.rc && cd frida-python && ./autogen.sh
@@ -139,25 +141,25 @@ build/frida-%-stripped/lib/python2.7/site-packages/_frida.so: build/tmp-linux-x8
 	cp build/tmp-$*/frida-python2.7/src/.libs/_frida.so $@
 	strip --strip-all $@
 
-build/tmp-%/frida-python3.3/Makefile: build/frida-env-%.rc frida-python/configure build/frida-%/lib/pkgconfig/frida-core-1.0.pc
+build/tmp-%/frida-${python3}/Makefile: build/frida-env-%.rc frida-python/configure build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	mkdir -p $(@D)
-	. build/frida-env-$*.rc && cd $(@D) && PYTHON=/usr/bin/python3.3 ../../../frida-python/configure
+	. build/frida-env-$*.rc && cd $(@D) && PYTHON=/usr/bin/${python3} ../../../frida-python/configure
 
-build/tmp-%/frida-python3.3/src/_frida.la: build/tmp-%/frida-python3.3/Makefile build/frida-python-submodule-stamp
-	. build/frida-env-$*.rc && cd build/tmp-$*/frida-python3.3 && make
-	@$(call ensure_relink,frida-python/src/_frida.c,build/tmp-$*/frida-python3.3/src/_frida.lo)
-	. build/frida-env-$*.rc && cd build/tmp-$*/frida-python3.3 && make install
+build/tmp-%/frida-${python3}/src/_frida.la: build/tmp-%/frida-${python3}/Makefile build/frida-python-submodule-stamp
+	. build/frida-env-$*.rc && cd build/tmp-$*/frida-${python3} && make
+	@$(call ensure_relink,frida-python/src/_frida.c,build/tmp-$*/frida-${python3}/src/_frida.lo)
+	. build/frida-env-$*.rc && cd build/tmp-$*/frida-${python3} && make install
 	@touch -c $@
 
-build/frida-%-stripped/lib/python3.3/site-packages/frida: build/tmp-linux-x86_64/frida-python3.3/src/_frida.la
+build/frida-%-stripped/lib/${python3}/site-packages/frida: build/tmp-linux-x86_64/frida-${python3}/src/_frida.la
 	rm -rf $@
 	mkdir -p $(@D)
-	cp -a build/frida-$*/lib/python3.3/site-packages/frida $@
+	cp -a build/frida-$*/lib/${python3}/site-packages/frida $@
 	@touch $@
 
-build/frida-%-stripped/lib/python3.3/site-packages/_frida.so: build/tmp-linux-x86_64/frida-python3.3/src/_frida.la
+build/frida-%-stripped/lib/${python3}/site-packages/_frida.so: build/tmp-linux-x86_64/frida-${python3}/src/_frida.la
 	mkdir -p $(@D)
-	cp build/tmp-$*/frida-python3.3/src/.libs/_frida.so $@
+	cp build/tmp-$*/frida-${python3}/src/.libs/_frida.so $@
 	strip --strip-all $@
 
 check-python: check-python2 check-python3
@@ -168,9 +170,9 @@ check-python2: frida-python2
 		&& python2.7 -m unittest tests.test_core tests.test_tracer
 
 check-python3: frida-python3
-	export PYTHONPATH="$(shell pwd)/build/frida-linux-x86_64-stripped/lib/python3.3/site-packages" \
+	export PYTHONPATH="$(shell pwd)/build/frida-linux-x86_64-stripped/lib/${python3}/site-packages" \
 		&& cd frida-python \
-		&& python3.3 -m unittest tests.test_core tests.test_tracer
+		&& ${python3} -m unittest tests.test_core tests.test_tracer
 
 
 frida-npapi: \
