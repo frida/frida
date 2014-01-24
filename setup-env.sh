@@ -76,7 +76,7 @@ popd > /dev/null
 FRIDA_BUILD="$FRIDA_ROOT/build"
 FRIDA_PREFIX="$FRIDA_BUILD/frida-$FRIDA_TARGET"
 FRIDA_PREFIX_LIB="$FRIDA_PREFIX/lib"
-FRIDA_TOOLROOT="$FRIDA_BUILD/toolchain"
+FRIDA_TOOLROOT="$FRIDA_BUILD/toolchain-$build_os"
 FRIDA_SDKROOT="$FRIDA_BUILD/sdk-$FRIDA_TARGET"
 
 CFLAGS=""
@@ -190,14 +190,14 @@ VALAC="$VALAC --vapidir=\"$FRIDA_SDKROOT/share/vala/vapi\" --vapidir=\"$FRIDA_PR
 [ ! -d "$FRIDA_PREFIX/share/aclocal}" ] && mkdir -p "$FRIDA_PREFIX/share/aclocal"
 [ ! -d "$FRIDA_PREFIX/lib}" ] && mkdir -p "$FRIDA_PREFIX/lib"
 
-if [ ! -d "$FRIDA_BUILD/toolchain" ]; then
+if [ ! -d "$FRIDA_BUILD/toolchain-$build_os" ]; then
   echo "Downloading and deploying toolchain..."
-  $download_command "http://ospy.org/toolchain-$build_os-$toolchain_version.tar.bz2" | tar -C "$FRIDA_BUILD" -xj $tar_stdin || exit 1
+  $download_command "http://build.frida.re/toolchain-$build_os-$toolchain_version.tar.bz2" | tar -C "$FRIDA_BUILD" -xj $tar_stdin || exit 1
 fi
 
 if [ ! -d "$FRIDA_BUILD/sdk-$FRIDA_TARGET" ]; then
   echo "Downloading and deploying SDK for $FRIDA_TARGET..."
-  $download_command "http://ospy.org/sdk-$FRIDA_TARGET-$sdk_version.tar.bz2" | tar -C "$FRIDA_BUILD" -xj $tar_stdin || exit 1
+  $download_command "http://build.frida.re/sdk-$FRIDA_TARGET-$sdk_version.tar.bz2" | tar -C "$FRIDA_BUILD" -xj $tar_stdin || exit 1
 fi
 
 for template in $(find $FRIDA_TOOLROOT $FRIDA_SDKROOT -name "*.frida.in"); do

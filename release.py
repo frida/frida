@@ -5,8 +5,14 @@ if __name__ == '__main__':
     import platform
     import subprocess
 
+    system = platform.system()
+
     build_dir = os.path.dirname(os.path.realpath(__file__))
-    toolchain_dir = os.path.join(build_dir, "build", "toolchain")
+    if system == 'Darwin':
+        build_os = 'mac'
+    else:
+        build_os = system.lower()
+    toolchain_dir = os.path.join(build_dir, "build", "toolchain-" + build_os)
     frida_core_dir = os.path.join(build_dir, "frida-core")
     frida_python_dir = os.path.join(build_dir, "frida-python")
 
@@ -35,7 +41,6 @@ if __name__ == '__main__':
         os.unlink(deb)
 
     if int(nano) == 0:
-        system = platform.system()
         if system == 'Windows':
             upload_to_pypi(r"C:\Program Files (x86)\Python27\python.exe",
                 os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "lib", "python2.7", "site-packages", "_frida.pyd"))
