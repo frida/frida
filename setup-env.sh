@@ -65,7 +65,7 @@ case $FRIDA_TARGET in
   mac32|mac64)
     sdk_version=20131224
     ;;
-  ios)
+  ios-arm)
     sdk_version=20130309
     ;;
 esac
@@ -113,7 +113,7 @@ case $FRIDA_TARGET in
     esac
     LDFLAGS="-no-undefined -Wl,-no_compact_unwind"
     ;;
-  ios)
+  ios-arm)
     ios_sdkver="7.0"
     ios_sdk="iphoneos$ios_sdkver"
     ios_minver="6.0"
@@ -238,7 +238,7 @@ case $FRIDA_TARGET in
       echo "export STRIP=\"$STRIP\""
     ) >> build/frida-env-${FRIDA_TARGET}.rc
     ;;
-  mac32|mac64|ios)
+  mac32|mac64|ios-arm)
     (
       echo "export OBJC=\"$OBJC\""
       echo "export OBJCFLAGS=\"$CFLAGS\""

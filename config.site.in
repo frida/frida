@@ -34,7 +34,7 @@ case $frida_target in
     host_alias="i686-apple-darwin"
     cross_compiling=yes
   ;;
-  ios)
+  ios-arm)
     host_alias="arm-apple-darwin"
     cross_compiling=yes
 
@@ -81,13 +81,13 @@ case "$PACKAGE_TARNAME" in
       linux-*)
         glib_cv_have_qsort_r=yes
       ;;
-      mac32|mac64|ios|android)
+      mac32|mac64|ios-arm|android)
         glib_cv_have_qsort_r=no
       ;;
     esac
 
     case $frida_target in
-      linux-*|android|mac32|mac64|ios)
+      linux-*|android|mac32|mac64|ios-arm)
         enable_proxy_libintl=yes
       ;;
     esac

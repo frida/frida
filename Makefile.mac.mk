@@ -15,13 +15,13 @@ clean:
 	rm -rf build/frida-mac32
 	rm -rf build/frida-mac64
 	rm -rf build/frida-mac-universal
-	rm -rf build/frida-ios
+	rm -rf build/frida-ios-arm
 	rm -rf build/tmp-mac32
 	rm -rf build/tmp-mac64
 	rm -rf build/tmp-mac64-stripped
 	rm -rf build/tmp-mac-universal
-	rm -rf build/tmp-ios
-	rm -rf build/tmp-ios-stripped
+	rm -rf build/tmp-ios-arm
+	rm -rf build/tmp-ios-arm-stripped
 	cd udis86 && git clean -xfd
 	cd frida-gum && git clean -xfd
 	cd frida-core && git clean -xfd
@@ -50,7 +50,7 @@ build/frida-%/lib/pkgconfig/udis86.pc: build/tmp-%/udis86/Makefile build/udis86-
 frida-gum: \
 	build/frida-mac32/lib/pkgconfig/frida-gum-1.0.pc \
 	build/frida-mac64/lib/pkgconfig/frida-gum-1.0.pc \
-	build/frida-ios/lib/pkgconfig/frida-gum-1.0.pc \
+	build/frida-ios-arm/lib/pkgconfig/frida-gum-1.0.pc \
 	build/frida-android/lib/pkgconfig/frida-gum-1.0.pc
 
 frida-gum/configure: build/frida-env-mac64.rc frida-gum/configure.ac
@@ -65,13 +65,13 @@ build/frida-%/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-%/frida-gum/Makefile bui
 	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-gum install
 	@touch -c $@
 
-build/tmp-ios/frida-gum/Makefile: build/frida-env-ios.rc frida-gum/configure
+build/tmp-ios-arm/frida-gum/Makefile: build/frida-env-ios-arm.rc frida-gum/configure
 	mkdir -p $(@D)
-	source build/frida-env-ios.rc && cd $(@D) && ../../../frida-gum/configure
+	source build/frida-env-ios-arm.rc && cd $(@D) && ../../../frida-gum/configure
 
-build/frida-ios/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-ios/frida-gum/Makefile build/frida-gum-submodule-stamp
-	@$(call ensure_relink,frida-gum/gum/gum.c,build/tmp-ios/frida-gum/gum/libfrida_gum_la-gum.lo)
-	source build/frida-env-ios.rc && make -C build/tmp-ios/frida-gum install
+build/frida-ios-arm/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-ios-arm/frida-gum/Makefile build/frida-gum-submodule-stamp
+	@$(call ensure_relink,frida-gum/gum/gum.c,build/tmp-ios-arm/frida-gum/gum/libfrida_gum_la-gum.lo)
+	source build/frida-env-ios-arm.rc && make -C build/tmp-ios-arm/frida-gum install
 	@touch -c $@
 
 build/tmp-android/frida-gum/Makefile: build/frida-env-android.rc frida-gum/configure
@@ -93,7 +93,7 @@ check-gum-mac64: build/frida-mac64/lib/pkgconfig/frida-gum-1.0.pc
 frida-core: \
 	build/frida-mac32/lib/pkgconfig/frida-core-1.0.pc \
 	build/frida-mac64/lib/pkgconfig/frida-core-1.0.pc \
-	build/frida-ios/lib/pkgconfig/frida-core-1.0.pc
+	build/frida-ios-arm/lib/pkgconfig/frida-core-1.0.pc
 
 frida-core/configure: build/frida-env-mac64.rc frida-core/configure.ac
 	source build/frida-env-mac64.rc && cd frida-core && ./autogen.sh
@@ -130,7 +130,7 @@ build/tmp-mac64-stripped/frida-core/src/frida-fruitjector-helper: build/tmp-mac6
 	codesign -f -s "$$MAC_CERTID" -i "com.tillitech.FridaFruitjectorHelper" $@.tmp
 	mv $@.tmp $@
 
-build/tmp-ios-stripped/frida-core/src/frida-fruitjector-helper: build/tmp-ios/frida-core/src/frida-fruitjector-helper
+build/tmp-ios-arm-stripped/frida-core/src/frida-fruitjector-helper: build/tmp-ios-arm/frida-core/src/frida-fruitjector-helper
 	mkdir -p $(@D)
 	cp $< $@.tmp
 	strip -Sx $@.tmp
@@ -147,19 +147,19 @@ build/frida-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-mac-universal/frida-cor
 		&& make install-data-am
 	@touch -c $@
 
-build/tmp-ios-stripped/frida-core/lib/agent/.libs/libfrida-agent.dylib: build/tmp-ios/frida-core/lib/agent/libfrida-agent.la
+build/tmp-ios-arm-stripped/frida-core/lib/agent/.libs/libfrida-agent.dylib: build/tmp-ios-arm/frida-core/lib/agent/libfrida-agent.la
 	mkdir -p $(@D)
 	cp $(<D)/.libs/$(@F) $@.tmp
 	mv $@.tmp $@
 
-build/frida-ios/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-stripped/frida-core/lib/agent/.libs/libfrida-agent.dylib build/tmp-ios-stripped/frida-core/src/frida-fruitjector-helper build/tmp-mac64/frida-core/tools/resource-compiler
-	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-ios/frida-core/src/libfrida_core_la-frida.lo)
-	source build/frida-env-ios.rc \
-		&& cd build/tmp-ios/frida-core \
+build/frida-ios-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-arm-stripped/frida-core/lib/agent/.libs/libfrida-agent.dylib build/tmp-ios-arm-stripped/frida-core/src/frida-fruitjector-helper build/tmp-mac64/frida-core/tools/resource-compiler
+	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-ios-arm/frida-core/src/libfrida_core_la-frida.lo)
+	source build/frida-env-ios-arm.rc \
+		&& cd build/tmp-ios-arm/frida-core \
 		&& make -C src install \
 			RESOURCE_COMPILER=../../../../build/tmp-mac64/frida-core/tools/resource-compiler \
-			AGENT=../../../../build/tmp-ios-stripped/frida-core/lib/agent/.libs/libfrida-agent.dylib \
-			FRUITJECTOR_HELPER=../../../../build/tmp-ios-stripped/frida-core/src/frida-fruitjector-helper \
+			AGENT=../../../../build/tmp-ios-arm-stripped/frida-core/lib/agent/.libs/libfrida-agent.dylib \
+			FRUITJECTOR_HELPER=../../../../build/tmp-ios-arm-stripped/frida-core/src/frida-fruitjector-helper \
 		&& make install-data-am
 	@touch -c $@
 
@@ -178,7 +178,7 @@ check-core-mac64: build/tmp-mac64/frida-core/tests/frida-tests
 
 
 frida-server: \
-	build/frida-ios/bin/frida-server
+	build/frida-ios-arm/bin/frida-server
 
 build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	@$(call ensure_relink,frida-core/server/server.c,build/tmp-$*/frida-core/server/frida_server-server.o)
