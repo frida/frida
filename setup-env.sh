@@ -56,14 +56,11 @@ case $build_os in
 esac
 
 case $FRIDA_TARGET in
-  linux-*)
-    sdk_version=20130508
+  linux-*|mac32|mac64|ios-arm)
+    sdk_version=20140223
     ;;
   android)
     sdk_version=20131027
-    ;;
-  mac32|mac64|ios-arm)
-    sdk_version=20140223
     ;;
 esac
 
