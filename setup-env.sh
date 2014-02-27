@@ -85,6 +85,10 @@ case $FRIDA_TARGET in
     CXX="/usr/bin/g++"
     OBJC=""
     LD="/usr/bin/ld"
+    AR="/usr/bin/ar"
+    OBJDUMP="/usr/bin/objdump"
+    RANLIB="/usr/bin/ranlib"
+    STRIP="/usr/bin/strip"
 
     CFLAGS="-ffunction-sections -fdata-sections"
     CPPFLAGS="-I$FRIDA_SDKROOT/include"
@@ -224,7 +228,7 @@ done
 ) > build/frida-env-${FRIDA_TARGET}.rc
 
 case $FRIDA_TARGET in
-  android)
+  linux-*|android)
     (
       echo "export AR=\"$AR\""
       echo "export OBJDUMP=\"$OBJDUMP\""
