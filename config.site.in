@@ -40,6 +40,10 @@ case $frida_target in
 
     frida_flags="$frida_flags -mthumb"
   ;;
+  ios-a64)
+    host_alias="aarch64-apple-darwin"
+    cross_compiling=yes
+  ;;
 esac
 
 # Work around a bug in stdint generation m4, where CFLAGS is overwritten,
@@ -81,13 +85,13 @@ case "$PACKAGE_TARNAME" in
       linux-*)
         glib_cv_have_qsort_r=yes
       ;;
-      mac32|mac64|ios-arm|android)
+      mac32|mac64|ios-arm|ios-a64|android)
         glib_cv_have_qsort_r=no
       ;;
     esac
 
     case $frida_target in
-      linux-*|android|mac32|mac64|ios-arm)
+      linux-*|android|mac32|mac64|ios-arm|ios-a64)
         enable_proxy_libintl=yes
       ;;
     esac
@@ -95,7 +99,13 @@ case "$PACKAGE_TARNAME" in
     CFLAGS="$CFLAGS -I$frida_prefix/include"
     LDFLAGS="$LDFLAGS -L$frida_prefix/lib"
   ;;
-  'vala'|'libgee'|'json-glib'|'udis86')
+  'libgee')
+    enable_shared=no
+    enable_static=yes
+
+    CFLAGS="$CFLAGS -Wno-error=implicit-function-declaration"
+  ;;
+  'vala'|'json-glib'|'udis86')
     enable_shared=no
     enable_static=yes
   ;;

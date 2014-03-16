@@ -56,7 +56,7 @@ case $build_os in
 esac
 
 case $FRIDA_TARGET in
-  linux-*|mac32|mac64|ios-arm)
+  linux-*|mac32|mac64|ios-arm|ios-a64)
     sdk_version=20140223
     ;;
   android)
@@ -111,7 +111,7 @@ case $FRIDA_TARGET in
     esac
     LDFLAGS="-no-undefined -Wl,-no_compact_unwind"
     ;;
-  ios-arm)
+  ios-arm|ios-a64)
     ios_sdkver="7.0"
     ios_sdk="iphoneos$ios_sdkver"
     ios_minver="6.0"
@@ -125,8 +125,10 @@ case $FRIDA_TARGET in
     ios_dev="$(dirname $(dirname $(dirname $(xcrun --sdk $ios_sdk -f iphoneos-optimize))))"
     ios_sdk="$ios_dev/SDKs/iPhoneOS$ios_sdkver.sdk"
 
-    CFLAGS="-isysroot $ios_sdk -miphoneos-version-min=$ios_minver -arch armv7"
-    LDFLAGS="-isysroot $ios_sdk -Wl,-iphoneos_version_min,$ios_minver -arch armv7 -no-undefined -Wl,-no_compact_unwind"
+    [ $FRIDA_TARGET == 'ios-arm' ] && ios_arch=armv7 || ios_arch=arm64
+
+    CFLAGS="-isysroot $ios_sdk -miphoneos-version-min=$ios_minver -arch $ios_arch"
+    LDFLAGS="-isysroot $ios_sdk -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -no-undefined -Wl,-no_compact_unwind"
     ;;
   android)
     android_clang_prefix="$ANDROID_NDK_ROOT/toolchains/llvm-3.3/prebuilt/darwin-x86_64"
@@ -236,7 +238,7 @@ case $FRIDA_TARGET in
       echo "export STRIP=\"$STRIP\""
     ) >> build/frida-env-${FRIDA_TARGET}.rc
     ;;
-  mac32|mac64|ios-arm)
+  mac32|mac64|ios-arm|ios-a64)
     (
       echo "export OBJC=\"$OBJC\""
       echo "export OBJCFLAGS=\"$CFLAGS\""
