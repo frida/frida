@@ -113,9 +113,9 @@ case $FRIDA_TARGET in
     LDFLAGS="-Wl,-no_compact_unwind"
     ;;
   ios-arm|ios-arm64)
-    ios_sdkver="7.0"
+    ios_sdkver="7.1"
     ios_sdk="iphoneos$ios_sdkver"
-    ios_minver="6.0"
+    ios_minver="7.0"
 
     CPP="$(xcrun --sdk $ios_sdk -f cpp)"
     CC="$(xcrun --sdk $ios_sdk -f clang)"
