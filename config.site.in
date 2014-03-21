@@ -40,7 +40,7 @@ case $frida_target in
 
     frida_flags="$frida_flags -mthumb"
   ;;
-  ios-a64)
+  ios-arm64)
     host_alias="aarch64-apple-darwin"
     cross_compiling=yes
   ;;
@@ -85,13 +85,13 @@ case "$PACKAGE_TARNAME" in
       linux-*)
         glib_cv_have_qsort_r=yes
       ;;
-      mac32|mac64|ios-arm|ios-a64|android)
+      mac32|mac64|ios-arm|ios-arm64|android)
         glib_cv_have_qsort_r=no
       ;;
     esac
 
     case $frida_target in
-      linux-*|android|mac32|mac64|ios-arm|ios-a64)
+      linux-*|android|mac32|mac64|ios-arm|ios-arm64)
         enable_proxy_libintl=yes
       ;;
     esac
