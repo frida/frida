@@ -33,7 +33,9 @@ check: check-gum check-core
 
 udis86: \
 	build/frida-mac32/lib/pkgconfig/udis86.pc \
-	build/frida-mac64/lib/pkgconfig/udis86.pc
+	build/frida-mac64/lib/pkgconfig/udis86.pc \
+	build/frida-ios-arm/lib/pkgconfig/udis86.pc \
+	build/frida-ios-arm64/lib/pkgconfig/udis86.pc
 
 udis86/configure: build/frida-env-mac64.rc udis86/configure.ac
 	source build/frida-env-mac64.rc && cd udis86 && ./autogen.sh
@@ -60,14 +62,6 @@ frida-gum/configure: build/frida-env-mac64.rc frida-gum/configure.ac
 build/tmp-%/frida-gum/Makefile: build/frida-env-%.rc frida-gum/configure build/frida-%/lib/pkgconfig/udis86.pc
 	mkdir -p $(@D)
 	source build/frida-env-$*.rc && cd $(@D) && ../../../frida-gum/configure
-
-build/tmp-ios-arm/frida-gum/Makefile: build/frida-env-ios-arm.rc frida-gum/configure
-	mkdir -p $(@D)
-	source build/frida-env-ios-arm.rc && cd $(@D) && ../../../frida-gum/configure
-
-build/tmp-ios-arm64/frida-gum/Makefile: build/frida-env-ios-arm64.rc frida-gum/configure
-	mkdir -p $(@D)
-	source build/frida-env-ios-arm64.rc && cd $(@D) && ../../../frida-gum/configure
 
 build/frida-%/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-%/frida-gum/Makefile build/frida-gum-submodule-stamp
 	@$(call ensure_relink,frida-gum/gum/gum.c,build/tmp-$*/frida-gum/gum/libfrida_gum_la-gum.lo)
