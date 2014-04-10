@@ -208,6 +208,7 @@ build/frida-ios-universal/bin/frida-server: build/frida-ios-arm/bin/frida-server
 	cp build/frida-ios-arm64/bin/frida-server $(@D)/frida-server-64
 	strip -Sx $(@D)/frida-server-32 $(@D)/frida-server-64
 	lipo $(@D)/frida-server-32 $(@D)/frida-server-64 -create -output $@
+	$(RM) $(@D)/frida-server-32 $(@D)/frida-server-64
 
 build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	@$(call ensure_relink,frida-core/server/server.c,build/tmp-$*/frida-core/server/frida_server-server.o)
