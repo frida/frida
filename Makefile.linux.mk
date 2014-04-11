@@ -6,10 +6,10 @@ all: \
 
 include common.mk
 
-distclean:
+distclean: clean-submodules
 	rm -rf build/
 
-clean:
+clean: clean-submodules
 	rm -f build/*.rc
 	rm -f build/*.site
 	rm -f build/*-stamp
@@ -17,6 +17,8 @@ clean:
 	rm -rf build/frida-linux-x86_64-stripped
 	rm -rf build/tmp-linux-x86_64
 	rm -rf build/tmp-linux-x86_64-stripped
+
+clean-submodules:
 	cd udis86 && git clean -xfd
 	cd frida-gum && git clean -xfd
 	cd frida-core && git clean -xfd
@@ -205,7 +207,7 @@ build/frida-%-stripped/lib/browser/plugins/libnpfrida.so: build/tmp-%/frida-npap
 
 
 .PHONY: \
-	distclean clean check git-submodules git-submodule-stamps \
+	distclean clean clean-submodules check git-submodules git-submodule-stamps \
 	udis86 udis86-update-submodule-stamp \
 	frida-gum frida-gum-update-submodule-stamp check-gum check-gum-linux-x86_64 \
 	frida-core frida-core-update-submodule-stamp check-core check-core-linux-x86_64 \
