@@ -112,8 +112,7 @@ case $FRIDA_TARGET in
         CFLAGS="-m64"
         ;;
     esac
-    CXXFLAGS="-std=gnu++11 -stdlib=libc++"
-    LDFLAGS="-stdlib=libc++ -Wl,-no_compact_unwind"
+    LDFLAGS="-Wl,-dead_strip -Wl,-no_compact_unwind"
     ;;
   ios-arm|ios-arm64)
     ios_sdkver="7.1"
@@ -132,8 +131,7 @@ case $FRIDA_TARGET in
     [ $FRIDA_TARGET == 'ios-arm' ] && ios_arch=armv7 || ios_arch=arm64
 
     CFLAGS="-isysroot $ios_sdk -miphoneos-version-min=$ios_minver -arch $ios_arch"
-    CXXFLAGS="-std=gnu++11 -stdlib=libc++"
-    LDFLAGS="-isysroot $ios_sdk -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -stdlib=libc++ -Wl,-no_compact_unwind"
+    LDFLAGS="-isysroot $ios_sdk -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
     ;;
   android)
     android_clang_prefix="$ANDROID_NDK_ROOT/toolchains/llvm-3.3/prebuilt/darwin-x86_64"
