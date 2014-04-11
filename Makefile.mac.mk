@@ -15,13 +15,18 @@ clean:
 	rm -rf build/frida-mac32
 	rm -rf build/frida-mac64
 	rm -rf build/frida-mac-universal
+	rm -rf build/frida-ios-universal
 	rm -rf build/frida-ios-arm
+	rm -rf build/frida-ios-arm64
 	rm -rf build/tmp-mac32
 	rm -rf build/tmp-mac64
 	rm -rf build/tmp-mac64-stripped
 	rm -rf build/tmp-mac-universal
 	rm -rf build/tmp-ios-arm
 	rm -rf build/tmp-ios-arm-stripped
+	rm -rf build/tmp-ios-arm64
+	rm -rf build/tmp-ios-arm64-stripped
+	rm -rf build/tmp-ios-universal
 	cd udis86 && git clean -xfd
 	cd frida-gum && git clean -xfd
 	cd frida-core && git clean -xfd
