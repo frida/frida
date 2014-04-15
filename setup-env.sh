@@ -190,14 +190,18 @@ VALAC="$VALAC --vapidir=\"$FRIDA_SDKROOT/share/vala/vapi\" --vapidir=\"$FRIDA_PR
 [ ! -d "$FRIDA_PREFIX/share/aclocal}" ] && mkdir -p "$FRIDA_PREFIX/share/aclocal"
 [ ! -d "$FRIDA_PREFIX/lib}" ] && mkdir -p "$FRIDA_PREFIX/lib"
 
-if [ ! -d "$FRIDA_BUILD/toolchain-$build_os" ]; then
+if [ ! -f "$FRIDA_BUILD/toolchain-$build_os/.stamp" ]; then
+  rm -rf "$FRIDA_BUILD/toolchain-$build_os"
   echo "Downloading and deploying toolchain..."
   $download_command "http://build.frida.re/toolchain-$build_os-$toolchain_version.tar.bz2" | tar -C "$FRIDA_BUILD" -xj $tar_stdin || exit 1
+  touch "$FRIDA_BUILD/toolchain-$build_os/.stamp"
 fi
 
-if [ ! -d "$FRIDA_BUILD/sdk-$FRIDA_TARGET" ]; then
+if [ ! -f "$FRIDA_BUILD/sdk-$FRIDA_TARGET/.stamp" ]; then
+  rm -rf "$FRIDA_BUILD/sdk-$FRIDA_TARGET"
   echo "Downloading and deploying SDK for $FRIDA_TARGET..."
   $download_command "http://build.frida.re/sdk-$FRIDA_TARGET-$sdk_version.tar.bz2" | tar -C "$FRIDA_BUILD" -xj $tar_stdin || exit 1
+  touch "$FRIDA_BUILD/sdk-$FRIDA_TARGET/.stamp"
 fi
 
 for template in $(find $FRIDA_TOOLROOT $FRIDA_SDKROOT -name "*.frida.in"); do
