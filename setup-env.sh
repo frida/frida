@@ -131,7 +131,7 @@ case $FRIDA_TARGET in
     LDFLAGS="-isysroot $ios_sdk -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
     ;;
   android-arm)
-    android_clang_prefix="$ANDROID_NDK_ROOT/toolchains/llvm-3.3/prebuilt/darwin-x86_64"
+    android_clang_prefix="$ANDROID_NDK_ROOT/toolchains/llvm-3.4/prebuilt/darwin-x86_64"
     android_gcc_toolchain="$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64"
     android_sysroot="$ANDROID_NDK_ROOT/platforms/android-14/arch-arm"
 
@@ -150,13 +150,17 @@ case $FRIDA_TARGET in
 -no-canonical-prefixes \
 -march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16 \
 -ffunction-sections -funwind-tables -fno-exceptions -fno-rtti \
--DANDROID -DUSE_STLPORT=1 -D_STLP_USE_PTR_SPECIALIZATIONS=1 \
+-Wa,--noexecstack \
+-DANDROID \
 -I$android_sysroot/usr/include \
--I$ANDROID_NDK_ROOT/sources/cxx-stl/stlport/stlport"
+-I$FRIDA_SDKROOT/include"
+    CXXFLAGS="\
+-I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/libcxx/include \
+-I$ANDROID_NDK_ROOT/sources/cxx-stl/gabi++/include \
+-I$ANDROID_NDK_ROOT/sources/android/support/include"
     CPPFLAGS="--sysroot=$android_sysroot \
--DANDROID -DUSE_STLPORT=1 -D_STLP_USE_PTR_SPECIALIZATIONS=1 \
+-DANDROID \
 -I$android_sysroot/usr/include \
--I$ANDROID_NDK_ROOT/sources/cxx-stl/stlport/stlport \
 -I$FRIDA_SDKROOT/include"
     LDFLAGS="--sysroot=$android_sysroot \
 -gcc-toolchain $android_gcc_toolchain \
@@ -167,10 +171,9 @@ case $FRIDA_TARGET in
 -Wl,-z,noexecstack \
 -Wl,-z,relro \
 -Wl,-z,now \
--L$android_sysroot/usr/lib \
--L$ANDROID_NDK_ROOT/sources/cxx-stl/stlport/libs/armeabi-v7a \
+-L$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a \
 -L$FRIDA_SDKROOT/lib \
--lgcc -lc -lm -lstlport_static -lz"
+-lgcc -lc -lm"
     ;;
 esac
 
