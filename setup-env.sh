@@ -38,7 +38,7 @@ if [ -z $FRIDA_TARGET ] ; then
 fi
 
 case $FRIDA_TARGET in
-  android)
+  android-*)
     if [ -z "$ANDROID_NDK_ROOT" ]; then
       echo "ANDROID_NDK_ROOT must be set" > /dev/stderr
       exit 1
@@ -59,11 +59,8 @@ case $FRIDA_TARGET in
   linux-*|mac32|mac64|ios-arm64)
     sdk_version=20140411
     ;;
-  ios-arm)
+  android-arm|ios-arm)
     sdk_version=20140421
-    ;;
-  android)
-    # TODO: build up-to-date SDK
     ;;
 esac
 
@@ -133,7 +130,7 @@ case $FRIDA_TARGET in
     CFLAGS="-isysroot $ios_sdk -miphoneos-version-min=$ios_minver -arch $ios_arch"
     LDFLAGS="-isysroot $ios_sdk -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
     ;;
-  android)
+  android-arm)
     android_clang_prefix="$ANDROID_NDK_ROOT/toolchains/llvm-3.3/prebuilt/darwin-x86_64"
     android_gcc_toolchain="$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64"
     android_sysroot="$ANDROID_NDK_ROOT/platforms/android-14/arch-arm"
@@ -237,7 +234,7 @@ done
 ) > build/frida-env-${FRIDA_TARGET}.rc
 
 case $FRIDA_TARGET in
-  linux-*|android)
+  linux-*|android-*)
     (
       echo "export AR=\"$AR\""
       echo "export OBJDUMP=\"$OBJDUMP\""

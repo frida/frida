@@ -20,7 +20,7 @@ case $frida_target in
     host_alias="x86_64-linux-gnu"
     cross_compiling=no
   ;;
-  android)
+  android-arm)
     if [ -n "$FRIDA_LEGACY_AUTOTOOLS" ]; then
       host_alias="armv7-linux-eabi"
     else
@@ -71,7 +71,7 @@ case "$PACKAGE_TARNAME" in
     glib_cv_uscore=no
 
     case $frida_target in
-      android)
+      android-*)
         ac_cv_func_posix_getgrgid_r=no
         ac_cv_func_posix_getpwuid_r=no
       ;;
@@ -85,13 +85,13 @@ case "$PACKAGE_TARNAME" in
       linux-*)
         glib_cv_have_qsort_r=yes
       ;;
-      mac32|mac64|ios-arm|ios-arm64|android)
+      mac32|mac64|ios-*|android-*)
         glib_cv_have_qsort_r=no
       ;;
     esac
 
     case $frida_target in
-      linux-*|android|mac32|mac64|ios-arm|ios-arm64)
+      linux-*|android-*|mac32|mac64|ios-*)
         enable_proxy_libintl=yes
       ;;
     esac

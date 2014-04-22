@@ -61,7 +61,7 @@ frida-gum: \
 	build/frida-mac64/lib/pkgconfig/frida-gum-1.0.pc \
 	build/frida-ios-arm/lib/pkgconfig/frida-gum-1.0.pc \
 	build/frida-ios-arm64/lib/pkgconfig/frida-gum-1.0.pc \
-	build/frida-android/lib/pkgconfig/frida-gum-1.0.pc
+	build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc
 
 frida-gum/configure: build/frida-env-mac64.rc frida-gum/configure.ac
 	source build/frida-env-mac64.rc && cd frida-gum && ./autogen.sh
@@ -75,13 +75,13 @@ build/frida-%/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-%/frida-gum/Makefile bui
 	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-gum install
 	@touch -c $@
 
-build/tmp-android/frida-gum/Makefile: build/frida-env-android.rc frida-gum/configure
+build/tmp-android-arm/frida-gum/Makefile: build/frida-env-android-arm.rc frida-gum/configure
 	mkdir -p $(@D)
-	source build/frida-env-android.rc && cd $(@D) && ../../../frida-gum/configure
+	source build/frida-env-android-arm.rc && cd $(@D) && ../../../frida-gum/configure
 
-build/frida-android/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-android/frida-gum/Makefile build/frida-gum-submodule-stamp
-	@$(call ensure_relink,frida-gum/gum/gum.c,build/tmp-android/frida-gum/gum/libfrida_gum_la-gum.lo)
-	source build/frida-env-android.rc && make -C build/tmp-android/frida-gum install
+build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-android-arm/frida-gum/Makefile build/frida-gum-submodule-stamp
+	@$(call ensure_relink,frida-gum/gum/gum.c,build/tmp-android-arm/frida-gum/gum/libfrida_gum_la-gum.lo)
+	source build/frida-env-android-arm.rc && make -C build/tmp-android-arm/frida-gum install
 	@touch -c $@
 
 check-gum: check-gum-mac32 check-gum-mac64
