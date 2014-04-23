@@ -86,6 +86,7 @@ case $FRIDA_TARGET in
     OBJC=""
     LD="/usr/bin/ld"
     AR="/usr/bin/ar"
+    NM="/usr/bin/nm"
     OBJDUMP="/usr/bin/objdump"
     RANLIB="/usr/bin/ranlib"
     STRIP="/usr/bin/strip"
@@ -135,22 +136,22 @@ case $FRIDA_TARGET in
     android_gcc_toolchain="$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64"
     android_sysroot="$ANDROID_NDK_ROOT/platforms/android-14/arch-arm"
 
-    CPP="$android_gcc_toolchain/bin/arm-linux-androideabi-cpp"
-    CC="$android_clang_prefix/bin/clang"
-    CXX="$android_clang_prefix/bin/clang++"
-    LD="$android_clang_prefix/bin/clang"
+    toolflags="--sysroot=$android_sysroot \
+-gcc-toolchain $android_gcc_toolchain \
+-target armv7-none-linux-androideabi \
+-no-canonical-prefixes"
+    CPP="$android_gcc_toolchain/bin/arm-linux-androideabi-cpp --sysroot=$android_sysroot"
+    CC="$android_clang_prefix/bin/clang $toolflags"
+    CXX="$android_clang_prefix/bin/clang++ $toolflags"
+    LD="$android_gcc_toolchain/bin/arm-linux-androideabi-ld --sysroot=$android_sysroot"
     AR="$android_gcc_toolchain/bin/arm-linux-androideabi-ar"
+    NM="$android_gcc_toolchain/bin/arm-linux-androideabi-nm"
     OBJDUMP="$android_gcc_toolchain/bin/arm-linux-androideabi-objdump"
     RANLIB="$android_gcc_toolchain/bin/arm-linux-androideabi-ranlib"
     STRIP="$android_gcc_toolchain/bin/arm-linux-androideabi-strip"
 
-    CFLAGS="--sysroot=$android_sysroot \
--gcc-toolchain $android_gcc_toolchain \
--target armv7-none-linux-androideabi \
--no-canonical-prefixes \
--march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16 \
+    CFLAGS="-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16 \
 -ffunction-sections -funwind-tables -fno-exceptions -fno-rtti \
--Wa,--noexecstack \
 -DANDROID \
 -I$android_sysroot/usr/include \
 -I$FRIDA_SDKROOT/include"
@@ -158,15 +159,10 @@ case $FRIDA_TARGET in
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/libcxx/include \
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/gabi++/include \
 -I$ANDROID_NDK_ROOT/sources/android/support/include"
-    CPPFLAGS="--sysroot=$android_sysroot \
--DANDROID \
+    CPPFLAGS="-DANDROID \
 -I$android_sysroot/usr/include \
 -I$FRIDA_SDKROOT/include"
-    LDFLAGS="--sysroot=$android_sysroot \
--gcc-toolchain $android_gcc_toolchain \
--target armv7-none-linux-androideabi \
--no-canonical-prefixes \
--Wl,--fix-cortex-a8 \
+    LDFLAGS="-Wl,--fix-cortex-a8 \
 -Wl,--no-undefined \
 -Wl,-z,noexecstack \
 -Wl,-z,relro \
@@ -240,6 +236,7 @@ case $FRIDA_TARGET in
   linux-*|android-*)
     (
       echo "export AR=\"$AR\""
+      echo "export NM=\"$NM\""
       echo "export OBJDUMP=\"$OBJDUMP\""
       echo "export RANLIB=\"$RANLIB\""
       echo "export STRIP=\"$STRIP\""
