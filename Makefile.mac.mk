@@ -48,16 +48,17 @@ capstone: \
 	build/frida-ios-arm/lib/pkgconfig/capstone.pc \
 	build/frida-ios-arm64/lib/pkgconfig/capstone.pc
 
-capstone/configure: build/frida-env-mac64.rc capstone/configure.ac
-	source build/frida-env-mac64.rc && cd capstone && ./autogen.sh
-
-build/tmp-%/capstone/Makefile: build/frida-env-%.rc capstone/configure
-	mkdir -p $(@D)
-	source build/frida-env-$*.rc && cd $(@D) && ../../../capstone/configure --disable-mips --disable-ppc --disable-sparc --disable-sysz
-
-build/frida-%/lib/pkgconfig/capstone.pc: build/tmp-%/capstone/Makefile build/capstone-submodule-stamp
-	source build/frida-env-$*.rc && make -C build/tmp-$*/capstone install
-	@touch -c $@
+build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-submodule-stamp
+	source build/frida-env-$*.rc \
+		&& export PACKAGE_TARNAME=capstone \
+		&& source $$CONFIG_SITE \
+		&& make -C capstone \
+			PREFIX=$$frida_prefix \
+			BUILDDIR=../build/tmp-$*/capstone \
+			CAPSTONE_ARCHS="arm aarch64 x86" \
+			CAPSTONE_SHARED=$$enable_shared \
+			CAPSTONE_STATIC=$$enable_static \
+			all install
 
 
 udis86: \
