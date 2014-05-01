@@ -29,8 +29,10 @@ clean: clean-submodules
 	rm -rf build/tmp-ios-arm64-stripped
 	rm -rf build/tmp-ios-universal
 	rm -rf build/tmp-android-arm
+	rm -rf build/tmp-android-arm-stripped
 
 clean-submodules:
+	cd capstone && git clean -xfd
 	cd udis86 && git clean -xfd
 	cd frida-gum && git clean -xfd
 	cd frida-core && git clean -xfd
@@ -38,6 +40,24 @@ clean-submodules:
 	cd frida-npapi && git clean -xfd
 
 check: check-gum check-core
+
+
+capstone: \
+	build/frida-mac32/lib/pkgconfig/capstone.pc \
+	build/frida-mac64/lib/pkgconfig/capstone.pc \
+	build/frida-ios-arm/lib/pkgconfig/capstone.pc \
+	build/frida-ios-arm64/lib/pkgconfig/capstone.pc
+
+capstone/configure: build/frida-env-mac64.rc capstone/configure.ac
+	source build/frida-env-mac64.rc && cd capstone && ./autogen.sh
+
+build/tmp-%/capstone/Makefile: build/frida-env-%.rc capstone/configure
+	mkdir -p $(@D)
+	source build/frida-env-$*.rc && cd $(@D) && ../../../capstone/configure --disable-mips --disable-ppc --disable-sparc --disable-sysz
+
+build/frida-%/lib/pkgconfig/capstone.pc: build/tmp-%/capstone/Makefile build/capstone-submodule-stamp
+	source build/frida-env-$*.rc && make -C build/tmp-$*/capstone install
+	@touch -c $@
 
 
 udis86: \
@@ -67,7 +87,7 @@ frida-gum: \
 frida-gum/configure: build/frida-env-mac64.rc frida-gum/configure.ac
 	source build/frida-env-mac64.rc && cd frida-gum && ./autogen.sh
 
-build/tmp-%/frida-gum/Makefile: build/frida-env-%.rc frida-gum/configure build/frida-%/lib/pkgconfig/udis86.pc
+build/tmp-%/frida-gum/Makefile: build/frida-env-%.rc frida-gum/configure build/frida-%/lib/pkgconfig/capstone.pc build/frida-%/lib/pkgconfig/udis86.pc
 	mkdir -p $(@D)
 	source build/frida-env-$*.rc && cd $(@D) && ../../../frida-gum/configure
 
@@ -340,6 +360,7 @@ build/frida-mac-universal/lib/browser/plugins/libnpfrida.dylib: build/tmp-mac32/
 
 .PHONY: \
 	distclean clean clean-submodules check git-submodules git-submodule-stamps \
+	capstone capstone-update-submodule-stamp \
 	udis86 udis86-update-submodule-stamp \
 	frida-gum frida-gum-update-submodule-stamp check-gum check-gum-mac32 check-gum-mac64 \
 	frida-core frida-core-update-submodule-stamp check-core check-core-mac32 check-core-mac64 \

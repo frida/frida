@@ -9,7 +9,15 @@ enable_nls=no
 
 frida_warning_flags="-Wall"
 
-frida_flags="-Os -pipe -gdwarf-2 -g3"
+case "$PACKAGE_TARNAME" in
+  capstone)
+    # Takes ages to compile with debug information
+    frida_flags="-Os -pipe"
+  ;;
+  *)
+    frida_flags="-Os -pipe -gdwarf-2 -g3"
+  ;;
+esac
 
 case $frida_target in
   linux-x86_32)
@@ -108,6 +116,12 @@ case "$PACKAGE_TARNAME" in
   'vala'|'json-glib'|'udis86')
     enable_shared=no
     enable_static=yes
+  ;;
+  'capstone')
+    enable_shared=no
+    enable_static=yes
+    enable_maintainer_mode=yes
+    frida_flags="$frida_warning_flags $frida_flags"
   ;;
   frida-*)
     enable_maintainer_mode=yes

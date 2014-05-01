@@ -1,3 +1,6 @@
+[submodule "capstone"]
+	path = capstone
+	url = git://github.com/frida/capstone.git
 [submodule "udis86"]
 	path = udis86
 	url = git://github.com/frida/udis86.git
