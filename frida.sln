@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-core", "frida-core\frida-core.vcxproj", "{B7DC9B02-A5FF-4AA1-B2A2-DC1653168D44}"
 	ProjectSection(ProjectDependencies) = postProject
 		{F4F9AF1C-3111-4563-8066-8FAE8CBEFBDC} = {F4F9AF1C-3111-4563-8066-8FAE8CBEFBDC}
@@ -42,6 +44,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-pipe-32", "frida-core\lib\pipe\frida-pipe-32.vcxproj", "{4C39C3CF-13E5-4346-B6AE-F73013105936}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-pipe-64", "frida-core\lib\pipe\frida-pipe-64.vcxproj", "{D50F460F-9C4D-42EB-A8C4-48C0C46CFAAF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "capstone-32", "capstone\capstone-32.vcxproj", "{42C2E7D0-0310-4128-80FF-14E16282E12C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "capstone-64", "capstone\capstone-64.vcxproj", "{3D5DFA8A-628C-40CC-86D7-078F72833309}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -203,6 +209,22 @@ Global
 		{D50F460F-9C4D-42EB-A8C4-48C0C46CFAAF}.Release|Win32.Build.0 = Release|x64
 		{D50F460F-9C4D-42EB-A8C4-48C0C46CFAAF}.Release|x64.ActiveCfg = Release|x64
 		{D50F460F-9C4D-42EB-A8C4-48C0C46CFAAF}.Release|x64.Build.0 = Release|x64
+		{42C2E7D0-0310-4128-80FF-14E16282E12C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{42C2E7D0-0310-4128-80FF-14E16282E12C}.Debug|Win32.Build.0 = Debug|Win32
+		{42C2E7D0-0310-4128-80FF-14E16282E12C}.Debug|x64.ActiveCfg = Debug|Win32
+		{42C2E7D0-0310-4128-80FF-14E16282E12C}.Debug|x64.Build.0 = Debug|Win32
+		{42C2E7D0-0310-4128-80FF-14E16282E12C}.Release|Win32.ActiveCfg = Release|Win32
+		{42C2E7D0-0310-4128-80FF-14E16282E12C}.Release|Win32.Build.0 = Release|Win32
+		{42C2E7D0-0310-4128-80FF-14E16282E12C}.Release|x64.ActiveCfg = Release|Win32
+		{42C2E7D0-0310-4128-80FF-14E16282E12C}.Release|x64.Build.0 = Release|Win32
+		{3D5DFA8A-628C-40CC-86D7-078F72833309}.Debug|Win32.ActiveCfg = Debug|x64
+		{3D5DFA8A-628C-40CC-86D7-078F72833309}.Debug|Win32.Build.0 = Debug|x64
+		{3D5DFA8A-628C-40CC-86D7-078F72833309}.Debug|x64.ActiveCfg = Debug|x64
+		{3D5DFA8A-628C-40CC-86D7-078F72833309}.Debug|x64.Build.0 = Debug|x64
+		{3D5DFA8A-628C-40CC-86D7-078F72833309}.Release|Win32.ActiveCfg = Release|x64
+		{3D5DFA8A-628C-40CC-86D7-078F72833309}.Release|Win32.Build.0 = Release|x64
+		{3D5DFA8A-628C-40CC-86D7-078F72833309}.Release|x64.ActiveCfg = Release|x64
+		{3D5DFA8A-628C-40CC-86D7-078F72833309}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
