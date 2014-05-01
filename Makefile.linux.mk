@@ -19,6 +19,7 @@ clean: clean-submodules
 	rm -rf build/tmp-linux-x86_64-stripped
 
 clean-submodules:
+	cd capstone && git clean -xfd
 	cd udis86 && git clean -xfd
 	cd frida-gum && git clean -xfd
 	cd frida-core && git clean -xfd
@@ -26,6 +27,22 @@ clean-submodules:
 	cd frida-npapi && git clean -xfd
 
 check: check-gum check-core
+
+
+capstone: \
+	build/frida-linux-x86_64/lib/pkgconfig/capstone.pc
+
+build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-submodule-stamp
+	source build/frida-env-$*.rc \
+		&& export PACKAGE_TARNAME=capstone \
+		&& source $$CONFIG_SITE \
+		&& make -C capstone \
+			PREFIX=$$frida_prefix \
+			BUILDDIR=../build/tmp-$*/capstone \
+			CAPSTONE_ARCHS="arm aarch64 x86" \
+			CAPSTONE_SHARED=$$enable_shared \
+			CAPSTONE_STATIC=$$enable_static \
+			install
 
 
 udis86: \
@@ -49,7 +66,7 @@ frida-gum: \
 frida-gum/configure: build/frida-env-linux-x86_64.rc frida-gum/configure.ac
 	. build/frida-env-linux-x86_64.rc && cd frida-gum && ./autogen.sh
 
-build/tmp-%/frida-gum/Makefile: build/frida-env-%.rc frida-gum/configure build/frida-%/lib/pkgconfig/udis86.pc
+build/tmp-%/frida-gum/Makefile: build/frida-env-%.rc frida-gum/configure build/frida-%/lib/pkgconfig/capstone.pc build/frida-%/lib/pkgconfig/udis86.pc
 	mkdir -p $(@D)
 	. build/frida-env-$*.rc && cd $(@D) && ../../../frida-gum/configure
 
@@ -208,6 +225,7 @@ build/frida-%-stripped/lib/browser/plugins/libnpfrida.so: build/tmp-%/frida-npap
 
 .PHONY: \
 	distclean clean clean-submodules check git-submodules git-submodule-stamps \
+	capstone capstone-update-submodule-stamp \
 	udis86 udis86-update-submodule-stamp \
 	frida-gum frida-gum-update-submodule-stamp check-gum check-gum-linux-x86_64 \
 	frida-core frida-core-update-submodule-stamp check-core check-core-linux-x86_64 \

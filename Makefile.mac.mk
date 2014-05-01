@@ -58,7 +58,7 @@ build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-sub
 			CAPSTONE_ARCHS="arm aarch64 x86" \
 			CAPSTONE_SHARED=$$enable_shared \
 			CAPSTONE_STATIC=$$enable_static \
-			all install
+			install
 
 
 udis86: \
