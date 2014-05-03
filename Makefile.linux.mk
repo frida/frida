@@ -33,9 +33,9 @@ capstone: \
 	build/frida-linux-x86_64/lib/pkgconfig/capstone.pc
 
 build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-submodule-stamp
-	source build/frida-env-$*.rc \
+	. build/frida-env-$*.rc \
 		&& export PACKAGE_TARNAME=capstone \
-		&& source $$CONFIG_SITE \
+		&& . $$CONFIG_SITE \
 		&& make -C capstone \
 			PREFIX=$$frida_prefix \
 			BUILDDIR=../build/tmp-$*/capstone \
