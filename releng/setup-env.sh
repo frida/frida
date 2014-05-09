@@ -1,5 +1,7 @@
 #!/bin/bash
 
+releng_path=`dirname $0`
+
 build_os=$(uname -s | tr '[A-Z]' '[a-z]')
 [ "$build_os" = 'darwin' ] && build_os=mac
 prompt_color=33
@@ -64,7 +66,7 @@ case $FRIDA_TARGET in
     ;;
 esac
 
-pushd `dirname $0` > /dev/null
+pushd $releng_path/../ > /dev/null
 FRIDA_ROOT=`pwd`
 popd > /dev/null
 FRIDA_BUILD="$FRIDA_ROOT/build"
@@ -254,7 +256,7 @@ esac
 sed \
   -e "s,@frida_target@,$FRIDA_TARGET,g" \
   -e "s,@frida_prefix@,$FRIDA_PREFIX,g" \
-  config.site.in > $CONFIG_SITE
+  $releng_path/config.site.in > "$CONFIG_SITE"
 
 echo "Environment created. To enter:"
 echo "# source $FRIDA_ROOT/build/frida-env-${FRIDA_TARGET}.rc"

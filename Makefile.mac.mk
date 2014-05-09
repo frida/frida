@@ -3,7 +3,7 @@ all: \
 	frida-python \
 	frida-npapi
 
-include common.mk
+include releng/common.mk
 
 distclean: clean-submodules
 	rm -rf build/
