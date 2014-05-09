@@ -7,7 +7,7 @@ if __name__ == '__main__':
 
     system = platform.system()
 
-    build_dir = os.path.dirname(os.path.realpath(__file__))
+    build_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     if system == 'Darwin':
         build_os = 'mac'
     else:
@@ -36,8 +36,8 @@ if __name__ == '__main__':
         env.update(os.environ)
         deb = os.path.join(build_dir, "frida_%s_iphoneos-arm.deb" % version)
         subprocess.call([os.path.join(frida_core_dir, "tools", "package-server.sh"), server, deb], env=env)
-        subprocess.call(["scp", deb, "buildmaster@ospy.org:/home/buildmaster/public_html/debs/"])
-        subprocess.call(["ssh", "buildmaster@ospy.org", "/home/buildmaster/cydia/sync-repo"])
+        subprocess.call(["scp", deb, "buildmaster@build.frida.re:/home/buildmaster/public_html/debs/"])
+        subprocess.call(["ssh", "buildmaster@build.frida.re", "/home/buildmaster/cydia/sync-repo"])
         os.unlink(deb)
 
     if int(nano) == 0:
