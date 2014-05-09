@@ -74,11 +74,11 @@
   <ItemGroup>
     <CustomBuild Include="windows-sdk.txt">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Checking SDK</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">if exist "$(ProjectDir)build\sdk-windows\" goto warn
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">if exist "$(ProjectDir)..\build\sdk-windows\" goto warn
 
-"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)build\sdk-windows.exe" || exit 1
-"$(ProjectDir)build\sdk-windows.exe" -o"$(ProjectDir)build\" || exit 1
-del "$(ProjectDir)build\sdk-windows.exe"
+"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)..\build\sdk-windows.exe" || exit 1
+"$(ProjectDir)..\build\sdk-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
+del "$(ProjectDir)..\build\sdk-windows.exe"
 goto done
 
 :warn
@@ -90,11 +90,11 @@ echo &gt; "$(IntDir)windows-sdk.stamp"
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)windows-sdk.stamp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Checking SDK</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">if exist "$(ProjectDir)build\sdk-windows\" goto warn
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">if exist "$(ProjectDir)..\build\sdk-windows\" goto warn
 
-"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)build\sdk-windows.exe" || exit 1
-"$(ProjectDir)build\sdk-windows.exe" -o"$(ProjectDir)build\" || exit 1
-del "$(ProjectDir)build\sdk-windows.exe"
+"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)..\build\sdk-windows.exe" || exit 1
+"$(ProjectDir)..\build\sdk-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
+del "$(ProjectDir)..\build\sdk-windows.exe"
 goto done
 
 :warn
@@ -106,11 +106,11 @@ echo &gt; "$(IntDir)windows-sdk.stamp"
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)windows-sdk.stamp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Checking SDK</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">if exist "$(ProjectDir)build\sdk-windows\" goto warn
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">if exist "$(ProjectDir)..\build\sdk-windows\" goto warn
 
-"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)build\sdk-windows.exe" || exit 1
-"$(ProjectDir)build\sdk-windows.exe" -o"$(ProjectDir)build\" || exit 1
-del "$(ProjectDir)build\sdk-windows.exe"
+"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)..\build\sdk-windows.exe" || exit 1
+"$(ProjectDir)..\build\sdk-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
+del "$(ProjectDir)..\build\sdk-windows.exe"
 goto done
 
 :warn
@@ -122,11 +122,11 @@ echo &gt; "$(IntDir)windows-sdk.stamp"
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)windows-sdk.stamp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Checking SDK</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">if exist "$(ProjectDir)build\sdk-windows\" goto warn
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">if exist "$(ProjectDir)..\build\sdk-windows\" goto warn
 
-"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)build\sdk-windows.exe" || exit 1
-"$(ProjectDir)build\sdk-windows.exe" -o"$(ProjectDir)build\" || exit 1
-del "$(ProjectDir)build\sdk-windows.exe"
+"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)..\build\sdk-windows.exe" || exit 1
+"$(ProjectDir)..\build\sdk-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
+del "$(ProjectDir)..\build\sdk-windows.exe"
 goto done
 
 :warn
@@ -141,11 +141,11 @@ echo &gt; "$(IntDir)windows-sdk.stamp"
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="windows-toolchain.txt">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">if exist "$(ProjectDir)build\toolchain-windows\" goto warn
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">if exist "$(ProjectDir)..\build\toolchain-windows\" goto warn
 
-"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)build\toolchain-windows.exe" || exit 1
-"$(ProjectDir)build\toolchain-windows.exe" -o"$(ProjectDir)build\" || exit 1
-del "$(ProjectDir)build\toolchain-windows.exe"
+"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)..\build\toolchain-windows.exe" || exit 1
+"$(ProjectDir)..\build\toolchain-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
+del "$(ProjectDir)..\build\toolchain-windows.exe"
 goto done
 
 :warn
@@ -154,11 +154,11 @@ echo Assuming toolchain is up to date - delete build\toolchain-windows if in dou
 :done
 echo &gt; "$(IntDir)windows-toolchain.stamp"
 </Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">if exist "$(ProjectDir)build\toolchain-windows\" goto warn
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">if exist "$(ProjectDir)..\build\toolchain-windows\" goto warn
 
-"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)build\toolchain-windows.exe" || exit 1
-"$(ProjectDir)build\toolchain-windows.exe" -o"$(ProjectDir)build\" || exit 1
-del "$(ProjectDir)build\toolchain-windows.exe"
+"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)..\build\toolchain-windows.exe" || exit 1
+"$(ProjectDir)..\build\toolchain-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
+del "$(ProjectDir)..\build\toolchain-windows.exe"
 goto done
 
 :warn
@@ -167,11 +167,11 @@ echo Assuming toolchain is up to date - delete build\toolchain-windows if in dou
 :done
 echo &gt; "$(IntDir)windows-toolchain.stamp"
 </Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">if exist "$(ProjectDir)build\toolchain-windows\" goto warn
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">if exist "$(ProjectDir)..\build\toolchain-windows\" goto warn
 
-"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)build\toolchain-windows.exe" || exit 1
-"$(ProjectDir)build\toolchain-windows.exe" -o"$(ProjectDir)build\" || exit 1
-del "$(ProjectDir)build\toolchain-windows.exe"
+"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)..\build\toolchain-windows.exe" || exit 1
+"$(ProjectDir)..\build\toolchain-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
+del "$(ProjectDir)..\build\toolchain-windows.exe"
 goto done
 
 :warn
@@ -180,11 +180,11 @@ echo Assuming toolchain is up to date - delete build\toolchain-windows if in dou
 :done
 echo &gt; "$(IntDir)windows-toolchain.stamp"
 </Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">if exist "$(ProjectDir)build\toolchain-windows\" goto warn
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">if exist "$(ProjectDir)..\build\toolchain-windows\" goto warn
 
-"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)build\toolchain-windows.exe" || exit 1
-"$(ProjectDir)build\toolchain-windows.exe" -o"$(ProjectDir)build\" || exit 1
-del "$(ProjectDir)build\toolchain-windows.exe"
+"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)..\build\toolchain-windows.exe" || exit 1
+"$(ProjectDir)..\build\toolchain-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
+del "$(ProjectDir)..\build\toolchain-windows.exe"
 goto done
 
 :warn
