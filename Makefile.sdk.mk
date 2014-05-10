@@ -53,20 +53,20 @@ endif
 endif
 
 
-binutils:
-	$(RM) -rf binutils.tmp
-	mkdir binutils.tmp
-	cd binutils.tmp \
-		&& $(download) http://gnuftp.uib.no/binutils/$@-2.24.tar.bz2 | tar -xj --strip-components 1 \
+build/binutils-stamp:
+	$(RM) -rf binutils
+	mkdir binutils
+	cd binutils \
+		&& $(download) http://gnuftp.uib.no/binutils/binutils-2.24.tar.bz2 | tar -xj --strip-components 1 \
 		&& patch -p1 < ../releng/patches/binutils-android.patch
-	mv binutils.tmp $@
+	touch $@
 
-build/tmp-%/binutils/libiberty/Makefile: binutils build/frida-env-%.rc
+build/tmp-%/binutils/libiberty/Makefile: build/binutils-stamp build/frida-env-%.rc
 	$(RM) -rf $(@D)
 	mkdir -p $(@D)
 	. build/frida-env-$*.rc && cd $(@D) && ../../../../binutils/libiberty/configure
 
-build/tmp-%/binutils/bfd/Makefile: binutils build/frida-env-%.rc
+build/tmp-%/binutils/bfd/Makefile: build/binutils-stamp build/frida-env-%.rc
 	$(RM) -rf $(@D)
 	mkdir -p $(@D)
 	. build/frida-env-$*.rc && cd $(@D) && ../../../../binutils/bfd/configure
@@ -98,16 +98,18 @@ build/tmp-%/binutils/bfd/libbfd.a: build/tmp-%/binutils/bfd/Makefile build/frida
 
 
 define make-plain-module-rules
-$1:
-	git clone $(REPO_BASE_URL)/$$@$(REPO_SUFFIX)
+build/$1-stamp:
+	$(RM) -rf $1
+	git clone $(REPO_BASE_URL)/$1$(REPO_SUFFIX)
+	@touch $$@
 
 $1/configure: build/frida-env-$(build_platform_arch).rc $1
-	. $$< && cd $$(@D) && NOCONFIGURE=1 ./autogen.sh && touch configure
+	. $$< && cd $$(@D) && NOCONFIGURE=1 ./autogen.sh
 
-build/tmp-%/$1/Makefile: $1/configure build/frida-env-%.rc
+build/tmp-%/$1/Makefile: build/frida-env-%.rc $1/configure
 	$(RM) -rf $$(@D)
 	mkdir -p $$(@D)
-	. build/frida-env-$$*.rc && cd $$(@D) && ../../../$1/configure
+	. $$< && cd $$(@D) && ../../../$1/configure
 
 build/frida-%/lib/pkgconfig/$2.pc: $3 build/tmp-%/$1/Makefile
 	. build/frida-env-$$*.rc && make -C build/tmp-$$*/$1 $(MAKE_J) install GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums
