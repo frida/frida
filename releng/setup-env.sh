@@ -15,7 +15,7 @@ case $build_platform in
     tar_stdin="-"
     ;;
   *)
-    echo "Could not determine build OS" > /dev/stderr
+    echo "Could not determine build platform" > /dev/stderr
     exit 1
 esac
 
