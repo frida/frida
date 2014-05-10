@@ -2,13 +2,12 @@
 
 releng_path=`dirname $0`
 
-build_os=$(uname -s | tr '[A-Z]' '[a-z]')
-[ "$build_os" = 'darwin' ] && build_os=mac
+build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,mac,')
 prompt_color=33
 
-case $build_os in
+case $build_platform in
   linux)
-    download_command="wget -O - -nv"
+    download_command="wget -O - -q"
     tar_stdin=""
     ;;
   mac)
@@ -20,27 +19,29 @@ case $build_os in
     exit 1
 esac
 
-if [ -z $FRIDA_TARGET ] ; then
-  if [ $build_os = 'linux' ] ; then
-    case $(uname -m) in
-      x86_64)
-        FRIDA_TARGET=linux-x86_64
-      ;;
-      i686)
-        FRIDA_TARGET=linux-x86_32
-      ;;
-      *)
-      echo "Could not automatically determine architecture" > /dev/stderr
-      exit 1
-    esac
-  else
-    FRIDA_TARGET=mac64
-  fi
-  echo "Assuming target is $FRIDA_TARGET. Set FRIDA_TARGET to override."
+if [ -n $FRIDA_HOST ]; then
+  host_platform=$(echo -n $FRIDA_HOST | sed 's,\([a-z]\+\)-\(.\+\),\1,g')
+else
+  host_platform=$build_platform
+fi
+if [ $host_platform = 'linux' ]; then
+  host_distro=$(lsb_release -is | tr '[A-Z]' '[a-z]')_$(lsb_release -cs)
+else
+  host_distro=all
+fi
+if [ -n $FRIDA_HOST ]; then
+  host_arch=$(echo -n $FRIDA_HOST | sed 's,\([a-z]\+\)-\(.\+\),\2,g')
+else
+  host_arch=$(uname -m)
+fi
+host_platform_arch=${host_platform}-${host_arch}
+
+if [ -z $FRIDA_HOST ]; then
+  echo "Assuming host is $host_platform_arch Set FRIDA_HOST to override."
 fi
 
-case $FRIDA_TARGET in
-  android-*)
+case $host_platform in
+  android)
     if [ -z "$ANDROID_NDK_ROOT" ]; then
       echo "ANDROID_NDK_ROOT must be set" > /dev/stderr
       exit 1
@@ -48,7 +49,7 @@ case $FRIDA_TARGET in
     ;;
 esac
 
-case $build_os in
+case $build_platform in
   linux)
     toolchain_version=20130508
     ;;
@@ -57,31 +58,24 @@ case $build_os in
     ;;
 esac
 
-case $FRIDA_TARGET in
-  linux-*|mac32|mac64|ios-arm64)
-    sdk_version=20140411
-    ;;
-  android-arm|ios-arm)
-    sdk_version=20140421
-    ;;
-esac
+sdk_version=20140510
 
 pushd $releng_path/../ > /dev/null
 FRIDA_ROOT=`pwd`
 popd > /dev/null
 FRIDA_BUILD="$FRIDA_ROOT/build"
-FRIDA_PREFIX="$FRIDA_BUILD/frida-$FRIDA_TARGET"
+FRIDA_PREFIX="$FRIDA_BUILD/frida-$host_platform_arch"
 FRIDA_PREFIX_LIB="$FRIDA_PREFIX/lib"
-FRIDA_TOOLROOT="$FRIDA_BUILD/toolchain-$build_os"
-FRIDA_SDKROOT="$FRIDA_BUILD/sdk-$FRIDA_TARGET"
+FRIDA_TOOLROOT="$FRIDA_BUILD/toolchain-$build_platform"
+FRIDA_SDKROOT="$FRIDA_BUILD/sdk-$host_platform_arch"
 
 CFLAGS=""
 CXXFLAGS=""
 CPPFLAGS=""
 LDFLAGS=""
 
-case $FRIDA_TARGET in
-  linux-*)
+case $host_platform in
+  linux)
     CPP="/usr/bin/cpp"
     CC="/usr/bin/gcc"
     CXX="/usr/bin/g++"
@@ -97,24 +91,24 @@ case $FRIDA_TARGET in
     CPPFLAGS="-I$FRIDA_SDKROOT/include"
     LDFLAGS="-Wl,--gc-sections -L$FRIDA_SDKROOT/lib -lz"
     ;;
-  mac32|mac64)
+  mac)
     CPP="/usr/bin/cpp"
     CC="/usr/bin/clang"
     CXX="/usr/bin/clang++"
     OBJC="/usr/bin/clang"
     LD="/usr/bin/clang"
 
-    case $FRIDA_TARGET in
-      mac32)
+    case $host_arch in
+      i386)
         CFLAGS="-m32"
         ;;
-      mac64)
+      x86_64)
         CFLAGS="-m64"
         ;;
     esac
     LDFLAGS="-Wl,-dead_strip -Wl,-no_compact_unwind"
     ;;
-  ios-arm|ios-arm64)
+  ios)
     ios_sdkver="7.1"
     ios_sdk="iphoneos$ios_sdkver"
     ios_minver="7.0"
@@ -128,12 +122,12 @@ case $FRIDA_TARGET in
     ios_dev="$(dirname $(dirname $(dirname $(xcrun --sdk $ios_sdk -f iphoneos-optimize))))"
     ios_sdk="$ios_dev/SDKs/iPhoneOS$ios_sdkver.sdk"
 
-    [ $FRIDA_TARGET == 'ios-arm' ] && ios_arch=armv7 || ios_arch=arm64
+    [ $host_arch == 'arm' ] && ios_arch=armv7 || ios_arch=arm64
 
     CFLAGS="-isysroot $ios_sdk -miphoneos-version-min=$ios_minver -arch $ios_arch"
     LDFLAGS="-isysroot $ios_sdk -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
     ;;
-  android-arm)
+  android)
     android_clang_prefix="$ANDROID_NDK_ROOT/toolchains/llvm-3.4/prebuilt/darwin-x86_64"
     android_gcc_toolchain="$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64"
     android_sysroot="$ANDROID_NDK_ROOT/platforms/android-14/arch-arm"
@@ -180,7 +174,7 @@ CXXFLAGS="$CFLAGS $CXXFLAGS"
 
 ACLOCAL_FLAGS="-I $FRIDA_PREFIX/share/aclocal -I $FRIDA_SDKROOT/share/aclocal -I $FRIDA_TOOLROOT/share/aclocal"
 ACLOCAL="aclocal $ACLOCAL_FLAGS"
-CONFIG_SITE="$FRIDA_BUILD/config-${FRIDA_TARGET}.site"
+CONFIG_SITE="$FRIDA_BUILD/config-${host_platform_arch}.site"
 
 PKG_CONFIG="$FRIDA_TOOLROOT/bin/pkg-config --define-variable=frida_sdk_prefix=$FRIDA_SDKROOT --static"
 PKG_CONFIG_PATH="$FRIDA_PREFIX_LIB/pkgconfig:$FRIDA_SDKROOT/lib/pkgconfig"
@@ -191,18 +185,18 @@ VALAC="$VALAC --vapidir=\"$FRIDA_SDKROOT/share/vala/vapi\" --vapidir=\"$FRIDA_PR
 [ ! -d "$FRIDA_PREFIX/share/aclocal}" ] && mkdir -p "$FRIDA_PREFIX/share/aclocal"
 [ ! -d "$FRIDA_PREFIX/lib}" ] && mkdir -p "$FRIDA_PREFIX/lib"
 
-if [ ! -f "$FRIDA_BUILD/toolchain-$build_os/.stamp" ]; then
-  rm -rf "$FRIDA_BUILD/toolchain-$build_os"
+if [ ! -f "$FRIDA_BUILD/toolchain-$build_platform/.stamp" ]; then
+  rm -rf "$FRIDA_BUILD/toolchain-$build_platform"
   echo "Downloading and deploying toolchain..."
-  $download_command "http://build.frida.re/toolchain-$build_os-$toolchain_version.tar.bz2" | tar -C "$FRIDA_BUILD" -xj $tar_stdin || exit 1
-  touch "$FRIDA_BUILD/toolchain-$build_os/.stamp"
+  $download_command "http://build.frida.re/toolchain-$build_platform-$toolchain_version.tar.bz2" | tar -C "$FRIDA_BUILD" -xj $tar_stdin || exit 1
+  touch "$FRIDA_BUILD/toolchain-$build_platform/.stamp"
 fi
 
-if [ ! -f "$FRIDA_BUILD/sdk-$FRIDA_TARGET/.stamp" ]; then
-  rm -rf "$FRIDA_BUILD/sdk-$FRIDA_TARGET"
-  echo "Downloading and deploying SDK for $FRIDA_TARGET..."
-  $download_command "http://build.frida.re/sdk-$FRIDA_TARGET-$sdk_version.tar.bz2" | tar -C "$FRIDA_BUILD" -xj $tar_stdin || exit 1
-  touch "$FRIDA_BUILD/sdk-$FRIDA_TARGET/.stamp"
+if [ ! -f "$FRIDA_BUILD/sdk-$host_platform_arch/.stamp" ]; then
+  rm -rf "$FRIDA_BUILD/sdk-$host_platform_arch"
+  echo "Downloading and deploying SDK for ${host_platform_arch}..."
+  $download_command "http://build.frida.re/sdk-${sdk_version}-${host_platform}-${host_distro}-${host_arch}.tar.bz2" | tar -C "$FRIDA_BUILD" -xj $tar_stdin || exit 1
+  touch "$FRIDA_BUILD/sdk-$host_platform_arch/.stamp"
 fi
 
 for template in $(find $FRIDA_TOOLROOT $FRIDA_SDKROOT -name "*.frida.in"); do
@@ -216,7 +210,7 @@ done
 
 (
   echo "export PATH=\"$FRIDA_TOOLROOT/bin:\$PATH\""
-  echo "export PS1=\"\e[0;${prompt_color}m[\u@\h \w \e[m\e[1;${prompt_color}mfrida-$FRIDA_TARGET\e[m\e[0;${prompt_color}m]\e[m\n\$ \""
+  echo "export PS1=\"\e[0;${prompt_color}m[\u@\h \w \e[m\e[1;${prompt_color}mfrida-${host_platform_arch}\e[m\e[0;${prompt_color}m]\e[m\n\$ \""
   echo "export PKG_CONFIG=\"$PKG_CONFIG\""
   echo "export PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\""
   echo "export VALAC=\"$VALAC\""
@@ -232,31 +226,34 @@ done
   echo "export ACLOCAL=\"$ACLOCAL\""
   echo "export CONFIG_SITE=\"$CONFIG_SITE\""
   echo "unset LANG LC_COLLATE LC_CTYPE LC_MESSAGES LC_NUMERIC LC_TIME"
-) > build/frida-env-${FRIDA_TARGET}.rc
+) > build/frida-env-${host_platform_arch}.rc
 
-case $FRIDA_TARGET in
-  linux-*|android-*)
+case $host_platform in
+  linux|android)
     (
       echo "export AR=\"$AR\""
       echo "export NM=\"$NM\""
       echo "export OBJDUMP=\"$OBJDUMP\""
       echo "export RANLIB=\"$RANLIB\""
       echo "export STRIP=\"$STRIP\""
-    ) >> build/frida-env-${FRIDA_TARGET}.rc
+    ) >> build/frida-env-${host_platform_arch}.rc
     ;;
-  mac32|mac64|ios-arm|ios-arm64)
+  mac|ios)
     (
       echo "export OBJC=\"$OBJC\""
       echo "export OBJCFLAGS=\"$CFLAGS\""
       echo "export MACOSX_DEPLOYMENT_TARGET=10.7"
-    ) >> build/frida-env-${FRIDA_TARGET}.rc
+    ) >> build/frida-env-${host_platform_arch}.rc
     ;;
 esac
 
 sed \
-  -e "s,@frida_target@,$FRIDA_TARGET,g" \
+  -e "s,@frida_host_platform@,$host_platform,g" \
+  -e "s,@frida_host_distro@,$host_distro,g" \
+  -e "s,@frida_host_arch@,$host_arch,g" \
+  -e "s,@frida_host_platform_arch@,$host_platform_arch,g" \
   -e "s,@frida_prefix@,$FRIDA_PREFIX,g" \
   $releng_path/config.site.in > "$CONFIG_SITE"
 
 echo "Environment created. To enter:"
-echo "# source $FRIDA_ROOT/build/frida-env-${FRIDA_TARGET}.rc"
+echo "# source ${FRIDA_ROOT}/build/frida-env-${host_platform_arch}.rc"
