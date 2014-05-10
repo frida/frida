@@ -54,8 +54,21 @@ build/.clean-sdk-stamp:
 build/frida-env-%.rc: build/.clean-sdk-stamp
 	FRIDA_HOST=$* ./releng/setup-env.sh
 
-build/frida-%/lib/libbfd.a: build/tmp-%/binutils/libiberty/libiberty.a build/tmp-%/binutils/bfd/libbfd.a build/frida-env-%.rc
-	@echo "TODO"
+build/frida-%/lib/libbfd.a: \
+		build/frida-%/include/bfd.h \
+		build/tmp-%/binutils/libiberty/libiberty.a \
+		build/tmp-%/binutils/bfd/libbfd.a \
+		build/frida-env-%.rc
+	mkdir -p $(@D)
+	rm -rf build/tmp-$*/binutils/tmp
+	mkdir build/tmp-$*/binutils/tmp
+	. build/frida-env-$*.rc \
+		&& cd build/tmp-$*/binutils/tmp \
+		&& $$AR x ../libiberty/libiberty.a \
+		&& $$AR x ../bfd/libbfd.a \
+		&& $$AR r libbfd-full.a *.o \
+		&& $$RANLIB libbfd-full.a \
+		&& install -m 644 libbfd-full.a ../../../../$@
 
 build/tmp-%/binutils/libiberty/Makefile: build/frida-env-%.rc binutils
 	$(RM) -rf $(@D)
@@ -67,11 +80,14 @@ build/tmp-%/binutils/bfd/Makefile: build/frida-env-%.rc binutils
 	mkdir -p $(@D)
 	. build/frida-env-$*.rc && cd $(@D) && ../../../../binutils/bfd/configure
 
+build/frida-%/include/bfd.h: build/tmp-%/binutils/bfd/Makefile
+	. build/frida-env-$*.rc && make -C build/tmp-$*/binutils/bfd $(MAKE_J) install-bfdincludeHEADERS
+
 build/tmp-%/binutils/libiberty/libiberty.a: build/tmp-%/binutils/libiberty/Makefile
-	. build/frida-env-$*.rc && cd $(@D) && make $(MAKE_J)
+	. build/frida-env-$*.rc && make -C $(@D) $(MAKE_J)
 
 build/tmp-%/binutils/bfd/libbfd.a: build/tmp-%/binutils/bfd/Makefile
-	. build/frida-env-$*.rc && cd $(@D) && make $(MAKE_J)
+	. build/frida-env-$*.rc && make -C $(@D) $(MAKE_J)
 
 binutils:
 	$(RM) -rf binutils.tmp
