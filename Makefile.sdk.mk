@@ -105,7 +105,7 @@ build/$1-stamp:
 	@mkdir -p $$(@D)
 	@touch $$@
 
-$1/configure: build/frida-env-$(build_platform_arch).rc $1
+$1/configure: build/frida-env-$(build_platform_arch).rc build/$1-stamp
 	. $$< && cd $$(@D) && NOCONFIGURE=1 ./autogen.sh
 
 build/tmp-%/$1/Makefile: build/frida-env-%.rc $1/configure
@@ -113,7 +113,7 @@ build/tmp-%/$1/Makefile: build/frida-env-%.rc $1/configure
 	mkdir -p $$(@D)
 	. $$< && cd $$(@D) && ../../../$1/configure
 
-build/frida-%/lib/pkgconfig/$2.pc: $3 build/tmp-%/$1/Makefile
+build/frida-%/lib/pkgconfig/$2.pc: build/tmp-%/$1/Makefile $3
 	. build/frida-env-$$*.rc && make -C build/tmp-$$*/$1 $(MAKE_J) install GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums
 	@touch $$@
 endef
