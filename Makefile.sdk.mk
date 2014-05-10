@@ -189,19 +189,23 @@ build/v8-stamp: build/.clean-sdk-stamp
 	@mkdir -p $(@D)
 	@touch $@
 
-build/tmp-%/v8/libv8-stamp: build/frida-env-%.rc build/v8-stamp
+build/tmp-%/v8-stamp: build/v8-stamp
+	# Poor-man's substitute for out-of-tree builds
 	@mkdir -p $(@D)
+	git clone --depth 1 v8 $(@D)/v8
+	@touch $@
+
+build/tmp-%/v8/out/$(v8_target)/libv8_base.$(v8_arch).a build/tmp-%/v8/out/$(v8_target)/libv8_snapshot.a: build/frida-env-%.rc build/tmp-%/v8-stamp
 	. $< \
-		&& cd v8 \
-		&& git clean -xffd \
+		&& cd build/tmp-$*/v8 \
 		&& PATH="/usr/bin:/bin:/usr/sbin:/sbin" \
 			$(v8_env_vars) \
-			make $(v8_target) GYPFLAGS=$(v8_flags) V=1 \
-		&& install -m 644 v8/out/$(v8_target)/libv8_base.$(v8_arch).a ../build/tmp-$*/v8/libv8_base.$(v8_arch).a \
-		&& install -m 644 v8/out/$(v8_target)/libv8_snapshot.a ../build/tmp-$*/v8/libv8_snapshot.a
-	touch $@
+			make $(v8_target) GYPFLAGS="$(v8_flags)" V=1
+	@touch $@
 
-build/frida-%/lib/pkgconfig/v8.pc: build/tmp-%/v8/libv8-stamp
+build/frida-%/lib/pkgconfig/v8.pc: build/tmp-%/v8/out/$(v8_target)/libv8_base.$(v8_arch).a build/tmp-%/v8/out/$(v8_target)/libv8_snapshot.a
+	echo "YEAH"
+
 
 build/.clean-sdk-stamp:
 	rm -rf build
