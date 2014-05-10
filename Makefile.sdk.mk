@@ -2,8 +2,6 @@ MAKE_J ?= -j 8
 REPO_BASE_URL = "git://github.com/frida"
 REPO_SUFFIX = ".git"
 
-plain_modules = libffi glib libgee json-glib
-
 build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,mac,')
 build_arch := $(shell uname -m)
 build_platform_arch := $(build_platform)-$(build_arch)
@@ -34,7 +32,11 @@ host_platform_arch := $(host_platform)-$(host_arch)
 prefix := build/frida-$(host_platform_arch)
 
 
-all: iconv bfd $(prefix)/lib/pkgconfig/libffi.pc $(prefix)/lib/pkgconfig/glib.pc
+all: iconv bfd \
+		$(prefix)/lib/pkgconfig/libffi.pc \
+		$(prefix)/lib/pkgconfig/glib-2.0.pc \
+		$(prefix)/lib/pkgconfig/gee-1.0.pc \
+		$(prefix)/lib/pkgconfig/json-glib-1.0.pc
 
 
 ifeq ($(host_platform), linux)
@@ -107,12 +109,15 @@ build/tmp-%/$1/Makefile: $1/configure build/frida-env-%.rc
 	mkdir -p $$(@D)
 	. build/frida-env-$$*.rc && cd $$(@D) && ../../../$1/configure
 
-build/frida-%/lib/pkgconfig/$1.pc: build/tmp-%/$1/Makefile
+build/frida-%/lib/pkgconfig/$2.pc: $3 build/tmp-%/$1/Makefile
 	. build/frida-env-$$*.rc && make -C build/tmp-$$*/$1 $(MAKE_J) install GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums
+	@touch $$@
 endef
-$(foreach m,$(plain_modules),$(eval $(call make-plain-module-rules,$m)))
-plain-modules: $(foreach m,$(modules),$m)
--include plain-modules
+
+$(eval $(call make-plain-module-rules,libffi,libffi,))
+$(eval $(call make-plain-module-rules,glib,glib-2.0,))
+$(eval $(call make-plain-module-rules,libgee,gee-1.0,build/frida-%/lib/pkgconfig/glib-2.0.pc))
+$(eval $(call make-plain-module-rules,json-glib,json-glib-1.0,build/frida-%/lib/pkgconfig/glib-2.0.pc))
 
 
 build/.clean-sdk-stamp:
