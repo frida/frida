@@ -4,5 +4,6 @@
 *.swp
 *.user
 *~
+/binutils
 /build
 /ipch
