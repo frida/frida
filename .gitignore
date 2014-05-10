@@ -8,4 +8,6 @@
 /build
 /glib
 /ipch
+/json-glib
 /libffi
+/libgee
