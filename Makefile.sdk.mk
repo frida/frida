@@ -59,7 +59,8 @@ build/binutils-stamp:
 	cd binutils \
 		&& $(download) http://gnuftp.uib.no/binutils/binutils-2.24.tar.bz2 | tar -xj --strip-components 1 \
 		&& patch -p1 < ../releng/patches/binutils-android.patch
-	touch $@
+	@mkdir -p $(@D)
+	@touch $@
 
 build/tmp-%/binutils/libiberty/Makefile: build/binutils-stamp build/frida-env-%.rc
 	$(RM) -rf $(@D)
@@ -101,6 +102,7 @@ define make-plain-module-rules
 build/$1-stamp:
 	$(RM) -rf $1
 	git clone $(REPO_BASE_URL)/$1$(REPO_SUFFIX)
+	@mkdir -p $$(@D)
 	@touch $$@
 
 $1/configure: build/frida-env-$(build_platform_arch).rc $1
