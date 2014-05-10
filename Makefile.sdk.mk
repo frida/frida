@@ -53,7 +53,7 @@ endif
 endif
 
 
-build/binutils-stamp:
+build/binutils-stamp: build/.clean-sdk-stamp
 	$(RM) -rf binutils
 	mkdir binutils
 	cd binutils \
@@ -99,7 +99,7 @@ build/tmp-%/binutils/bfd/libbfd.a: build/tmp-%/binutils/bfd/Makefile build/frida
 
 
 define make-plain-module-rules
-build/$1-stamp:
+build/$1-stamp: build/.clean-sdk-stamp
 	$(RM) -rf $1
 	git clone $(REPO_BASE_URL)/$1$(REPO_SUFFIX)
 	@mkdir -p $$(@D)
