@@ -6,4 +6,6 @@
 *~
 /binutils
 /build
+/glib
 /ipch
+/libffi
