@@ -189,16 +189,19 @@ build/v8-stamp: build/.clean-sdk-stamp
 	@mkdir -p $(@D)
 	@touch $@
 
-v8/out/$(v8_target)/libv8_base.$(v8_arch).a: build/frida-env-%.rc build/v8-stamp
+build/tmp-%/v8/libv8-stamp: build/frida-env-%.rc build/v8-stamp
+	@mkdir -p $(@D)
 	. $< \
 		&& cd v8 \
 		&& git clean -xffd \
 		&& PATH="/usr/bin:/bin:/usr/sbin:/sbin" \
 			$(v8_env_vars) \
-			make $(v8_target) GYPFLAGS=$(v8_flags) V=1
+			make $(v8_target) GYPFLAGS=$(v8_flags) V=1 \
+		&& install -m 644 v8/out/$(v8_target)/libv8_base.$(v8_arch).a ../build/tmp-$*/v8/libv8_base.$(v8_arch).a \
+		&& install -m 644 v8/out/$(v8_target)/libv8_snapshot.a ../build/tmp-$*/v8/libv8_snapshot.a
+	touch $@
 
-build/frida-%/lib/pkgconfig/v8.pc: v8/out/$(v8_target)/libv8_base.$(v8_arch).a
-
+build/frida-%/lib/pkgconfig/v8.pc: build/tmp-%/v8/libv8-stamp
 
 build/.clean-sdk-stamp:
 	rm -rf build
