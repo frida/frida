@@ -39,8 +39,15 @@ ifeq ($(host_platform), android)
 endif
 
 
-all: build/fs-tmp-$(host_platform_arch)/.package-stamp
+all: build/sdk-$(host_platform)-$(host_distro)-$(host_arch).tar.bz2
 
+
+build/sdk-$(host_platform)-$(host_distro)-$(host_arch).tar.bz2: build/fs-tmp-$(host_platform_arch)/.package-stamp
+	tar \
+		-C build/fs-tmp-$(host_platform_arch)/package \
+		-cj -f $(abspath $@.tmp) \
+		.
+	mv $@.tmp $@
 
 build/fs-tmp-%/.package-stamp: \
 		$(iconv) \
@@ -50,9 +57,24 @@ build/fs-tmp-%/.package-stamp: \
 		build/fs-%/lib/pkgconfig/gee-1.0.pc \
 		build/fs-%/lib/pkgconfig/json-glib-1.0.pc \
 		build/fs-%/lib/pkgconfig/v8.pc
-	rm -rf $(@D)/package
-	cp -a build/fs-$* $(@D)/package
+	$(RM) -r $(@D)/package
+	mkdir -p $(@D)/package
+	cd build/fs-$* \
+		&& tar -c \
+			include \
+			lib/*.a \
+			lib/*.la \
+			lib/glib-2.0 \
+			lib/libffi* \
+			lib/pkgconfig \
+			share/aclocal \
+			share/glib-2.0/schemas \
+			share/vala \
+			| tar -C $(abspath $(@D)/package) -xf -
 	releng/relocatify.sh $(@D)/package $(abspath build/fs-$*) $(abspath build/fs-sdk-$*)
+ifeq ($(host_platform), ios)
+	cp /System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/mach_vm.h $(@D)/package/include/frida_mach_vm.h
+endif
 	@touch $@
 
 
