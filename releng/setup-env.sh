@@ -3,6 +3,7 @@
 releng_path=`dirname $0`
 
 build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,mac,')
+build_arch=$(uname -m)
 prompt_color=33
 
 case $build_platform in
@@ -195,7 +196,7 @@ if [ ! -f "$FRIDA_TOOLROOT/.stamp" ]; then
   rm -rf "$FRIDA_TOOLROOT"
   mkdir -p "$FRIDA_TOOLROOT"
   echo "Downloading and deploying toolchain..."
-  $download_command "http://build.frida.re/toolchain-${toolchain_version}-${build_platform}.tar.bz2" | tar -C "$FRIDA_TOOLROOT" -xj $tar_stdin --strip-components 1 || exit 1
+  $download_command "http://build.frida.re/toolchain-${toolchain_version}-${build_platform}-${build_arch}.tar.bz2" | tar -C "$FRIDA_TOOLROOT" -xj $tar_stdin --strip-components 1 || exit 1
   touch "$FRIDA_TOOLROOT/.stamp"
 fi
 
