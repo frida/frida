@@ -195,7 +195,7 @@ build/tmp-%/v8-stamp: build/v8-stamp
 	git clone --depth 1 v8 $(@D)/v8
 	@touch $@
 
-build/tmp-%/v8/out/$(v8_target)/libv8_base.$(v8_arch).a build/tmp-%/v8/out/$(v8_target)/libv8_snapshot.a: build/frida-env-%.rc build/tmp-%/v8-stamp
+build/tmp-%/v8/out/$(v8_target)/libv8_base.$(v8_arch).a: build/frida-env-%.rc build/tmp-%/v8-stamp
 	. $< \
 		&& cd build/tmp-$*/v8 \
 		&& PATH="/usr/bin:/bin:/usr/sbin:/sbin" \
@@ -203,8 +203,24 @@ build/tmp-%/v8/out/$(v8_target)/libv8_base.$(v8_arch).a build/tmp-%/v8/out/$(v8_
 			make $(v8_target) GYPFLAGS="$(v8_flags)" V=1
 	@touch $@
 
-build/frida-%/lib/pkgconfig/v8.pc: build/tmp-%/v8/out/$(v8_target)/libv8_base.$(v8_arch).a build/tmp-%/v8/out/$(v8_target)/libv8_snapshot.a
-	echo "YEAH"
+build/frida-%/lib/pkgconfig/v8.pc: build/tmp-%/v8/out/$(v8_target)/libv8_base.$(v8_arch).a
+	install -d build/frida-$*/include
+	install -m 644 v8/include/* build/frida-$*/include
+	install -d build/frida-$*/lib
+	install -m 644 build/tmp-$*/v8/out/$(v8_target)/libv8_base.$(v8_arch).a build/frida-$*/lib
+	install -m 644 build/tmp-$*/v8/out/$(v8_target)/libv8_snapshot.a build/frida-$*/lib
+	install -d $(@D)
+	echo "prefix=\$${frida_sdk_prefix}" > $@.tmp
+	echo "exec_prefix=\$${prefix}" >> $@.tmp
+	echo "libdir=\$${exec_prefix}/lib" >> $@.tmp
+	echo "includedir=\$${prefix}/include" >> $@.tmp
+	echo "" >> $@.tmp
+	echo "Name: V8" >> $@.tmp
+	echo "Description: V8 JavaScript Engine" >> $@.tmp
+	echo "Version: 3.26.6.1" >> $@.tmp
+	echo "Libs: -L\$${libdir} -lv8_base.$(v8_arch) -lv8_snapshot" >> $@.tmp
+	echo "Cflags: -I\$${includedir}" >> $@.tmp
+	mv $@.tmp $@
 
 
 build/.clean-sdk-stamp:
