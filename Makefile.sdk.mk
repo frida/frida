@@ -229,7 +229,7 @@ build/.fs-sdk-stamp:
 	touch $@
 
 build/fs-env-%.rc: build/.fs-sdk-stamp
-	FRIDA_HOST=$* FRIDA_ENV_NAME=fs ./releng/setup-env.sh
+	FRIDA_ENV_NAME=fs FRIDA_HOST=$* ./releng/setup-env.sh
 
 
 .PHONY: all iconv bfd
