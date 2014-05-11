@@ -248,7 +248,7 @@ build/fs-tmp-%/v8/out/$(v8_target)/libv8_base.$(v8_arch).a: build/fs-env-%.rc bu
 		&& cd build/fs-tmp-$*/v8 \
 		&& PATH="/usr/bin:/bin:/usr/sbin:/sbin" \
 			$(v8_env_vars) \
-			make $(v8_target) GYPFLAGS="$(v8_flags)" V=1
+			make $(MAKE_J) $(v8_target) GYPFLAGS="$(v8_flags)"
 	@touch $@
 
 build/fs-%/lib/pkgconfig/v8.pc: build/fs-tmp-%/v8/out/$(v8_target)/libv8_base.$(v8_arch).a
