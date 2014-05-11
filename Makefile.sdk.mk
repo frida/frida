@@ -188,10 +188,12 @@ endif
 
 ifeq ($(host_platform), linux)
 	v8_host_flags := -f make-linux
+	v8_libs_private := " -lm"
 endif
 ifeq ($(host_platform), android)
 	v8_flavor_prefix := android_
 	v8_host_flags := -f make-android -D clang=1
+	v8_libs_private := " -lm"
 endif
 ifeq ($(host_platform), mac)
 	v8_host_flags := -f make-mac -D mac_deployment_target=10.7 -D clang=1
@@ -266,7 +268,7 @@ build/fs-%/lib/pkgconfig/v8.pc: build/fs-tmp-%/v8/out/$(v8_target)/libv8_base.$(
 	echo "Name: V8" >> $@.tmp
 	echo "Description: V8 JavaScript Engine" >> $@.tmp
 	echo "Version: 3.26.6.1" >> $@.tmp
-	echo "Libs: -L\$${libdir} -lv8_base.$(v8_arch) -lv8_snapshot" >> $@.tmp
+	echo "Libs: -L\$${libdir} -lv8_base.$(v8_arch) -lv8_snapshot$(v8_libs_private)" >> $@.tmp
 	echo "Cflags: -I\$${includedir}" >> $@.tmp
 	mv $@.tmp $@
 
