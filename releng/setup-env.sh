@@ -2,7 +2,7 @@
 
 releng_path=`dirname $0`
 
-build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,mac,')
+build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,mac,')
 build_arch=$(uname -m)
 build_platform_arch=${build_platform}-${build_arch}
 
