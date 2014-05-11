@@ -96,7 +96,7 @@ case $host_platform in
 
     CFLAGS="-ffunction-sections -fdata-sections"
     CPPFLAGS="-I$FRIDA_SDKROOT/include"
-    LDFLAGS="-Wl,--gc-sections -L$FRIDA_SDKROOT/lib -lz"
+    LDFLAGS="-Wl,--gc-sections -L$FRIDA_SDKROOT/lib"
     ;;
   mac)
     CPP="/usr/bin/cpp"
