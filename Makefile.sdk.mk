@@ -39,10 +39,10 @@ ifeq ($(host_platform), android)
 endif
 
 
-all: build/fs-tmp-$(host_platform_arch)/.fs-package-stamp
+all: build/fs-tmp-$(host_platform_arch)/.package-stamp
 
 
-build/fs-tmp-%/.fs-package-stamp: \
+build/fs-tmp-%/.package-stamp: \
 		$(iconv) \
 		$(bfd) \
 		build/fs-%/lib/pkgconfig/libffi.pc \
@@ -50,7 +50,10 @@ build/fs-tmp-%/.fs-package-stamp: \
 		build/fs-%/lib/pkgconfig/gee-1.0.pc \
 		build/fs-%/lib/pkgconfig/json-glib-1.0.pc \
 		build/fs-%/lib/pkgconfig/v8.pc
-	echo "TODO"
+	rm -rf $(@D)/package
+	cp -a build/fs-$* $(@D)/package
+	releng/relocatify.sh $(@D)/package $(abspath build/fs-$*) $(abspath build/fs-sdk-$*)
+	@touch $@
 
 
 build/.binutils-stamp:
