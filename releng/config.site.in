@@ -80,7 +80,7 @@ case "$PACKAGE_TARNAME" in
     glib_cv_stack_grows=no
     glib_cv_uscore=no
 
-    case $host_platform in
+    case $frida_host_platform in
       android)
         ac_cv_func_posix_getgrgid_r=no
         ac_cv_func_posix_getpwuid_r=no
@@ -91,7 +91,7 @@ case "$PACKAGE_TARNAME" in
       ;;
     esac
 
-    case $host_platform in
+    case $frida_host_platform in
       linux)
         glib_cv_have_qsort_r=yes
       ;;
@@ -100,7 +100,7 @@ case "$PACKAGE_TARNAME" in
       ;;
     esac
 
-    case $host_platform in
+    case $frida_host_platform in
       linux|android|mac|ios)
         enable_proxy_libintl=yes
       ;;
