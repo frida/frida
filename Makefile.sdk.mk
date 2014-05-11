@@ -39,10 +39,10 @@ ifeq ($(host_platform), android)
 endif
 
 
-all: build/tmp-$(host_platform_arch)/.sdk-package-stamp
+all: build/fs-tmp-$(host_platform_arch)/.fs-package-stamp
 
 
-build/tmp-%/.sdk-package-stamp: \
+build/fs-tmp-%/.fs-package-stamp: \
 		$(iconv) \
 		$(bfd) \
 		build/fs-%/lib/pkgconfig/libffi.pc \
@@ -62,12 +62,12 @@ build/.binutils-stamp:
 	@mkdir -p $(@D)
 	@touch $@
 
-build/tmp-%/binutils/libiberty/Makefile: build/fs-env-%.rc build/.binutils-stamp
+build/fs-tmp-%/binutils/libiberty/Makefile: build/fs-env-%.rc build/.binutils-stamp
 	$(RM) -r $(@D)
 	mkdir -p $(@D)
 	. $< && cd $(@D) && ../../../../binutils/libiberty/configure
 
-build/tmp-%/binutils/bfd/Makefile: build/fs-env-%.rc build/.binutils-stamp
+build/fs-tmp-%/binutils/bfd/Makefile: build/fs-env-%.rc build/.binutils-stamp
 	$(RM) -r $(@D)
 	mkdir -p $(@D)
 	. $< && cd $(@D) && ../../../../binutils/bfd/configure
@@ -75,26 +75,26 @@ build/tmp-%/binutils/bfd/Makefile: build/fs-env-%.rc build/.binutils-stamp
 build/fs-%/lib/libbfd.a: \
 		build/fs-env-%.rc \
 		build/fs-%/include/bfd.h \
-		build/tmp-%/binutils/libiberty/libiberty.a \
-		build/tmp-%/binutils/bfd/libbfd.a
+		build/fs-tmp-%/binutils/libiberty/libiberty.a \
+		build/fs-tmp-%/binutils/bfd/libbfd.a
 	mkdir -p $(@D)
-	$(RM) -r build/tmp-$*/binutils/tmp
-	mkdir build/tmp-$*/binutils/tmp
+	$(RM) -r build/fs-tmp-$*/binutils/tmp
+	mkdir build/fs-tmp-$*/binutils/tmp
 	. $< \
-		&& cd build/tmp-$*/binutils/tmp \
+		&& cd build/fs-tmp-$*/binutils/tmp \
 		&& $$AR x ../libiberty/libiberty.a \
 		&& $$AR x ../bfd/libbfd.a \
 		&& $$AR r libbfd-full.a *.o \
 		&& $$RANLIB libbfd-full.a \
 		&& install -m 644 libbfd-full.a ../../../../$@
 
-build/fs-%/include/bfd.h: build/fs-env-%.rc build/tmp-%/binutils/bfd/Makefile
-	. $< && make -C build/tmp-$*/binutils/bfd $(MAKE_J) install-bfdincludeHEADERS
+build/fs-%/include/bfd.h: build/fs-env-%.rc build/fs-tmp-%/binutils/bfd/Makefile
+	. $< && make -C build/fs-tmp-$*/binutils/bfd $(MAKE_J) install-bfdincludeHEADERS
 
-build/tmp-%/binutils/libiberty/libiberty.a: build/fs-env-%.rc build/tmp-%/binutils/libiberty/Makefile
+build/fs-tmp-%/binutils/libiberty/libiberty.a: build/fs-env-%.rc build/fs-tmp-%/binutils/libiberty/Makefile
 	. $< && make -C $(@D) $(MAKE_J)
 
-build/tmp-%/binutils/bfd/libbfd.a: build/fs-env-%.rc build/tmp-%/binutils/bfd/Makefile
+build/fs-tmp-%/binutils/bfd/libbfd.a: build/fs-env-%.rc build/fs-tmp-%/binutils/bfd/Makefile
 	. $< && make -C $(@D) $(MAKE_J)
 
 
@@ -108,13 +108,13 @@ build/.$1-stamp:
 $1/configure: build/fs-env-$(build_platform_arch).rc build/.$1-stamp
 	. $$< && cd $$(@D) && NOCONFIGURE=1 ./autogen.sh
 
-build/tmp-%/$1/Makefile: build/fs-env-%.rc $1/configure
+build/fs-tmp-%/$1/Makefile: build/fs-env-%.rc $1/configure
 	$(RM) -r $$(@D)
 	mkdir -p $$(@D)
 	. $$< && cd $$(@D) && ../../../$1/configure
 
-build/fs-%/lib/pkgconfig/$2.pc: build/fs-env-%.rc build/tmp-%/$1/Makefile $3
-	. $$< && make -C build/tmp-$$*/$1 $(MAKE_J) install GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums
+build/fs-%/lib/pkgconfig/$2.pc: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile $3
+	. $$< && make -C build/fs-tmp-$$*/$1 $(MAKE_J) install GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums
 	@touch $$@
 endef
 
@@ -188,26 +188,26 @@ build/.v8-stamp:
 	@mkdir -p $(@D)
 	@touch $@
 
-build/tmp-%/.v8-stamp: build/.v8-stamp
+build/fs-tmp-%/.v8-stamp: build/.v8-stamp
 	# Poor-man's substitute for out-of-tree builds
 	@mkdir -p $(@D)
 	git clone --depth 1 v8 $(@D)/v8
 	@touch $@
 
-build/tmp-%/v8/out/$(v8_target)/libv8_base.$(v8_arch).a: build/fs-env-%.rc build/tmp-%/.v8-stamp
+build/fs-tmp-%/v8/out/$(v8_target)/libv8_base.$(v8_arch).a: build/fs-env-%.rc build/fs-tmp-%/.v8-stamp
 	. $< \
-		&& cd build/tmp-$*/v8 \
+		&& cd build/fs-tmp-$*/v8 \
 		&& PATH="/usr/bin:/bin:/usr/sbin:/sbin" \
 			$(v8_env_vars) \
 			make $(v8_target) GYPFLAGS="$(v8_flags)" V=1
 	@touch $@
 
-build/fs-%/lib/pkgconfig/v8.pc: build/tmp-%/v8/out/$(v8_target)/libv8_base.$(v8_arch).a
+build/fs-%/lib/pkgconfig/v8.pc: build/fs-tmp-%/v8/out/$(v8_target)/libv8_base.$(v8_arch).a
 	install -d build/fs-$*/include
 	install -m 644 v8/include/* build/fs-$*/include
 	install -d build/fs-$*/lib
-	install -m 644 build/tmp-$*/v8/out/$(v8_target)/libv8_base.$(v8_arch).a build/fs-$*/lib
-	install -m 644 build/tmp-$*/v8/out/$(v8_target)/libv8_snapshot.a build/fs-$*/lib
+	install -m 644 build/fs-tmp-$*/v8/out/$(v8_target)/libv8_base.$(v8_arch).a build/fs-$*/lib
+	install -m 644 build/fs-tmp-$*/v8/out/$(v8_target)/libv8_snapshot.a build/fs-$*/lib
 	install -d $(@D)
 	echo "prefix=\$${frida_sdk_prefix}" > $@.tmp
 	echo "exec_prefix=\$${prefix}" >> $@.tmp
