@@ -13,12 +13,12 @@ download := curl -sS
 endif
 
 ifdef FRIDA_HOST
-	host_platform := $(shell echo -n $(FRIDA_HOST) | cut -f1 -d"-")
+	host_platform := $(shell echo $(FRIDA_HOST) | cut -f1 -d"-")
 else
 	host_platform := $(build_platform)
 endif
 ifdef FRIDA_HOST
-	host_arch := $(shell echo -n $(FRIDA_HOST) | cut -f1 -d"-")
+	host_arch := $(shell echo $(FRIDA_HOST) | cut -f2 -d"-")
 else
 	host_arch := $(shell uname -m)
 endif
