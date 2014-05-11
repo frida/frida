@@ -11,11 +11,6 @@ if [ -n "$FRIDA_HOST" ]; then
 else
   host_platform=$build_platform
 fi
-if [ $host_platform = linux ]; then
-  host_distro=$(lsb_release -is | tr '[A-Z]' '[a-z]')_$(lsb_release -cs)
-else
-  host_distro=all
-fi
 if [ -n "$FRIDA_HOST" ]; then
   host_arch=$(echo -n $FRIDA_HOST | sed 's,\([a-z]\+\)-\(.\+\),\2,g')
 else
@@ -193,13 +188,13 @@ fi
 if [ ! -f "$FRIDA_SDKROOT/.stamp" ]; then
   rm -rf "$FRIDA_SDKROOT"
   mkdir -p "$FRIDA_SDKROOT"
-  local_sdk=$FRIDA_BUILD/sdk-${host_platform}-${host_distro}-${host_arch}.tar.bz2
+  local_sdk=$FRIDA_BUILD/sdk-${host_platform}-${host_arch}.tar.bz2
   if [ -f $local_sdk ]; then
     echo "Deploying local SDK $(basename $local_sdk)..."
     tar -C "$FRIDA_SDKROOT" -xjf $local_sdk || exit 1
   else
     echo "Downloading and deploying SDK for ${host_platform_arch}..."
-    $download_command "http://build.frida.re/sdk-${sdk_version}-${host_platform}-${host_distro}-${host_arch}.tar.bz2" | tar -C "$FRIDA_SDKROOT" -xj $tar_stdin 2> /dev/null
+    $download_command "http://build.frida.re/sdk-${sdk_version}-${host_platform}-${host_arch}.tar.bz2" | tar -C "$FRIDA_SDKROOT" -xj $tar_stdin 2> /dev/null
     if [ $? -ne 0 ]; then
       echo ""
       echo "Bummer. It seems we don't have a prebuilt SDK for your system."
@@ -267,7 +262,6 @@ esac
 
 sed \
   -e "s,@frida_host_platform@,$host_platform,g" \
-  -e "s,@frida_host_distro@,$host_distro,g" \
   -e "s,@frida_host_arch@,$host_arch,g" \
   -e "s,@frida_host_platform_arch@,$host_platform_arch,g" \
   -e "s,@frida_prefix@,$FRIDA_PREFIX,g" \

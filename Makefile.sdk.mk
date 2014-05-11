@@ -17,11 +17,6 @@ ifdef FRIDA_HOST
 else
 	host_platform := $(build_platform)
 endif
-ifeq ($(host_platform), linux)
-	host_distro := $(shell lsb_release -is | tr '[A-Z]' '[a-z]')_$(shell lsb_release -cs)
-else
-	host_distro := all
-endif
 ifdef FRIDA_HOST
 	host_arch := $(shell echo -n $(FRIDA_HOST) | sed 's,\([a-z]\+\)-\(.\+\),\2,g')
 else
@@ -39,7 +34,7 @@ ifeq ($(host_platform), android)
 endif
 
 
-all: build/sdk-$(host_platform)-$(host_distro)-$(host_arch).tar.bz2
+all: build/sdk-$(host_platform)-$(host_arch).tar.bz2
 	@echo ""
 	@echo "\033[0;32mSuccess!\033[0;39m Here's your SDK: \033[1m$<\033[0m"
 	@echo ""
@@ -47,7 +42,7 @@ all: build/sdk-$(host_platform)-$(host_distro)-$(host_arch).tar.bz2
 	@echo ""
 
 
-build/sdk-$(host_platform)-$(host_distro)-$(host_arch).tar.bz2: build/fs-tmp-$(host_platform_arch)/.package-stamp
+build/sdk-$(host_platform)-$(host_arch).tar.bz2: build/fs-tmp-$(host_platform_arch)/.package-stamp
 	tar \
 		-C build/fs-tmp-$(host_platform_arch)/package \
 		-cjf $(abspath $@.tmp) \
