@@ -5,7 +5,7 @@ prefix=$2
 sdk=$3
 [ -z "$package" -o -z "$prefix" -o -z "$sdk" ] && exit 1
 
-build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,mac,')
+build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,mac,')
 
 shopt -s expand_aliases
 if [ "$build_platform" = "mac" ]; then
