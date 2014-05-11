@@ -64,10 +64,10 @@ pushd $releng_path/../ > /dev/null
 FRIDA_ROOT=`pwd`
 popd > /dev/null
 FRIDA_BUILD="$FRIDA_ROOT/build"
-FRIDA_PREFIX="$FRIDA_BUILD/frida-$host_platform_arch"
+FRIDA_PREFIX="$FRIDA_BUILD/frida-${host_platform_arch}${FRIDA_ENV_SUFFIX}"
 FRIDA_PREFIX_LIB="$FRIDA_PREFIX/lib"
-FRIDA_TOOLROOT="$FRIDA_BUILD/toolchain-$build_platform"
-FRIDA_SDKROOT="$FRIDA_BUILD/sdk-$host_platform_arch"
+FRIDA_TOOLROOT="$FRIDA_BUILD/toolchain-${build_platform}${FRIDA_ENV_SUFFIX}"
+FRIDA_SDKROOT="$FRIDA_BUILD/sdk-${host_platform_arch}${FRIDA_ENV_SUFFIX}"
 
 CFLAGS=""
 CXXFLAGS=""
@@ -174,7 +174,7 @@ CXXFLAGS="$CFLAGS $CXXFLAGS"
 
 ACLOCAL_FLAGS="-I $FRIDA_PREFIX/share/aclocal -I $FRIDA_SDKROOT/share/aclocal -I $FRIDA_TOOLROOT/share/aclocal"
 ACLOCAL="aclocal $ACLOCAL_FLAGS"
-CONFIG_SITE="$FRIDA_BUILD/config-${host_platform_arch}.site"
+CONFIG_SITE="$FRIDA_BUILD/config-${host_platform_arch}${FRIDA_ENV_SUFFIX}.site"
 
 PKG_CONFIG="$FRIDA_TOOLROOT/bin/pkg-config --define-variable=frida_sdk_prefix=$FRIDA_SDKROOT --static"
 PKG_CONFIG_PATH="$FRIDA_PREFIX_LIB/pkgconfig:$FRIDA_SDKROOT/lib/pkgconfig"
@@ -185,18 +185,18 @@ VALAC="$VALAC --vapidir=\"$FRIDA_SDKROOT/share/vala/vapi\" --vapidir=\"$FRIDA_PR
 [ ! -d "$FRIDA_PREFIX/share/aclocal}" ] && mkdir -p "$FRIDA_PREFIX/share/aclocal"
 [ ! -d "$FRIDA_PREFIX/lib}" ] && mkdir -p "$FRIDA_PREFIX/lib"
 
-if [ ! -f "$FRIDA_BUILD/toolchain-$build_platform/.stamp" ]; then
-  rm -rf "$FRIDA_BUILD/toolchain-$build_platform"
+if [ ! -f "$FRIDA_TOOLROOT/.stamp" ]; then
+  rm -rf "$FRIDA_TOOLROOT"
   echo "Downloading and deploying toolchain..."
   $download_command "http://build.frida.re/toolchain-$build_platform-$toolchain_version.tar.bz2" | tar -C "$FRIDA_BUILD" -xj $tar_stdin || exit 1
-  touch "$FRIDA_BUILD/toolchain-$build_platform/.stamp"
+  touch "$FRIDA_TOOLROOT/.stamp"
 fi
 
-if [ ! -f "$FRIDA_BUILD/sdk-$host_platform_arch/.stamp" ]; then
-  rm -rf "$FRIDA_BUILD/sdk-$host_platform_arch"
+if [ ! -f "$FRIDA_SDKROOT/.stamp" ]; then
+  rm -rf "$FRIDA_SDKROOT"
   echo "Downloading and deploying SDK for ${host_platform_arch}..."
   $download_command "http://build.frida.re/sdk-${sdk_version}-${host_platform}-${host_distro}-${host_arch}.tar.bz2" | tar -C "$FRIDA_BUILD" -xj $tar_stdin || exit 1
-  touch "$FRIDA_BUILD/sdk-$host_platform_arch/.stamp"
+  touch "$FRIDA_SDKROOT/.stamp"
 fi
 
 for template in $(find $FRIDA_TOOLROOT $FRIDA_SDKROOT -name "*.frida.in"); do
@@ -207,6 +207,8 @@ for template in $(find $FRIDA_TOOLROOT $FRIDA_SDKROOT -name "*.frida.in"); do
     -e "s,@FRIDA_SDKROOT@,$FRIDA_SDKROOT,g" \
     "$template" > "$target"
 done
+
+env_rc=build/frida-env-${host_platform_arch}${FRIDA_ENV_SUFFIX}.rc
 
 (
   echo "export PATH=\"$FRIDA_TOOLROOT/bin:\$PATH\""
@@ -226,7 +228,7 @@ done
   echo "export ACLOCAL=\"$ACLOCAL\""
   echo "export CONFIG_SITE=\"$CONFIG_SITE\""
   echo "unset LANG LC_COLLATE LC_CTYPE LC_MESSAGES LC_NUMERIC LC_TIME"
-) > build/frida-env-${host_platform_arch}.rc
+) > $env_rc
 
 case $host_platform in
   linux|android)
@@ -236,14 +238,14 @@ case $host_platform in
       echo "export OBJDUMP=\"$OBJDUMP\""
       echo "export RANLIB=\"$RANLIB\""
       echo "export STRIP=\"$STRIP\""
-    ) >> build/frida-env-${host_platform_arch}.rc
+    ) >> $env_rc
     ;;
   mac|ios)
     (
       echo "export OBJC=\"$OBJC\""
       echo "export OBJCFLAGS=\"$CFLAGS\""
       echo "export MACOSX_DEPLOYMENT_TARGET=10.7"
-    ) >> build/frida-env-${host_platform_arch}.rc
+    ) >> $env_rc
     ;;
 esac
 
@@ -256,4 +258,4 @@ sed \
   $releng_path/config.site.in > "$CONFIG_SITE"
 
 echo "Environment created. To enter:"
-echo "# source ${FRIDA_ROOT}/build/frida-env-${host_platform_arch}.rc"
+echo "# source ${FRIDA_ROOT}/$env_rc"
