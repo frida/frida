@@ -4,5 +4,11 @@
 *.swp
 *.user
 *~
+/binutils
 /build
+/glib
 /ipch
+/json-glib
+/libffi
+/libgee
+/v8

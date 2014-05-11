@@ -1,6 +1,8 @@
 # config.site for configure
 
-frida_target=@frida_target@
+frida_host_platform=@frida_host_platform@
+frida_host_arch=@frida_host_arch@
+frida_host_platform_arch=@frida_host_platform_arch@
 frida_prefix=@frida_prefix@
 
 test "$prefix" = NONE && prefix="$frida_prefix"
@@ -19,8 +21,8 @@ case "$PACKAGE_TARNAME" in
   ;;
 esac
 
-case $frida_target in
-  linux-x86_32)
+case $frida_host_platform_arch in
+  linux-i386)
     host_alias="i686-linux-gnu"
     cross_compiling=yes
   ;;
@@ -38,7 +40,7 @@ case $frida_target in
 
     frida_flags="$frida_flags -mthumb"
   ;;
-  mac32)
+  mac-i386)
     host_alias="i686-apple-darwin"
     cross_compiling=yes
   ;;
@@ -78,8 +80,8 @@ case "$PACKAGE_TARNAME" in
     glib_cv_stack_grows=no
     glib_cv_uscore=no
 
-    case $frida_target in
-      android-*)
+    case $host_platform in
+      android)
         ac_cv_func_posix_getgrgid_r=no
         ac_cv_func_posix_getpwuid_r=no
       ;;
@@ -89,17 +91,17 @@ case "$PACKAGE_TARNAME" in
       ;;
     esac
 
-    case $frida_target in
-      linux-*)
+    case $host_platform in
+      linux)
         glib_cv_have_qsort_r=yes
       ;;
-      mac32|mac64|ios-*|android-*)
+      mac|ios|android)
         glib_cv_have_qsort_r=no
       ;;
     esac
 
-    case $frida_target in
-      linux-*|android-*|mac32|mac64|ios-*)
+    case $host_platform in
+      linux|android|mac|ios)
         enable_proxy_libintl=yes
       ;;
     esac

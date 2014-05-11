@@ -31,6 +31,6 @@ git-submodule-stamps: $(foreach m,$(modules),$m-update-submodule-stamp)
 -include git-submodule-stamps
 
 build/frida-env-%.rc: releng/setup-env.sh releng/config.site.in
-	FRIDA_TARGET=$* ./releng/setup-env.sh
+	FRIDA_HOST=$* ./releng/setup-env.sh
 
 ensure_relink = test $(1) -nt $(2) || touch -c $(2)
