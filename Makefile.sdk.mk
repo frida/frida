@@ -98,8 +98,8 @@ build/fs-tmp-%/libiconv/Makefile: build/fs-env-%.rc build/.libiconv-stamp
 			--disable-rpath
 
 build/fs-%/lib/libiconv.a: build/fs-env-%.rc build/fs-tmp-%/libiconv/Makefile
-	. $< && make -C build/fs-tmp-$*/libiconv $(MAKE_J)
-	touch $@
+	. $< && make -C build/fs-tmp-$*/libiconv $(MAKE_J) install
+	@touch $@
 
 
 build/.binutils-stamp:
