@@ -78,6 +78,30 @@ endif
 	@touch $@
 
 
+build/.libiconv-stamp:
+	$(RM) -r libiconv
+	mkdir libiconv
+	cd libiconv \
+		&& $(download) http://gnuftp.uib.no/libiconv/libiconv-1.14.tar.gz | tar -xz --strip-components 1 \
+		&& patch -p1 < ../releng/patches/libiconv-android.patch
+	@mkdir -p $(@D)
+	@touch $@
+
+build/fs-tmp-%/libiconv/Makefile: build/fs-env-%.rc build/.libiconv-stamp
+	$(RM) -r $(@D)
+	mkdir -p $(@D)
+	. $< \
+		&& cd $(@D) \
+		&& FRIDA_LEGACY_AUTOTOOLS=1 ../../../libiconv/configure \
+			--enable-static \
+			--enable-relocatable \
+			--disable-rpath
+
+build/fs-%/lib/libiconv.a: build/fs-env-%.rc build/fs-tmp-%/libiconv/Makefile
+	. $< && make -C build/fs-tmp-$*/libiconv $(MAKE_J)
+	touch $@
+
+
 build/.binutils-stamp:
 	$(RM) -r binutils
 	mkdir binutils
