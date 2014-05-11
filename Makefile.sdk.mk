@@ -281,5 +281,5 @@ build/fs-env-%.rc: build/.fs-sdk-stamp
 	FRIDA_ENV_NAME=fs FRIDA_HOST=$* ./releng/setup-env.sh
 
 
-.PHONY: all iconv bfd
+.PHONY: all
 .SECONDARY:
