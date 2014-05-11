@@ -29,29 +29,27 @@ else
 endif
 host_platform_arch := $(host_platform)-$(host_arch)
 
-prefix := build/frida-$(host_platform_arch)
-
-
-all: iconv bfd \
-		$(prefix)/lib/pkgconfig/libffi.pc \
-		$(prefix)/lib/pkgconfig/glib-2.0.pc \
-		$(prefix)/lib/pkgconfig/gee-1.0.pc \
-		$(prefix)/lib/pkgconfig/json-glib-1.0.pc \
-		$(prefix)/lib/pkgconfig/v8.pc
-
 
 ifeq ($(host_platform), linux)
-iconv:
-bfd: $(prefix)/lib/libbfd.a
-else
+	bfd := build/frida-%/lib/libbfd.a
+endif
 ifeq ($(host_platform), android)
-iconv: $(prefix)/lib/libiconv.a
-bfd: $(prefix)/lib/libbfd.a
-else
-iconv:
-bfd:
+	iconv := build/frida-%/lib/libiconv.a
+	bfd := build/frida-%/lib/libbfd.a
 endif
-endif
+
+
+all: build/tmp-$(host_platform_arch)/sdk-package-stamp
+
+
+build/tmp-%/sdk-package-stamp: \
+		$(iconv) \
+		$(bfd) \
+		build/frida-%/lib/pkgconfig/libffi.pc \
+		build/frida-%/lib/pkgconfig/glib-2.0.pc \
+		build/frida-%/lib/pkgconfig/gee-1.0.pc \
+		build/frida-%/lib/pkgconfig/json-glib-1.0.pc \
+		build/frida-%/lib/pkgconfig/v8.pc
 
 
 build/binutils-stamp: build/.clean-sdk-stamp
