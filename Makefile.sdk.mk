@@ -273,13 +273,13 @@ build/fs-%/lib/pkgconfig/v8.pc: build/fs-tmp-%/v8/out/$(v8_target)/libv8_base.$(
 	mv $@.tmp $@
 
 
-build/.fs-sdk-stamp:
+build/.fs-sdk-$(host_platform_arch)-stamp:
 	$(RM) -r build/fs-sdk-$(host_platform_arch)
 	mkdir -p build/fs-sdk-$(host_platform_arch)/share/aclocal
 	touch build/fs-sdk-$(host_platform_arch)/.stamp
 	touch $@
 
-build/fs-env-%.rc: build/.fs-sdk-stamp
+build/fs-env-%.rc: build/.fs-sdk-$(host_platform_arch)-stamp
 	FRIDA_ENV_NAME=fs FRIDA_HOST=$* ./releng/setup-env.sh
 
 
