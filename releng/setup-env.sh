@@ -7,12 +7,12 @@ build_arch=$(uname -m)
 build_platform_arch=${build_platform}-${build_arch}
 
 if [ -n "$FRIDA_HOST" ]; then
-  host_platform=$(echo -n $FRIDA_HOST | sed 's,\([a-z]\+\)-\(.\+\),\1,g')
+  host_platform=$(echo -n $FRIDA_HOST | cut -f1 -d"-")
 else
   host_platform=$build_platform
 fi
 if [ -n "$FRIDA_HOST" ]; then
-  host_arch=$(echo -n $FRIDA_HOST | sed 's,\([a-z]\+\)-\(.\+\),\2,g')
+  host_arch=$(echo -n $FRIDA_HOST | cut -f2 -d"-")
 else
   host_arch=$(uname -m)
 fi
