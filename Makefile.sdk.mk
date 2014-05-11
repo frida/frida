@@ -168,7 +168,7 @@ build/fs-%/lib/pkgconfig/$2.pc: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile $3
 endef
 
 $(eval $(call make-plain-module-rules,libffi,libffi,))
-$(eval $(call make-plain-module-rules,glib,glib-2.0,))
+$(eval $(call make-plain-module-rules,glib,glib-2.0,$(iconv)))
 $(eval $(call make-plain-module-rules,libgee,gee-1.0,build/fs-%/lib/pkgconfig/glib-2.0.pc))
 $(eval $(call make-plain-module-rules,json-glib,json-glib-1.0,build/fs-%/lib/pkgconfig/glib-2.0.pc))
 
