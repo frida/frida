@@ -4,7 +4,24 @@ releng_path=`dirname $0`
 
 build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,mac,')
 build_arch=$(uname -m)
-prompt_color=33
+build_platform_arch=${build_platform}-${build_arch}
+
+if [ -n "$FRIDA_HOST" ]; then
+  host_platform=$(echo -n $FRIDA_HOST | sed 's,\([a-z]\+\)-\(.\+\),\1,g')
+else
+  host_platform=$build_platform
+fi
+if [ $host_platform = linux ]; then
+  host_distro=$(lsb_release -is | tr '[A-Z]' '[a-z]')_$(lsb_release -cs)
+else
+  host_distro=all
+fi
+if [ -n "$FRIDA_HOST" ]; then
+  host_arch=$(echo -n $FRIDA_HOST | sed 's,\([a-z]\+\)-\(.\+\),\2,g')
+else
+  host_arch=$(uname -m)
+fi
+host_platform_arch=${host_platform}-${host_arch}
 
 case $build_platform in
   linux)
@@ -20,46 +37,19 @@ case $build_platform in
     exit 1
 esac
 
-if [ -n $FRIDA_HOST ]; then
-  host_platform=$(echo -n $FRIDA_HOST | sed 's,\([a-z]\+\)-\(.\+\),\1,g')
-else
-  host_platform=$build_platform
-fi
-if [ $host_platform = 'linux' ]; then
-  host_distro=$(lsb_release -is | tr '[A-Z]' '[a-z]')_$(lsb_release -cs)
-else
-  host_distro=all
-fi
-if [ -n $FRIDA_HOST ]; then
-  host_arch=$(echo -n $FRIDA_HOST | sed 's,\([a-z]\+\)-\(.\+\),\2,g')
-else
-  host_arch=$(uname -m)
-fi
-host_platform_arch=${host_platform}-${host_arch}
-
-if [ -z $FRIDA_HOST ]; then
+if [ -z "$FRIDA_HOST" ]; then
   echo "Assuming host is $host_platform_arch Set FRIDA_HOST to override."
 fi
 
-case $host_platform in
-  android)
-    if [ -z "$ANDROID_NDK_ROOT" ]; then
-      echo "ANDROID_NDK_ROOT must be set" > /dev/stderr
-      exit 1
-    fi
-    ;;
-esac
+if [ $host_platform = "android" -a -z "$ANDROID_NDK_ROOT" ]; then
+  echo "ANDROID_NDK_ROOT must be set" > /dev/stderr
+  exit 1
+fi
 
-case $build_platform in
-  linux)
-    toolchain_version=20130508
-    ;;
-  mac)
-    toolchain_version=20131231
-    ;;
-esac
+prompt_color=33
 
-sdk_version=20140510
+toolchain_version=20140511
+sdk_version=20140511
 
 if [ -n "$FRIDA_ENV_NAME" ]; then
   frida_env_name_prefix=${FRIDA_ENV_NAME}-
@@ -73,7 +63,7 @@ popd > /dev/null
 FRIDA_BUILD="$FRIDA_ROOT/build"
 FRIDA_PREFIX="$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}"
 FRIDA_PREFIX_LIB="$FRIDA_PREFIX/lib"
-FRIDA_TOOLROOT="$FRIDA_BUILD/${frida_env_name_prefix}toolchain-${build_platform}"
+FRIDA_TOOLROOT="$FRIDA_BUILD/${frida_env_name_prefix}toolchain-${build_platform_arch}"
 FRIDA_SDKROOT="$FRIDA_BUILD/${frida_env_name_prefix}sdk-${host_platform_arch}"
 
 CFLAGS=""
@@ -196,15 +186,32 @@ if [ ! -f "$FRIDA_TOOLROOT/.stamp" ]; then
   rm -rf "$FRIDA_TOOLROOT"
   mkdir -p "$FRIDA_TOOLROOT"
   echo "Downloading and deploying toolchain..."
-  $download_command "http://build.frida.re/toolchain-${toolchain_version}-${build_platform}-${build_arch}.tar.bz2" | tar -C "$FRIDA_TOOLROOT" -xj $tar_stdin --strip-components 1 || exit 1
+  $download_command "http://build.frida.re/toolchain-${toolchain_version}-${build_platform}-${build_arch}.tar.bz2" | tar -C "$FRIDA_TOOLROOT" -xj $tar_stdin || exit 1
   touch "$FRIDA_TOOLROOT/.stamp"
 fi
 
 if [ ! -f "$FRIDA_SDKROOT/.stamp" ]; then
   rm -rf "$FRIDA_SDKROOT"
   mkdir -p "$FRIDA_SDKROOT"
-  echo "Downloading and deploying SDK for ${host_platform_arch}..."
-  $download_command "http://build.frida.re/sdk-${sdk_version}-${host_platform}-${host_distro}-${host_arch}.tar.bz2" | tar -C "$FRIDA_SDKROOT" -xj $tar_stdin --strip-components 1 || exit 1
+  local_sdk=$FRIDA_BUILD/sdk-${host_platform}-${host_distro}-${host_arch}.tar.bz2
+  if [ -f $local_sdk ]; then
+    echo "Deploying local SDK $(basename $local_sdk)..."
+    tar -C "$FRIDA_SDKROOT" -xjf $local_sdk || exit 1
+  else
+    echo "Downloading and deploying SDK for ${host_platform_arch}..."
+    $download_command "http://build.frida.re/sdk-${sdk_version}-${host_platform}-${host_distro}-${host_arch}.tar.bz2" | tar -C "$FRIDA_SDKROOT" -xj $tar_stdin 2> /dev/null
+    if [ $? -ne 0 ]; then
+      echo ""
+      echo "Bummer. It seems we don't have a prebuilt SDK for your system."
+      echo ""
+      echo "Please go ahead and build it yourself:"
+      echo "$ make -f Makefile.sdk.mk"
+      echo ""
+      echo "Afterwards just retry and the SDK will get picked up automatically."
+      echo ""
+      exit 1
+    fi
+  fi
   touch "$FRIDA_SDKROOT/.stamp"
 fi
 
@@ -217,7 +224,7 @@ for template in $(find $FRIDA_TOOLROOT $FRIDA_SDKROOT -name "*.frida.in"); do
     "$template" > "$target"
 done
 
-env_rc=build/${frida_env_name_prefix}env-${host_platform_arch}.rc
+env_rc=build/${FRIDA_ENV_NAME:-frida}-env-${host_platform_arch}.rc
 
 (
   echo "export PATH=\"$FRIDA_TOOLROOT/bin:\$PATH\""

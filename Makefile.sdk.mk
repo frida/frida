@@ -40,12 +40,17 @@ endif
 
 
 all: build/sdk-$(host_platform)-$(host_distro)-$(host_arch).tar.bz2
+	@echo ""
+	@echo "\033[0;32mSuccess!\033[0;39m Here's your SDK: \033[1m$<\033[0m"
+	@echo ""
+	@echo "It will be picked up automatically if you now proceed to build Frida."
+	@echo ""
 
 
 build/sdk-$(host_platform)-$(host_distro)-$(host_arch).tar.bz2: build/fs-tmp-$(host_platform_arch)/.package-stamp
 	tar \
 		-C build/fs-tmp-$(host_platform_arch)/package \
-		-cj -f $(abspath $@.tmp) \
+		-cjf $(abspath $@.tmp) \
 		.
 	mv $@.tmp $@
 
