@@ -50,6 +50,7 @@ build/tmp-%/.sdk-package-stamp: \
 		build/fs-%/lib/pkgconfig/gee-1.0.pc \
 		build/fs-%/lib/pkgconfig/json-glib-1.0.pc \
 		build/fs-%/lib/pkgconfig/v8.pc
+	echo "TODO"
 
 
 build/.binutils-stamp:
@@ -228,7 +229,7 @@ build/.fs-sdk-stamp:
 	touch $@
 
 build/fs-env-%.rc: build/.fs-sdk-stamp
-	FRIDA_HOST=$* FRIDA_ENV_NAME=$(env_name) ./releng/setup-env.sh
+	FRIDA_HOST=$* FRIDA_ENV_NAME=fs ./releng/setup-env.sh
 
 
 .PHONY: all iconv bfd
