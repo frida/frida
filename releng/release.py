@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
     build_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     if system == 'Darwin':
-        build_os = 'mac'
+        build_os = 'mac-x86_64'
     else:
         build_os = system.lower()
     toolchain_dir = os.path.join(build_dir, "build", "toolchain-" + build_os)
