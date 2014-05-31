@@ -1,3 +1,5 @@
+python3 = python3.4
+
 all: \
 	frida-server \
 	frida-python \
@@ -267,8 +269,8 @@ frida-python2: \
 	build/frida-mac-universal/lib/python2.7/site-packages/_frida.so
 
 frida-python3: \
-	build/frida-mac-universal/lib/python3.3/site-packages/frida \
-	build/frida-mac-universal/lib/python3.3/site-packages/_frida.so
+	build/frida-mac-universal/lib/$(python3)/site-packages/frida \
+	build/frida-mac-universal/lib/$(python3)/site-packages/_frida.so
 
 frida-python/configure: build/frida-env-mac-x86_64.rc frida-python/configure.ac
 	source build/frida-env-mac-x86_64.rc && cd frida-python && ./autogen.sh
@@ -293,14 +295,14 @@ build/tmp-%/frida-python2.7/src/_frida.la: build/tmp-%/frida-python2.7/Makefile 
 	source build/frida-env-$*.rc && cd build/tmp-$*/frida-python2.7 && make install
 	@touch -c $@
 
-build/tmp-%/frida-python3.3/Makefile: build/frida-env-%.rc frida-python/configure build/frida-%/lib/pkgconfig/frida-core-1.0.pc
+build/tmp-%/frida-$(python3)/Makefile: build/frida-env-%.rc frida-python/configure build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	mkdir -p $(@D)
-	source build/frida-env-$*.rc && cd $(@D) && PYTHON=/usr/local/bin/python3.3 ../../../frida-python/configure
+	source build/frida-env-$*.rc && cd $(@D) && PYTHON=/usr/local/bin/$(python3) ../../../frida-python/configure
 
-build/tmp-%/frida-python3.3/src/_frida.la: build/tmp-%/frida-python3.3/Makefile build/frida-python-submodule-stamp
-	source build/frida-env-$*.rc && cd build/tmp-$*/frida-python3.3 && make
-	@$(call ensure_relink,frida-python/src/_frida.c,build/tmp-$*/frida-python3.3/src/_frida.lo)
-	source build/frida-env-$*.rc && cd build/tmp-$*/frida-python3.3 && make install
+build/tmp-%/frida-$(python3)/src/_frida.la: build/tmp-%/frida-$(python3)/Makefile build/frida-python-submodule-stamp
+	source build/frida-env-$*.rc && cd build/tmp-$*/frida-$(python3) && make
+	@$(call ensure_relink,frida-python/src/_frida.c,build/tmp-$*/frida-$(python3)/src/_frida.lo)
+	source build/frida-env-$*.rc && cd build/tmp-$*/frida-$(python3) && make install
 	@touch -c $@
 
 build/frida-mac-universal/lib/python%/site-packages/frida: build/tmp-mac-x86_64/frida-python%/src/_frida.la
@@ -328,9 +330,9 @@ check-python2: frida-python2
 		&& python2.7 -m unittest discover
 
 check-python3: frida-python3
-	export PYTHONPATH="$(shell pwd)/build/frida-mac-universal/lib/python3.3/site-packages" \
+	export PYTHONPATH="$(shell pwd)/build/frida-mac-universal/lib/$(python3)/site-packages" \
 		&& cd frida-python \
-		&& python3.3 -m unittest discover
+		&& $(python3) -m unittest discover
 
 
 frida-npapi: \
