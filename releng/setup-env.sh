@@ -219,6 +219,16 @@ for template in $(find $FRIDA_TOOLROOT $FRIDA_SDKROOT -name "*.frida.in"); do
     "$template" > "$target"
 done
 
+# TODO: fix this in libffi
+for name in libffi.pc gobject-2.0.pc; do
+  pc=$FRIDA_SDKROOT/lib/pkgconfig/$name
+  if grep -q '$(libdir)' $pc; then
+    sed -e "s,\$(libdir),\${libdir},g" $pc > $pc.tmp
+    cat $pc.tmp > $pc
+    rm $pc.tmp
+  fi
+done
+
 env_rc=build/${FRIDA_ENV_NAME:-frida}-env-${host_platform_arch}.rc
 
 (
