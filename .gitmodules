@@ -19,3 +19,6 @@
 [submodule "frida-clr"]
 	path = frida-clr
 	url = git://github.com/frida/frida-clr.git
+[submodule "frida-qml"]
+	path = frida-qml
+	url = git://github.com/frida/frida-qml.git
