@@ -54,7 +54,7 @@ build/fs-tmp-%/.package-stamp: \
 		$(bfd) \
 		build/fs-%/lib/pkgconfig/libffi.pc \
 		build/fs-%/lib/pkgconfig/glib-2.0.pc \
-		build/fs-%/lib/pkgconfig/gee-1.0.pc \
+		build/fs-%/lib/pkgconfig/gee-0.8.pc \
 		build/fs-%/lib/pkgconfig/json-glib-1.0.pc \
 		build/fs-%/lib/pkgconfig/v8.pc
 	$(RM) -r $(@D)/package
@@ -169,7 +169,7 @@ endef
 
 $(eval $(call make-plain-module-rules,libffi,libffi,))
 $(eval $(call make-plain-module-rules,glib,glib-2.0,$(iconv)))
-$(eval $(call make-plain-module-rules,libgee,gee-1.0,build/fs-%/lib/pkgconfig/glib-2.0.pc))
+$(eval $(call make-plain-module-rules,libgee,gee-0.8,build/fs-%/lib/pkgconfig/glib-2.0.pc))
 $(eval $(call make-plain-module-rules,json-glib,json-glib-1.0,build/fs-%/lib/pkgconfig/glib-2.0.pc))
 
 
