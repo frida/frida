@@ -112,6 +112,8 @@ case "$PACKAGE_TARNAME" in
   'libgee')
     enable_shared=no
     enable_static=yes
+    enable_internal_asserts=no
+    enable_consistency_check=no
 
     CFLAGS="$CFLAGS -Wno-error=implicit-function-declaration"
   ;;
