@@ -43,7 +43,7 @@ fi
 
 prompt_color=33
 
-toolchain_version=20140720
+toolchain_version=20140721
 sdk_version=20140720
 
 if [ -n "$FRIDA_ENV_NAME" ]; then

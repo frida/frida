@@ -1,1 +1,1 @@
-http://build.frida.re/toolchain-20140720-windows-i386.exe
+http://build.frida.re/toolchain-20140721-windows-i386.exe
