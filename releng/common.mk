@@ -1,9 +1,9 @@
 FRIDA_VERSION := $(shell git describe --tags --always --long | sed 's,-,.,g' | cut -f1-3 -d'.')
 
-modules = capstone udis86 frida-gum frida-core frida-python frida-npapi
+modules = capstone frida-gum frida-core frida-python frida-npapi
 
 git-submodules:
-	@if [ ! -f udis86/configure.ac ]; then \
+	@if [ ! -f frida-core/configure.ac ]; then \
 		git submodule init; \
 		git submodule update; \
 	fi

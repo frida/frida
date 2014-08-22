@@ -36,7 +36,6 @@ clean: clean-submodules
 
 clean-submodules:
 	cd capstone && git clean -xfd
-	cd udis86 && git clean -xfd
 	cd frida-gum && git clean -xfd
 	cd frida-core && git clean -xfd
 	cd frida-python && git clean -xfd
@@ -64,24 +63,6 @@ build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-sub
 			install
 
 
-udis86: \
-	build/frida-mac-i386/lib/pkgconfig/udis86.pc \
-	build/frida-mac-x86_64/lib/pkgconfig/udis86.pc \
-	build/frida-ios-arm/lib/pkgconfig/udis86.pc \
-	build/frida-ios-arm64/lib/pkgconfig/udis86.pc
-
-udis86/configure: build/frida-env-mac-x86_64.rc udis86/configure.ac
-	source build/frida-env-mac-x86_64.rc && cd udis86 && ./autogen.sh
-
-build/tmp-%/udis86/Makefile: build/frida-env-%.rc udis86/configure
-	mkdir -p $(@D)
-	source build/frida-env-$*.rc && cd $(@D) && ../../../udis86/configure
-
-build/frida-%/lib/pkgconfig/udis86.pc: build/tmp-%/udis86/Makefile build/udis86-submodule-stamp
-	source build/frida-env-$*.rc && make -C build/tmp-$*/udis86 install
-	@touch -c $@
-
-
 frida-gum: \
 	build/frida-mac-i386/lib/pkgconfig/frida-gum-1.0.pc \
 	build/frida-mac-x86_64/lib/pkgconfig/frida-gum-1.0.pc \
@@ -91,7 +72,7 @@ frida-gum: \
 frida-gum/configure: build/frida-env-mac-x86_64.rc frida-gum/configure.ac
 	source build/frida-env-mac-x86_64.rc && cd frida-gum && ./autogen.sh
 
-build/tmp-%/frida-gum/Makefile: build/frida-env-%.rc frida-gum/configure build/frida-%/lib/pkgconfig/capstone.pc build/frida-%/lib/pkgconfig/udis86.pc
+build/tmp-%/frida-gum/Makefile: build/frida-env-%.rc frida-gum/configure build/frida-%/lib/pkgconfig/capstone.pc
 	mkdir -p $(@D)
 	source build/frida-env-$*.rc && cd $(@D) && ../../../frida-gum/configure
 
@@ -371,7 +352,6 @@ build/frida-mac-universal/lib/browser/plugins/libnpfrida.dylib: build/tmp-mac-i3
 .PHONY: \
 	distclean clean clean-submodules check git-submodules git-submodule-stamps \
 	capstone capstone-update-submodule-stamp \
-	udis86 udis86-update-submodule-stamp \
 	frida-gum frida-gum-update-submodule-stamp check-gum check-gum-mac-i386 check-gum-mac-x86_64 \
 	frida-core frida-core-update-submodule-stamp check-core check-core-mac-i386 check-core-mac-x86_64 \
 	frida-server \
