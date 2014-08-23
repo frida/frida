@@ -20,7 +20,6 @@ clean: clean-submodules
 
 clean-submodules:
 	cd capstone && git clean -xfd
-	cd udis86 && git clean -xfd
 	cd frida-gum && git clean -xfd
 	cd frida-core && git clean -xfd
 	cd frida-python && git clean -xfd
@@ -45,28 +44,13 @@ build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-sub
 			install
 
 
-udis86: \
-	build/frida-linux-x86_64/lib/pkgconfig/udis86.pc
-
-udis86/configure: build/frida-env-linux-x86_64.rc udis86/configure.ac
-	. build/frida-env-linux-x86_64.rc && cd udis86 && ./autogen.sh
-
-build/tmp-%/udis86/Makefile: build/frida-env-%.rc udis86/configure
-	mkdir -p $(@D)
-	. build/frida-env-$*.rc && cd $(@D) && ../../../udis86/configure
-
-build/frida-%/lib/pkgconfig/udis86.pc: build/tmp-%/udis86/Makefile build/udis86-submodule-stamp
-	. build/frida-env-$*.rc && make -C build/tmp-$*/udis86 install
-	@touch -c $@
-
-
 frida-gum: \
 	build/frida-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc
 
 frida-gum/configure: build/frida-env-linux-x86_64.rc frida-gum/configure.ac
 	. build/frida-env-linux-x86_64.rc && cd frida-gum && ./autogen.sh
 
-build/tmp-%/frida-gum/Makefile: build/frida-env-%.rc frida-gum/configure build/frida-%/lib/pkgconfig/capstone.pc build/frida-%/lib/pkgconfig/udis86.pc
+build/tmp-%/frida-gum/Makefile: build/frida-env-%.rc frida-gum/configure build/frida-%/lib/pkgconfig/capstone.pc
 	mkdir -p $(@D)
 	. build/frida-env-$*.rc && cd $(@D) && ../../../frida-gum/configure
 
@@ -226,7 +210,6 @@ build/frida-%-stripped/lib/browser/plugins/libnpfrida.so: build/tmp-%/frida-npap
 .PHONY: \
 	distclean clean clean-submodules check git-submodules git-submodule-stamps \
 	capstone capstone-update-submodule-stamp \
-	udis86 udis86-update-submodule-stamp \
 	frida-gum frida-gum-update-submodule-stamp check-gum check-gum-linux-x86_64 \
 	frida-core frida-core-update-submodule-stamp check-core check-core-linux-x86_64 \
 	frida-python frida-python2 frida-python3 frida-python-update-submodule-stamp check-python check-python2 check-python3 \

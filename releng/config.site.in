@@ -117,7 +117,7 @@ case "$PACKAGE_TARNAME" in
 
     CFLAGS="$CFLAGS -Wno-error=implicit-function-declaration"
   ;;
-  'vala'|'json-glib'|'udis86')
+  'vala'|'json-glib')
     enable_shared=no
     enable_static=yes
   ;;
