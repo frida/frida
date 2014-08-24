@@ -1,4 +1,4 @@
-python3=python3.3
+python3 = python3.4
 
 all: \
 	frida-python \
