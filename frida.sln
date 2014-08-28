@@ -49,7 +49,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "capstone-32", "capstone\cap
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "capstone-64", "capstone\capstone-64.vcxproj", "{3D5DFA8A-628C-40CC-86D7-078F72833309}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gumpp-static", "frida-gum\bindings\gumpp-static\gumpp-static.vcxproj", "{905F6909-645E-44B4-BA25-D3481B4DF985}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gumpp-static", "frida-gum\bindings\gumpp\gumpp-static.vcxproj", "{905F6909-645E-44B4-BA25-D3481B4DF985}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

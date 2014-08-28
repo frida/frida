@@ -19,12 +19,10 @@
       <WarningLevel>Level4</WarningLevel>
       <DisableSpecificWarnings>4127;4244;4305;4715;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>WIN32;_WINDOWS;WINVER=0x0601;_WIN32_WINNT=0x0601;GUM_STATIC;FFI_BUILDING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(IntDir)..\gum-32;$(IntDir)..\gum-64;$(SolutionDir)build\sdk-windows\$(PlatformName)-$(ConfigurationName)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>ffi.lib;gee-0.8.lib;gio-2.0.lib;glib-2.0.lib;gmodule-2.0.lib;gobject-2.0.lib;gthread-2.0.lib;intl.lib;json-glib-1.0.lib;v8_base.$(V8Arch).lib;v8_snapshot.lib;z.lib;dnsapi.lib;iphlpapi.lib;ole32.lib;psapi.lib;shlwapi.lib;winmm.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <PropertyGroup Label="Configuration">
