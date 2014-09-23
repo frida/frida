@@ -84,26 +84,27 @@ case $host_platform in
     LDFLAGS="-Wl,--gc-sections -L$FRIDA_SDKROOT/lib"
     ;;
   mac)
-    CPP="/usr/bin/cpp"
-    CC="/usr/bin/clang"
-    CXX="/usr/bin/clang++"
-    OBJC="/usr/bin/clang"
-    LD="/usr/bin/clang"
+    mac_minver="10.7"
+    mac_sdkver="10.9"
 
-    case $host_arch in
-      i386)
-        CFLAGS="-m32"
-        ;;
-      x86_64)
-        CFLAGS="-m64"
-        ;;
-    esac
-    LDFLAGS="-Wl,-dead_strip -Wl,-no_compact_unwind"
+    mac_sdk="macosx$mac_sdkver"
+    mac_sdk_path="$(xcrun --sdk $mac_sdk --show-sdk-path)"
+
+    CPP="$(xcrun --sdk $mac_sdk -f cpp)"
+    CC="$(xcrun --sdk $mac_sdk -f clang)"
+    CXX="$(xcrun --sdk $mac_sdk -f clang++)"
+    OBJC="$(xcrun --sdk $mac_sdk -f clang)"
+    LD="$(xcrun --sdk $mac_sdk -f ld)"
+
+    CFLAGS="-isysroot $mac_sdk_path -mmacosx-version-min=$mac_minver -arch $host_arch"
+    LDFLAGS="-isysroot $mac_sdk_path -Wl,-macosx_version_min,$mac_minver -arch $host_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
     ;;
   ios)
-    ios_sdkver="7.1"
-    ios_sdk="iphoneos$ios_sdkver"
     ios_minver="7.0"
+    ios_sdkver="8.0"
+
+    ios_sdk="iphoneos$ios_sdkver"
+    ios_sdk_path="$(xcrun --sdk $ios_sdk --show-sdk-path)"
 
     CPP="$(xcrun --sdk $ios_sdk -f cpp)"
     CC="$(xcrun --sdk $ios_sdk -f clang)"
@@ -111,13 +112,10 @@ case $host_platform in
     OBJC="$(xcrun --sdk $ios_sdk -f clang)"
     LD="$(xcrun --sdk $ios_sdk -f ld)"
 
-    ios_dev="$(dirname $(dirname $(dirname $(xcrun --sdk $ios_sdk -f iphoneos-optimize))))"
-    ios_sdk="$ios_dev/SDKs/iPhoneOS$ios_sdkver.sdk"
-
     [ $host_arch == 'arm' ] && ios_arch=armv7 || ios_arch=arm64
 
-    CFLAGS="-isysroot $ios_sdk -miphoneos-version-min=$ios_minver -arch $ios_arch"
-    LDFLAGS="-isysroot $ios_sdk -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
+    CFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch"
+    LDFLAGS="-isysroot $ios_sdk_path -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
     ;;
   android)
     android_clang_prefix="$ANDROID_NDK_ROOT/toolchains/llvm-3.4/prebuilt/darwin-x86_64"
