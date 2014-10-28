@@ -85,7 +85,7 @@ case $host_platform in
     ;;
   mac)
     mac_minver="10.7"
-    mac_sdkver="10.9"
+    mac_sdkver="10.10"
 
     mac_sdk="macosx$mac_sdkver"
     mac_sdk_path="$(xcrun --sdk $mac_sdk --show-sdk-path)"
@@ -101,7 +101,7 @@ case $host_platform in
     ;;
   ios)
     ios_minver="7.0"
-    ios_sdkver="8.0"
+    ios_sdkver="8.1"
 
     ios_sdk="iphoneos$ios_sdkver"
     ios_sdk_path="$(xcrun --sdk $ios_sdk --show-sdk-path)"
