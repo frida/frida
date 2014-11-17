@@ -125,33 +125,33 @@ build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib: build/t
 	strip -Sx $(@D)/libfrida-agent-32.dylib $(@D)/libfrida-agent-64.dylib
 	lipo $(@D)/libfrida-agent-32.dylib $(@D)/libfrida-agent-64.dylib -create -output $@
 
-build/tmp-%/frida-core/src/frida-fruitjector-helper: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
-	@$(call ensure_relink,frida-core/src/darwin/fruitjector-helper-core.c,build/tmp-$*/frida-core/src/fruitjector-helper-core.lo)
-	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/src libfruitjector-types.la frida-fruitjector-helper.stamp
+build/tmp-%/frida-core/src/frida-helper: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
+	@$(call ensure_relink,frida-core/src/darwin/frida-helper-glue.c,build/tmp-$*/frida-core/src/frida-helper-glue.lo)
+	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/src libfrida-helper-types.la frida-helper.stamp
 	@touch -c $@
 
-build/tmp-mac-x86_64-stripped/frida-core/src/frida-fruitjector-helper: build/tmp-mac-x86_64/frida-core/src/frida-fruitjector-helper
+build/tmp-mac-x86_64-stripped/frida-core/src/frida-helper: build/tmp-mac-x86_64/frida-core/src/frida-helper
 	mkdir -p $(@D)
 	cp $< $@.tmp
 	strip -Sx $@.tmp
-	codesign -f -s "$$MAC_CERTID" -i "com.tillitech.FridaFruitjectorHelper" $@.tmp
+	codesign -f -s "$$MAC_CERTID" -i "re.frida.Helper" $@.tmp
 	mv $@.tmp $@
 
-build/tmp-ios-arm-stripped/frida-core/src/frida-fruitjector-helper: build/tmp-ios-arm/frida-core/src/frida-fruitjector-helper
-	mkdir -p $(@D)
-	cp $< $@.tmp
-	strip -Sx $@.tmp
-	codesign -f -s "$$IOS_CERTID" --entitlements frida-core/src/darwin/fruitjector-helper.xcent $@.tmp
-	mv $@.tmp $@
-
-build/tmp-ios-arm64-stripped/frida-core/src/frida-fruitjector-helper: build/tmp-ios-arm64/frida-core/src/frida-fruitjector-helper
+build/tmp-ios-arm-stripped/frida-core/src/frida-helper: build/tmp-ios-arm/frida-core/src/frida-helper
 	mkdir -p $(@D)
 	cp $< $@.tmp
 	strip -Sx $@.tmp
 	codesign -f -s "$$IOS_CERTID" --entitlements frida-core/src/darwin/fruitjector-helper.xcent $@.tmp
 	mv $@.tmp $@
 
-build/tmp-ios-universal/frida-core/src/frida-fruitjector-helper: build/tmp-ios-arm-stripped/frida-core/src/frida-fruitjector-helper build/tmp-ios-arm64-stripped/frida-core/src/frida-fruitjector-helper
+build/tmp-ios-arm64-stripped/frida-core/src/frida-helper: build/tmp-ios-arm64/frida-core/src/frida-helper
+	mkdir -p $(@D)
+	cp $< $@.tmp
+	strip -Sx $@.tmp
+	codesign -f -s "$$IOS_CERTID" --entitlements frida-core/src/darwin/fruitjector-helper.xcent $@.tmp
+	mv $@.tmp $@
+
+build/tmp-ios-universal/frida-core/src/frida-helper: build/tmp-ios-arm-stripped/frida-core/src/frida-helper build/tmp-ios-arm64-stripped/frida-core/src/frida-helper
 	mkdir -p $(@D)
 	lipo $^ -create -output $@.tmp
 	codesign -f -s "$$IOS_CERTID" --entitlements frida-core/src/darwin/fruitjector-helper.xcent $@.tmp
@@ -162,35 +162,35 @@ build/tmp-%-stripped/frida-core/lib/agent/.libs/libfrida-agent.so: build/tmp-%/f
 	cp build/tmp-$*/frida-core/lib/agent/.libs/libfrida-agent.so $@
 	source build/frida-env-$*.rc && $$STRIP --strip-all $@
 
-build/frida-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib build/tmp-mac-x86_64-stripped/frida-core/src/frida-fruitjector-helper build/tmp-%/frida-core/tools/resource-compiler
+build/frida-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib build/tmp-mac-x86_64-stripped/frida-core/src/frida-helper build/tmp-%/frida-core/tools/resource-compiler
 	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-$*/frida-core/src/libfrida_core_la-frida.lo)
 	source build/frida-env-$*.rc \
 		&& cd build/tmp-$*/frida-core \
 		&& make -C src install \
 			AGENT=../../../../build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib \
-			FRUITJECTOR_HELPER=../../../../build/tmp-mac-x86_64-stripped/frida-core/src/frida-fruitjector-helper \
+			HELPER=../../../../build/tmp-mac-x86_64-stripped/frida-core/src/frida-helper \
 		&& make install-data-am
 	@touch -c $@
 
-build/frida-ios-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib build/tmp-ios-universal/frida-core/src/frida-fruitjector-helper build/tmp-mac-x86_64/frida-core/tools/resource-compiler
+build/frida-ios-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib build/tmp-ios-universal/frida-core/src/frida-helper build/tmp-mac-x86_64/frida-core/tools/resource-compiler
 	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-ios-arm/frida-core/src/libfrida_core_la-frida.lo)
 	source build/frida-env-ios-arm.rc \
 		&& cd build/tmp-ios-arm/frida-core \
 		&& make -C src install \
 			RESOURCE_COMPILER=../../../../build/tmp-mac-x86_64/frida-core/tools/resource-compiler \
 			AGENT=../../../../build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib \
-			FRUITJECTOR_HELPER=../../../../build/tmp-ios-universal/frida-core/src/frida-fruitjector-helper \
+			HELPER=../../../../build/tmp-ios-universal/frida-core/src/frida-helper \
 		&& make install-data-am
 	@touch -c $@
 
-build/frida-ios-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib build/tmp-ios-universal/frida-core/src/frida-fruitjector-helper build/tmp-mac-x86_64/frida-core/tools/resource-compiler
+build/frida-ios-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib build/tmp-ios-universal/frida-core/src/frida-helper build/tmp-mac-x86_64/frida-core/tools/resource-compiler
 	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-ios-arm64/frida-core/src/libfrida_core_la-frida.lo)
 	source build/frida-env-ios-arm64.rc \
 		&& cd build/tmp-ios-arm64/frida-core \
 		&& make -C src install \
 			RESOURCE_COMPILER=../../../../build/tmp-mac-x86_64/frida-core/tools/resource-compiler \
 			AGENT=../../../../build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib \
-			FRUITJECTOR_HELPER=../../../../build/tmp-ios-arm64-stripped/frida-core/src/frida-fruitjector-helper \
+			HELPER=../../../../build/tmp-ios-arm64-stripped/frida-core/src/frida-helper \
 		&& make install-data-am
 	@touch -c $@
 
