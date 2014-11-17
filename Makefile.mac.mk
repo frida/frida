@@ -141,20 +141,20 @@ build/tmp-ios-arm-stripped/frida-core/src/frida-helper: build/tmp-ios-arm/frida-
 	mkdir -p $(@D)
 	cp $< $@.tmp
 	strip -Sx $@.tmp
-	codesign -f -s "$$IOS_CERTID" --entitlements frida-core/src/darwin/fruitjector-helper.xcent $@.tmp
+	codesign -f -s "$$IOS_CERTID" --entitlements frida-core/src/darwin/frida-helper.xcent $@.tmp
 	mv $@.tmp $@
 
 build/tmp-ios-arm64-stripped/frida-core/src/frida-helper: build/tmp-ios-arm64/frida-core/src/frida-helper
 	mkdir -p $(@D)
 	cp $< $@.tmp
 	strip -Sx $@.tmp
-	codesign -f -s "$$IOS_CERTID" --entitlements frida-core/src/darwin/fruitjector-helper.xcent $@.tmp
+	codesign -f -s "$$IOS_CERTID" --entitlements frida-core/src/darwin/frida-helper.xcent $@.tmp
 	mv $@.tmp $@
 
 build/tmp-ios-universal/frida-core/src/frida-helper: build/tmp-ios-arm-stripped/frida-core/src/frida-helper build/tmp-ios-arm64-stripped/frida-core/src/frida-helper
 	mkdir -p $(@D)
 	lipo $^ -create -output $@.tmp
-	codesign -f -s "$$IOS_CERTID" --entitlements frida-core/src/darwin/fruitjector-helper.xcent $@.tmp
+	codesign -f -s "$$IOS_CERTID" --entitlements frida-core/src/darwin/frida-helper.xcent $@.tmp
 	mv $@.tmp $@
 
 build/tmp-%-stripped/frida-core/lib/agent/.libs/libfrida-agent.so: build/tmp-%/frida-core/lib/agent/libfrida-agent.la
