@@ -123,8 +123,8 @@ case $host_platform in
     android_sysroot="$ANDROID_NDK_ROOT/platforms/android-14/arch-arm"
 
     toolflags="--sysroot=$android_sysroot \
--gcc-toolchain $android_gcc_toolchain \
--target armv7-none-linux-androideabi \
+--gcc-toolchain=$android_gcc_toolchain \
+--target=armv7-none-linux-androideabi \
 -no-canonical-prefixes"
     CPP="$android_gcc_toolchain/bin/arm-linux-androideabi-cpp --sysroot=$android_sysroot"
     CC="$android_clang_prefix/bin/clang $toolflags"
