@@ -110,6 +110,21 @@ check-core-linux-x86_64: build/tmp-linux-x86_64/frida-core/tests/frida-tests
 	$<
 
 
+frida-server: \
+	build/frida-android-arm-stripped/bin/frida-server
+
+build/frida-android-arm-stripped/bin/frida-server: build/frida-android-arm/bin/frida-server
+	mkdir -p $(@D)
+	cp $< $@.tmp
+	source build/frida-env-android-arm.rc && $$STRIP --strip-all $@.tmp
+	mv $@.tmp $@
+
+build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
+	@$(call ensure_relink,frida-core/server/server.c,build/tmp-$*/frida-core/server/frida_server-server.o)
+	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/server install
+	@touch -c $@
+
+
 frida-python: frida-python2 frida-python3
 
 frida-python2: \
@@ -212,6 +227,7 @@ build/frida-%-stripped/lib/browser/plugins/libnpfrida.so: build/tmp-%/frida-npap
 	capstone capstone-update-submodule-stamp \
 	frida-gum frida-gum-update-submodule-stamp check-gum check-gum-linux-x86_64 \
 	frida-core frida-core-update-submodule-stamp check-core check-core-linux-x86_64 \
+	frida-server \
 	frida-python frida-python2 frida-python3 frida-python-update-submodule-stamp check-python check-python2 check-python3 \
 	frida-npapi frida-npapi-update-submodule-stamp
 .SECONDARY:
