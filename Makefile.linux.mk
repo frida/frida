@@ -2,7 +2,8 @@ python3 = python3.4
 
 all: \
 	frida-python \
-	frida-npapi
+	frida-npapi \
+	frida-server
 
 include releng/common.mk
 
@@ -15,8 +16,12 @@ clean: clean-submodules
 	rm -f build/*-stamp
 	rm -rf build/frida-linux-x86_64
 	rm -rf build/frida-linux-x86_64-stripped
+	rm -rf build/frida-android-arm
+	rm -rf build/frida-android-arm-stripped
 	rm -rf build/tmp-linux-x86_64
 	rm -rf build/tmp-linux-x86_64-stripped
+	rm -rf build/tmp-android-arm
+	rm -rf build/tmp-android-arm-stripped
 
 clean-submodules:
 	cd capstone && git clean -xfd
@@ -87,13 +92,14 @@ build/tmp-%/frida-core/lib/agent/libfrida-agent.la: build/tmp-%/frida-core/Makef
 build/tmp-%-stripped/frida-core/lib/agent/.libs/libfrida-agent.so: build/tmp-%/frida-core/lib/agent/libfrida-agent.la
 	mkdir -p $(@D)
 	cp build/tmp-$*/frida-core/lib/agent/.libs/libfrida-agent.so $@
-	strip --strip-all $@
+	. build/frida-env-$*.rc && $$STRIP --strip-all $@
 
 build/frida-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-%-stripped/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp-%/frida-core/tools/resource-compiler
 	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-$*/frida-core/src/libfrida_core_la-frida.lo)
 	. build/frida-env-$*.rc \
 		&& cd build/tmp-$*/frida-core \
 		&& make -C src install \
+		 	RESOURCE_COMPILER="../../../../build/tmp-linux-x86_64/frida-core/tools/resource-compiler --toolchain=gnu" \
 			AGENT=../../../../build/tmp-$*-stripped/frida-core/lib/agent/.libs/libfrida-agent.so \
 		&& make install-data-am
 	@touch -c $@
@@ -109,19 +115,18 @@ check-core: check-core-linux-x86_64
 check-core-linux-x86_64: build/tmp-linux-x86_64/frida-core/tests/frida-tests
 	$<
 
-
 frida-server: \
 	build/frida-android-arm-stripped/bin/frida-server
 
 build/frida-android-arm-stripped/bin/frida-server: build/frida-android-arm/bin/frida-server
 	mkdir -p $(@D)
 	cp $< $@.tmp
-	source build/frida-env-android-arm.rc && $$STRIP --strip-all $@.tmp
+	. build/frida-env-android-arm.rc && $$STRIP --strip-all $@.tmp
 	mv $@.tmp $@
 
 build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	@$(call ensure_relink,frida-core/server/server.c,build/tmp-$*/frida-core/server/frida_server-server.o)
-	source build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/server install
+	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/server install
 	@touch -c $@
 
 
