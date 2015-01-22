@@ -38,7 +38,9 @@ if [ -z "$FRIDA_HOST" ]; then
 fi
 
 if [ $host_platform = "android" -a -z "$ANDROID_NDK_ROOT" ]; then
-  echo "ANDROID_NDK_ROOT must be set" > /dev/stderr
+  echo "ANDROID_NDK_ROOT must be set to the location of your r9d NDK." > /dev/stderr
+  echo "Note that the ABI was broken at r10, so r9d is required until Frida's SDK" > /dev/stderr
+  echo "has been rebuilt against the latest version." > /dev/stderr
   exit 1
 fi
 
