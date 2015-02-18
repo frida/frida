@@ -1,6 +1,10 @@
 Inject JavaScript to explore native apps on Windows, Mac, Linux, iOS and Android.
 ===
 
+### Dependencies
+
+For the running the frida binaries (`frida-discover`, `frida-ps`, `frida-repl` and `frida-trace`) you need to have python 3.4 installed with the `colorama` package (`pip3 install colorama`).
+
 ### To build:
 
 Mac and 64-bit Linux:
