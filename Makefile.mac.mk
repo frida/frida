@@ -131,6 +131,7 @@ build/tmp-%/frida-core/src/frida-helper: build/tmp-%/frida-core/Makefile build/f
 	@touch -c $@
 
 build/tmp-mac-x86_64-stripped/frida-core/src/frida-helper: build/tmp-mac-x86_64/frida-core/src/frida-helper
+	@if [ -z "$$MAC_CERTID" ]; then echo "MAC_CERTID not set, see https://github.com/frida/frida#mac-and-ios"; exit 1; fi
 	mkdir -p $(@D)
 	cp $< $@.tmp
 	strip -Sx $@.tmp
@@ -138,6 +139,7 @@ build/tmp-mac-x86_64-stripped/frida-core/src/frida-helper: build/tmp-mac-x86_64/
 	mv $@.tmp $@
 
 build/tmp-ios-arm-stripped/frida-core/src/frida-helper: build/tmp-ios-arm/frida-core/src/frida-helper
+	@if [ -z "$$IOS_CERTID" ]; then echo "IOS_CERTID not set, see https://github.com/frida/frida#mac-and-ios"; exit 1; fi
 	mkdir -p $(@D)
 	cp $< $@.tmp
 	strip -Sx $@.tmp
@@ -145,6 +147,7 @@ build/tmp-ios-arm-stripped/frida-core/src/frida-helper: build/tmp-ios-arm/frida-
 	mv $@.tmp $@
 
 build/tmp-ios-arm64-stripped/frida-core/src/frida-helper: build/tmp-ios-arm64/frida-core/src/frida-helper
+	@if [ -z "$$IOS_CERTID" ]; then echo "IOS_CERTID not set, see https://github.com/frida/frida#mac-and-ios"; exit 1; fi
 	mkdir -p $(@D)
 	cp $< $@.tmp
 	strip -Sx $@.tmp
@@ -152,6 +155,7 @@ build/tmp-ios-arm64-stripped/frida-core/src/frida-helper: build/tmp-ios-arm64/fr
 	mv $@.tmp $@
 
 build/tmp-ios-universal/frida-core/src/frida-helper: build/tmp-ios-arm-stripped/frida-core/src/frida-helper build/tmp-ios-arm64-stripped/frida-core/src/frida-helper
+	@if [ -z "$$IOS_CERTID" ]; then echo "IOS_CERTID not set, see https://github.com/frida/frida#mac-and-ios"; exit 1; fi
 	mkdir -p $(@D)
 	lipo $^ -create -output $@.tmp
 	codesign -f -s "$$IOS_CERTID" --entitlements frida-core/src/darwin/frida-helper.xcent $@.tmp
