@@ -37,17 +37,43 @@ if [ -z "$FRIDA_HOST" ]; then
   echo "Assuming host is $host_platform_arch Set FRIDA_HOST to override."
 fi
 
-if [ $host_platform = "android" -a -z "$ANDROID_NDK_ROOT" ]; then
-  echo "ANDROID_NDK_ROOT must be set to the location of your r9d NDK." > /dev/stderr
-  echo "Note that the ABI was broken at r10, so r9d is required until Frida's SDK" > /dev/stderr
-  echo "has been rebuilt against the latest version." > /dev/stderr
-  exit 1
+if [ $host_platform = "android" ]; then
+  ndk_required=r10d
+  if [ -n "$ANDROID_NDK_ROOT" ]; then
+    ndk_installed=$(cut -f1 -d" " "$ANDROID_NDK_ROOT/RELEASE.TXT")
+    if [ "$ndk_installed" != "$ndk_required" ]; then
+      echo "Unsupported NDK version: ${ndk_installed}. Please install ${ndk_required}."               > /dev/stderr
+      echo ""                                                                                         > /dev/stderr
+      echo "Frida's SDK - the prebuilt dependencies snapshot - was compiled against ${ndk_required}," > /dev/stderr
+      echo "and as we have observed the NDK ABI breaking over time, we ask you to install"            > /dev/stderr
+      echo "the exact same version."                                                                  > /dev/stderr
+      echo ""                                                                                         > /dev/stderr
+      echo "However, if you'd like to take the risk and use a different NDK, you may edit"            > /dev/stderr
+      echo "releng/setup-env.sh and adjust the ndk_required variable. Make sure you use"              > /dev/stderr
+      echo "a newer NDK, and not an older one. Note that the proper solution is to rebuild"           > /dev/stderr
+      echo "the SDK against your NDK by running:"                                                     > /dev/stderr
+      echo "  make -f Makefile.sdk.mk FRIDA_HOST=android-arm"                                         > /dev/stderr
+      echo "If you do this and it works well for you, please let us know so we can upgrade"           > /dev/stderr
+      echo "the upstream SDK version."                                                                > /dev/stderr
+      exit 1
+    fi
+  else
+    echo "ANDROID_NDK_ROOT must be set to the location of your $frida_ndk NDK." > /dev/stderr
+    exit 1
+  fi
 fi
 
 prompt_color=33
 
 toolchain_version=20141117
-sdk_version=20141117
+case $host_platform in
+  android)
+    sdk_version=20150218
+    ;;
+  *)
+    sdk_version=20141117
+    ;;
+esac
 
 if [ -n "$FRIDA_ENV_NAME" ]; then
   frida_env_name_prefix=${FRIDA_ENV_NAME}-
@@ -158,7 +184,7 @@ case $host_platform in
 -Wl,-z,now \
 -L$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a \
 -L$FRIDA_SDKROOT/lib \
--lgcc -lc -lm"
+-lm"
     ;;
 esac
 
