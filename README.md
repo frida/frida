@@ -1,4 +1,4 @@
-Inject JavaScript to explore native apps on Windows, OS X, Linux, iOS and Android.
+Inject JavaScript to explore native apps on Windows, Mac, Linux, iOS and Android.
 ===
 
 ## Dependencies
@@ -11,7 +11,7 @@ For the running the frida binaries (`frida-discover`, `frida-ps`, `frida-repl` a
 
     make
 
-### OS X and iOS
+### Mac and iOS
 
 First make a trusted codesigning certificate. You can use the guide at https://sourceware.org/gdb/wiki/BuildingOnDarwin in the section "Creating a certificate". You can use the name `frida-cert` instead of `gdb-cert` if you want to.
 
