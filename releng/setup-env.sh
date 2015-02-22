@@ -67,7 +67,7 @@ prompt_color=33
 toolchain_version=20141117
 case $host_platform in
   android)
-    sdk_version=20150218
+    sdk_version=20150222
     ;;
   *)
     sdk_version=20141117
