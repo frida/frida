@@ -20,6 +20,8 @@ clean: clean-submodules
 	rm -rf build/frida-ios-universal
 	rm -rf build/frida-ios-arm
 	rm -rf build/frida-ios-arm64
+	rm -rf build/frida-android-i386
+	rm -rf build/frida-android-i386-stripped
 	rm -rf build/frida-android-arm
 	rm -rf build/frida-android-arm-stripped
 	rm -rf build/tmp-mac-i386
@@ -31,6 +33,8 @@ clean: clean-submodules
 	rm -rf build/tmp-ios-arm64
 	rm -rf build/tmp-ios-arm64-stripped
 	rm -rf build/tmp-ios-universal
+	rm -rf build/tmp-android-i386
+	rm -rf build/tmp-android-i386-stripped
 	rm -rf build/tmp-android-arm
 	rm -rf build/tmp-android-arm-stripped
 
@@ -222,6 +226,16 @@ build/frida-ios-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-universal/f
 		&& make install-data-am
 	@touch -c $@
 
+build/frida-android-i386/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-i386-stripped/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp-mac-x86_64/frida-core/tools/resource-compiler
+	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-android-i386/frida-core/src/libfrida_core_la-frida.lo)
+	source build/frida-env-android-i386.rc \
+		&& cd build/tmp-android-i386/frida-core \
+		&& make -C src install \
+			RESOURCE_COMPILER="../../../../build/tmp-mac-x86_64/frida-core/tools/resource-compiler --toolchain=gnu" \
+			AGENT=../../../../build/tmp-android-i386-stripped/frida-core/lib/agent/.libs/libfrida-agent.so \
+		&& make install-data-am
+	@touch -c $@
+
 build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm-stripped/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp-mac-x86_64/frida-core/tools/resource-compiler
 	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-android-arm/frida-core/src/libfrida_core_la-frida.lo)
 	source build/frida-env-android-arm.rc \
@@ -256,6 +270,12 @@ build/frida-ios-universal/bin/frida-server: build/frida-ios-arm/bin/frida-server
 	strip -Sx $(@D)/frida-server-32 $(@D)/frida-server-64
 	lipo $(@D)/frida-server-32 $(@D)/frida-server-64 -create -output $@
 	$(RM) $(@D)/frida-server-32 $(@D)/frida-server-64
+
+build/frida-android-i386-stripped/bin/frida-server: build/frida-android-i386/bin/frida-server
+	mkdir -p $(@D)
+	cp $< $@.tmp
+	source build/frida-env-android-i386.rc && $$STRIP --strip-all $@.tmp
+	mv $@.tmp $@
 
 build/frida-android-arm-stripped/bin/frida-server: build/frida-android-arm/bin/frida-server
 	mkdir -p $(@D)
