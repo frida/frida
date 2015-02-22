@@ -94,6 +94,7 @@ build/fs-tmp-%/libiconv/Makefile: build/fs-env-%.rc build/.libiconv-stamp
 		&& cd $(@D) \
 		&& FRIDA_LEGACY_AUTOTOOLS=1 ../../../libiconv/configure \
 			--enable-static \
+			--disable-shared \
 			--enable-relocatable \
 			--disable-rpath
 
