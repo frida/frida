@@ -16,10 +16,14 @@ clean: clean-submodules
 	rm -f build/*-stamp
 	rm -rf build/frida-linux-x86_64
 	rm -rf build/frida-linux-x86_64-stripped
+	rm -rf build/frida-android-i386
+	rm -rf build/frida-android-i386-stripped
 	rm -rf build/frida-android-arm
 	rm -rf build/frida-android-arm-stripped
 	rm -rf build/tmp-linux-x86_64
 	rm -rf build/tmp-linux-x86_64-stripped
+	rm -rf build/tmp-android-i386
+	rm -rf build/tmp-android-i386-stripped
 	rm -rf build/tmp-android-arm
 	rm -rf build/tmp-android-arm-stripped
 
@@ -116,7 +120,14 @@ check-core-linux-x86_64: build/tmp-linux-x86_64/frida-core/tests/frida-tests
 	$<
 
 frida-server: \
+	build/frida-android-i386-stripped/bin/frida-server \
 	build/frida-android-arm-stripped/bin/frida-server
+
+build/frida-android-i386-stripped/bin/frida-server: build/frida-android-i386/bin/frida-server
+	mkdir -p $(@D)
+	cp $< $@.tmp
+	. build/frida-env-android-i386.rc && $$STRIP --strip-all $@.tmp
+	mv $@.tmp $@
 
 build/frida-android-arm-stripped/bin/frida-server: build/frida-android-arm/bin/frida-server
 	mkdir -p $(@D)
