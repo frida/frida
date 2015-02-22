@@ -106,7 +106,7 @@ build/.binutils-stamp:
 	$(RM) -r binutils
 	mkdir binutils
 	cd binutils \
-		&& $(download) http://gnuftp.uib.no/binutils/binutils-2.24.tar.bz2 | tar -xj --strip-components 1 \
+		&& $(download) http://gnuftp.uib.no/binutils/binutils-2.25.tar.bz2 | tar -xj --strip-components 1 \
 		&& patch -p1 < ../releng/patches/binutils-android.patch
 	@mkdir -p $(@D)
 	@touch $@
