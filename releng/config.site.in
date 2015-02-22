@@ -30,6 +30,22 @@ case $frida_host_platform_arch in
     host_alias="x86_64-linux-gnu"
     cross_compiling=no
   ;;
+  android-i386)
+    if [ -n "$FRIDA_LEGACY_AUTOTOOLS" ]; then
+      host_alias="i686-linux-gnu"
+    else
+      host_alias="i686-none-linux-android"
+    fi
+    cross_compiling=yes
+  ;;
+  android-x86_64)
+    if [ -n "$FRIDA_LEGACY_AUTOTOOLS" ]; then
+      host_alias="x86_64-linux-gnu"
+    else
+      host_alias="x86_64-none-linux-android"
+    fi
+    cross_compiling=yes
+  ;;
   android-arm)
     if [ -n "$FRIDA_LEGACY_AUTOTOOLS" ]; then
       host_alias="armv7-linux-eabi"
@@ -39,6 +55,14 @@ case $frida_host_platform_arch in
     cross_compiling=yes
 
     frida_flags="$frida_flags -mthumb"
+  ;;
+  android-arm64)
+    if [ -n "$FRIDA_LEGACY_AUTOTOOLS" ]; then
+      host_alias="aarch64-linux-gnu"
+    else
+      host_alias="aarch64-none-linux-android"
+    fi
+    cross_compiling=yes
   ;;
   mac-i386)
     host_alias="i686-apple-darwin"

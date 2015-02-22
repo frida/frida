@@ -5,7 +5,6 @@ releng_path=`dirname $0`
 build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,mac,')
 build_arch=$(uname -m)
 build_platform_arch=${build_platform}-${build_arch}
-android_build_platform=$(echo ${build_platform} | sed 's,^mac$,darwin,')
 
 if [ -n "$FRIDA_HOST" ]; then
   host_platform=$(echo -n $FRIDA_HOST | cut -f1 -d"-")
@@ -147,25 +146,62 @@ case $host_platform in
     LDFLAGS="-isysroot $ios_sdk_path -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
     ;;
   android)
+    android_build_platform=$(echo ${build_platform} | sed 's,^mac$,darwin,')
+    android_host_arch=$(echo ${host_arch} | sed 's,^i386$,x86,')
+    case $android_host_arch in
+      x86)
+        android_host_abi=x86
+        android_host_target=i686-none-linux-android
+        android_host_toolchain=x86-4.8
+        android_host_toolprefix=i686-linux-android-
+        android_host_cflags="-march=i686"
+        android_host_ldflags=""
+        ;;
+      x86_64)
+        android_host_abi=x86_64
+        android_host_target=x86_64-none-linux-android
+        android_host_toolchain=x86_64-4.9
+        android_host_toolprefix=x86_64-linux-android-
+        android_host_cflags="-march=x86_64"
+        android_host_ldflags=""
+        ;;
+      arm)
+        android_host_abi=armeabi-v7a
+        android_host_target=armv7-none-linux-androideabi
+        android_host_toolchain=arm-linux-androideabi-4.8
+        android_host_toolprefix=arm-linux-androideabi-
+        android_host_cflags="-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16"
+        android_host_ldflags="-Wl,--fix-cortex-a8"
+        ;;
+      arm64)
+        android_host_abi=arm64-v8a
+        android_host_target=aarch64-none-linux-android
+        android_host_toolchain=aarch64-linux-android-4.9
+        android_host_toolprefix=aarch64-linux-android-
+        android_host_cflags="-march=arm64"
+        android_host_ldflags=""
+        ;;
+    esac
+
     android_clang_prefix="$ANDROID_NDK_ROOT/toolchains/llvm-3.4/prebuilt/${android_build_platform}-x86_64"
-    android_gcc_toolchain="$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.8/prebuilt/${android_build_platform}-x86_64"
-    android_sysroot="$ANDROID_NDK_ROOT/platforms/android-14/arch-arm"
+    android_gcc_toolchain="$ANDROID_NDK_ROOT/toolchains/${android_host_toolchain}/prebuilt/${android_build_platform}-x86_64"
+    android_sysroot="$ANDROID_NDK_ROOT/platforms/android-14/arch-${android_host_arch}"
 
     toolflags="--sysroot=$android_sysroot \
 --gcc-toolchain=$android_gcc_toolchain \
---target=armv7-none-linux-androideabi \
+--target=$android_host_target \
 -no-canonical-prefixes"
-    CPP="$android_gcc_toolchain/bin/arm-linux-androideabi-cpp --sysroot=$android_sysroot"
+    CPP="$android_gcc_toolchain/bin/${android_host_toolprefix}cpp --sysroot=$android_sysroot"
     CC="$android_clang_prefix/bin/clang $toolflags"
     CXX="$android_clang_prefix/bin/clang++ $toolflags"
-    LD="$android_gcc_toolchain/bin/arm-linux-androideabi-ld --sysroot=$android_sysroot"
-    AR="$android_gcc_toolchain/bin/arm-linux-androideabi-ar"
-    NM="$android_gcc_toolchain/bin/arm-linux-androideabi-nm"
-    OBJDUMP="$android_gcc_toolchain/bin/arm-linux-androideabi-objdump"
-    RANLIB="$android_gcc_toolchain/bin/arm-linux-androideabi-ranlib"
-    STRIP="$android_gcc_toolchain/bin/arm-linux-androideabi-strip"
+    LD="$android_gcc_toolchain/bin/${android_host_toolprefix}ld --sysroot=$android_sysroot"
+    AR="$android_gcc_toolchain/bin/${android_host_toolprefix}ar"
+    NM="$android_gcc_toolchain/bin/${android_host_toolprefix}nm"
+    OBJDUMP="$android_gcc_toolchain/bin/${android_host_toolprefix}objdump"
+    RANLIB="$android_gcc_toolchain/bin/${android_host_toolprefix}ranlib"
+    STRIP="$android_gcc_toolchain/bin/${android_host_toolprefix}strip"
 
-    CFLAGS="-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16 \
+    CFLAGS="$android_host_cflags \
 -ffunction-sections -funwind-tables -fno-exceptions -fno-rtti \
 -DANDROID \
 -I$android_sysroot/usr/include \
@@ -177,12 +213,12 @@ case $host_platform in
     CPPFLAGS="-DANDROID \
 -I$android_sysroot/usr/include \
 -I$FRIDA_SDKROOT/include"
-    LDFLAGS="-Wl,--fix-cortex-a8 \
+    LDFLAGS="$android_host_ldflags \
 -Wl,--no-undefined \
 -Wl,-z,noexecstack \
 -Wl,-z,relro \
 -Wl,-z,now \
--L$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a \
+-L$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/libs/$android_host_abi \
 -L$FRIDA_SDKROOT/lib \
 -lm"
     ;;
