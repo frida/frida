@@ -2,8 +2,7 @@ python3 = python3.4
 
 all: \
 	frida-python \
-	frida-npapi \
-	frida-server
+	frida-npapi
 
 include releng/common.mk
 
