@@ -10,6 +10,9 @@
 [submodule "frida-python"]
 	path = frida-python
 	url = git://github.com/frida/frida-python.git
+[submodule "frida-node"]
+	path = frida-node
+	url = git://github.com/frida/frida-node.git
 [submodule "frida-npapi"]
 	path = frida-npapi
 	url = git://github.com/frida/frida-npapi.git
