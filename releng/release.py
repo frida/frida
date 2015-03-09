@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 if __name__ == '__main__':
+    import glob
     import os
     import platform
     import subprocess
@@ -15,6 +16,14 @@ if __name__ == '__main__':
     toolchain_dir = os.path.join(build_dir, "build", "toolchain-" + build_os)
     frida_core_dir = os.path.join(build_dir, "frida-core")
     frida_python_dir = os.path.join(build_dir, "frida-python")
+    frida_node_dir = os.path.join(build_dir, "frida-node")
+
+    if system == 'Windows':
+        ssh_cmd = r"C:\Program Files (x86)\PuTTY\plink.exe"
+        scp_cmd = r"C:\Program Files (x86)\PuTTY\pscp.exe"
+    else:
+        ssh_cmd = "ssh"
+        scp_cmd = "scp"
 
     raw_version = subprocess.check_output(["git", "describe", "--tags", "--always", "--long"], cwd=build_dir).strip().replace("-", ".")
     (major, minor, micro, nano, commit) = raw_version.split(".")
@@ -28,6 +37,41 @@ if __name__ == '__main__':
         env.update(os.environ)
         subprocess.call([interpreter, "setup.py", "bdist_egg", "upload"], cwd=os.path.join(frida_python_dir, "src"), env=env)
 
+    def upload_to_npm(node, publish):
+        node_pre_gyp_bin_dir = os.path.join(frida_node_dir, "node_modules", "node-pre-gyp", "bin")
+        env = dict(os.environ)
+        env.update({
+            'PATH': os.pathsep.join([node_pre_gyp_bin_dir, os.path.dirname(node)]) + os.pathsep + os.getenv('PATH'),
+            'FRIDA': build_dir
+        })
+        def do(args):
+            exit_code = subprocess.call(args, cwd=frida_node_dir, env=env)
+            if exit_code != 0:
+                raise RuntimeError("Failed to run: " + " ".join(args))
+        def reset():
+            tags = [tag.strip() for tag in subprocess.check_output(["git", "tag", "-l"], cwd=frida_node_dir, env=env).split("\n") if len(tag.strip()) > 0]
+            for tag in tags:
+                do(["git", "tag", "-d", tag])
+            do(["git", "reset", "--hard", "origin/master"])
+            do(["git", "clean", "-xffd"])
+        reset()
+        do(["npm", "version", version])
+        if publish:
+            do(["npm", "publish"])
+        do(["npm", "install", "--build-from-source"])
+        if system == 'Darwin':
+            do(["strip", "-Sx", "build/Release/frida_binding.node"])
+            do(["strip", "-Sx", glob.glob(frida_node_dir + "/lib/binding/Release/node-*/frida_binding.node")[0]])
+        elif system == 'Linux':
+            do(["strip", "--strip-all", "build/Release/frida_binding.node"])
+            do(["strip", "--strip-all", glob.glob(frida_node_dir + "/lib/binding/Release/node-*/frida_binding.node")[0]])
+        do(["node-pre-gyp", "package"])
+        package = glob.glob(os.path.join(frida_node_dir, "build", "stage", "node", "v*", "Release", "*.tar.gz"))[0]
+        remote_path = os.path.dirname(package[len(frida_node_dir) + 12:]) + "/"
+        do([ssh_cmd, "buildmaster@build.frida.re", "mkdir -p /home/buildmaster/public_html/" + remote_path])
+        do([scp_cmd, package, "buildmaster@build.frida.re:/home/buildmaster/public_html/" + remote_path])
+        reset()
+
     def upload_ios_deb(server):
         env = {
             'FRIDA_VERSION': version,
@@ -36,8 +80,8 @@ if __name__ == '__main__':
         env.update(os.environ)
         deb = os.path.join(build_dir, "frida_%s_iphoneos-arm.deb" % version)
         subprocess.call([os.path.join(frida_core_dir, "tools", "package-server.sh"), server, deb], env=env)
-        subprocess.call(["scp", deb, "buildmaster@build.frida.re:/home/buildmaster/public_html/debs/"])
-        subprocess.call(["ssh", "buildmaster@build.frida.re", "/home/buildmaster/cydia/sync-repo"])
+        subprocess.call([scp_cmd, deb, "buildmaster@build.frida.re:/home/buildmaster/public_html/debs/"])
+        subprocess.call([ssh_cmd, "buildmaster@build.frida.re", "/home/buildmaster/cydia/sync-repo"])
         os.unlink(deb)
 
     if int(nano) == 0:
@@ -50,6 +94,8 @@ if __name__ == '__main__':
                 os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "lib", "python3.4", "site-packages", "_frida.pyd"))
             upload_to_pypi(r"C:\Program Files\Python34\python.exe",
                 os.path.join(build_dir, "build", "frida-windows", "x64-Release", "lib", "python3.4", "site-packages", "_frida.pyd"))
+            upload_to_npm(r"C:\Program Files (x86)\nodejs\node.exe", publish=False)
+            upload_to_npm(r"C:\Program Files\nodejs\node.exe", publish=True)
         elif system == 'Darwin':
             upload_to_pypi("python2.6",
                 os.path.join(build_dir, "build", "frida-mac-universal", "lib", "python2.6", "site-packages", "_frida.so"))
@@ -57,9 +103,11 @@ if __name__ == '__main__':
                 os.path.join(build_dir, "build", "frida-mac-universal", "lib", "python2.7", "site-packages", "_frida.so"))
             upload_to_pypi("python3.4",
                 os.path.join(build_dir, "build", "frida-mac-universal", "lib", "python3.4", "site-packages", "_frida.so"))
+            upload_to_npm("/usr/local/bin/node", publish=False)
             upload_ios_deb(os.path.join(build_dir, "build", "frida-ios-arm", "bin", "frida-server"))
         elif system == 'Linux':
             upload_to_pypi("python2.7",
                 os.path.join(build_dir, "build", "frida-linux-x86_64-stripped", "lib", "python2.7", "site-packages", "_frida.so"))
             upload_to_pypi("python3.4",
                 os.path.join(build_dir, "build", "frida-linux-x86_64-stripped", "lib", "python3.4", "site-packages", "_frida.so"))
+            upload_to_npm("/opt/node/bin/node", publish=False)
