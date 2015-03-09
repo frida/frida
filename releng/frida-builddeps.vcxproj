@@ -76,7 +76,7 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Checking SDK</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">if exist "$(ProjectDir)..\build\sdk-windows\" goto warn
 
-"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)..\build\sdk-windows.exe" || exit 1
+"$(ProjectDir)wget.exe" --dot-style=mega --ca-certificate="$(ProjectDir)ca-bundle.crt" --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)..\build\sdk-windows.exe" || exit 1
 "$(ProjectDir)..\build\sdk-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
 del "$(ProjectDir)..\build\sdk-windows.exe"
 goto done
@@ -92,7 +92,7 @@ echo &gt; "$(IntDir)windows-sdk.stamp"
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Checking SDK</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">if exist "$(ProjectDir)..\build\sdk-windows\" goto warn
 
-"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)..\build\sdk-windows.exe" || exit 1
+"$(ProjectDir)wget.exe" --dot-style=mega --ca-certificate="$(ProjectDir)ca-bundle.crt" --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)..\build\sdk-windows.exe" || exit 1
 "$(ProjectDir)..\build\sdk-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
 del "$(ProjectDir)..\build\sdk-windows.exe"
 goto done
@@ -108,7 +108,7 @@ echo &gt; "$(IntDir)windows-sdk.stamp"
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Checking SDK</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">if exist "$(ProjectDir)..\build\sdk-windows\" goto warn
 
-"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)..\build\sdk-windows.exe" || exit 1
+"$(ProjectDir)wget.exe" --dot-style=mega --ca-certificate="$(ProjectDir)ca-bundle.crt" --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)..\build\sdk-windows.exe" || exit 1
 "$(ProjectDir)..\build\sdk-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
 del "$(ProjectDir)..\build\sdk-windows.exe"
 goto done
@@ -124,7 +124,7 @@ echo &gt; "$(IntDir)windows-sdk.stamp"
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Checking SDK</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">if exist "$(ProjectDir)..\build\sdk-windows\" goto warn
 
-"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)..\build\sdk-windows.exe" || exit 1
+"$(ProjectDir)wget.exe" --dot-style=mega --ca-certificate="$(ProjectDir)ca-bundle.crt" --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)..\build\sdk-windows.exe" || exit 1
 "$(ProjectDir)..\build\sdk-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
 del "$(ProjectDir)..\build\sdk-windows.exe"
 goto done
@@ -143,7 +143,7 @@ echo &gt; "$(IntDir)windows-sdk.stamp"
     <CustomBuild Include="windows-toolchain.txt">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">if exist "$(ProjectDir)..\build\toolchain-windows\" goto warn
 
-"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)..\build\toolchain-windows.exe" || exit 1
+"$(ProjectDir)wget.exe" --dot-style=mega --ca-certificate="$(ProjectDir)ca-bundle.crt" --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)..\build\toolchain-windows.exe" || exit 1
 "$(ProjectDir)..\build\toolchain-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
 del "$(ProjectDir)..\build\toolchain-windows.exe"
 goto done
@@ -156,7 +156,7 @@ echo &gt; "$(IntDir)windows-toolchain.stamp"
 </Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">if exist "$(ProjectDir)..\build\toolchain-windows\" goto warn
 
-"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)..\build\toolchain-windows.exe" || exit 1
+"$(ProjectDir)wget.exe" --dot-style=mega --ca-certificate="$(ProjectDir)ca-bundle.crt" --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)..\build\toolchain-windows.exe" || exit 1
 "$(ProjectDir)..\build\toolchain-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
 del "$(ProjectDir)..\build\toolchain-windows.exe"
 goto done
@@ -169,7 +169,7 @@ echo &gt; "$(IntDir)windows-toolchain.stamp"
 </Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">if exist "$(ProjectDir)..\build\toolchain-windows\" goto warn
 
-"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)..\build\toolchain-windows.exe" || exit 1
+"$(ProjectDir)wget.exe" --dot-style=mega --ca-certificate="$(ProjectDir)ca-bundle.crt" --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)..\build\toolchain-windows.exe" || exit 1
 "$(ProjectDir)..\build\toolchain-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
 del "$(ProjectDir)..\build\toolchain-windows.exe"
 goto done
@@ -182,7 +182,7 @@ echo &gt; "$(IntDir)windows-toolchain.stamp"
 </Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">if exist "$(ProjectDir)..\build\toolchain-windows\" goto warn
 
-"$(ProjectDir)wget.exe" --dot-style=mega --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)..\build\toolchain-windows.exe" || exit 1
+"$(ProjectDir)wget.exe" --dot-style=mega --ca-certificate="$(ProjectDir)ca-bundle.crt" --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)..\build\toolchain-windows.exe" || exit 1
 "$(ProjectDir)..\build\toolchain-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
 del "$(ProjectDir)..\build\toolchain-windows.exe"
 goto done
