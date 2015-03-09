@@ -244,7 +244,7 @@ if [ ! -f "$FRIDA_TOOLROOT/.stamp" ]; then
   rm -rf "$FRIDA_TOOLROOT"
   mkdir -p "$FRIDA_TOOLROOT"
   echo "Downloading and deploying toolchain..."
-  $download_command "http://build.frida.re/toolchain-${toolchain_version}-${build_platform}-${build_arch}.tar.bz2" | tar -C "$FRIDA_TOOLROOT" -xj $tar_stdin || exit 1
+  $download_command "https://build.frida.re/toolchain-${toolchain_version}-${build_platform}-${build_arch}.tar.bz2" | tar -C "$FRIDA_TOOLROOT" -xj $tar_stdin || exit 1
   touch "$FRIDA_TOOLROOT/.stamp"
 fi
 
@@ -257,7 +257,7 @@ if [ ! -f "$FRIDA_SDKROOT/.stamp" ]; then
     tar -C "$FRIDA_SDKROOT" -xjf $local_sdk || exit 1
   else
     echo "Downloading and deploying SDK for ${host_platform_arch}..."
-    $download_command "http://build.frida.re/sdk-${sdk_version}-${host_platform}-${host_arch}.tar.bz2" | tar -C "$FRIDA_SDKROOT" -xj $tar_stdin 2> /dev/null
+    $download_command "https://build.frida.re/sdk-${sdk_version}-${host_platform}-${host_arch}.tar.bz2" | tar -C "$FRIDA_SDKROOT" -xj $tar_stdin 2> /dev/null
     if [ $? -ne 0 ]; then
       echo ""
       echo "Bummer. It seems we don't have a prebuilt SDK for your system."
