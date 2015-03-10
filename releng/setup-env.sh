@@ -100,7 +100,7 @@ case $host_platform in
     CC="/usr/bin/gcc -static-libgcc -static-libstdc++"
     CXX="/usr/bin/g++ -static-libgcc -static-libstdc++"
     OBJC=""
-    LD="/usr/bin/ld -static-libgcc -static-libstdc++"
+    LD="/usr/bin/ld"
     AR="/usr/bin/ar"
     NM="/usr/bin/nm"
     OBJDUMP="/usr/bin/objdump"
