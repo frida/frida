@@ -31,8 +31,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-agent-64", "frida-cor
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gumpp", "frida-gum\bindings\gumpp\gumpp.vcxproj", "{BB098FCF-D570-43FF-BB10-985189B2E1AB}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-npapi", "frida-npapi\frida-npapi.vcxproj", "{99C17854-578D-49E7-BB80-AEBE4B5D3BA6}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-server", "frida-core\frida-server.vcxproj", "{218DDF16-1726-4492-A92F-DC190397DB44}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-clr", "frida-clr\frida-clr.vcxproj", "{48AFFAE0-8789-44A6-8756-BC9EA344500C}"
@@ -155,14 +153,6 @@ Global
 		{BB098FCF-D570-43FF-BB10-985189B2E1AB}.Release|Win32.Build.0 = Release|Win32
 		{BB098FCF-D570-43FF-BB10-985189B2E1AB}.Release|x64.ActiveCfg = Release|x64
 		{BB098FCF-D570-43FF-BB10-985189B2E1AB}.Release|x64.Build.0 = Release|x64
-		{99C17854-578D-49E7-BB80-AEBE4B5D3BA6}.Debug|Win32.ActiveCfg = Debug|Win32
-		{99C17854-578D-49E7-BB80-AEBE4B5D3BA6}.Debug|Win32.Build.0 = Debug|Win32
-		{99C17854-578D-49E7-BB80-AEBE4B5D3BA6}.Debug|x64.ActiveCfg = Debug|x64
-		{99C17854-578D-49E7-BB80-AEBE4B5D3BA6}.Debug|x64.Build.0 = Debug|x64
-		{99C17854-578D-49E7-BB80-AEBE4B5D3BA6}.Release|Win32.ActiveCfg = Release|Win32
-		{99C17854-578D-49E7-BB80-AEBE4B5D3BA6}.Release|Win32.Build.0 = Release|Win32
-		{99C17854-578D-49E7-BB80-AEBE4B5D3BA6}.Release|x64.ActiveCfg = Release|x64
-		{99C17854-578D-49E7-BB80-AEBE4B5D3BA6}.Release|x64.Build.0 = Release|x64
 		{218DDF16-1726-4492-A92F-DC190397DB44}.Debug|Win32.ActiveCfg = Debug|Win32
 		{218DDF16-1726-4492-A92F-DC190397DB44}.Debug|Win32.Build.0 = Debug|Win32
 		{218DDF16-1726-4492-A92F-DC190397DB44}.Debug|x64.ActiveCfg = Debug|x64

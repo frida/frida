@@ -2,8 +2,7 @@ python3 = python3.4
 
 all: \
 	frida-server \
-	frida-python \
-	frida-npapi
+	frida-python
 
 include releng/common.mk
 
@@ -43,7 +42,6 @@ clean-submodules:
 	cd frida-gum && git clean -xfd
 	cd frida-core && git clean -xfd
 	cd frida-python && git clean -xfd
-	cd frida-npapi && git clean -xfd
 
 check: check-gum check-core
 
@@ -364,45 +362,11 @@ check-python3: frida-python3
 		&& $(python3) -m unittest discover
 
 
-frida-npapi: \
-	build/frida-mac-universal/lib/browser/plugins/libnpfrida.dylib
-
-frida-npapi/configure: build/frida-env-mac-x86_64.rc frida-npapi/configure.ac build/frida-mac-x86_64/lib/pkgconfig/frida-core-1.0.pc
-	source build/frida-env-mac-x86_64.rc \
-		&& pushd frida-npapi >/dev/null \
-		&& ./autogen.sh \
-		&& popd >/dev/null \
-		&& mkdir -p build/tmp-mac-x86_64/frida-npapi \
-		&& pushd build/tmp-mac-x86_64/frida-npapi >/dev/null \
-		&& ../../../frida-npapi/configure \
-		&& rm -f ../../../frida-npapi/src/libnpfrida_codegen_la_vala.stamp \
-		&& make -C src ../../../../frida-npapi/src/libnpfrida_codegen_la_vala.stamp \
-		&& popd >/dev/null
-
-build/tmp-%/frida-npapi/Makefile: build/frida-env-%.rc frida-npapi/configure build/frida-%/lib/pkgconfig/frida-core-1.0.pc
-	mkdir -p $(@D)
-	source build/frida-env-$*.rc && cd $(@D) && ../../../frida-npapi/configure
-
-build/tmp-%/frida-npapi/src/libnpfrida.la: build/tmp-%/frida-npapi/Makefile build/frida-npapi-submodule-stamp
-	@$(call ensure_relink,frida-npapi/src/npfrida-plugin.cpp,build/tmp-$*/frida-npapi/src/npfrida-plugin.lo)
-	source build/frida-env-$*.rc && cd build/tmp-$*/frida-npapi && make install
-	@touch -c $@
-
-build/frida-mac-universal/lib/browser/plugins/libnpfrida.dylib: build/tmp-mac-i386/frida-npapi/src/libnpfrida.la build/tmp-mac-x86_64/frida-npapi/src/libnpfrida.la
-	mkdir -p $(@D)
-	cp build/tmp-mac-i386/frida-npapi/src/.libs/libnpfrida.dylib $(@D)/libnpfrida-32.dylib
-	cp build/tmp-mac-x86_64/frida-npapi/src/.libs/libnpfrida.dylib $(@D)/libnpfrida-64.dylib
-	strip -Sx $(@D)/libnpfrida-32.dylib $(@D)/libnpfrida-64.dylib
-	lipo $(@D)/libnpfrida-32.dylib $(@D)/libnpfrida-64.dylib -create -output $@
-	rm $(@D)/libnpfrida-32.dylib $(@D)/libnpfrida-64.dylib
-
-
 .PHONY: \
 	install distclean clean clean-submodules check git-submodules git-submodule-stamps \
 	capstone capstone-update-submodule-stamp \
 	frida-gum frida-gum-update-submodule-stamp check-gum check-gum-mac-i386 check-gum-mac-x86_64 \
 	frida-core frida-core-update-submodule-stamp check-core check-core-mac-i386 check-core-mac-x86_64 \
 	frida-server \
-	frida-python frida-python2 frida-python3 frida-python-update-submodule-stamp check-python check-python2 check-python3 \
-	frida-npapi frida-npapi-update-submodule-stamp
+	frida-python frida-python2 frida-python3 frida-python-update-submodule-stamp check-python check-python2 check-python3
 .SECONDARY:

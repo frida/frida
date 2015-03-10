@@ -1,8 +1,7 @@
 python3 = python3.4
 
 all: \
-	frida-python \
-	frida-npapi
+	frida-python
 
 include releng/common.mk
 
@@ -35,7 +34,6 @@ clean-submodules:
 	cd frida-gum && git clean -xfd
 	cd frida-core && git clean -xfd
 	cd frida-python && git clean -xfd
-	cd frida-npapi && git clean -xfd
 
 check: check-gum check-core
 
@@ -241,42 +239,11 @@ check-python3: frida-python3
 		&& ${python3} -m unittest tests.test_core tests.test_tracer
 
 
-frida-npapi: \
-	build/frida-linux-i386-stripped/lib/browser/plugins/libnpfrida.so \
-	build/frida-linux-x86_64-stripped/lib/browser/plugins/libnpfrida.so
-
-frida-npapi/configure: build/frida-env-linux-x86_64.rc frida-npapi/configure.ac build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc
-	. build/frida-env-linux-x86_64.rc \
-		&& cd frida-npapi \
-		&& ./autogen.sh \
-		&& cd .. \
-		&& mkdir -p build/tmp-linux-x86_64/frida-npapi \
-		&& cd build/tmp-linux-x86_64/frida-npapi \
-		&& ../../../frida-npapi/configure \
-		&& rm -f ../../../frida-npapi/src/libnpfrida_codegen_la_vala.stamp \
-		&& make -C src ../../../../frida-npapi/src/libnpfrida_codegen_la_vala.stamp
-
-build/tmp-%/frida-npapi/Makefile: build/frida-env-%.rc frida-npapi/configure build/frida-%/lib/pkgconfig/frida-core-1.0.pc
-	mkdir -p $(@D)
-	. build/frida-env-$*.rc && cd $(@D) && ../../../frida-npapi/configure
-
-build/tmp-%/frida-npapi/src/libnpfrida.la: build/tmp-%/frida-npapi/Makefile build/frida-npapi-submodule-stamp
-	@$(call ensure_relink,frida-npapi/src/npfrida-plugin.cpp,build/tmp-$*/frida-npapi/src/npfrida-plugin.lo)
-	. build/frida-env-$*.rc && cd build/tmp-$*/frida-npapi && make install
-	@touch -c $@
-
-build/frida-%-stripped/lib/browser/plugins/libnpfrida.so: build/tmp-%/frida-npapi/src/libnpfrida.la
-	mkdir -p $(@D)
-	cp build/tmp-$*/frida-npapi/src/.libs/libnpfrida.so $@
-	strip --strip-all $@
-
-
 .PHONY: \
 	distclean clean clean-submodules check git-submodules git-submodule-stamps \
 	capstone capstone-update-submodule-stamp \
 	frida-gum frida-gum-update-submodule-stamp check-gum check-gum-linux-i386 check-gum-linux-x86_64 \
 	frida-core frida-core-update-submodule-stamp check-core check-core-linux-i386 check-core-linux-x86_64 \
 	frida-server \
-	frida-python frida-python2 frida-python3 frida-python-update-submodule-stamp check-python check-python2 check-python3 \
-	frida-npapi frida-npapi-update-submodule-stamp
+	frida-python frida-python2 frida-python3 frida-python-update-submodule-stamp check-python check-python2 check-python3
 .SECONDARY:
