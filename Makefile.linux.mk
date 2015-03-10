@@ -13,12 +13,16 @@ clean: clean-submodules
 	rm -f build/*.rc
 	rm -f build/*.site
 	rm -f build/*-stamp
+	rm -rf build/frida-linux-i386
+	rm -rf build/frida-linux-i386-stripped
 	rm -rf build/frida-linux-x86_64
 	rm -rf build/frida-linux-x86_64-stripped
 	rm -rf build/frida-android-i386
 	rm -rf build/frida-android-i386-stripped
 	rm -rf build/frida-android-arm
 	rm -rf build/frida-android-arm-stripped
+	rm -rf build/tmp-linux-i386
+	rm -rf build/tmp-linux-i386-stripped
 	rm -rf build/tmp-linux-x86_64
 	rm -rf build/tmp-linux-x86_64-stripped
 	rm -rf build/tmp-android-i386
@@ -37,6 +41,7 @@ check: check-gum check-core
 
 
 capstone: \
+	build/frida-linux-i386/lib/pkgconfig/capstone.pc \
 	build/frida-linux-x86_64/lib/pkgconfig/capstone.pc
 
 build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-submodule-stamp
@@ -53,6 +58,7 @@ build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-sub
 
 
 frida-gum: \
+	build/frida-linux-i386/lib/pkgconfig/frida-gum-1.0.pc \
 	build/frida-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc
 
 frida-gum/configure: build/frida-env-linux-x86_64.rc frida-gum/configure.ac
@@ -67,12 +73,13 @@ build/frida-%/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-%/frida-gum/Makefile bui
 	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-gum install
 	@touch -c $@
 
-check-gum: check-gum-linux-x86_64
-check-gum-linux-x86_64: build/frida-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc
-	build/tmp-linux-x86_64/frida-gum/tests/gum-tests
+check-gum: check-gum-linux-86_64
+check-gum-linux-%: build/frida-linux-%/lib/pkgconfig/frida-gum-1.0.pc
+	build/tmp-linux-$*/frida-gum/tests/gum-tests
 
 
 frida-core: \
+	build/frida-linux-i386/lib/pkgconfig/frida-core-1.0.pc \
 	build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc
 
 frida-core/configure: build/frida-env-linux-x86_64.rc frida-core/configure.ac
@@ -97,7 +104,7 @@ build/tmp-%-stripped/frida-core/lib/agent/.libs/libfrida-agent.so: build/tmp-%/f
 	cp build/tmp-$*/frida-core/lib/agent/.libs/libfrida-agent.so $@
 	. build/frida-env-$*.rc && $$STRIP --strip-all $@
 
-build/frida-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-%-stripped/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp-%/frida-core/tools/resource-compiler
+build/frida-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-%-stripped/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp-linux-x86_64/frida-core/tools/resource-compiler
 	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-$*/frida-core/src/libfrida_core_la-frida.lo)
 	. build/frida-env-$*.rc \
 		&& cd build/tmp-$*/frida-core \
@@ -114,8 +121,8 @@ build/tmp-%/frida-core/tests/frida-tests: build/frida-%/lib/pkgconfig/frida-core
 	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/tests
 	@touch -c $@
 
-check-core: check-core-linux-x86_64
-check-core-linux-x86_64: build/tmp-linux-x86_64/frida-core/tests/frida-tests
+check-core: check-core-linux-i386 check-core-linux-x86_64
+check-core-linux-%: build/tmp-linux-%/frida-core/tests/frida-tests
 	$<
 
 frida-server: \
@@ -143,10 +150,14 @@ build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 frida-python: frida-python2 frida-python3
 
 frida-python2: \
+	build/frida-linux-i386-stripped/lib/python2.7/site-packages/frida \
+	build/frida-linux-i386-stripped/lib/python2.7/site-packages/_frida.so \
 	build/frida-linux-x86_64-stripped/lib/python2.7/site-packages/frida \
 	build/frida-linux-x86_64-stripped/lib/python2.7/site-packages/_frida.so
 
 frida-python3: \
+	build/frida-linux-i386-stripped/lib/${python3}/site-packages/frida \
+	build/frida-linux-i386-stripped/lib/${python3}/site-packages/_frida.so \
 	build/frida-linux-x86_64-stripped/lib/${python3}/site-packages/frida \
 	build/frida-linux-x86_64-stripped/lib/${python3}/site-packages/_frida.so
 
@@ -163,11 +174,22 @@ build/tmp-%/frida-python2.7/src/_frida.la: build/tmp-%/frida-python2.7/Makefile 
 	. build/frida-env-$*.rc && cd build/tmp-$*/frida-python2.7 && make install
 	@touch -c $@
 
+build/frida-%-stripped/lib/python2.7/site-packages/frida: build/tmp-linux-i386/frida-python2.7/src/_frida.la
+	rm -rf $@
+	mkdir -p $(@D)
+	cp -a build/frida-$*/lib/python2.7/site-packages/frida $@
+	@touch $@
+
 build/frida-%-stripped/lib/python2.7/site-packages/frida: build/tmp-linux-x86_64/frida-python2.7/src/_frida.la
 	rm -rf $@
 	mkdir -p $(@D)
 	cp -a build/frida-$*/lib/python2.7/site-packages/frida $@
 	@touch $@
+
+build/frida-%-stripped/lib/python2.7/site-packages/_frida.so: build/tmp-linux-i386/frida-python2.7/src/_frida.la
+	mkdir -p $(@D)
+	cp build/tmp-$*/frida-python2.7/src/.libs/_frida.so $@
+	strip --strip-all $@
 
 build/frida-%-stripped/lib/python2.7/site-packages/_frida.so: build/tmp-linux-x86_64/frida-python2.7/src/_frida.la
 	mkdir -p $(@D)
@@ -184,11 +206,22 @@ build/tmp-%/frida-${python3}/src/_frida.la: build/tmp-%/frida-${python3}/Makefil
 	. build/frida-env-$*.rc && cd build/tmp-$*/frida-${python3} && make install
 	@touch -c $@
 
+build/frida-%-stripped/lib/${python3}/site-packages/frida: build/tmp-linux-i386/frida-${python3}/src/_frida.la
+	rm -rf $@
+	mkdir -p $(@D)
+	cp -a build/frida-$*/lib/${python3}/site-packages/frida $@
+	@touch $@
+
 build/frida-%-stripped/lib/${python3}/site-packages/frida: build/tmp-linux-x86_64/frida-${python3}/src/_frida.la
 	rm -rf $@
 	mkdir -p $(@D)
 	cp -a build/frida-$*/lib/${python3}/site-packages/frida $@
 	@touch $@
+
+build/frida-%-stripped/lib/${python3}/site-packages/_frida.so: build/tmp-linux-i386/frida-${python3}/src/_frida.la
+	mkdir -p $(@D)
+	cp build/tmp-$*/frida-${python3}/src/.libs/_frida.so $@
+	strip --strip-all $@
 
 build/frida-%-stripped/lib/${python3}/site-packages/_frida.so: build/tmp-linux-x86_64/frida-${python3}/src/_frida.la
 	mkdir -p $(@D)
@@ -209,6 +242,7 @@ check-python3: frida-python3
 
 
 frida-npapi: \
+	build/frida-linux-i386-stripped/lib/browser/plugins/libnpfrida.so \
 	build/frida-linux-x86_64-stripped/lib/browser/plugins/libnpfrida.so
 
 frida-npapi/configure: build/frida-env-linux-x86_64.rc frida-npapi/configure.ac build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc
@@ -240,8 +274,8 @@ build/frida-%-stripped/lib/browser/plugins/libnpfrida.so: build/tmp-%/frida-npap
 .PHONY: \
 	distclean clean clean-submodules check git-submodules git-submodule-stamps \
 	capstone capstone-update-submodule-stamp \
-	frida-gum frida-gum-update-submodule-stamp check-gum check-gum-linux-x86_64 \
-	frida-core frida-core-update-submodule-stamp check-core check-core-linux-x86_64 \
+	frida-gum frida-gum-update-submodule-stamp check-gum check-gum-linux-i386 check-gum-linux-x86_64 \
+	frida-core frida-core-update-submodule-stamp check-core check-core-linux-i386 check-core-linux-x86_64 \
 	frida-server \
 	frida-python frida-python2 frida-python3 frida-python-update-submodule-stamp check-python check-python2 check-python3 \
 	frida-npapi frida-npapi-update-submodule-stamp

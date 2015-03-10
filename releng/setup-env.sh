@@ -97,19 +97,21 @@ LDFLAGS=""
 case $host_platform in
   linux)
     CPP="/usr/bin/cpp"
-    CC="/usr/bin/gcc"
-    CXX="/usr/bin/g++"
+    CC="/usr/bin/gcc -static-libgcc -static-libstdc++"
+    CXX="/usr/bin/g++ -static-libgcc -static-libstdc++"
     OBJC=""
-    LD="/usr/bin/ld"
+    LD="/usr/bin/ld -static-libgcc -static-libstdc++"
     AR="/usr/bin/ar"
     NM="/usr/bin/nm"
     OBJDUMP="/usr/bin/objdump"
     RANLIB="/usr/bin/ranlib"
     STRIP="/usr/bin/strip"
 
-    CFLAGS="-ffunction-sections -fdata-sections"
+    [ $host_arch == 'i386' ] && host_arch_flags="-m32" || host_arch_flags="-m64"
+
+    CFLAGS="$host_arch_flags -ffunction-sections -fdata-sections"
     CPPFLAGS="-I$FRIDA_SDKROOT/include"
-    LDFLAGS="-Wl,--gc-sections -L$FRIDA_SDKROOT/lib"
+    LDFLAGS="$host_arch_flags -Wl,--gc-sections -L$FRIDA_SDKROOT/lib"
     ;;
   mac)
     mac_minver="10.7"

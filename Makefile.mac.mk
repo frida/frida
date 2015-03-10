@@ -194,7 +194,7 @@ build/tmp-%-stripped/frida-core/lib/agent/.libs/libfrida-agent.so: build/tmp-%/f
 	cp build/tmp-$*/frida-core/lib/agent/.libs/libfrida-agent.so $@
 	source build/frida-env-$*.rc && $$STRIP --strip-all $@
 
-build/frida-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib build/tmp-mac-x86_64-stripped/frida-core/src/frida-helper build/tmp-%/frida-core/tools/resource-compiler
+build/frida-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib build/tmp-mac-x86_64-stripped/frida-core/src/frida-helper build/tmp-mac-x86_64/frida-core/tools/resource-compiler
 	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-$*/frida-core/src/libfrida_core_la-frida.lo)
 	source build/frida-env-$*.rc \
 		&& cd build/tmp-$*/frida-core \
