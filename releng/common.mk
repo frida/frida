@@ -30,7 +30,7 @@ $(foreach m,$(modules),$(eval $(call make-update-submodule-stamp,$m)))
 git-submodule-stamps: $(foreach m,$(modules),$m-update-submodule-stamp)
 -include git-submodule-stamps
 
-build/frida-env-%.rc: releng/setup-env.sh releng/config.site.in
+build/frida-env-%.rc: releng/setup-env.sh releng/config.site.in $(MAKEFILE_LIST)
 	FRIDA_HOST=$* ./releng/setup-env.sh
 
 ensure_relink = test $(1) -nt $(2) || touch -c $(2)
