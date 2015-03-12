@@ -1,4 +1,4 @@
-PYTHON ?= /usr/bin/python2.7
+PYTHON ?= $(shell readlink -f $(shell which python))
 PYTHON_NAME ?= $(shell basename $(PYTHON))
 
 all: help
@@ -162,7 +162,7 @@ frida-python/configure: build/frida-env-linux-x86_64.rc frida-python/configure.a
 
 build/tmp-%/frida-$(PYTHON_NAME)/Makefile: build/frida-env-%.rc frida-python/configure build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	mkdir -p $(@D)
-	. build/frida-env-$*.rc && cd $(@D) && ../../../frida-python/configure
+	. build/frida-env-$*.rc && cd $(@D) && PYTHON=$(PYTHON) ../../../frida-python/configure
 
 build/tmp-%/frida-$(PYTHON_NAME)/src/_frida.la: build/tmp-%/frida-$(PYTHON_NAME)/Makefile build/frida-python-submodule-stamp
 	. build/frida-env-$*.rc && cd build/tmp-$*/frida-$(PYTHON_NAME) && make
