@@ -1,5 +1,5 @@
 PYTHON ?= /usr/bin/python2.7
-PYTHON_NAME ?= $(shell basename $PYTHON)
+PYTHON_NAME ?= $(shell basename $(PYTHON))
 
 all: help
 
@@ -154,46 +154,38 @@ build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	@touch -c $@
 
 
-python-32: build/frida-linux-i386-stripped/lib/${PYTHON_NAME}/site-packages/frida build/frida-linux-i386-stripped/lib/${PYTHON_NAME}/site-packages/_frida.so ##@bindings Build Python bindings for i386
-python-64: build/frida-linux-x86_64-stripped/lib/${PYTHON_NAME}/site-packages/frida build/frida-linux-x86_64-stripped/lib/${PYTHON_NAME}/site-packages/_frida.so ##@bindings Build Python bindings for x86_64
+python-32: build/frida-linux-i386-stripped/lib/$(PYTHON_NAME)/site-packages/frida build/frida-linux-i386-stripped/lib/$(PYTHON_NAME)/site-packages/_frida.so ##@bindings Build Python bindings for i386
+python-64: build/frida-linux-x86_64-stripped/lib/$(PYTHON_NAME)/site-packages/frida build/frida-linux-x86_64-stripped/lib/$(PYTHON_NAME)/site-packages/_frida.so ##@bindings Build Python bindings for x86_64
 
-build/tmp-%/frida-${PYTHON_NAME}/Makefile: build/frida-env-%.rc frida-python/configure build/frida-%/lib/pkgconfig/frida-core-1.0.pc
+frida-python/configure: build/frida-env-linux-x86_64.rc frida-python/configure.ac
+	. build/frida-env-linux-x86_64.rc && cd frida-python && ./autogen.sh
+
+build/tmp-%/frida-$(PYTHON_NAME)/Makefile: build/frida-env-%.rc frida-python/configure build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	mkdir -p $(@D)
 	. build/frida-env-$*.rc && cd $(@D) && ../../../frida-python/configure
 
-build/tmp-%/frida-${PYTHON_NAME}/src/_frida.la: build/tmp-%/frida-${PYTHON_NAME}/Makefile build/frida-python-submodule-stamp
-	. build/frida-env-$*.rc && cd build/tmp-$*/frida-${PYTHON_NAME} && make
-	@$(call ensure_relink,frida-python/src/_frida.c,build/tmp-$*/frida-${PYTHON_NAME}/src/_frida.lo)
-	. build/frida-env-$*.rc && cd build/tmp-$*/frida-${PYTHON_NAME} && make install
+build/tmp-%/frida-$(PYTHON_NAME)/src/_frida.la: build/tmp-%/frida-$(PYTHON_NAME)/Makefile build/frida-python-submodule-stamp
+	. build/frida-env-$*.rc && cd build/tmp-$*/frida-$(PYTHON_NAME) && make
+	@$(call ensure_relink,frida-python/src/_frida.c,build/tmp-$*/frida-$(PYTHON_NAME)/src/_frida.lo)
+	. build/frida-env-$*.rc && cd build/tmp-$*/frida-$(PYTHON_NAME) && make install
 	@touch -c $@
 
-build/frida-%-stripped/lib/${PYTHON_NAME}/site-packages/frida: build/tmp-linux-i386/frida-${PYTHON_NAME}/src/_frida.la
+build/frida-%-stripped/lib/$(PYTHON_NAME)/site-packages/frida: build/tmp-%/frida-$(PYTHON_NAME)/src/_frida.la
 	rm -rf $@
 	mkdir -p $(@D)
-	cp -a build/frida-$*/lib/${PYTHON_NAME}/site-packages/frida $@
+	cp -a build/frida-$*/lib/$(PYTHON_NAME)/site-packages/frida $@
 	@touch $@
 
-build/frida-%-stripped/lib/${PYTHON_NAME}/site-packages/frida: build/tmp-linux-x86_64/frida-${PYTHON_NAME}/src/_frida.la
-	rm -rf $@
+build/frida-%-stripped/lib/$(PYTHON_NAME)/site-packages/_frida.so: build/tmp-%/frida-$(PYTHON_NAME)/src/_frida.la
 	mkdir -p $(@D)
-	cp -a build/frida-$*/lib/${PYTHON_NAME}/site-packages/frida $@
-	@touch $@
-
-build/frida-%-stripped/lib/${PYTHON_NAME}/site-packages/_frida.so: build/tmp-linux-i386/frida-${PYTHON_NAME}/src/_frida.la
-	mkdir -p $(@D)
-	cp build/tmp-$*/frida-${PYTHON_NAME}/src/.libs/_frida.so $@
-	strip --strip-all $@
-
-build/frida-%-stripped/lib/${PYTHON_NAME}/site-packages/_frida.so: build/tmp-linux-x86_64/frida-${PYTHON_NAME}/src/_frida.la
-	mkdir -p $(@D)
-	cp build/tmp-$*/frida-${PYTHON_NAME}/src/.libs/_frida.so $@
+	cp build/tmp-$*/frida-$(PYTHON_NAME)/src/.libs/_frida.so $@
 	strip --strip-all $@
 
 check-python-32: check-python-i386 ##@bindings Test Python bindings for i386
 check-python-64: check-python-x86_64 ##@bindings Test Python bindings for x86-64
 
 check-python-%: frida-python
-	export PYTHONPATH="$(shell pwd)/build/frida-linux-$*-stripped/lib/${PYTHON_NAME}/site-packages" \
+	export PYTHONPATH="$(shell pwd)/build/frida-linux-$*-stripped/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
 		&& ${PYTHON} -m unittest tests.test_core tests.test_tracer
 
