@@ -1,5 +1,11 @@
-PYTHON ?= $(shell readlink -f $(shell which python))
+FRIDA := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+
+PYTHON ?= $(shell readlink -f $(shell which python) 2>/dev/null)
 PYTHON_NAME ?= $(shell basename $(PYTHON))
+
+NODE ?= $(shell readlink -f $(shell which node) 2>/dev/null)
+NODE_BIN_DIR := $(shell dirname $(NODE) 2>/dev/null)
+NPM ?= $(NODE_BIN_DIR)/npm
 
 all: help
 
@@ -156,7 +162,7 @@ build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 
 
 python-32: build/frida-linux-i386-stripped/lib/$(PYTHON_NAME)/site-packages/frida build/frida-linux-i386-stripped/lib/$(PYTHON_NAME)/site-packages/_frida.so ##@bindings Build Python bindings for i386
-python-64: build/frida-linux-x86_64-stripped/lib/$(PYTHON_NAME)/site-packages/frida build/frida-linux-x86_64-stripped/lib/$(PYTHON_NAME)/site-packages/_frida.so ##@bindings Build Python bindings for x86_64
+python-64: build/frida-linux-x86_64-stripped/lib/$(PYTHON_NAME)/site-packages/frida build/frida-linux-x86_64-stripped/lib/$(PYTHON_NAME)/site-packages/_frida.so ##@bindings Build Python bindings for x86-64
 
 frida-python/configure: build/frida-env-linux-x86_64.rc frida-python/configure.ac
 	. build/frida-env-linux-x86_64.rc && cd frida-python && ./autogen.sh
@@ -185,18 +191,42 @@ build/frida-%-stripped/lib/$(PYTHON_NAME)/site-packages/_frida.so: build/tmp-%/f
 check-python-32: check-python-i386 ##@bindings Test Python bindings for i386
 check-python-64: check-python-x86_64 ##@bindings Test Python bindings for x86-64
 
-check-python-%: frida-python
+check-python-%: build/frida-%-stripped/lib/$(PYTHON_NAME)/site-packages/frida build/frida-%-stripped/lib/$(PYTHON_NAME)/site-packages/_frida.so
 	export PYTHONPATH="$(shell pwd)/build/frida-linux-$*-stripped/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
 		&& ${PYTHON} -m unittest tests.test_core tests.test_tracer
+
+
+node-32: build/frida-linux-i386-stripped/lib/node_modules/frida ##@bindings Build Node.js bindings for i386
+node-64: build/frida-linux-x86_64-stripped/lib/node_modules/frida ##@bindings Build Node.js bindings for x86-64
+
+build/frida-%-stripped/lib/node_modules/frida: build/frida-%/lib/pkgconfig/frida-core-1.0.pc build/frida-node-submodule-stamp
+	export PATH=$(NODE_BIN_DIR):$$PATH FRIDA=$(FRIDA) \
+		&& cd frida-node \
+		&& rm -rf frida-0.0.0.tgz build lib/binding node_modules \
+		&& $(NPM) install --build-from-source \
+		&& $(NPM) pack \
+		&& rm -rf ../$@/ ../$@.tmp/ \
+		&& mkdir -p ../$@.tmp/ \
+		&& tar -C ../$@.tmp/ --strip-components 1 -x -f frida-0.0.0.tgz \
+		&& mv lib/binding ../$@.tmp/lib/ \
+		&& strip --strip-all ../$@.tmp/lib/binding/Release/node-*/frida_binding.node \
+		&& mv ../$@.tmp ../$@
+
+check-node-32: check-node-i386 ##@bindings Test Node.js bindings for i386
+check-node-64: check-node-x86_64 ##@bindings Test Node.js bindings for x86-64
+
+check-node-%: build/frida-%-stripped/lib/node_modules/frida
+	$(NODE) --expose-gc $</node_modules/mocha/bin/_mocha
 
 
 .PHONY: \
 	help \
 	distclean clean clean-submodules git-submodules git-submodule-stamps \
 	capstone-32 capstone-64 capstone-update-submodule-stamp \
-	gum-32 gum-64 check-gum-32 check-gum-64 frida-gum-update-submodule-stamp \
-	core-32 core-64 check-core-32 check-core-64 frida-core-update-submodule-stamp \
+	gum-32 gum-64 check-gum-32 check-gum-64 check-gum-linux-i386 check-gum-linux-x86_64 frida-gum-update-submodule-stamp \
+	core-32 core-64 check-core-32 check-core-64 check-core-linux-i386 check-core-linux-x86_64 frida-core-update-submodule-stamp \
 	android-server-i386 android-server-arm \
-	python-32 python-64 check-python-32 check-python-64 frida-python-update-submodule-stamp
+	python-32 python-64 check-python-32 check-python-64 check-python-i386 check-python-x86_64 frida-python-update-submodule-stamp \
+	node-32 node-64 check-node-32 check-node-64 check-node-i386 check-node-x86_64 frida-node-update-submodule-stamp
 .SECONDARY:
