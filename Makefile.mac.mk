@@ -42,6 +42,7 @@ clean-submodules:
 	cd frida-gum && git clean -xfd
 	cd frida-core && git clean -xfd
 	cd frida-python && git clean -xfd
+	cd frida-node && git clean -xfd
 
 check: check-gum check-core
 
