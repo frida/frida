@@ -80,6 +80,15 @@ else
   frida_env_name_prefix=
 fi
 
+frida_env_sdk=${FRIDA_ENV_SDK:default}
+case $frida_env_sdk in
+  default|none)
+    ;;
+  *)
+    echo "FRIDA_ENV_SDK must be either default or none." > /dev/stderr
+    exit 1
+esac
+
 pushd $releng_path/../ > /dev/null
 FRIDA_ROOT=`pwd`
 popd > /dev/null
@@ -110,8 +119,12 @@ case $host_platform in
     [ $host_arch == 'i386' ] && host_arch_flags="-m32" || host_arch_flags="-m64"
 
     CFLAGS="$host_arch_flags -ffunction-sections -fdata-sections"
-    CPPFLAGS="-I$FRIDA_SDKROOT/include"
-    LDFLAGS="$host_arch_flags -Wl,--no-undefined -Wl,--gc-sections -L$FRIDA_SDKROOT/lib"
+    LDFLAGS="$host_arch_flags -Wl,--no-undefined -Wl,--gc-sections"
+    if [ $frida_env_sdk != 'none' ]; then
+      CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
+      CPPFLAGS="-I$FRIDA_SDKROOT/include"
+      LDFLAGS="$LDFLAGS -L$FRIDA_SDKROOT/lib"
+    fi
     ;;
   mac)
     mac_minver="10.7"
@@ -206,38 +219,51 @@ case $host_platform in
     CFLAGS="$android_host_cflags \
 -ffunction-sections -funwind-tables -fno-exceptions -fno-rtti \
 -DANDROID \
--I$android_sysroot/usr/include \
--I$FRIDA_SDKROOT/include"
+-I$android_sysroot/usr/include"
     CXXFLAGS="\
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/libcxx/include \
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/gabi++/include \
 -I$ANDROID_NDK_ROOT/sources/android/support/include"
     CPPFLAGS="-DANDROID \
--I$android_sysroot/usr/include \
--I$FRIDA_SDKROOT/include"
+-I$android_sysroot/usr/include"
     LDFLAGS="$android_host_ldflags \
 -Wl,--no-undefined \
 -Wl,-z,noexecstack \
 -Wl,-z,relro \
 -Wl,-z,now \
 -L$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/libs/$android_host_abi \
--L$FRIDA_SDKROOT/lib \
 -lm"
+    if [ $frida_env_sdk != 'none' ]; then
+      CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
+      CPPFLAGS="$CPPFLAGS -I$FRIDA_SDKROOT/include"
+      LDFLAGS="$LDFLAGS -L$FRIDA_SDKROOT/lib"
+    fi
     ;;
 esac
 
 CFLAGS="-fPIC $CFLAGS"
 CXXFLAGS="$CFLAGS $CXXFLAGS"
 
-ACLOCAL_FLAGS="-I $FRIDA_PREFIX/share/aclocal -I $FRIDA_SDKROOT/share/aclocal -I $FRIDA_TOOLROOT/share/aclocal"
+ACLOCAL_FLAGS="-I $FRIDA_PREFIX/share/aclocal"
+if [ $frida_env_sdk != 'none' ]; then
+  ACLOCAL_FLAGS="$ACLOCAL_FLAGS -I $FRIDA_SDKROOT/share/aclocal"
+fi
+ACLOCAL_FLAGS="$ACLOCAL_FLAGS -I $FRIDA_TOOLROOT/share/aclocal"
 ACLOCAL="aclocal $ACLOCAL_FLAGS"
 CONFIG_SITE="$FRIDA_BUILD/${frida_env_name_prefix}config-${host_platform_arch}.site"
 
-PKG_CONFIG="$FRIDA_TOOLROOT/bin/pkg-config --define-variable=frida_sdk_prefix=$FRIDA_SDKROOT --static"
-PKG_CONFIG_PATH="$FRIDA_PREFIX_LIB/pkgconfig:$FRIDA_SDKROOT/lib/pkgconfig"
+PKG_CONFIG="$FRIDA_TOOLROOT/bin/pkg-config --static"
+PKG_CONFIG_PATH="$FRIDA_PREFIX_LIB/pkgconfig"
+if [ $frida_env_sdk != 'none' ]; then
+  PKG_CONFIG="$PKG_CONFIG --define-variable=frida_sdk_prefix=$FRIDA_SDKROOT"
+  PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$FRIDA_SDKROOT/lib/pkgconfig"
+fi
 
 VALAC="$FRIDA_TOOLROOT/bin/valac-0.26 --vapidir=\"$FRIDA_TOOLROOT/share/vala-0.26/vapi\""
-VALAC="$VALAC --vapidir=\"$FRIDA_SDKROOT/share/vala/vapi\" --vapidir=\"$FRIDA_PREFIX/share/vala/vapi\""
+if [ $frida_env_sdk != 'none' ]; then
+  VALAC="$VALAC --vapidir=\"$FRIDA_SDKROOT/share/vala/vapi\""
+fi
+VALAC="$VALAC --vapidir=\"$FRIDA_PREFIX/share/vala/vapi\""
 
 [ ! -d "$FRIDA_PREFIX/share/aclocal}" ] && mkdir -p "$FRIDA_PREFIX/share/aclocal"
 [ ! -d "$FRIDA_PREFIX/lib}" ] && mkdir -p "$FRIDA_PREFIX/lib"
@@ -245,14 +271,25 @@ VALAC="$VALAC --vapidir=\"$FRIDA_SDKROOT/share/vala/vapi\" --vapidir=\"$FRIDA_PR
 if [ ! -f "$FRIDA_TOOLROOT/.stamp" ]; then
   rm -rf "$FRIDA_TOOLROOT"
   mkdir -p "$FRIDA_TOOLROOT"
+
   echo "Downloading and deploying toolchain..."
   $download_command "https://build.frida.re/toolchain-${toolchain_version}-${build_platform}-${build_arch}.tar.bz2" | tar -C "$FRIDA_TOOLROOT" -xj $tar_stdin || exit 1
+
+  for template in $(find $FRIDA_TOOLROOT -name "*.frida.in"); do
+    target=$(echo $template | sed 's,\.frida\.in$,,')
+    cp -a "$template" "$target"
+    sed \
+      -e "s,@FRIDA_TOOLROOT@,$FRIDA_TOOLROOT,g" \
+      "$template" > "$target"
+  done
+
   touch "$FRIDA_TOOLROOT/.stamp"
 fi
 
-if [ ! -f "$FRIDA_SDKROOT/.stamp" ]; then
+if [ $frida_env_sdk != 'none' -a ! -f "$FRIDA_SDKROOT/.stamp" ]; then
   rm -rf "$FRIDA_SDKROOT"
   mkdir -p "$FRIDA_SDKROOT"
+
   local_sdk=$FRIDA_BUILD/sdk-${host_platform}-${host_arch}.tar.bz2
   if [ -f $local_sdk ]; then
     echo "Deploying local SDK $(basename $local_sdk)..."
@@ -272,27 +309,27 @@ if [ ! -f "$FRIDA_SDKROOT/.stamp" ]; then
       exit 1
     fi
   fi
+
+  for template in $(find $FRIDA_SDKROOT -name "*.frida.in"); do
+    target=$(echo $template | sed 's,\.frida\.in$,,')
+    cp -a "$template" "$target"
+    sed \
+      -e "s,@FRIDA_SDKROOT@,$FRIDA_SDKROOT,g" \
+      "$template" > "$target"
+  done
+
+  # TODO: fix this in libffi
+  for name in libffi.pc gobject-2.0.pc; do
+    pc=$FRIDA_SDKROOT/lib/pkgconfig/$name
+    if grep -q '$(libdir)' $pc; then
+      sed -e "s,\$(libdir),\${libdir},g" $pc > $pc.tmp
+      cat $pc.tmp > $pc
+      rm $pc.tmp
+    fi
+  done
+
   touch "$FRIDA_SDKROOT/.stamp"
 fi
-
-for template in $(find $FRIDA_TOOLROOT $FRIDA_SDKROOT -name "*.frida.in"); do
-  target=$(echo $template | sed 's,\.frida\.in$,,')
-  cp -a "$template" "$target"
-  sed \
-    -e "s,@FRIDA_TOOLROOT@,$FRIDA_TOOLROOT,g" \
-    -e "s,@FRIDA_SDKROOT@,$FRIDA_SDKROOT,g" \
-    "$template" > "$target"
-done
-
-# TODO: fix this in libffi
-for name in libffi.pc gobject-2.0.pc; do
-  pc=$FRIDA_SDKROOT/lib/pkgconfig/$name
-  if grep -q '$(libdir)' $pc; then
-    sed -e "s,\$(libdir),\${libdir},g" $pc > $pc.tmp
-    cat $pc.tmp > $pc
-    rm $pc.tmp
-  fi
-done
 
 env_rc=build/${FRIDA_ENV_NAME:-frida}-env-${host_platform_arch}.rc
 

@@ -71,7 +71,7 @@ build/fs-tmp-%/.package-stamp: \
 			share/glib-2.0/schemas \
 			share/vala \
 			| tar -C $(abspath $(@D)/package) -xf -
-	releng/relocatify.sh $(@D)/package $(abspath build/fs-$*) $(abspath build/fs-sdk-$*)
+	releng/relocatify.sh $(@D)/package $(abspath build/fs-$*)
 ifeq ($(host_platform), ios)
 	cp /System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/mach_vm.h $(@D)/package/include/frida_mach_vm.h
 endif
@@ -274,14 +274,8 @@ build/fs-%/lib/pkgconfig/v8.pc: build/fs-tmp-%/v8/out/$(v8_target)/libv8_base.$(
 	mv $@.tmp $@
 
 
-build/.fs-sdk-$(host_platform_arch)-stamp:
-	$(RM) -r build/fs-sdk-$(host_platform_arch)
-	mkdir -p build/fs-sdk-$(host_platform_arch)/share/aclocal
-	touch build/fs-sdk-$(host_platform_arch)/.stamp
-	touch $@
-
-build/fs-env-%.rc: build/.fs-sdk-$(host_platform_arch)-stamp
-	FRIDA_ENV_NAME=fs FRIDA_HOST=$* ./releng/setup-env.sh
+build/fs-env-%.rc:
+	FRIDA_ENV_NAME=fs FRIDA_ENV_SDK=none FRIDA_HOST=$* ./releng/setup-env.sh
 
 
 .PHONY: all

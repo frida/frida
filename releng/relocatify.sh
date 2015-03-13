@@ -2,8 +2,7 @@
 
 package=$1
 prefix=$2
-sdk=$3
-[ -z "$package" -o -z "$prefix" -o -z "$sdk" ] && exit 1
+[ -z "$package" -o -z "$prefix" ] && exit 1
 
 build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,mac,')
 
@@ -27,7 +26,6 @@ for file in $(find "$package" -type f); do
       mv "$file" "$newname"
       sed_inplace \
         -e "s,$prefix,@FRIDA_SDKROOT@,g" \
-        -e "s,-L$sdk/lib ,,g" \
         $newname
     elif echo "$file" | grep -Eq "\\.pc$"; then
       sed_inplace \
