@@ -67,8 +67,8 @@ clean-submodules:
 	cd frida-node && git clean -xfd
 
 
-capstone-32: build/frida-linux-i386/lib/pkgconfig/capstone.pc
-capstone-64: build/frida-linux-x86_64/lib/pkgconfig/capstone.pc
+capstone-32: build/frida-linux-i386/lib/pkgconfig/capstone.pc build/capstone-submodule-stamp
+capstone-64: build/frida-linux-x86_64/lib/pkgconfig/capstone.pc build/capstone-submodule-stamp
 
 build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-submodule-stamp
 	. build/frida-env-$*.rc \
@@ -98,9 +98,9 @@ build/frida-%/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-%/frida-gum/Makefile bui
 	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-gum install
 	@touch -c $@
 
-check-gum-32: build/frida-linux-i386/lib/pkgconfig/frida-gum-1.0.pc ##@gum Run tests for i386
+check-gum-32: build/frida-linux-i386/lib/pkgconfig/frida-gum-1.0.pc build/frida-gum-submodule-stamp ##@gum Run tests for i386
 	build/tmp-linux-i386/frida-gum/tests/gum-tests
-check-gum-64: build/frida-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Run tests for x86-64
+check-gum-64: build/frida-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc build/frida-gum-submodule-stamp ##@gum Run tests for x86-64
 	build/tmp-linux-x86_64/frida-gum/tests/gum-tests
 
 
@@ -146,9 +146,9 @@ build/tmp-%/frida-core/tests/frida-tests: build/frida-%/lib/pkgconfig/frida-core
 	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/tests
 	@touch -c $@
 
-check-core-32: build/tmp-linux-i386/frida-core/tests/frida-tests ##@core Run tests for i386
+check-core-32: build/tmp-linux-i386/frida-core/tests/frida-tests build/frida-core-submodule-stamp ##@core Run tests for i386
 	$<
-check-core-64: build/tmp-linux-x86_64/frida-core/tests/frida-tests ##@core Run tests for x86-64
+check-core-64: build/tmp-linux-x86_64/frida-core/tests/frida-tests build/frida-core-submodule-stamp ##@core Run tests for x86-64
 	$<
 
 
@@ -171,8 +171,8 @@ build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	@touch -c $@
 
 
-python-32: build/frida-linux-i386-stripped/lib/$(PYTHON_NAME)/site-packages/frida build/frida-linux-i386-stripped/lib/$(PYTHON_NAME)/site-packages/_frida.so ##@bindings Build Python bindings for i386
-python-64: build/frida-linux-x86_64-stripped/lib/$(PYTHON_NAME)/site-packages/frida build/frida-linux-x86_64-stripped/lib/$(PYTHON_NAME)/site-packages/_frida.so ##@bindings Build Python bindings for x86-64
+python-32: build/frida-linux-i386-stripped/lib/$(PYTHON_NAME)/site-packages/frida build/frida-linux-i386-stripped/lib/$(PYTHON_NAME)/site-packages/_frida.so build/frida-python-submodule-stamp ##@bindings Build Python bindings for i386
+python-64: build/frida-linux-x86_64-stripped/lib/$(PYTHON_NAME)/site-packages/frida build/frida-linux-x86_64-stripped/lib/$(PYTHON_NAME)/site-packages/_frida.so build/frida-python-submodule-stamp ##@bindings Build Python bindings for x86-64
 
 frida-python/configure: build/frida-env-linux-x86_64.rc frida-python/configure.ac
 	. build/frida-env-linux-x86_64.rc && cd frida-python && ./autogen.sh
@@ -208,8 +208,8 @@ check-python-64: build/frida-linux-x86_64-stripped/lib/$(PYTHON_NAME)/site-packa
 		&& ${PYTHON} -m unittest tests.test_core tests.test_tracer
 
 
-node-32: build/frida-linux-i386-stripped/lib/node_modules/frida ##@bindings Build Node.js bindings for i386
-node-64: build/frida-linux-x86_64-stripped/lib/node_modules/frida ##@bindings Build Node.js bindings for x86-64
+node-32: build/frida-linux-i386-stripped/lib/node_modules/frida build/frida-node-submodule-stamp ##@bindings Build Node.js bindings for i386
+node-64: build/frida-linux-x86_64-stripped/lib/node_modules/frida build/frida-node-submodule-stamp ##@bindings Build Node.js bindings for x86-64
 
 build/frida-%-stripped/lib/node_modules/frida: build/frida-%/lib/pkgconfig/frida-core-1.0.pc build/frida-node-submodule-stamp
 	export PATH=$(NODE_BIN_DIR):$$PATH FRIDA=$(FRIDA) \
