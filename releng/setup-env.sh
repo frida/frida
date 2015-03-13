@@ -111,7 +111,7 @@ case $host_platform in
 
     CFLAGS="$host_arch_flags -ffunction-sections -fdata-sections"
     CPPFLAGS="-I$FRIDA_SDKROOT/include"
-    LDFLAGS="$host_arch_flags -Wl,--gc-sections -L$FRIDA_SDKROOT/lib"
+    LDFLAGS="$host_arch_flags -Wl,--no-undefined -Wl,--gc-sections -L$FRIDA_SDKROOT/lib"
     ;;
   mac)
     mac_minver="10.7"
