@@ -80,15 +80,6 @@ else
   frida_env_name_prefix=
 fi
 
-frida_env_sdk=${FRIDA_ENV_SDK:default}
-case $frida_env_sdk in
-  default|none)
-    ;;
-  *)
-    echo "FRIDA_ENV_SDK must be either default or none." > /dev/stderr
-    exit 1
-esac
-
 pushd $releng_path/../ > /dev/null
 FRIDA_ROOT=`pwd`
 popd > /dev/null
@@ -120,7 +111,7 @@ case $host_platform in
 
     CFLAGS="$host_arch_flags -ffunction-sections -fdata-sections"
     LDFLAGS="$host_arch_flags -Wl,--no-undefined -Wl,--gc-sections"
-    if [ $frida_env_sdk != 'none' ]; then
+    if [ "$FRIDA_ENV_SDK" != 'none' ]; then
       CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
       CPPFLAGS="-I$FRIDA_SDKROOT/include"
       LDFLAGS="$LDFLAGS -L$FRIDA_SDKROOT/lib"
@@ -233,7 +224,7 @@ case $host_platform in
 -Wl,-z,now \
 -L$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/libs/$android_host_abi \
 -lm"
-    if [ $frida_env_sdk != 'none' ]; then
+    if [ "$FRIDA_ENV_SDK" != 'none' ]; then
       CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
       CPPFLAGS="$CPPFLAGS -I$FRIDA_SDKROOT/include"
       LDFLAGS="$LDFLAGS -L$FRIDA_SDKROOT/lib"
@@ -245,7 +236,7 @@ CFLAGS="-fPIC $CFLAGS"
 CXXFLAGS="$CFLAGS $CXXFLAGS"
 
 ACLOCAL_FLAGS="-I $FRIDA_PREFIX/share/aclocal"
-if [ $frida_env_sdk != 'none' ]; then
+if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   ACLOCAL_FLAGS="$ACLOCAL_FLAGS -I $FRIDA_SDKROOT/share/aclocal"
 fi
 ACLOCAL_FLAGS="$ACLOCAL_FLAGS -I $FRIDA_TOOLROOT/share/aclocal"
@@ -254,13 +245,13 @@ CONFIG_SITE="$FRIDA_BUILD/${frida_env_name_prefix}config-${host_platform_arch}.s
 
 PKG_CONFIG="$FRIDA_TOOLROOT/bin/pkg-config --static"
 PKG_CONFIG_PATH="$FRIDA_PREFIX_LIB/pkgconfig"
-if [ $frida_env_sdk != 'none' ]; then
+if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   PKG_CONFIG="$PKG_CONFIG --define-variable=frida_sdk_prefix=$FRIDA_SDKROOT"
   PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$FRIDA_SDKROOT/lib/pkgconfig"
 fi
 
 VALAC="$FRIDA_TOOLROOT/bin/valac-0.26 --vapidir=\"$FRIDA_TOOLROOT/share/vala-0.26/vapi\""
-if [ $frida_env_sdk != 'none' ]; then
+if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   VALAC="$VALAC --vapidir=\"$FRIDA_SDKROOT/share/vala/vapi\""
 fi
 VALAC="$VALAC --vapidir=\"$FRIDA_PREFIX/share/vala/vapi\""
@@ -286,7 +277,7 @@ if [ ! -f "$FRIDA_TOOLROOT/.stamp" ]; then
   touch "$FRIDA_TOOLROOT/.stamp"
 fi
 
-if [ $frida_env_sdk != 'none' -a ! -f "$FRIDA_SDKROOT/.stamp" ]; then
+if [ "$FRIDA_ENV_SDK" != 'none' -a ! -f "$FRIDA_SDKROOT/.stamp" ]; then
   rm -rf "$FRIDA_SDKROOT"
   mkdir -p "$FRIDA_SDKROOT"
 
