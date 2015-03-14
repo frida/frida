@@ -198,7 +198,7 @@ build/frida-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-mac-universal/frida-cor
 	source build/frida-env-$*.rc \
 		&& cd build/tmp-$*/frida-core \
 		&& make -C src install \
-			AGENT=../../../../build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib \
+			AGENT=../../../../build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib!frida-agent.dylib \
 			HELPER=../../../../build/tmp-mac-x86_64-stripped/frida-core/src/frida-helper \
 		&& make install-data-am
 	@touch -c $@
@@ -209,7 +209,7 @@ build/frida-ios-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-universal/fri
 		&& cd build/tmp-ios-arm/frida-core \
 		&& make -C src install \
 			RESOURCE_COMPILER=../../../../build/tmp-mac-x86_64/frida-core/tools/resource-compiler \
-			AGENT=../../../../build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib \
+			AGENT=../../../../build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib!frida-agent.dylib \
 			HELPER=../../../../build/tmp-ios-universal/frida-core/src/frida-helper \
 		&& make install-data-am
 	@touch -c $@
@@ -220,7 +220,7 @@ build/frida-ios-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-universal/f
 		&& cd build/tmp-ios-arm64/frida-core \
 		&& make -C src install \
 			RESOURCE_COMPILER=../../../../build/tmp-mac-x86_64/frida-core/tools/resource-compiler \
-			AGENT=../../../../build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib \
+			AGENT=../../../../build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib!frida-agent.dylib \
 			HELPER=../../../../build/tmp-ios-arm64-stripped/frida-core/src/frida-helper \
 		&& make install-data-am
 	@touch -c $@
@@ -231,7 +231,7 @@ build/frida-android-i386/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-i386
 		&& cd build/tmp-android-i386/frida-core \
 		&& make -C src install \
 			RESOURCE_COMPILER="../../../../build/tmp-mac-x86_64/frida-core/tools/resource-compiler --toolchain=gnu" \
-			AGENT=../../../../build/tmp-android-i386-stripped/frida-core/lib/agent/.libs/libfrida-agent.so \
+			AGENT32=../../../../build/tmp-android-i386-stripped/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent-32.so \
 		&& make install-data-am
 	@touch -c $@
 
@@ -241,7 +241,7 @@ build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm-s
 		&& cd build/tmp-android-arm/frida-core \
 		&& make -C src install \
 			RESOURCE_COMPILER="../../../../build/tmp-mac-x86_64/frida-core/tools/resource-compiler --toolchain=gnu" \
-			AGENT=../../../../build/tmp-android-arm-stripped/frida-core/lib/agent/.libs/libfrida-agent.so \
+			AGENT32=../../../../build/tmp-android-arm-stripped/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent-32.so \
 		&& make install-data-am
 	@touch -c $@
 
