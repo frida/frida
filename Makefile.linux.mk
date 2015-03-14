@@ -7,6 +7,8 @@ NODE ?= $(shell readlink -f $(shell which node) 2>/dev/null)
 NODE_BIN_DIR := $(shell dirname $(NODE) 2>/dev/null)
 NPM ?= $(NODE_BIN_DIR)/npm
 
+build_arch := $(shell uname -m)
+
 all: help
 
 HELP_FUN = \
@@ -86,8 +88,8 @@ build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-sub
 gum-32: build/frida-linux-i386/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for i386
 gum-64: build/frida-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for x86-64
 
-frida-gum/configure: build/frida-env-linux-x86_64.rc frida-gum/configure.ac
-	. build/frida-env-linux-x86_64.rc && cd frida-gum && ./autogen.sh
+frida-gum/configure: build/frida-env-linux-$(build_arch).rc frida-gum/configure.ac
+	. build/frida-env-linux-$(build_arch).rc && cd frida-gum && ./autogen.sh
 
 build/tmp-%/frida-gum/Makefile: build/frida-env-%.rc frida-gum/configure build/frida-%/lib/pkgconfig/capstone.pc
 	mkdir -p $(@D)
@@ -107,8 +109,8 @@ check-gum-64: build/frida-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc build/frid
 core-32: build/frida-linux-i386/lib/pkgconfig/frida-core-1.0.pc ##@core Build for i386
 core-64: build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for x86-64
 
-frida-core/configure: build/frida-env-linux-x86_64.rc frida-core/configure.ac
-	. build/frida-env-linux-x86_64.rc && cd frida-core && ./autogen.sh
+frida-core/configure: build/frida-env-linux-$(build_arch).rc frida-core/configure.ac
+	. build/frida-env-linux-$(build_arch).rc && cd frida-core && ./autogen.sh
 
 build/tmp-%/frida-core/Makefile: build/frida-env-%.rc frida-core/configure build/frida-%/lib/pkgconfig/frida-gum-1.0.pc
 	mkdir -p $(@D)
@@ -123,19 +125,31 @@ build/tmp-%/frida-core/lib/agent/libfrida-agent.la: build/tmp-%/frida-core/Makef
 	@$(call ensure_relink,frida-core/lib/agent/agent.c,build/tmp-$*/frida-core/lib/agent/libfrida_agent_la-agent.lo)
 	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/lib
 	@touch -c $@
-
 build/tmp-%-stripped/frida-core/lib/agent/.libs/libfrida-agent.so: build/tmp-%/frida-core/lib/agent/libfrida-agent.la
 	mkdir -p $(@D)
 	cp build/tmp-$*/frida-core/lib/agent/.libs/libfrida-agent.so $@
 	. build/frida-env-$*.rc && $$STRIP --strip-all $@
 
-build/frida-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-%-stripped/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp-linux-x86_64/frida-core/tools/resource-compiler
+build/tmp-%/frida-core/src/frida-helper: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
+	@$(call ensure_relink,frida-core/src/darwin/frida-helper-glue.c,build/tmp-$*/frida-core/src/frida-helper-glue.lo)
+	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/src libfrida-helper-types.la frida-helper
+	@touch -c $@
+build/tmp-%-stripped/frida-core/src/frida-helper: build/tmp-%/frida-core/src/frida-helper
+	mkdir -p $(@D)
+	cp $< $@.tmp
+	. build/frida-env-$*.rc && $$STRIP --strip-all $@.tmp
+	mv $@.tmp $@
+
+build/frida-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-linux-i386-stripped/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp-linux-x86_64-stripped/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp-linux-i386-stripped/frida-core/src/frida-helper build/tmp-linux-x86_64-stripped/frida-core/src/frida-helper build/tmp-linux-$(build_arch)/frida-core/tools/resource-compiler
 	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-$*/frida-core/src/libfrida_core_la-frida.lo)
 	. build/frida-env-$*.rc \
 		&& cd build/tmp-$*/frida-core \
 		&& make -C src install \
-		 	RESOURCE_COMPILER="../../../../build/tmp-linux-x86_64/frida-core/tools/resource-compiler --toolchain=gnu" \
-			AGENT=../../../../build/tmp-$*-stripped/frida-core/lib/agent/.libs/libfrida-agent.so \
+		 	RESOURCE_COMPILER="../../../../build/tmp-linux-$(build_arch)/frida-core/tools/resource-compiler --toolchain=gnu" \
+			AGENT32=../../../../build/tmp-linux-i386-stripped/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent-32.so \
+			AGENT64=../../../../build/tmp-linux-x86_64-stripped/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent-64.so \
+			HELPER32=../../../../build/tmp-linux-i386-stripped/frida-core/src/frida-helper!frida-helper-32 \
+			HELPER64=../../../../build/tmp-linux-x86_64-stripped/frida-core/src/frida-helper!frida-helper-64 \
 		&& make install-data-am
 	@touch -c $@
 
@@ -174,8 +188,8 @@ build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 python-32: build/frida-linux-i386-stripped/lib/$(PYTHON_NAME)/site-packages/frida build/frida-linux-i386-stripped/lib/$(PYTHON_NAME)/site-packages/_frida.so build/frida-python-submodule-stamp ##@bindings Build Python bindings for i386
 python-64: build/frida-linux-x86_64-stripped/lib/$(PYTHON_NAME)/site-packages/frida build/frida-linux-x86_64-stripped/lib/$(PYTHON_NAME)/site-packages/_frida.so build/frida-python-submodule-stamp ##@bindings Build Python bindings for x86-64
 
-frida-python/configure: build/frida-env-linux-x86_64.rc frida-python/configure.ac
-	. build/frida-env-linux-x86_64.rc && cd frida-python && ./autogen.sh
+frida-python/configure: build/frida-env-linux-$(build_arch).rc frida-python/configure.ac
+	. build/frida-env-linux-$(build_arch).rc && cd frida-python && ./autogen.sh
 
 build/tmp-%/frida-$(PYTHON_NAME)/Makefile: build/frida-env-%.rc frida-python/configure build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	mkdir -p $(@D)
