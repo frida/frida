@@ -18,22 +18,25 @@ HELP_FUN = \
 			push @{$$help{$$section}}, [$$1, $$3]; \
 		} \
 	} \
+	$$target_color = "\033[32m"; \
+	$$variable_color = "\033[36m"; \
+	$$reset_color = "\033[0m"; \
 	print "\n"; \
-	print "Usage: make -f Makefile.mac.mk TARGET [VARIABLE=value]\n\n"; \
-	print "Where TARGET specifies one or more of:\n"; \
+	print "\033[31mUsage:$${reset_color} make -f Makefile.mac.mk $${target_color}TARGET$${reset_color} [$${variable_color}VARIABLE$${reset_color}=value]\n\n"; \
+	print "Where $${target_color}TARGET$${reset_color} specifies one or more of:\n"; \
 	print "\n"; \
 	for (@sections) { \
 		print "  /* $$_ */\n"; $$sep = " " x (20 - length $$_->[0]); \
-		printf("  %-20s    %s\n", $$_->[0], $$_->[1]) for @{$$help{$$_}}; \
+		printf("  $${target_color}%-20s$${reset_color}    %s\n", $$_->[0], $$_->[1]) for @{$$help{$$_}}; \
 		print "\n"; \
 	} \
-	print "And optionally also VARIABLE values:\n"; \
-	print "  PYTHON                  Absolute path of Python interpreter including version suffix\n"; \
-	print "  NODE                    Absolute path of Node.js binary\n"; \
+	print "And optionally also $${variable_color}VARIABLE$${reset_color} values:\n"; \
+	print "  $${variable_color}PYTHON$${reset_color}                  Absolute path of Python interpreter including version suffix\n"; \
+	print "  $${variable_color}NODE$${reset_color}                    Absolute path of Node.js binary\n"; \
 	print "\n"; \
 	print "For example:\n"; \
-	print "  \$$ make -f Makefile.mac.mk python-mac PYTHON=/usr/local/bin/python3.4\n"; \
-	print "  \$$ make -f Makefile.mac.mk node-mac NODE=/usr/local/bin/node\n"; \
+	print "  \$$ make -f Makefile.mac.mk $${target_color}python-mac $${variable_color}PYTHON$${reset_color}=/usr/local/bin/python3.4\n"; \
+	print "  \$$ make -f Makefile.mac.mk $${target_color}node-mac $${variable_color}NODE$${reset_color}=/usr/local/bin/node\n"; \
 	print "\n";
 
 help:
