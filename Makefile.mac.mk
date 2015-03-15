@@ -359,7 +359,7 @@ build/frida-%-stripped/lib/node_modules/frida: build/frida-%/lib/pkgconfig/frida
 		&& tar -C ../$@.tmp/ --strip-components 1 -x -f frida-0.0.0.tgz \
 		&& rm frida-0.0.0.tgz \
 		&& mv lib/binding ../$@.tmp/lib/ \
-		&& strip --strip-all ../$@.tmp/lib/binding/Release/node-*/frida_binding.node \
+		&& strip -Sx ../$@.tmp/lib/binding/Release/node-*/frida_binding.node \
 		&& mv ../$@.tmp ../$@
 
 check-node-mac: build/frida-mac-$(build_arch)-stripped/lib/node_modules/frida ##@bindings Test Node.js bindings for Mac
