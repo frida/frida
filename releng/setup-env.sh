@@ -131,6 +131,7 @@ case $host_platform in
     LD="$(xcrun --sdk $mac_sdk -f ld)"
 
     CFLAGS="-isysroot $mac_sdk_path -mmacosx-version-min=$mac_minver -arch $host_arch"
+    CXXFLAGS="-stdlib=libc++"
     LDFLAGS="-isysroot $mac_sdk_path -Wl,-macosx_version_min,$mac_minver -arch $host_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
     ;;
   ios)
@@ -149,6 +150,7 @@ case $host_platform in
     [ $host_arch == 'arm' ] && ios_arch=armv7 || ios_arch=arm64
 
     CFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch"
+    CXXFLAGS="-stdlib=libc++"
     LDFLAGS="-isysroot $ios_sdk_path -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
     ;;
   android)
@@ -212,6 +214,7 @@ case $host_platform in
 -DANDROID \
 -I$android_sysroot/usr/include"
     CXXFLAGS="\
+-stdlib=libc++ \
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/libcxx/include \
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/gabi++/include \
 -I$ANDROID_NDK_ROOT/sources/android/support/include"
