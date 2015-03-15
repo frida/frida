@@ -10,13 +10,19 @@ NPM ?= $(NODE_BIN_DIR)/npm
 build_arch := $(shell uname -m)
 
 HELP_FUN = \
-	%help; \
-	while(<>) { push @{$$help{$$2 // 'options'}}, [$$1, $$3] if /^([\w-]+)\s*:.*\#\#(?:@([\w-]+))?\s(.*)$$/ }; \
+	my (%help, @sections); \
+	while(<>) { \
+		if (/^([\w-]+)\s*:.*\#\#(?:@([\w-]+))?\s(.*)$$/) { \
+			$$section = $$2 // 'options'; \
+			push @sections, $$section unless exists $$help{$$section}; \
+			push @{$$help{$$section}}, [$$1, $$3]; \
+		} \
+	} \
 	print "\n"; \
 	print "Usage: make -f Makefile.mac.mk TARGET [VARIABLE=value]\n\n"; \
 	print "Where TARGET specifies one or more of:\n"; \
 	print "\n"; \
-	for (keys %help) { \
+	for (@sections) { \
 		print "  /* $$_ */\n"; $$sep = " " x (20 - length $$_->[0]); \
 		printf("  %-20s    %s\n", $$_->[0], $$_->[1]) for @{$$help{$$_}}; \
 		print "\n"; \
