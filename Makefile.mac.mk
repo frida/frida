@@ -335,7 +335,7 @@ build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so: build/tmp-
 	lipo $(@D)/_frida-32.so $(@D)/_frida-64.so -create -output $@
 	rm $(@D)/_frida-32.so $(@D)/_frida-64.so
 
-check-python-mac: python-mac
+check-python-mac: python-mac ##@bindings Test Python bindings for Mac
 	export PYTHONPATH="$(shell pwd)/build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
 		&& $(PYTHON) -m unittest discover
