@@ -339,7 +339,11 @@ build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so: build/tmp-
 check-python-mac: python-mac ##@bindings Test Python bindings for Mac
 	export PYTHONPATH="$(shell pwd)/build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
-		&& $(PYTHON) -m unittest discover
+		&& if $(PYTHON) -c "import sys; v = sys.version_info; can_execute_modules = v[0] > 2 or (v[0] == 2 and v[1] >= 7); sys.exit(0 if can_execute_modules else 1)"; then \
+			$(PYTHON) -m unittest discover; \
+		else \
+			unit2 discover; \
+		fi
 
 
 node-mac: build/frida-mac-$(build_arch)-stripped/lib/node_modules/frida build/frida-node-submodule-stamp ##@bindings Build Node.js bindings for Mac
