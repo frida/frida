@@ -218,6 +218,7 @@ build/frida-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-mac-universal/frida-cor
 	. build/frida-env-$*.rc \
 		&& cd build/tmp-$*/frida-core \
 		&& make -C src install \
+			RESOURCE_COMPILER=../../../../build/tmp-mac-$(build_arch)/frida-core/tools/resource-compiler \
 			AGENT=../../../../build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib!frida-agent.dylib \
 			HELPER=../../../../build/tmp-mac-x86_64-stripped/frida-core/src/frida-helper \
 		&& make install-data-am
