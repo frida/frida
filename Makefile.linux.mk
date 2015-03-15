@@ -238,6 +238,7 @@ build/frida-%-stripped/lib/node_modules/frida: build/frida-%/lib/pkgconfig/frida
 		&& tar -C ../$@.tmp/ --strip-components 1 -x -f frida-0.0.0.tgz \
 		&& rm frida-0.0.0.tgz \
 		&& mv lib/binding ../$@.tmp/lib/ \
+		&& mv node_modules ../$@.tmp/ \
 		&& strip --strip-all ../$@.tmp/lib/binding/Release/node-*/frida_binding.node \
 		&& mv ../$@.tmp ../$@
 
