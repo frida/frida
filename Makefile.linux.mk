@@ -3,7 +3,7 @@ FRIDA := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 PYTHON ?= $(shell readlink -f $(shell which python) 2>/dev/null)
 PYTHON_NAME ?= $(shell basename $(PYTHON))
 
-NODE ?= $(shell readlink -f $(shell which node) 2>/dev/null)
+NODE ?= $(shell which node)
 NODE_BIN_DIR := $(shell dirname $(NODE) 2>/dev/null)
 NPM ?= $(NODE_BIN_DIR)/npm
 
