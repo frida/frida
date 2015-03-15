@@ -9,8 +9,6 @@ NPM ?= $(NODE_BIN_DIR)/npm
 
 build_arch := $(shell uname -m)
 
-all: help
-
 HELP_FUN = \
 	%help; \
 	while(<>) { push @{$$help{$$2 // 'options'}}, [$$1, $$3] if /^([\w-]+)\s*:.*\#\#(?:@([\w-]+))?\s(.*)$$/ }; \
@@ -34,6 +32,7 @@ HELP_FUN = \
 
 help:
 	@LC_ALL=C perl -e '$(HELP_FUN)' $(MAKEFILE_LIST)
+
 
 include releng/common.mk
 
@@ -69,9 +68,6 @@ clean-submodules:
 	cd frida-node && git clean -xfd
 
 
-capstone-32: build/frida-linux-i386/lib/pkgconfig/capstone.pc build/capstone-submodule-stamp
-capstone-64: build/frida-linux-x86_64/lib/pkgconfig/capstone.pc build/capstone-submodule-stamp
-
 build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-submodule-stamp
 	. build/frida-env-$*.rc \
 		&& export PACKAGE_TARNAME=capstone \
@@ -87,6 +83,7 @@ build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-sub
 
 gum-32: build/frida-linux-i386/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for i386
 gum-64: build/frida-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for x86-64
+gum-android: build/frida-android-i386/lib/pkgconfig/frida-gum-1.0.pc build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android
 
 frida-gum/configure: build/frida-env-linux-$(build_arch).rc frida-gum/configure.ac
 	. build/frida-env-linux-$(build_arch).rc && cd frida-gum && ./autogen.sh
@@ -108,6 +105,7 @@ check-gum-64: build/frida-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc build/frid
 
 core-32: build/frida-linux-i386/lib/pkgconfig/frida-core-1.0.pc ##@core Build for i386
 core-64: build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for x86-64
+core-android: build/frida-android-i386/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android
 
 frida-core/configure: build/frida-env-linux-$(build_arch).rc frida-core/configure.ac
 	. build/frida-env-linux-$(build_arch).rc && cd frida-core && ./autogen.sh
@@ -166,18 +164,14 @@ check-core-64: build/tmp-linux-x86_64/frida-core/tests/frida-tests build/frida-c
 	$<
 
 
-android-server-i386: build/frida-android-i386-stripped/bin/frida-server ##@android Build frida-server for Android/i386
-android-server-arm: build/frida-android-arm-stripped/bin/frida-server ##@android Build frida-server for Android/ARM
+server-32: build/frida-linux-i386-stripped/bin/frida-server ##@server Build for i386
+server-64: build/frida-linux-x86_64-stripped/bin/frida-server ##@server Build for x86-64
+server-android: build/frida-android-i386-stripped/bin/frida-server build/frida-android-arm-stripped/bin/frida-server ##@server Build for Android
 
-build/frida-android-i386-stripped/bin/frida-server: build/frida-android-i386/bin/frida-server
+build/frida-%-stripped/bin/frida-server: build/frida-%/bin/frida-server
 	mkdir -p $(@D)
 	cp $< $@.tmp
-	. build/frida-env-android-i386.rc && $$STRIP --strip-all $@.tmp
-	mv $@.tmp $@
-build/frida-android-arm-stripped/bin/frida-server: build/frida-android-arm/bin/frida-server
-	mkdir -p $(@D)
-	cp $< $@.tmp
-	. build/frida-env-android-arm.rc && $$STRIP --strip-all $@.tmp
+	. build/frida-env-$*.rc && $$STRIP --strip-all $@.tmp
 	mv $@.tmp $@
 build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	@$(call ensure_relink,frida-core/server/server.c,build/tmp-$*/frida-core/server/frida_server-server.o)
@@ -206,7 +200,6 @@ build/frida-%-stripped/lib/$(PYTHON_NAME)/site-packages/frida: build/tmp-%/frida
 	mkdir -p $(@D)
 	cp -a build/frida-$*/lib/$(PYTHON_NAME)/site-packages/frida $@
 	@touch $@
-
 build/frida-%-stripped/lib/$(PYTHON_NAME)/site-packages/_frida.so: build/tmp-%/frida-$(PYTHON_NAME)/src/_frida.la
 	mkdir -p $(@D)
 	cp build/tmp-$*/frida-$(PYTHON_NAME)/src/.libs/_frida.so $@
@@ -234,6 +227,7 @@ build/frida-%-stripped/lib/node_modules/frida: build/frida-%/lib/pkgconfig/frida
 		&& rm -rf ../$@/ ../$@.tmp/ \
 		&& mkdir -p ../$@.tmp/ \
 		&& tar -C ../$@.tmp/ --strip-components 1 -x -f frida-0.0.0.tgz \
+		&& rm frida-0.0.0.tgz \
 		&& mv lib/binding ../$@.tmp/lib/ \
 		&& strip --strip-all ../$@.tmp/lib/binding/Release/node-*/frida_binding.node \
 		&& mv ../$@.tmp ../$@
@@ -247,10 +241,10 @@ check-node-64: build/frida-linux-x86_64-stripped/lib/node_modules/frida ##@bindi
 .PHONY: \
 	help \
 	distclean clean clean-submodules git-submodules git-submodule-stamps \
-	capstone-32 capstone-64 capstone-update-submodule-stamp \
-	gum-32 gum-64 check-gum-32 check-gum-64 frida-gum-update-submodule-stamp \
-	core-32 core-64 check-core-32 check-core-64 frida-core-update-submodule-stamp \
-	android-server-i386 android-server-arm \
+	capstone-update-submodule-stamp \
+	gum-32 gum-64 gum-android check-gum-32 check-gum-64 frida-gum-update-submodule-stamp \
+	core-32 core-64 core-android check-core-32 check-core-64 frida-core-update-submodule-stamp \
+	server-32 server-64 server-android \
 	python-32 python-64 check-python-32 check-python-64 frida-python-update-submodule-stamp \
 	node-32 node-64 check-node-32 check-node-64 frida-node-update-submodule-stamp
 .SECONDARY:
