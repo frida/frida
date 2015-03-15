@@ -243,9 +243,9 @@ build/frida-%-stripped/lib/node_modules/frida: build/frida-%/lib/pkgconfig/frida
 		&& mv ../$@.tmp ../$@
 
 check-node-32: build/frida-linux-i386-stripped/lib/node_modules/frida ##@bindings Test Node.js bindings for i386
-	$(NODE) --expose-gc $</node_modules/mocha/bin/_mocha
+	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha
 check-node-64: build/frida-linux-x86_64-stripped/lib/node_modules/frida ##@bindings Test Node.js bindings for x86-64
-	$(NODE) --expose-gc $</node_modules/mocha/bin/_mocha
+	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha
 
 
 .PHONY: \
