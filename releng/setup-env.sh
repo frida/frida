@@ -221,6 +221,7 @@ case $host_platform in
 -I$android_sysroot/usr/include"
     LDFLAGS="$android_host_ldflags \
 -Wl,--no-undefined \
+-Wl,--gc-sections \
 -Wl,-z,noexecstack \
 -Wl,-z,relro \
 -Wl,-z,now \
