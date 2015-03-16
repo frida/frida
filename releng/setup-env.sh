@@ -214,7 +214,6 @@ case $host_platform in
 -DANDROID \
 -I$android_sysroot/usr/include"
     CXXFLAGS="\
--stdlib=libc++ \
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/libcxx/include \
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/gabi++/include \
 -I$ANDROID_NDK_ROOT/sources/android/support/include"
@@ -226,7 +225,8 @@ case $host_platform in
 -Wl,-z,relro \
 -Wl,-z,now \
 -L$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/libs/$android_host_abi \
--lm"
+-lm \
+-lc++_static"
     if [ "$FRIDA_ENV_SDK" != 'none' ]; then
       CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
       CPPFLAGS="$CPPFLAGS -I$FRIDA_SDKROOT/include"
