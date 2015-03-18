@@ -83,30 +83,6 @@ clean-submodules:
 	cd frida-python && git clean -xfd
 	cd frida-node && git clean -xfd
 
-install: all
-	@ \
-	PREFIX="/usr"; \
-	cd build; \
-	\
-	for py in python python3; do \
-		if ! which "$$py" &>/dev/null; then \
-			echo "$$py command not found, skipping..."; \
-			continue; \
-		fi; \
-	\
-		version=`"$$py" -c 'import sys; v = sys.version_info; print("{}.{}".format(v.major, v.minor))'`; \
-		path="frida-mac-universal/lib/python$$version/site-packages"; \
-	\
-		if [ -d "$$path" ]; then \
-			sitepackages=$("$$py" -c 'import site; print(site.getsitepackages()[0])'); \
-			cp -r "$$path/." "$$sitepackages"; \
-		else \
-			echo "No frida python lib found for $$py executable (version: $$py)"; \
-		fi; \
-	done; \
-	\
-	cp -r frida-mac-$(build_arch)/bin/. "$$PREFIX/bin"
-
 
 build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-submodule-stamp
 	. build/frida-env-$*.rc \
@@ -368,7 +344,7 @@ check-node-mac: build/frida-mac-$(build_arch)-stripped/lib/node_modules/frida ##
 
 
 .PHONY: \
-	install distclean clean clean-submodules check git-submodules git-submodule-stamps \
+	distclean clean clean-submodules git-submodules git-submodule-stamps \
 	capstone-update-submodule-stamp \
 	gum-mac gum-ios gum-android check-gum-mac frida-gum-update-submodule-stamp \
 	core-mac core-ios core-android check-core-mac frida-core-update-submodule-stamp \

@@ -44,14 +44,6 @@ for more details.
 You may also download pre-built binaries for various operating systems from
 [http://www.frida.re/](http://www.frida.re/).
 
-## Installing
-
-Currently there is only a make install target for Mac.
-
-### Mac
-
-    make install
-
 ## Learn more
 
 Have a look at our [documentation](http://www.frida.re/docs/home/).
