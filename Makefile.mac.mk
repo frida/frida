@@ -59,21 +59,21 @@ clean: clean-submodules
 	rm -rf build/frida-ios-arm
 	rm -rf build/frida-ios-arm64
 	rm -rf build/frida-android-i386
-	rm -rf build/frida_stripped-android-i386
 	rm -rf build/frida-android-arm
+	rm -rf build/frida_stripped-android-i386
 	rm -rf build/frida_stripped-android-arm
 	rm -rf build/tmp-mac-i386
 	rm -rf build/tmp-mac-x86_64
 	rm -rf build/tmp-mac-universal
-	rm -rf build/tmp_stripped-mac-x86_64
 	rm -rf build/tmp-ios-arm
-	rm -rf build/tmp_stripped-ios-arm
 	rm -rf build/tmp-ios-arm64
-	rm -rf build/tmp_stripped-ios-arm64
 	rm -rf build/tmp-ios-universal
 	rm -rf build/tmp-android-i386
-	rm -rf build/tmp_stripped-android-i386
 	rm -rf build/tmp-android-arm
+	rm -rf build/tmp_stripped-mac-x86_64
+	rm -rf build/tmp_stripped-ios-arm
+	rm -rf build/tmp_stripped-ios-arm64
+	rm -rf build/tmp_stripped-android-i386
 	rm -rf build/tmp_stripped-android-arm
 
 clean-submodules:
