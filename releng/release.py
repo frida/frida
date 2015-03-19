@@ -29,12 +29,14 @@ if __name__ == '__main__':
     (major, minor, micro, nano, commit) = raw_version.split(".")
     version = "%d.%d.%d" % (int(major), int(minor), int(micro))
 
-    def upload_to_pypi(interpreter, extension):
-        env = {
+    def upload_to_pypi(interpreter, extension, extra_env = {}):
+        env = {}
+        env.update(os.environ)
+        env.update({
             'FRIDA_VERSION': version,
             'FRIDA_EXTENSION': extension
-        }
-        env.update(os.environ)
+        })
+        env.update(extra_env)
         subprocess.call([interpreter, "setup.py", "bdist_egg", "upload"], cwd=os.path.join(frida_python_dir, "src"), env=env)
 
     def upload_to_npm(node, publish):
@@ -104,17 +106,27 @@ if __name__ == '__main__':
             upload_to_npm(r"C:\Program Files (x86)\nodejs\node.exe", publish=False)
             upload_to_npm(r"C:\Program Files\nodejs\node.exe", publish=True)
         elif system == 'Darwin':
-            upload_to_pypi("python2.6",
+            upload_to_pypi("/usr/bin/python2.6",
                 os.path.join(build_dir, "build", "frida-mac-universal", "lib", "python2.6", "site-packages", "_frida.so"))
-            upload_to_pypi("python2.7",
+            upload_to_pypi("/usr/bin/python2.7",
                 os.path.join(build_dir, "build", "frida-mac-universal", "lib", "python2.7", "site-packages", "_frida.so"))
-            upload_to_pypi("python3.4",
+            upload_to_pypi("/usr/local/bin/python3.4",
                 os.path.join(build_dir, "build", "frida-mac-universal", "lib", "python3.4", "site-packages", "_frida.so"))
-            upload_to_npm("/usr/local/bin/node", publish=False)
-            upload_ios_deb(os.path.join(build_dir, "build", "frida-ios-arm", "bin", "frida-server"))
+            upload_to_npm("/opt/node-32/bin/node", publish=False)
+            upload_to_npm("/opt/node-64/bin/node", publish=False)
+            upload_ios_deb(os.path.join(build_dir, "build", "frida-ios-universal", "bin", "frida-server"))
         elif system == 'Linux':
-            upload_to_pypi("python2.7",
-                os.path.join(build_dir, "build", "frida-linux-x86_64-stripped", "lib", "python2.7", "site-packages", "_frida.so"))
-            upload_to_pypi("python3.4",
-                os.path.join(build_dir, "build", "frida-linux-x86_64-stripped", "lib", "python3.4", "site-packages", "_frida.so"))
-            upload_to_npm("/opt/node/bin/node", publish=False)
+            upload_to_pypi("/opt/python27-32/bin/python2.7",
+                os.path.join(build_dir, "build", "frida_stripped-linux-i386", "lib", "python2.7", "site-packages", "_frida.so"),
+                { 'LD_LIBRARY_PATH': "/opt/python27-32/lib" })
+            upload_to_pypi("/opt/python27-64/bin/python2.7",
+                os.path.join(build_dir, "build", "frida_stripped-linux-x86_64", "lib", "python2.7", "site-packages", "_frida.so"),
+                { 'LD_LIBRARY_PATH': "/opt/python27-64/lib" })
+            upload_to_pypi("/opt/python34-32/bin/python3.4",
+                os.path.join(build_dir, "build", "frida_stripped-linux-i386", "lib", "python3.4", "site-packages", "_frida.so"),
+                { 'LD_LIBRARY_PATH': "/opt/python34-32/lib" })
+            upload_to_pypi("/opt/python34-64/bin/python3.4",
+                os.path.join(build_dir, "build", "frida_stripped-linux-x86_64", "lib", "python3.4", "site-packages", "_frida.so"),
+                { 'LD_LIBRARY_PATH': "/opt/python34-64/lib" })
+            upload_to_npm("/opt/node-32/bin/node", publish=False)
+            upload_to_npm("/opt/node-64/bin/node", publish=False)
