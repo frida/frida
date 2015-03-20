@@ -118,15 +118,15 @@ if __name__ == '__main__':
         elif system == 'Linux':
             upload_to_pypi("/opt/python27-32/bin/python2.7",
                 os.path.join(build_dir, "build", "frida_stripped-linux-i386", "lib", "python2.7", "site-packages", "_frida.so"),
-                { 'LD_LIBRARY_PATH': "/opt/python27-32/lib" })
+                { 'LD_LIBRARY_PATH': "/opt/python27-32/lib", '_PYTHON_HOST_PLATFORM': "linux-i686" })
             upload_to_pypi("/opt/python27-64/bin/python2.7",
                 os.path.join(build_dir, "build", "frida_stripped-linux-x86_64", "lib", "python2.7", "site-packages", "_frida.so"),
-                { 'LD_LIBRARY_PATH': "/opt/python27-64/lib" })
+                { 'LD_LIBRARY_PATH': "/opt/python27-64/lib", '_PYTHON_HOST_PLATFORM': "linux-x86_64" })
             upload_to_pypi("/opt/python34-32/bin/python3.4",
                 os.path.join(build_dir, "build", "frida_stripped-linux-i386", "lib", "python3.4", "site-packages", "_frida.so"),
-                { 'LD_LIBRARY_PATH': "/opt/python34-32/lib" })
+                { 'LD_LIBRARY_PATH': "/opt/python34-32/lib", '_PYTHON_HOST_PLATFORM': "linux-i686" })
             upload_to_pypi("/opt/python34-64/bin/python3.4",
                 os.path.join(build_dir, "build", "frida_stripped-linux-x86_64", "lib", "python3.4", "site-packages", "_frida.so"),
-                { 'LD_LIBRARY_PATH': "/opt/python34-64/lib" })
+                { 'LD_LIBRARY_PATH': "/opt/python34-64/lib", '_PYTHON_HOST_PLATFORM': "linux-x86_64" })
             upload_to_npm("/opt/node-32/bin/node", publish=False)
             upload_to_npm("/opt/node-64/bin/node", publish=False)
