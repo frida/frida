@@ -108,8 +108,10 @@ if __name__ == '__main__':
         elif system == 'Darwin':
             upload_to_pypi("/usr/bin/python2.6",
                 os.path.join(build_dir, "build", "frida-mac-universal", "lib", "python2.6", "site-packages", "_frida.so"))
-            upload_to_pypi("/usr/bin/python2.7",
-                os.path.join(build_dir, "build", "frida-mac-universal", "lib", "python2.7", "site-packages", "_frida.so"))
+            for osx_minor in xrange(7, 11):
+                upload_to_pypi("/usr/bin/python2.7",
+                    os.path.join(build_dir, "build", "frida-mac-universal", "lib", "python2.7", "site-packages", "_frida.so"),
+                    { '_PYTHON_HOST_PLATFORM': "macosx-10.%d-intel" % osx_minor })
             upload_to_pypi("/usr/local/bin/python3.4",
                 os.path.join(build_dir, "build", "frida-mac-universal", "lib", "python3.4", "site-packages", "_frida.so"))
             upload_to_npm("/opt/node-32/bin/node", publish=False)
