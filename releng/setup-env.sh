@@ -62,6 +62,13 @@ if [ $host_platform = "android" ]; then
   fi
 fi
 
+if [ $host_platform = "qnx" ]; then
+  if [ ! -n "$QNX_HOST" ]; then
+    echo "You need to specify QNX_HOST and QNX_TARGET"
+    exit 1
+  fi
+fi
+
 prompt_color=33
 
 toolchain_version=20141117
@@ -116,6 +123,26 @@ case $host_platform in
       CPPFLAGS="-I$FRIDA_SDKROOT/include"
       LDFLAGS="$LDFLAGS -L$FRIDA_SDKROOT/lib"
     fi
+    ;;
+  qnx)
+    qnx_toolchain_dir=$QNX_HOST/linux/x86/usr/bin
+    qnx_host_target=$host_arch-unknown-nto-qnx6.5.0
+    qnx_toolchain_prefix=$qnx_toolchain_dir/$qnx_host_target
+    qnx_libdir=$QNX_TARGET/$host_arch/armle/lib
+    echo "using qnx toolchain with prefix: $qnx_toolchain_prefix"
+    export PATH="$qnx_toolchain_dir:$PATH"
+    CPP="$qnx_toolchain_prefix-cpp"
+    CC="$qnx_toolchain_prefix-gcc -static-libgcc"
+    CXX="$qnx_toolchain_prefix-g++ -static-libgcc"
+    OBJC=""
+    LD="$qnx_toolchain_prefix-ld -rpath=$qnx_libdir"
+    # rm $qnx_toolchain_dir/ld
+    # echo ln -s $LD $qnx_toolchain_dir/ld
+    AR="$qnx_toolchain_prefix-ar"
+    NM="$qnx_toolchain_prefix-nm"
+    OBJDUMP="$qnx_toolchain_prefix-objdump"
+    RANLIB="$qnx_toolchain_prefix-ranlib"
+    STRIP="$qnx_toolchain_prefix-strip"
     ;;
   mac)
     mac_minver="10.7"

@@ -30,6 +30,10 @@ case $frida_host_platform_arch in
     host_alias="x86_64-linux-gnu"
     cross_compiling=no
   ;;
+  qnx-arm)
+    host_alias="arm-unknown-nto-qnx6.5.0"
+    cross_compiling=yes
+  ;;
   android-i386)
     if [ -n "$FRIDA_LEGACY_AUTOTOOLS" ]; then
       host_alias="i686-linux-gnu"
