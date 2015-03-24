@@ -31,7 +31,7 @@ case $frida_host_platform_arch in
     cross_compiling=no
   ;;
   qnx-arm)
-    host_alias="arm-unknown-nto-qnx6.5.0"
+    host_alias="arm-unknown-nto-qnx6.6.0eabi"
     cross_compiling=yes
   ;;
   android-i386)

@@ -125,8 +125,8 @@ case $host_platform in
     fi
     ;;
   qnx)
-    qnx_toolchain_dir=$QNX_HOST/linux/x86/usr/bin
-    qnx_host_target=$host_arch-unknown-nto-qnx6.5.0
+    qnx_toolchain_dir=$QNX_HOST/usr/bin
+    qnx_host_target=$host_arch-unknown-nto-qnx6.6.0eabi
     qnx_toolchain_prefix=$qnx_toolchain_dir/$qnx_host_target
     qnx_libdir=$QNX_TARGET/$host_arch/armle/lib
     echo "using qnx toolchain with prefix: $qnx_toolchain_prefix"
