@@ -26,9 +26,13 @@ host_platform_arch := $(host_platform)-$(host_arch)
 
 
 ifeq ($(host_platform), linux)
+	xz := build/fs-%/lib/liblzma.a
+	unwind := build/fs-%/lib/libunwind.a
 	bfd := build/fs-%/lib/libbfd.a
 endif
 ifeq ($(host_platform), android)
+	xz := build/fs-%/lib/liblzma.a
+	unwind := build/fs-%/lib/libunwind.a
 	iconv := build/fs-%/lib/libiconv.a
 	bfd := build/fs-%/lib/libbfd.a
 endif
@@ -50,6 +54,8 @@ build/sdk-$(host_platform)-$(host_arch).tar.bz2: build/fs-tmp-$(host_platform_ar
 	mv $@.tmp $@
 
 build/fs-tmp-%/.package-stamp: \
+		$(xz) \
+		$(unwind) \
 		$(iconv) \
 		$(bfd) \
 		build/fs-%/lib/pkgconfig/libffi.pc \
@@ -75,6 +81,46 @@ build/fs-tmp-%/.package-stamp: \
 ifeq ($(host_platform), ios)
 	cp /System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/mach_vm.h $(@D)/package/include/frida_mach_vm.h
 endif
+	@touch $@
+
+
+build/.xz-stamp:
+	$(RM) -r xz
+	mkdir xz
+	$(download) http://tukaani.org/xz/xz-5.2.1.tar.bz2 | tar -C xz -xj --strip-components 1
+	@mkdir -p $(@D)
+	@touch $@
+
+build/fs-tmp-%/xz/Makefile: build/fs-env-%.rc build/.xz-stamp
+	$(RM) -r $(@D)
+	mkdir -p $(@D)
+	. $< \
+		&& cd $(@D) \
+		&& ../../../xz/configure
+
+build/fs-%/lib/liblzma.a: build/fs-env-%.rc build/fs-tmp-%/xz/Makefile
+	. $< && make -C build/fs-tmp-$*/xz $(MAKE_J) install
+	@touch $@
+
+
+build/.libunwind-stamp:
+	$(RM) -r libunwind
+	git clone $(REPO_BASE_URL)/libunwind$(REPO_SUFFIX)
+	@mkdir -p $(@D)
+	@touch $@
+
+libunwind/configure: build/fs-env-$(build_platform_arch).rc build/.libunwind-stamp
+	. $< && cd $(@D) && NOCONFIGURE=1 ./autogen.sh
+
+build/fs-tmp-%/libunwind/Makefile: build/fs-env-%.rc libunwind/configure build/fs-%/lib/liblzma.a
+	$(RM) -r $(@D)
+	mkdir -p $(@D)
+	. $< \
+		&& cd $(@D) \
+		&& ../../../libunwind/configure
+
+build/fs-%/lib/libunwind.a: build/fs-env-%.rc build/fs-tmp-%/libunwind/Makefile
+	. $< && make -C build/fs-tmp-$*/libunwind $(MAKE_J) install
 	@touch $@
 
 

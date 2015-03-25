@@ -12,4 +12,6 @@
 /libffi
 /libgee
 /libiconv
+/libunwind
 /v8
+/xz
