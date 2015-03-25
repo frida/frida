@@ -191,6 +191,9 @@ ifeq ($(host_platform), linux)
 	v8_host_flags := -f make-linux
 	v8_libs_private := " -lm"
 endif
+ifeq ($(host_platform), qnx)
+	v8_host_flags := -f make-qnx -D snapshot=off
+endif
 ifeq ($(host_platform), android)
 	v8_flavor_prefix := android_
 	v8_host_flags := -f make-android -D clang=1
@@ -228,10 +231,17 @@ else
 		LINK="$$CXX -stdlib=libc++"
 endif
 else
+ifeq ($(host_platform), qnx)
+	v8_env_vars := \
+		CXX_host="g++ -std=c++11" \
+		CXX_target="$$CXX" \
+		LINK="$$CXX"
+else
 	v8_env_vars := \
 		CXX_host="$$CXX" \
 		CXX_target="$$CXX" \
 		LINK="$$CXX"
+endif
 endif
 
 build/.v8-stamp:
