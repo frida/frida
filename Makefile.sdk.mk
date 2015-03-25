@@ -158,12 +158,12 @@ build/.$1-stamp:
 $1/configure: build/fs-env-$(build_platform_arch).rc build/.$1-stamp
 	. $$< && cd $$(@D) && NOCONFIGURE=1 ./autogen.sh
 
-build/fs-tmp-%/$1/Makefile: build/fs-env-%.rc $1/configure
+build/fs-tmp-%/$1/Makefile: build/fs-env-%.rc $1/configure $3
 	$(RM) -r $$(@D)
 	mkdir -p $$(@D)
 	. $$< && cd $$(@D) && ../../../$1/configure
 
-build/fs-%/lib/pkgconfig/$2.pc: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile $3
+build/fs-%/lib/pkgconfig/$2.pc: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
 	. $$< && make -C build/fs-tmp-$$*/$1 $(MAKE_J) install GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums
 	@touch $$@
 endef
