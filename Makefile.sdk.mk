@@ -250,7 +250,7 @@ ifeq ($(host_platform), linux)
 	v8_libs_private := " -lm"
 endif
 ifeq ($(host_platform), qnx)
-	v8_host_flags := -f make-qnx -D snapshot=off
+	v8_host_flags := -f make-qnx
 endif
 ifeq ($(host_platform), android)
 	v8_flavor_prefix := android_
