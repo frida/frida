@@ -8,6 +8,7 @@ frida_prefix=@frida_prefix@
 test "$prefix" = NONE && prefix="$frida_prefix"
 
 enable_nls=no
+enable_silent_rules=yes
 
 frida_warning_flags="-Wall"
 
