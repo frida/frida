@@ -26,13 +26,13 @@ host_platform_arch := $(host_platform)-$(host_arch)
 
 
 ifeq ($(host_platform), linux)
-	xz := build/fs-%/lib/liblzma.a
-	unwind := build/fs-%/lib/libunwind.a
+	xz := build/fs-%/lib/pkgconfig/liblzma.pc
+	unwind := build/fs-%/lib/pkgconfig/libunwind.pc
 	bfd := build/fs-%/lib/libbfd.a
 endif
 ifeq ($(host_platform), android)
-	xz := build/fs-%/lib/liblzma.a
-	unwind := build/fs-%/lib/libunwind.a
+	xz := build/fs-%/lib/pkgconfig/liblzma.pc
+	unwind := build/fs-%/lib/pkgconfig/libunwind.pc
 	iconv := build/fs-%/lib/libiconv.a
 	bfd := build/fs-%/lib/libbfd.a
 endif
@@ -98,7 +98,7 @@ build/fs-tmp-%/xz/Makefile: build/fs-env-%.rc build/.xz-stamp
 		&& cd $(@D) \
 		&& ../../../xz/configure
 
-build/fs-%/lib/liblzma.a: build/fs-env-%.rc build/fs-tmp-%/xz/Makefile
+build/fs-%/lib/pkgconfig/liblzma.pc: build/fs-env-%.rc build/fs-tmp-%/xz/Makefile
 	. $< \
 		&& cd build/fs-tmp-$*/xz \
 		&& make $(MAKE_J) \
@@ -115,14 +115,14 @@ build/.libunwind-stamp:
 libunwind/configure: build/fs-env-$(build_platform_arch).rc build/.libunwind-stamp
 	. $< && cd $(@D) && autoreconf -ifv
 
-build/fs-tmp-%/libunwind/Makefile: build/fs-env-%.rc libunwind/configure build/fs-%/lib/liblzma.a
+build/fs-tmp-%/libunwind/Makefile: build/fs-env-%.rc libunwind/configure build/fs-%/lib/pkgconfig/liblzma.pc
 	$(RM) -r $(@D)
 	mkdir -p $(@D)
 	. $< \
 		&& cd $(@D) \
 		&& ../../../libunwind/configure
 
-build/fs-%/lib/libunwind.a: build/fs-env-%.rc build/fs-tmp-%/libunwind/Makefile
+build/fs-%/lib/pkgconfig/libunwind.pc: build/fs-env-%.rc build/fs-tmp-%/libunwind/Makefile
 	. $< \
 		&& cd build/fs-tmp-$*/libunwind \
 		&& make $(MAKE_J) \
