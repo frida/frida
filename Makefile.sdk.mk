@@ -99,7 +99,10 @@ build/fs-tmp-%/xz/Makefile: build/fs-env-%.rc build/.xz-stamp
 		&& ../../../xz/configure
 
 build/fs-%/lib/liblzma.a: build/fs-env-%.rc build/fs-tmp-%/xz/Makefile
-	. $< && make -C build/fs-tmp-$*/xz $(MAKE_J) install
+	. $< \
+		&& cd build/fs-tmp-$*/xz \
+		&& make $(MAKE_J) \
+		&& make $(MAKE_J) install
 	@touch $@
 
 
@@ -120,7 +123,10 @@ build/fs-tmp-%/libunwind/Makefile: build/fs-env-%.rc libunwind/configure build/f
 		&& ../../../libunwind/configure
 
 build/fs-%/lib/libunwind.a: build/fs-env-%.rc build/fs-tmp-%/libunwind/Makefile
-	. $< && make -C build/fs-tmp-$*/libunwind $(MAKE_J) install
+	. $< \
+		&& cd build/fs-tmp-$*/libunwind \
+		&& make $(MAKE_J) \
+		&& make $(MAKE_J) install
 	@touch $@
 
 
@@ -145,7 +151,10 @@ build/fs-tmp-%/libiconv/Makefile: build/fs-env-%.rc build/.libiconv-stamp
 			--disable-rpath
 
 build/fs-%/lib/libiconv.a: build/fs-env-%.rc build/fs-tmp-%/libiconv/Makefile
-	. $< && make -C build/fs-tmp-$*/libiconv $(MAKE_J) install
+	. $< \
+		&& cd build/fs-tmp-$*/libiconv \
+		&& make $(MAKE_J) \
+		&& make $(MAKE_J) install
 	@touch $@
 
 
@@ -210,7 +219,10 @@ build/fs-tmp-%/$1/Makefile: build/fs-env-%.rc $1/configure $3
 	. $$< && cd $$(@D) && ../../../$1/configure
 
 build/fs-%/lib/pkgconfig/$2.pc: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
-	. $$< && make -C build/fs-tmp-$$*/$1 $(MAKE_J) install GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums
+	. $$< \
+		&& cd build/fs-tmp-$$*/$1 \
+		&& make $(MAKE_J) GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums \
+		&& make $(MAKE_J) GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums install
 	@touch $$@
 endef
 
