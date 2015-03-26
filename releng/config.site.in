@@ -154,7 +154,7 @@ case "$PACKAGE_TARNAME" in
     esac
 
     case $frida_host_platform in
-      linux|android|mac|ios)
+      linux|android|mac|ios|qnx)
         enable_proxy_libintl=yes
       ;;
     esac
