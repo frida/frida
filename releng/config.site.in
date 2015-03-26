@@ -58,7 +58,14 @@ case $frida_host_platform_arch in
     fi
     cross_compiling=yes
 
-    frida_flags="$frida_flags -mthumb"
+    case "$PACKAGE_TARNAME" in
+      'libunwind')
+        frida_flags="$frida_flags -marm"
+      ;;
+      *)
+        frida_flags="$frida_flags -mthumb"
+      ;;
+    esac
   ;;
   android-arm64)
     if [ -n "$FRIDA_LEGACY_AUTOTOOLS" ]; then
