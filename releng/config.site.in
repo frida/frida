@@ -105,7 +105,6 @@ case "$PACKAGE_TARNAME" in
     enable_ptrace=no
     enable_setjmp=no
     enable_debug=no
-    enable_cxx_exceptions=no
     enable_msabi_support=no
     enable_minidebuginfo=yes
 
