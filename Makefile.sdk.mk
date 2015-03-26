@@ -110,7 +110,7 @@ build/.libunwind-stamp:
 	@touch $@
 
 libunwind/configure: build/fs-env-$(build_platform_arch).rc build/.libunwind-stamp
-	. $< && cd $(@D) && NOCONFIGURE=1 ./autogen.sh
+	. $< && cd $(@D) && autoreconf -ifv
 
 build/fs-tmp-%/libunwind/Makefile: build/fs-env-%.rc libunwind/configure build/fs-%/lib/liblzma.a
 	$(RM) -r $(@D)
