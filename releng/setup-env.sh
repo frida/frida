@@ -153,7 +153,6 @@ case $host_platform in
     OBJDUMP="$qnx_toolchain_prefix-objdump"
     RANLIB="$qnx_toolchain_prefix-ranlib"
     STRIP="$qnx_toolchain_prefix-strip"
-    CFLAGS="-D_QNX_SOURCE"
     ;;
   mac)
     mac_minver="10.7"
