@@ -125,19 +125,29 @@ case $host_platform in
     fi
     ;;
   qnx)
+    case $host_arch in
+      i486)
+        qnx_host=i486-pc-nto-qnx6.6.0
+        qnx_libdir=$QNX_TARGET/x86/lib
+        ;;
+      arm)
+        qnx_host=arm-unknown-nto-qnx6.6.0eabi
+        qnx_libdir=$QNX_TARGET/armle-v7/lib
+        ;;
+      *)
+        echo "Unsupported QNX architecture" > /dev/stderr
+        exit 1
+        ;;
+    esac
+
     qnx_toolchain_dir=$QNX_HOST/usr/bin
-    qnx_host_target=$host_arch-unknown-nto-qnx6.6.0eabi
-    qnx_toolchain_prefix=$qnx_toolchain_dir/$qnx_host_target
-    qnx_libdir=$QNX_TARGET/$host_arch/armle/lib
-    echo "using qnx toolchain with prefix: $qnx_toolchain_prefix"
-    export PATH="$qnx_toolchain_dir:$PATH"
+    qnx_toolchain_prefix=$qnx_toolchain_dir/$qnx_host
+    PATH="$qnx_toolchain_dir:$PATH"
     CPP="$qnx_toolchain_prefix-cpp"
     CC="$qnx_toolchain_prefix-gcc -static-libgcc"
     CXX="$qnx_toolchain_prefix-g++ -static-libgcc"
     OBJC=""
     LD="$qnx_toolchain_prefix-ld -rpath=$qnx_libdir"
-    # rm $qnx_toolchain_dir/ld
-    # echo ln -s $LD $qnx_toolchain_dir/ld
     AR="$qnx_toolchain_prefix-ar"
     NM="$qnx_toolchain_prefix-nm"
     OBJDUMP="$qnx_toolchain_prefix-objdump"

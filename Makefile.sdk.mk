@@ -235,6 +235,9 @@ $(eval $(call make-plain-module-rules,json-glib,json-glib-1.0,build/fs-%/lib/pkg
 ifeq ($(host_arch), i386)
 	v8_arch := ia32
 endif
+ifeq ($(host_arch), i486)
+	v8_arch := ia32
+endif
 ifeq ($(host_arch), x86_64)
 	v8_arch := x64
 endif
