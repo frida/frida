@@ -36,6 +36,11 @@ ifeq ($(host_platform), android)
 	iconv := build/fs-%/lib/libiconv.a
 	bfd := build/fs-%/lib/libbfd.a
 endif
+ifeq ($(host_platform), qnx)
+	xz := build/fs-%/lib/pkgconfig/liblzma.pc
+	unwind := build/fs-%/lib/pkgconfig/libunwind.pc
+	bfd := build/fs-%/lib/libbfd.a
+endif
 
 
 all: build/sdk-$(host_platform)-$(host_arch).tar.bz2
@@ -81,52 +86,6 @@ build/fs-tmp-%/.package-stamp: \
 ifeq ($(host_platform), ios)
 	cp /System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/mach_vm.h $(@D)/package/include/frida_mach_vm.h
 endif
-	@touch $@
-
-
-build/.xz-stamp:
-	$(RM) -r xz
-	mkdir xz
-	$(download) http://tukaani.org/xz/xz-5.2.1.tar.bz2 | tar -C xz -xj --strip-components 1
-	@mkdir -p $(@D)
-	@touch $@
-
-build/fs-tmp-%/xz/Makefile: build/fs-env-%.rc build/.xz-stamp
-	$(RM) -r $(@D)
-	mkdir -p $(@D)
-	. $< \
-		&& cd $(@D) \
-		&& ../../../xz/configure
-
-build/fs-%/lib/pkgconfig/liblzma.pc: build/fs-env-%.rc build/fs-tmp-%/xz/Makefile
-	. $< \
-		&& cd build/fs-tmp-$*/xz \
-		&& make $(MAKE_J) \
-		&& make $(MAKE_J) install
-	@touch $@
-
-
-build/.libunwind-stamp:
-	$(RM) -r libunwind
-	git clone $(REPO_BASE_URL)/libunwind$(REPO_SUFFIX)
-	@mkdir -p $(@D)
-	@touch $@
-
-libunwind/configure: build/fs-env-$(build_platform_arch).rc build/.libunwind-stamp
-	. $< && cd $(@D) && autoreconf -ifv
-
-build/fs-tmp-%/libunwind/Makefile: build/fs-env-%.rc libunwind/configure $(xz)
-	$(RM) -r $(@D)
-	mkdir -p $(@D)
-	. $< \
-		&& cd $(@D) \
-		&& ../../../libunwind/configure
-
-build/fs-%/lib/pkgconfig/libunwind.pc: build/fs-env-%.rc build/fs-tmp-%/libunwind/Makefile
-	. $< \
-		&& cd build/fs-tmp-$*/libunwind \
-		&& make $(MAKE_J) \
-		&& make $(MAKE_J) install
 	@touch $@
 
 
@@ -211,7 +170,9 @@ build/.$1-stamp:
 	@touch $$@
 
 $1/configure: build/fs-env-$(build_platform_arch).rc build/.$1-stamp
-	. $$< && cd $$(@D) && NOCONFIGURE=1 ./autogen.sh
+	. $$< \
+		&& cd $$(@D) \
+		&& [ -f autogen.sh ] && NOCONFIGURE=1 ./autogen.sh || autoreconf -ifv
 
 build/fs-tmp-%/$1/Makefile: build/fs-env-%.rc $1/configure $3
 	$(RM) -r $$(@D)
@@ -226,6 +187,8 @@ build/fs-%/lib/pkgconfig/$2.pc: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
 	@touch $$@
 endef
 
+$(eval $(call make-plain-module-rules,xz,liblzma,))
+$(eval $(call make-plain-module-rules,libunwind,libunwind,$(xz)))
 $(eval $(call make-plain-module-rules,libffi,libffi,))
 $(eval $(call make-plain-module-rules,glib,glib-2.0,$(iconv)))
 $(eval $(call make-plain-module-rules,libgee,gee-0.8,build/fs-%/lib/pkgconfig/glib-2.0.pc))
