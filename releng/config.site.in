@@ -127,7 +127,7 @@ case "$PACKAGE_TARNAME" in
     glib_cv_uscore=no
 
     case $frida_host_platform in
-      android)
+      android|qnx)
         ac_cv_func_posix_getgrgid_r=no
         ac_cv_func_posix_getpwuid_r=no
       ;;
@@ -141,7 +141,7 @@ case "$PACKAGE_TARNAME" in
       linux)
         glib_cv_have_qsort_r=yes
       ;;
-      mac|ios|android)
+      mac|ios|android|qnx)
         glib_cv_have_qsort_r=no
       ;;
     esac
