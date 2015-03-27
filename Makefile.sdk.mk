@@ -115,7 +115,7 @@ build/.libunwind-stamp:
 libunwind/configure: build/fs-env-$(build_platform_arch).rc build/.libunwind-stamp
 	. $< && cd $(@D) && autoreconf -ifv
 
-build/fs-tmp-%/libunwind/Makefile: build/fs-env-%.rc libunwind/configure build/fs-%/lib/pkgconfig/liblzma.pc
+build/fs-tmp-%/libunwind/Makefile: build/fs-env-%.rc libunwind/configure $(xz)
 	$(RM) -r $(@D)
 	mkdir -p $(@D)
 	. $< \
@@ -251,6 +251,7 @@ ifeq ($(host_platform), linux)
 endif
 ifeq ($(host_platform), qnx)
 	v8_host_flags := -f make-qnx
+	v8_libs_private := " -lbacktrace"
 endif
 ifeq ($(host_platform), android)
 	v8_flavor_prefix := android_
