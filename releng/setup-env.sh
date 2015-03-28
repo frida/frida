@@ -245,9 +245,11 @@ case $host_platform in
     case $host_arch in
       i486)
         qnx_host=i486-pc-nto-qnx6.6.0
+        qnx_sysroot=$QNX_TARGET/x86
         ;;
       arm)
         qnx_host=arm-unknown-nto-qnx6.6.0eabi
+        qnx_sysroot=$QNX_TARGET/armle-v7
         ;;
       *)
         echo "Unsupported QNX architecture" > /dev/stderr
@@ -258,11 +260,11 @@ case $host_platform in
     qnx_toolchain_dir=$QNX_HOST/usr/bin
     qnx_toolchain_prefix=$qnx_toolchain_dir/$qnx_host
     PATH="$qnx_toolchain_dir:$PATH"
-    CPP="$qnx_toolchain_prefix-cpp"
-    CC="$qnx_toolchain_prefix-gcc -static-libgcc"
-    CXX="$qnx_toolchain_prefix-g++ -static-libgcc"
+    CPP="$qnx_toolchain_prefix-cpp --sysroot=$qnx_sysroot"
+    CC="$qnx_toolchain_prefix-gcc --sysroot=$qnx_sysroot -static-libgcc -static-libstdc++"
+    CXX="$qnx_toolchain_prefix-g++ --sysroot=$qnx_sysroot -static-libgcc -static-libstdc++"
     OBJC=""
-    LD="$qnx_toolchain_prefix-ld"
+    LD="$qnx_toolchain_prefix-ld --sysroot=$qnx_sysroot"
     AR="$qnx_toolchain_prefix-ar"
     NM="$qnx_toolchain_prefix-nm"
     OBJDUMP="$qnx_toolchain_prefix-objdump"
@@ -270,7 +272,7 @@ case $host_platform in
     STRIP="$qnx_toolchain_prefix-strip"
 
     CFLAGS="-ffunction-sections -fdata-sections"
-    LDFLAGS="-Wl,--no-undefined -Wl,--gc-sections"
+    LDFLAGS="-Wl,--no-undefined -Wl,--gc-sections -L$(dirname $qnx_sysroot/lib/gcc/*/libstdc++.a)"
     if [ "$FRIDA_ENV_SDK" != 'none' ]; then
       CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
       CPPFLAGS="-I$FRIDA_SDKROOT/include"
