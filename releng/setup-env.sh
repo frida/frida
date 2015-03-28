@@ -386,7 +386,7 @@ env_rc=build/${FRIDA_ENV_NAME:-frida}-env-${host_platform_arch}.rc
 ) > $env_rc
 
 case $host_platform in
-  linux|android)
+  linux|android|qnx)
     (
       echo "export AR=\"$AR\""
       echo "export NM=\"$NM\""
