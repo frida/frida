@@ -124,36 +124,6 @@ case $host_platform in
       LDFLAGS="$LDFLAGS -L$FRIDA_SDKROOT/lib"
     fi
     ;;
-  qnx)
-    case $host_arch in
-      i486)
-        qnx_host=i486-pc-nto-qnx6.6.0
-        qnx_libdir=$QNX_TARGET/x86/lib
-        ;;
-      arm)
-        qnx_host=arm-unknown-nto-qnx6.6.0eabi
-        qnx_libdir=$QNX_TARGET/armle-v7/lib
-        ;;
-      *)
-        echo "Unsupported QNX architecture" > /dev/stderr
-        exit 1
-        ;;
-    esac
-
-    qnx_toolchain_dir=$QNX_HOST/usr/bin
-    qnx_toolchain_prefix=$qnx_toolchain_dir/$qnx_host
-    PATH="$qnx_toolchain_dir:$PATH"
-    CPP="$qnx_toolchain_prefix-cpp"
-    CC="$qnx_toolchain_prefix-gcc -static-libgcc"
-    CXX="$qnx_toolchain_prefix-g++ -static-libgcc"
-    OBJC=""
-    LD="$qnx_toolchain_prefix-ld -rpath=$qnx_libdir"
-    AR="$qnx_toolchain_prefix-ar"
-    NM="$qnx_toolchain_prefix-nm"
-    OBJDUMP="$qnx_toolchain_prefix-objdump"
-    RANLIB="$qnx_toolchain_prefix-ranlib"
-    STRIP="$qnx_toolchain_prefix-strip"
-    ;;
   mac)
     mac_minver="10.7"
     mac_sdkver="10.10"
@@ -268,6 +238,44 @@ case $host_platform in
     if [ "$FRIDA_ENV_SDK" != 'none' ]; then
       CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
       CPPFLAGS="$CPPFLAGS -I$FRIDA_SDKROOT/include"
+      LDFLAGS="$LDFLAGS -L$FRIDA_SDKROOT/lib"
+    fi
+    ;;
+  qnx)
+    case $host_arch in
+      i486)
+        qnx_host=i486-pc-nto-qnx6.6.0
+        qnx_libdir=$QNX_TARGET/x86/lib
+        ;;
+      arm)
+        qnx_host=arm-unknown-nto-qnx6.6.0eabi
+        qnx_libdir=$QNX_TARGET/armle-v7/lib
+        ;;
+      *)
+        echo "Unsupported QNX architecture" > /dev/stderr
+        exit 1
+        ;;
+    esac
+
+    qnx_toolchain_dir=$QNX_HOST/usr/bin
+    qnx_toolchain_prefix=$qnx_toolchain_dir/$qnx_host
+    PATH="$qnx_toolchain_dir:$PATH"
+    CPP="$qnx_toolchain_prefix-cpp"
+    CC="$qnx_toolchain_prefix-gcc -static-libgcc"
+    CXX="$qnx_toolchain_prefix-g++ -static-libgcc"
+    OBJC=""
+    LD="$qnx_toolchain_prefix-ld -rpath=$qnx_libdir"
+    AR="$qnx_toolchain_prefix-ar"
+    NM="$qnx_toolchain_prefix-nm"
+    OBJDUMP="$qnx_toolchain_prefix-objdump"
+    RANLIB="$qnx_toolchain_prefix-ranlib"
+    STRIP="$qnx_toolchain_prefix-strip"
+
+    CFLAGS="-ffunction-sections -fdata-sections"
+    LDFLAGS="-Wl,--no-undefined -Wl,--gc-sections"
+    if [ "$FRIDA_ENV_SDK" != 'none' ]; then
+      CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
+      CPPFLAGS="-I$FRIDA_SDKROOT/include"
       LDFLAGS="$LDFLAGS -L$FRIDA_SDKROOT/lib"
     fi
     ;;
