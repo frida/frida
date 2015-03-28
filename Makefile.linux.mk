@@ -56,18 +56,26 @@ clean: clean-submodules
 	rm -rf build/frida-linux-x86_64
 	rm -rf build/frida-android-i386
 	rm -rf build/frida-android-arm
+	rm -rf build/frida-qnx-i486
+	rm -rf build/frida-qnx-arm
 	rm -rf build/frida_stripped-linux-i386
 	rm -rf build/frida_stripped-linux-x86_64
 	rm -rf build/frida_stripped-android-i386
 	rm -rf build/frida_stripped-android-arm
+	rm -rf build/frida_stripped-qnx-i486
+	rm -rf build/frida_stripped-qnx-arm
 	rm -rf build/tmp-linux-i386
 	rm -rf build/tmp-linux-x86_64
 	rm -rf build/tmp-android-i386
 	rm -rf build/tmp-android-arm
+	rm -rf build/tmp-qnx-i486
+	rm -rf build/tmp-qnx-arm
 	rm -rf build/tmp_stripped-linux-i386
 	rm -rf build/tmp_stripped-linux-x86_64
 	rm -rf build/tmp_stripped-android-i386
 	rm -rf build/tmp_stripped-android-arm
+	rm -rf build/tmp_stripped-qnx-i486
+	rm -rf build/tmp_stripped-qnx-arm
 
 clean-submodules:
 	cd capstone && git clean -xfd
