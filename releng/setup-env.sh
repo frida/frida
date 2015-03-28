@@ -259,10 +259,11 @@ case $host_platform in
 
     qnx_toolchain_dir=$QNX_HOST/usr/bin
     qnx_toolchain_prefix=$qnx_toolchain_dir/$qnx_host
+    qnx_preprocessor_flags="-include $FRIDA_ROOT/releng/frida-qnx-defines.h"
     PATH="$qnx_toolchain_dir:$PATH"
-    CPP="$qnx_toolchain_prefix-cpp --sysroot=$qnx_sysroot"
-    CC="$qnx_toolchain_prefix-gcc --sysroot=$qnx_sysroot -static-libgcc -static-libstdc++"
-    CXX="$qnx_toolchain_prefix-g++ --sysroot=$qnx_sysroot -static-libgcc -static-libstdc++"
+    CPP="$qnx_toolchain_prefix-cpp --sysroot=$qnx_sysroot $qnx_preprocessor_flags"
+    CC="$qnx_toolchain_prefix-gcc --sysroot=$qnx_sysroot -static-libgcc -static-libstdc++ $qnx_preprocessor_flags"
+    CXX="$qnx_toolchain_prefix-g++ --sysroot=$qnx_sysroot -static-libgcc -static-libstdc++ $qnx_preprocessor_flags"
     OBJC=""
     LD="$qnx_toolchain_prefix-ld --sysroot=$qnx_sysroot"
     AR="$qnx_toolchain_prefix-ar"
