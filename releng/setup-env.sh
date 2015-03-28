@@ -245,11 +245,9 @@ case $host_platform in
     case $host_arch in
       i486)
         qnx_host=i486-pc-nto-qnx6.6.0
-        qnx_libdir=$QNX_TARGET/x86/lib
         ;;
       arm)
         qnx_host=arm-unknown-nto-qnx6.6.0eabi
-        qnx_libdir=$QNX_TARGET/armle-v7/lib
         ;;
       *)
         echo "Unsupported QNX architecture" > /dev/stderr
@@ -264,7 +262,7 @@ case $host_platform in
     CC="$qnx_toolchain_prefix-gcc -static-libgcc"
     CXX="$qnx_toolchain_prefix-g++ -static-libgcc"
     OBJC=""
-    LD="$qnx_toolchain_prefix-ld -rpath=$qnx_libdir"
+    LD="$qnx_toolchain_prefix-ld"
     AR="$qnx_toolchain_prefix-ar"
     NM="$qnx_toolchain_prefix-nm"
     OBJDUMP="$qnx_toolchain_prefix-objdump"
