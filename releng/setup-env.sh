@@ -73,7 +73,7 @@ prompt_color=33
 
 toolchain_version=20141117
 case $host_platform in
-  linux|android)
+  linux|android|qnx)
     sdk_version=20150222
     ;;
   *)
