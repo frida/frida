@@ -1,0 +1,20 @@
+--- binutils/libiberty/choose-temp.c-orig	2015-03-29 13:14:41.512000000 +0200
++++ binutils/libiberty/choose-temp.c	2015-03-29 13:14:46.812000000 +0200
+@@ -63,13 +63,16 @@
+   const char *base = choose_tmpdir ();
+   char *temp_filename;
+   int len;
++  int fd;
+ 
+   len = strlen (base);
+   temp_filename = XNEWVEC (char, len + TEMP_FILE_LEN + 1);
+   strcpy (temp_filename, base);
+   strcpy (temp_filename + len, TEMP_FILE);
+ 
+-  if (mktemp (temp_filename) == 0)
++  fd = mkstemp (temp_filename);
++  if (fd == -1)
+     abort ();
++  close (fd);
+   return temp_filename;
+ }
