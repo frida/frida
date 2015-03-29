@@ -4,6 +4,8 @@
 *.swp
 *.user
 *~
+/autoconf
+/automake
 /binutils
 /build
 /glib
@@ -12,6 +14,10 @@
 /libffi
 /libgee
 /libiconv
+/libtool
 /libunwind
+/m4
+/pkg-config
 /v8
+/vala
 /xz

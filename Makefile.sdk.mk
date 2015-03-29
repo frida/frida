@@ -1,6 +1,11 @@
 MAKE_J ?= -j 8
-REPO_BASE_URL = "git://github.com/frida"
-REPO_SUFFIX = ".git"
+
+repo_base_url := "git://github.com/frida"
+repo_suffix := ".git"
+
+libiconv_version := 1.14
+binutils_version := 2.25
+
 
 build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,mac,')
 build_arch := $(shell uname -m)
@@ -93,7 +98,7 @@ build/.libiconv-stamp:
 	$(RM) -r libiconv
 	mkdir libiconv
 	cd libiconv \
-		&& $(download) http://gnuftp.uib.no/libiconv/libiconv-1.14.tar.gz | tar -xz --strip-components 1 \
+		&& $(download) http://gnuftp.uib.no/libiconv/libiconv-$(libiconv_version).tar.gz | tar -xz --strip-components 1 \
 		&& patch -p1 < ../releng/patches/libiconv-android.patch
 	@mkdir -p $(@D)
 	@touch $@
@@ -121,7 +126,7 @@ build/.binutils-stamp:
 	$(RM) -r binutils
 	mkdir binutils
 	cd binutils \
-		&& $(download) http://gnuftp.uib.no/binutils/binutils-2.25.tar.bz2 | tar -xj --strip-components 1 \
+		&& $(download) http://gnuftp.uib.no/binutils/binutils-$(binutils_version).tar.bz2 | tar -xj --strip-components 1 \
 		&& patch -p1 < ../releng/patches/binutils-silence-linker-warning.patch \
 		&& patch -p1 < ../releng/patches/binutils-android.patch \
 		&& patch -p1 < ../releng/patches/binutils-qnx.patch
@@ -164,10 +169,10 @@ build/fs-tmp-%/binutils/bfd/libbfd.a: build/fs-env-%.rc build/fs-tmp-%/binutils/
 	. $< && make -C $(@D) $(MAKE_J)
 
 
-define make-plain-module-rules
+define make-git-module-rules
 build/.$1-stamp:
 	$(RM) -r $1
-	git clone $(REPO_BASE_URL)/$1$(REPO_SUFFIX)
+	git clone $(repo_base_url)/$1$(repo_suffix)
 	@mkdir -p $$(@D)
 	@touch $$@
 
@@ -181,7 +186,7 @@ build/fs-tmp-%/$1/Makefile: build/fs-env-%.rc $1/configure $3
 	mkdir -p $$(@D)
 	. $$< && cd $$(@D) && ../../../$1/configure
 
-build/fs-%/lib/pkgconfig/$2.pc: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
+$2: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
 	. $$< \
 		&& cd build/fs-tmp-$$*/$1 \
 		&& make $(MAKE_J) GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums \
@@ -189,12 +194,12 @@ build/fs-%/lib/pkgconfig/$2.pc: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
 	@touch $$@
 endef
 
-$(eval $(call make-plain-module-rules,xz,liblzma,))
-$(eval $(call make-plain-module-rules,libunwind,libunwind,$(xz)))
-$(eval $(call make-plain-module-rules,libffi,libffi,))
-$(eval $(call make-plain-module-rules,glib,glib-2.0,$(iconv)))
-$(eval $(call make-plain-module-rules,libgee,gee-0.8,build/fs-%/lib/pkgconfig/glib-2.0.pc))
-$(eval $(call make-plain-module-rules,json-glib,json-glib-1.0,build/fs-%/lib/pkgconfig/glib-2.0.pc))
+$(eval $(call make-git-module-rules,xz,build/fs-%/lib/pkgconfig/liblzma.pc,))
+$(eval $(call make-git-module-rules,libunwind,build/fs-%/lib/pkgconfig/libunwind.pc,$(xz)))
+$(eval $(call make-git-module-rules,libffi,build/fs-%/lib/pkgconfig/libffi.pc,))
+$(eval $(call make-git-module-rules,glib,build/fs-%/lib/pkgconfig/glib-2.0.pc,build/fs-%/lib/pkgconfig/libffi.pc $(iconv)))
+$(eval $(call make-git-module-rules,libgee,build/fs-%/lib/pkgconfig/gee-0.8.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc))
+$(eval $(call make-git-module-rules,json-glib,build/fs-%/lib/pkgconfig/json-glib-1.0.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc))
 
 
 ifeq ($(host_arch), i386)
@@ -273,7 +278,7 @@ endif
 
 build/.v8-stamp:
 	$(RM) -r v8
-	git clone $(REPO_BASE_URL)/v8$(REPO_SUFFIX)
+	git clone $(repo_base_url)/v8$(repo_suffix)
 	@mkdir -p $(@D)
 	@touch $@
 
