@@ -12,9 +12,9 @@ build_arch := $(shell uname -m)
 build_platform_arch := $(build_platform)-$(build_arch)
 
 ifeq ($(build_platform), linux)
-download := wget -O - -q
+	download := wget -O - -q
 else
-download := curl -sS
+	download := curl -sS
 endif
 
 ifdef FRIDA_HOST
