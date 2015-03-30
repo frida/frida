@@ -1,0 +1,142 @@
+From 00d66d4264723326a258653e09977a5c0060a219 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ole=20Andr=C3=A9=20Vadla=20Ravn=C3=A5s?=
+ <ole.andre.ravnas@tillitech.com>
+Date: Mon, 30 Mar 2015 14:38:46 +0200
+Subject: [PATCH 1/3] libtool.m4: fix missing initialization.
+
+The `prev` variable is used uninitialized for the first loop iteration.
+---
+ m4/libtool.m4 | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/m4/libtool.m4 b/m4/libtool.m4
+index a3bc337..a49d486 100644
+--- a/m4/libtool.m4
++++ b/m4/libtool.m4
+@@ -7528,6 +7528,7 @@ if AC_TRY_EVAL(ac_compile); then
+   # the conftest object file.
+   pre_test_object_deps_done=no
+ 
++  prev=
+   for p in `eval "$output_verbose_link_cmd"`; do
+     case $prev$p in
+ 
+-- 
+2.1.0
+
+From 25825b304a5cb75d046a660da91fc0e33b7d0cd3 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ole=20Andr=C3=A9=20Vadla=20Ravn=C3=A5s?=
+ <ole.andre.ravnas@tillitech.com>
+Date: Mon, 30 Mar 2015 14:45:00 +0200
+Subject: [PATCH 2/3] libtool.m4: fix space logic in flag detection.
+
+This is a regression introduced by a53d6cc4.
+---
+ m4/libtool.m4 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/m4/libtool.m4 b/m4/libtool.m4
+index a49d486..b6f5e91 100644
+--- a/m4/libtool.m4
++++ b/m4/libtool.m4
+@@ -7535,8 +7535,8 @@ if AC_TRY_EVAL(ac_compile); then
+     -L* | -R* | -l*)
+        # Some compilers place space between "-{L,R}" and the path.
+        # Remove the space.
+-       if test x-L = "$p" ||
+-          test x-R = "$p"; then
++       if test x-L = "x$p" ||
++          test x-R = "x$p"; then
+ 	 prev=$p
+ 	 continue
+        fi
+-- 
+2.1.0
+
+From 5fbebe40a8134fb138b337d13863763de88a83b2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ole=20Andr=C3=A9=20Vadla=20Ravn=C3=A5s?=
+ <ole.andre.ravnas@tillitech.com>
+Date: Mon, 30 Mar 2015 15:31:55 +0200
+Subject: [PATCH 3/3] libtool.m4: preserve static vs. dynamic postdeps.
+
+This makes it possible to specify flags like `-static-libstdc++` without
+the `-Bstatic` getting dropped by libtool.
+---
+ m4/libtool.m4 | 34 ++++++++++++++++++++++++++++++++--
+ 1 file changed, 32 insertions(+), 2 deletions(-)
+
+diff --git a/m4/libtool.m4 b/m4/libtool.m4
+index b6f5e91..f7f4200 100644
+--- a/m4/libtool.m4
++++ b/m4/libtool.m4
+@@ -7528,6 +7528,10 @@ if AC_TRY_EVAL(ac_compile); then
+   # the conftest object file.
+   pre_test_object_deps_done=no
+ 
++  # Preserve the desired link mode, typically influenced by flags
++  # like -static-libgcc, -static-libstdc++, etc.
++  link_mode=default
++
+   prev=
+   for p in `eval "$output_verbose_link_cmd"`; do
+     case $prev$p in
+@@ -7568,21 +7572,43 @@ if AC_TRY_EVAL(ac_compile); then
+ 	 # linked, so don't bother handling this case.
+ 	 esac
+        else
++	 s=$prev$p
++
++	 case $link_mode in
++	 static_pending)
++	   s="-Bstatic $s"
++	   link_mode=static
++	   ;;
++	 dynamic_pending)
++	   s="-Bdynamic $s"
++	   link_mode=dynamic
++	   ;;
++	 esac
++
+ 	 if test -z "$_LT_TAGVAR(postdeps, $1)"; then
+-	   _LT_TAGVAR(postdeps, $1)=$prev$p
++	   _LT_TAGVAR(postdeps, $1)=$s
+ 	 else
+-	   _LT_TAGVAR(postdeps, $1)="${_LT_TAGVAR(postdeps, $1)} $prev$p"
++	   _LT_TAGVAR(postdeps, $1)="${_LT_TAGVAR(postdeps, $1)} $s"
+ 	 fi
+        fi
+        prev=
+        ;;
+ 
++    -Bstatic)
++      link_mode=static_pending
++      ;;
++
++    -Bdynamic)
++      link_mode=dynamic_pending
++      ;;
++
+     *.lto.$objext) ;; # Ignore GCC LTO objects
+     *.$objext)
+        # This assumes that the test object file only shows up
+        # once in the compiler output.
+        if test "$p" = "conftest.$objext"; then
+ 	 pre_test_object_deps_done=yes
++	 link_mode=default
+ 	 continue
+        fi
+ 
+@@ -7606,6 +7632,10 @@ if AC_TRY_EVAL(ac_compile); then
+     esac
+   done
+ 
++  if test static = "$link_mode"; then
++    _LT_TAGVAR(postdeps, $1)="${_LT_TAGVAR(postdeps, $1)} -Bdynamic"
++  fi
++
+   # Clean up.
+   rm -f a.out a.exe
+ else
+-- 
+2.1.0
+

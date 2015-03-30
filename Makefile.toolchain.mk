@@ -109,6 +109,9 @@ build/.$1-stamp:
 	$(RM) -r $1
 	mkdir -p $1
 	$(download) $2 | tar -C $1 -xz --strip-components 1
+	if [ -n "$5" ]; then \
+		cd $1 && patch -p1 < ../releng/patches/$5; \
+	fi
 	@mkdir -p $$(@D)
 	@touch $$@
 
@@ -159,7 +162,7 @@ endef
 $(eval $(call make-tarball-module-rules,m4,http://gnuftp.uib.no/m4/m4-$(m4_version).tar.gz,build/ft-%/bin/m4,))
 $(eval $(call make-tarball-module-rules,autoconf,http://gnuftp.uib.no/autoconf/autoconf-$(autoconf_version).tar.gz,build/ft-%/bin/autoconf,build/ft-%/bin/m4))
 $(eval $(call make-tarball-module-rules,automake,http://gnuftp.uib.no/automake/automake-$(automake_version).tar.gz,build/ft-%/bin/automake,build/ft-%/bin/autoconf))
-$(eval $(call make-tarball-module-rules,libtool,http://gnuftp.uib.no/libtool/libtool-$(libtool_version).tar.gz,build/ft-%/bin/libtool,build/ft-%/bin/automake))
+$(eval $(call make-tarball-module-rules,libtool,http://gnuftp.uib.no/libtool/libtool-$(libtool_version).tar.gz,build/ft-%/bin/libtool,build/ft-%/bin/automake,libtool-fixes.patch))
 $(eval $(call make-git-module-rules,libffi,build/ft-%/lib/pkgconfig/libffi.pc,build/ft-%/bin/libtool))
 $(eval $(call make-git-module-rules,glib,build/ft-%/bin/glib-genmarshal,build/ft-%/lib/pkgconfig/libffi.pc))
 $(eval $(call make-tarball-module-rules,pkg-config,http://pkgconfig.freedesktop.org/releases/pkg-config-$(pkg_config_version).tar.gz,build/ft-%/bin/pkg-config,build/ft-%/bin/glib-genmarshal))
