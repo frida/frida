@@ -290,8 +290,8 @@ case $host_platform in
     PATH="$qnx_toolchain_dir:$PATH"
 
     CPP="$qnx_toolchain_prefix-cpp --sysroot=$qnx_sysroot $qnx_preprocessor_flags"
-    CC="$qnx_toolchain_prefix-gcc --sysroot=$qnx_sysroot $qnx_preprocessor_flags"
-    CXX="$qnx_toolchain_prefix-g++ --sysroot=$qnx_sysroot $qnx_preprocessor_flags"
+    CC="$qnx_toolchain_prefix-gcc --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc -static-libstdc++"
+    CXX="$qnx_toolchain_prefix-g++ --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc -static-libstdc++"
     OBJC=""
     LD="$qnx_toolchain_prefix-ld --sysroot=$qnx_sysroot"
 
