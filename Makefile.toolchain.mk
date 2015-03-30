@@ -74,7 +74,6 @@ build/ft-tmp-%/.package-stamp: \
 		build/ft-%/bin/valac
 	$(RM) -r $(@D)/package
 	mkdir -p $(@D)/package
-	. $< && $$STRIP $(strip_all) build/ft-$*/bin/*
 	cd build/ft-$* \
 		&& tar -c \
 			--exclude etc \
@@ -87,6 +86,12 @@ build/ft-tmp-%/.package-stamp: \
 			--exclude share/info \
 			--exclude share/man \
 			. | tar -C $(abspath $(@D)/package) -xf -
+	. $< \
+		&& for f in $(@D)/package/bin/*; do \
+			if $$(file -b --mime-type $$f) | egrep -q "^application"; then \
+				$$STRIP $(strip_all) $$f || exit 1 \
+			fi \
+		done
 	releng/relocatify.sh $(@D)/package $(abspath build/ft-$*)
 	@touch $@
 
