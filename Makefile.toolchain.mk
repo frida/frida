@@ -88,8 +88,8 @@ build/ft-tmp-%/.package-stamp: \
 			. | tar -C $(abspath $(@D)/package) -xf -
 	. $< \
 		&& for f in $(@D)/package/bin/*; do \
-			if $$(file -b --mime-type $$f) | egrep -q "^application"; then \
-				$$STRIP $(strip_all) $$f || exit 1 \
+			if file -b --mime-type $$f | egrep -q "^application"; then \
+				$$STRIP $(strip_all) $$f || exit 1; \
 			fi \
 		done
 	releng/relocatify.sh $(@D)/package $(abspath build/ft-$*)
