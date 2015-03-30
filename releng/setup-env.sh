@@ -110,7 +110,6 @@ case $host_platform in
     CPP="/usr/bin/cpp"
     CC="/usr/bin/gcc -static-libgcc -static-libstdc++"
     CXX="/usr/bin/g++ -static-libgcc -static-libstdc++"
-    OBJC=""
     LD="/usr/bin/ld"
 
     AR="/usr/bin/ar"
@@ -292,7 +291,6 @@ case $host_platform in
     CPP="$qnx_toolchain_prefix-cpp --sysroot=$qnx_sysroot $qnx_preprocessor_flags"
     CC="$qnx_toolchain_prefix-gcc --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc -static-libstdc++"
     CXX="$qnx_toolchain_prefix-g++ --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc -static-libstdc++"
-    OBJC=""
     LD="$qnx_toolchain_prefix-ld --sysroot=$qnx_sysroot"
 
     AR="$qnx_toolchain_prefix-ar"
