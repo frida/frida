@@ -339,8 +339,14 @@ if [ ! -f "$FRIDA_TOOLROOT/.stamp" ]; then
   rm -rf "$FRIDA_TOOLROOT"
   mkdir -p "$FRIDA_TOOLROOT"
 
-  echo "Downloading and deploying toolchain..."
-  $download_command "https://build.frida.re/toolchain-${toolchain_version}-${build_platform}-${build_arch}.tar.bz2" | tar -C "$FRIDA_TOOLROOT" -xj $tar_stdin || exit 1
+  local_toolchain=$FRIDA_BUILD/toolchain-${build_platform}-${build_arch}.tar.bz2
+  if [ -f $local_toolchain ]; then
+    echo "Deploying local toolchain $(basename $local_toolchain)..."
+    tar -C "$FRIDA_TOOLROOT" -xjf $local_toolchain || exit 1
+  else
+    echo "Downloading and deploying toolchain..."
+    $download_command "https://build.frida.re/toolchain-${toolchain_version}-${build_platform}-${build_arch}.tar.bz2" | tar -C "$FRIDA_TOOLROOT" -xj $tar_stdin || exit 1
+  fi
 
   for template in $(find $FRIDA_TOOLROOT -name "*.frida.in"); do
     target=$(echo $template | sed 's,\.frida\.in$,,')
