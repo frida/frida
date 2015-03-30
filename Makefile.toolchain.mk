@@ -162,7 +162,6 @@ $(eval $(call make-tarball-module-rules,autoconf,http://gnuftp.uib.no/autoconf/a
 
 $(eval $(call make-tarball-module-rules,automake,http://gnuftp.uib.no/automake/automake-$(automake_version).tar.gz,build/ft-%/bin/automake,build/ft-%/bin/autoconf))
 
-$(eval $(call make-tarball-module-rules,libtool,http://gnuftp.uib.no/libtool/libtool-$(libtool_version).tar.gz,build/ft-%/bin/libtool,build/ft-%/bin/automake))
 build/.libtool-stamp:
 	$(RM) -r libtool
 	mkdir -p libtool
