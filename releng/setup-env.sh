@@ -4,7 +4,12 @@ releng_path=`dirname $0`
 
 build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,mac,')
 if [ $build_platform = "linux" ]; then
-  build_arch=$(uname -i)
+  build_hwp=$(uname -i)
+  if [ $build_hwp != "unknown" ]; then
+    build_arch=$build_hwp
+  else
+    build_arch=$(uname -m)
+  fi
 else
   build_arch=$(uname -m)
 fi
