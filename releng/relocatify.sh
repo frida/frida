@@ -20,17 +20,17 @@ for file in $(find "$package" -type f); do
       mv "$file" "$newname"
       sed_inplace \
         -e "s,$prefix,@FRIDA_TOOLROOT@,g" \
-        $newname
+        $newname || exit 1
     elif echo "$file" | grep -Eq "\\.la$"; then
       newname="$file.frida.in"
       mv "$file" "$newname"
       sed_inplace \
         -e "s,$prefix,@FRIDA_SDKROOT@,g" \
-        $newname
+        $newname || exit 1
     elif echo "$file" | grep -Eq "\\.pc$"; then
       sed_inplace \
         -e "s,$prefix,\${frida_sdk_prefix},g" \
-        $file
+        $file || exit 1
     fi
   fi
 done
