@@ -114,7 +114,7 @@ $3: build/ft-env-%.rc build/ft-tmp-%/$1/Makefile
 		&& cd build/ft-tmp-$$*/$1 \
 		&& export PATH=$$(shell pwd)/build/ft-$$*/bin:$$$$PATH \
 		&& make $(MAKE_J) GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums \
-		&& make $(MAKE_J) GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums install
+		&& make $(MAKE_J) GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums LN="ln -sf" install
 	@touch $$@
 endef
 
@@ -143,7 +143,7 @@ $2: build/ft-env-%.rc build/ft-tmp-%/$1/Makefile
 		&& cd build/ft-tmp-$$*/$1 \
 		&& export PATH=$$(shell pwd)/build/ft-$$*/bin:$$$$PATH \
 		&& make $(MAKE_J) GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums \
-		&& make $(MAKE_J) GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums install
+		&& make $(MAKE_J) GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums LN="ln -sf" install
 	@touch $$@
 endef
 
