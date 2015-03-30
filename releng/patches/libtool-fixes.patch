@@ -192,10 +192,10 @@ index d5cf07a..7392493 100644
      $ECHO "\
  
  # A function that is used when there is no print builtin or printf.
-diff --git a/gl/build-aux/funclib.sh b/gl/build-aux/funclib.sh
+diff --git a/build-aux/funclib.sh b/build-aux/funclib.sh
 index 39d972e..bd69802 100644
---- a/gl/build-aux/funclib.sh
-+++ b/gl/build-aux/funclib.sh
+--- a/build-aux/funclib.sh
++++ b/build-aux/funclib.sh
 @@ -1044,7 +1044,15 @@ func_quote_for_eval ()
      while test 0 -lt $#; do
        case $1 in
