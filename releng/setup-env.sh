@@ -75,7 +75,7 @@ fi
 
 prompt_color=33
 
-toolchain_version=20141117
+toolchain_version=20150330
 case $host_platform in
   linux|android|qnx)
     sdk_version=20150222
