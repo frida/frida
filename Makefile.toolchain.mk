@@ -67,7 +67,7 @@ build/ft-tmp-%/.package-stamp: \
 		build/ft-env-%.rc \
 		build/ft-%/bin/m4 \
 		build/ft-%/bin/autoconf \
-		build/ft-tmp-%/.automake-symlink-stamp \
+		build/ft-%/bin/automake \
 		build/ft-%/bin/libtool \
 		build/ft-%/bin/glib-genmarshal \
 		build/ft-%/bin/pkg-config \
@@ -149,26 +149,12 @@ endef
 
 
 $(eval $(call make-tarball-module-rules,m4,http://gnuftp.uib.no/m4/m4-$(m4_version).tar.gz,build/ft-%/bin/m4,))
-
 $(eval $(call make-tarball-module-rules,autoconf,http://gnuftp.uib.no/autoconf/autoconf-$(autoconf_version).tar.gz,build/ft-%/bin/autoconf,build/ft-%/bin/m4))
-
 $(eval $(call make-tarball-module-rules,automake,http://gnuftp.uib.no/automake/automake-$(automake_version).tar.gz,build/ft-%/bin/automake,build/ft-%/bin/autoconf))
-build/ft-tmp-%/.automake-symlink-stamp: build/ft-%/bin/automake
-	cd build/ft-$*/bin \
-		&& $(RM) aclocal automake \
-		&& ln -s aclocal-$(automake_version) aclocal \
-		&& ln -s automake-$(automake_version) automake
-	@mkdir -p $(@D)
-	@touch $@
-
-$(eval $(call make-tarball-module-rules,libtool,http://gnuftp.uib.no/libtool/libtool-$(libtool_version).tar.gz,build/ft-%/bin/libtool,build/ft-tmp-%/.automake-symlink-stamp))
-
+$(eval $(call make-tarball-module-rules,libtool,http://gnuftp.uib.no/libtool/libtool-$(libtool_version).tar.gz,build/ft-%/bin/libtool,build/ft-%/bin/automake))
 $(eval $(call make-git-module-rules,libffi,build/ft-%/lib/pkgconfig/libffi.pc,build/ft-%/bin/libtool))
-
 $(eval $(call make-git-module-rules,glib,build/ft-%/bin/glib-genmarshal,build/ft-%/lib/pkgconfig/libffi.pc))
-
 $(eval $(call make-tarball-module-rules,pkg-config,http://pkgconfig.freedesktop.org/releases/pkg-config-$(pkg_config_version).tar.gz,build/ft-%/bin/pkg-config,build/ft-%/bin/glib-genmarshal))
-
 $(eval $(call make-git-module-rules,vala,build/ft-%/bin/valac,build/ft-%/bin/glib-genmarshal))
 
 
