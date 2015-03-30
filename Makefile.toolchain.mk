@@ -10,7 +10,11 @@ pkg_config_version := 0.28
 
 
 build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,mac,')
-build_arch := $(shell uname -m)
+ifeq ($(build_platform), linux)
+	build_arch := $(shell uname -i)
+else
+	build_arch := $(shell uname -m)
+endif
 build_platform_arch := $(build_platform)-$(build_arch)
 
 ifeq ($(build_platform), linux)
@@ -27,7 +31,7 @@ endif
 ifdef FRIDA_HOST
 	host_arch := $(shell echo $(FRIDA_HOST) | cut -f2 -d"-")
 else
-	host_arch := $(shell uname -m)
+	host_arch := $(build_arch)
 endif
 host_platform_arch := $(host_platform)-$(host_arch)
 

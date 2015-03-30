@@ -3,7 +3,11 @@
 releng_path=`dirname $0`
 
 build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,mac,')
-build_arch=$(uname -m)
+if [ $build_platform = "linux" ]; then
+  build_arch=$(uname -i)
+else
+  build_arch=$(uname -m)
+fi
 build_platform_arch=${build_platform}-${build_arch}
 
 if [ -n "$FRIDA_HOST" ]; then
@@ -14,7 +18,7 @@ fi
 if [ -n "$FRIDA_HOST" ]; then
   host_arch=$(echo -n $FRIDA_HOST | cut -f2 -d"-")
 else
-  host_arch=$(uname -m)
+  host_arch=$build_arch
 fi
 host_platform_arch=${host_platform}-${host_arch}
 
@@ -265,7 +269,7 @@ case $host_platform in
     ;;
   qnx)
     case $host_arch in
-      i486)
+      i386)
         qnx_host=i486-pc-nto-qnx6.6.0
         qnx_sysroot=$QNX_TARGET/x86
         ;;

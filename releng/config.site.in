@@ -31,7 +31,7 @@ case $frida_host_platform_arch in
     host_alias="x86_64-linux-gnu"
     cross_compiling=no
   ;;
-  qnx-i486)
+  qnx-i386)
     host_alias="i486-pc-nto-qnx6.6.0"
     cross_compiling=yes
   ;;
