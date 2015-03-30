@@ -108,11 +108,13 @@ case $host_platform in
     CXX="/usr/bin/g++ -static-libgcc -static-libstdc++"
     OBJC=""
     LD="/usr/bin/ld"
+
     AR="/usr/bin/ar"
     NM="/usr/bin/nm"
-    OBJDUMP="/usr/bin/objdump"
     RANLIB="/usr/bin/ranlib"
     STRIP="/usr/bin/strip"
+
+    OBJDUMP="/usr/bin/objdump"
 
     [ $host_arch == 'i386' ] && host_arch_flags="-m32" || host_arch_flags="-m64"
 
@@ -137,6 +139,15 @@ case $host_platform in
     OBJC="$(xcrun --sdk $mac_sdk -f clang)"
     LD="$(xcrun --sdk $mac_sdk -f ld)"
 
+    AR="$(xcrun --sdk $mac_sdk -f ar)"
+    NM="$(xcrun --sdk $mac_sdk -f nm)"
+    RANLIB="$(xcrun --sdk $mac_sdk -f ranlib)"
+    STRIP="$(xcrun --sdk $mac_sdk -f strip)"
+
+    OTOOL="$(xcrun --sdk $mac_sdk -f otool)"
+    CODESIGN="$(xcrun --sdk $mac_sdk -f codesign)"
+    LIPO="$(xcrun --sdk $mac_sdk -f lipo)"
+
     CFLAGS="-isysroot $mac_sdk_path -mmacosx-version-min=$mac_minver -arch $host_arch"
     CXXFLAGS="-stdlib=libc++"
     LDFLAGS="-isysroot $mac_sdk_path -Wl,-macosx_version_min,$mac_minver -arch $host_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
@@ -153,6 +164,15 @@ case $host_platform in
     CXX="$(xcrun --sdk $ios_sdk -f clang++)"
     OBJC="$(xcrun --sdk $ios_sdk -f clang)"
     LD="$(xcrun --sdk $ios_sdk -f ld)"
+
+    AR="$(xcrun --sdk $ios_sdk -f ar)"
+    NM="$(xcrun --sdk $ios_sdk -f nm)"
+    RANLIB="$(xcrun --sdk $ios_sdk -f ranlib)"
+    STRIP="$(xcrun --sdk $ios_sdk -f strip)"
+
+    OTOOL="$(xcrun --sdk $ios_sdk -f otool)"
+    CODESIGN="$(xcrun --sdk $ios_sdk -f codesign)"
+    LIPO="$(xcrun --sdk $ios_sdk -f lipo)"
 
     [ $host_arch == 'arm' ] && ios_arch=armv7 || ios_arch=arm64
 
@@ -201,20 +221,22 @@ case $host_platform in
     android_clang_prefix="$ANDROID_NDK_ROOT/toolchains/llvm-3.4/prebuilt/${android_build_platform}-x86_64"
     android_gcc_toolchain="$ANDROID_NDK_ROOT/toolchains/${android_host_toolchain}/prebuilt/${android_build_platform}-x86_64"
     android_sysroot="$ANDROID_NDK_ROOT/platforms/android-14/arch-${android_host_arch}"
-
     toolflags="--sysroot=$android_sysroot \
 --gcc-toolchain=$android_gcc_toolchain \
 --target=$android_host_target \
 -no-canonical-prefixes"
+
     CPP="$android_gcc_toolchain/bin/${android_host_toolprefix}cpp --sysroot=$android_sysroot"
     CC="$android_clang_prefix/bin/clang $toolflags"
     CXX="$android_clang_prefix/bin/clang++ $toolflags"
     LD="$android_gcc_toolchain/bin/${android_host_toolprefix}ld --sysroot=$android_sysroot"
+
     AR="$android_gcc_toolchain/bin/${android_host_toolprefix}ar"
     NM="$android_gcc_toolchain/bin/${android_host_toolprefix}nm"
-    OBJDUMP="$android_gcc_toolchain/bin/${android_host_toolprefix}objdump"
     RANLIB="$android_gcc_toolchain/bin/${android_host_toolprefix}ranlib"
     STRIP="$android_gcc_toolchain/bin/${android_host_toolprefix}strip"
+
+    OBJDUMP="$android_gcc_toolchain/bin/${android_host_toolprefix}objdump"
 
     CFLAGS="$android_host_cflags \
 -ffunction-sections -funwind-tables -fno-exceptions -fno-rtti \
@@ -260,17 +282,21 @@ case $host_platform in
     qnx_toolchain_dir=$QNX_HOST/usr/bin
     qnx_toolchain_prefix=$qnx_toolchain_dir/$qnx_host
     qnx_preprocessor_flags="-include $FRIDA_ROOT/releng/frida-qnx-defines.h"
+
     PATH="$qnx_toolchain_dir:$PATH"
+
     CPP="$qnx_toolchain_prefix-cpp --sysroot=$qnx_sysroot $qnx_preprocessor_flags"
     CC="$qnx_toolchain_prefix-gcc --sysroot=$qnx_sysroot $qnx_preprocessor_flags"
     CXX="$qnx_toolchain_prefix-g++ --sysroot=$qnx_sysroot $qnx_preprocessor_flags"
     OBJC=""
     LD="$qnx_toolchain_prefix-ld --sysroot=$qnx_sysroot"
+
     AR="$qnx_toolchain_prefix-ar"
     NM="$qnx_toolchain_prefix-nm"
-    OBJDUMP="$qnx_toolchain_prefix-objdump"
     RANLIB="$qnx_toolchain_prefix-ranlib"
     STRIP="$qnx_toolchain_prefix-strip"
+
+    OBJDUMP="$qnx_toolchain_prefix-objdump"
 
     CFLAGS="-ffunction-sections -fdata-sections"
     LDFLAGS="-Wl,--no-undefined -Wl,--gc-sections -L$(dirname $qnx_sysroot/lib/gcc/*/libstdc++.a)"
@@ -388,6 +414,10 @@ env_rc=build/${FRIDA_ENV_NAME:-frida}-env-${host_platform_arch}.rc
   echo "export CXXFLAGS=\"$CXXFLAGS\""
   echo "export LD=\"$LD\""
   echo "export LDFLAGS=\"$LDFLAGS\""
+  echo "export AR=\"$AR\""
+  echo "export NM=\"$NM\""
+  echo "export RANLIB=\"$RANLIB\""
+  echo "export STRIP=\"$STRIP\""
   echo "export ACLOCAL_FLAGS=\"$ACLOCAL_FLAGS\""
   echo "export ACLOCAL=\"$ACLOCAL\""
   echo "export CONFIG_SITE=\"$CONFIG_SITE\""
@@ -397,15 +427,14 @@ env_rc=build/${FRIDA_ENV_NAME:-frida}-env-${host_platform_arch}.rc
 case $host_platform in
   linux|android|qnx)
     (
-      echo "export AR=\"$AR\""
-      echo "export NM=\"$NM\""
       echo "export OBJDUMP=\"$OBJDUMP\""
-      echo "export RANLIB=\"$RANLIB\""
-      echo "export STRIP=\"$STRIP\""
     ) >> $env_rc
     ;;
   mac|ios)
     (
+      echo "export OTOOL=\"$OTOOL\""
+      echo "export CODESIGN=\"$CODESIGN\""
+      echo "export LIPO=\"$LIPO\""
       echo "export OBJC=\"$OBJC\""
       echo "export OBJCFLAGS=\"$CFLAGS\""
       echo "export MACOSX_DEPLOYMENT_TARGET=10.7"
