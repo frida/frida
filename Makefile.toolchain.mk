@@ -85,6 +85,8 @@ build/ft-tmp-%/.package-stamp: \
 			--exclude share/gdb \
 			--exclude share/info \
 			--exclude share/man \
+			--exclude "*.pyc" \
+			--exclude "*.pyo" \
 			. | tar -C $(abspath $(@D)/package) -xf -
 	. $< \
 		&& for f in $(@D)/package/bin/*; do \
