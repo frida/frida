@@ -7,6 +7,8 @@ NODE ?= $(shell which node)
 NODE_BIN_DIR := $(shell dirname $(NODE) 2>/dev/null)
 NPM ?= $(NODE_BIN_DIR)/npm
 
+tests ?= /
+
 build_arch := $(shell releng/detect-arch.sh)
 
 HELP_FUN = \
@@ -115,9 +117,9 @@ build/frida-%/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-%/frida-gum/Makefile bui
 	@touch -c $@
 
 check-gum-32: build/frida-linux-i386/lib/pkgconfig/frida-gum-1.0.pc build/frida-gum-submodule-stamp ##@gum Run tests for i386
-	build/tmp-linux-i386/frida-gum/tests/gum-tests
+	build/tmp-linux-i386/frida-gum/tests/gum-tests -p $(tests)
 check-gum-64: build/frida-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc build/frida-gum-submodule-stamp ##@gum Run tests for x86-64
-	build/tmp-linux-x86_64/frida-gum/tests/gum-tests
+	build/tmp-linux-x86_64/frida-gum/tests/gum-tests -p $(tests)
 
 
 core-32: build/frida-linux-i386/lib/pkgconfig/frida-core-1.0.pc ##@core Build for i386

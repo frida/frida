@@ -7,7 +7,11 @@ NODE ?= $(shell which node)
 NODE_BIN_DIR := $(shell dirname $(NODE) 2>/dev/null)
 NPM ?= $(NODE_BIN_DIR)/npm
 
+tests ?= /
+
 build_arch := $(shell releng/detect-arch.sh)
+
+PREFIX ?= /usr
 
 HELP_FUN = \
 	my (%help, @sections); \
@@ -116,8 +120,8 @@ build/frida-%/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-%/frida-gum/Makefile bui
 	@touch -c $@
 
 check-gum-mac: build/frida-mac-i386/lib/pkgconfig/frida-gum-1.0.pc build/frida-mac-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Run tests for Mac
-	build/tmp-mac-i386/frida-gum/tests/gum-tests
-	build/tmp-mac-x86_64/frida-gum/tests/gum-tests
+	build/tmp-mac-i386/frida-gum/tests/gum-tests -p $(tests)
+	build/tmp-mac-x86_64/frida-gum/tests/gum-tests -p $(tests)
 
 
 core-mac: build/frida-mac-i386/lib/pkgconfig/frida-core-1.0.pc build/frida-mac-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Mac
@@ -309,7 +313,7 @@ build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	@touch -c $@
 
 
-python-mac: build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/frida build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so ##@bindings Build Python bindings for Mac
+python-mac: build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/frida build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so build/frida-mac-universal/bin/frida-repl ##@bindings Build Python bindings for Mac
 
 frida-python/configure: build/frida-env-mac-$(build_arch).rc frida-python/configure.ac
 	. build/frida-env-mac-$(build_arch).rc && cd frida-python && ./autogen.sh
@@ -329,6 +333,7 @@ build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/frida: build/tmp-mac-
 	mkdir -p $(@D)
 	cp -a build/frida-mac-x86_64/lib/$(PYTHON_NAME)/site-packages/frida $@
 	@touch $@
+
 build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so: build/tmp-mac-i386/frida-$(PYTHON_NAME)/src/_frida.la build/tmp-mac-x86_64/frida-$(PYTHON_NAME)/src/_frida.la
 	mkdir -p $(@D)
 	cp build/tmp-mac-i386/frida-$(PYTHON_NAME)/src/.libs/_frida.so $(@D)/_frida-32.so
@@ -338,6 +343,10 @@ build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so: build/tmp-
 		&& $$LIPO $(@D)/_frida-32.so $(@D)/_frida-64.so -create -output $@
 	rm $(@D)/_frida-32.so $(@D)/_frida-64.so
 
+build/frida-mac-universal/bin/frida-%: build/tmp-mac-x86_64/frida-$(PYTHON_NAME)/src/_frida.la
+	mkdir -p build/frida-mac-universal/bin \
+		&& cp -r build/frida-mac-x86_64/bin/ build/frida-mac-universal/bin
+
 check-python-mac: python-mac ##@bindings Test Python bindings for Mac
 	export PYTHONPATH="$(shell pwd)/build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
@@ -346,6 +355,14 @@ check-python-mac: python-mac ##@bindings Test Python bindings for Mac
 		else \
 			unit2 discover; \
 		fi
+
+install-python-mac: python-mac ##@bindings Install Python bindings for Mac
+	sitepackages=`$(PYTHON) -c 'import site; print(site.getsitepackages()[0])'` \
+		&& cp -r "build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/" "$$sitepackages"
+
+uninstall-python-mac: ##@bindings Uninstall Python bindings for mac
+	cd `$(PYTHON) -c 'import site; print(site.getsitepackages()[0])'` \
+		&& rm -rf _frida.so frida
 
 
 node-mac: build/frida_stripped-mac-$(build_arch)/lib/node_modules/frida build/frida-node-submodule-stamp ##@bindings Build Node.js bindings for Mac
@@ -369,12 +386,31 @@ check-node-mac: build/frida_stripped-mac-$(build_arch)/lib/node_modules/frida ##
 	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha
 
 
+install-mac: install-python-mac ##@utilities Install frida utilities (frida-{discover,ps,repl,trace})
+	@$(PYTHON) -measy_install colorama \
+		&& for b in "build/frida-mac-universal/bin"/*; do \
+			n=`basename $$b`; \
+			p="$(PREFIX)/bin/$$n"; \
+			grep -v 'sys.path.insert' "$$b" > "$$p"; \
+			chmod +x "$$p"; \
+		done
+
+uninstall-mac: ##@utilities Uninstall frida utilities
+	@for c in discover ps repl trace; do \
+		n=frida-"$$c"; \
+		if which "$$n" &> /dev/null; then \
+			p=`which "$$n"`; \
+			rm -f "$$p"; \
+		fi \
+	done
+
 .PHONY: \
 	distclean clean clean-submodules git-submodules git-submodule-stamps \
 	capstone-update-submodule-stamp \
 	gum-mac gum-ios gum-android check-gum-mac frida-gum-update-submodule-stamp \
 	core-mac core-ios core-android check-core-mac frida-core-update-submodule-stamp \
 	server-mac server-ios server-android \
-	python-mac check-python-mac frida-python-update-submodule-stamp \
-	node-mac check-node-mac frida-node-update-submodule-stamp
+	python-mac check-python-mac install-python-mac uninstall-python-mac frida-python-update-submodule-stamp \
+	node-mac check-node-mac frida-node-update-submodule-stamp \
+	install-mac uninstall-mac
 .SECONDARY:
