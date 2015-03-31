@@ -10,16 +10,7 @@ pkg_config_version := 0.28
 
 
 build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,mac,')
-ifeq ($(build_platform), linux)
-	build_hwp := $(shell uname -i)
-ifneq ($(build_hwp), unknown)
-	build_arch := $(build_hwp)
-else
-	build_arch := $(shell uname -m)
-endif
-else
-	build_arch := $(shell uname -m)
-endif
+build_arch := $(shell releng/detect-arch.sh)
 build_platform_arch := $(build_platform)-$(build_arch)
 
 ifeq ($(build_platform), linux)

@@ -7,12 +7,7 @@ NODE ?= $(shell which node)
 NODE_BIN_DIR := $(shell dirname $(NODE) 2>/dev/null)
 NPM ?= $(NODE_BIN_DIR)/npm
 
-build_hwp := $(shell uname -i)
-ifneq ($(build_hwp), unknown)
-	build_arch := $(build_hwp)
-else
-	build_arch := $(shell uname -m)
-endif
+build_arch := $(shell releng/detect-arch.sh)
 
 HELP_FUN = \
 	my (%help, @sections); \

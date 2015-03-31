@@ -7,7 +7,7 @@ NODE ?= $(shell which node)
 NODE_BIN_DIR := $(shell dirname $(NODE) 2>/dev/null)
 NPM ?= $(NODE_BIN_DIR)/npm
 
-build_arch := $(shell uname -m)
+build_arch := $(shell releng/detect-arch.sh)
 
 HELP_FUN = \
 	my (%help, @sections); \
