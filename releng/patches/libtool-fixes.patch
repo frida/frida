@@ -2,7 +2,7 @@ From 00d66d4264723326a258653e09977a5c0060a219 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Ole=20Andr=C3=A9=20Vadla=20Ravn=C3=A5s?=
  <ole.andre.ravnas@tillitech.com>
 Date: Mon, 30 Mar 2015 14:38:46 +0200
-Subject: [PATCH 1/6] libtool.m4: fix missing initialization.
+Subject: [PATCH 1/7] libtool.m4: fix missing initialization.
 
 The `prev` variable is used uninitialized for the first loop iteration.
 ---
@@ -28,7 +28,7 @@ From 25825b304a5cb75d046a660da91fc0e33b7d0cd3 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Ole=20Andr=C3=A9=20Vadla=20Ravn=C3=A5s?=
  <ole.andre.ravnas@tillitech.com>
 Date: Mon, 30 Mar 2015 14:45:00 +0200
-Subject: [PATCH 2/6] libtool.m4: fix space logic in flag detection.
+Subject: [PATCH 2/7] libtool.m4: fix space logic in flag detection.
 
 This is a regression introduced by a53d6cc4.
 ---
@@ -53,18 +53,35 @@ index a49d486..b6f5e91 100644
 -- 
 2.2.1
 
-From 5fbebe40a8134fb138b337d13863763de88a83b2 Mon Sep 17 00:00:00 2001
+From cef307760b53d39c0640e180df54e5a59bd861c3 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Ole=20Andr=C3=A9=20Vadla=20Ravn=C3=A5s?=
  <ole.andre.ravnas@tillitech.com>
 Date: Mon, 30 Mar 2015 15:31:55 +0200
-Subject: [PATCH 3/6] libtool.m4: preserve static vs. dynamic postdeps.
+Subject: [PATCH 3/7] libtool.m4: preserve static vs. dynamic postdeps.
 
 This makes it possible to specify flags like `-static-libstdc++` without
 the `-Bstatic` getting dropped by libtool.
 ---
- m4/libtool.m4 | 34 ++++++++++++++++++++++++++++++++--
- 1 file changed, 32 insertions(+), 2 deletions(-)
+ build-aux/ltmain.in |  5 +++++
+ m4/libtool.m4       | 34 ++++++++++++++++++++++++++++++++--
+ 2 files changed, 37 insertions(+), 2 deletions(-)
 
+diff --git a/build-aux/ltmain.in b/build-aux/ltmain.in
+index d5cf07a..8fe3565 100644
+--- a/build-aux/ltmain.in
++++ b/build-aux/ltmain.in
+@@ -5708,6 +5708,11 @@ func_mode_link ()
+ 	  fi
+ 	  continue
+ 	  ;;
++	-Bstatic|-Bdynamic)
++	  deplibs="$deplib $deplibs"
++	  test lib = "$linkmode" && newdependency_libs="$deplib $newdependency_libs"
++	  continue
++	  ;;
+ 	-l*)
+ 	  if test lib != "$linkmode" && test prog != "$linkmode"; then
+ 	    func_warning "'-l' is ignored for archives/objects"
 diff --git a/m4/libtool.m4 b/m4/libtool.m4
 index b6f5e91..f7f4200 100644
 --- a/m4/libtool.m4
@@ -140,18 +157,18 @@ index b6f5e91..f7f4200 100644
 -- 
 2.2.1
 
-From 0c7eb75a75068806db40a5029260252e1efa72c9 Mon Sep 17 00:00:00 2001
+From a3376cb02dd44010c53f0695b67ddb0d2cfb8673 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Ole=20Andr=C3=A9=20Vadla=20Ravn=C3=A5s?=
  <ole.andre.ravnas@tillitech.com>
 Date: Mon, 30 Mar 2015 17:26:44 +0200
-Subject: [PATCH 4/6] libtool: get rid of excessive sed forks.
+Subject: [PATCH 4/7] libtool: get rid of excessive sed forks.
 
 Based on patch by Harald Hoyer:
 http://lists.gnu.org/archive/html/bug-libtool/2015-03/msg00001.html
 ---
  bootstrap               | 10 +++++++++-
  build-aux/ltmain.in     |  6 +++++-
- gl/build-aux/funclib.sh | 10 +++++++++-
+ build-aux/funclib.sh | 10 +++++++++-
  3 files changed, 23 insertions(+), 3 deletions(-)
 
 diff --git a/bootstrap b/bootstrap
@@ -176,7 +193,7 @@ index 4596413..d9952b5 100755
            _G_unquoted_arg=$1 ;;
        esac
 diff --git a/build-aux/ltmain.in b/build-aux/ltmain.in
-index d5cf07a..7392493 100644
+index 8fe3565..1cc1e82 100644
 --- a/build-aux/ltmain.in
 +++ b/build-aux/ltmain.in
 @@ -3346,7 +3346,11 @@ else
@@ -216,10 +233,10 @@ index 39d972e..bd69802 100644
 -- 
 2.2.1
 
-From ecf98f7454642187769ce56ebd3fb091dfbf62f1 Mon Sep 17 00:00:00 2001
+From 73eb6df92a588b826d10c8ed48b298332c653c0d Mon Sep 17 00:00:00 2001
 From: Mike Frysinger <vapier@gentoo.org>
 Date: Mon, 16 Mar 2015 18:18:29 -0400
-Subject: [PATCH 5/6] libtool: pass through -fuse-ld flags.
+Subject: [PATCH 5/7] libtool: pass through -fuse-ld flags.
 
 Starting with gcc-4.8, there's a -fuse-ld flag that can be used to select
 between bfd & gold.  Make sure we pass it through to the linking stage.
@@ -230,7 +247,7 @@ between bfd & gold.  Make sure we pass it through to the linking stage.
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/build-aux/ltmain.in b/build-aux/ltmain.in
-index 7392493..6975d0f 100644
+index 1cc1e82..c1d98bd 100644
 --- a/build-aux/ltmain.in
 +++ b/build-aux/ltmain.in
 @@ -5364,10 +5364,12 @@ func_mode_link ()
@@ -250,11 +267,11 @@ index 7392493..6975d0f 100644
 -- 
 2.2.1
 
-From 1adaa0db9716f1cd0edeb2e7946534544bd24b3f Mon Sep 17 00:00:00 2001
+From a1cc45ba433d3de13215364f66b3e205c59c5c08 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Ole=20Andr=C3=A9=20Vadla=20Ravn=C3=A5s?=
  <ole.andre.ravnas@tillitech.com>
 Date: Mon, 30 Mar 2015 17:51:01 +0200
-Subject: [PATCH 6/6] libtool: pass through -fsanitize flags.
+Subject: [PATCH 6/7] libtool: pass through -fsanitize flags.
 
 Recent versions of GCC and Clang provide an -fsanitize flag that can be
 used to generate additional runtime checks.
@@ -265,7 +282,7 @@ used to generate additional runtime checks.
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/build-aux/ltmain.in b/build-aux/ltmain.in
-index 6975d0f..2c67097 100644
+index c1d98bd..84f7084 100644
 --- a/build-aux/ltmain.in
 +++ b/build-aux/ltmain.in
 @@ -5360,6 +5360,7 @@ func_mode_link ()
@@ -285,6 +302,44 @@ index 6975d0f..2c67097 100644
          func_quote_for_eval "$arg"
  	arg=$func_quote_for_eval_result
          func_append compile_command " $arg"
+-- 
+2.2.1
+
+From ba1ecd5fc3883ab757d0a177ae53e78ec6222f9e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ole=20Andr=C3=A9=20Vadla=20Ravn=C3=A5s?=
+ <ole.andre.ravnas@tillitech.com>
+Date: Mon, 30 Mar 2015 18:32:22 +0200
+Subject: [PATCH 7/7] libtool.m4: add support for Android conventions.
+
+Based on patch by @mbernasocchi.
+---
+ m4/libtool.m4 | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/m4/libtool.m4 b/m4/libtool.m4
+index f7f4200..efb99f9 100644
+--- a/m4/libtool.m4
++++ b/m4/libtool.m4
+@@ -2841,8 +2841,17 @@ linux* | k*bsd*-gnu | kopensolaris*-gnu | gnu*)
+   version_type=linux # correct to gnu/linux during the next big refactor
+   need_lib_prefix=no
+   need_version=no
+-  library_names_spec='$libname$release$shared_ext$versuffix $libname$release$shared_ext$major $libname$shared_ext'
+-  soname_spec='$libname$release$shared_ext$major'
++  case $host_os in
++  # This must be Linux Android ELF which has no support for versioned libs.
++  linux-android*)
++    library_names_spec='$libname$shared_ext'
++    soname_spec='$libname$shared_ext'
++    ;;
++  *)
++     library_names_spec='$libname$release$shared_ext$versuffix $libname$release$shared_ext$major $libname$shared_ext'
++     soname_spec='$libname$release$shared_ext$major'
++    ;;
++  esac
+   finish_cmds='PATH="\$PATH:/sbin" ldconfig -n $libdir'
+   shlibpath_var=LD_LIBRARY_PATH
+   shlibpath_overrides_runpath=no
 -- 
 2.2.1
 
