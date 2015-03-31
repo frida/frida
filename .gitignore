@@ -8,6 +8,7 @@
 /automake
 /binutils
 /build
+/gettext
 /glib
 /ipch
 /json-glib

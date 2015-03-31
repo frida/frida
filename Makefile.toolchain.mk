@@ -6,6 +6,7 @@ m4_version := 1.4.17
 autoconf_version := 2.69
 automake_version := 1.15
 libtool_version := 2.4.6
+gettext_version := 0.19.4
 pkg_config_version := 0.28
 
 
@@ -74,6 +75,7 @@ build/ft-tmp-%/.package-stamp: \
 		build/ft-%/bin/autoconf \
 		build/ft-%/bin/automake \
 		build/ft-%/bin/libtool \
+		build/ft-%/bin/autopoint \
 		build/ft-%/bin/glib-genmarshal \
 		build/ft-%/bin/pkg-config \
 		build/ft-%/bin/valac \
@@ -189,7 +191,9 @@ build/ft-%/bin/libtool: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 		&& make $(MAKE_J) install
 	@touch $@
 
-$(eval $(call make-git-module-rules,libffi,build/ft-%/lib/pkgconfig/libffi.pc,build/ft-%/bin/libtool))
+$(eval $(call make-tarball-module-rules,gettext,http://gnuftp.uib.no/gettext/gettext-$(gettext_version).tar.gz,build/ft-%/bin/autopoint,build/ft-%/bin/libtool))
+
+$(eval $(call make-git-module-rules,libffi,build/ft-%/lib/pkgconfig/libffi.pc,build/ft-%/bin/autopoint))
 
 $(eval $(call make-git-module-rules,glib,build/ft-%/bin/glib-genmarshal,build/ft-%/lib/pkgconfig/libffi.pc))
 
