@@ -198,9 +198,9 @@ build/tmp-%/frida-core/tests/frida-tests: build/frida-%/lib/pkgconfig/frida-core
 	@touch -c $@
 
 check-core-32: build/tmp-linux-i386/frida-core/tests/frida-tests build/frida-core-submodule-stamp ##@core Run tests for i386
-	$<
+	$< -p $(tests)
 check-core-64: build/tmp-linux-x86_64/frida-core/tests/frida-tests build/frida-core-submodule-stamp ##@core Run tests for x86-64
-	$<
+	$< -p $(tests)
 
 
 server-32: build/frida_stripped-linux-i386/bin/frida-server ##@server Build for i386

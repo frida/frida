@@ -273,8 +273,8 @@ build/tmp-%/frida-core/tests/frida-tests: build/frida-%/lib/pkgconfig/frida-core
 	@touch -c $@
 
 check-core-mac: build/tmp-mac-i386/frida-core/tests/frida-tests build/tmp-mac-x86_64/frida-core/tests/frida-tests ##@core Run tests for Mac
-	build/tmp-mac-i386/frida-core/tests/frida-tests
-	build/tmp-mac-x86_64/frida-core/tests/frida-tests
+	build/tmp-mac-i386/frida-core/tests/frida-tests -p $(tests)
+	build/tmp-mac-x86_64/frida-core/tests/frida-tests -p $(tests)
 
 
 server-mac: build/frida-mac-universal/bin/frida-server ##@server Build for Mac
@@ -333,7 +333,6 @@ build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/frida: build/tmp-mac-
 	mkdir -p $(@D)
 	cp -a build/frida-mac-x86_64/lib/$(PYTHON_NAME)/site-packages/frida $@
 	@touch $@
-
 build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so: build/tmp-mac-i386/frida-$(PYTHON_NAME)/src/_frida.la build/tmp-mac-x86_64/frida-$(PYTHON_NAME)/src/_frida.la
 	mkdir -p $(@D)
 	cp build/tmp-mac-i386/frida-$(PYTHON_NAME)/src/.libs/_frida.so $(@D)/_frida-32.so
@@ -403,6 +402,7 @@ uninstall-mac: ##@utilities Uninstall frida utilities
 			rm -f "$$p"; \
 		fi \
 	done
+
 
 .PHONY: \
 	distclean clean clean-submodules git-submodules git-submodule-stamps \
