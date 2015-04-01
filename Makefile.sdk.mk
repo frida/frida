@@ -222,7 +222,7 @@ endif
 
 ifeq ($(host_platform), linux)
 	v8_host_flags := -f make-linux
-	v8_libs_private := " -lm"
+	v8_libs_private := " -lrt"
 endif
 ifeq ($(host_platform), qnx)
 	v8_host_flags := -f make-qnx
@@ -248,10 +248,10 @@ ifeq ($(host_platform), android)
 	v8_env_vars := \
 		MACOSX_DEPLOYMENT_TARGET="" \
 		CXX="$$CXX" \
-		CXX_host="$$(xcrun --sdk macosx10.9 -f clang++) -stdlib=libc++" \
+		CXX_host="$$(xcrun --sdk macosx10.10 -f clang++) -stdlib=libc++" \
 		CXX_target="$$CXX" \
 		LINK="$$CXX" \
-		LINK_host="$$(xcrun --sdk macosx10.9 -f clang++) -stdlib=libc++" \
+		LINK_host="$$(xcrun --sdk macosx10.10 -f clang++) -stdlib=libc++" \
 		CFLAGS="" \
 		CXXFLAGS="" \
 		CPPFLAGS="" \
@@ -290,7 +290,7 @@ build/fs-tmp-%/.v8-stamp: build/.v8-stamp
 	git clone --depth 1 v8 $(@D)/v8
 	@touch $@
 
-build/fs-tmp-%/v8/out/$(v8_target)/libv8_base.$(v8_arch).a: build/fs-env-%.rc build/fs-tmp-%/.v8-stamp
+build/fs-tmp-%/v8/out/$(v8_target)/libv8_snapshot.a: build/fs-env-%.rc build/fs-tmp-%/.v8-stamp
 	. $< \
 		&& cd build/fs-tmp-$*/v8 \
 		&& PATH="/usr/bin:/bin:/usr/sbin:/sbin" \
@@ -298,11 +298,13 @@ build/fs-tmp-%/v8/out/$(v8_target)/libv8_base.$(v8_arch).a: build/fs-env-%.rc bu
 			make $(MAKE_J) $(v8_target) GYPFLAGS="$(v8_flags)"
 	@touch $@
 
-build/fs-%/lib/pkgconfig/v8.pc: build/fs-tmp-%/v8/out/$(v8_target)/libv8_base.$(v8_arch).a
+build/fs-%/lib/pkgconfig/v8.pc: build/fs-tmp-%/v8/out/$(v8_target)/libv8_snapshot.a
 	install -d build/fs-$*/include
 	install -m 644 v8/include/* build/fs-$*/include
 	install -d build/fs-$*/lib
-	install -m 644 build/fs-tmp-$*/v8/out/$(v8_target)/libv8_base.$(v8_arch).a build/fs-$*/lib
+	install -m 644 build/fs-tmp-$*/v8/out/$(v8_target)/libv8_libbase.a build/fs-$*/lib
+	install -m 644 build/fs-tmp-$*/v8/out/$(v8_target)/libv8_base.a build/fs-$*/lib
+	install -m 644 build/fs-tmp-$*/v8/out/$(v8_target)/libv8_libplatform.a build/fs-$*/lib
 	install -m 644 build/fs-tmp-$*/v8/out/$(v8_target)/libv8_snapshot.a build/fs-$*/lib
 	install -d $(@D)
 	echo "prefix=\$${frida_sdk_prefix}" > $@.tmp
@@ -312,8 +314,8 @@ build/fs-%/lib/pkgconfig/v8.pc: build/fs-tmp-%/v8/out/$(v8_target)/libv8_base.$(
 	echo "" >> $@.tmp
 	echo "Name: V8" >> $@.tmp
 	echo "Description: V8 JavaScript Engine" >> $@.tmp
-	echo "Version: 3.26.6.1" >> $@.tmp
-	echo "Libs: -L\$${libdir} -lv8_base.$(v8_arch) -lv8_snapshot$(v8_libs_private)" >> $@.tmp
+	echo "Version: 4.3.62" >> $@.tmp
+	echo "Libs: -L\$${libdir} -lv8_libbase -lv8_base -lv8_libplatform -lv8_snapshot$(v8_libs_private)" >> $@.tmp
 	echo "Cflags: -I\$${includedir}" >> $@.tmp
 	mv $@.tmp $@
 
