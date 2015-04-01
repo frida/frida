@@ -313,7 +313,7 @@ build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	@touch -c $@
 
 
-python-mac: build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/frida build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so build/frida-mac-universal/bin/frida-repl ##@bindings Build Python bindings for Mac
+python-mac: build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/frida build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so build/frida-mac-universal/bin/frida-repl ##@python Build Python bindings for Mac
 
 frida-python/configure: build/frida-env-mac-$(build_arch).rc frida-python/configure.ac
 	. build/frida-env-mac-$(build_arch).rc && cd frida-python && ./autogen.sh
@@ -346,7 +346,7 @@ build/frida-mac-universal/bin/frida-%: build/tmp-mac-x86_64/frida-$(PYTHON_NAME)
 	mkdir -p build/frida-mac-universal/bin \
 		&& cp -r build/frida-mac-x86_64/bin/ build/frida-mac-universal/bin
 
-check-python-mac: python-mac ##@bindings Test Python bindings for Mac
+check-python-mac: python-mac ##@python Test Python bindings for Mac
 	export PYTHONPATH="$(shell pwd)/build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
 		&& if $(PYTHON) -c "import sys; v = sys.version_info; can_execute_modules = v[0] > 2 or (v[0] == 2 and v[1] >= 7); sys.exit(0 if can_execute_modules else 1)"; then \
@@ -355,16 +355,16 @@ check-python-mac: python-mac ##@bindings Test Python bindings for Mac
 			unit2 discover; \
 		fi
 
-install-python-mac: python-mac ##@bindings Install Python bindings for Mac
+install-python-mac: python-mac ##@python Install Python bindings for Mac
 	sitepackages=`$(PYTHON) -c 'import site; print(site.getsitepackages()[0])'` \
 		&& cp -r "build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/" "$$sitepackages"
 
-uninstall-python-mac: ##@bindings Uninstall Python bindings for mac
+uninstall-python-mac: ##@python Uninstall Python bindings for mac
 	cd `$(PYTHON) -c 'import site; print(site.getsitepackages()[0])'` \
 		&& rm -rf _frida.so frida
 
 
-node-mac: build/frida_stripped-mac-$(build_arch)/lib/node_modules/frida build/frida-node-submodule-stamp ##@bindings Build Node.js bindings for Mac
+node-mac: build/frida_stripped-mac-$(build_arch)/lib/node_modules/frida build/frida-node-submodule-stamp ##@node Build Node.js bindings for Mac
 
 build/frida_stripped-%/lib/node_modules/frida: build/frida-%/lib/pkgconfig/frida-core-1.0.pc build/frida-node-submodule-stamp
 	export PATH=$(NODE_BIN_DIR):$$PATH FRIDA=$(FRIDA) \
@@ -381,7 +381,7 @@ build/frida_stripped-%/lib/node_modules/frida: build/frida-%/lib/pkgconfig/frida
 		&& . build/frida-env-mac-$(build_arch).rc && $$STRIP -Sx ../$@.tmp/lib/binding/Release/node-*/frida_binding.node \
 		&& mv ../$@.tmp ../$@
 
-check-node-mac: build/frida_stripped-mac-$(build_arch)/lib/node_modules/frida ##@bindings Test Node.js bindings for Mac
+check-node-mac: build/frida_stripped-mac-$(build_arch)/lib/node_modules/frida ##@node Test Node.js bindings for Mac
 	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha
 
 

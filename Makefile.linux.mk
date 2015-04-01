@@ -218,8 +218,8 @@ build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	@touch -c $@
 
 
-python-32: build/frida_stripped-linux-i386/lib/$(PYTHON_NAME)/site-packages/frida build/frida_stripped-linux-i386/lib/$(PYTHON_NAME)/site-packages/_frida.so build/frida-python-submodule-stamp ##@bindings Build Python bindings for i386
-python-64: build/frida_stripped-linux-x86_64/lib/$(PYTHON_NAME)/site-packages/frida build/frida_stripped-linux-x86_64/lib/$(PYTHON_NAME)/site-packages/_frida.so build/frida-python-submodule-stamp ##@bindings Build Python bindings for x86-64
+python-32: build/frida_stripped-linux-i386/lib/$(PYTHON_NAME)/site-packages/frida build/frida_stripped-linux-i386/lib/$(PYTHON_NAME)/site-packages/_frida.so build/frida-python-submodule-stamp ##@python Build Python bindings for i386
+python-64: build/frida_stripped-linux-x86_64/lib/$(PYTHON_NAME)/site-packages/frida build/frida_stripped-linux-x86_64/lib/$(PYTHON_NAME)/site-packages/_frida.so build/frida-python-submodule-stamp ##@python Build Python bindings for x86-64
 
 frida-python/configure: build/frida-env-linux-$(build_arch).rc frida-python/configure.ac
 	. build/frida-env-linux-$(build_arch).rc && cd frida-python && ./autogen.sh
@@ -244,18 +244,18 @@ build/frida_stripped-%/lib/$(PYTHON_NAME)/site-packages/_frida.so: build/tmp-%/f
 	cp build/tmp-$*/frida-$(PYTHON_NAME)/src/.libs/_frida.so $@
 	strip --strip-all $@
 
-check-python-32: build/frida_stripped-linux-i386/lib/$(PYTHON_NAME)/site-packages/frida build/frida_stripped-linux-i386/lib/$(PYTHON_NAME)/site-packages/_frida.so ##@bindings Test Python bindings for i386
+check-python-32: build/frida_stripped-linux-i386/lib/$(PYTHON_NAME)/site-packages/frida build/frida_stripped-linux-i386/lib/$(PYTHON_NAME)/site-packages/_frida.so ##@python Test Python bindings for i386
 	export PYTHONPATH="$(shell pwd)/build/frida_stripped-linux-i386/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
 		&& ${PYTHON} -m unittest tests.test_core tests.test_tracer
-check-python-64: build/frida_stripped-linux-x86_64/lib/$(PYTHON_NAME)/site-packages/frida build/frida_stripped-linux-x86_64/lib/$(PYTHON_NAME)/site-packages/_frida.so ##@bindings Test Python bindings for x86-64
+check-python-64: build/frida_stripped-linux-x86_64/lib/$(PYTHON_NAME)/site-packages/frida build/frida_stripped-linux-x86_64/lib/$(PYTHON_NAME)/site-packages/_frida.so ##@python Test Python bindings for x86-64
 	export PYTHONPATH="$(shell pwd)/build/frida_stripped-linux-x86_64/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
 		&& ${PYTHON} -m unittest tests.test_core tests.test_tracer
 
 
-node-32: build/frida_stripped-linux-i386/lib/node_modules/frida build/frida-node-submodule-stamp ##@bindings Build Node.js bindings for i386
-node-64: build/frida_stripped-linux-x86_64/lib/node_modules/frida build/frida-node-submodule-stamp ##@bindings Build Node.js bindings for x86-64
+node-32: build/frida_stripped-linux-i386/lib/node_modules/frida build/frida-node-submodule-stamp ##@node Build Node.js bindings for i386
+node-64: build/frida_stripped-linux-x86_64/lib/node_modules/frida build/frida-node-submodule-stamp ##@node Build Node.js bindings for x86-64
 
 build/frida_stripped-%/lib/node_modules/frida: build/frida-%/lib/pkgconfig/frida-core-1.0.pc build/frida-node-submodule-stamp
 	export PATH=$(NODE_BIN_DIR):$$PATH FRIDA=$(FRIDA) \
@@ -272,9 +272,9 @@ build/frida_stripped-%/lib/node_modules/frida: build/frida-%/lib/pkgconfig/frida
 		&& strip --strip-all ../$@.tmp/lib/binding/Release/node-*/frida_binding.node \
 		&& mv ../$@.tmp ../$@
 
-check-node-32: build/frida_stripped-linux-i386/lib/node_modules/frida ##@bindings Test Node.js bindings for i386
+check-node-32: build/frida_stripped-linux-i386/lib/node_modules/frida ##@node Test Node.js bindings for i386
 	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha
-check-node-64: build/frida_stripped-linux-x86_64/lib/node_modules/frida ##@bindings Test Node.js bindings for x86-64
+check-node-64: build/frida_stripped-linux-x86_64/lib/node_modules/frida ##@node Test Node.js bindings for x86-64
 	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha
 
 
