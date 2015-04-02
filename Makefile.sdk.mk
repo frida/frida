@@ -299,8 +299,10 @@ build/fs-tmp-%/v8/out/$(v8_target)/libv8_snapshot.a: build/fs-env-%.rc build/fs-
 	@touch $@
 
 build/fs-%/lib/pkgconfig/v8.pc: build/fs-tmp-%/v8/out/$(v8_target)/libv8_snapshot.a
-	install -d build/fs-$*/include
-	install -m 644 v8/include/* build/fs-$*/include
+	install -d build/fs-$*/include/v8/include
+	install -m 644 v8/include/*.h build/fs-$*/include/v8/include
+	install -d build/fs-$*/include/v8/include/libplatform
+	install -m 644 v8/include/libplatform/*.h build/fs-$*/include/v8/include/libplatform
 	install -d build/fs-$*/lib
 	install -m 644 build/fs-tmp-$*/v8/out/$(v8_target)/libv8_libbase.a build/fs-$*/lib
 	install -m 644 build/fs-tmp-$*/v8/out/$(v8_target)/libv8_base.a build/fs-$*/lib
@@ -310,13 +312,13 @@ build/fs-%/lib/pkgconfig/v8.pc: build/fs-tmp-%/v8/out/$(v8_target)/libv8_snapsho
 	echo "prefix=\$${frida_sdk_prefix}" > $@.tmp
 	echo "exec_prefix=\$${prefix}" >> $@.tmp
 	echo "libdir=\$${exec_prefix}/lib" >> $@.tmp
-	echo "includedir=\$${prefix}/include" >> $@.tmp
+	echo "includedir=\$${prefix}/include/v8" >> $@.tmp
 	echo "" >> $@.tmp
 	echo "Name: V8" >> $@.tmp
 	echo "Description: V8 JavaScript Engine" >> $@.tmp
 	echo "Version: 4.3.62" >> $@.tmp
 	echo "Libs: -L\$${libdir} -lv8_libbase -lv8_base -lv8_libplatform -lv8_snapshot$(v8_libs_private)" >> $@.tmp
-	echo "Cflags: -I\$${includedir}" >> $@.tmp
+	echo "Cflags: -I\$${includedir} -I\$${includedir}/include" >> $@.tmp
 	mv $@.tmp $@
 
 
