@@ -18,7 +18,7 @@
       <AdditionalIncludeDirectories>$(IntDir);$(SolutionDir)capstone\include;$(SolutionDir)frida-gum;$(SolutionDir)frida-gum\libs;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\v8;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\v8\include;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\json-glib-1.0;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\gee-0.8;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\gio-win32-2.0;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\lib\glib-2.0\include;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\glib-2.0;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\lib\libffi-3.1\include;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <DisableSpecificWarnings>4127;4244;4305;4715;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <PreprocessorDefinitions>PSAPI_VERSION=1;WIN32;_WINDOWS;WINVER=0x0601;_WIN32_WINNT=0x0601;GUM_STATIC;FFI_BUILDING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PSAPI_VERSION=1;WIN32;_WINDOWS;WINVER=0x0501;_WIN32_WINNT=0x0501;GUM_STATIC;FFI_BUILDING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ProgramDataBaseFileName>$(OutDir)\$(ProjectName).pdb</ProgramDataBaseFileName>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
