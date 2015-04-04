@@ -106,6 +106,7 @@ build/.zlib-stamp:
 
 build/fs-tmp-%/zlib/Makefile: build/fs-env-%.rc build/.zlib-stamp
 	$(RM) -r $(@D)
+	mkdir -p build/fs-tmp-$*
 	cp -a zlib $(@D)
 	. $< \
 		&& cd $(@D) \
