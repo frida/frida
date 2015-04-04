@@ -86,7 +86,14 @@ build/ft-tmp-%/.package-stamp: \
 		&& tar -c \
 			--exclude etc \
 			--exclude include \
-			--exclude lib \
+			--exclude "lib/*.a" \
+			--exclude "lib/*.la" \
+			--exclude "lib/*.so*" \
+			--exclude "lib/*.dylib*" \
+			--exclude lib/glib-2.0 \
+			--exclude lib/gio \
+			--exclude lib/libffi* \
+			--exclude lib/pkgconfig \
 			--exclude share/devhelp \
 			--exclude share/doc \
 			--exclude share/emacs \
@@ -96,8 +103,14 @@ build/ft-tmp-%/.package-stamp: \
 			--exclude "*.pyc" \
 			--exclude "*.pyo" \
 			. | tar -C $(abspath $(@D)/package) -xf -
+	cd $(abspath $(@D)/package)/bin \
+		&& for tool in aclocal automake; do \
+			rm $$tool-$(automake_version); \
+			mv $$tool $$tool-$(automake_version); \
+			ln -s $$tool-$(automake_version) $$tool; \
+		done
 	. $< \
-		&& for f in $(@D)/package/bin/*; do \
+		&& for f in $(@D)/package/bin/* $(@D)/package/lib/gettext/* $(@D)/package/lib/vala-*/*; do \
 			if ! [ -L $$f ] && file -b --mime-type $$f | egrep -q "^application"; then \
 				$$STRIP $(strip_all) $$f || exit 1; \
 			fi \
