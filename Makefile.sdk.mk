@@ -109,10 +109,12 @@ build/fs-tmp-%/zlib/Makefile: build/fs-env-%.rc build/.zlib-stamp
 	mkdir -p build/fs-tmp-$*
 	cp -a zlib $(@D)
 	. $< \
+		&& export PACKAGE_TARNAME=zlib \
+		&& . $$CONFIG_SITE \
+		&& export CFLAGS CXXFLAGS OBJCFLAGS \
 		&& cd $(@D) \
-		&& prefix=$$(egrep "^frida_prefix=" "$$CONFIG_SITE" | cut -f2 -d"=") \
 		&& ./configure \
-			--prefix=$$prefix \
+			--prefix=$$frida_prefix \
 			--static
 
 build/fs-%/lib/libz.a: build/fs-env-%.rc build/fs-tmp-%/zlib/Makefile
