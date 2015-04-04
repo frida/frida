@@ -3,6 +3,7 @@ MAKE_J ?= -j 8
 repo_base_url := "git://github.com/frida"
 repo_suffix := ".git"
 
+zlib_version := 1.2.8
 libiconv_version := 1.14
 binutils_version := 2.25
 
@@ -65,6 +66,7 @@ build/sdk-$(host_platform)-$(host_arch).tar.bz2: build/fs-tmp-$(host_platform_ar
 	mv $@.tmp $@
 
 build/fs-tmp-%/.package-stamp: \
+		build/fs-%/lib/libz.a \
 		$(xz) \
 		$(unwind) \
 		$(iconv) \
@@ -170,6 +172,27 @@ build/fs-tmp-%/binutils/bfd/libbfd.a: build/fs-env-%.rc build/fs-tmp-%/binutils/
 	. $< && make -C $(@D) $(MAKE_J)
 
 
+define make-tarball-module-rules
+build/.$1-stamp:
+	$(RM) -r $1
+	mkdir -p $1
+	$(download) $2 | tar -C $1 -xz --strip-components 1
+	@mkdir -p $$(@D)
+	@touch $$@
+
+build/fs-tmp-%/$1/Makefile: build/fs-env-%.rc build/.$1-stamp $4
+	$(RM) -r $$(@D)
+	mkdir -p $$(@D)
+	. $$< && cd $$(@D) && ../../../$1/configure
+
+$3: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
+	. $$< \
+		&& cd build/fs-tmp-$$*/$1 \
+		&& make $(MAKE_J) GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums \
+		&& make $(MAKE_J) GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums install
+	@touch $$@
+endef
+
 define make-git-module-rules
 build/.$1-stamp:
 	$(RM) -r $1
@@ -195,13 +218,15 @@ $2: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
 	@touch $$@
 endef
 
+$(eval $(call make-tarball-module-rules,zlib,http://zlib.net/zlib-$(zlib_version).tar.gz,build/fs-%/lib/libz.a,))
+
 $(eval $(call make-git-module-rules,xz,build/fs-%/lib/pkgconfig/liblzma.pc,))
 
 $(eval $(call make-git-module-rules,libunwind,build/fs-%/lib/pkgconfig/libunwind.pc,$(xz)))
 
 $(eval $(call make-git-module-rules,libffi,build/fs-%/lib/pkgconfig/libffi.pc,))
 
-$(eval $(call make-git-module-rules,glib,build/fs-%/lib/pkgconfig/glib-2.0.pc,build/fs-%/lib/pkgconfig/libffi.pc $(iconv)))
+$(eval $(call make-git-module-rules,glib,build/fs-%/lib/pkgconfig/glib-2.0.pc,build/fs-%/lib/pkgconfig/libffi.pc $(iconv) build/fs-%/lib/libz.a))
 
 $(eval $(call make-git-module-rules,libgee,build/fs-%/lib/pkgconfig/gee-0.8.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc))
 
