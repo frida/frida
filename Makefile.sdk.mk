@@ -97,6 +97,31 @@ endif
 	@touch $@
 
 
+build/.zlib-stamp:
+	$(RM) -r zlib
+	mkdir zlib
+	$(download) http://zlib.net/zlib-$(zlib_version).tar.gz | tar -C zlib -xz --strip-components 1
+	@mkdir -p $(@D)
+	@touch $@
+
+build/fs-tmp-%/zlib/Makefile: build/fs-env-%.rc build/.zlib-stamp
+	$(RM) -r $(@D)
+	cp -a zlib $(@D)
+	. $< \
+		&& cd $(@D) \
+		&& prefix=$$(egrep "^frida_prefix=" "$$CONFIG_SITE" | cut -f2 -d"=") \
+		&& ./configure \
+			--prefix=$$prefix \
+			--static
+
+build/fs-%/lib/libz.a: build/fs-env-%.rc build/fs-tmp-%/zlib/Makefile
+	. $< \
+		&& cd build/fs-tmp-$*/zlib \
+		&& make $(MAKE_J) \
+		&& make $(MAKE_J) install
+	@touch $@
+
+
 build/.libiconv-stamp:
 	$(RM) -r libiconv
 	mkdir libiconv
@@ -172,27 +197,6 @@ build/fs-tmp-%/binutils/bfd/libbfd.a: build/fs-env-%.rc build/fs-tmp-%/binutils/
 	. $< && make -C $(@D) $(MAKE_J)
 
 
-define make-tarball-module-rules
-build/.$1-stamp:
-	$(RM) -r $1
-	mkdir -p $1
-	$(download) $2 | tar -C $1 -xz --strip-components 1
-	@mkdir -p $$(@D)
-	@touch $$@
-
-build/fs-tmp-%/$1/Makefile: build/fs-env-%.rc build/.$1-stamp $4
-	$(RM) -r $$(@D)
-	mkdir -p $$(@D)
-	. $$< && cd $$(@D) && ../../../$1/configure
-
-$3: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
-	. $$< \
-		&& cd build/fs-tmp-$$*/$1 \
-		&& make $(MAKE_J) GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums \
-		&& make $(MAKE_J) GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums install
-	@touch $$@
-endef
-
 define make-git-module-rules
 build/.$1-stamp:
 	$(RM) -r $1
@@ -217,8 +221,6 @@ $2: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
 		&& make $(MAKE_J) GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums install
 	@touch $$@
 endef
-
-$(eval $(call make-tarball-module-rules,zlib,http://zlib.net/zlib-$(zlib_version).tar.gz,build/fs-%/lib/libz.a,))
 
 $(eval $(call make-git-module-rules,xz,build/fs-%/lib/pkgconfig/liblzma.pc,))
 
