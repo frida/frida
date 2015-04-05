@@ -270,7 +270,7 @@ ifeq ($(host_arch), arm64)
 endif
 
 ifeq ($(host_platform), linux)
-	v8_host_flags := -f make-linux
+	v8_host_flags := -f make-linux -Dlinux_use_bundled_binutils=0 -Dlinux_use_bundled_gold=0 -Dlinux_use_gold_flags=0
 	v8_libs_private := " -lrt"
 endif
 ifeq ($(host_platform), qnx)
