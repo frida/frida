@@ -86,13 +86,10 @@ build/ft-tmp-%/.package-stamp: \
 		&& tar -c \
 			--exclude etc \
 			--exclude include \
-			--exclude "lib/*.a" \
-			--exclude "lib/*.la" \
-			--exclude "lib/*.so*" \
-			--exclude "lib/*.dylib*" \
+			--exclude lib/charset.alias \
+			--exclude "lib/lib*" \
 			--exclude lib/glib-2.0 \
 			--exclude lib/gio \
-			--exclude lib/libffi* \
 			--exclude lib/pkgconfig \
 			--exclude share/devhelp \
 			--exclude share/doc \
