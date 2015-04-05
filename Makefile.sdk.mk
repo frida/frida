@@ -31,6 +31,12 @@ endif
 host_platform_arch := $(host_platform)-$(host_arch)
 
 
+ifeq ($(host_platform), mac)
+	iconv := build/fs-%/lib/libiconv.a
+endif
+ifeq ($(host_platform), ios)
+	iconv := build/fs-%/lib/libiconv.a
+endif
 ifeq ($(host_platform), linux)
 	xz := build/fs-%/lib/pkgconfig/liblzma.pc
 	unwind := build/fs-%/lib/pkgconfig/libunwind.pc
