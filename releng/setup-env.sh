@@ -111,6 +111,7 @@ case $host_platform in
     [ $host_arch == 'i386' ] && host_arch_flags="-m32" || host_arch_flags="-m64"
 
     CFLAGS="$host_arch_flags -ffunction-sections -fdata-sections"
+    CXXFLAGS="-std=c++11"
     LDFLAGS="$host_arch_flags -Wl,--no-undefined -Wl,--gc-sections"
     if [ "$FRIDA_ENV_SDK" != 'none' ]; then
       CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
@@ -141,7 +142,7 @@ case $host_platform in
     LIPO="$(xcrun --sdk $mac_sdk -f lipo)"
 
     CFLAGS="-isysroot $mac_sdk_path -mmacosx-version-min=$mac_minver -arch $host_arch"
-    CXXFLAGS="-stdlib=libc++"
+    CXXFLAGS="-std=c++11 -stdlib=libc++"
     LDFLAGS="-isysroot $mac_sdk_path -Wl,-macosx_version_min,$mac_minver -arch $host_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
     ;;
   ios)
@@ -169,7 +170,7 @@ case $host_platform in
     [ $host_arch == 'arm' ] && ios_arch=armv7 || ios_arch=arm64
 
     CFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch"
-    CXXFLAGS="-stdlib=libc++"
+    CXXFLAGS="-std=c++11 -stdlib=libc++"
     LDFLAGS="-isysroot $ios_sdk_path -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
     ;;
   android)
@@ -235,6 +236,7 @@ case $host_platform in
 -DANDROID \
 -I$android_sysroot/usr/include"
     CXXFLAGS="\
+-std=c++11 -stdlib=libc++ \
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/libcxx/include \
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/gabi++/include \
 -I$ANDROID_NDK_ROOT/sources/android/support/include"
