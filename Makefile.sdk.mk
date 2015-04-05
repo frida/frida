@@ -112,6 +112,24 @@ build/fs-tmp-%/zlib/Makefile: build/fs-env-%.rc build/.zlib-stamp
 		&& export PACKAGE_TARNAME=zlib \
 		&& . $$CONFIG_SITE \
 		&& export CFLAGS CXXFLAGS OBJCFLAGS \
+		&& case "$*" in \
+			android-i386) \
+				export PATH="$$(dirname $$NM):$$PATH"; \
+				export CHOST="i686-linux-android"; \
+				;; \
+			android-arm) \
+				export PATH="$$(dirname $$NM):$$PATH"; \
+				export CHOST="arm-linux-androideabi"; \
+				;; \
+			qnx-i386) \
+				export PATH="$$(dirname $$NM):$$PATH"; \
+				export CHOST="i486-pc-nto-qnx6.6.0"; \
+				;; \
+			qnx-arm) \
+				export PATH="$$(dirname $$NM):$$PATH"; \
+				export CHOST="arm-unknown-nto-qnx6.6.0eabi"; \
+				;; \
+		esac \
 		&& cd $(@D) \
 		&& ./configure \
 			--prefix=$$frida_prefix \
