@@ -270,7 +270,7 @@ ifeq ($(host_arch), arm64)
 endif
 
 ifeq ($(host_platform), linux)
-	v8_host_flags := -f make-linux -Dlinux_use_bundled_binutils=0 -Dlinux_use_bundled_gold=0 -Dlinux_use_gold_flags=0
+	v8_host_flags := -f make-linux -D linux_use_bundled_binutils=0 -D linux_use_bundled_gold=0 -D linux_use_gold_flags=0
 	v8_libs_private := " -lrt"
 endif
 ifeq ($(host_platform), qnx)
@@ -279,7 +279,7 @@ ifeq ($(host_platform), qnx)
 endif
 ifeq ($(host_platform), android)
 	v8_flavor_prefix := android_
-	v8_host_flags := -f make-android -D clang=1
+	v8_host_flags := -f make-android -D android_ndk_root=$(ANDROID_NDK_ROOT) -D android_sysroot=$(ANDROID_NDK_ROOT) -D android_target_platform=14 -D clang=1
 	v8_libs_private := " -lm"
 endif
 ifeq ($(host_platform), mac)
@@ -288,7 +288,7 @@ endif
 ifeq ($(host_platform), ios)
 	v8_host_flags := -f make-mac -D mac_deployment_target=10.7 -D ios_deployment_target=7.0 -D clang=1
 endif
-v8_flags := -D host_os=$(build_platform) -D werror='' -Dv8_enable_gdbjit=0 -Dv8_enable_i18n_support=0 $(v8_host_flags)
+v8_flags := -D host_os=$(build_platform) -D werror='' -D v8_enable_gdbjit=0 -D v8_enable_i18n_support=0 $(v8_host_flags)
 
 v8_target := $(v8_flavor_prefix)$(v8_arch).release
 
