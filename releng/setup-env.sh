@@ -236,7 +236,7 @@ case $host_platform in
 -DANDROID \
 -I$android_sysroot/usr/include"
     CXXFLAGS="\
--std=c++11 -stdlib=libc++ \
+-std=c++11 \
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/libcxx/include \
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/gabi++/include \
 -I$ANDROID_NDK_ROOT/sources/android/support/include"
