@@ -372,7 +372,7 @@ build/fs-%/lib/pkgconfig/v8.pc: build/fs-tmp-%/v8/out/$(v8_target)/libv8_snapsho
 	echo "Name: V8" >> $@.tmp
 	echo "Description: V8 JavaScript Engine" >> $@.tmp
 	echo "Version: 4.3.62" >> $@.tmp
-	echo "Libs: -L\$${libdir} -lv8_libbase -lv8_base -lv8_libplatform -lv8_snapshot$(v8_libs_private)" >> $@.tmp
+	echo "Libs: -L\$${libdir} -lv8_base -lv8_snapshot -lv8_libplatform -lv8_libbase$(v8_libs_private)" >> $@.tmp
 	echo "Cflags: -I\$${includedir} -I\$${includedir}/include" >> $@.tmp
 	mv $@.tmp $@
 
