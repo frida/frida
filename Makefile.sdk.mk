@@ -154,6 +154,7 @@ build/.libiconv-stamp:
 	mkdir libiconv
 	cd libiconv \
 		&& $(download) http://gnuftp.uib.no/libiconv/libiconv-$(libiconv_version).tar.gz | tar -xz --strip-components 1 \
+		&& patch -p1 < ../releng/patches/libiconv-arm64.patch \
 		&& patch -p1 < ../releng/patches/libiconv-android.patch
 	@mkdir -p $(@D)
 	@touch $@
