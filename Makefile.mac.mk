@@ -378,7 +378,7 @@ build/frida_stripped-%/lib/node_modules/frida: build/frida-%/lib/pkgconfig/frida
 		&& rm frida-0.0.0.tgz \
 		&& mv lib/binding ../$@.tmp/lib/ \
 		&& mv node_modules ../$@.tmp/ \
-		&& . build/frida-env-mac-$(build_arch).rc && $$STRIP -Sx ../$@.tmp/lib/binding/Release/node-*/frida_binding.node \
+		&& . ../build/frida-env-mac-$(build_arch).rc && $$STRIP -Sx ../$@.tmp/lib/binding/Release/node-*/frida_binding.node \
 		&& mv ../$@.tmp ../$@
 
 check-node-mac: build/frida_stripped-mac-$(build_arch)/lib/node_modules/frida ##@node Test Node.js bindings for Mac
