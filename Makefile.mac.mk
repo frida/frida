@@ -1,6 +1,6 @@
 FRIDA := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
-PYTHON ?= /usr/bin/python2.7
+PYTHON ?= $(shell readlink -f $(shell which python) 2>/dev/null)
 PYTHON_NAME ?= $(shell basename $(PYTHON))
 
 NODE ?= $(shell which node)
