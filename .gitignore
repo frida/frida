@@ -19,6 +19,7 @@
 /libunwind
 /m4
 /pkg-config
+/stlport
 /v8
 /vala
 /xz
