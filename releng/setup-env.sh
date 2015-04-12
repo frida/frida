@@ -280,8 +280,8 @@ case $host_platform in
     PATH="$qnx_toolchain_dir:$PATH"
 
     CPP="$qnx_toolchain_prefix-cpp --sysroot=$qnx_sysroot $qnx_preprocessor_flags"
-    CC="$qnx_toolchain_prefix-gcc --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc -static-libstdc++"
-    CXX="$qnx_toolchain_prefix-g++ --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc -static-libstdc++"
+    CC="$qnx_toolchain_prefix-gcc --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc"
+    CXX="$qnx_toolchain_prefix-g++ --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc"
     LD="$qnx_toolchain_prefix-ld --sysroot=$qnx_sysroot"
 
     AR="$qnx_toolchain_prefix-ar"
@@ -293,10 +293,17 @@ case $host_platform in
 
     CFLAGS="-ffunction-sections -fdata-sections"
     LDFLAGS="-Wl,--no-undefined -Wl,--gc-sections -L$(dirname $qnx_sysroot/lib/gcc/*/libstdc++.a)"
+
     if [ "$FRIDA_ENV_SDK" != 'none' ]; then
+      CXX="$CXX -I$FRIDA_SDKROOT/include/stlport"
+
       CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
       CPPFLAGS="-I$FRIDA_SDKROOT/include"
       LDFLAGS="$LDFLAGS -L$FRIDA_SDKROOT/lib"
+    else
+      CXX="$CXX -I$FRIDA_PREFIX/include/stlport"
+
+      LDFLAGS="$LDFLAGS -L$FRIDA_PREFIX/lib"
     fi
     ;;
 esac
