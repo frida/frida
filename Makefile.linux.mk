@@ -1,7 +1,8 @@
 FRIDA := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
-PYTHON ?= $(shell readlink -f $(shell which python) 2>/dev/null)
-PYTHON_NAME ?= $(shell basename $(PYTHON))
+PYTHON ?= $(shell which python)
+PYTHON_VERSION := $(shell $(PYTHON) -c 'import sys; v = sys.version_info; print "{}.{}".format(v[0], v[1])')
+PYTHON_NAME ?= python$(PYTHON-VERSION)
 
 NODE ?= $(shell which node)
 NODE_BIN_DIR := $(shell dirname $(NODE) 2>/dev/null)
