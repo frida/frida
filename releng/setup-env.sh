@@ -295,14 +295,10 @@ case $host_platform in
     LDFLAGS="-Wl,--no-undefined -Wl,--gc-sections -L$(dirname $qnx_sysroot/lib/gcc/*/libstdc++.a)"
 
     if [ "$FRIDA_ENV_SDK" != 'none' ]; then
-      CXX="$CXX -I$FRIDA_SDKROOT/include/stlport"
-
       CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
       CPPFLAGS="-I$FRIDA_SDKROOT/include"
       LDFLAGS="$LDFLAGS -L$FRIDA_SDKROOT/lib"
     else
-      CXX="$CXX -I$FRIDA_PREFIX/include/stlport"
-
       LDFLAGS="$LDFLAGS -L$FRIDA_PREFIX/lib"
     fi
     ;;
