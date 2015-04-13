@@ -292,7 +292,13 @@ case $host_platform in
     OBJDUMP="$qnx_toolchain_prefix-objdump"
 
     CFLAGS="-ffunction-sections -fdata-sections"
-    LDFLAGS="-Wl,--no-undefined -Wl,--gc-sections -L$(dirname $qnx_sysroot/lib/gcc/*/libstdc++.a)"
+    LDFLAGS="-Wl,--no-undefined -Wl,--gc-sections -L$(dirname $qnx_sysroot/lib/gcc/4.8.3/libstdc++.a)"
+    if [ $host_arch == "arm" ]; then
+      # The armle toolchain is incomplete
+      mkdir -p $FRIDA_PREFIX_LIB
+      $CC $CFLAGS -c $FRIDA_ROOT/releng/atexit_stub.c -o $FRIDA_PREFIX_LIB/atexit_stub.o
+      LDFLAGS="$LDFLAGS $FRIDA_PREFIX_LIB/atexit_stub.o"
+    fi
 
     if [ "$FRIDA_ENV_SDK" != 'none' ]; then
       CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
