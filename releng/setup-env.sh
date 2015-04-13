@@ -264,8 +264,8 @@ case $host_platform in
         qnx_sysroot=$QNX_TARGET/x86
         ;;
       arm)
-        qnx_host=arm-unknown-nto-qnx6.6.0eabi
-        qnx_sysroot=$QNX_TARGET/armle-v7
+        qnx_host=arm-unknown-nto-qnx6.5.0eabi
+        qnx_sysroot=$QNX_TARGET/armle
         ;;
       *)
         echo "Unsupported QNX architecture" > /dev/stderr
