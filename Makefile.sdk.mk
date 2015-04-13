@@ -379,14 +379,14 @@ build/.v8-stamp:
 	@mkdir -p $(@D)
 	@touch $@
 
-build/fs-tmp-%/.v8-stamp: build/.v8-stamp
+build/fs-tmp-%/.v8-source-stamp: build/.v8-stamp
 	# Poor-man's substitute for out-of-tree builds
 	@mkdir -p $(@D)
 	$(RM) -r $(@D)/v8
 	git clone v8 $(@D)/v8
 	@touch $@
 
-build/fs-tmp-%/v8/out/$(v8_target)/libv8_snapshot.a: build/fs-env-%.rc build/fs-tmp-%/.v8-stamp $(stlport)
+build/fs-tmp-%/.v8-build-stamp: build/fs-env-%.rc build/fs-tmp-%/.v8-source-stamp $(stlport)
 	. $< \
 		&& cd build/fs-tmp-$*/v8 \
 		&& PATH="/usr/bin:/bin:/usr/sbin:/sbin" \
@@ -394,7 +394,7 @@ build/fs-tmp-%/v8/out/$(v8_target)/libv8_snapshot.a: build/fs-env-%.rc build/fs-
 			make $(MAKE_J) $(v8_target) GYPFLAGS="$(v8_flags)"
 	@touch $@
 
-build/fs-%/lib/pkgconfig/v8.pc: build/fs-tmp-%/v8/out/$(v8_target)/libv8_snapshot.a
+build/fs-%/lib/pkgconfig/v8.pc: build/fs-tmp-%/.v8-build-stamp
 	install -d build/fs-$*/include/v8/include
 	install -m 644 v8/include/*.h build/fs-$*/include/v8/include
 	install -d build/fs-$*/include/v8/include/libplatform
