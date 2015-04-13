@@ -49,7 +49,6 @@ ifeq ($(host_platform), android)
 	bfd := build/fs-%/lib/libbfd.a
 endif
 ifeq ($(host_platform), qnx)
-	stlport := build/fs-%/lib/libstlport.a build/fs-%/include/stlport
 	xz := build/fs-%/lib/pkgconfig/liblzma.pc
 	unwind := build/fs-%/lib/pkgconfig/libunwind.pc
 	iconv := build/fs-%/lib/libiconv.a
@@ -73,7 +72,6 @@ build/sdk-$(host_platform)-$(host_arch).tar.bz2: build/fs-tmp-$(host_platform_ar
 	mv $@.tmp $@
 
 build/fs-tmp-%/.package-stamp: \
-		$(stlport) \
 		build/fs-%/lib/libz.a \
 		$(xz) \
 		$(unwind) \
@@ -103,43 +101,6 @@ ifeq ($(host_platform), ios)
 	cp /System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/mach_vm.h $(@D)/package/include/frida_mach_vm.h
 endif
 	@touch $@
-
-
-build/.stlport-stamp:
-	$(RM) -r stlport
-	git clone $(repo_base_url)/stlport$(repo_suffix)
-	@mkdir -p $(@D)
-	@touch $@
-
-build/fs-tmp-%/.stlport-stamp: build/.stlport-stamp
-	# Poor-man's substitute for out-of-tree builds
-	@mkdir -p $(@D)
-	$(RM) -r $(@D)/stlport
-	git clone stlport $(@D)/stlport
-	@touch $@
-
-build/fs-%/lib/libstlport.a: build/fs-env-%.rc build/fs-tmp-%/.stlport-stamp
-	. $< \
-		&& export PACKAGE_TARNAME=stlport \
-		&& . $$CONFIG_SITE \
-		&& export CFLAGS CXXFLAGS OBJCFLAGS \
-		&& unset CC CXX \
-		&& cd build/fs-tmp-$*/stlport \
-		&& ./configure \
-			--prefix=$$frida_prefix \
-			--libdir=$$frida_prefix/lib \
-			--enable-static \
-			--disable-shared \
-			--without-debug \
-			--without-stldebug \
-			--target=$$host_alias \
-		&& make install
-
-build/fs-%/include/stlport: build/.stlport-stamp
-	@mkdir -p $(@D)
-	cp -a stlport/stlport $(@D)/stlport.tmp
-	$(RM) -r $@
-	mv $(@D)/stlport.tmp $@
 
 
 build/.zlib-stamp:
@@ -386,7 +347,7 @@ build/fs-tmp-%/.v8-source-stamp: build/.v8-stamp
 	git clone v8 $(@D)/v8
 	@touch $@
 
-build/fs-tmp-%/.v8-build-stamp: build/fs-env-%.rc build/fs-tmp-%/.v8-source-stamp $(stlport)
+build/fs-tmp-%/.v8-build-stamp: build/fs-env-%.rc build/fs-tmp-%/.v8-source-stamp
 	. $< \
 		&& cd build/fs-tmp-$*/v8 \
 		&& PATH="/usr/bin:/bin:/usr/sbin:/sbin" \
