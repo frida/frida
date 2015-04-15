@@ -264,7 +264,7 @@ case $host_platform in
         qnx_sysroot=$QNX_TARGET/x86
         ;;
       arm)
-        qnx_host=arm-unknown-nto-qnx6.5.0eabi
+        qnx_host=arm-unknown-nto-qnx6.5.0
         qnx_sysroot=$QNX_TARGET/armle
         ;;
       *)
@@ -279,10 +279,10 @@ case $host_platform in
 
     PATH="$qnx_toolchain_dir:$PATH"
 
-    CPP="$qnx_toolchain_prefix-cpp --sysroot=$qnx_sysroot $qnx_preprocessor_flags"
-    CC="$qnx_toolchain_prefix-gcc --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc"
-    CXX="$qnx_toolchain_prefix-g++ --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc"
-    LD="$qnx_toolchain_prefix-ld --sysroot=$qnx_sysroot"
+    CPP="$qnx_toolchain_prefix-cpp -march=armv6 --sysroot=$qnx_sysroot $qnx_preprocessor_flags"
+    CC="$qnx_toolchain_prefix-gcc -march=armv6 --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc"
+    CXX="$qnx_toolchain_prefix-g++ -march=armv6 --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc -std=c++11"
+    LD="$qnx_toolchain_prefix-ld -march=armv6 --sysroot=$qnx_sysroot"
 
     AR="$qnx_toolchain_prefix-ar"
     NM="$qnx_toolchain_prefix-nm"
@@ -293,12 +293,6 @@ case $host_platform in
 
     CFLAGS="-ffunction-sections -fdata-sections"
     LDFLAGS="-Wl,--no-undefined -Wl,--gc-sections -L$(dirname $qnx_sysroot/lib/gcc/4.8.3/libstdc++.a)"
-    if [ $host_arch == "arm" ]; then
-      # The armle toolchain is incomplete
-      mkdir -p $FRIDA_PREFIX_LIB
-      $CC $CFLAGS -c $FRIDA_ROOT/releng/atexit_stub.c -o $FRIDA_PREFIX_LIB/atexit_stub.o
-      LDFLAGS="$LDFLAGS $FRIDA_PREFIX_LIB/atexit_stub.o"
-    fi
 
     if [ "$FRIDA_ENV_SDK" != 'none' ]; then
       CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
