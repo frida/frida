@@ -33,7 +33,7 @@ git-submodule-stamps: $(foreach m,$(modules),$m-update-submodule-stamp)
 build/frida-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida-version.h
 	FRIDA_HOST=$* ./releng/setup-env.sh
 
-build/frida-version.h: .git/refs/heads/master
+build/frida-version.h: releng/generate-version-header.py .git/refs/heads/master
 	@python releng/generate-version-header.py > $@.tmp
 	@mv $@.tmp $@
 
