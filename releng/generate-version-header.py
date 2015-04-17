@@ -18,5 +18,6 @@ print("""\
 #define FRIDA_MAJOR_VERSION {major}
 #define FRIDA_MINOR_VERSION {minor}
 #define FRIDA_MICRO_VERSION {micro}
+#define FRIDA_NANO_VERSION {nano}
 
-#endif""").format(version=version, major=major, minor=minor, micro=micro)
+#endif""").format(version=version, major=major, minor=minor, micro=micro, nano=nano)
