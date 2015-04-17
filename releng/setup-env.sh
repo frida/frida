@@ -307,6 +307,10 @@ esac
 CFLAGS="-fPIC $CFLAGS"
 CXXFLAGS="$CFLAGS $CXXFLAGS"
 
+version_include="-include $FRIDA_BUILD/frida-version.h"
+CPPFLAGS="$version_include $CPPFLAGS"
+CFLAGS="$version_include $CFLAGS"
+
 ACLOCAL_FLAGS="-I $FRIDA_PREFIX/share/aclocal"
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   ACLOCAL_FLAGS="$ACLOCAL_FLAGS -I $FRIDA_SDKROOT/share/aclocal"
