@@ -314,7 +314,7 @@ build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	@touch -c $@
 
 
-python-mac: build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/frida build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so build/frida-mac-universal/bin/frida-repl ##@python Build Python bindings for Mac
+python-mac: build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/frida build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so build/frida-mac-universal/bin/frida ##@python Build Python bindings for Mac
 
 frida-python/configure: build/frida-env-mac-$(build_arch).rc frida-python/configure.ac
 	. build/frida-env-mac-$(build_arch).rc && cd frida-python && ./autogen.sh
@@ -343,7 +343,7 @@ build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so: build/tmp-
 		&& $$LIPO $(@D)/_frida-32.so $(@D)/_frida-64.so -create -output $@
 	rm $(@D)/_frida-32.so $(@D)/_frida-64.so
 
-build/frida-mac-universal/bin/frida-%: build/tmp-mac-x86_64/frida-$(PYTHON_NAME)/src/_frida.la
+build/frida-mac-universal/bin/frida: build/tmp-mac-x86_64/frida-$(PYTHON_NAME)/src/_frida.la
 	mkdir -p build/frida-mac-universal/bin \
 		&& cp -r build/frida-mac-x86_64/bin/ build/frida-mac-universal/bin
 
@@ -386,7 +386,7 @@ check-node-mac: build/frida_stripped-mac-$(build_arch)/lib/node_modules/frida ##
 	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha
 
 
-install-mac: install-python-mac ##@utilities Install frida utilities (frida-{discover,ps,repl,trace})
+install-mac: install-python-mac ##@utilities Install frida utilities (frida{-discover,-ps,-trace})
 	@$(PYTHON) -measy_install colorama \
 		&& for b in "build/frida-mac-universal/bin"/*; do \
 			n=`basename $$b`; \
@@ -396,7 +396,7 @@ install-mac: install-python-mac ##@utilities Install frida utilities (frida-{dis
 		done
 
 uninstall-mac: ##@utilities Uninstall frida utilities
-	@for c in discover ps repl trace; do \
+	@for c in "" -discover -ps -trace; do \
 		n=frida-"$$c"; \
 		if which "$$n" &> /dev/null; then \
 			p=`which "$$n"`; \
