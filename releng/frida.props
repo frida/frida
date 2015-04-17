@@ -15,6 +15,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
+      <ForcedIncludeFiles>$(IntDir)..\frida-builddeps\frida-version.h</ForcedIncludeFiles>
       <AdditionalIncludeDirectories>$(IntDir);$(SolutionDir)capstone\include;$(SolutionDir)frida-gum;$(SolutionDir)frida-gum\libs;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\v8;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\v8\include;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\json-glib-1.0;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\gee-0.8;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\gio-win32-2.0;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\lib\glib-2.0\include;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\glib-2.0;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\lib\libffi-3.1\include;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <DisableSpecificWarnings>4127;4244;4305;4715;%(DisableSpecificWarnings)</DisableSpecificWarnings>

@@ -17,5 +17,6 @@
   <ItemGroup>
     <CustomBuild Include="windows-sdk.txt" />
     <CustomBuild Include="windows-toolchain.txt" />
+    <CustomBuild Include="generate-version-header.py" />
   </ItemGroup>
 </Project>
