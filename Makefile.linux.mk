@@ -103,7 +103,7 @@ build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-sub
 
 gum-32: build/frida-linux-i386/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for i386
 gum-64: build/frida-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for x86-64
-gum-android: build/frida-android-i386/lib/pkgconfig/frida-gum-1.0.pc build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android
+gum-android: build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android
 
 frida-gum/configure: build/frida-env-linux-$(build_arch).rc frida-gum/configure.ac
 	. build/frida-env-linux-$(build_arch).rc && cd frida-gum && ./autogen.sh
@@ -125,7 +125,7 @@ check-gum-64: build/frida-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc build/frid
 
 core-32: build/frida-linux-i386/lib/pkgconfig/frida-core-1.0.pc ##@core Build for i386
 core-64: build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for x86-64
-core-android: build/frida-android-i386/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android
+core-android: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android
 
 frida-core/configure: build/frida-env-linux-$(build_arch).rc frida-core/configure.ac
 	. build/frida-env-linux-$(build_arch).rc && cd frida-core && ./autogen.sh
@@ -206,7 +206,7 @@ check-core-64: build/tmp-linux-x86_64/frida-core/tests/frida-tests build/frida-c
 
 server-32: build/frida_stripped-linux-i386/bin/frida-server ##@server Build for i386
 server-64: build/frida_stripped-linux-x86_64/bin/frida-server ##@server Build for x86-64
-server-android: build/frida_stripped-android-i386/bin/frida-server build/frida_stripped-android-arm/bin/frida-server ##@server Build for Android
+server-android: build/frida_stripped-android-arm/bin/frida-server ##@server Build for Android
 
 build/frida_stripped-%/bin/frida-server: build/frida-%/bin/frida-server
 	mkdir -p $(@D)
