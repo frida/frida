@@ -6,7 +6,8 @@ import sys
 
 def generate_version_header():
     build_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    version = subprocess.check_output(["git", "describe", "--tags", "--always", "--long"], cwd=build_dir).strip().decode('utf-8').replace("-", ".")
+    description = subprocess.Popen(["git", "describe", "--tags", "--always", "--long"], cwd=build_dir, stdout=subprocess.PIPE).communicate()[0]
+    version = description.strip().decode('utf-8').replace("-", ".")
     (major, minor, micro, nano, commit) = version.split(".")
     if nano == "0":
         version = ".".join([major, minor, micro])
