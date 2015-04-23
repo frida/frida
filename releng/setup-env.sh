@@ -72,7 +72,7 @@ fi
 prompt_color=33
 
 toolchain_version=20150406
-sdk_version=20150406
+sdk_version=20150423
 
 if [ -n "$FRIDA_ENV_NAME" ]; then
   frida_env_name_prefix=${FRIDA_ENV_NAME}-
