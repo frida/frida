@@ -25,7 +25,7 @@ HELP_FUN = \
 	$$variable_color = "\033[36m"; \
 	$$reset_color = "\033[0m"; \
 	print "\n"; \
-	print "\033[31mUsage:$${reset_color} make -f Makefile.linux.mk $${target_color}TARGET$${reset_color} [$${variable_color}VARIABLE$${reset_color}=value]\n\n"; \
+	print "\033[31mUsage:$${reset_color} make $${target_color}TARGET$${reset_color} [$${variable_color}VARIABLE$${reset_color}=value]\n\n"; \
 	print "Where $${target_color}TARGET$${reset_color} specifies one or more of:\n"; \
 	print "\n"; \
 	for (@sections) { \
@@ -38,8 +38,8 @@ HELP_FUN = \
 	print "  $${variable_color}NODE$${reset_color}                    Absolute path of Node.js binary\n"; \
 	print "\n"; \
 	print "For example:\n"; \
-	print "  \$$ make -f Makefile.linux.mk $${target_color}python-64 $${variable_color}PYTHON$${reset_color}=/opt/python34-64/bin/python3.4\n"; \
-	print "  \$$ make -f Makefile.linux.mk $${target_color}node-32 $${variable_color}NODE$${reset_color}=/opt/node-32/bin/node\n"; \
+	print "  \$$ make $${target_color}python-64 $${variable_color}PYTHON$${reset_color}=/opt/python34-64/bin/python3.4\n"; \
+	print "  \$$ make $${target_color}node-32 $${variable_color}NODE$${reset_color}=/opt/node-32/bin/node\n"; \
 	print "\n";
 
 help:
