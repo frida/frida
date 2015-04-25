@@ -126,7 +126,7 @@ case $host_platform in
     mac_sdk="macosx$mac_sdkver"
     mac_sdk_path="$(xcrun --sdk $mac_sdk --show-sdk-path)"
 
-    CPP="$(xcrun --sdk $mac_sdk -f cpp)"
+    CPP="$(xcrun --sdk $mac_sdk -f clang) -E"
     CC="$(xcrun --sdk $mac_sdk -f clang)"
     CXX="$(xcrun --sdk $mac_sdk -f clang++)"
     OBJC="$(xcrun --sdk $mac_sdk -f clang)"
@@ -141,6 +141,7 @@ case $host_platform in
     CODESIGN="$(xcrun --sdk $mac_sdk -f codesign)"
     LIPO="$(xcrun --sdk $mac_sdk -f lipo)"
 
+    CPPFLAGS="-isysroot $mac_sdk_path -mmacosx-version-min=$mac_minver -arch $host_arch"
     CFLAGS="-isysroot $mac_sdk_path -mmacosx-version-min=$mac_minver -arch $host_arch"
     CXXFLAGS="-std=c++11 -stdlib=libc++"
     LDFLAGS="-isysroot $mac_sdk_path -Wl,-macosx_version_min,$mac_minver -arch $host_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
@@ -152,7 +153,7 @@ case $host_platform in
     ios_sdk="iphoneos$ios_sdkver"
     ios_sdk_path="$(xcrun --sdk $ios_sdk --show-sdk-path)"
 
-    CPP="$(xcrun --sdk $ios_sdk -f cpp)"
+    CPP="$(xcrun --sdk $ios_sdk -f clang) -E"
     CC="$(xcrun --sdk $ios_sdk -f clang)"
     CXX="$(xcrun --sdk $ios_sdk -f clang++)"
     OBJC="$(xcrun --sdk $ios_sdk -f clang)"
@@ -169,6 +170,7 @@ case $host_platform in
 
     [ $host_arch == 'arm' ] && ios_arch=armv7 || ios_arch=arm64
 
+    CPPFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch"
     CFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch"
     CXXFLAGS="-std=c++11 -stdlib=libc++"
     LDFLAGS="-isysroot $ios_sdk_path -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
