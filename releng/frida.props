@@ -16,7 +16,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <ForcedIncludeFiles>$(SolutionDir)build\tmp-windows\frida-version.h</ForcedIncludeFiles>
-      <AdditionalIncludeDirectories>$(IntDir);$(SolutionDir)capstone\include;$(SolutionDir)frida-gum;$(SolutionDir)frida-gum\libs;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\v8;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\v8\include;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\json-glib-1.0;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\gee-0.8;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\gio-win32-2.0;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\lib\glib-2.0\include;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\glib-2.0;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\lib\libffi-3.1\include;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IntDir);$(SolutionDir)capstone\include;$(SolutionDir)frida-gum;$(SolutionDir)frida-gum\libs;$(SolutionDir)frida-gum\bindings;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\v8;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\v8\include;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\json-glib-1.0;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\gee-0.8;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\gio-win32-2.0;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\lib\glib-2.0\include;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\glib-2.0;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\lib\libffi-3.1\include;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <DisableSpecificWarnings>4127;4244;4305;4715;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>PSAPI_VERSION=1;WIN32;_WINDOWS;WINVER=0x0501;_WIN32_WINNT=0x0501;GUM_STATIC;FFI_BUILDING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -24,7 +24,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(IntDir)..\gum-32;$(IntDir)..\gum-64;$(SolutionDir)build\sdk-windows\$(PlatformName)-$(ConfigurationName)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(IntDir)..\gum-32;$(IntDir)..\gum-64;$(IntDir)..\gumjs-32;$(IntDir)..\gumjs-64;$(SolutionDir)build\sdk-windows\$(PlatformName)-$(ConfigurationName)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>ffi.lib;gee-0.8.lib;gio-2.0.lib;glib-2.0.lib;gmodule-2.0.lib;gobject-2.0.lib;gthread-2.0.lib;intl.lib;json-glib-1.0.lib;v8_libbase.lib;v8_base.lib;v8_libplatform.lib;v8_snapshot.lib;z.lib;dnsapi.lib;iphlpapi.lib;ole32.lib;psapi.lib;shlwapi.lib;winmm.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
