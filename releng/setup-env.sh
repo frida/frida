@@ -283,7 +283,7 @@ case $host_platform in
 
     CPP="$qnx_toolchain_prefix-cpp -march=armv6 --sysroot=$qnx_sysroot $qnx_preprocessor_flags"
     CC="$qnx_toolchain_prefix-gcc -march=armv6 --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc"
-    CXX="$qnx_toolchain_prefix-g++ -march=armv6 --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc -std=c++11 -static-libstdc++"
+    CXX="$qnx_toolchain_prefix-g++ -march=armv6 --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc -static-libstdc++ -std=c++11"
     LD="$qnx_toolchain_prefix-ld -march=armv6 --sysroot=$qnx_sysroot"
 
     AR="$qnx_toolchain_prefix-ar"
