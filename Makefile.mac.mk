@@ -386,16 +386,25 @@ install-mac: install-python-mac ##@utilities Install frida utilities (frida{-dis
 		&& for b in "build/frida-mac-universal/bin"/*; do \
 			n=`basename $$b`; \
 			p="$(PREFIX)/bin/$$n"; \
-			grep -v 'sys.path.insert' "$$b" > "$$p"; \
-			chmod +x "$$p"; \
+			t=$$(mktemp -t frida); \
+			grep -v 'sys.path.insert' "$$b" > "$$t"; \
+			chmod +x "$$t"; \
+			if [ -w "$(PREFIX)/bin" ]; then \
+				mv "$$t" "$$p"; \
+			else \
+				sudo mv "$$t" "$$p"; \
+			fi \
 		done
 
 uninstall-mac: ##@utilities Uninstall frida utilities
-	@for c in "" -discover -ps -trace; do \
-		n=frida-"$$c"; \
+	@for n in frida frida-discover frida-ps frida-trace; do \
 		if which "$$n" &> /dev/null; then \
 			p=`which "$$n"`; \
-			rm -f "$$p"; \
+			if [ -w "$$(dirname "$$p")" ]; then \
+				rm -f "$$p"; \
+			else \
+				sudo rm -f "$$p"; \
+			fi \
 		fi \
 	done
 
