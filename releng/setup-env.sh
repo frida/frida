@@ -339,7 +339,7 @@ VALAC="$VALAC --vapidir=\"$FRIDA_PREFIX/share/vala/vapi\""
 [ ! -d "$FRIDA_PREFIX/share/aclocal}" ] && mkdir -p "$FRIDA_PREFIX/share/aclocal"
 [ ! -d "$FRIDA_PREFIX/lib}" ] && mkdir -p "$FRIDA_PREFIX/lib"
 
-if [ ! -f "$FRIDA_TOOLROOT/.stamp" ]; then
+if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/.version" 2>/dev/null; then
   rm -rf "$FRIDA_TOOLROOT"
   mkdir -p "$FRIDA_TOOLROOT"
 
@@ -360,10 +360,10 @@ if [ ! -f "$FRIDA_TOOLROOT/.stamp" ]; then
       "$template" > "$target"
   done
 
-  touch "$FRIDA_TOOLROOT/.stamp"
+  echo $toolchain_version > "$FRIDA_TOOLROOT/.version"
 fi
 
-if [ "$FRIDA_ENV_SDK" != 'none' -a ! -f "$FRIDA_SDKROOT/.stamp" ]; then
+if [ "$FRIDA_ENV_SDK" != 'none' ] && ! grep -Eq "^$sdk_version\$" "$FRIDA_SDKROOT/.version" 2>/dev/null; then
   rm -rf "$FRIDA_SDKROOT"
   mkdir -p "$FRIDA_SDKROOT"
 
@@ -405,7 +405,7 @@ if [ "$FRIDA_ENV_SDK" != 'none' -a ! -f "$FRIDA_SDKROOT/.stamp" ]; then
     fi
   done
 
-  touch "$FRIDA_SDKROOT/.stamp"
+  echo $sdk_version > "$FRIDA_SDKROOT/.version"
 fi
 
 env_rc=build/${FRIDA_ENV_NAME:-frida}-env-${host_platform_arch}.rc
