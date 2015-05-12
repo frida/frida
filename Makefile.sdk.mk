@@ -123,9 +123,17 @@ build/fs-tmp-%/zlib/Makefile: build/fs-env-%.rc build/.zlib-stamp
 				export PATH="$$(dirname $$NM):$$PATH"; \
 				export CHOST="i686-linux-android"; \
 				;; \
+			android-x86_64) \
+				export PATH="$$(dirname $$NM):$$PATH"; \
+				export CHOST="x86_64-linux-android"; \
+				;; \
 			android-arm) \
 				export PATH="$$(dirname $$NM):$$PATH"; \
 				export CHOST="arm-linux-androideabi"; \
+				;; \
+			android-arm64) \
+				export PATH="$$(dirname $$NM):$$PATH"; \
+				export CHOST="aarch64-linux-android"; \
 				;; \
 			qnx-i386) \
 				export PATH="$$(dirname $$NM):$$PATH"; \
