@@ -224,7 +224,7 @@ case $host_platform in
         ;;
     esac
 
-    android_clang_prefix="$ANDROID_NDK_ROOT/toolchains/llvm-3.4/prebuilt/${android_build_platform}-x86_64"
+    android_clang_prefix="$ANDROID_NDK_ROOT/toolchains/llvm-3.5/prebuilt/${android_build_platform}-x86_64"
     android_gcc_toolchain="$ANDROID_NDK_ROOT/toolchains/${android_host_toolchain}/prebuilt/${android_build_platform}-x86_64"
     android_sysroot="$ANDROID_NDK_ROOT/platforms/android-${android_api}/arch-${android_host_arch}"
     toolflags="--sysroot=$android_sysroot \
