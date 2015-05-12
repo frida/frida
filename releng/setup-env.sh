@@ -219,7 +219,7 @@ case $host_platform in
         android_host_target=aarch64-none-linux-android
         android_host_toolchain=aarch64-linux-android-4.9
         android_host_toolprefix=aarch64-linux-android-
-        android_host_cflags="-march=arm64"
+        android_host_cflags=""
         android_host_ldflags=""
         ;;
     esac
