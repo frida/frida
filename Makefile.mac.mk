@@ -65,10 +65,12 @@ clean: clean-submodules
 	rm -rf build/frida-ios-arm64
 	rm -rf build/frida-android-i386
 	rm -rf build/frida-android-arm
+	rm -rf build/frida-android-arm64
 	rm -rf build/frida_stripped-mac-i386
 	rm -rf build/frida_stripped-mac-x86_64
 	rm -rf build/frida_stripped-android-i386
 	rm -rf build/frida_stripped-android-arm
+	rm -rf build/frida_stripped-android-arm64
 	rm -rf build/tmp-mac-i386
 	rm -rf build/tmp-mac-x86_64
 	rm -rf build/tmp-mac-universal
@@ -77,11 +79,13 @@ clean: clean-submodules
 	rm -rf build/tmp-ios-universal
 	rm -rf build/tmp-android-i386
 	rm -rf build/tmp-android-arm
+	rm -rf build/tmp-android-arm64
 	rm -rf build/tmp_stripped-mac-x86_64
 	rm -rf build/tmp_stripped-ios-arm
 	rm -rf build/tmp_stripped-ios-arm64
 	rm -rf build/tmp_stripped-android-i386
 	rm -rf build/tmp_stripped-android-arm
+	rm -rf build/tmp_stripped-android-arm64
 
 clean-submodules:
 	cd capstone && git clean -xfd
@@ -106,7 +110,7 @@ build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-sub
 
 gum-mac: build/frida-mac-i386/lib/pkgconfig/frida-gum-1.0.pc build/frida-mac-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Mac
 gum-ios: build/frida-ios-arm/lib/pkgconfig/frida-gum-1.0.pc build/frida-ios-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for iOS
-gum-android: build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android
+gum-android: build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android
 
 frida-gum/configure: build/frida-env-mac-$(build_arch).rc frida-gum/configure.ac
 	. build/frida-env-mac-$(build_arch).rc && cd frida-gum && ./autogen.sh
@@ -127,7 +131,7 @@ check-gum-mac: build/frida-mac-i386/lib/pkgconfig/frida-gum-1.0.pc build/frida-m
 
 core-mac: build/frida-mac-i386/lib/pkgconfig/frida-core-1.0.pc build/frida-mac-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Mac
 core-ios: build/frida-ios-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-ios-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for iOS
-core-android: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android
+core-android: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android
 
 frida-core/configure: build/frida-env-mac-$(build_arch).rc frida-core/configure.ac
 	. build/frida-env-mac-$(build_arch).rc && cd frida-core && ./autogen.sh
@@ -260,6 +264,18 @@ build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-andr
 			HELPER32=../../../../build/tmp_stripped-android-arm/frida-core/src/frida-helper!frida-helper-32 \
 		&& make install-data-am
 	@touch -c $@
+build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-android-arm/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp_stripped-android-arm64/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp_stripped-android-arm/frida-core/src/frida-helper build/tmp_stripped-android-arm64/frida-core/src/frida-helper
+	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-android-arm/frida-core/src/libfrida_core_la-frida.lo)
+	. build/frida-env-android-arm64.rc \
+		&& cd build/tmp-android-arm64/frida-core \
+		&& make -C src install \
+			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-mac-$(build_arch)\" --toolchain=gnu" \
+			AGENT32=../../../../build/tmp_stripped-android-arm/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent-32.so \
+			AGENT64=../../../../build/tmp_stripped-android-arm64/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent-64.so \
+			HELPER32=../../../../build/tmp_stripped-android-arm/frida-core/src/frida-helper!frida-helper-32 \
+			HELPER64=../../../../build/tmp_stripped-android-arm64/frida-core/src/frida-helper!frida-helper-64 \
+		&& make install-data-am
+	@touch -c $@
 
 build/tmp-%/frida-core/tests/frida-tests: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	@$(call ensure_relink,frida-core/tests/main.c,build/tmp-$*/frida-core/tests/main.o)
@@ -275,7 +291,7 @@ check-core-mac: build/tmp-mac-i386/frida-core/tests/frida-tests build/tmp-mac-x8
 
 server-mac: build/frida-mac-universal/bin/frida-server ##@server Build for Mac
 server-ios: build/frida-ios-universal/bin/frida-server ##@server Build for iOS
-server-android: build/frida_stripped-android-arm/bin/frida-server ##@server Build for Android
+server-android: build/frida_stripped-android-arm/bin/frida-server build/frida_stripped-android-arm64/bin/frida-server ##@server Build for Android
 
 build/frida-mac-universal/bin/frida-server: build/frida-mac-i386/bin/frida-server build/frida-mac-x86_64/bin/frida-server
 	mkdir -p $(@D)
@@ -302,6 +318,11 @@ build/frida_stripped-android-arm/bin/frida-server: build/frida-android-arm/bin/f
 	mkdir -p $(@D)
 	cp $< $@.tmp
 	. build/frida-env-android-arm.rc && $$STRIP --strip-all $@.tmp
+	mv $@.tmp $@
+build/frida_stripped-android-arm64/bin/frida-server: build/frida-android-arm64/bin/frida-server
+	mkdir -p $(@D)
+	cp $< $@.tmp
+	. build/frida-env-android-arm64.rc && $$STRIP --strip-all $@.tmp
 	mv $@.tmp $@
 build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	@$(call ensure_relink,frida-core/server/server.c,build/tmp-$*/frida-core/server/frida_server-server.o)
