@@ -187,7 +187,7 @@ case $host_platform in
     android_host_arch=$(echo ${host_arch} | sed 's,^i386$,x86,')
     case $android_host_arch in
       x86)
-        android_api=14
+        android_target_platform=14
         android_host_abi=x86
         android_host_target=i686-none-linux-android
         android_host_toolchain=x86-4.8
@@ -196,7 +196,7 @@ case $host_platform in
         android_host_ldflags=""
         ;;
       x86_64)
-        android_api=21
+        android_target_platform=21
         android_host_abi=x86_64
         android_host_target=x86_64-none-linux-android
         android_host_toolchain=x86_64-4.9
@@ -205,7 +205,7 @@ case $host_platform in
         android_host_ldflags=""
         ;;
       arm)
-        android_api=14
+        android_target_platform=14
         android_host_abi=armeabi-v7a
         android_host_target=armv7-none-linux-androideabi
         android_host_toolchain=arm-linux-androideabi-4.8
@@ -214,7 +214,7 @@ case $host_platform in
         android_host_ldflags="-Wl,--fix-cortex-a8"
         ;;
       arm64)
-        android_api=21
+        android_target_platform=21
         android_host_abi=arm64-v8a
         android_host_target=aarch64-none-linux-android
         android_host_toolchain=aarch64-linux-android-4.9
@@ -226,7 +226,7 @@ case $host_platform in
 
     android_clang_prefix="$ANDROID_NDK_ROOT/toolchains/llvm-3.5/prebuilt/${android_build_platform}-x86_64"
     android_gcc_toolchain="$ANDROID_NDK_ROOT/toolchains/${android_host_toolchain}/prebuilt/${android_build_platform}-x86_64"
-    android_sysroot="$ANDROID_NDK_ROOT/platforms/android-${android_api}/arch-${android_host_arch}"
+    android_sysroot="$ANDROID_NDK_ROOT/platforms/android-${android_target_platform}/arch-${android_host_arch}"
     toolflags="--sysroot=$android_sysroot \
 --gcc-toolchain=$android_gcc_toolchain \
 --target=$android_host_target \

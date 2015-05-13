@@ -273,15 +273,19 @@ $(eval $(call make-git-module-rules,json-glib,build/fs-%/lib/pkgconfig/json-glib
 
 ifeq ($(host_arch), i386)
 	v8_arch := ia32
+	android_target_platform := 14
 endif
 ifeq ($(host_arch), x86_64)
 	v8_arch := x64
+	android_target_platform := 21
 endif
 ifeq ($(host_arch), arm)
 	v8_arch := arm
+	android_target_platform := 14
 endif
 ifeq ($(host_arch), arm64)
 	v8_arch := arm64
+	android_target_platform := 21
 endif
 
 ifeq ($(host_platform), linux)
@@ -294,7 +298,7 @@ ifeq ($(host_platform), qnx)
 endif
 ifeq ($(host_platform), android)
 	v8_flavor_prefix := android_
-	v8_host_flags := -f make-android -D android_ndk_root=$(ANDROID_NDK_ROOT) -D android_sysroot=$(ANDROID_NDK_ROOT) -D android_target_platform=14 -D clang=1
+	v8_host_flags := -f make-android -D android_ndk_root=$(ANDROID_NDK_ROOT) -D android_sysroot=$(ANDROID_NDK_ROOT) -D android_target_platform=$(android_target_platform) -D clang=1
 	v8_libs_private := " -lm"
 endif
 ifeq ($(host_platform), mac)
