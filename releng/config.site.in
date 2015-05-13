@@ -18,7 +18,7 @@ case "$PACKAGE_TARNAME" in
     frida_flags="-Os -pipe"
   ;;
   *)
-    frida_flags="-Os -pipe -gdwarf-2 -g3"
+    frida_flags="-Os -pipe -g3"
   ;;
 esac
 
