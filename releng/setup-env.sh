@@ -73,7 +73,7 @@ prompt_color=33
 
 toolchain_version=20150406
 case $host_platform_arch in
-  ios-arm64)
+  ios-arm64|android-arm|android-arm64)
     sdk_version=20150512
     ;;
   *)
