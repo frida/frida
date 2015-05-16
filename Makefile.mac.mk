@@ -110,7 +110,7 @@ build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-sub
 
 gum-mac: build/frida-mac-i386/lib/pkgconfig/frida-gum-1.0.pc build/frida-mac-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Mac
 gum-ios: build/frida-ios-arm/lib/pkgconfig/frida-gum-1.0.pc build/frida-ios-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for iOS
-gum-android: build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android
+gum-android: build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android
 
 frida-gum/configure: build/frida-env-mac-$(build_arch).rc frida-gum/configure.ac
 	. build/frida-env-mac-$(build_arch).rc && cd frida-gum && ./autogen.sh
@@ -131,7 +131,7 @@ check-gum-mac: build/frida-mac-i386/lib/pkgconfig/frida-gum-1.0.pc build/frida-m
 
 core-mac: build/frida-mac-i386/lib/pkgconfig/frida-core-1.0.pc build/frida-mac-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Mac
 core-ios: build/frida-ios-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-ios-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for iOS
-core-android: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android
+core-android: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android
 
 frida-core/configure: build/frida-env-mac-$(build_arch).rc frida-core/configure.ac
 	. build/frida-env-mac-$(build_arch).rc && cd frida-core && ./autogen.sh
@@ -291,7 +291,7 @@ check-core-mac: build/tmp-mac-i386/frida-core/tests/frida-tests build/tmp-mac-x8
 
 server-mac: build/frida-mac-universal/bin/frida-server ##@server Build for Mac
 server-ios: build/frida-ios-universal/bin/frida-server ##@server Build for iOS
-server-android: build/frida_stripped-android-arm/bin/frida-server build/frida_stripped-android-arm64/bin/frida-server ##@server Build for Android
+server-android: build/frida_stripped-android-arm/bin/frida-server ##@server Build for Android
 
 build/frida-mac-universal/bin/frida-server: build/frida-mac-i386/bin/frida-server build/frida-mac-x86_64/bin/frida-server
 	mkdir -p $(@D)
