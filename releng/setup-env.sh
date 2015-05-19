@@ -306,6 +306,12 @@ case $host_platform in
 
     CFLAGS="-ffunction-sections -fdata-sections"
     LDFLAGS="-Wl,--no-undefined -Wl,--gc-sections -L$(dirname $qnx_sysroot/lib/gcc/4.8.3/libstdc++.a)"
+    if [ $host_arch == "arm" ]; then
+      # The __modsi3 function is not available in all libc.so
+      mkdir -p $FRIDA_PREFIX_LIB
+      $CC $CFLAGS -c $FRIDA_ROOT/releng/modsi3_stub.c -O0 -o $FRIDA_PREFIX_LIB/modsi3_stub.o
+      LDFLAGS="$LDFLAGS $FRIDA_PREFIX_LIB/modsi3_stub.o"
+    fi
 
     if [ "$FRIDA_ENV_SDK" != 'none' ]; then
       CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
