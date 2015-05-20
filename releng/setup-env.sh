@@ -309,8 +309,9 @@ case $host_platform in
     if [ $host_arch == "arm" ]; then
       # The __modsi3 function is not available in all libc.so
       mkdir -p $FRIDA_PREFIX_LIB
-      $CC $CFLAGS -c $FRIDA_ROOT/releng/modsi3_stub.c -O0 -o $FRIDA_PREFIX_LIB/modsi3_stub.o
-      LDFLAGS="$LDFLAGS $FRIDA_PREFIX_LIB/modsi3_stub.o"
+      $CC $CFLAGS -c $FRIDA_ROOT/releng/libc-compat/modsi3.c -O0 -o $FRIDA_PREFIX_LIB/modsi3.o
+      $AR rcs $FRIDA_PREFIX_LIB/libfrida-libc-compat.a $FRIDA_PREFIX_LIB/modsi3.o
+      LDFLAGS="$LDFLAGS -lfrida-libc-compat"
     fi
 
     if [ "$FRIDA_ENV_SDK" != 'none' ]; then
