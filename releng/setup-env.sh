@@ -193,7 +193,7 @@ case $host_platform in
         android_host_toolchain=x86-4.8
         android_host_toolprefix=i686-linux-android-
         android_host_cflags="-march=i686"
-        android_host_ldflags=""
+        android_host_ldflags="-fuse-ld=gold"
         ;;
       x86_64)
         android_target_platform=21
@@ -202,7 +202,7 @@ case $host_platform in
         android_host_toolchain=x86_64-4.9
         android_host_toolprefix=x86_64-linux-android-
         android_host_cflags="-march=x86_64"
-        android_host_ldflags=""
+        android_host_ldflags="-fuse-ld=gold"
         ;;
       arm)
         android_target_platform=14
@@ -211,7 +211,7 @@ case $host_platform in
         android_host_toolchain=arm-linux-androideabi-4.8
         android_host_toolprefix=arm-linux-androideabi-
         android_host_cflags="-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16"
-        android_host_ldflags="-Wl,--fix-cortex-a8"
+        android_host_ldflags="-fuse-ld=gold -Wl,--fix-cortex-a8"
         ;;
       arm64)
         android_target_platform=21
@@ -220,7 +220,7 @@ case $host_platform in
         android_host_toolchain=aarch64-linux-android-4.9
         android_host_toolprefix=aarch64-linux-android-
         android_host_cflags=""
-        android_host_ldflags=""
+        android_host_ldflags="-fuse-ld=mcld"
         ;;
     esac
 
