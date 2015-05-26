@@ -307,10 +307,11 @@ case $host_platform in
     CFLAGS="-ffunction-sections -fdata-sections"
     LDFLAGS="-Wl,--no-undefined -Wl,--gc-sections -L$(dirname $qnx_sysroot/lib/gcc/4.8.3/libstdc++.a)"
     if [ $host_arch == "arm" ]; then
-      # The __modsi3 function is not available in all libc.so
+      # The __modsi3 and __umoddi3 functions are not available in all libc.so
       mkdir -p $FRIDA_PREFIX_LIB
       $CC $CFLAGS -c $FRIDA_ROOT/releng/libc-compat/modsi3.c -O0 -o $FRIDA_PREFIX_LIB/modsi3.o
-      $AR rcs $FRIDA_PREFIX_LIB/libfrida-libc-compat.a $FRIDA_PREFIX_LIB/modsi3.o
+      $CC $CFLAGS -c $FRIDA_ROOT/releng/libc-compat/umoddi3.c -O0 -o $FRIDA_PREFIX_LIB/umoddi3.o
+      $AR rcs $FRIDA_PREFIX_LIB/libfrida-libc-compat.a $FRIDA_PREFIX_LIB/modsi3.o $FRIDA_PREFIX_LIB/umoddi3.o
       LDFLAGS="$LDFLAGS -lfrida-libc-compat"
     fi
 
