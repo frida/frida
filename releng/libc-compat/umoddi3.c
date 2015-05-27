@@ -8,7 +8,7 @@ __udivmoddi4 (uint64_t num, uint64_t den, uint64_t *rem_p)
 
   if (den == 0)
   {
-    return 1/((unsigned) den); /* Intentional divide by zero, without
+    return 1 / ((unsigned) den); /* Intentional divide by zero, without
                                  triggering a compiler warning which
                                  would abort the build */
   }
