@@ -1,14 +1,4 @@
-FRIDA := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-
-PYTHON ?= $(shell which python)
-PYTHON_VERSION := $(shell $(PYTHON) -c 'import sys; v = sys.version_info; print("{0}.{1}".format(v[0], v[1]))')
-PYTHON_NAME ?= python$(PYTHON_VERSION)
-
-NODE ?= $(shell which node)
-NODE_BIN_DIR := $(shell dirname $(NODE) 2>/dev/null)
-NPM ?= $(NODE_BIN_DIR)/npm
-
-tests ?= /
+include config.mk
 
 build_arch := $(shell releng/detect-arch.sh)
 
@@ -86,7 +76,6 @@ clean-submodules:
 	cd frida-core && git clean -xfd
 	cd frida-python && git clean -xfd
 	cd frida-node && git clean -xfd
-
 
 build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-submodule-stamp
 	. build/frida-env-$*.rc \
@@ -209,8 +198,16 @@ check-core-64: build/tmp-linux-x86_64/frida-core/tests/frida-tests build/frida-c
 
 
 server-32: build/frida_stripped-linux-i386/bin/frida-server ##@server Build for i386
+	mkdir -p $(BINDIST)/bin
+	cp -f build/frida_stripped-linux-i386/bin/frida-server $(BINDIST)/bin/frida-server-linux-32
+
 server-64: build/frida_stripped-linux-x86_64/bin/frida-server ##@server Build for x86-64
+	mkdir -p $(BINDIST)/bin
+	cp -f build/frida_stripped-linux-x86_64/bin/frida-server $(BINDIST)/bin/frida-server-linux-64
+
 server-android: build/frida_stripped-android-arm/bin/frida-server ##@server Build for Android
+	mkdir -p $(BINDIST)/bin
+	cp -f build/frida_stripped-android-arm/bin/frida-server $(BINDIST)/bin/frida-server-android
 
 build/frida_stripped-%/bin/frida-server: build/frida-%/bin/frida-server
 	mkdir -p $(@D)
@@ -224,7 +221,12 @@ build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 
 
 python-32: build/frida_stripped-linux-i386/lib/$(PYTHON_NAME)/site-packages/frida build/frida_stripped-linux-i386/lib/$(PYTHON_NAME)/site-packages/_frida.so build/frida-python-submodule-stamp ##@python Build Python bindings for i386
+	mkdir -p $(BINDIST)/lib32/$(PYTHON_NAME)/site-packages
+	cp -rf build/frida_stripped-linux-i386/lib/$(PYTHON_NAME)/* $(BINDIST)/lib32/$(PYTHON_NAME)/site-packages
+
 python-64: build/frida_stripped-linux-x86_64/lib/$(PYTHON_NAME)/site-packages/frida build/frida_stripped-linux-x86_64/lib/$(PYTHON_NAME)/site-packages/_frida.so build/frida-python-submodule-stamp ##@python Build Python bindings for x86-64
+	mkdir -p $(BINDIST)/lib64/$(PYTHON_NAME)/site-packages
+	cp -rf build/frida_stripped-linux-x86_64/lib/$(PYTHON_NAME)/* $(BINDIST)/lib64/$(PYTHON_NAME)/site-packages
 
 frida-python/configure: build/frida-env-linux-$(build_arch).rc frida-python/configure.ac
 	. build/frida-env-linux-$(build_arch).rc && cd frida-python && ./autogen.sh
@@ -260,7 +262,12 @@ check-python-64: build/frida_stripped-linux-x86_64/lib/$(PYTHON_NAME)/site-packa
 
 
 node-32: build/frida_stripped-linux-i386/lib/node_modules/frida build/frida-node-submodule-stamp ##@node Build Node.js bindings for i386
+	mkdir -p $(BINDIST)/lib32/node_modules
+	cp -rf build/frida_stripped-linux-i386/lib/node_modules/frida $(BINDIST)/lib32/node_modules
+
 node-64: build/frida_stripped-linux-x86_64/lib/node_modules/frida build/frida-node-submodule-stamp ##@node Build Node.js bindings for x86-64
+	mkdir -p $(BINDIST)/lib64/node_modules
+	cp -rf build/frida_stripped-linux-x86_64/lib/node_modules/frida $(BINDIST)/lib64/node_modules
 
 build/frida_stripped-%/lib/node_modules/frida: build/frida-%/lib/pkgconfig/frida-core-1.0.pc build/frida-node-submodule-stamp
 	export PATH=$(NODE_BIN_DIR):$$PATH FRIDA=$(FRIDA) \
