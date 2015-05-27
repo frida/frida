@@ -126,6 +126,7 @@ check-gum-64: build/frida-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc build/frid
 core-32: build/frida-linux-i386/lib/pkgconfig/frida-core-1.0.pc ##@core Build for i386
 core-64: build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for x86-64
 core-android: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android
+core-qnx-arm: build/frida-qnx-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for QNX-arm
 
 frida-core/configure: build/frida-env-linux-$(build_arch).rc frida-core/configure.ac
 	. build/frida-env-linux-$(build_arch).rc && cd frida-core && ./autogen.sh
@@ -211,6 +212,7 @@ check-core-64: build/tmp-linux-x86_64/frida-core/tests/frida-tests build/frida-c
 server-32: build/frida_stripped-linux-i386/bin/frida-server ##@server Build for i386
 server-64: build/frida_stripped-linux-x86_64/bin/frida-server ##@server Build for x86-64
 server-android: build/frida_stripped-android-arm/bin/frida-server ##@server Build for Android
+server-qnx-arm: build/frida_stripped-qnx-arm/bin/frida-server ##@server Build for QNX-arm
 
 build/frida_stripped-%/bin/frida-server: build/frida-%/bin/frida-server
 	mkdir -p $(@D)
