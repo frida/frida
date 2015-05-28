@@ -1,4 +1,4 @@
-BINDIST=build/bindist
+BINDIST = build/bindist
 DESTDIR ?=
 PREFIX ?= /usr
 

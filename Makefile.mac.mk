@@ -35,6 +35,7 @@ HELP_FUN = \
 help:
 	@LC_ALL=C perl -e '$(HELP_FUN)' $(MAKEFILE_LIST)
 
+
 include releng/common.mk
 
 distclean: clean-submodules
@@ -275,7 +276,6 @@ check-core-mac: build/tmp-mac-i386/frida-core/tests/frida-tests build/tmp-mac-x8
 	build/tmp-mac-i386/frida-core/tests/frida-tests -p $(tests)
 	build/tmp-mac-x86_64/frida-core/tests/frida-tests -p $(tests)
 
-BINDIST=build/bindist
 server-mac: build/frida-mac-universal/bin/frida-server ##@server Build for Mac
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida-mac-universal/bin/frida-server $(BINDIST)/bin/frida-server-osx
