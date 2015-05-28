@@ -1,18 +1,6 @@
-FRIDA := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-
-PYTHON ?= $(shell which python)
-PYTHON_VERSION := $(shell $(PYTHON) -c 'import sys; v = sys.version_info; print("{0}.{1}".format(v[0], v[1]))')
-PYTHON_NAME ?= python$(PYTHON_VERSION)
-
-NODE ?= $(shell which node)
-NODE_BIN_DIR := $(shell dirname $(NODE) 2>/dev/null)
-NPM ?= $(NODE_BIN_DIR)/npm
-
-tests ?= /
+include config.mk
 
 build_arch := $(shell releng/detect-arch.sh)
-
-PREFIX ?= /usr
 
 HELP_FUN = \
 	my (%help, @sections); \
@@ -288,10 +276,15 @@ check-core-mac: build/tmp-mac-i386/frida-core/tests/frida-tests build/tmp-mac-x8
 	build/tmp-mac-i386/frida-core/tests/frida-tests -p $(tests)
 	build/tmp-mac-x86_64/frida-core/tests/frida-tests -p $(tests)
 
-
 server-mac: build/frida-mac-universal/bin/frida-server ##@server Build for Mac
+	mkdir -p $(BINDIST)/bin
+	cp -f build/frida-mac-universal/bin/frida-server $(BINDIST)/bin/frida-server-osx
 server-ios: build/frida-ios-universal/bin/frida-server ##@server Build for iOS
+	mkdir -p $(BINDIST)/bin
+	cp -f build/frida-ios-universal/bin/frida-server $(BINDIST)/bin/frida-server-ios
 server-android: build/frida_stripped-android-arm/bin/frida-server ##@server Build for Android
+	mkdir -p $(BINDIST)/bin
+	cp -f build/frida_stripped-android-arm/bin/frida-server $(BINDIST)/bin/frida-server-android
 
 build/frida-mac-universal/bin/frida-server: build/frida-mac-i386/bin/frida-server build/frida-mac-x86_64/bin/frida-server
 	mkdir -p $(@D)
@@ -331,6 +324,8 @@ build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 
 
 python-mac: build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/frida build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so build/frida-mac-universal/bin/frida ##@python Build Python bindings for Mac
+	mkdir -p $(BINDIST)/lib/$(PYTHON_NAME)/site-packages
+	cp -rf build/frida-mac-universal/lib/$(PYTHON_NAME)/site-packages/frida $(BINDIST)/lib/$(PYTHON_NAME)/site-packages
 
 frida-python/configure: build/frida-env-mac-$(build_arch).rc frida-python/configure.ac
 	. build/frida-env-mac-$(build_arch).rc && cd frida-python && ./autogen.sh
@@ -382,6 +377,8 @@ uninstall-python-mac: ##@python Uninstall Python bindings for mac
 
 
 node-mac: build/frida_stripped-mac-$(build_arch)/lib/node_modules/frida build/frida-node-submodule-stamp ##@node Build Node.js bindings for Mac
+	mkdir -p $(BINDIST)/lib/node_modules/
+	cp -rf build/frida_stripped-mac-$(build_arch)/lib/node_modules/frida $(BINDIST)/lib/node_modules/
 
 build/frida_stripped-%/lib/node_modules/frida: build/frida-%/lib/pkgconfig/frida-core-1.0.pc build/frida-node-submodule-stamp
 	export PATH=$(NODE_BIN_DIR):$$PATH FRIDA=$(FRIDA) \
