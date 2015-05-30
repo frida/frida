@@ -69,6 +69,7 @@ clean: clean-submodules
 	rm -rf build/tmp_stripped-android-arm
 	rm -rf build/tmp_stripped-qnx-i386
 	rm -rf build/tmp_stripped-qnx-arm
+	rm -rf $(BINDIST)
 
 clean-submodules:
 	cd capstone && git clean -xfd

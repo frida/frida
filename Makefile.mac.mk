@@ -74,6 +74,7 @@ clean: clean-submodules
 	rm -rf build/tmp_stripped-android-i386
 	rm -rf build/tmp_stripped-android-arm
 	rm -rf build/tmp_stripped-android-arm64
+	rm -rf $(BINDIST)
 
 clean-submodules:
 	cd capstone && git clean -xfd
