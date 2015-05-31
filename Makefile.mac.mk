@@ -99,7 +99,7 @@ build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-sub
 
 gum-mac: build/frida-mac-i386/lib/pkgconfig/frida-gum-1.0.pc build/frida-mac-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Mac
 gum-ios: build/frida-ios-arm/lib/pkgconfig/frida-gum-1.0.pc build/frida-ios-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for iOS
-gum-android: build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android
+gum-android: build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android
 
 frida-gum/configure: build/frida-env-mac-$(build_arch).rc frida-gum/configure.ac
 	. build/frida-env-mac-$(build_arch).rc && cd frida-gum && ./autogen.sh
@@ -120,7 +120,7 @@ check-gum-mac: build/frida-mac-i386/lib/pkgconfig/frida-gum-1.0.pc build/frida-m
 
 core-mac: build/frida-mac-i386/lib/pkgconfig/frida-core-1.0.pc build/frida-mac-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Mac
 core-ios: build/frida-ios-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-ios-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for iOS
-core-android: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android
+core-android: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android
 
 frida-core/configure: build/frida-env-mac-$(build_arch).rc frida-core/configure.ac
 	. build/frida-env-mac-$(build_arch).rc && cd frida-core && ./autogen.sh
@@ -309,6 +309,15 @@ build/tmp-%/frida-core/tests/frida-tests: build/frida-%/lib/pkgconfig/frida-core
 check-core-mac: build/tmp-mac-i386/frida-core/tests/frida-tests build/tmp-mac-x86_64/frida-core/tests/frida-tests ##@core Run tests for Mac
 	build/tmp-mac-i386/frida-core/tests/frida-tests -p $(tests)
 	build/tmp-mac-x86_64/frida-core/tests/frida-tests -p $(tests)
+check-core-android-arm64: build/tmp_stripped-android-arm/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp_stripped-android-arm64/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp_stripped-android-arm/frida-core/src/frida-helper build/tmp_stripped-android-arm64/frida-core/src/frida-helper
+	. build/frida-env-android-arm64.rc \
+		&& cd build/tmp-android-arm64/frida-core \
+		&& make check \
+			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-mac-$(build_arch)\" --toolchain=gnu" \
+			HELPER32=../../../../build/tmp_stripped-android-arm/frida-core/src/frida-helper!frida-helper-32 \
+			HELPER64=../../../../build/tmp_stripped-android-arm64/frida-core/src/frida-helper!frida-helper-64 \
+			AGENT32=../../../../build/tmp_stripped-android-arm/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent-32.so \
+			AGENT64=../../../../build/tmp_stripped-android-arm64/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent-64.so
 
 server-mac: build/frida-mac-universal/bin/frida-server ##@server Build for Mac
 	mkdir -p $(BINDIST)/bin
@@ -316,7 +325,7 @@ server-mac: build/frida-mac-universal/bin/frida-server ##@server Build for Mac
 server-ios: build/frida-ios-universal/bin/frida-server ##@server Build for iOS
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida-ios-universal/bin/frida-server $(BINDIST)/bin/frida-server-ios
-server-android: build/frida_stripped-android-arm/bin/frida-server ##@server Build for Android
+server-android: build/frida_stripped-android-arm/bin/frida-server build/frida_stripped-android-arm64/bin/frida-server ##@server Build for Android
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida_stripped-android-arm/bin/frida-server $(BINDIST)/bin/frida-server-android
 
@@ -465,7 +474,7 @@ uninstall-mac: ##@utilities Uninstall frida utilities
 	distclean clean clean-submodules git-submodules git-submodule-stamps \
 	capstone-update-submodule-stamp \
 	gum-mac gum-ios gum-android check-gum-mac frida-gum-update-submodule-stamp \
-	core-mac core-ios core-android check-core-mac frida-core-update-submodule-stamp \
+	core-mac core-ios core-android check-core-mac check-core-android-arm64 frida-core-update-submodule-stamp \
 	server-mac server-ios server-android \
 	python-mac check-python-mac install-python-mac uninstall-python-mac frida-python-update-submodule-stamp \
 	node-mac check-node-mac frida-node-update-submodule-stamp \
