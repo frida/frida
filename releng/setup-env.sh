@@ -287,7 +287,7 @@ case $host_platform in
 
     CPP="$qnx_toolchain_prefix-cpp -march=armv6 --sysroot=$qnx_sysroot $qnx_preprocessor_flags"
     CC="$qnx_toolchain_prefix-gcc -march=armv6 --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc"
-    CXX="$qnx_toolchain_prefix-g++ -march=armv6 --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc -static-libstdc++ -std=c++11"
+    CXX="$FRIDA_ROOT/releng/qnx-g++-wrapper.sh $qnx_toolchain_prefix-g++ -march=armv6 --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc -static-libstdc++ -std=c++11"
     LD="$qnx_toolchain_prefix-ld -march=armv6 --sysroot=$qnx_sysroot"
 
     AR="$qnx_toolchain_prefix-ar"
@@ -299,14 +299,6 @@ case $host_platform in
 
     CFLAGS="-ffunction-sections -fdata-sections"
     LDFLAGS="-Wl,--no-undefined -Wl,--gc-sections -L$(dirname $qnx_sysroot/lib/gcc/4.8.3/libstdc++.a)"
-    if [ $host_arch == "arm" ]; then
-      # The __modsi3 and __umoddi3 functions are not available in all libc.so
-      mkdir -p $FRIDA_PREFIX_LIB
-      $CC $CFLAGS -c $FRIDA_ROOT/releng/libc-compat/modsi3.c -O0 -o $FRIDA_PREFIX_LIB/modsi3.o
-      $CC $CFLAGS -c $FRIDA_ROOT/releng/libc-compat/umoddi3.c -O0 -o $FRIDA_PREFIX_LIB/umoddi3.o
-      $AR rcs $FRIDA_PREFIX_LIB/libfrida-libc-compat.a $FRIDA_PREFIX_LIB/modsi3.o $FRIDA_PREFIX_LIB/umoddi3.o
-      LDFLAGS="$LDFLAGS -lfrida-libc-compat"
-    fi
 
     if [ "$FRIDA_ENV_SDK" != 'none' ]; then
       CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
