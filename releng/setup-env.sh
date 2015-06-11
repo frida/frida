@@ -285,10 +285,10 @@ case $host_platform in
 
     PATH="$qnx_toolchain_dir:$PATH"
 
-    CPP="$qnx_toolchain_prefix-cpp -march=armv6 --sysroot=$qnx_sysroot $qnx_preprocessor_flags"
-    CC="$qnx_toolchain_prefix-gcc -march=armv6 --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc"
-    CXX="$FRIDA_ROOT/releng/qnx-g++-wrapper.sh $qnx_toolchain_prefix-g++ -march=armv6 --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc -static-libstdc++ -std=c++11"
-    LD="$qnx_toolchain_prefix-ld -march=armv6 --sysroot=$qnx_sysroot"
+    CPP="$qnx_toolchain_prefix-cpp -march=armv6 -mno-unaligned-access --sysroot=$qnx_sysroot $qnx_preprocessor_flags"
+    CC="$qnx_toolchain_prefix-gcc -march=armv6 -mno-unaligned-access --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc"
+    CXX="$FRIDA_ROOT/releng/qnx-g++-wrapper.sh $qnx_toolchain_prefix-g++ -march=armv6 -mno-unaligned-access --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc -static-libstdc++ -std=c++11"
+    LD="$qnx_toolchain_prefix-ld -march=armv6 -mno-unaligned-access --sysroot=$qnx_sysroot"
 
     AR="$qnx_toolchain_prefix-ar"
     NM="$qnx_toolchain_prefix-nm"
