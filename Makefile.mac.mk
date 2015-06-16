@@ -443,7 +443,7 @@ check-node-mac: build/frida_stripped-mac-$(build_arch)/lib/node_modules/frida ##
 
 
 install-mac: install-python-mac ##@utilities Install frida utilities (frida{-discover,-ps,-trace})
-	@$(PYTHON) -measy_install colorama \
+	@awk '/install_requires=\[/,/\],/' frida-python/src/setup.py | sed -n 's/.*"\(.*\)".*/\1/p' | $(PYTHON) -mpip install -r /dev/stdin \
 		&& for b in "build/frida-mac-universal/bin"/*; do \
 			n=`basename $$b`; \
 			p="$(PREFIX)/bin/$$n"; \
