@@ -37,7 +37,7 @@ if [ -z "$FRIDA_HOST" ]; then
 fi
 
 if [ $host_platform = "android" ]; then
-  ndk_required=r10d
+  ndk_required=r10e
   if [ -n "$ANDROID_NDK_ROOT" ]; then
     ndk_installed=$(cut -f1 -d" " "$ANDROID_NDK_ROOT/RELEASE.TXT")
     if [ "$ndk_installed" != "$ndk_required" ]; then
