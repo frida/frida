@@ -152,7 +152,7 @@ case $host_platform in
     ;;
   ios)
     ios_minver="7.0"
-    ios_sdkver="8.3"
+    ios_sdkver="8.4"
 
     ios_sdk="iphoneos$ios_sdkver"
     ios_sdk_path="$(xcrun --sdk $ios_sdk --show-sdk-path)"
