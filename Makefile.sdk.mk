@@ -38,18 +38,15 @@ ifeq ($(host_platform), ios)
 	iconv := build/fs-%/lib/libiconv.a
 endif
 ifeq ($(host_platform), linux)
-	xz := build/fs-%/lib/pkgconfig/liblzma.pc
 	unwind := build/fs-%/lib/pkgconfig/libunwind.pc
 	bfd := build/fs-%/lib/libbfd.a
 endif
 ifeq ($(host_platform), android)
-	xz := build/fs-%/lib/pkgconfig/liblzma.pc
 	unwind := build/fs-%/lib/pkgconfig/libunwind.pc
 	iconv := build/fs-%/lib/libiconv.a
 	bfd := build/fs-%/lib/libbfd.a
 endif
 ifeq ($(host_platform), qnx)
-	xz := build/fs-%/lib/pkgconfig/liblzma.pc
 	unwind := build/fs-%/lib/pkgconfig/libunwind.pc
 	iconv := build/fs-%/lib/libiconv.a
 	bfd := build/fs-%/lib/libbfd.a
@@ -73,7 +70,7 @@ build/sdk-$(host_platform)-$(host_arch).tar.bz2: build/fs-tmp-$(host_platform_ar
 
 build/fs-tmp-%/.package-stamp: \
 		build/fs-%/lib/libz.a \
-		$(xz) \
+		build/fs-%/lib/pkgconfig/liblzma.pc \
 		$(unwind) \
 		$(iconv) \
 		$(bfd) \
@@ -260,7 +257,7 @@ endef
 
 $(eval $(call make-git-module-rules,xz,build/fs-%/lib/pkgconfig/liblzma.pc,))
 
-$(eval $(call make-git-module-rules,libunwind,build/fs-%/lib/pkgconfig/libunwind.pc,$(xz)))
+$(eval $(call make-git-module-rules,libunwind,build/fs-%/lib/pkgconfig/libunwind.pc,build/fs-%/lib/pkgconfig/liblzma.pc))
 
 $(eval $(call make-git-module-rules,libffi,build/fs-%/lib/pkgconfig/libffi.pc,))
 
