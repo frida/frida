@@ -72,11 +72,14 @@ fi
 prompt_color=33
 
 toolchain_version=20150406
-if [ $host_platform = "android" ]; then
-  sdk_version=20150628
-else
-  sdk_version=20150607
-fi
+case $host_platform in
+  mac|ios|android)
+    sdk_version=20150628
+    ;;
+  *)
+    sdk_version=20150607
+    ;;
+esac
 
 if [ -n "$FRIDA_ENV_NAME" ]; then
   frida_env_name_prefix=${FRIDA_ENV_NAME}-
