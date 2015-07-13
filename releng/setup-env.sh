@@ -73,8 +73,11 @@ prompt_color=33
 
 toolchain_version=20150406
 case $host_platform in
-  mac|ios|android)
+  mac|android)
     sdk_version=20150628
+    ;;
+  ios)
+    [ $host_arch == 'arm64' ] && sdk_version=20150713 || sdk_version=20150628
     ;;
   *)
     sdk_version=20150607
