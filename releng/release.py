@@ -29,7 +29,7 @@ if __name__ == '__main__':
     (major, minor, micro, nano, commit) = raw_version.split(".")
     version = "%d.%d.%d" % (int(major), int(minor), int(micro))
 
-    def upload_to_pypi(interpreter, extension, extra_env = {}):
+    def upload_to_pypi(interpreter, extension, extra_env = {}, sdist = False):
         env = {}
         env.update(os.environ)
         env.update({
@@ -37,7 +37,13 @@ if __name__ == '__main__':
             'FRIDA_EXTENSION': extension
         })
         env.update(extra_env)
-        subprocess.call([interpreter, "setup.py", "bdist_egg", "upload"], cwd=os.path.join(frida_python_dir, "src"), env=env)
+
+        targets = []
+        if sdist:
+            targets.append("sdist")
+        targets.extend(["bdist_egg", "upload"])
+
+        subprocess.call([interpreter, "setup.py"] + targets, cwd=os.path.join(frida_python_dir, "src"), env=env)
 
     def upload_to_npm(node, publish):
         node_bin_dir = os.path.dirname(node)
@@ -102,7 +108,7 @@ if __name__ == '__main__':
             upload_to_pypi(r"C:\Program Files (x86)\Python34\python.exe",
                 os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "lib", "python3.4", "site-packages", "_frida.pyd"))
             upload_to_pypi(r"C:\Program Files\Python34\python.exe",
-                os.path.join(build_dir, "build", "frida-windows", "x64-Release", "lib", "python3.4", "site-packages", "_frida.pyd"))
+                os.path.join(build_dir, "build", "frida-windows", "x64-Release", "lib", "python3.4", "site-packages", "_frida.pyd"), sdist=True)
             upload_to_npm(r"C:\Program Files (x86)\nodejs\node.exe", publish=False)
             upload_to_npm(r"C:\Program Files\nodejs\node.exe", publish=True)
         elif system == 'Darwin':
