@@ -203,7 +203,7 @@ build/tmp-ios-%/frida-core/src/frida-helper: build/tmp-ios-%/frida-core/lib/inte
 	@$(call ensure_relink,frida-core/src/darwin/frida-helper-glue.c,build/tmp-ios-$*/frida-core/src/frida-helper-glue.lo)
 	. build/frida-env-ios-$*.rc && make -C build/tmp-ios-$*/frida-core/src libfrida-helper-types.la frida-helper.stamp
 	@touch -c $@
-build/tmp-android-%/frida-core/src/frida-helper: build/tmp-android-%/frida-core/lib/interfaces/libfrida-interfaces.la
+build/tmp-android-%/frida-core/src/frida-helper: build/tmp-android-%/frida-core/lib/selinux/libfrida-selinux.stamp build/tmp-android-%/frida-core/lib/interfaces/libfrida-interfaces.la
 	@$(call ensure_relink,frida-core/src/linux/frida-helper-glue.c,build/tmp-android-$*/frida-core/src/frida-helper-glue.lo)
 	. build/frida-env-android-$*.rc && make -C build/tmp-android-$*/frida-core/src libfrida-helper-types.la frida-helper
 	@touch -c $@
@@ -244,12 +244,15 @@ build/tmp_stripped-android-%/frida-core/src/frida-helper: build/tmp-android-%/fr
 	. build/frida-env-android-$*.rc && $$STRIP --strip-all $@.tmp
 	mv $@.tmp $@
 
+build/tmp-%/frida-core/lib/selinux/libfrida-selinux.stamp: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
+	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/lib/selinux
+	@touch -c $@
 build/tmp-%/frida-core/lib/interfaces/libfrida-interfaces.la: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
 	@$(call ensure_relink,frida-core/lib/interfaces/session.c,build/tmp-$*/frida-core/lib/interfaces/libfrida_interfaces_la-session.lo)
 	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/lib/interfaces
 	@touch -c $@
 
-build/tmp-%/frida-core/lib/pipe/libfrida-pipe.la: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
+build/tmp-%/frida-core/lib/pipe/libfrida-pipe.la: build/tmp-%/frida-core/lib/selinux/libfrida-selinux.stamp build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
 	@$(call ensure_relink,frida-core/lib/pipe/pipe.c,build/tmp-$*/frida-core/lib/pipe/libfrida_pipe_la-pipe.lo)
 	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/lib/pipe
 	@touch -c $@
