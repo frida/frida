@@ -328,6 +328,7 @@ server-ios: build/frida-ios-universal/bin/frida-server ##@server Build for iOS
 server-android: build/frida_stripped-android-arm/bin/frida-server build/frida_stripped-android-arm64/bin/frida-server ##@server Build for Android
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida_stripped-android-arm/bin/frida-server $(BINDIST)/bin/frida-server-android
+	cp -f build/frida_stripped-android-arm64/bin/frida-server $(BINDIST)/bin/frida-server-android64
 
 build/frida-mac-universal/bin/frida-server: build/frida-mac-i386/bin/frida-server build/frida-mac-x86_64/bin/frida-server
 	mkdir -p $(@D)
