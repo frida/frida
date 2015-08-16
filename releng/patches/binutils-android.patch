@@ -68,3 +68,37 @@ diff -Nur binutils-2.25-old/bfd/hosts/x86-64linux.h binutils-2.25/bfd/hosts/i386
  /* Unsigned 64-bit integer aligned to 8 bytes.  */
  typedef uint64_t __attribute__ ((__aligned__ (8))) a8_uint64_t;
  
+--- binutils/libiberty/d-demangle.c-orig	2015-08-16 21:12:49.000000000 +0200
++++ binutils/libiberty/d-demangle.c	2015-08-16 21:15:36.000000000 +0200
+@@ -44,7 +44,6 @@
+ #include <stdlib.h>
+ #else
+ extern long strtol (const char *nptr, char **endptr, int base);
+-extern long double strtold (const char *nptr, char **endptr);
+ #endif
+ 
+ #include <demangle.h>
+@@ -810,7 +809,7 @@
+ {
+   char buffer[64];
+   int len = 0;
+-  long double value;
++  double value;
+   char *endptr;
+ 
+   /* Handle NAN and +-INF.  */
+@@ -877,12 +876,12 @@
+ 
+   /* Convert buffer from hexadecimal to floating-point.  */
+   buffer[len] = '\0';
+-  value = strtold (buffer, &endptr);
++  value = strtod (buffer, &endptr);
+ 
+   if (endptr == NULL || endptr != (buffer + len))
+     return NULL;
+ 
+-  len = snprintf (buffer, sizeof(buffer), "%#Lg", value);
++  len = snprintf (buffer, sizeof(buffer), "%#g", value);
+   string_appendn (decl, buffer, len);
+   return mangled;
+ }
