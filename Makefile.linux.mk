@@ -179,6 +179,8 @@ build/tmp_stripped-%/frida-core/src/frida-helper: build/tmp-%/frida-core/src/fri
 	mv $@.tmp $@
 
 build/tmp-%/frida-core/lib/selinux/libfrida-selinux.stamp: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
+	@$(call ensure_relink,frida-core/lib/pipe/pipe-posix.c,build/tmp-$*/frida-core/lib/pipe/libfrida_pipe_la-pipe-posix.lo)
+	@$(call ensure_relink,frida-core/src/frida-glue.c,build/tmp-$*/frida-core/src/libfrida_core_glue_la-frida-glue.lo)
 	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/lib/selinux
 	@touch -c $@
 build/tmp-%/frida-core/lib/interfaces/libfrida-interfaces.la: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
