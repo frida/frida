@@ -77,7 +77,7 @@ case $host_platform in
     sdk_version=20150607
     ;;
   *)
-    sdk_version=20150720
+    sdk_version=20150821
     ;;
 esac
 
