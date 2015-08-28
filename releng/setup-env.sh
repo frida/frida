@@ -40,7 +40,13 @@ if [ $host_platform = "android" ]; then
   ndk_required=r10e
   if [ -n "$ANDROID_NDK_ROOT" ]; then
     ndk_installed=$(cut -f1 -d" " "$ANDROID_NDK_ROOT/RELEASE.TXT")
-    if [ "$ndk_installed" != "$ndk_required" ]; then
+    case ${ndk_installed} in
+    ${ndk_required})
+	    ;;
+    ${ndk_required}*)
+	    echo "ndk version kinda sorta matches: ${ndk_installed} ~= ${ndk_required}"
+	    ;;
+    *)
       echo "Unsupported NDK version: ${ndk_installed}. Please install ${ndk_required}."               > /dev/stderr
       echo ""                                                                                         > /dev/stderr
       echo "Frida's SDK - the prebuilt dependencies snapshot - was compiled against ${ndk_required}," > /dev/stderr
@@ -55,7 +61,8 @@ if [ $host_platform = "android" ]; then
       echo "If you do this and it works well for you, please let us know so we can upgrade"           > /dev/stderr
       echo "the upstream SDK version."                                                                > /dev/stderr
       exit 1
-    fi
+      ;;
+    esac
   else
     echo "ANDROID_NDK_ROOT must be set to the location of your $frida_ndk NDK." > /dev/stderr
     exit 1
