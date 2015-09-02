@@ -87,12 +87,19 @@ build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-sub
 	. build/frida-env-$*.rc \
 		&& export PACKAGE_TARNAME=capstone \
 		&& . $$CONFIG_SITE \
+		&& case $* in \
+			*-i386)   capstone_archs="x86"     ;; \
+			*-x86_64) capstone_archs="x86"     ;; \
+			*-arm)    capstone_archs="arm"     ;; \
+			*-arm64)  capstone_archs="aarch64" ;; \
+		esac \
 		&& make -C capstone \
 			PREFIX=$$frida_prefix \
 			BUILDDIR=../build/tmp-$*/capstone \
-			CAPSTONE_ARCHS="arm aarch64 x86" \
+			CAPSTONE_ARCHS="$$capstone_archs" \
 			CAPSTONE_SHARED=$$enable_shared \
 			CAPSTONE_STATIC=$$enable_static \
+			CAPSTONE_DIET=yes \
 			install
 
 
