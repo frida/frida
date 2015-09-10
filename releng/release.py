@@ -110,9 +110,7 @@ if __name__ == '__main__':
             upload_to_pypi(r"C:\Program Files\Python34\python.exe",
                 os.path.join(build_dir, "build", "frida-windows", "x64-Release", "lib", "python3.4", "site-packages", "_frida.pyd"), sdist=True)
             upload_to_npm(r"C:\Program Files (x86)\nodejs\node.exe", publish=False)
-            upload_to_npm(r"C:\Program Files\nodejs\node.exe", publish=False)
-            upload_to_npm(r"C:\Program Files (x86)\iojs-v45\iojs.exe", publish=False)
-            upload_to_npm(r"C:\Program Files\iojs-v45\iojs.exe", publish=True)
+            upload_to_npm(r"C:\Program Files\nodejs\node.exe", publish=True)
         elif system == 'Darwin':
             upload_to_pypi("/usr/bin/python2.6",
                 os.path.join(build_dir, "build", "frida-mac-universal", "lib", "python2.6", "site-packages", "_frida.so"))
@@ -122,9 +120,7 @@ if __name__ == '__main__':
                     { '_PYTHON_HOST_PLATFORM': "macosx-10.%d-intel" % osx_minor })
             upload_to_pypi("/usr/local/bin/python3.4",
                 os.path.join(build_dir, "build", "frida-mac-universal", "lib", "python3.4", "site-packages", "_frida.so"))
-            upload_to_npm("/opt/node-32/bin/node", publish=False)
             upload_to_npm("/opt/node-64/bin/node", publish=False)
-            upload_to_npm("/opt/iojs-v45-64/bin/iojs", publish=False)
             upload_ios_deb(os.path.join(build_dir, "build", "frida-ios-universal", "bin", "frida-server"))
         elif system == 'Linux':
             upload_to_pypi("/opt/python27-32/bin/python2.7",
@@ -141,5 +137,3 @@ if __name__ == '__main__':
                 { 'LD_LIBRARY_PATH': "/opt/python34-64/lib", '_PYTHON_HOST_PLATFORM': "linux-x86_64" })
             upload_to_npm("/opt/node-32/bin/node", publish=False)
             upload_to_npm("/opt/node-64/bin/node", publish=False)
-            upload_to_npm("/opt/iojs-v45-32/bin/iojs", publish=False)
-            upload_to_npm("/opt/iojs-v45-64/bin/iojs", publish=False)
