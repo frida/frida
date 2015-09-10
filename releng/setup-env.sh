@@ -41,27 +41,23 @@ if [ $host_platform = "android" ]; then
   if [ -n "$ANDROID_NDK_ROOT" ]; then
     ndk_installed=$(cut -f1 -d" " "$ANDROID_NDK_ROOT/RELEASE.TXT")
     case ${ndk_installed} in
-    ${ndk_required})
-	    ;;
-    ${ndk_required}*)
-	    echo "ndk version kinda sorta matches: ${ndk_installed} ~= ${ndk_required}"
-	    ;;
-    *)
-      echo "Unsupported NDK version: ${ndk_installed}. Please install ${ndk_required}."               > /dev/stderr
-      echo ""                                                                                         > /dev/stderr
-      echo "Frida's SDK - the prebuilt dependencies snapshot - was compiled against ${ndk_required}," > /dev/stderr
-      echo "and as we have observed the NDK ABI breaking over time, we ask you to install"            > /dev/stderr
-      echo "the exact same version."                                                                  > /dev/stderr
-      echo ""                                                                                         > /dev/stderr
-      echo "However, if you'd like to take the risk and use a different NDK, you may edit"            > /dev/stderr
-      echo "releng/setup-env.sh and adjust the ndk_required variable. Make sure you use"              > /dev/stderr
-      echo "a newer NDK, and not an older one. Note that the proper solution is to rebuild"           > /dev/stderr
-      echo "the SDK against your NDK by running:"                                                     > /dev/stderr
-      echo "  make -f Makefile.sdk.mk FRIDA_HOST=android-arm"                                         > /dev/stderr
-      echo "If you do this and it works well for you, please let us know so we can upgrade"           > /dev/stderr
-      echo "the upstream SDK version."                                                                > /dev/stderr
-      exit 1
-      ;;
+      ${ndk_required}*)
+        ;;
+      *)
+        echo "Unsupported NDK version: ${ndk_installed}. Please install ${ndk_required}."               > /dev/stderr
+        echo ""                                                                                         > /dev/stderr
+        echo "Frida's SDK - the prebuilt dependencies snapshot - was compiled against ${ndk_required}," > /dev/stderr
+        echo "and as we have observed the NDK ABI breaking over time, we ask you to install"            > /dev/stderr
+        echo "the exact same version."                                                                  > /dev/stderr
+        echo ""                                                                                         > /dev/stderr
+        echo "However, if you'd like to take the risk and use a different NDK, you may edit"            > /dev/stderr
+        echo "releng/setup-env.sh and adjust the ndk_required variable. Make sure you use"              > /dev/stderr
+        echo "a newer NDK, and not an older one. Note that the proper solution is to rebuild"           > /dev/stderr
+        echo "the SDK against your NDK by running:"                                                     > /dev/stderr
+        echo "  make -f Makefile.sdk.mk FRIDA_HOST=android-arm"                                         > /dev/stderr
+        echo "If you do this and it works well for you, please let us know so we can upgrade"           > /dev/stderr
+        echo "the upstream SDK version."                                                                > /dev/stderr
+        exit 1
     esac
   else
     echo "ANDROID_NDK_ROOT must be set to the location of your $frida_ndk NDK." > /dev/stderr
