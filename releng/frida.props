@@ -25,7 +25,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(IntDir)..\gum-32;$(IntDir)..\gum-64;$(IntDir)..\gumjs-32;$(IntDir)..\gumjs-64;$(SolutionDir)build\sdk-windows\$(PlatformName)-$(ConfigurationName)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ffi.lib;gee-0.8.lib;gio-2.0.lib;glib-2.0.lib;gmodule-2.0.lib;gobject-2.0.lib;gthread-2.0.lib;intl.lib;json-glib-1.0.lib;v8_libbase.lib;v8_base.lib;v8_libplatform.lib;v8_snapshot.lib;z.lib;dnsapi.lib;iphlpapi.lib;ole32.lib;psapi.lib;shlwapi.lib;winmm.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ffi.lib;gee-0.8.lib;gio-2.0.lib;glib-2.0.lib;gmodule-2.0.lib;gobject-2.0.lib;gthread-2.0.lib;intl.lib;json-glib-1.0.lib;v8_libbase.lib;v8_base_0.lib;v8_base_1.lib;v8_base_2.lib;v8_base_3.lib;v8_libplatform.lib;v8_snapshot.lib;z.lib;dnsapi.lib;iphlpapi.lib;ole32.lib;psapi.lib;shlwapi.lib;winmm.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <PropertyGroup Label="Configuration">
