@@ -193,7 +193,7 @@ case $host_platform in
         android_target_platform=14
         android_host_abi=x86
         android_host_target=i686-none-linux-android
-        android_host_toolchain=x86-4.8
+        android_host_toolchain=x86-4.9
         android_host_toolprefix=i686-linux-android-
         android_host_cflags="-march=i686"
         android_host_ldflags="-fuse-ld=gold"
@@ -211,7 +211,7 @@ case $host_platform in
         android_target_platform=14
         android_host_abi=armeabi-v7a
         android_host_target=armv7-none-linux-androideabi
-        android_host_toolchain=arm-linux-androideabi-4.8
+        android_host_toolchain=arm-linux-androideabi-4.9
         android_host_toolprefix=arm-linux-androideabi-
         android_host_cflags="-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16"
         android_host_ldflags="-fuse-ld=gold -Wl,--fix-cortex-a8"
