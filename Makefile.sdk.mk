@@ -286,11 +286,11 @@ ifeq ($(host_arch), arm64)
 endif
 
 ifeq ($(host_platform), linux)
-	v8_host_flags := -f make-linux -D linux_use_bundled_binutils=0 -D linux_use_bundled_gold=0 -D linux_use_gold_flags=0
+	v8_host_flags := -f make-linux -D clang=0 -D host_clang=0 -D linux_use_bundled_binutils=0 -D linux_use_bundled_gold=0 -D linux_use_gold_flags=0
 	v8_libs_private := " -lrt"
 endif
 ifeq ($(host_platform), qnx)
-	v8_host_flags := -f make-qnx
+	v8_host_flags := -f make-qnx -D clang=0 -D host_clang=0
 	v8_libs_private := " -lbacktrace"
 endif
 ifeq ($(host_platform), android)
