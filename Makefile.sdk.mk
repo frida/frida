@@ -304,7 +304,7 @@ endif
 ifeq ($(host_platform), ios)
 	v8_host_flags := -f make-mac -D mac_deployment_target=10.7 -D ios_deployment_target=7.0 -D clang=1
 endif
-v8_flags := -D host_os=$(build_platform) -D werror='' -D v8_enable_gdbjit=0 -D v8_enable_i18n_support=0 $(v8_host_flags)
+v8_flags := -D host_os=$(build_platform) -D werror='' -D v8_use_external_startup_data=0 -D v8_enable_gdbjit=0 -D v8_enable_i18n_support=0 $(v8_host_flags)
 
 v8_target := $(v8_flavor_prefix)$(v8_arch).release
 
