@@ -466,7 +466,7 @@ check-node-mac: build/frida_stripped-mac-$(build_arch)/lib/node_modules/frida ##
 	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha
 
 
-install-mac: install-python-mac ##@utilities Install frida utilities (frida{-discover,-ps,-trace})
+install-mac: install-python-mac ##@utilities Install frida utilities (frida{-discover,-ls-devices,-ps,-trace})
 	@awk '/install_requires=\[/,/\],/' frida-python/src/setup.py | sed -n 's/.*"\(.*\)".*/\1/p' | $(PYTHON) -mpip install -r /dev/stdin \
 		&& for b in "build/frida-mac-universal/bin"/*; do \
 			n=`basename $$b`; \
@@ -482,7 +482,7 @@ install-mac: install-python-mac ##@utilities Install frida utilities (frida{-dis
 		done
 
 uninstall-mac: ##@utilities Uninstall frida utilities
-	@for n in frida frida-discover frida-ps frida-trace; do \
+	@for n in frida frida-discover frida-ls-devices frida-ps frida-trace; do \
 		if which "$$n" &> /dev/null; then \
 			p=`which "$$n"`; \
 			if [ -w "$$(dirname "$$p")" ]; then \
