@@ -131,9 +131,8 @@ case $host_platform in
     ;;
   mac)
     mac_minver="10.7"
-    mac_sdkver="10.10"
 
-    mac_sdk="macosx$mac_sdkver"
+    mac_sdk="macosx"
     mac_sdk_path="$(xcrun --sdk $mac_sdk --show-sdk-path)"
 
     CPP="$(xcrun --sdk $mac_sdk -f clang) -E"
@@ -158,9 +157,8 @@ case $host_platform in
     ;;
   ios)
     ios_minver="7.0"
-    ios_sdkver="8.4"
 
-    ios_sdk="iphoneos$ios_sdkver"
+    ios_sdk="iphoneos"
     ios_sdk_path="$(xcrun --sdk $ios_sdk --show-sdk-path)"
 
     CPP="$(xcrun --sdk $ios_sdk -f clang) -E"
