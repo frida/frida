@@ -100,7 +100,6 @@ build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-sub
 			CAPSTONE_ARCHS="$$capstone_archs" \
 			CAPSTONE_SHARED=$$enable_shared \
 			CAPSTONE_STATIC=$$enable_static \
-			CAPSTONE_DIET=yes \
 			install
 
 
