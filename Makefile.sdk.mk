@@ -313,10 +313,10 @@ ifeq ($(host_platform), android)
 	v8_env_vars := \
 		MACOSX_DEPLOYMENT_TARGET="" \
 		CXX="$$CXX" \
-		CXX_host="$$(xcrun --sdk macosx10.10 -f clang++) -stdlib=libc++" \
+		CXX_host="$$(xcrun --sdk macosx -f clang++) -stdlib=libc++" \
 		CXX_target="$$CXX" \
 		LINK="$$CXX" \
-		LINK_host="$$(xcrun --sdk macosx10.10 -f clang++) -stdlib=libc++" \
+		LINK_host="$$(xcrun --sdk macosx -f clang++) -stdlib=libc++" \
 		CFLAGS="" \
 		CXXFLAGS="" \
 		CPPFLAGS="" \
