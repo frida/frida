@@ -1,13 +1,21 @@
 Inject JavaScript to explore native apps on Windows, Mac, Linux, iOS and Android.
 ===
 
-## Dependencies
+## Installing from prebuilt binaries
 
-For running the Frida tools (`frida-discover`, `frida-ps`, `frida-repl` and
-`frida-trace`) you need to have python installed with the `colorama`
-package (`pip3 install colorama`).
+    pip install frida # CLI tools and Python bindings
+    npm install frida # Node.js bindings
+
+You may also download pre-built binaries for various operating systems from
+[http://www.frida.re/](http://www.frida.re/).
 
 ## Building
+
+### Dependencies
+
+For running the Frida tools (`frida`, `frida-ls-devices`, `frida-ps`,
+`frida-trace`, and `frida-discover`) you need to have python installed with
+the `colorama` package (`pip3 install colorama`).
 
 ### Linux
 
@@ -40,9 +48,6 @@ To ensure that OS X accepts the newly created certificate, restart the
 
 See [http://www.frida.re/docs/building/](http://www.frida.re/docs/building/)
 for more details.
-
-You may also download pre-built binaries for various operating systems from
-[http://www.frida.re/](http://www.frida.re/).
 
 ## Learn more
 
