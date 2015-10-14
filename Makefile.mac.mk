@@ -300,19 +300,25 @@ build/tmp-%/frida-core/lib/agent/libfrida-agent.la: build/tmp-%/frida-core/lib/i
 	@touch -c $@
 
 build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib: build/tmp-mac-i386/frida-core/lib/agent/libfrida-agent.la build/tmp-mac-x86_64/frida-core/lib/agent/libfrida-agent.la
+	@if [ -z "$$MAC_CERTID" ]; then echo "MAC_CERTID not set, see https://github.com/frida/frida#mac-and-ios"; exit 1; fi
 	mkdir -p $(@D)
 	cp build/tmp-mac-i386/frida-core/lib/agent/.libs/libfrida-agent.dylib $(@D)/libfrida-agent-32.dylib
 	cp build/tmp-mac-x86_64/frida-core/lib/agent/.libs/libfrida-agent.dylib $(@D)/libfrida-agent-64.dylib
 	. build/frida-env-mac-$(build_arch).rc \
 		&& $$STRIP -Sx $(@D)/libfrida-agent-32.dylib $(@D)/libfrida-agent-64.dylib \
-		&& $$LIPO $(@D)/libfrida-agent-32.dylib $(@D)/libfrida-agent-64.dylib -create -output $@
+		&& $$LIPO $(@D)/libfrida-agent-32.dylib $(@D)/libfrida-agent-64.dylib -create -output $@.tmp \
+		&& $$CODESIGN -f -s "$$MAC_CERTID" $@.tmp
+	mv $@.tmp $@
 build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib: build/tmp-ios-arm/frida-core/lib/agent/libfrida-agent.la build/tmp-ios-arm64/frida-core/lib/agent/libfrida-agent.la
+	@if [ -z "$$IOS_CERTID" ]; then echo "IOS_CERTID not set, see https://github.com/frida/frida#mac-and-ios"; exit 1; fi
 	mkdir -p $(@D)
 	cp build/tmp-ios-arm/frida-core/lib/agent/.libs/libfrida-agent.dylib $(@D)/libfrida-agent-32.dylib
 	cp build/tmp-ios-arm64/frida-core/lib/agent/.libs/libfrida-agent.dylib $(@D)/libfrida-agent-64.dylib
 	. build/frida-env-ios-arm64.rc \
 		&& $$STRIP -Sx $(@D)/libfrida-agent-32.dylib $(@D)/libfrida-agent-64.dylib \
-		&& $$LIPO $(@D)/libfrida-agent-32.dylib $(@D)/libfrida-agent-64.dylib -create -output $@
+		&& $$LIPO $(@D)/libfrida-agent-32.dylib $(@D)/libfrida-agent-64.dylib -create -output $@.tmp \
+		&& $$CODESIGN -f -s "$$IOS_CERTID" $@.tmp
+	mv $@.tmp $@
 build/tmp_stripped-%/frida-core/lib/agent/.libs/libfrida-agent.so: build/tmp-%/frida-core/lib/agent/libfrida-agent.la
 	mkdir -p $(@D)
 	cp build/tmp-$*/frida-core/lib/agent/.libs/libfrida-agent.so $@.tmp
@@ -353,21 +359,27 @@ server-android: build/frida_stripped-android-arm/bin/frida-server build/frida_st
 	cp -f build/frida_stripped-android-arm64/bin/frida-server $(BINDIST)/bin/frida-server-android64
 
 build/frida-mac-universal/bin/frida-server: build/frida-mac-i386/bin/frida-server build/frida-mac-x86_64/bin/frida-server
+	@if [ -z "$$MAC_CERTID" ]; then echo "MAC_CERTID not set, see https://github.com/frida/frida#mac-and-ios"; exit 1; fi
 	mkdir -p $(@D)
 	cp build/frida-mac-i386/bin/frida-server $(@D)/frida-server-32
 	cp build/frida-mac-x86_64/bin/frida-server $(@D)/frida-server-64
 	. build/frida-env-mac-$(build_arch).rc \
 		&& $$STRIP -Sx $(@D)/frida-server-32 $(@D)/frida-server-64 \
-		&& $$LIPO $(@D)/frida-server-32 $(@D)/frida-server-64 -create -output $@
+		&& $$LIPO $(@D)/frida-server-32 $(@D)/frida-server-64 -create -output $@.tmp \
+		&& $$CODESIGN -f -s "$$MAC_CERTID" $@.tmp
 	$(RM) $(@D)/frida-server-32 $(@D)/frida-server-64
+	mv $@.tmp $@
 build/frida-ios-universal/bin/frida-server: build/frida-ios-arm/bin/frida-server build/frida-ios-arm64/bin/frida-server
+	@if [ -z "$$IOS_CERTID" ]; then echo "IOS_CERTID not set, see https://github.com/frida/frida#mac-and-ios"; exit 1; fi
 	mkdir -p $(@D)
 	cp build/frida-ios-arm/bin/frida-server $(@D)/frida-server-32
 	cp build/frida-ios-arm64/bin/frida-server $(@D)/frida-server-64
 	. build/frida-env-ios-arm64.rc \
 		&& $$STRIP -Sx $(@D)/frida-server-32 $(@D)/frida-server-64 \
-		&& $$LIPO $(@D)/frida-server-32 $(@D)/frida-server-64 -create -output $@
+		&& $$LIPO $(@D)/frida-server-32 $(@D)/frida-server-64 -create -output $@.tmp \
+		&& $$CODESIGN -f -s "$$IOS_CERTID" $@.tmp
 	$(RM) $(@D)/frida-server-32 $(@D)/frida-server-64
+	mv $@.tmp $@
 build/frida_stripped-android-i386/bin/frida-server: build/frida-android-i386/bin/frida-server
 	mkdir -p $(@D)
 	cp $< $@.tmp
