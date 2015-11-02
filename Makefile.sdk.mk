@@ -95,7 +95,7 @@ build/fs-tmp-%/.package-stamp: \
 			| tar -C $(abspath $(@D)/package) -xf -
 	releng/relocatify.sh $(@D)/package $(abspath build/fs-$*)
 ifeq ($(host_platform), ios)
-	cp /System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/mach_vm.h $(@D)/package/include/frida_mach_vm.h
+	cp $(shell xcrun --sdk macosx --show-sdk-path)/usr/include/mach/mach_vm.h $(@D)/package/include/frida_mach_vm.h
 endif
 	@touch $@
 
