@@ -310,13 +310,14 @@ v8_target := $(v8_flavor_prefix)$(v8_arch).release
 
 ifeq ($(build_platform), mac)
 ifeq ($(host_platform), android)
+	mac_sdk_path := $$(xcrun --sdk macosx --show-sdk-path)
 	v8_env_vars := \
 		MACOSX_DEPLOYMENT_TARGET="" \
 		CXX="$$CXX" \
-		CXX_host="$$(xcrun --sdk macosx -f clang++) -stdlib=libc++" \
+		CXX_host="$$(xcrun --sdk macosx -f clang++) -isysroot $(mac_sdk_path) -stdlib=libc++" \
 		CXX_target="$$CXX" \
 		LINK="$$CXX" \
-		LINK_host="$$(xcrun --sdk macosx -f clang++) -stdlib=libc++" \
+		LINK_host="$$(xcrun --sdk macosx -f clang++) -isysroot $(mac_sdk_path) -stdlib=libc++" \
 		CFLAGS="" \
 		CXXFLAGS="" \
 		CPPFLAGS="" \
