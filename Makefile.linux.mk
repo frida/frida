@@ -344,12 +344,13 @@ build/frida_stripped-%/lib/node_modules/frida: build/frida-%/lib/pkgconfig/frida
 		&& $(NPM) install --build-from-source \
 		&& $(NPM) pack \
 		&& rm -rf ../$@/ ../$@.tmp/ \
-		&& mkdir -p ../$@.tmp/ \
+		&& mkdir -p ../$@.tmp/build/bindings/ \
 		&& tar -C ../$@.tmp/ --strip-components 1 -x -f frida-0.0.0.tgz \
 		&& rm frida-0.0.0.tgz \
-		&& mv lib/binding ../$@.tmp/lib/ \
+		&& mv build/Release/frida_binding.node ../$@.tmp/build/bindings/ \
+		&& rm -rf build \
 		&& mv node_modules ../$@.tmp/ \
-		&& strip --strip-all ../$@.tmp/lib/binding/Release/node-*/frida_binding.node \
+		&& strip --strip-all ../$@.tmp/build/bindings/frida_binding.node \
 		&& mv ../$@.tmp ../$@
 
 check-node-32: build/frida_stripped-linux-i386/lib/node_modules/frida ##@node Test Node.js bindings for i386
