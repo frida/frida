@@ -80,7 +80,7 @@ case $host_platform in
     sdk_version=20150607
     ;;
   *)
-    sdk_version=20151001
+    sdk_version=20151103
     ;;
 esac
 
