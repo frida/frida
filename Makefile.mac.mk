@@ -275,19 +275,25 @@ build/tmp-%/frida-core/lib/loader/libfrida-loader.la: build/tmp-%/frida-core/Mak
 	@touch -c $@
 
 build/tmp-mac-universal/frida-core/lib/loader/.libs/libfrida-loader.dylib: build/tmp-mac-i386/frida-core/lib/loader/libfrida-loader.la build/tmp-mac-x86_64/frida-core/lib/loader/libfrida-loader.la
+	@if [ -z "$$MAC_CERTID" ]; then echo "MAC_CERTID not set, see https://github.com/frida/frida#mac-and-ios"; exit 1; fi
 	mkdir -p $(@D)
 	cp build/tmp-mac-i386/frida-core/lib/loader/.libs/libfrida-loader.dylib $(@D)/libfrida-loader-32.dylib
 	cp build/tmp-mac-x86_64/frida-core/lib/loader/.libs/libfrida-loader.dylib $(@D)/libfrida-loader-64.dylib
 	. build/frida-env-mac-$(build_arch).rc \
 		&& $$STRIP -Sx $(@D)/libfrida-loader-32.dylib $(@D)/libfrida-loader-64.dylib \
-		&& $$LIPO $(@D)/libfrida-loader-32.dylib $(@D)/libfrida-loader-64.dylib -create -output $@
+		&& $$LIPO $(@D)/libfrida-loader-32.dylib $(@D)/libfrida-loader-64.dylib -create -output $@.tmp \
+		&& $$CODESIGN -f -s "$$MAC_CERTID" $@.tmp
+	mv $@.tmp $@
 build/tmp-ios-universal/frida-core/lib/loader/.libs/libfrida-loader.dylib: build/tmp-ios-arm/frida-core/lib/loader/libfrida-loader.la build/tmp-ios-arm64/frida-core/lib/loader/libfrida-loader.la
+	@if [ -z "$$IOS_CERTID" ]; then echo "IOS_CERTID not set, see https://github.com/frida/frida#mac-and-ios"; exit 1; fi
 	mkdir -p $(@D)
 	cp build/tmp-ios-arm/frida-core/lib/loader/.libs/libfrida-loader.dylib $(@D)/libfrida-loader-32.dylib
 	cp build/tmp-ios-arm64/frida-core/lib/loader/.libs/libfrida-loader.dylib $(@D)/libfrida-loader-64.dylib
 	. build/frida-env-ios-arm64.rc \
 		&& $$STRIP -Sx $(@D)/libfrida-loader-32.dylib $(@D)/libfrida-loader-64.dylib \
-		&& $$LIPO $(@D)/libfrida-loader-32.dylib $(@D)/libfrida-loader-64.dylib -create -output $@
+		&& $$LIPO $(@D)/libfrida-loader-32.dylib $(@D)/libfrida-loader-64.dylib -create -output $@.tmp \
+		&& $$CODESIGN -f -s "$$IOS_CERTID" $@.tmp
+	mv $@.tmp $@
 build/tmp_stripped-%/frida-core/lib/loader/.libs/libfrida-loader.so: build/tmp-%/frida-core/lib/loader/libfrida-loader.la
 	mkdir -p $(@D)
 	cp build/tmp-$*/frida-core/lib/loader/.libs/libfrida-loader.so $@.tmp
