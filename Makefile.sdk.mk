@@ -82,6 +82,8 @@ build/fs-tmp-%/.package-stamp: \
 	$(RM) -r $(@D)/package
 	mkdir -p $(@D)/package
 	cd build/fs-$* \
+		&& [ -d lib32 ] && lib32=lib32 || lib32= \
+		&& [ -d lib64 ] && lib64=lib64 || lib64= \
 		&& tar -c \
 			include \
 			lib/*.a \
@@ -89,6 +91,8 @@ build/fs-tmp-%/.package-stamp: \
 			lib/glib-2.0 \
 			lib/libffi* \
 			lib/pkgconfig \
+			$$lib32 \
+			$$lib64 \
 			share/aclocal \
 			share/glib-2.0/schemas \
 			share/vala \
