@@ -47,16 +47,12 @@ if __name__ == '__main__':
 
     def upload_to_npm(node, publish):
         node_bin_dir = os.path.dirname(node)
-        node_pre_gyp_bin_dir = os.path.join(frida_node_dir, "node_modules", "node-pre-gyp", "bin")
         npm = os.path.join(node_bin_dir, "npm")
         if system == 'Windows':
             npm += '.cmd'
-        node_pre_gyp = os.path.join(node_pre_gyp_bin_dir, "node-pre-gyp")
-        if system == 'Windows':
-            node_pre_gyp += '.cmd'
         env = dict(os.environ)
         env.update({
-            'PATH': os.pathsep.join([node_pre_gyp_bin_dir, node_bin_dir]) + os.pathsep + os.getenv('PATH'),
+            'PATH': node_bin_dir + os.pathsep + os.getenv('PATH'),
             'FRIDA': build_dir
         })
         def do(args):
@@ -73,18 +69,12 @@ if __name__ == '__main__':
         do([npm, "version", version])
         if publish:
             do([npm, "publish"])
-        do([npm, "install", "--build-from-source"])
-        if system == 'Darwin':
-            do(["strip", "-Sx", "build/Release/frida_binding.node"])
-            do(["strip", "-Sx", glob.glob(frida_node_dir + "/lib/binding/Release/node-*/frida_binding.node")[0]])
-        elif system == 'Linux':
-            do(["strip", "--strip-all", "build/Release/frida_binding.node"])
-            do(["strip", "--strip-all", glob.glob(frida_node_dir + "/lib/binding/Release/node-*/frida_binding.node")[0]])
-        do([node_pre_gyp, "package"])
-        package = glob.glob(os.path.join(frida_node_dir, "build", "stage", "node", "v*", "Release", "*.tar.gz"))[0]
-        remote_path = os.path.dirname(package[len(frida_node_dir) + 13:]).replace("\\", "/") + "/"
-        do([ssh, "buildmaster@build.frida.re", "mkdir -p /home/buildmaster/public_html/" + remote_path])
-        do([scp, package, "buildmaster@build.frida.re:/home/buildmaster/public_html/" + remote_path])
+        do([npm, "run", "prebuild"])
+        packages = glob.glob(os.path.join(frida_node_dir, "prebuilds", "*.tar.gz"))
+        for package in packages:
+            remote_path = "node/v" + version
+            do([ssh, "buildmaster@build.frida.re", "mkdir -p /home/buildmaster/public_html/" + remote_path])
+            do([scp, package, "buildmaster@build.frida.re:/home/buildmaster/public_html/" + remote_path])
         reset()
 
     def upload_ios_deb(server):
