@@ -467,17 +467,17 @@ node-mac: build/frida_stripped-mac-$(build_arch)/lib/node_modules/frida build/fr
 build/frida_stripped-%/lib/node_modules/frida: build/frida-%/lib/pkgconfig/frida-core-1.0.pc build/frida-node-submodule-stamp
 	export PATH=$(NODE_BIN_DIR):$$PATH FRIDA=$(FRIDA) \
 		&& cd frida-node \
-		&& rm -rf frida-0.0.0.tgz build lib/binding node_modules \
-		&& $(NPM) install --build-from-source \
+		&& rm -rf frida-0.0.0.tgz build node_modules \
+		&& $(NPM) install \
 		&& $(NPM) pack \
 		&& rm -rf ../$@/ ../$@.tmp/ \
-		&& mkdir -p ../$@.tmp/build/bindings/ \
+		&& mkdir -p ../$@.tmp/build/ \
 		&& tar -C ../$@.tmp/ --strip-components 1 -x -f frida-0.0.0.tgz \
 		&& rm frida-0.0.0.tgz \
-		&& mv build/Release/frida_binding.node ../$@.tmp/build/bindings/ \
+		&& mv build/Release/frida_binding.node ../$@.tmp/build/ \
 		&& rm -rf build \
 		&& mv node_modules ../$@.tmp/ \
-		&& . ../build/frida-env-mac-$(build_arch).rc && $$STRIP -Sx ../$@.tmp/build/bindings/frida_binding.node \
+		&& . ../build/frida-env-mac-$(build_arch).rc && $$STRIP -Sx ../$@.tmp/build/frida_binding.node \
 		&& mv ../$@.tmp ../$@
 
 check-node-mac: build/frida_stripped-mac-$(build_arch)/lib/node_modules/frida ##@node Test Node.js bindings for Mac

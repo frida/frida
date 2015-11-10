@@ -340,17 +340,17 @@ node-64: build/frida_stripped-linux-x86_64/lib/node_modules/frida build/frida-no
 build/frida_stripped-%/lib/node_modules/frida: build/frida-%/lib/pkgconfig/frida-core-1.0.pc build/frida-node-submodule-stamp
 	export PATH=$(NODE_BIN_DIR):$$PATH FRIDA=$(FRIDA) \
 		&& cd frida-node \
-		&& rm -rf frida-0.0.0.tgz build lib/binding node_modules \
-		&& $(NPM) install --build-from-source \
+		&& rm -rf frida-0.0.0.tgz build node_modules \
+		&& $(NPM) install \
 		&& $(NPM) pack \
 		&& rm -rf ../$@/ ../$@.tmp/ \
-		&& mkdir -p ../$@.tmp/build/bindings/ \
+		&& mkdir -p ../$@.tmp/build/ \
 		&& tar -C ../$@.tmp/ --strip-components 1 -x -f frida-0.0.0.tgz \
 		&& rm frida-0.0.0.tgz \
-		&& mv build/Release/frida_binding.node ../$@.tmp/build/bindings/ \
+		&& mv build/Release/frida_binding.node ../$@.tmp/build/ \
 		&& rm -rf build \
 		&& mv node_modules ../$@.tmp/ \
-		&& strip --strip-all ../$@.tmp/build/bindings/frida_binding.node \
+		&& strip --strip-all ../$@.tmp/build/frida_binding.node \
 		&& mv ../$@.tmp ../$@
 
 check-node-32: build/frida_stripped-linux-i386/lib/node_modules/frida ##@node Test Node.js bindings for i386
