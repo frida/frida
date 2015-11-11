@@ -69,6 +69,7 @@ if __name__ == '__main__':
         do([npm, "version", version])
         if publish:
             do([npm, "publish"])
+        do([npm, "install"])
         do([npm, "run", "prebuild"])
         packages = glob.glob(os.path.join(frida_node_dir, "prebuilds", "*.tar.gz"))
         for package in packages:
