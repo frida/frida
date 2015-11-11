@@ -41,7 +41,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-clr", "frida-clr\frid
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-python27", "frida-python\frida-python27.vcxproj", "{7409F45B-E10E-48AA-9E68-94C113995D4A}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-python34", "frida-python\frida-python34.vcxproj", "{7505F884-DD69-4F23-ADE6-1E0E049AB018}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-python35", "frida-python\frida-python35.vcxproj", "{7505F884-DD69-4F23-ADE6-1E0E049AB018}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-pipe-32", "frida-core\lib\pipe\frida-pipe-32.vcxproj", "{4C39C3CF-13E5-4346-B6AE-F73013105936}"
 EndProject

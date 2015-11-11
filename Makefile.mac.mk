@@ -28,7 +28,7 @@ HELP_FUN = \
 	print "  $${variable_color}NODE$${reset_color}                    Absolute path of Node.js binary\n"; \
 	print "\n"; \
 	print "For example:\n"; \
-	print "  \$$ make $${target_color}python-mac $${variable_color}PYTHON$${reset_color}=/usr/local/bin/python3.4\n"; \
+	print "  \$$ make $${target_color}python-mac $${variable_color}PYTHON$${reset_color}=/usr/local/bin/python3.5\n"; \
 	print "  \$$ make $${target_color}node-mac $${variable_color}NODE$${reset_color}=/usr/local/bin/node\n"; \
 	print "\n";
 
