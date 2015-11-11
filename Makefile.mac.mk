@@ -207,11 +207,11 @@ build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-an
 		&& make install-data-am
 	@touch -c $@
 
-build/tmp-mac-%/frida-core/src/frida-helper: build/tmp-mac-%/frida-core/lib/interfaces/libfrida-interfaces.la build/tmp-mac-%/frida-core/lib/pipe/libfrida-pipe.la
+build/tmp-mac-%/frida-core/src/frida-helper: build/tmp-mac-%/frida-core/lib/interfaces/libfrida-interfaces.la build/tmp-mac-%/frida-core/lib/pipe/libfrida-pipe.la build/tmp-mac-%/frida-core/lib/agent/libfrida-agent-container.la
 	@$(call ensure_relink,frida-core/src/darwin/frida-helper-glue.c,build/tmp-mac-$*/frida-core/src/frida-helper-glue.lo)
 	. build/frida-env-mac-$*.rc && make -C build/tmp-mac-$*/frida-core/src libfrida-helper-types.la frida-helper.stamp
 	@touch -c $@
-build/tmp-ios-%/frida-core/src/frida-helper: build/tmp-ios-%/frida-core/lib/interfaces/libfrida-interfaces.la build/tmp-ios-%/frida-core/lib/pipe/libfrida-pipe.la
+build/tmp-ios-%/frida-core/src/frida-helper: build/tmp-ios-%/frida-core/lib/interfaces/libfrida-interfaces.la build/tmp-ios-%/frida-core/lib/pipe/libfrida-pipe.la build/tmp-ios-%/frida-core/lib/agent/libfrida-agent-container.la
 	@$(call ensure_relink,frida-core/src/darwin/frida-helper-glue.c,build/tmp-ios-$*/frida-core/src/frida-helper-glue.lo)
 	. build/frida-env-ios-$*.rc && make -C build/tmp-ios-$*/frida-core/src libfrida-helper-types.la frida-helper.stamp
 	@touch -c $@
@@ -261,6 +261,7 @@ build/tmp-%/frida-core/lib/selinux/libfrida-selinux.stamp: build/tmp-%/frida-cor
 	@$(call ensure_relink,frida-core/src/frida-glue.c,build/tmp-$*/frida-core/src/libfrida_core_glue_la-frida-glue.lo)
 	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/lib/selinux
 	@touch -c $@
+
 build/tmp-%/frida-core/lib/interfaces/libfrida-interfaces.la: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
 	@$(call ensure_relink,frida-core/lib/interfaces/session.c,build/tmp-$*/frida-core/lib/interfaces/libfrida_interfaces_la-session.lo)
 	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/lib/interfaces
@@ -269,6 +270,11 @@ build/tmp-%/frida-core/lib/interfaces/libfrida-interfaces.la: build/tmp-%/frida-
 build/tmp-%/frida-core/lib/pipe/libfrida-pipe.la: build/tmp-%/frida-core/lib/selinux/libfrida-selinux.stamp build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
 	@$(call ensure_relink,frida-core/lib/pipe/pipe.c,build/tmp-$*/frida-core/lib/pipe/libfrida_pipe_la-pipe.lo)
 	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/lib/pipe
+	@touch -c $@
+
+build/tmp-%/frida-core/lib/agent/libfrida-agent-container.la: build/tmp-%/frida-core/lib/interfaces/libfrida-interfaces.la build/tmp-%/frida-core/lib/pipe/libfrida-pipe.la
+	@$(call ensure_relink,frida-core/lib/agent/agent-container.c,build/tmp-$*/frida-core/lib/agent/libfrida_agent_container_la-agent-container.lo)
+	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/lib/agent libfrida-agent-container.la
 	@touch -c $@
 
 build/tmp-%/frida-core/lib/loader/libfrida-loader.la: build/tmp-%/frida-core/Makefile build/frida-core-submodule-stamp
