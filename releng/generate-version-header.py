@@ -37,7 +37,7 @@ def generate_version_header():
                     return
         except:
             pass
-        with open(output_filename, "wb") as f:
+        with open(output_filename, "w") as f:
             f.write(header)
 
 
