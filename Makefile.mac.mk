@@ -339,6 +339,22 @@ build/tmp_stripped-%/frida-core/lib/agent/.libs/libfrida-agent.so: build/tmp-%/f
 	. build/frida-env-$*.rc && $$STRIP --strip-all $@.tmp
 	mv $@.tmp $@
 
+build/tmp-%/frida-core/lib/gadget/libfrida-gadget.la: build/tmp-%/frida-core/lib/interfaces/libfrida-interfaces.la
+	@$(call ensure_relink,frida-core/lib/gadget/gadget.c,build/tmp-$*/frida-core/lib/gadget/libfrida_gadget_la-gadget.lo)
+	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/lib/gadget
+	@touch -c $@
+
+build/frida-ios-universal/lib/FridaGadget.dylib: build/tmp-ios-arm/frida-core/lib/gadget/libfrida-gadget.la build/tmp-ios-arm64/frida-core/lib/gadget/libfrida-gadget.la
+	@if [ -z "$$IOS_CERTID" ]; then echo "IOS_CERTID not set, see https://github.com/frida/frida#mac-and-ios"; exit 1; fi
+	mkdir -p $(@D)
+	cp build/tmp-ios-arm/frida-core/lib/gadget/.libs/libfrida-gadget.dylib $(@D)/libfrida-gadget-32.dylib
+	cp build/tmp-ios-arm64/frida-core/lib/gadget/.libs/libfrida-gadget.dylib $(@D)/libfrida-gadget-64.dylib
+	. build/frida-env-ios-arm64.rc \
+		&& $$STRIP -Sx $(@D)/libfrida-gadget-32.dylib $(@D)/libfrida-gadget-64.dylib \
+		&& $$LIPO $(@D)/libfrida-gadget-32.dylib $(@D)/libfrida-gadget-64.dylib -create -output $@.tmp \
+		&& $$CODESIGN -f -s "$$IOS_CERTID" $@.tmp
+	mv $@.tmp $@
+
 build/tmp-%/frida-core/tests/frida-tests: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	@$(call ensure_relink,frida-core/tests/main.c,build/tmp-$*/frida-core/tests/main.o)
 	@$(call ensure_relink,frida-core/tests/inject-victim.c,build/tmp-$*/frida-core/tests/inject-victim.o)
@@ -371,6 +387,10 @@ server-android: build/frida_stripped-android-arm/bin/frida-server build/frida_st
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida_stripped-android-arm/bin/frida-server $(BINDIST)/bin/frida-server-android
 	cp -f build/frida_stripped-android-arm64/bin/frida-server $(BINDIST)/bin/frida-server-android64
+
+gadget-ios: build/frida-ios-universal/lib/FridaGadget.dylib ##@server Build Gadget for iOS
+	mkdir -p $(BINDIST)/lib
+	cp -f build/frida-ios-universal/lib/FridaGadget.dylib $(BINDIST)/lib/
 
 build/frida-mac-universal/bin/frida-server: build/frida-mac-i386/bin/frida-server build/frida-mac-x86_64/bin/frida-server
 	@if [ -z "$$MAC_CERTID" ]; then echo "MAC_CERTID not set, see https://github.com/frida/frida#mac-and-ios"; exit 1; fi
