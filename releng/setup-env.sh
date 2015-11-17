@@ -456,7 +456,7 @@ case $host_platform in
     ;;
   mac|ios)
     (
-      echo "export INSTALL_NAME_TOOL=\"$OTOOL\""
+      echo "export INSTALL_NAME_TOOL=\"$INSTALL_NAME_TOOL\""
       echo "export OTOOL=\"$OTOOL\""
       echo "export CODESIGN=\"$CODESIGN\""
       echo "export LIPO=\"$LIPO\""
