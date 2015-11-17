@@ -356,6 +356,7 @@ build/frida-ios-universal/lib/FridaGadget.dylib: build/tmp-ios-arm/frida-core/li
 	. build/frida-env-ios-arm64.rc \
 		&& $$STRIP -Sx $(@D)/libfrida-gadget-32.dylib $(@D)/libfrida-gadget-64.dylib \
 		&& $$LIPO $(@D)/libfrida-gadget-32.dylib $(@D)/libfrida-gadget-64.dylib -create -output $@.tmp \
+		&& $$INSTALL_NAME_TOOL -id @rpath/FridaGadget.dylib $@.tmp \
 		&& $$CODESIGN -f -s "$$IOS_CERTID" $@.tmp
 	rm $(@D)/libfrida-gadget-32.dylib $(@D)/libfrida-gadget-64.dylib
 	mv $@.tmp $@
