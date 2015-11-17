@@ -291,6 +291,7 @@ build/tmp-mac-universal/frida-core/lib/loader/.libs/libfrida-loader.dylib: build
 		&& $$STRIP -Sx $(@D)/libfrida-loader-32.dylib $(@D)/libfrida-loader-64.dylib \
 		&& $$LIPO $(@D)/libfrida-loader-32.dylib $(@D)/libfrida-loader-64.dylib -create -output $@.tmp \
 		&& $$CODESIGN -f -s "$$MAC_CERTID" $@.tmp
+	rm $(@D)/libfrida-loader-32.dylib $(@D)/libfrida-loader-64.dylib
 	mv $@.tmp $@
 build/tmp-ios-universal/frida-core/lib/loader/.libs/libfrida-loader.dylib: build/tmp-ios-arm/frida-core/lib/loader/libfrida-loader.la build/tmp-ios-arm64/frida-core/lib/loader/libfrida-loader.la
 	@if [ -z "$$IOS_CERTID" ]; then echo "IOS_CERTID not set, see https://github.com/frida/frida#mac-and-ios"; exit 1; fi
@@ -301,6 +302,7 @@ build/tmp-ios-universal/frida-core/lib/loader/.libs/libfrida-loader.dylib: build
 		&& $$STRIP -Sx $(@D)/libfrida-loader-32.dylib $(@D)/libfrida-loader-64.dylib \
 		&& $$LIPO $(@D)/libfrida-loader-32.dylib $(@D)/libfrida-loader-64.dylib -create -output $@.tmp \
 		&& $$CODESIGN -f -s "$$IOS_CERTID" $@.tmp
+	rm $(@D)/libfrida-loader-32.dylib $(@D)/libfrida-loader-64.dylib
 	mv $@.tmp $@
 build/tmp_stripped-%/frida-core/lib/loader/.libs/libfrida-loader.so: build/tmp-%/frida-core/lib/loader/libfrida-loader.la
 	mkdir -p $(@D)
@@ -322,6 +324,7 @@ build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib: build/t
 		&& $$STRIP -Sx $(@D)/libfrida-agent-32.dylib $(@D)/libfrida-agent-64.dylib \
 		&& $$LIPO $(@D)/libfrida-agent-32.dylib $(@D)/libfrida-agent-64.dylib -create -output $@.tmp \
 		&& $$CODESIGN -f -s "$$MAC_CERTID" $@.tmp
+	rm $(@D)/libfrida-agent-32.dylib $(@D)/libfrida-agent-64.dylib
 	mv $@.tmp $@
 build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib: build/tmp-ios-arm/frida-core/lib/agent/libfrida-agent.la build/tmp-ios-arm64/frida-core/lib/agent/libfrida-agent.la
 	@if [ -z "$$IOS_CERTID" ]; then echo "IOS_CERTID not set, see https://github.com/frida/frida#mac-and-ios"; exit 1; fi
@@ -332,6 +335,7 @@ build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib: build/t
 		&& $$STRIP -Sx $(@D)/libfrida-agent-32.dylib $(@D)/libfrida-agent-64.dylib \
 		&& $$LIPO $(@D)/libfrida-agent-32.dylib $(@D)/libfrida-agent-64.dylib -create -output $@.tmp \
 		&& $$CODESIGN -f -s "$$IOS_CERTID" $@.tmp
+	rm $(@D)/libfrida-agent-32.dylib $(@D)/libfrida-agent-64.dylib
 	mv $@.tmp $@
 build/tmp_stripped-%/frida-core/lib/agent/.libs/libfrida-agent.so: build/tmp-%/frida-core/lib/agent/libfrida-agent.la
 	mkdir -p $(@D)
@@ -353,6 +357,7 @@ build/frida-ios-universal/lib/FridaGadget.dylib: build/tmp-ios-arm/frida-core/li
 		&& $$STRIP -Sx $(@D)/libfrida-gadget-32.dylib $(@D)/libfrida-gadget-64.dylib \
 		&& $$LIPO $(@D)/libfrida-gadget-32.dylib $(@D)/libfrida-gadget-64.dylib -create -output $@.tmp \
 		&& $$CODESIGN -f -s "$$IOS_CERTID" $@.tmp
+	rm $(@D)/libfrida-gadget-32.dylib $(@D)/libfrida-gadget-64.dylib
 	mv $@.tmp $@
 
 build/tmp-%/frida-core/tests/frida-tests: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
