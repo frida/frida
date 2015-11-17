@@ -146,6 +146,7 @@ case $host_platform in
     RANLIB="$(xcrun --sdk $mac_sdk -f ranlib)"
     STRIP="$(xcrun --sdk $mac_sdk -f strip)"
 
+    INSTALL_NAME_TOOL="$(xcrun --sdk $mac_sdk -f install_name_tool)"
     OTOOL="$(xcrun --sdk $mac_sdk -f otool)"
     CODESIGN="$(xcrun --sdk $mac_sdk -f codesign)"
     LIPO="$(xcrun --sdk $mac_sdk -f lipo)"
@@ -172,6 +173,7 @@ case $host_platform in
     RANLIB="$(xcrun --sdk $ios_sdk -f ranlib)"
     STRIP="$(xcrun --sdk $ios_sdk -f strip)"
 
+    INSTALL_NAME_TOOL="$(xcrun --sdk $ios_sdk -f install_name_tool)"
     OTOOL="$(xcrun --sdk $ios_sdk -f otool)"
     CODESIGN="$(xcrun --sdk $ios_sdk -f codesign)"
     LIPO="$(xcrun --sdk $ios_sdk -f lipo)"
@@ -454,6 +456,7 @@ case $host_platform in
     ;;
   mac|ios)
     (
+      echo "export INSTALL_NAME_TOOL=\"$OTOOL\""
       echo "export OTOOL=\"$OTOOL\""
       echo "export CODESIGN=\"$CODESIGN\""
       echo "export LIPO=\"$LIPO\""
