@@ -160,7 +160,7 @@ case $host_platform in
     ios_minver="7.0"
 
     case $host_arch in
-      i386)
+      i386|x86_64)
         ios_sdk="iphonesimulator"
         ;;
       *)

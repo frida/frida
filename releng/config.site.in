@@ -77,6 +77,10 @@ case $frida_host_platform_arch in
     host_alias="i686-apple-darwin"
     cross_compiling=yes
   ;;
+  ios-x86_64)
+    host_alias="x86_64-apple-darwin"
+    cross_compiling=yes
+  ;;
   ios-arm)
     host_alias="arm-apple-darwin"
     cross_compiling=yes
