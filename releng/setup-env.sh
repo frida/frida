@@ -178,7 +178,14 @@ case $host_platform in
     CODESIGN="$(xcrun --sdk $ios_sdk -f codesign)"
     LIPO="$(xcrun --sdk $ios_sdk -f lipo)"
 
-    [ $host_arch == 'arm' ] && ios_arch=armv7 || ios_arch=arm64
+    case $host_arch in
+      arm)
+        ios_arch=armv7
+        ;;
+      *)
+        ios_arch=$host_arch
+        ;;
+    esac
 
     CPPFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch"
     CFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch"

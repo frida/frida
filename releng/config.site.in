@@ -73,7 +73,7 @@ case $frida_host_platform_arch in
     fi
     cross_compiling=yes
   ;;
-  mac-i386)
+  mac-i386|ios-i386)
     host_alias="i686-apple-darwin"
     cross_compiling=yes
   ;;
