@@ -348,15 +348,16 @@ build/tmp-%/frida-core/lib/gadget/libfrida-gadget.la: build/tmp-%/frida-core/lib
 	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/lib/gadget
 	@touch -c $@
 
-build/frida-ios-universal/lib/FridaGadget.dylib: build/tmp-ios-i386/frida-core/lib/gadget/libfrida-gadget.la build/tmp-ios-arm/frida-core/lib/gadget/libfrida-gadget.la build/tmp-ios-arm64/frida-core/lib/gadget/libfrida-gadget.la
+build/frida-ios-universal/lib/FridaGadget.dylib: build/tmp-ios-i386/frida-core/lib/gadget/libfrida-gadget.la build/tmp-ios-x86_64/frida-core/lib/gadget/libfrida-gadget.la build/tmp-ios-arm/frida-core/lib/gadget/libfrida-gadget.la build/tmp-ios-arm64/frida-core/lib/gadget/libfrida-gadget.la
 	@if [ -z "$$IOS_CERTID" ]; then echo "IOS_CERTID not set, see https://github.com/frida/frida#mac-and-ios"; exit 1; fi
 	mkdir -p $(@D)
 	cp build/tmp-ios-i386/frida-core/lib/gadget/.libs/libfrida-gadget.dylib $(@D)/libfrida-gadget-i386.dylib
+	cp build/tmp-ios-x86_64/frida-core/lib/gadget/.libs/libfrida-gadget.dylib $(@D)/libfrida-gadget-x86_64.dylib
 	cp build/tmp-ios-arm/frida-core/lib/gadget/.libs/libfrida-gadget.dylib $(@D)/libfrida-gadget-armv7.dylib
 	cp build/tmp-ios-arm64/frida-core/lib/gadget/.libs/libfrida-gadget.dylib $(@D)/libfrida-gadget-arm64.dylib
 	. build/frida-env-ios-arm64.rc \
-		&& $$STRIP -Sx $(@D)/libfrida-gadget-i386.dylib $(@D)/libfrida-gadget-armv7.dylib $(@D)/libfrida-gadget-arm64.dylib \
-		&& $$LIPO $(@D)/libfrida-gadget-i386.dylib $(@D)/libfrida-gadget-armv7.dylib $(@D)/libfrida-gadget-arm64.dylib -create -output $@.tmp \
+		&& $$STRIP -Sx $(@D)/libfrida-gadget-i386.dylib $(@D)/libfrida-gadget-x86_64.dylib $(@D)/libfrida-gadget-armv7.dylib $(@D)/libfrida-gadget-arm64.dylib \
+		&& $$LIPO $(@D)/libfrida-gadget-i386.dylib $(@D)/libfrida-gadget-x86_64.dylib $(@D)/libfrida-gadget-armv7.dylib $(@D)/libfrida-gadget-arm64.dylib -create -output $@.tmp \
 		&& $$INSTALL_NAME_TOOL -id @rpath/FridaGadget.dylib $@.tmp \
 		&& $$CODESIGN -f -s "$$IOS_CERTID" $@.tmp
 	rm $(@D)/libfrida-gadget-*.dylib
