@@ -159,7 +159,14 @@ case $host_platform in
   ios)
     ios_minver="7.0"
 
-    ios_sdk="iphoneos"
+    case $host_arch in
+      i386)
+        ios_sdk="iphonesimulator"
+        ;;
+      *)
+        ios_sdk="iphoneos"
+        ;;
+    esac
     ios_sdk_path="$(xcrun --sdk $ios_sdk --show-sdk-path)"
 
     CPP="$(xcrun --sdk $ios_sdk -f clang) -E"
