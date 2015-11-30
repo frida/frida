@@ -194,10 +194,10 @@ case $host_platform in
         ;;
     esac
 
-    CPPFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch"
-    CFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch"
+    CPPFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch -fembed-bitcode-marker"
+    CFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch -fembed-bitcode-marker"
     CXXFLAGS="-std=c++11 -stdlib=libc++"
-    LDFLAGS="-isysroot $ios_sdk_path -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
+    LDFLAGS="-isysroot $ios_sdk_path -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -fembed-bitcode-marker -Wl,-dead_strip"
     ;;
   android)
     android_build_platform=$(echo ${build_platform} | sed 's,^mac$,darwin,')
