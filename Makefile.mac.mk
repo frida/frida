@@ -49,6 +49,8 @@ clean: clean-submodules
 	rm -rf build/frida-mac-x86_64
 	rm -rf build/frida-mac-universal
 	rm -rf build/frida-ios-universal
+	rm -rf build/frida-ios-i386
+	rm -rf build/frida-ios-x86_64
 	rm -rf build/frida-ios-arm
 	rm -rf build/frida-ios-arm64
 	rm -rf build/frida-android-i386
