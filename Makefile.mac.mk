@@ -64,6 +64,8 @@ clean: clean-submodules
 	rm -rf build/tmp-mac-i386
 	rm -rf build/tmp-mac-x86_64
 	rm -rf build/tmp-mac-universal
+	rm -rf build/tmp-ios-i386
+	rm -rf build/tmp-ios-x86_64
 	rm -rf build/tmp-ios-arm
 	rm -rf build/tmp-ios-arm64
 	rm -rf build/tmp-ios-universal
@@ -71,6 +73,8 @@ clean: clean-submodules
 	rm -rf build/tmp-android-arm
 	rm -rf build/tmp-android-arm64
 	rm -rf build/tmp_stripped-mac-x86_64
+	rm -rf build/tmp_stripped-ios-i386
+	rm -rf build/tmp_stripped-ios-x86_64
 	rm -rf build/tmp_stripped-ios-arm
 	rm -rf build/tmp_stripped-ios-arm64
 	rm -rf build/tmp_stripped-android-i386
