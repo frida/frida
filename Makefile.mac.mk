@@ -369,6 +369,12 @@ build/frida-ios-universal/lib/FridaGadget.dylib: build/tmp-ios-i386/frida-core/l
 	rm $(@D)/libfrida-gadget-*.dylib
 	mv $@.tmp $@
 
+build/frida-android-%/lib/frida-gadget.so: build/tmp-android-%/frida-core/lib/gadget/libfrida-gadget.la
+	mkdir -p $(@D)
+	cp build/tmp-android-$*/frida-core/lib/gadget/.libs/libfrida-gadget.so $@.tmp
+	. build/frida-env-android-$*.rc && $$STRIP --strip-all $@.tmp
+	mv $@.tmp $@
+
 build/tmp-%/frida-core/tests/frida-tests: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	@$(call ensure_relink,frida-core/tests/main.c,build/tmp-$*/frida-core/tests/main.o)
 	@$(call ensure_relink,frida-core/tests/inject-victim.c,build/tmp-$*/frida-core/tests/inject-victim.o)
@@ -405,6 +411,11 @@ server-android: build/frida_stripped-android-arm/bin/frida-server build/frida_st
 gadget-ios: build/frida-ios-universal/lib/FridaGadget.dylib ##@server Build Gadget for iOS
 	mkdir -p $(BINDIST)/lib
 	cp -f build/frida-ios-universal/lib/FridaGadget.dylib $(BINDIST)/lib/
+
+gadget-android: build/frida-android-arm/lib/frida-gadget.so build/frida-android-arm64/lib/frida-gadget.so ##@server Build Gadget for Android
+	mkdir -p $(BINDIST)/lib
+	cp -f build/frida-android-arm/lib/frida-gadget.so $(BINDIST)/lib/frida-gadget-android-arm.so
+	cp -f build/frida-android-arm64/lib/frida-gadget.so $(BINDIST)/lib/frida-gadget-android-arm64.so
 
 build/frida-mac-universal/bin/frida-server: build/frida-mac-i386/bin/frida-server build/frida-mac-x86_64/bin/frida-server
 	@if [ -z "$$MAC_CERTID" ]; then echo "MAC_CERTID not set, see https://github.com/frida/frida#mac-and-ios"; exit 1; fi
@@ -561,6 +572,7 @@ uninstall-mac: ##@utilities Uninstall frida utilities
 	gum-mac gum-ios gum-android check-gum-mac frida-gum-update-submodule-stamp \
 	core-mac core-ios core-android check-core-mac check-core-android-arm64 frida-core-update-submodule-stamp \
 	server-mac server-ios server-android \
+	gadget-ios gadget-android \
 	python-mac check-python-mac install-python-mac uninstall-python-mac frida-python-update-submodule-stamp \
 	node-mac check-node-mac frida-node-update-submodule-stamp \
 	install-mac uninstall-mac
