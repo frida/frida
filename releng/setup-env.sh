@@ -221,7 +221,7 @@ case $host_platform in
         android_host_target=x86_64-none-linux-android
         android_host_toolchain=x86_64-4.9
         android_host_toolprefix=x86_64-linux-android-
-        android_host_cflags="-march=x86_64"
+        android_host_cflags=""
         android_host_ldflags="-fuse-ld=gold"
         ;;
       arm)
