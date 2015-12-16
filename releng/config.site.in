@@ -23,6 +23,10 @@ case "$PACKAGE_TARNAME" in
 esac
 
 case $frida_host_platform_arch in
+  linux-arm)
+    host_alias="arm-linux-gnueabi"
+    cross_compiling=yes
+  ;;
   linux-i386)
     host_alias="i686-linux-gnu"
     cross_compiling=yes
