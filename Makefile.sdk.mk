@@ -316,8 +316,6 @@ v8_flags := -D host_os=$(build_platform) -D werror='' -D v8_use_external_startup
 
 v8_target := $(v8_flavor_prefix)$(v8_arch).release
 
-
-
 ifeq ($(build_platform), mac)
 ifeq ($(host_platform), android)
 	mac_sdk_path := $$(xcrun --sdk macosx --show-sdk-path)
