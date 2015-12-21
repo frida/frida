@@ -138,7 +138,7 @@ build/tmp-%/frida-core/Makefile: build/frida-env-%.rc frida-core/configure build
 	mkdir -p $(@D)
 	. build/frida-env-$*.rc && cd $(@D) && ../../../frida-core/configure
 
-build/frida-linux-i386/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-linux-i386/frida-core/src/frida-helper build/tmp_stripped-linux-x86_64/frida-core/src/frida-helper build/tmp_stripped-linux-arm/frida-core/src/frida-helper build/tmp_stripped-linux-i386/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp_stripped-linux-x86_64/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp_stripped-linux-arm/frida-core/lib/agent/.libs/libfrida-agent.so
+build/frida-linux-i386/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-linux-i386/frida-core/src/frida-helper build/tmp_stripped-linux-x86_64/frida-core/src/frida-helper build/tmp_stripped-linux-i386/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp_stripped-linux-x86_64/frida-core/lib/agent/.libs/libfrida-agent.so
 	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-linux-$*/frida-core/src/libfrida_core_la-frida.lo)
 	. build/frida-env-linux-i386.rc \
 		&& cd build/tmp-linux-i386/frida-core \
@@ -150,7 +150,7 @@ build/frida-linux-i386/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-linux
 			AGENT64=../../../../build/tmp_stripped-linux-x86_64/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent-64.so \
 		&& make install-data-am
 	@touch -c $@
-build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-linux-i386/frida-core/src/frida-helper build/tmp_stripped-linux-x86_64/frida-core/src/frida-helper build/tmp_stripped-linux-arm/frida-core/src/frida-helper build/tmp_stripped-linux-i386/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp_stripped-linux-x86_64/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp_stripped-linux-arm/frida-core/lib/agent/.libs/libfrida-agent.so
+build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-linux-i386/frida-core/src/frida-helper build/tmp_stripped-linux-x86_64/frida-core/src/frida-helper build/tmp_stripped-linux-i386/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp_stripped-linux-x86_64/frida-core/lib/agent/.libs/libfrida-agent.so
 	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-linux-$*/frida-core/src/libfrida_core_la-frida.lo)
 	. build/frida-env-linux-x86_64.rc \
 		&& cd build/tmp-linux-x86_64/frida-core \
