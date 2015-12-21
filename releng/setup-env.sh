@@ -109,19 +109,31 @@ LDFLAGS=""
 
 case $host_platform in
   linux)
-    CPP="/usr/bin/cpp"
-    CC="/usr/bin/gcc -static-libgcc -static-libstdc++"
-    CXX="/usr/bin/g++ -static-libgcc -static-libstdc++"
-    LD="/usr/bin/ld"
+    case $host_arch in
+      i386)
+        host_arch_flags="-m32"
+        host_toolprefix="/usr/bin/"
+        ;;
+      x86_64)
+        host_arch_flags="-m64"
+        host_toolprefix="/usr/bin/"
+        ;;
+      arm)
+        host_arch_flags="-march=armv5t"
+        host_toolprefix="arm-linux-gnueabi-"
+        ;;
+    esac
+    CPP="${host_toolprefix}cpp"
+    CC="${host_toolprefix}gcc -static-libgcc -static-libstdc++"
+    CXX="${host_toolprefix}g++ -static-libgcc -static-libstdc++"
+    LD="${host_toolprefix}ld"
 
-    AR="/usr/bin/ar"
-    NM="/usr/bin/nm"
-    RANLIB="/usr/bin/ranlib"
-    STRIP="/usr/bin/strip"
+    AR="${host_toolprefix}ar"
+    NM="${host_toolprefix}nm"
+    RANLIB="${host_toolprefix}ranlib"
+    STRIP="${host_toolprefix}strip"
 
-    OBJDUMP="/usr/bin/objdump"
-
-    [ $host_arch == 'i386' ] && host_arch_flags="-m32" || host_arch_flags="-m64"
+    OBJDUMP="${host_toolprefix}objdump"
 
     CFLAGS="$host_arch_flags -ffunction-sections -fdata-sections"
     CXXFLAGS="-std=c++11"

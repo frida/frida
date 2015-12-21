@@ -120,6 +120,10 @@ build/fs-tmp-%/zlib/Makefile: build/fs-env-%.rc build/.zlib-stamp
 		&& . $$CONFIG_SITE \
 		&& export CFLAGS CXXFLAGS OBJCFLAGS \
 		&& case "$*" in \
+			linux-arm) \
+				export PATH="$$(dirname $$NM):$$PATH"; \
+				export CHOST="arm-linux-gnueabi"; \
+				;; \
 			android-i386) \
 				export PATH="$$(dirname $$NM):$$PATH"; \
 				export CHOST="i686-linux-android"; \
@@ -312,6 +316,8 @@ v8_flags := -D host_os=$(build_platform) -D werror='' -D v8_use_external_startup
 
 v8_target := $(v8_flavor_prefix)$(v8_arch).release
 
+
+
 ifeq ($(build_platform), mac)
 ifeq ($(host_platform), android)
 	mac_sdk_path := $$(xcrun --sdk macosx --show-sdk-path)
@@ -341,10 +347,25 @@ ifeq ($(host_platform), qnx)
 		CXX_target="$$CXX" \
 		LINK="$$CXX"
 else
+ifeq ($(build_platform), linux)
+ifeq ($(host_platform_arch), linux-arm)
+	v8_env_vars := \
+		CXX="$$CXX" \
+		CXX_host="g++ -m32" \
+		CXX_target="$$CXX" \
+		LINK="$$CXX" \
+		LINK_host="g++ -m32" \
+		CFLAGS="$$CFLAGS" \
+		LDFLAGS="$$LDFLAGS" \
+		CXXFLAGS="$$CXXFLAGS" \
+		CPPFLAGS="$$CPPFLAGs"
+else
 	v8_env_vars := \
 		CXX_host="$$CXX" \
 		CXX_target="$$CXX" \
 		LINK="$$CXX"
+endif
+endif
 endif
 endif
 
@@ -364,7 +385,7 @@ build/fs-tmp-%/.v8-source-stamp: build/.v8-stamp
 build/fs-tmp-%/.v8-build-stamp: build/fs-env-%.rc build/fs-tmp-%/.v8-source-stamp
 	. $< \
 		&& cd build/fs-tmp-$*/v8 \
-		&& PATH="/usr/bin:/bin:/usr/sbin:/sbin" \
+		&& PATH="/usr/bin:/bin:/usr/sbin:/sbin:$$PATH" \
 			$(v8_env_vars) \
 			make $(MAKE_J) $(v8_target) GYPFLAGS="$(v8_flags)"
 	@touch $@
