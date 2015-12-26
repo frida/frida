@@ -47,10 +47,28 @@ diff -Nur binutils-2.25-old/bfd/hosts/i386linux.h binutils-2.25/bfd/hosts/i386li
 +#endif
 +
  #define TRAD_CORE_EXTRA_SIZE_ALLOWED 4096
-diff -Nur binutils-2.25-old/bfd/hosts/x86-64linux.h binutils-2.25/bfd/hosts/i386linux.h
---- binutils-2.25-old/bfd/hosts/x86-64linux.h	2015-02-22 14:56:31.000000000 +0100
-+++ binutils-2.25/bfd/hosts/x86-64linux.h	2015-02-22 15:02:04.000000000 +0100
-@@ -39,6 +39,17 @@
+diff -Nur binutils-2.25-old/bfd/hosts/x86-64linux.h binutils-2.25/bfd/hosts/x86-64linux.h
+--- binutils-2.25-old/bfd/hosts/x86-64linux.h	2014-10-14 09:32:02.000000000 +0200
++++ binutils-2.25/bfd/hosts/x86-64linux.h	2015-12-26 20:55:04.000000000 +0100
+@@ -30,7 +30,17 @@
+ #include <sys/types.h>
+ 
+ /* We define here only the symbols differing from their 64-bit variant.  */
++#ifdef ANDROID
++#define ELF_PRARGSZ (80)
++struct elf_siginfo
++{
++ int si_signo;
++ int si_code;
++ int si_errno;
++};
++#else
+ #include <sys/procfs.h>
++#endif
+ 
+ #ifdef HAVE_STDINT_H
+ #include <stdint.h>
+@@ -39,6 +49,17 @@
  typedef unsigned long long int uint64_t;
  #endif
  

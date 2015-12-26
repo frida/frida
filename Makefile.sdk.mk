@@ -196,7 +196,7 @@ build/.binutils-stamp:
 	mkdir binutils
 	cd binutils \
 		&& $(download) http://gnuftp.uib.no/binutils/binutils-$(binutils_version).tar.bz2 | tar -xj --strip-components 1 \
-		&& patch -p1 < ../releng/patches/binutils-silence-linker-warning.patch \
+		&& patch -p1 < ../releng/patches/binutils-warnings.patch \
 		&& patch -p1 < ../releng/patches/binutils-android.patch \
 		&& patch -p1 < ../releng/patches/binutils-qnx.patch
 	@mkdir -p $(@D)
