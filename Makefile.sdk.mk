@@ -317,6 +317,25 @@ v8_flags := -D host_os=$(build_platform) -D werror='' -D v8_use_external_startup
 v8_target := $(v8_flavor_prefix)$(v8_arch).release
 
 ifeq ($(build_platform), mac)
+ifeq ($(host_platform), mac)
+	v8_env_vars := \
+		MACOSX_DEPLOYMENT_TARGET="" \
+		CXX="$$CXX -stdlib=libc++" \
+		CXX_host="$$CXX -stdlib=libc++" \
+		CXX_target="$$CXX -stdlib=libc++" \
+		LINK="$$CXX -stdlib=libc++"
+endif
+ifeq ($(host_platform), ios)
+	mac_sdk_path := $$(xcrun --sdk macosx --show-sdk-path)
+	v8_env_vars := \
+		GYP_CROSSCOMPILE=1 \
+		MACOSX_DEPLOYMENT_TARGET="" \
+		CXX="$$CXX -stdlib=libc++" \
+		CXX_host="$$(xcrun --sdk macosx -f clang++) -isysroot $(mac_sdk_path) -stdlib=libc++" \
+		CXX_target="$$CXX -stdlib=libc++" \
+		LINK="$$CXX -stdlib=libc++" \
+		LINK_host="$$(xcrun --sdk macosx -f clang++) -isysroot $(mac_sdk_path) -stdlib=libc++"
+endif
 ifeq ($(host_platform), android)
 	mac_sdk_path := $$(xcrun --sdk macosx --show-sdk-path)
 	v8_env_vars := \
@@ -330,13 +349,6 @@ ifeq ($(host_platform), android)
 		CXXFLAGS="" \
 		CPPFLAGS="" \
 		LDFLAGS=""
-else
-	v8_env_vars := \
-		MACOSX_DEPLOYMENT_TARGET="" \
-		CXX="$$CXX -stdlib=libc++" \
-		CXX_host="$$CXX -stdlib=libc++" \
-		CXX_target="$$CXX -stdlib=libc++" \
-		LINK="$$CXX -stdlib=libc++"
 endif
 else
 ifeq ($(host_platform), qnx)
