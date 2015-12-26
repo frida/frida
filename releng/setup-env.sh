@@ -125,7 +125,7 @@ case $host_platform in
     esac
     CPP="${host_toolprefix}cpp"
     CC="${host_toolprefix}gcc -static-libgcc -static-libstdc++"
-    CXX="${host_toolprefix}g++ -static-libgcc -static-libstdc++"
+    CXX="$FRIDA_ROOT/releng/linux-g++-wrapper.sh ${host_toolprefix}g++ -static-libgcc -static-libstdc++"
     LD="${host_toolprefix}ld"
 
     AR="${host_toolprefix}ar"
