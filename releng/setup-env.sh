@@ -76,14 +76,11 @@ prompt_color=33
 
 toolchain_version=20150406
 case $host_platform in
-  ios)
-    sdk_version=20151201
-    ;;
   qnx)
     sdk_version=20150607
     ;;
   *)
-    sdk_version=20151119
+    sdk_version=20151226
     ;;
 esac
 
