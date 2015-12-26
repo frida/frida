@@ -294,7 +294,7 @@ server-32: build/frida_stripped-linux-i386/bin/frida-server ##@server Build for 
 server-64: build/frida_stripped-linux-x86_64/bin/frida-server ##@server Build for x86-64
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida_stripped-linux-x86_64/bin/frida-server $(BINDIST)/bin/frida-server-linux-64
-server-arm: build/frida_stripped-linux-arm/bin/frida-server ##@server Build for i386
+server-arm: build/frida_stripped-linux-arm/bin/frida-server ##@server Build for arm
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida_stripped-linux-arm/bin/frida-server $(BINDIST)/bin/frida-server-linux-arm
 server-android: build/frida_stripped-android-arm/bin/frida-server build/frida_stripped-android-arm64/bin/frida-server ##@server Build for Android

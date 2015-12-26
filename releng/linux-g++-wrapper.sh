@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# This wrapper script is necessary in order to combat the evil that is libtool. We need to
+# This wrapper script is necessary in order to combat g++ trying to be smart. We need to
 # statically link libstdc++ into frida-core/lib/agent, which we haven't been able to find
 # a way to do via conventional methods.
 
