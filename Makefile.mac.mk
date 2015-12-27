@@ -380,7 +380,6 @@ build/frida-ios-universal/lib/FridaGadget.dylib: build/tmp-ios-i386/frida-core/l
 		&& $$CODESIGN -f -s "$$IOS_CERTID" $@.tmp
 	rm $(@D)/libfrida-gadget-*.dylib
 	mv $@.tmp $@
-
 build/frida-android-%/lib/frida-gadget.so: build/tmp-android-%/frida-core/lib/gadget/libfrida-gadget.la
 	mkdir -p $(@D)
 	cp build/tmp-android-$*/frida-core/lib/gadget/.libs/libfrida-gadget.so $@.tmp
@@ -420,13 +419,13 @@ server-android: build/frida_stripped-android-arm/bin/frida-server build/frida_st
 	cp -f build/frida_stripped-android-arm/bin/frida-server $(BINDIST)/bin/frida-server-android
 	cp -f build/frida_stripped-android-arm64/bin/frida-server $(BINDIST)/bin/frida-server-android64
 
-gadget-mac: build/frida-mac-universal/lib/FridaGadget.dylib ##@server Build Gadget for Mac
+gadget-mac: build/frida-mac-universal/lib/FridaGadget.dylib ##@gadget Build for Mac
 	mkdir -p $(BINDIST)/lib
 	cp -f build/frida-mac-universal/lib/FridaGadget.dylib $(BINDIST)/lib/
-gadget-ios: build/frida-ios-universal/lib/FridaGadget.dylib ##@server Build Gadget for iOS
+gadget-ios: build/frida-ios-universal/lib/FridaGadget.dylib ##@gadget Build for iOS
 	mkdir -p $(BINDIST)/lib
 	cp -f build/frida-ios-universal/lib/FridaGadget.dylib $(BINDIST)/lib/
-gadget-android: build/frida-android-arm/lib/frida-gadget.so build/frida-android-arm64/lib/frida-gadget.so ##@server Build Gadget for Android
+gadget-android: build/frida-android-arm/lib/frida-gadget.so build/frida-android-arm64/lib/frida-gadget.so ##@gadget Build for Android
 	mkdir -p $(BINDIST)/lib
 	cp -f build/frida-android-arm/lib/frida-gadget.so $(BINDIST)/lib/frida-gadget-android-arm.so
 	cp -f build/frida-android-arm64/lib/frida-gadget.so $(BINDIST)/lib/frida-gadget-android-arm64.so

@@ -265,6 +265,17 @@ build/tmp_stripped-%/frida-core/lib/agent/.libs/libfrida-agent.so: build/tmp-%/f
 	cp build/tmp-$*/frida-core/lib/agent/.libs/libfrida-agent.so $@
 	. build/frida-env-$*.rc && $$STRIP --strip-all $@
 
+build/tmp-%/frida-core/lib/gadget/libfrida-gadget.la: build/tmp-%/frida-core/lib/interfaces/libfrida-interfaces.la
+	@$(call ensure_relink,frida-core/lib/gadget/gadget.c,build/tmp-$*/frida-core/lib/gadget/libfrida_gadget_la-gadget.lo)
+	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/lib/gadget
+	@touch -c $@
+
+build/frida_stripped-%/lib/frida-gadget.so: build/tmp-%/frida-core/lib/gadget/libfrida-gadget.la
+	mkdir -p $(@D)
+	cp build/tmp-$*/frida-core/lib/gadget/.libs/libfrida-gadget.so $@.tmp
+	. build/frida-env-$*.rc && $$STRIP --strip-all $@.tmp
+	mv $@.tmp $@
+
 build/tmp-%/frida-core/tests/frida-tests: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	@$(call ensure_relink,frida-core/tests/main.c,build/tmp-$*/frida-core/tests/main.o)
 	@$(call ensure_relink,frida-core/tests/inject-victim.c,build/tmp-$*/frida-core/tests/inject-victim.o)
@@ -304,6 +315,13 @@ server-android: build/frida_stripped-android-arm/bin/frida-server build/frida_st
 server-qnx-arm: build/frida_stripped-qnx-arm/bin/frida-server ##@server Build for QNX-arm
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida_stripped-qnx-arm/bin/frida-server $(BINDIST)/bin/frida-server-qnx
+
+gadget-32: build/frida_stripped-linux-i386/lib/frida-gadget.so ##@gadget Build for i386
+	mkdir -p $(BINDIST)/lib
+	cp -f $< $(BINDIST)/lib/frida-gadget-32.so
+gadget-64: build/frida_stripped-linux-x86_64/lib/frida-gadget.so ##@gadget Build for x86-64
+	mkdir -p $(BINDIST)/lib
+	cp -f $< $(BINDIST)/lib/frida-gadget-64.so
 
 build/frida_stripped-%/bin/frida-server: build/frida-%/bin/frida-server
 	mkdir -p $(@D)
