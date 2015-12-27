@@ -354,6 +354,18 @@ build/tmp-%/frida-core/lib/gadget/libfrida-gadget.la: build/tmp-%/frida-core/lib
 	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/lib/gadget
 	@touch -c $@
 
+build/frida-mac-universal/lib/FridaGadget.dylib: build/tmp-mac-i386/frida-core/lib/gadget/libfrida-gadget.la build/tmp-mac-x86_64/frida-core/lib/gadget/libfrida-gadget.la
+	@if [ -z "$$MAC_CERTID" ]; then echo "MAC_CERTID not set, see https://github.com/frida/frida#mac-and-mac"; exit 1; fi
+	mkdir -p $(@D)
+	cp build/tmp-mac-i386/frida-core/lib/gadget/.libs/libfrida-gadget.dylib $(@D)/libfrida-gadget-i386.dylib
+	cp build/tmp-mac-x86_64/frida-core/lib/gadget/.libs/libfrida-gadget.dylib $(@D)/libfrida-gadget-x86_64.dylib
+	. build/frida-env-mac-x86_64.rc \
+		&& $$STRIP -Sx $(@D)/libfrida-gadget-i386.dylib $(@D)/libfrida-gadget-x86_64.dylib \
+		&& $$LIPO $(@D)/libfrida-gadget-i386.dylib $(@D)/libfrida-gadget-x86_64.dylib -create -output $@.tmp \
+		&& $$INSTALL_NAME_TOOL -id @executable_path/../Frameworks/FridaGadget.dylib $@.tmp \
+		&& $$CODESIGN -f -s "$$MAC_CERTID" $@.tmp
+	rm $(@D)/libfrida-gadget-*.dylib
+	mv $@.tmp $@
 build/frida-ios-universal/lib/FridaGadget.dylib: build/tmp-ios-i386/frida-core/lib/gadget/libfrida-gadget.la build/tmp-ios-x86_64/frida-core/lib/gadget/libfrida-gadget.la build/tmp-ios-arm/frida-core/lib/gadget/libfrida-gadget.la build/tmp-ios-arm64/frida-core/lib/gadget/libfrida-gadget.la
 	@if [ -z "$$IOS_CERTID" ]; then echo "IOS_CERTID not set, see https://github.com/frida/frida#mac-and-ios"; exit 1; fi
 	mkdir -p $(@D)
@@ -408,10 +420,12 @@ server-android: build/frida_stripped-android-arm/bin/frida-server build/frida_st
 	cp -f build/frida_stripped-android-arm/bin/frida-server $(BINDIST)/bin/frida-server-android
 	cp -f build/frida_stripped-android-arm64/bin/frida-server $(BINDIST)/bin/frida-server-android64
 
+gadget-mac: build/frida-mac-universal/lib/FridaGadget.dylib ##@server Build Gadget for Mac
+	mkdir -p $(BINDIST)/lib
+	cp -f build/frida-mac-universal/lib/FridaGadget.dylib $(BINDIST)/lib/
 gadget-ios: build/frida-ios-universal/lib/FridaGadget.dylib ##@server Build Gadget for iOS
 	mkdir -p $(BINDIST)/lib
 	cp -f build/frida-ios-universal/lib/FridaGadget.dylib $(BINDIST)/lib/
-
 gadget-android: build/frida-android-arm/lib/frida-gadget.so build/frida-android-arm64/lib/frida-gadget.so ##@server Build Gadget for Android
 	mkdir -p $(BINDIST)/lib
 	cp -f build/frida-android-arm/lib/frida-gadget.so $(BINDIST)/lib/frida-gadget-android-arm.so
@@ -572,7 +586,7 @@ uninstall-mac: ##@utilities Uninstall frida utilities
 	gum-mac gum-ios gum-android check-gum-mac frida-gum-update-submodule-stamp \
 	core-mac core-ios core-android check-core-mac check-core-android-arm64 frida-core-update-submodule-stamp \
 	server-mac server-ios server-android \
-	gadget-ios gadget-android \
+	gadget-mac gadget-ios gadget-android \
 	python-mac check-python-mac install-python-mac uninstall-python-mac frida-python-update-submodule-stamp \
 	node-mac check-node-mac frida-node-update-submodule-stamp \
 	install-mac uninstall-mac
