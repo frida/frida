@@ -91,6 +91,7 @@ build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-sub
 			*-i386)   capstone_archs="x86"     ;; \
 			*-x86_64) capstone_archs="x86"     ;; \
 			*-arm)    capstone_archs="arm"     ;; \
+			*-armhf)  capstone_archs="arm"     ;; \
 			*-arm64)  capstone_archs="aarch64" ;; \
 		esac \
 		&& make -C capstone \
@@ -171,6 +172,17 @@ build/frida-linux-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-linux-
 			HELPER32=../../../../build/tmp_stripped-linux-arm/frida-core/src/frida-helper!frida-helper-32 \
 			LOADER32=../../../../build/tmp_stripped-linux-arm/frida-core/lib/loader/.libs/libfrida-loader.so!frida-loader-32.so \
 			AGENT32=../../../../build/tmp_stripped-linux-arm/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent-32.so \
+		&& make install-data-am
+	@touch -c $@
+build/frida-linux-armhf/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-linux-armhf/frida-core/src/frida-helper build/tmp_stripped-linux-armhf/frida-core/lib/loader/.libs/libfrida-loader.so build/tmp_stripped-linux-armhf/frida-core/lib/agent/.libs/libfrida-agent.so
+	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-android-armhf/frida-core/src/libfrida_core_la-frida.lo)
+	. build/frida-env-linux-armhf.rc \
+		&& cd build/tmp-linux-armhf/frida-core \
+		&& make -C src install \
+			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-linux-$(build_arch)\" --toolchain=gnu" \
+			HELPER32=../../../../build/tmp_stripped-linux-armhf/frida-core/src/frida-helper!frida-helper-32 \
+			LOADER32=../../../../build/tmp_stripped-linux-armhf/frida-core/lib/loader/.libs/libfrida-loader.so!frida-loader-32.so \
+			AGENT32=../../../../build/tmp_stripped-linux-armhf/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent-32.so \
 		&& make install-data-am
 	@touch -c $@
 build/frida-android-i386/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-android-i386/frida-core/src/frida-helper build/tmp_stripped-android-i386/frida-core/lib/loader/.libs/libfrida-loader.so build/tmp_stripped-android-i386/frida-core/lib/agent/.libs/libfrida-agent.so
@@ -308,6 +320,9 @@ server-64: build/frida_stripped-linux-x86_64/bin/frida-server ##@server Build fo
 server-arm: build/frida_stripped-linux-arm/bin/frida-server ##@server Build for arm
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida_stripped-linux-arm/bin/frida-server $(BINDIST)/bin/frida-server-linux-arm
+server-armhf: build/frida_stripped-linux-armhf/bin/frida-server ##@server Build for arm
+	mkdir -p $(BINDIST)/bin
+	cp -f build/frida_stripped-linux-armhf/bin/frida-server $(BINDIST)/bin/frida-server-linux-armhf
 server-android: build/frida_stripped-android-arm/bin/frida-server build/frida_stripped-android-arm64/bin/frida-server ##@server Build for Android
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida_stripped-android-arm/bin/frida-server $(BINDIST)/bin/frida-server-android

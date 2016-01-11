@@ -124,6 +124,10 @@ build/fs-tmp-%/zlib/Makefile: build/fs-env-%.rc build/.zlib-stamp
 				export PATH="$$(dirname $$NM):$$PATH"; \
 				export CHOST="arm-linux-gnueabi"; \
 				;; \
+			linux-armhf) \
+				export PATH="$$(dirname $$NM):$$PATH"; \
+				export CHOST="arm-linux-gnueabihf"; \
+				;; \
 			android-i386) \
 				export PATH="$$(dirname $$NM):$$PATH"; \
 				export CHOST="i686-linux-android"; \
@@ -287,6 +291,12 @@ endif
 ifeq ($(host_arch), arm)
 	v8_arch := arm
 	android_target_platform := 14
+	v8_abi_flags := -D armfloatabi=softfp
+endif
+ifeq ($(host_arch), armhf)
+	v8_arch := arm
+	android_target_platform := 14
+	v8_abi_flags := -D armfloatabi=hard
 endif
 ifeq ($(host_arch), arm64)
 	v8_arch := arm64
@@ -312,7 +322,7 @@ endif
 ifeq ($(host_platform), ios)
 	v8_host_flags := -f make-mac -D mac_deployment_target=10.7 -D ios_deployment_target=7.0 -D clang=1
 endif
-v8_flags := -D host_os=$(build_platform) -D werror='' -D v8_use_external_startup_data=0 -D v8_enable_gdbjit=0 -D v8_enable_i18n_support=0 $(v8_host_flags)
+v8_flags := -D host_os=$(build_platform) -D werror='' -D v8_use_external_startup_data=0 -D v8_enable_gdbjit=0 -D v8_enable_i18n_support=0 $(v8_host_flags) $(v8_abi_flags)
 
 v8_target := $(v8_flavor_prefix)$(v8_arch).release
 
@@ -370,10 +380,23 @@ ifeq ($(host_platform_arch), linux-arm)
 		CXXFLAGS="$$CXXFLAGS" \
 		CPPFLAGS="$$CPPFLAGs"
 else
+ifeq ($(host_platform_arch), linux-armhf)
+	v8_env_vars := \
+		CXX="$$CXX" \
+		CXX_host="g++ -m32" \
+		CXX_target="$$CXX" \
+		LINK="$$CXX" \
+		LINK_host="g++ -m32" \
+		CFLAGS="$$CFLAGS" \
+		LDFLAGS="$$LDFLAGS" \
+		CXXFLAGS="$$CXXFLAGS" \
+		CPPFLAGS="$$CPPFLAGs"
+else
 	v8_env_vars := \
 		CXX_host="$$CXX" \
 		CXX_target="$$CXX" \
 		LINK="$$CXX"
+endif
 endif
 endif
 endif
