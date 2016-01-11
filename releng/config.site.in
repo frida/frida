@@ -26,6 +26,12 @@ case $frida_host_platform_arch in
   linux-arm)
     host_alias="arm-linux-gnueabi"
     cross_compiling=yes
+    enable_diet=yes
+  ;;
+  linux-armhf)
+    host_alias="arm-linux-gnueabihf"
+    cross_compiling=yes
+    enable_diet=yes
   ;;
   linux-i386)
     host_alias="i686-linux-gnu"

@@ -119,6 +119,10 @@ case $host_platform in
         host_arch_flags="-march=armv5t"
         host_toolprefix="arm-linux-gnueabi-"
         ;;
+      armhf)
+        host_arch_flags="-march=armv6"
+        host_toolprefix="arm-linux-gnueabihf-"
+        ;;
     esac
     CPP="${host_toolprefix}cpp"
     CC="${host_toolprefix}gcc -static-libgcc -static-libstdc++"
