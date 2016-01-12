@@ -193,6 +193,7 @@ case "$PACKAGE_TARNAME" in
   ;;
   frida-*)
     enable_maintainer_mode=yes
+    enable_diet=yes
     frida_flags="$frida_warning_flags $frida_flags"
   ;;
   *)
