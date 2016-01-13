@@ -254,37 +254,37 @@ REM. &gt; "$(IntDir)frida-version.stamp"
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)windows-babel.stamp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Installing Babel</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)windows-babel.stamp;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">npm --version &gt;NUL 2&gt;NUL
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">call npm --version &gt;NUL 2&gt;NUL
 if errorlevel 1 (
   echo Node.js not found on your PATH
   exit 1
 )
 cd "$(ProjectDir)..\frida-gum\bindings\gumjs\"
-npm install || exit 1
+call npm install || exit 1
 echo &gt; "$(IntDir)windows-babel.stamp"</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">npm --version &gt;NUL 2&gt;NUL
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call npm --version &gt;NUL 2&gt;NUL
 if errorlevel 1 (
   echo Node.js not found on your PATH
   exit 1
 )
 cd "$(ProjectDir)..\frida-gum\bindings\gumjs\"
-npm install || exit 1
+call npm install || exit 1
 echo &gt; "$(IntDir)windows-babel.stamp"</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">npm --version &gt;NUL 2&gt;NUL
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">call npm --version &gt;NUL 2&gt;NUL
 if errorlevel 1 (
   echo Node.js not found on your PATH
   exit 1
 )
 cd "$(ProjectDir)..\frida-gum\bindings\gumjs\"
-npm install || exit 1
+call npm install || exit 1
 echo &gt; "$(IntDir)windows-babel.stamp"</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">npm --version &gt;NUL 2&gt;NUL
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">call npm --version &gt;NUL 2&gt;NUL
 if errorlevel 1 (
   echo Node.js not found on your PATH
   exit 1
 )
 cd "$(ProjectDir)..\frida-gum\bindings\gumjs\"
-npm install || exit 1
+call npm install || exit 1
 echo &gt; "$(IntDir)windows-babel.stamp"</Command>
     </CustomBuild>
   </ItemGroup>
