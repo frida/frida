@@ -102,7 +102,7 @@ case $frida_host_platform_arch in
 esac
 
 case $frida_host_platform_arch in
-  linux-arm|linux-armhf|qnx-*|android-*|ios-*)
+  linux-arm|linux-armhf|qnx-*)
     enable_diet=yes
   ;;
   *)
