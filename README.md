@@ -26,7 +26,7 @@ For running the Frida tools (`frida`, `frida-ls-devices`, `frida-ps`,
 
 First make a trusted code-signing certificate. You can use the guide at
 https://sourceware.org/gdb/wiki/BuildingOnDarwin in the section
-"Creating a certificate". You can use the name `frida-cert` instead of
+“Creating a certificate”. You can use the name `frida-cert` instead of
 `gdb-cert` if you'd like.
 
 Next export the name of the created certificate to the environment
