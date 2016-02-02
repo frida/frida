@@ -187,6 +187,20 @@ build/frida-android-i386/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-and
 			AGENT32=../../../../build/tmp_stripped-android-i386/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent-32.so \
 		&& make install-data-am
 	@touch -c $@
+build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-android-i386/frida-core/src/frida-helper build/tmp_stripped-android-x86_64/frida-core/src/frida-helper build/tmp_stripped-android-i386/frida-core/lib/loader/.libs/libfrida-loader.so build/tmp_stripped-android-x86_64/frida-core/lib/loader/.libs/libfrida-loader.so build/tmp_stripped-android-i386/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp_stripped-android-x86_64/frida-core/lib/agent/.libs/libfrida-agent.so
+	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-android-i386/frida-core/src/libfrida_core_la-frida.lo)
+	. build/frida-env-android-x86_64.rc \
+		&& cd build/tmp-android-x86_64/frida-core \
+		&& make -C src install \
+			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-mac-$(build_arch)\" --toolchain=gnu" \
+			HELPER32=../../../../build/tmp_stripped-android-i386/frida-core/src/frida-helper!frida-helper-32 \
+			HELPER64=../../../../build/tmp_stripped-android-x86_64/frida-core/src/frida-helper!frida-helper-64 \
+			LOADER32=../../../../build/tmp_stripped-android-i386/frida-core/lib/loader/.libs/libfrida-loader.so!frida-loader-32.so \
+			LOADER64=../../../../build/tmp_stripped-android-x86_64/frida-core/lib/loader/.libs/libfrida-loader.so!frida-loader-64.so \
+			AGENT32=../../../../build/tmp_stripped-android-i386/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent-32.so \
+			AGENT64=../../../../build/tmp_stripped-android-x86_64/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent-64.so \
+		&& make install-data-am
+	@touch -c $@
 build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-android-arm/frida-core/src/frida-helper build/tmp_stripped-android-arm/frida-core/lib/loader/.libs/libfrida-loader.so build/tmp_stripped-android-arm/frida-core/lib/agent/.libs/libfrida-agent.so
 	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-android-arm/frida-core/src/libfrida_core_la-frida.lo)
 	. build/frida-env-android-arm.rc \
@@ -456,6 +470,11 @@ build/frida_stripped-android-i386/bin/frida-server: build/frida-android-i386/bin
 	mkdir -p $(@D)
 	cp $< $@.tmp
 	. build/frida-env-android-i386.rc && $$STRIP --strip-all $@.tmp
+	mv $@.tmp $@
+build/frida_stripped-android-x86_64/bin/frida-server: build/frida-android-x86_64/bin/frida-server
+	mkdir -p $(@D)
+	cp $< $@.tmp
+	. build/frida-env-android-x86_64.rc && $$STRIP --strip-all $@.tmp
 	mv $@.tmp $@
 build/frida_stripped-android-arm/bin/frida-server: build/frida-android-arm/bin/frida-server
 	mkdir -p $(@D)
