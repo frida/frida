@@ -345,16 +345,16 @@ server-qnx-arm: build/frida_stripped-qnx-arm/bin/frida-server ##@server Build fo
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida_stripped-qnx-arm/bin/frida-server $(BINDIST)/bin/frida-server-qnx
 
-inject-32: build/frida_stripped-linux-i386/bin/frida-inject ##@server Build for i386
+inject-32: build/frida_stripped-linux-i386/bin/frida-inject ##@inject Build for i386
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida_stripped-linux-i386/bin/frida-inject $(BINDIST)/bin/frida-inject-linux-32
-inject-64: build/frida_stripped-linux-x86_64/bin/frida-inject ##@server Build for x86-64
+inject-64: build/frida_stripped-linux-x86_64/bin/frida-inject ##@inject Build for x86-64
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida_stripped-linux-x86_64/bin/frida-inject $(BINDIST)/bin/frida-inject-linux-64
-inject-arm: build/frida_stripped-linux-arm/bin/frida-inject ##@server Build for arm
+inject-arm: build/frida_stripped-linux-arm/bin/frida-inject ##@inject Build for arm
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida_stripped-linux-arm/bin/frida-inject $(BINDIST)/bin/frida-inject-linux-arm
-inject-armhf: build/frida_stripped-linux-armhf/bin/frida-inject ##@server Build for armhf
+inject-armhf: build/frida_stripped-linux-armhf/bin/frida-inject ##@inject Build for armhf
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida_stripped-linux-armhf/bin/frida-inject $(BINDIST)/bin/frida-inject-linux-armhf
 
