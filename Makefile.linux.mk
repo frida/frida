@@ -345,6 +345,19 @@ server-qnx-arm: build/frida_stripped-qnx-arm/bin/frida-server ##@server Build fo
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida_stripped-qnx-arm/bin/frida-server $(BINDIST)/bin/frida-server-qnx
 
+inject-32: build/frida_stripped-linux-i386/bin/frida-inject ##@server Build for i386
+	mkdir -p $(BINDIST)/bin
+	cp -f build/frida_stripped-linux-i386/bin/frida-inject $(BINDIST)/bin/frida-inject-linux-32
+inject-64: build/frida_stripped-linux-x86_64/bin/frida-inject ##@server Build for x86-64
+	mkdir -p $(BINDIST)/bin
+	cp -f build/frida_stripped-linux-x86_64/bin/frida-inject $(BINDIST)/bin/frida-inject-linux-64
+inject-arm: build/frida_stripped-linux-arm/bin/frida-inject ##@server Build for arm
+	mkdir -p $(BINDIST)/bin
+	cp -f build/frida_stripped-linux-arm/bin/frida-inject $(BINDIST)/bin/frida-inject-linux-arm
+inject-armhf: build/frida_stripped-linux-armhf/bin/frida-inject ##@server Build for armhf
+	mkdir -p $(BINDIST)/bin
+	cp -f build/frida_stripped-linux-armhf/bin/frida-inject $(BINDIST)/bin/frida-inject-linux-armhf
+
 gadget-32: build/frida_stripped-linux-i386/lib/frida-gadget.so ##@gadget Build for i386
 	mkdir -p $(BINDIST)/lib
 	cp -f $< $(BINDIST)/lib/frida-gadget-32.so
@@ -360,6 +373,16 @@ build/frida_stripped-%/bin/frida-server: build/frida-%/bin/frida-server
 build/frida-%/bin/frida-server: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
 	@$(call ensure_relink,frida-core/server/server.c,build/tmp-$*/frida-core/server/frida_server-server.o)
 	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/server install
+	@touch -c $@
+
+build/frida_stripped-%/bin/frida-inject: build/frida-%/bin/frida-inject
+	mkdir -p $(@D)
+	cp $< $@.tmp
+	. build/frida-env-$*.rc && $$STRIP --strip-all $@.tmp
+	mv $@.tmp $@
+build/frida-%/bin/frida-inject: build/frida-%/lib/pkgconfig/frida-core-1.0.pc
+	@$(call ensure_relink,frida-core/inject/inject.c,build/tmp-$*/frida-core/inject/frida_inject-inject.o)
+	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/inject install
 	@touch -c $@
 
 
