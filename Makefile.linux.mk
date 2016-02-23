@@ -52,6 +52,7 @@ clean: clean-submodules
 	rm -rf build/frida-android-arm64
 	rm -rf build/frida-qnx-i386
 	rm -rf build/frida-qnx-arm
+	rm -rf build/frida-qnx-armeabi
 	rm -rf build/frida_stripped-linux-i386
 	rm -rf build/frida_stripped-linux-x86_64
 	rm -rf build/frida_stripped-android-i386
@@ -59,6 +60,7 @@ clean: clean-submodules
 	rm -rf build/frida_stripped-android-arm64
 	rm -rf build/frida_stripped-qnx-i386
 	rm -rf build/frida_stripped-qnx-arm
+	rm -rf build/frida_stripped-qnx-armeabi
 	rm -rf build/tmp-linux-i386
 	rm -rf build/tmp-linux-x86_64
 	rm -rf build/tmp-android-i386
@@ -66,6 +68,7 @@ clean: clean-submodules
 	rm -rf build/tmp-android-arm64
 	rm -rf build/tmp-qnx-i386
 	rm -rf build/tmp-qnx-arm
+	rm -rf build/tmp-qnx-armeabi
 	rm -rf build/tmp_stripped-linux-i386
 	rm -rf build/tmp_stripped-linux-x86_64
 	rm -rf build/tmp_stripped-android-i386
@@ -73,6 +76,7 @@ clean: clean-submodules
 	rm -rf build/tmp_stripped-android-arm64
 	rm -rf build/tmp_stripped-qnx-i386
 	rm -rf build/tmp_stripped-qnx-arm
+	rm -rf build/tmp_stripped-qnx-armeabi
 	rm -rf $(BINDIST)
 
 clean-submodules:
@@ -92,6 +96,7 @@ build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-sub
 			*-x86_64) capstone_archs="x86"     ;; \
 			*-arm)    capstone_archs="arm"     ;; \
 			*-armhf)  capstone_archs="arm"     ;; \
+			*-armeabi)capstone_archs="arm"     ;; \
 			*-arm64)  capstone_archs="aarch64" ;; \
 		esac \
 		&& make -C capstone \
@@ -131,6 +136,7 @@ core-32: build/frida-linux-i386/lib/pkgconfig/frida-core-1.0.pc ##@core Build fo
 core-64: build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for x86-64
 core-android: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android
 core-qnx-arm: build/frida-qnx-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for QNX-arm
+core-qnx-armeabi: build/frida-qnx-armeabi/lib/pkgconfig/frida-core-1.0.pc ##@core Build for QNX-armeabi
 
 frida-core/configure: build/frida-env-linux-$(build_arch).rc frida-core/configure.ac
 	. build/frida-env-linux-$(build_arch).rc && cd frida-core && ./autogen.sh
@@ -244,6 +250,15 @@ build/frida-qnx-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-qnx-arm/
 			AGENT=../../../../build/tmp_stripped-qnx-arm/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent.so \
 		&& make install-data-am
 	@touch -c $@
+build/frida-qnx-armeabi/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-qnx-armeabi/frida-core/lib/agent/.libs/libfrida-agent.so
+	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-qnx-armeabi/frida-core/src/libfrida_core_la-frida.lo)
+	. build/frida-env-qnx-armeabi.rc \
+		&& cd build/tmp-qnx-armeabi/frida-core \
+		&& make -C src install \
+			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-linux-$(build_arch)\" --toolchain=gnu" \
+			AGENT=../../../../build/tmp_stripped-qnx-armeabi/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent.so \
+		&& make install-data-am
+	@touch -c $@
 
 build/tmp-%/frida-core/src/frida-helper: build/tmp-%/frida-core/lib/selinux/libfrida-selinux.stamp build/tmp-%/frida-core/lib/interfaces/libfrida-interfaces.la
 	@$(call ensure_relink,frida-core/src/darwin/frida-helper-glue.c,build/tmp-$*/frida-core/src/frida-helper-glue.lo)
@@ -343,7 +358,10 @@ server-android: build/frida_stripped-android-arm/bin/frida-server build/frida_st
 	cp -f build/frida_stripped-android-arm64/bin/frida-server $(BINDIST)/bin/frida-server-android64
 server-qnx-arm: build/frida_stripped-qnx-arm/bin/frida-server ##@server Build for QNX-arm
 	mkdir -p $(BINDIST)/bin
-	cp -f build/frida_stripped-qnx-arm/bin/frida-server $(BINDIST)/bin/frida-server-qnx
+	cp -f build/frida_stripped-qnx-arm/bin/frida-server $(BINDIST)/bin/frida-server-qnx-arm
+server-qnx-armeabi: build/frida_stripped-qnx-armeabi/bin/frida-server ##@server Build for QNX-armeabi
+	mkdir -p $(BINDIST)/bin
+	cp -f build/frida_stripped-qnx-armeabi/bin/frida-server $(BINDIST)/bin/frida-server-qnx-armeabi
 
 inject-32: build/frida_stripped-linux-i386/bin/frida-inject ##@inject Build for i386
 	mkdir -p $(BINDIST)/bin
@@ -464,7 +482,7 @@ check-node-64: build/frida_stripped-linux-x86_64/lib/node_modules/frida ##@node 
 	capstone-update-submodule-stamp \
 	gum-32 gum-64 gum-android check-gum-32 check-gum-64 frida-gum-update-submodule-stamp \
 	core-32 core-64 core-android check-core-32 check-core-64 frida-core-update-submodule-stamp \
-	server-32 server-64 server-android server-qnx-arm \
+	server-32 server-64 server-android server-qnx-arm server-qnx-armeabi \
 	python-32 python-64 check-python-32 check-python-64 frida-python-update-submodule-stamp \
 	node-32 node-64 check-node-32 check-node-64 frida-node-update-submodule-stamp
 .SECONDARY:

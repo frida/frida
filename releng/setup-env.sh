@@ -309,9 +309,15 @@ case $host_platform in
         qnx_host=i486-pc-nto-qnx6.6.0
         qnx_sysroot=$QNX_TARGET/x86
         ;;
+      armeabi)
+        qnx_host=arm-unknown-nto-qnx6.5.0eabi
+        qnx_sysroot=$QNX_TARGET/armle-v7
+        qnx_march=armv7-a
+        ;;
       arm)
         qnx_host=arm-unknown-nto-qnx6.5.0
         qnx_sysroot=$QNX_TARGET/armle
+        qnx_march=armv6
         ;;
       *)
         echo "Unsupported QNX architecture" > /dev/stderr
@@ -325,9 +331,9 @@ case $host_platform in
 
     PATH="$qnx_toolchain_dir:$PATH"
 
-    CPP="$qnx_toolchain_prefix-cpp -march=armv6 -mno-unaligned-access --sysroot=$qnx_sysroot $qnx_preprocessor_flags"
-    CC="$FRIDA_ROOT/releng/qnx-g++-wrapper.sh $qnx_toolchain_prefix-gcc -march=armv6 -mno-unaligned-access --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc"
-    CXX="$FRIDA_ROOT/releng/qnx-g++-wrapper.sh $qnx_toolchain_prefix-g++ -march=armv6 -mno-unaligned-access --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc -static-libstdc++ -std=c++11"
+    CPP="$qnx_toolchain_prefix-cpp -march=$qnx_march -mno-unaligned-access --sysroot=$qnx_sysroot $qnx_preprocessor_flags"
+    CC="$FRIDA_ROOT/releng/qnx-g++-wrapper.sh $qnx_toolchain_prefix-gcc -march=$qnx_march -mno-unaligned-access --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc"
+    CXX="$FRIDA_ROOT/releng/qnx-g++-wrapper.sh $qnx_toolchain_prefix-g++ -march=$qnx_march -mno-unaligned-access --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc -static-libstdc++ -std=c++11"
     LD="$qnx_toolchain_prefix-ld --sysroot=$qnx_sysroot"
 
     AR="$qnx_toolchain_prefix-ar"

@@ -43,6 +43,10 @@ case $frida_host_platform_arch in
     host_alias="i486-pc-nto-qnx6.6.0"
     cross_compiling=yes
   ;;
+  qnx-armeabi)
+    host_alias="arm-unknown-nto-qnx6.5.0eabi"
+    cross_compiling=yes
+  ;;
   qnx-arm)
     host_alias="arm-unknown-nto-qnx6.5.0"
     cross_compiling=yes
