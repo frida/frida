@@ -150,7 +150,11 @@ build/fs-tmp-%/zlib/Makefile: build/fs-env-%.rc build/.zlib-stamp
 				;; \
 			qnx-arm) \
 				export PATH="$$(dirname $$NM):$$PATH"; \
-				export CHOST="arm-unknown-nto-qnx6.6.0eabi"; \
+				export CHOST="arm-unknown-nto-qnx6.5.0"; \
+				;; \
+			qnx-armeabi) \
+				export PATH="$$(dirname $$NM):$$PATH"; \
+				export CHOST="arm-unknown-nto-qnx6.5.0eabi"; \
 				;; \
 		esac \
 		&& cd $(@D) \
@@ -289,6 +293,11 @@ ifeq ($(host_arch), x86_64)
 	android_target_platform := 21
 endif
 ifeq ($(host_arch), arm)
+	v8_arch := arm
+	android_target_platform := 14
+	v8_abi_flags := -D armfloatabi=softfp
+endif
+ifeq ($(host_arch), armeabi)
 	v8_arch := arm
 	android_target_platform := 14
 	v8_abi_flags := -D armfloatabi=softfp
