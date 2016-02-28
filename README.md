@@ -1,7 +1,9 @@
-Inject JavaScript to explore native apps on Windows, Mac, Linux, iOS, Android and QNX.
+Inject JavaScript to explore native apps on Windows, Mac, Linux, iOS, Android, and QNX.
 ===
 
 ## Installing from prebuilt binaries
+
+This is the recommended way to get started. All you need to do is:
 
     pip install frida # CLI tools and Python bindings
     npm install frida # Node.js bindings
