@@ -75,14 +75,7 @@ fi
 prompt_color=33
 
 toolchain_version=20150406
-case $host_platform in
-  qnx)
-    sdk_version=20150607
-    ;;
-  *)
-    sdk_version=20151226
-    ;;
-esac
+sdk_version=20151226
 
 if [ -n "$FRIDA_ENV_NAME" ]; then
   frida_env_name_prefix=${FRIDA_ENV_NAME}-
