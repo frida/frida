@@ -9,7 +9,7 @@ This is the recommended way to get started. All you need to do is:
     npm install frida # Node.js bindings
 
 You may also download pre-built binaries for various operating systems from
-[http://www.frida.re/](http://www.frida.re/).
+[http://build.frida.re/frida/](http://build.frida.re/frida/).
 
 ## Building
 
