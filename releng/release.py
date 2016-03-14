@@ -88,6 +88,11 @@ if __name__ == '__main__':
         subprocess.call([os.path.join(frida_core_dir, "tools", "package-server.sh"), server, deb], env=env)
         subprocess.call([scp, deb, "buildmaster@build.frida.re:/home/buildmaster/public_html/debs/"])
         subprocess.call([ssh, "buildmaster@build.frida.re", "/home/buildmaster/cydia/sync-repo"])
+        subprocess.call([scp, "buildmaster@build.frida.re:/home/buildmaster/public_html/Release", "Release"])
+        subprocess.call(["gpg", "-abs", "-o", "Release.gpg", "Release"])
+        subprocess.call([scp, "Release.gpg", "buildmaster@build.frida.re:/home/buildmaster/public_html/Release.gpg"])
+        os.unlink("Release")
+        os.unlink("Release.gpg")
         os.unlink(deb)
 
     if int(nano) == 0:
