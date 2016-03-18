@@ -50,7 +50,7 @@ To ensure that OS X accepts the newly created certificate, restart the
 (Requires Visual Studio 2013.)
 
 See [http://www.frida.re/docs/building/](http://www.frida.re/docs/building/)
-for more details.
+for details.
 
 ## Learn more
 
