@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
+from collections import OrderedDict
 from glob import glob
 import os
 import pipes
@@ -80,6 +81,7 @@ def generate_library(package, env_rc):
     library_names = infer_library_names(library_flags)
     library_paths, extra_flags = resolve_library_paths(library_names, library_dirs)
     extra_flags += infer_linker_flags(library_flags)
+    extra_flags = list(OrderedDict.fromkeys(extra_flags))
 
     combined_dir = tempfile.mkdtemp(prefix="devkit")
     object_names = set()
