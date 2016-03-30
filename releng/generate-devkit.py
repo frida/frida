@@ -44,7 +44,7 @@ def generate_devkit(package, umbrella_header, host, output_dir, output_base_name
 def generate_header(package, frida_root, env_rc, umbrella_header_path):
     header_dependencies = subprocess.check_output(
         ["(. \"{rc}\" && $CPP -M $($PKG_CONFIG --cflags {package}) \"{header}\")".format(rc=env_rc, package=package, header=umbrella_header_path)],
-        shell=True)
+        shell=True).decode('utf-8')
     header_lines = header_dependencies.strip().split("\n")[1:]
     header_files = [line.rstrip("\\").strip() for line in header_lines]
     header_files = [header_file for header_file in header_files if header_file.startswith(frida_root)]
@@ -76,7 +76,7 @@ def ingest_header(header, all_header_files, processed_header_files, result):
 def generate_library(package, env_rc):
     library_flags = subprocess.check_output(
         ["(. \"{rc}\" && $PKG_CONFIG --static --libs {package})".format(rc=env_rc, package=package)],
-        shell=True).strip().split(" ")
+        shell=True).decode('utf-8').strip().split(" ")
     library_dirs = infer_library_dirs(library_flags)
     library_names = infer_library_names(library_flags)
     library_paths, extra_flags = resolve_library_paths(library_names, library_dirs)
@@ -145,7 +145,7 @@ def resolve_library_paths(names, dirs):
 def generate_example(filename, package, env_rc, library_name, extra_flags):
     cc = subprocess.check_output(
         ["(. \"{rc}\" && echo $CC)".format(rc=env_rc)],
-        shell=True).strip()
+        shell=True).decode('utf-8').strip()
 
     params = {
         "cc": cc,
