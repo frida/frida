@@ -36,7 +36,7 @@ def generate_devkit(package, umbrella_header, host, output_dir, output_base_name
         extra_flags.append("-Wl,-no_compact_unwind")
 
     example_filename = output_base_name + "-example.c"
-    example = generate_example(example_filename, package, output_base_name, extra_flags)
+    example = generate_example(example_filename, package, env_rc, output_base_name, extra_flags)
     with open(os.path.join(output_dir, example_filename), "w") as f:
         f.write(example)
 
@@ -140,8 +140,13 @@ def resolve_library_paths(names, dirs):
             flags.append("-l{}".format(name))
     return (list(set(paths)), flags)
 
-def generate_example(filename, package, library_name, extra_flags):
+def generate_example(filename, package, env_rc, library_name, extra_flags):
+    cc = subprocess.check_output(
+        ["(. \"{rc}\" && echo $CC)".format(rc=env_rc)],
+        shell=True).strip()
+
     params = {
+        "cc": cc,
         "source_filename": filename,
         "program_filename": os.path.splitext(filename)[0],
         "library_name": library_name,
@@ -152,7 +157,7 @@ def generate_example(filename, package, library_name, extra_flags):
 /*
  * Compile with:
  *
- * clang -Wall -pipe -Os -g3 %(source_filename)s -o %(program_filename)s -L. -l%(library_name)s %(extra_flags)s
+ * %(cc)s -Wall -pipe -Os -g3 %(source_filename)s -o %(program_filename)s -L. -l%(library_name)s %(extra_flags)s
  */""" % params
 
     if package == "frida-gum-1.0":
