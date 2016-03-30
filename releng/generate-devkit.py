@@ -545,6 +545,12 @@ if __name__ == "__main__":
 
     host = sys.argv[1]
     outdir = sys.argv[2]
+
+    try:
+        os.makedirs(output_dir)
+    except:
+        pass
+
     generate_devkit("frida-gum-1.0", ("frida-1.0", "gum", "gum.h"), host, outdir, "frida-gum")
     generate_devkit("frida-gumjs-1.0", ("frida-1.0", "gumjs", "gumscriptbackend.h"), host, outdir, "frida-gumjs")
     generate_devkit("frida-core-1.0", ("frida-1.0", "frida-core.h"), host, outdir, "frida-core")
