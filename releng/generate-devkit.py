@@ -4,7 +4,6 @@ from __future__ import print_function
 from glob import glob
 import os
 import pipes
-import platform
 import re
 import shutil
 import subprocess
@@ -27,8 +26,13 @@ def generate_devkit(package, umbrella_header, host, output_dir, output_base_name
     with open(os.path.join(output_dir, "lib{}.a".format(output_base_name)), "wb") as f:
         f.write(library)
 
-    if platform.system() == 'Darwin':
+    if host.startswith("linux-") or host.startswith("android-"):
+        extra_flags.append("-Wl,--no-undefined")
+        extra_flags.append("-Wl,--gc-sections")
+    elif host.startswith("mac-") or host.startswith("ios-"):
         extra_flags.append("-Wl,-dead_strip")
+
+    if host.startswith("mac-"):
         extra_flags.append("-Wl,-no_compact_unwind")
 
     example_filename = output_base_name + "-example.c"
