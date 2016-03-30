@@ -549,7 +549,7 @@ if __name__ == "__main__":
     outdir = sys.argv[2]
 
     try:
-        os.makedirs(output_dir)
+        os.makedirs(outdir)
     except:
         pass
 
