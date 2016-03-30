@@ -27,15 +27,6 @@ def generate_devkit(package, umbrella_header, host, output_dir, output_base_name
     with open(os.path.join(output_dir, "lib{}.a".format(output_base_name)), "wb") as f:
         f.write(library)
 
-    if host.startswith("linux-") or host.startswith("android-"):
-        extra_flags.append("-Wl,--no-undefined")
-        extra_flags.append("-Wl,--gc-sections")
-    elif host.startswith("mac-") or host.startswith("ios-"):
-        extra_flags.append("-Wl,-dead_strip")
-
-    if host.startswith("mac-"):
-        extra_flags.append("-Wl,-no_compact_unwind")
-
     example_filename = output_base_name + "-example.c"
     example = generate_example(example_filename, package, env_rc, output_base_name, extra_flags)
     with open(os.path.join(output_dir, example_filename), "w") as f:
@@ -81,7 +72,7 @@ def generate_library(package, env_rc):
     library_names = infer_library_names(library_flags)
     library_paths, extra_flags = resolve_library_paths(library_names, library_dirs)
     extra_flags += infer_linker_flags(library_flags)
-    extra_flags = list(OrderedDict.fromkeys(extra_flags))
+    extra_flags = deduplicate(extra_flags)
 
     combined_dir = tempfile.mkdtemp(prefix="devkit")
     object_names = set()
@@ -143,12 +134,16 @@ def resolve_library_paths(names, dirs):
     return (list(set(paths)), flags)
 
 def generate_example(filename, package, env_rc, library_name, extra_flags):
-    cc = subprocess.check_output(
-        ["(. \"{rc}\" && echo $CC)".format(rc=env_rc)],
-        shell=True).decode('utf-8').strip()
+    cc = probe_env(env_rc, "echo $CC")
+    cflags = probe_env(env_rc, "echo $CFLAGS")
+    ldflags = probe_env(env_rc, "echo $LDFLAGS")
+
+    (cflags, ldflags) = trim_flags(cflags, ldflags)
 
     params = {
         "cc": cc,
+        "cflags": cflags,
+        "ldflags": ldflags,
         "source_filename": filename,
         "program_filename": os.path.splitext(filename)[0],
         "library_name": library_name,
@@ -159,7 +154,7 @@ def generate_example(filename, package, env_rc, library_name, extra_flags):
 /*
  * Compile with:
  *
- * %(cc)s -Wall -pipe -Os -g3 %(source_filename)s -o %(program_filename)s -L. -l%(library_name)s %(extra_flags)s
+ * %(cc)s %(cflags)s %(source_filename)s -o %(program_filename)s -L. -l%(library_name)s %(extra_flags)s %(ldflags)s
  */""" % params
 
     if package == "frida-gum-1.0":
@@ -538,6 +533,35 @@ stop (gpointer user_data)
   return FALSE;
 }
 """ % { "preamble": preamble }
+
+def probe_env(env_rc, command):
+    return subprocess.check_output([
+        "(. \"{rc}\" && PACKAGE_TARNAME=frida-devkit . $CONFIG_SITE && {command})".format(rc=env_rc, command=command)
+    ], shell=True).decode('utf-8').strip()
+
+def trim_flags(cflags, ldflags):
+    trimmed_cflags = []
+    trimmed_ldflags = []
+
+    pending_cflags = cflags.split(" ")
+    while len(pending_cflags) > 0:
+        flag = pending_cflags.pop(0)
+        if flag == "-include":
+            pending_cflags.pop(0)
+        else:
+            trimmed_cflags.append(flag)
+
+    trimmed_cflags = deduplicate(trimmed_cflags)
+    existing_cflags = set(trimmed_cflags)
+
+    for flag in deduplicate(ldflags.split(" ")):
+        if flag not in existing_cflags:
+            trimmed_ldflags.append(flag)
+
+    return (" ".join(trimmed_cflags), " ".join(trimmed_ldflags))
+
+def deduplicate(items):
+    return list(OrderedDict.fromkeys(items))
 
 
 if __name__ == "__main__":
