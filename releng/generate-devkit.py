@@ -23,12 +23,12 @@ def generate_devkit(package, umbrella_header, host, output_dir, output_base_name
     with open(os.path.join(output_dir, output_base_name + ".h"), "w") as f:
         f.write(header)
 
-    (library, extra_flags) = generate_library(package, env_rc)
+    (library, extra_ldflags) = generate_library(package, env_rc)
     with open(os.path.join(output_dir, "lib{}.a".format(output_base_name)), "wb") as f:
         f.write(library)
 
     example_filename = output_base_name + "-example.c"
-    example = generate_example(example_filename, package, env_rc, output_base_name, extra_flags)
+    example = generate_example(example_filename, package, env_rc, output_base_name, extra_ldflags)
     with open(os.path.join(output_dir, example_filename), "w") as f:
         f.write(example)
 
@@ -72,7 +72,6 @@ def generate_library(package, env_rc):
     library_names = infer_library_names(library_flags)
     library_paths, extra_flags = resolve_library_paths(library_names, library_dirs)
     extra_flags += infer_linker_flags(library_flags)
-    extra_flags = deduplicate(extra_flags)
 
     combined_dir = tempfile.mkdtemp(prefix="devkit")
     object_names = set()
@@ -133,12 +132,12 @@ def resolve_library_paths(names, dirs):
             flags.append("-l{}".format(name))
     return (list(set(paths)), flags)
 
-def generate_example(filename, package, env_rc, library_name, extra_flags):
+def generate_example(filename, package, env_rc, library_name, extra_ldflags):
     cc = probe_env(env_rc, "echo $CC")
     cflags = probe_env(env_rc, "echo $CFLAGS")
     ldflags = probe_env(env_rc, "echo $LDFLAGS")
 
-    (cflags, ldflags) = trim_flags(cflags, ldflags)
+    (cflags, ldflags) = trim_flags(cflags, " ".join([" ".join(extra_ldflags), ldflags]))
 
     params = {
         "cc": cc,
@@ -146,15 +145,14 @@ def generate_example(filename, package, env_rc, library_name, extra_flags):
         "ldflags": ldflags,
         "source_filename": filename,
         "program_filename": os.path.splitext(filename)[0],
-        "library_name": library_name,
-        "extra_flags": " ".join(extra_flags)
+        "library_name": library_name
     }
 
     preamble = """\
 /*
  * Compile with:
  *
- * %(cc)s %(cflags)s %(source_filename)s -o %(program_filename)s -L. -l%(library_name)s %(extra_flags)s %(ldflags)s
+ * %(cc)s %(cflags)s %(source_filename)s -o %(program_filename)s -L. -l%(library_name)s %(ldflags)s
  */""" % params
 
     if package == "frida-gum-1.0":
@@ -554,8 +552,31 @@ def trim_flags(cflags, ldflags):
     trimmed_cflags = deduplicate(trimmed_cflags)
     existing_cflags = set(trimmed_cflags)
 
-    for flag in deduplicate(ldflags.split(" ")):
-        if flag not in existing_cflags:
+    pending_ldflags = ldflags.split(" ")
+    while len(pending_ldflags) > 0:
+        flag = pending_ldflags.pop(0)
+        if flag in ("-arch", "-isysroot") and flag in existing_cflags:
+            pending_ldflags.pop(0)
+        else:
+            trimmed_ldflags.append(flag)
+
+    pending_ldflags = trimmed_ldflags
+    trimmed_ldflags = []
+    while len(pending_ldflags) > 0:
+        flag = pending_ldflags.pop(0)
+
+        raw_flags = []
+        while flag.startswith("-Wl,"):
+            raw_flags.append(flag[4:])
+            if len(pending_ldflags) > 0:
+                flag = pending_ldflags.pop(0)
+            else:
+                flag = None
+                break
+        if len(raw_flags) > 0:
+            trimmed_ldflags.append("-Wl," + ",".join(raw_flags))
+
+        if flag is not None and flag not in existing_cflags:
             trimmed_ldflags.append(flag)
 
     return (" ".join(trimmed_cflags), " ".join(trimmed_ldflags))
