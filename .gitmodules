@@ -13,6 +13,9 @@
 [submodule "frida-node"]
 	path = frida-node
 	url = git://github.com/frida/frida-node.git
+[submodule "frida-swift"]
+	path = frida-swift
+	url = git://github.com/frida/frida-swift.git
 [submodule "frida-clr"]
 	path = frida-clr
 	url = git://github.com/frida/frida-clr.git
