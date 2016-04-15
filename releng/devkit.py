@@ -13,24 +13,38 @@ import tempfile
 
 INCLUDE_PATTERN = re.compile("#include\s+[<\"](.*?)[>\"]")
 
-def generate_devkit(package, umbrella_header, host, output_dir, output_base_name):
+DEVKITS = {
+    "frida-gum": ("frida-gum-1.0", ("frida-1.0", "gum", "gum.h")),
+    "frida-gumjs": ("frida-gumjs-1.0", ("frida-1.0", "gumjs", "gumscriptbackend.h")),
+    "frida-core": ("frida-core-1.0", ("frida-1.0", "frida-core.h")),
+}
+
+def generate_devkit(kit, host, output_dir):
+    package, umbrella_header = DEVKITS[kit]
+
     frida_root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
     env_rc = os.path.join(frida_root, "build", "frida-env-{}.rc".format(host))
     umbrella_header_path = os.path.join(frida_root, "build", "frida-" + host, "include", *umbrella_header)
 
+    header_filename = kit + ".h"
+    if not os.path.exists(umbrella_header_path):
+        raise Exception("Header not found: {}".format(umbrella_header_path))
     header = generate_header(package, frida_root, env_rc, umbrella_header_path)
-    with open(os.path.join(output_dir, output_base_name + ".h"), "w") as f:
+    with open(os.path.join(output_dir, header_filename), "w") as f:
         f.write(header)
 
+    library_filename = "lib{}.a".format(kit)
     (library, extra_ldflags) = generate_library(package, env_rc)
-    with open(os.path.join(output_dir, "lib{}.a".format(output_base_name)), "wb") as f:
+    with open(os.path.join(output_dir, library_filename), "wb") as f:
         f.write(library)
 
-    example_filename = output_base_name + "-example.c"
-    example = generate_example(example_filename, package, env_rc, output_base_name, extra_ldflags)
+    example_filename = kit + "-example.c"
+    example = generate_example(example_filename, package, env_rc, kit, extra_ldflags)
     with open(os.path.join(output_dir, example_filename), "w") as f:
         f.write(example)
+
+    return [header_filename, library_filename, example_filename]
 
 def generate_header(package, frida_root, env_rc, umbrella_header_path):
     header_dependencies = subprocess.check_output(
@@ -586,18 +600,17 @@ def deduplicate(items):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: {0} host outdir".format(sys.argv[0]), file=sys.stderr)
+    if len(sys.argv) != 4:
+        print("Usage: {0} kit host outdir".format(sys.argv[0]), file=sys.stderr)
         sys.exit(1)
 
-    host = sys.argv[1]
-    outdir = sys.argv[2]
+    kit = sys.argv[1]
+    host = sys.argv[2]
+    outdir = sys.argv[3]
 
     try:
         os.makedirs(outdir)
     except:
         pass
 
-    generate_devkit("frida-gum-1.0", ("frida-1.0", "gum", "gum.h"), host, outdir, "frida-gum")
-    generate_devkit("frida-gumjs-1.0", ("frida-1.0", "gumjs", "gumscriptbackend.h"), host, outdir, "frida-gumjs")
-    generate_devkit("frida-core-1.0", ("frida-1.0", "frida-core.h"), host, outdir, "frida-core")
+    generate_devkit(kit, host, outdir)

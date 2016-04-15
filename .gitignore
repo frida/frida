@@ -1,4 +1,5 @@
 *.opensdf
+*.pyc
 *.sdf
 *.suo
 *.swp
