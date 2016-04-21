@@ -127,18 +127,20 @@ if __name__ == '__main__':
         upload_url = upload_url[:upload_url.index("{")]
 
         def upload(name, mimetype, data):
-            r = requests.post(
-                url=upload_url,
-                params={
-                    "name": name,
-                },
-                headers={
-                    "Authorization": "Token {}".format(token),
-                    "Accept": "application/vnd.github.v3+json",
-                    "Content-Type": mimetype,
-                },
-                data=data)
-            r.raise_for_status()
+            try:
+                r = requests.post(
+                    url=upload_url,
+                    params={
+                        "name": name,
+                    },
+                    headers={
+                        "Authorization": "Token {}".format(token),
+                        "Content-Type": mimetype,
+                    },
+                    data=data)
+                r.raise_for_status()
+            except Exception as e:
+                print("Skipping {}: {}".format(name, e))
 
         return upload
 
