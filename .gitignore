@@ -1,3 +1,4 @@
+*.VC.*
 *.opensdf
 *.pyc
 *.sdf
