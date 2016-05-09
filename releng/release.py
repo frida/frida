@@ -76,7 +76,7 @@ if __name__ == '__main__':
         if publish:
             do([npm, "publish"])
         do([npm, "install"])
-        do([npm, "run", "prebuild", "--", "-t", "4.0.0", "-t", "5.0.0"])
+        do([npm, "run", "prebuild", "--", "-t", "4.0.0", "-t", "5.0.0", "-t", "6.0.0"])
         packages = glob.glob(os.path.join(frida_node_dir, "prebuilds", "*.tar.gz"))
         for package in packages:
             remote_path = "node/v" + version
