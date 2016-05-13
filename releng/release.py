@@ -195,9 +195,9 @@ if __name__ == '__main__':
 
     if int(nano) == 0:
         if slave == 'windows':
-            upload_to_pypi(r"C:\Program Files (x86)\Python27\python.exe",
+            upload_to_pypi(r"C:\Program Files (x86)\Python 2.7\python.exe",
                 os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "lib", "python2.7", "site-packages", "_frida.pyd"))
-            upload_to_pypi(r"C:\Program Files\Python27\python.exe",
+            upload_to_pypi(r"C:\Program Files\Python 2.7\python.exe",
                 os.path.join(build_dir, "build", "frida-windows", "x64-Release", "lib", "python2.7", "site-packages", "_frida.pyd"))
             upload_to_pypi(r"C:\Program Files (x86)\Python 3.5\python.exe",
                 os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "lib", "python3.5", "site-packages", "_frida.pyd"))
