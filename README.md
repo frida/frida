@@ -47,7 +47,7 @@ To ensure that OS X accepts the newly created certificate, restart the
 
     frida.sln
 
-(Requires Visual Studio 2013.)
+(Requires Visual Studio 2015.)
 
 See [http://www.frida.re/docs/building/](http://www.frida.re/docs/building/)
 for details.
