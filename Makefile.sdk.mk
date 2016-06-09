@@ -30,7 +30,7 @@ else
 endif
 host_platform_arch := $(host_platform)-$(host_arch)
 
-DIET ?= $(shell echo $(host_platform_arch) | egrep -q "^(linux-arm|linux-armhf|qnx-.+)$$" && echo 1 || echo 0)
+enable_diet := $(shell echo $(host_platform_arch) | egrep -q "^(linux-arm|linux-armhf|qnx-.+)$$" && echo 1 || echo 0)
 
 
 ifeq ($(host_platform), mac)
@@ -53,7 +53,7 @@ ifeq ($(host_platform), qnx)
 	iconv := build/fs-%/lib/libiconv.a
 	bfd := build/fs-%/lib/libbfd.a
 endif
-ifeq ($(DIET), 0)
+ifeq ($(enable_diet), 0)
 	v8 := build/fs-%/lib/pkgconfig/v8.pc
 endif
 
