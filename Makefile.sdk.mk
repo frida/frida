@@ -30,6 +30,8 @@ else
 endif
 host_platform_arch := $(host_platform)-$(host_arch)
 
+DIET ?= $(shell echo $(host_platform_arch) | egrep -q "^(linux-arm|linux-armhf|qnx-.+)$$" && echo 1 || echo 0)
+
 
 ifeq ($(host_platform), mac)
 	iconv := build/fs-%/lib/libiconv.a
@@ -50,6 +52,9 @@ ifeq ($(host_platform), qnx)
 	unwind := build/fs-%/lib/pkgconfig/libunwind.pc
 	iconv := build/fs-%/lib/libiconv.a
 	bfd := build/fs-%/lib/libbfd.a
+endif
+ifeq ($(DIET), 0)
+	v8 := build/fs-%/lib/pkgconfig/v8.pc
 endif
 
 
@@ -78,7 +83,7 @@ build/fs-tmp-%/.package-stamp: \
 		build/fs-%/lib/pkgconfig/glib-2.0.pc \
 		build/fs-%/lib/pkgconfig/gee-0.8.pc \
 		build/fs-%/lib/pkgconfig/json-glib-1.0.pc \
-		build/fs-%/lib/pkgconfig/v8.pc
+		$(v8)
 	$(RM) -r $(@D)/package
 	mkdir -p $(@D)/package
 	cd build/fs-$* \
