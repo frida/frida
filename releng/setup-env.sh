@@ -116,9 +116,17 @@ case $host_platform in
         host_arch_flags="-march=armv6"
         host_toolprefix="arm-linux-gnueabihf-"
         ;;
+      mips)
+        host_arch_flags="-march=mips1"
+        host_toolprefix="mips-linux-"
+        ;;
+      mipsel)
+        host_arch_flags="-march=mips1"
+        host_toolprefix="mipsel-linux-"
+        ;;
     esac
     CPP="${host_toolprefix}cpp"
-    CC="${host_toolprefix}gcc -static-libgcc -static-libstdc++"
+    CC="${host_toolprefix}gcc -static-libgcc"
     CXX="$FRIDA_ROOT/releng/linux-g++-wrapper.sh ${host_toolprefix}g++ -static-libgcc -static-libstdc++"
     LD="${host_toolprefix}ld"
 
@@ -130,7 +138,14 @@ case $host_platform in
     OBJDUMP="${host_toolprefix}objdump"
 
     CFLAGS="$host_arch_flags -ffunction-sections -fdata-sections"
-    CXXFLAGS="-std=c++11"
+    case $host_arch in
+      mips|mipsel)
+        CXXFLAGS=""
+        ;;
+      *)
+        CXXFLAGS="-std=c++11"
+        ;;
+    esac
     LDFLAGS="$host_arch_flags -Wl,--no-undefined -Wl,--gc-sections"
     if [ "$FRIDA_ENV_SDK" != 'none' ]; then
       CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"

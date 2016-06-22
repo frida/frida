@@ -31,6 +31,14 @@ case $frida_host_platform_arch in
     host_alias="arm-linux-gnueabihf"
     cross_compiling=yes
   ;;
+  linux-mips)
+    host_alias="mips-linux-uclibc"
+    cross_compiling=yes
+  ;;
+  linux-mipsel)
+    host_alias="mipsel-linux-uclibc"
+    cross_compiling=yes
+  ;;
   linux-i386)
     host_alias="i686-linux-gnu"
     cross_compiling=yes
@@ -106,8 +114,9 @@ case $frida_host_platform_arch in
 esac
 
 case $frida_host_platform_arch in
-  linux-arm|linux-armhf|qnx-*)
+  linux-arm|linux-armhf|linux-mips|linux-mipsel|qnx-*)
     enable_diet=yes
+    enable_gumpp=no
   ;;
   *)
     enable_diet=no
