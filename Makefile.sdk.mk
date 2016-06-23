@@ -30,7 +30,7 @@ else
 endif
 host_platform_arch := $(host_platform)-$(host_arch)
 
-enable_diet := $(shell echo $(host_platform_arch) | egrep -q "^(linux-arm|linux-armhf|qnx-.+)$$" && echo 1 || echo 0)
+enable_diet := $(shell echo $(host_platform_arch) | egrep -q "^(linux-arm|linux-armhf|linux-mips|linux-mipsel|qnx-.+)$$" && echo 1 || echo 0)
 
 
 ifeq ($(host_platform), mac)
@@ -132,6 +132,14 @@ build/fs-tmp-%/zlib/Makefile: build/fs-env-%.rc build/.zlib-stamp
 			linux-armhf) \
 				export PATH="$$(dirname $$NM):$$PATH"; \
 				export CHOST="arm-linux-gnueabihf"; \
+				;; \
+			linux-mips) \
+				export PATH="$$(dirname $$NM):$$PATH"; \
+				export CHOST="mips-linux"; \
+				;; \
+			linux-mipsel) \
+				export PATH="$$(dirname $$NM):$$PATH"; \
+				export CHOST="mipsel-linux"; \
 				;; \
 			android-i386) \
 				export PATH="$$(dirname $$NM):$$PATH"; \

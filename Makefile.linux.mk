@@ -98,6 +98,8 @@ build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-sub
 			*-armhf)  capstone_archs="arm"     ;; \
 			*-armeabi)capstone_archs="arm"     ;; \
 			*-arm64)  capstone_archs="aarch64" ;; \
+			*-mips)   capstone_archs="mips"    ;; \
+			*-mipsel) capstone_archs="mips"    ;; \
 		esac \
 		&& make -C capstone \
 			PREFIX=$$frida_prefix \
@@ -137,6 +139,8 @@ core-64: build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build 
 core-android: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android
 core-qnx-arm: build/frida-qnx-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for QNX-arm
 core-qnx-armeabi: build/frida-qnx-armeabi/lib/pkgconfig/frida-core-1.0.pc ##@core Build for QNX-armeabi
+core-linux-mips: build/frida-linux-mips/lib/pkgconfig/frida-core-1.0.pc ##@core Build for mips
+core-linux-mipsel: build/frida-linux-mipsel/lib/pkgconfig/frida-core-1.0.pc ##@core Build for mipsel
 
 frida-core/configure: build/frida-env-linux-$(build_arch).rc frida-core/configure.ac
 	. build/frida-env-linux-$(build_arch).rc && cd frida-core && ./autogen.sh
@@ -189,6 +193,28 @@ build/frida-linux-armhf/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-linu
 			HELPER32=../../../../build/tmp_stripped-linux-armhf/frida-core/src/frida-helper!frida-helper-32 \
 			LOADER32=../../../../build/tmp_stripped-linux-armhf/frida-core/lib/loader/.libs/libfrida-loader.so!frida-loader-32.so \
 			AGENT32=../../../../build/tmp_stripped-linux-armhf/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent-32.so \
+		&& make install-data-am
+	@touch -c $@
+build/frida-linux-mips/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-linux-mips/frida-core/src/frida-helper build/tmp_stripped-linux-mips/frida-core/lib/loader/.libs/libfrida-loader.so build/tmp_stripped-linux-mips/frida-core/lib/agent/.libs/libfrida-agent.so
+	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-android-mips/frida-core/src/libfrida_core_la-frida.lo)
+	. build/frida-env-linux-mips.rc \
+		&& cd build/tmp-linux-mips/frida-core \
+		&& make -C src install \
+			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-linux-$(build_arch)\" --toolchain=gnu" \
+			HELPER32=../../../../build/tmp_stripped-linux-mips/frida-core/src/frida-helper!frida-helper-32 \
+			LOADER32=../../../../build/tmp_stripped-linux-mips/frida-core/lib/loader/.libs/libfrida-loader.so!frida-loader-32.so \
+			AGENT32=../../../../build/tmp_stripped-linux-mips/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent-32.so \
+		&& make install-data-am
+	@touch -c $@
+build/frida-linux-mipsel/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-linux-mipsel/frida-core/src/frida-helper build/tmp_stripped-linux-mipsel/frida-core/lib/loader/.libs/libfrida-loader.so build/tmp_stripped-linux-mipsel/frida-core/lib/agent/.libs/libfrida-agent.so
+	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-android-mipsel/frida-core/src/libfrida_core_la-frida.lo)
+	. build/frida-env-linux-mipsel.rc \
+		&& cd build/tmp-linux-mipsel/frida-core \
+		&& make -C src install \
+			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-linux-$(build_arch)\" --toolchain=gnu" \
+			HELPER32=../../../../build/tmp_stripped-linux-mipsel/frida-core/src/frida-helper!frida-helper-32 \
+			LOADER32=../../../../build/tmp_stripped-linux-mipsel/frida-core/lib/loader/.libs/libfrida-loader.so!frida-loader-32.so \
+			AGENT32=../../../../build/tmp_stripped-linux-mipsel/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent-32.so \
 		&& make install-data-am
 	@touch -c $@
 build/frida-android-i386/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-android-i386/frida-core/src/frida-helper build/tmp_stripped-android-i386/frida-core/lib/loader/.libs/libfrida-loader.so build/tmp_stripped-android-i386/frida-core/lib/agent/.libs/libfrida-agent.so
@@ -352,6 +378,12 @@ server-arm: build/frida_stripped-linux-arm/bin/frida-server ##@server Build for 
 server-armhf: build/frida_stripped-linux-armhf/bin/frida-server ##@server Build for arm
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida_stripped-linux-armhf/bin/frida-server $(BINDIST)/bin/frida-server-linux-armhf
+server-mips: build/frida_stripped-linux-mips/bin/frida-server ##@server Build for mips
+	mkdir -p $(BINDIST)/bin
+	cp -f build/frida_stripped-linux-mips/bin/frida-server $(BINDIST)/bin/frida-server-linux-mips
+server-mipsel: build/frida_stripped-linux-mipsel/bin/frida-server ##@server Build for mipsel
+	mkdir -p $(BINDIST)/bin
+	cp -f build/frida_stripped-linux-mipsel/bin/frida-server $(BINDIST)/bin/frida-server-linux-mipsel
 server-android: build/frida_stripped-android-arm/bin/frida-server build/frida_stripped-android-arm64/bin/frida-server ##@server Build for Android
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida_stripped-android-arm/bin/frida-server $(BINDIST)/bin/frida-server-android
