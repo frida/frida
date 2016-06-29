@@ -118,11 +118,11 @@ case $host_platform in
         ;;
       mips)
         host_arch_flags="-march=mips1"
-        host_toolprefix="mips-linux-"
+        host_toolprefix="mips-unknown-linux-uclibc-"
         ;;
       mipsel)
         host_arch_flags="-march=mips1"
-        host_toolprefix="mipsel-linux-"
+        host_toolprefix="mipsel-unknown-linux-uclibc-"
         ;;
     esac
     CPP="${host_toolprefix}cpp"
