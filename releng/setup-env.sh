@@ -75,7 +75,14 @@ fi
 prompt_color=33
 
 toolchain_version=20150406
-sdk_version=20151226
+case $host_platform_arch in
+  linux-arm|linux-armhf|qnx-arm|qnx-armeabi)
+    sdk_version=20151226
+    ;;
+  *)
+    sdk_version=20160707
+    ;;
+esac
 
 if [ -n "$FRIDA_ENV_NAME" ]; then
   frida_env_name_prefix=${FRIDA_ENV_NAME}-
