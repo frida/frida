@@ -1,3 +1,5 @@
+include config.mk
+
 MAKE_J ?= -j 8
 repo_base_url = "git://github.com/frida"
 repo_suffix = ".git"
@@ -220,7 +222,16 @@ build/ft-%/bin/dpkg-deb:
 
 
 build/ft-env-%.rc:
-	FRIDA_ENV_NAME=ft FRIDA_ENV_SDK=none FRIDA_HOST=$* ./releng/setup-env.sh
+	FRIDA_HOST=$* \
+		FRIDA_OPTIMIZATION_FLAGS=$(FRIDA_OPTIMIZATION_FLAGS) \
+		FRIDA_DEBUG_FLAGS=$(FRIDA_DEBUG_FLAGS) \
+		FRIDA_STRIP=$(FRIDA_STRIP) \
+		FRIDA_DIET=$(FRIDA_DIET) \
+		FRIDA_MAPPER=$(FRIDA_MAPPER) \
+		FRIDA_ASAN=$(FRIDA_ASAN) \
+		FRIDA_ENV_NAME=ft \
+		FRIDA_ENV_SDK=none \
+		./releng/setup-env.sh
 
 
 .PHONY: all
