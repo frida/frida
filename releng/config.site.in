@@ -7,6 +7,8 @@ frida_prefix=@frida_prefix@
 
 test "$prefix" = NONE && prefix="$frida_prefix"
 
+enable_diet=@frida_enable_diet@
+enable_mapper=@frida_enable_mapper@
 enable_nls=no
 enable_silent_rules=yes
 
@@ -15,10 +17,10 @@ frida_warning_flags="-Wall"
 case "$PACKAGE_TARNAME" in
   capstone)
     # Takes ages to compile with debug information
-    frida_flags="-Os -pipe"
+    frida_flags="@frida_optimization_flags@ -pipe"
     ;;
   *)
-    frida_flags="-Os -pipe -g3"
+    frida_flags="@frida_optimization_flags@ -pipe @frida_debug_flags@"
     ;;
 esac
 
@@ -115,11 +117,10 @@ esac
 
 case $frida_host_platform_arch in
   linux-arm|linux-armhf|linux-mips|linux-mipsel|qnx-*)
-    enable_diet=yes
     enable_gumpp=no
     ;;
   *)
-    enable_diet=no
+    enable_gumpp=yes
     ;;
 esac
 

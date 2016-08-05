@@ -3,6 +3,12 @@ DESTDIR ?=
 PREFIX ?= /usr
 
 FRIDA := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+FRIDA_OPTIMIZATION_FLAGS ?= -Os
+FRIDA_DEBUG_FLAGS ?= -g3
+FRIDA_STRIP ?= yes
+FRIDA_DIET ?= auto
+FRIDA_MAPPER ?= yes
+FRIDA_ASAN ?= no
 
 PYTHON ?= $(shell which python)
 PYTHON_VERSION := $(shell $(PYTHON) -c 'import sys; v = sys.version_info; print("{0}.{1}".format(v[0], v[1]))')

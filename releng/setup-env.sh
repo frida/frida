@@ -18,6 +18,40 @@ else
 fi
 host_platform_arch=${host_platform}-${host_arch}
 
+case $FRIDA_DIET in
+  yes|no)
+    enable_diet=$FRIDA_DIET
+    ;;
+  *)
+    case $host_platform_arch in
+      linux-arm|linux-armhf|linux-mips|linux-mipsel|qnx-*)
+        enable_diet=yes
+        ;;
+      *)
+        enable_diet=no
+        ;;
+    esac
+    ;;
+esac
+
+case $FRIDA_MAPPER in
+  yes|no)
+    enable_mapper=$FRIDA_MAPPER
+    ;;
+  *)
+    enable_mapper=yes
+    ;;
+esac
+
+case $FRIDA_ASAN in
+  yes|no)
+    enable_asan=$FRIDA_ASAN
+    ;;
+  *)
+    enable_asan=no
+    ;;
+esac
+
 case $build_platform in
   linux)
     download_command="wget -O - -q"
@@ -83,6 +117,9 @@ case $host_platform_arch in
     sdk_version=20160707
     ;;
 esac
+if [ $enable_asan = yes ]; then
+  sdk_version="$sdk_version-asan"
+fi
 
 if [ -n "$FRIDA_ENV_NAME" ]; then
   frida_env_name_prefix=${FRIDA_ENV_NAME}-
@@ -371,6 +408,15 @@ case $host_platform in
     ;;
 esac
 
+if [ $enable_asan = yes ]; then
+  CC="$CC -fsanitize=address"
+  CXX="$CXX -fsanitize=address"
+  if [ -n "$OBJC" ]; then
+    OBJC="$OBJC -fsanitize=address"
+  fi
+  LD="$LD -fsanitize=address"
+fi
+
 CFLAGS="-fPIC $CFLAGS"
 CXXFLAGS="$CFLAGS $CXXFLAGS"
 
@@ -492,7 +538,11 @@ env_rc=build/${FRIDA_ENV_NAME:-frida}-env-${host_platform_arch}.rc
   echo "export AR=\"$AR\""
   echo "export NM=\"$NM\""
   echo "export RANLIB=\"$RANLIB\""
-  echo "export STRIP=\"$STRIP\""
+  if [ "$FRIDA_STRIP" = yes ]; then
+    echo "export STRIP=\"$STRIP\""
+  else
+    echo "export STRIP=\"echo # $STRIP\""
+  fi
   echo "export ACLOCAL_FLAGS=\"$ACLOCAL_FLAGS\""
   echo "export ACLOCAL=\"$ACLOCAL\""
   echo "export CONFIG_SITE=\"$CONFIG_SITE\""
@@ -523,6 +573,10 @@ sed \
   -e "s,@frida_host_arch@,$host_arch,g" \
   -e "s,@frida_host_platform_arch@,$host_platform_arch,g" \
   -e "s,@frida_prefix@,$FRIDA_PREFIX,g" \
+  -e "s,@frida_optimization_flags@,$FRIDA_OPTIMIZATION_FLAGS,g" \
+  -e "s,@frida_debug_flags@,$FRIDA_DEBUG_FLAGS,g" \
+  -e "s,@frida_enable_diet@,$enable_diet,g" \
+  -e "s,@frida_enable_mapper@,$enable_mapper,g" \
   $releng_path/config.site.in > "$CONFIG_SITE"
 
 echo "Environment created. To enter:"
