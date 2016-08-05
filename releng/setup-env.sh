@@ -36,7 +36,7 @@ if [ -z "$FRIDA_HOST" ]; then
   echo "Assuming host is $host_platform_arch Set FRIDA_HOST to override."
 fi
 
-if [ $host_platform = "android" ]; then
+if [ $host_platform = android ]; then
   ndk_required=r10e
   if [ -n "$ANDROID_NDK_ROOT" ]; then
     ndk_installed=$(cut -f1 -d" " "$ANDROID_NDK_ROOT/RELEASE.TXT")
@@ -65,7 +65,7 @@ if [ $host_platform = "android" ]; then
   fi
 fi
 
-if [ $host_platform = "qnx" ]; then
+if [ $host_platform = qnx ]; then
   if [ ! -n "$QNX_HOST" ]; then
     echo "You need to specify QNX_HOST and QNX_TARGET"
     exit 1

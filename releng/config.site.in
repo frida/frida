@@ -16,49 +16,49 @@ case "$PACKAGE_TARNAME" in
   capstone)
     # Takes ages to compile with debug information
     frida_flags="-Os -pipe"
-  ;;
+    ;;
   *)
     frida_flags="-Os -pipe -g3"
-  ;;
+    ;;
 esac
 
 case $frida_host_platform_arch in
   linux-arm)
     host_alias="arm-linux-gnueabi"
     cross_compiling=yes
-  ;;
+    ;;
   linux-armhf)
     host_alias="arm-linux-gnueabihf"
     cross_compiling=yes
-  ;;
+    ;;
   linux-mips)
     host_alias="mips-linux-uclibc"
     cross_compiling=yes
-  ;;
+    ;;
   linux-mipsel)
     host_alias="mipsel-linux-uclibc"
     cross_compiling=yes
-  ;;
+    ;;
   linux-i386)
     host_alias="i686-linux-gnu"
     cross_compiling=yes
-  ;;
+    ;;
   linux-x86_64)
     host_alias="x86_64-linux-gnu"
     cross_compiling=no
-  ;;
+    ;;
   qnx-i386)
     host_alias="i486-pc-nto-qnx6.6.0"
     cross_compiling=yes
-  ;;
+    ;;
   qnx-armeabi)
     host_alias="arm-unknown-nto-qnx6.5.0eabi"
     cross_compiling=yes
-  ;;
+    ;;
   qnx-arm)
     host_alias="arm-unknown-nto-qnx6.5.0"
     cross_compiling=yes
-  ;;
+    ;;
   android-i386)
     if [ -n "$FRIDA_LEGACY_AUTOTOOLS" ]; then
       host_alias="i686-linux-gnu"
@@ -66,7 +66,7 @@ case $frida_host_platform_arch in
       host_alias="i686-none-linux-android"
     fi
     cross_compiling=yes
-  ;;
+    ;;
   android-x86_64)
     if [ -n "$FRIDA_LEGACY_AUTOTOOLS" ]; then
       host_alias="x86_64-linux-gnu"
@@ -74,7 +74,7 @@ case $frida_host_platform_arch in
       host_alias="x86_64-none-linux-android"
     fi
     cross_compiling=yes
-  ;;
+    ;;
   android-arm)
     if [ -n "$FRIDA_LEGACY_AUTOTOOLS" ]; then
       host_alias="armv7-linux-eabi"
@@ -84,7 +84,7 @@ case $frida_host_platform_arch in
     cross_compiling=yes
 
     frida_flags="$frida_flags -mthumb"
-  ;;
+    ;;
   android-arm64)
     if [ -n "$FRIDA_LEGACY_AUTOTOOLS" ]; then
       host_alias="aarch64-linux-gnu"
@@ -92,35 +92,35 @@ case $frida_host_platform_arch in
       host_alias="aarch64-none-linux-android"
     fi
     cross_compiling=yes
-  ;;
+    ;;
   mac-i386|ios-i386)
     host_alias="i686-apple-darwin"
     cross_compiling=yes
-  ;;
+    ;;
   ios-x86_64)
     host_alias="x86_64-apple-darwin"
     cross_compiling=yes
-  ;;
+    ;;
   ios-arm)
     host_alias="arm-apple-darwin"
     cross_compiling=yes
 
     frida_flags="$frida_flags -mthumb"
-  ;;
+    ;;
   ios-arm64)
     host_alias="aarch64-apple-darwin"
     cross_compiling=yes
-  ;;
+    ;;
 esac
 
 case $frida_host_platform_arch in
   linux-arm|linux-armhf|linux-mips|linux-mipsel|qnx-*)
     enable_diet=yes
     enable_gumpp=no
-  ;;
+    ;;
   *)
     enable_diet=no
-  ;;
+    ;;
 esac
 
 # Work around a bug in stdint generation m4, where CFLAGS is overwritten,
@@ -135,7 +135,7 @@ case "$PACKAGE_TARNAME" in
   'xz')
     enable_shared=no
     enable_static=yes
-  ;;
+    ;;
   'libunwind')
     enable_shared=no
     enable_static=yes
@@ -148,12 +148,12 @@ case "$PACKAGE_TARNAME" in
 
     CFLAGS="$CFLAGS -I$frida_prefix/include"
     LDFLAGS="$LDFLAGS -L$frida_prefix/lib"
-  ;;
+    ;;
   'libffi')
     CFLAGS="$CFLAGS -DFFI_MMAP_EXEC_WRIT=1 -DFFI_MMAP_EXEC_SELINUX=0"
     enable_shared=no
     enable_static=yes
-  ;;
+    ;;
   'glib')
     enable_dtrace=no
     enable_tests=no
@@ -168,31 +168,31 @@ case "$PACKAGE_TARNAME" in
       android|qnx)
         ac_cv_func_posix_getgrgid_r=no
         ac_cv_func_posix_getpwuid_r=no
-      ;;
+        ;;
       *)
         ac_cv_func_posix_getgrgid_r=yes
         ac_cv_func_posix_getpwuid_r=yes
-      ;;
+        ;;
     esac
 
     case $frida_host_platform in
       linux)
         glib_cv_have_qsort_r=yes
-      ;;
+        ;;
       mac|ios|android|qnx)
         glib_cv_have_qsort_r=no
-      ;;
+        ;;
     esac
 
     case $frida_host_platform in
       linux|android|mac|ios|qnx)
         enable_proxy_libintl=yes
-      ;;
+        ;;
     esac
 
     CFLAGS="$CFLAGS -I$frida_prefix/include"
     LDFLAGS="$LDFLAGS -L$frida_prefix/lib"
-  ;;
+    ;;
   'libgee')
     enable_shared=no
     enable_static=yes
@@ -200,24 +200,24 @@ case "$PACKAGE_TARNAME" in
     enable_consistency_check=no
 
     CFLAGS="$CFLAGS -Wno-error=implicit-function-declaration"
-  ;;
+    ;;
   'vala'|'json-glib')
     enable_shared=no
     enable_static=yes
-  ;;
+    ;;
   'capstone')
     enable_shared=no
     enable_static=yes
     enable_maintainer_mode=yes
     frida_flags="$frida_warning_flags $frida_flags"
-  ;;
+    ;;
   frida-*)
     enable_maintainer_mode=yes
     frida_flags="$frida_warning_flags $frida_flags"
-  ;;
+    ;;
   *)
     frida_flags="$frida_warning_flags $frida_flags"
-  ;;
+    ;;
 esac
 
 CFLAGS="$CFLAGS $frida_flags"
