@@ -39,7 +39,7 @@ case $FRIDA_MAPPER in
     enable_mapper=$FRIDA_MAPPER
     ;;
   *)
-    enable_mapper=yes
+    enable_mapper=auto
     ;;
 esac
 
