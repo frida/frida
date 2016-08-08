@@ -156,6 +156,8 @@ case "$PACKAGE_TARNAME" in
     enable_static=yes
     ;;
   'glib')
+    with_pcre=internal
+    enable_debug=minimum
     enable_dtrace=no
     enable_tests=no
 
