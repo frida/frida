@@ -209,7 +209,7 @@ $(eval $(call make-git-module-rules,libffi,build/ft-%/lib/pkgconfig/libffi.pc,bu
 
 $(eval $(call make-git-module-rules,glib,build/ft-%/bin/glib-genmarshal,build/ft-%/lib/pkgconfig/libffi.pc))
 
-$(eval $(call make-tarball-module-rules,pkg-config,http://pkgconfig.freedesktop.org/releases/pkg-config-$(pkg_config_version).tar.gz,build/ft-%/bin/pkg-config,build/ft-%/bin/glib-genmarshal))
+$(eval $(call make-tarball-module-rules,pkg-config,https://pkgconfig.freedesktop.org/releases/pkg-config-$(pkg_config_version).tar.gz,build/ft-%/bin/pkg-config,build/ft-%/bin/glib-genmarshal))
 
 $(eval $(call make-git-module-rules,vala,build/ft-%/bin/valac,build/ft-%/bin/glib-genmarshal))
 
