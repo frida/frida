@@ -463,7 +463,7 @@ if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/.version" 2>/dev/null; th
   rm -rf "$FRIDA_TOOLROOT"
   mkdir -p "$FRIDA_TOOLROOT"
 
-  local_toolchain=$FRIDA_BUILD/toolchain-${build_platform}-${build_arch}.tar.bz2
+  local_toolchain=$FRIDA_BUILD/toolchain.tar.bz2
   if [ -f $local_toolchain ]; then
     echo "Deploying local toolchain $(basename $local_toolchain)..."
     tar -C "$FRIDA_TOOLROOT" -xjf $local_toolchain || exit 1
