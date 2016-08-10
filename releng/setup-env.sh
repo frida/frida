@@ -71,30 +71,39 @@ if [ -z "$FRIDA_HOST" ]; then
 fi
 
 if [ $host_platform = android ]; then
-  ndk_required=r10e
+  ndk_required_name=r12b
+  ndk_required_version=12.1.2977051
   if [ -n "$ANDROID_NDK_ROOT" ]; then
-    ndk_installed=$(cut -f1 -d" " "$ANDROID_NDK_ROOT/RELEASE.TXT")
-    case ${ndk_installed} in
-      ${ndk_required}*)
+    if [ -f "$ANDROID_NDK_ROOT/source.properties" ]; then
+      ndk_installed_version=$(grep Pkg.Revision "$ANDROID_NDK_ROOT/source.properties" | awk '{ print $NF; }')
+    else
+      ndk_installed_version=$(cut -f1 -d" " "$ANDROID_NDK_ROOT/RELEASE.TXT")
+    fi
+    case $ndk_installed_version in
+      $ndk_required_version)
         ;;
       *)
-        echo "Unsupported NDK version: ${ndk_installed}. Please install ${ndk_required}."               > /dev/stderr
-        echo ""                                                                                         > /dev/stderr
-        echo "Frida's SDK - the prebuilt dependencies snapshot - was compiled against ${ndk_required}," > /dev/stderr
-        echo "and as we have observed the NDK ABI breaking over time, we ask you to install"            > /dev/stderr
-        echo "the exact same version."                                                                  > /dev/stderr
-        echo ""                                                                                         > /dev/stderr
-        echo "However, if you'd like to take the risk and use a different NDK, you may edit"            > /dev/stderr
-        echo "releng/setup-env.sh and adjust the ndk_required variable. Make sure you use"              > /dev/stderr
-        echo "a newer NDK, and not an older one. Note that the proper solution is to rebuild"           > /dev/stderr
-        echo "the SDK against your NDK by running:"                                                     > /dev/stderr
-        echo "  make -f Makefile.sdk.mk FRIDA_HOST=android-arm"                                         > /dev/stderr
-        echo "If you do this and it works well for you, please let us know so we can upgrade"           > /dev/stderr
-        echo "the upstream SDK version."                                                                > /dev/stderr
+        (
+          echo ""
+          echo "Unsupported NDK version $ndk_installed_version. Please install NDK $ndk_required_name ($ndk_required_version)."
+          echo ""
+          echo "Frida's SDK - the prebuilt dependencies snapshot - was compiled against $ndk_required_name,"
+          echo "and as we have observed the NDK ABI breaking over time, we ask you to install"
+          echo "the exact same version."
+          echo ""
+          echo "However, if you'd like to take the risk and use a different NDK, you may edit"
+          echo "releng/setup-env.sh and adjust the ndk_required variable. Make sure you use"
+          echo "a newer NDK, and not an older one. Note that the proper solution is to rebuild"
+          echo "the SDK against your NDK by running:"
+          echo "  make -f Makefile.sdk.mk FRIDA_HOST=android-arm"
+          echo "If you do this and it works well for you, please let us know so we can upgrade"
+          echo "the upstream SDK version."
+          echo ""
+        ) > /dev/stderr
         exit 1
     esac
   else
-    echo "ANDROID_NDK_ROOT must be set to the location of your $frida_ndk NDK." > /dev/stderr
+    echo "ANDROID_NDK_ROOT must be set to the location of your $ndk_required_name NDK." > /dev/stderr
     exit 1
   fi
 fi
@@ -309,7 +318,7 @@ case $host_platform in
         ;;
     esac
 
-    android_clang_prefix="$ANDROID_NDK_ROOT/toolchains/llvm-3.6/prebuilt/${android_build_platform}-x86_64"
+    android_clang_prefix="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/${android_build_platform}-x86_64"
     android_gcc_toolchain="$ANDROID_NDK_ROOT/toolchains/${android_host_toolchain}/prebuilt/${android_build_platform}-x86_64"
     android_sysroot="$ANDROID_NDK_ROOT/platforms/android-${android_target_platform}/arch-${android_host_arch}"
     toolflags="--sysroot=$android_sysroot \
