@@ -1,23 +1,7 @@
-diff -Nur binutils-2.23.2-old/libiberty/getpagesize.c binutils-2.23.2/libiberty/getpagesize.c
---- binutils-2.23.2-old/libiberty/getpagesize.c	2005-03-28 04:09:01.000000000 +0200
-+++ binutils-2.23.2/libiberty/getpagesize.c	2013-10-24 22:45:24.000000000 +0200
-@@ -20,6 +20,7 @@
- 
- */
- 
-+#ifndef ANDROID
- #ifndef VMS
- 
- #include "config.h"
-@@ -88,3 +89,4 @@
- }
- 
- #endif /* VMS */
-+#endif /* ANDROID */
-diff -Nur binutils-2.23.2-old/bfd/archive.c binutils-2.23.2/bfd/archive.c
---- binutils-2.23.2-old/bfd/archive.c	2013-03-25 09:06:19.000000000 +0100
-+++ binutils-2.23.2/bfd/archive.c	2013-10-24 21:48:30.000000000 +0200
-@@ -1863,7 +1863,9 @@
+diff -Nur binutils-2.27-orig/bfd/archive.c binutils-2.27/bfd/archive.c
+--- binutils-2.27-orig/bfd/archive.c	2016-08-03 09:36:50.000000000 +0200
++++ binutils-2.27/bfd/archive.c	2016-08-10 19:14:04.000000000 +0200
+@@ -1922,7 +1922,9 @@
      {
        /* Assume we just "made" the member, and fake it.  */
        struct bfd_in_memory *bim = (struct bfd_in_memory *) member->iostream;
@@ -28,9 +12,9 @@ diff -Nur binutils-2.23.2-old/bfd/archive.c binutils-2.23.2/bfd/archive.c
        status.st_uid = getuid ();
        status.st_gid = getgid ();
        status.st_mode = 0644;
-diff -Nur binutils-2.25-old/bfd/hosts/i386linux.h binutils-2.25/bfd/hosts/i386linux.h
---- binutils-2.25-old/bfd/hosts/i386linux.h	2015-02-22 14:56:13.000000000 +0100
-+++ binutils-2.25/bfd/hosts/i386linux.h	2015-02-22 15:01:47.000000000 +0100
+diff -Nur binutils-2.27-orig/bfd/hosts/i386linux.h binutils-2.27/bfd/hosts/i386linux.h
+--- binutils-2.27-orig/bfd/hosts/i386linux.h	2016-08-03 09:36:51.000000000 +0200
++++ binutils-2.27/bfd/hosts/i386linux.h	2016-08-10 19:14:04.000000000 +0200
 @@ -24,4 +24,15 @@
     our ability to process the core file).  So allow 0-4096 extra bytes at
     the end.  */
@@ -47,9 +31,9 @@ diff -Nur binutils-2.25-old/bfd/hosts/i386linux.h binutils-2.25/bfd/hosts/i386li
 +#endif
 +
  #define TRAD_CORE_EXTRA_SIZE_ALLOWED 4096
-diff -Nur binutils-2.25-old/bfd/hosts/x86-64linux.h binutils-2.25/bfd/hosts/x86-64linux.h
---- binutils-2.25-old/bfd/hosts/x86-64linux.h	2014-10-14 09:32:02.000000000 +0200
-+++ binutils-2.25/bfd/hosts/x86-64linux.h	2015-12-26 20:55:04.000000000 +0100
+diff -Nur binutils-2.27-orig/bfd/hosts/x86-64linux.h binutils-2.27/bfd/hosts/x86-64linux.h
+--- binutils-2.27-orig/bfd/hosts/x86-64linux.h	2016-08-03 09:36:51.000000000 +0200
++++ binutils-2.27/bfd/hosts/x86-64linux.h	2016-08-10 19:14:04.000000000 +0200
 @@ -30,7 +30,17 @@
  #include <sys/types.h>
  
@@ -86,37 +70,19 @@ diff -Nur binutils-2.25-old/bfd/hosts/x86-64linux.h binutils-2.25/bfd/hosts/x86-
  /* Unsigned 64-bit integer aligned to 8 bytes.  */
  typedef uint64_t __attribute__ ((__aligned__ (8))) a8_uint64_t;
  
---- binutils/libiberty/d-demangle.c-orig	2015-08-16 21:12:49.000000000 +0200
-+++ binutils/libiberty/d-demangle.c	2015-08-16 21:15:36.000000000 +0200
-@@ -44,7 +44,6 @@
- #include <stdlib.h>
- #else
- extern long strtol (const char *nptr, char **endptr, int base);
--extern long double strtold (const char *nptr, char **endptr);
- #endif
+diff -Nur binutils-2.27-orig/libiberty/getpagesize.c binutils-2.27/libiberty/getpagesize.c
+--- binutils-2.27-orig/libiberty/getpagesize.c	2013-11-04 16:33:40.000000000 +0100
++++ binutils-2.27/libiberty/getpagesize.c	2016-08-10 19:14:04.000000000 +0200
+@@ -20,6 +20,7 @@
  
- #include <demangle.h>
-@@ -810,7 +809,7 @@
- {
-   char buffer[64];
-   int len = 0;
--  long double value;
-+  double value;
-   char *endptr;
+ */
  
-   /* Handle NAN and +-INF.  */
-@@ -877,12 +876,12 @@
++#ifndef ANDROID
+ #ifndef VMS
  
-   /* Convert buffer from hexadecimal to floating-point.  */
-   buffer[len] = '\0';
--  value = strtold (buffer, &endptr);
-+  value = strtod (buffer, &endptr);
- 
-   if (endptr == NULL || endptr != (buffer + len))
-     return NULL;
- 
--  len = snprintf (buffer, sizeof(buffer), "%#Lg", value);
-+  len = snprintf (buffer, sizeof(buffer), "%#g", value);
-   string_appendn (decl, buffer, len);
-   return mangled;
+ #include "config.h"
+@@ -88,3 +89,4 @@
  }
+ 
+ #endif /* VMS */
++#endif /* ANDROID */
