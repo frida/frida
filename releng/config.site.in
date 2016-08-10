@@ -152,6 +152,9 @@ case "$PACKAGE_TARNAME" in
     ;;
   'libffi')
     CFLAGS="$CFLAGS -DFFI_MMAP_EXEC_WRIT=1 -DFFI_MMAP_EXEC_SELINUX=0"
+
+    enable_multi_os_directory=no
+
     enable_shared=no
     enable_static=yes
     ;;
