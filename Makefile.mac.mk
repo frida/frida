@@ -1,6 +1,7 @@
 include config.mk
 
 build_arch := $(shell releng/detect-arch.sh)
+test_args := $(addprefix -p=,$(tests))
 
 HELP_FUN = \
 	my (%help, @sections); \
@@ -128,8 +129,8 @@ build/frida-%/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-%/frida-gum/Makefile bui
 	@touch -c $@
 
 check-gum-mac: build/frida-mac-i386/lib/pkgconfig/frida-gum-1.0.pc build/frida-mac-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Run tests for Mac
-	build/tmp-mac-i386/frida-gum/tests/gum-tests -p $(tests)
-	build/tmp-mac-x86_64/frida-gum/tests/gum-tests -p $(tests)
+	build/tmp-mac-i386/frida-gum/tests/gum-tests $(test_args)
+	build/tmp-mac-x86_64/frida-gum/tests/gum-tests $(test_args)
 
 
 core-mac: build/frida-mac-i386/lib/pkgconfig/frida-core-1.0.pc build/frida-mac-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Mac
@@ -408,8 +409,8 @@ build/tmp-%/frida-core/tests/frida-tests: build/frida-%/lib/pkgconfig/frida-core
 	@touch -c $@
 
 check-core-mac: build/tmp-mac-i386/frida-core/tests/frida-tests build/tmp-mac-x86_64/frida-core/tests/frida-tests ##@core Run tests for Mac
-	build/tmp-mac-i386/frida-core/tests/frida-tests -p $(tests)
-	build/tmp-mac-x86_64/frida-core/tests/frida-tests -p $(tests)
+	build/tmp-mac-i386/frida-core/tests/frida-tests $(test_args)
+	build/tmp-mac-x86_64/frida-core/tests/frida-tests $(test_args)
 check-core-android-arm64: build/tmp_stripped-android-arm/frida-core/src/frida-helper build/tmp_stripped-android-arm64/frida-core/src/frida-helper build/tmp_stripped-android-arm/frida-core/lib/loader/.libs/libfrida-loader.so build/tmp_stripped-android-arm64/frida-core/lib/loader/.libs/libfrida-loader.so build/tmp_stripped-android-arm/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp_stripped-android-arm64/frida-core/lib/agent/.libs/libfrida-agent.so
 	. build/frida-env-android-arm64.rc \
 		&& cd build/tmp-android-arm64/frida-core \

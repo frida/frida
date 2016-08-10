@@ -18,4 +18,4 @@ NODE ?= $(shell which node)
 NODE_BIN_DIR := $(shell dirname $(NODE) 2>/dev/null)
 NPM ?= $(NODE_BIN_DIR)/npm
 
-tests ?= /
+tests ?=

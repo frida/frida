@@ -1,6 +1,7 @@
 include config.mk
 
 build_arch := $(shell releng/detect-arch.sh)
+test_args := $(addprefix -p=,$(tests))
 
 HELP_FUN = \
 	my (%help, @sections); \
@@ -129,9 +130,9 @@ build/frida-%/lib/pkgconfig/frida-gum-1.0.pc: build/tmp-%/frida-gum/Makefile bui
 	@touch -c $@
 
 check-gum-32: build/frida-linux-i386/lib/pkgconfig/frida-gum-1.0.pc build/frida-gum-submodule-stamp ##@gum Run tests for i386
-	build/tmp-linux-i386/frida-gum/tests/gum-tests -p $(tests)
+	build/tmp-linux-i386/frida-gum/tests/gum-tests $(test_args)
 check-gum-64: build/frida-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc build/frida-gum-submodule-stamp ##@gum Run tests for x86-64
-	build/tmp-linux-x86_64/frida-gum/tests/gum-tests -p $(tests)
+	build/tmp-linux-x86_64/frida-gum/tests/gum-tests $(test_args)
 
 
 core-32: build/frida-linux-i386/lib/pkgconfig/frida-core-1.0.pc ##@core Build for i386
@@ -351,9 +352,9 @@ build/tmp-%/frida-core/tests/frida-tests: build/frida-%/lib/pkgconfig/frida-core
 	@touch -c $@
 
 check-core-32: build/tmp-linux-i386/frida-core/tests/frida-tests build/frida-core-submodule-stamp ##@core Run tests for i386
-	$< -p $(tests)
+	$< $(test_args)
 check-core-64: build/tmp-linux-x86_64/frida-core/tests/frida-tests build/frida-core-submodule-stamp ##@core Run tests for x86-64
-	$< -p $(tests)
+	$< $(test_args)
 check-core-android-arm64: build/tmp_stripped-android-arm/frida-core/src/frida-helper build/tmp_stripped-android-arm64/frida-core/src/frida-helper build/tmp_stripped-android-arm/frida-core/lib/loader/.libs/libfrida-loader.so build/tmp_stripped-android-arm64/frida-core/lib/loader/.libs/libfrida-loader.so build/tmp_stripped-android-arm/frida-core/lib/agent/.libs/libfrida-agent.so build/tmp_stripped-android-arm64/frida-core/lib/agent/.libs/libfrida-agent.so
 	. build/frida-env-android-arm64.rc \
 		&& cd build/tmp-android-arm64/frida-core \
