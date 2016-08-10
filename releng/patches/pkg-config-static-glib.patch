@@ -1,0 +1,15 @@
+Binary files pkg-config-orig/.main.c.swp and pkg-config/.main.c.swp differ
+diff -Nur pkg-config-orig/main.c pkg-config/main.c
+--- pkg-config-orig/main.c	2016-08-10 20:08:03.000000000 +0200
++++ pkg-config/main.c	2016-08-10 20:08:24.000000000 +0200
+@@ -494,6 +494,10 @@
+   GError *error = NULL;
+   GOptionContext *opt_context;
+ 
++#ifdef GLIB_STATIC_COMPILATION
++  glib_init ();
++#endif
++
+   /* This is here so that we get debug spew from the start,
+    * during arg parsing
+    */

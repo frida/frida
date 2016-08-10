@@ -123,6 +123,12 @@ build/.$1-stamp:
 	$(RM) -r $1
 	mkdir -p $1
 	$(download) $2 | tar -C $1 -xz --strip-components 1
+	if [ -n "$5" ]; then \
+		cd $1; \
+		for patch in $5; do \
+			patch -p1 < ../releng/patches/$$$$patch; \
+		done; \
+	fi
 	@mkdir -p $$(@D)
 	@touch $$@
 
@@ -209,7 +215,7 @@ $(eval $(call make-git-module-rules,libffi,build/ft-%/lib/pkgconfig/libffi.pc,bu
 
 $(eval $(call make-git-module-rules,glib,build/ft-%/bin/glib-genmarshal,build/ft-%/lib/pkgconfig/libffi.pc))
 
-$(eval $(call make-tarball-module-rules,pkg-config,https://pkgconfig.freedesktop.org/releases/pkg-config-$(pkg_config_version).tar.gz,build/ft-%/bin/pkg-config,build/ft-%/bin/glib-genmarshal))
+$(eval $(call make-tarball-module-rules,pkg-config,https://pkgconfig.freedesktop.org/releases/pkg-config-$(pkg_config_version).tar.gz,build/ft-%/bin/pkg-config,build/ft-%/bin/glib-genmarshal,pkg-config-static-glib.patch))
 
 $(eval $(call make-git-module-rules,vala,build/ft-%/bin/valac,build/ft-%/bin/glib-genmarshal))
 
