@@ -117,15 +117,8 @@ fi
 
 prompt_color=33
 
-toolchain_version=20150406
-case $host_platform_arch in
-  linux-arm|linux-armhf|qnx-arm|qnx-armeabi)
-    sdk_version=20151226
-    ;;
-  *)
-    sdk_version=20160707
-    ;;
-esac
+toolchain_version=20160810
+sdk_version=20160810
 if [ $enable_asan = yes ]; then
   sdk_version="$sdk_version-asan"
 fi
