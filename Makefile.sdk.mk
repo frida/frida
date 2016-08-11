@@ -456,6 +456,7 @@ build/fs-%/lib/pkgconfig/v8.pc: build/fs-tmp-%/.v8-build-stamp
 	install -m 644 build/fs-tmp-$*/v8/out/$(v8_target)/libv8_libbase.a build/fs-$*/lib
 	install -m 644 build/fs-tmp-$*/v8/out/$(v8_target)/libv8_base.a build/fs-$*/lib
 	install -m 644 build/fs-tmp-$*/v8/out/$(v8_target)/libv8_libplatform.a build/fs-$*/lib
+	install -m 644 build/fs-tmp-$*/v8/out/$(v8_target)/libv8_libsampler.a build/fs-$*/lib
 	install -m 644 build/fs-tmp-$*/v8/out/$(v8_target)/libv8_snapshot.a build/fs-$*/lib
 	install -d $(@D)
 	echo "prefix=\$${frida_sdk_prefix}" > $@.tmp
@@ -466,7 +467,7 @@ build/fs-%/lib/pkgconfig/v8.pc: build/fs-tmp-%/.v8-build-stamp
 	echo "Name: V8" >> $@.tmp
 	echo "Description: V8 JavaScript Engine" >> $@.tmp
 	echo "Version: 5.4.401.0" >> $@.tmp
-	echo "Libs: -L\$${libdir} -lv8_base -lv8_snapshot -lv8_libplatform -lv8_libbase$(v8_libs_private)" >> $@.tmp
+	echo "Libs: -L\$${libdir} -lv8_base -lv8_snapshot -lv8_libplatform -lv8_libsampler -lv8_libbase$(v8_libs_private)" >> $@.tmp
 	echo "Cflags: -I\$${includedir} -I\$${includedir}/include" >> $@.tmp
 	mv $@.tmp $@
 
