@@ -356,7 +356,8 @@ case $host_platform in
 -Wl,--gc-sections \
 -Wl,-z,noexecstack \
 -Wl,-z,relro \
--Wl,-z,now"
+-Wl,-z,now \
+-Wl,--icf=safe"
     if [ "$FRIDA_ENV_SDK" != 'none' ]; then
       CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
       CPPFLAGS="$CPPFLAGS -I$FRIDA_SDKROOT/include"
