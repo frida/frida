@@ -332,12 +332,12 @@ ifeq ($(build_platform), mac)
 endif
 ifeq ($(host_platform), linux)
 	v8_host_flags := -f make-linux -D clang=0 -D host_clang=0 -D linux_use_bundled_binutils=0 -D linux_use_bundled_gold=0 -D linux_use_gold_flags=0
-	v8_libs_private := " -lrt"
+	v8_libs_private := "-lrt"
 endif
 ifeq ($(host_platform), android)
 	v8_flavor_prefix := android_
 	v8_host_flags := -f make-android -D android_ndk_root=$(ANDROID_NDK_ROOT) -D android_sysroot=$(ANDROID_NDK_ROOT) -D android_target_platform=$(android_target_platform) -D clang=1
-	v8_libs_private := " -lm"
+	v8_libs_private := "-llog -lm"
 endif
 ifeq ($(host_platform), mac)
 	v8_host_flags := -f make-mac -D mac_deployment_target=10.7 -D clang=1
@@ -459,7 +459,10 @@ build/fs-%/lib/pkgconfig/v8.pc: build/fs-tmp-%/.v8-build-stamp
 	echo "Name: V8" >> $@.tmp
 	echo "Description: V8 JavaScript Engine" >> $@.tmp
 	echo "Version: 5.4.401.0" >> $@.tmp
-	echo "Libs: -L\$${libdir} -lv8_base -lv8_snapshot -lv8_libplatform -lv8_libsampler -lv8_libbase$(v8_libs_private)" >> $@.tmp
+	echo "Libs: -L\$${libdir} -lv8_base -lv8_snapshot -lv8_libplatform -lv8_libsampler -lv8_libbase" >> $@.tmp
+	if [ -n "$(v8_libs_private)" ]; then \
+		echo "Libs.private: $(v8_libs_private)" >> $@.tmp; \
+	fi
 	echo "Cflags: -I\$${includedir} -I\$${includedir}/include" >> $@.tmp
 	mv $@.tmp $@
 
