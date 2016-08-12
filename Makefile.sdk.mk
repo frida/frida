@@ -402,7 +402,7 @@ ifeq ($(host_platform_arch), linux-arm)
 		CFLAGS="$$CFLAGS" \
 		LDFLAGS="$$LDFLAGS" \
 		CXXFLAGS="$$CXXFLAGS" \
-		CPPFLAGS="$$CPPFLAGs"
+		CPPFLAGS="$$CPPFLAGS"
 else
 ifeq ($(host_platform_arch), linux-armhf)
 	v8_env_vars := \
@@ -414,7 +414,7 @@ ifeq ($(host_platform_arch), linux-armhf)
 		CFLAGS="$$CFLAGS" \
 		LDFLAGS="$$LDFLAGS" \
 		CXXFLAGS="$$CXXFLAGS" \
-		CPPFLAGS="$$CPPFLAGs"
+		CPPFLAGS="$$CPPFLAGS"
 else
 	v8_env_vars := \
 		CXX_host="$$CXX" \
