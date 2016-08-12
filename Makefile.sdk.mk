@@ -7,7 +7,7 @@ repo_suffix := ".git"
 
 zlib_version := 1.2.8
 libiconv_version := 1.14
-binutils_version := 2.27
+binutils_version := 2.25
 
 
 build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,mac,')

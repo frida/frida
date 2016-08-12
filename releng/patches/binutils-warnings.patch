@@ -1,7 +1,18 @@
-diff -Nur binutils-2.27-orig/libiberty/choose-temp.c binutils-2.27/libiberty/choose-temp.c
---- binutils-2.27-orig/libiberty/choose-temp.c	2015-11-13 09:27:42.000000000 +0100
-+++ binutils-2.27/libiberty/choose-temp.c	2016-08-10 19:12:22.000000000 +0200
-@@ -62,13 +62,16 @@
+diff -Nur binutils-2.25-old/bfd/elf64-x86-64.c binutils-2.25/bfd/elf64-x86-64.c
+--- binutils-2.25-old/bfd/elf64-x86-64.c	2014-12-23 09:47:10.000000000 +0100
++++ binutils-2.25/bfd/elf64-x86-64.c	2015-12-26 20:54:40.000000000 +0100
+@@ -5400,7 +5400,7 @@
+   if (plt_sym_val == NULL)
+     goto bad_return;
+ 
+-  for (i = 0; i < count; i++, p++)
++  for (i = 0; i < count; i++)
+     plt_sym_val[i] = -1;
+ 
+   plt_offset = bed->plt_entry_size;
+--- binutils/libiberty/choose-temp.c-orig	2015-03-29 13:14:41.512000000 +0200
++++ binutils/libiberty/choose-temp.c	2015-03-29 13:14:46.812000000 +0200
+@@ -63,13 +63,16 @@
    const char *base = choose_tmpdir ();
    char *temp_filename;
    int len;
