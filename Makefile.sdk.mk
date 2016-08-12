@@ -327,6 +327,9 @@ ifeq ($(host_arch), arm64)
 	android_target_platform := 21
 endif
 
+ifeq ($(build_platform), mac)
+	v8_build_flags := -D clang_xcode=1
+endif
 ifeq ($(host_platform), linux)
 	v8_host_flags := -f make-linux -D clang=0 -D host_clang=0 -D linux_use_bundled_binutils=0 -D linux_use_bundled_gold=0 -D linux_use_gold_flags=0
 	v8_libs_private := " -lrt"
@@ -346,7 +349,7 @@ endif
 ifeq ($(host_platform), ios)
 	v8_host_flags := -f make-mac -D mac_deployment_target=10.7 -D ios_deployment_target=7.0 -D clang=1
 endif
-v8_flags := -D host_os=$(build_platform) -D werror='' -D v8_use_external_startup_data=0 -D v8_enable_gdbjit=0 -D v8_enable_i18n_support=0 $(v8_host_flags) $(v8_abi_flags)
+v8_flags := -D host_os=$(build_platform) -D werror='' -D v8_use_external_startup_data=0 -D v8_enable_gdbjit=0 -D v8_enable_i18n_support=0 $(v8_host_flags) $(v8_build_flags) $(v8_abi_flags)
 
 v8_target := $(v8_flavor_prefix)$(v8_arch).release
 
