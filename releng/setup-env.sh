@@ -173,7 +173,7 @@ case $host_platform in
     esac
     CPP="${host_toolprefix}cpp"
     CC="${host_toolprefix}gcc -static-libgcc"
-    CXX="$FRIDA_ROOT/releng/linux-g++-wrapper.sh ${host_toolprefix}g++ -static-libgcc -static-libstdc++"
+    CXX="$FRIDA_ROOT/releng/cxx-wrapper-linux.sh ${host_toolprefix}g++ -static-libgcc -static-libstdc++"
     LD="${host_toolprefix}ld"
 
     AR="${host_toolprefix}ar"
@@ -272,6 +272,7 @@ case $host_platform in
   android)
     android_build_platform=$(echo ${build_platform} | sed 's,^mac$,darwin,')
     android_host_arch=$(echo ${host_arch} | sed 's,^i386$,x86,')
+    android_have_unwind=no
     case $android_host_arch in
       x86)
         android_target_platform=14
@@ -299,6 +300,7 @@ case $host_platform in
         android_host_toolprefix=arm-linux-androideabi-
         android_host_cflags="-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16"
         android_host_ldflags="-fuse-ld=gold -Wl,--fix-cortex-a8"
+        android_have_unwind=yes
         ;;
       arm64)
         android_target_platform=21
@@ -319,9 +321,16 @@ case $host_platform in
 --target=$android_host_target \
 -no-canonical-prefixes"
 
+    cxx_wrapper="$FRIDA_BUILD/cxx-wrapper-android.sh"
+    sed \
+      -e "s,@libdir@,$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/libs/$android_host_abi,g" \
+      -e "s,@have_unwind_library@,$android_have_unwind,g" \
+      "$releng_path/cxx-wrapper-android.sh.in" > "$cxx_wrapper"
+    chmod +x "$cxx_wrapper"
+
     CPP="$android_gcc_toolchain/bin/${android_host_toolprefix}cpp --sysroot=$android_sysroot"
     CC="$android_clang_prefix/bin/clang $toolflags"
-    CXX="$android_clang_prefix/bin/clang++ $toolflags"
+    CXX="$cxx_wrapper $android_clang_prefix/bin/clang++ $toolflags"
     LD="$android_gcc_toolchain/bin/${android_host_toolprefix}ld --sysroot=$android_sysroot"
 
     AR="$android_gcc_toolchain/bin/${android_host_toolprefix}ar"
@@ -347,10 +356,7 @@ case $host_platform in
 -Wl,--gc-sections \
 -Wl,-z,noexecstack \
 -Wl,-z,relro \
--Wl,-z,now \
--L$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/libs/$android_host_abi \
--lm \
--lc++_static"
+-Wl,-z,now"
     if [ "$FRIDA_ENV_SDK" != 'none' ]; then
       CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
       CPPFLAGS="$CPPFLAGS -I$FRIDA_SDKROOT/include"
@@ -386,8 +392,8 @@ case $host_platform in
     PATH="$qnx_toolchain_dir:$PATH"
 
     CPP="$qnx_toolchain_prefix-cpp -march=$qnx_march -mno-unaligned-access --sysroot=$qnx_sysroot $qnx_preprocessor_flags"
-    CC="$FRIDA_ROOT/releng/qnx-g++-wrapper.sh $qnx_toolchain_prefix-gcc -march=$qnx_march -mno-unaligned-access --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc"
-    CXX="$FRIDA_ROOT/releng/qnx-g++-wrapper.sh $qnx_toolchain_prefix-g++ -march=$qnx_march -mno-unaligned-access --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc -static-libstdc++ -std=c++11"
+    CC="$FRIDA_ROOT/releng/cxx-wrapper-qnx.sh $qnx_toolchain_prefix-gcc -march=$qnx_march -mno-unaligned-access --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc"
+    CXX="$FRIDA_ROOT/releng/cxx-wrapper-qnx.sh $qnx_toolchain_prefix-g++ -march=$qnx_march -mno-unaligned-access --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc -static-libstdc++ -std=c++11"
     LD="$qnx_toolchain_prefix-ld --sysroot=$qnx_sysroot"
 
     AR="$qnx_toolchain_prefix-ar"

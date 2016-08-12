@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# This wrapper script is necessary in order to hide the gory details of how
+# to link against libc++ with the Android NDK.
+
+libdir=@libdir@
+have_unwind_library=@have_unwind_library@
+
+cxx_library=$libdir/libc++_static.a
+abi_library=$libdir/libc++abi.a
+support_library=$libdir/libandroid_support.a
+unwind_library=$libdir/libunwind.a
+
+original_argv=("$@")
+
+function have_argument {
+  local needle=$1
+  shift
+
+  for arg in "${original_argv[@]}"; do
+    if [[ $arg == $needle ]]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+argv=("$@")
+if ! have_argument "-c"; then
+  argv+=("$cxx_library" "$abi_library" "$support_library")
+  if [[ $have_unwind_library == yes ]]; then
+    argv+=("$unwind_library")
+  fi
+fi
+exec "${argv[@]}"
