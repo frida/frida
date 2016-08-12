@@ -334,10 +334,6 @@ ifeq ($(host_platform), linux)
 	v8_host_flags := -f make-linux -D clang=0 -D host_clang=0 -D linux_use_bundled_binutils=0 -D linux_use_bundled_gold=0 -D linux_use_gold_flags=0
 	v8_libs_private := " -lrt"
 endif
-ifeq ($(host_platform), qnx)
-	v8_host_flags := -f make-qnx -D clang=0 -D host_clang=0
-	v8_libs_private := " -lbacktrace"
-endif
 ifeq ($(host_platform), android)
 	v8_flavor_prefix := android_
 	v8_host_flags := -f make-android -D android_ndk_root=$(ANDROID_NDK_ROOT) -D android_sysroot=$(ANDROID_NDK_ROOT) -D android_target_platform=$(android_target_platform) -D clang=1
@@ -388,12 +384,6 @@ ifeq ($(host_platform), android)
 		LDFLAGS=""
 endif
 else
-ifeq ($(host_platform), qnx)
-	v8_env_vars := \
-		CXX_host="g++ -std=c++11" \
-		CXX_target="$$CXX" \
-		LINK="$$CXX"
-else
 ifeq ($(build_platform), linux)
 ifeq ($(host_platform_arch), linux-arm)
 	v8_env_vars := \
@@ -423,7 +413,6 @@ else
 		CXX_host="$$CXX" \
 		CXX_target="$$CXX" \
 		LINK="$$CXX"
-endif
 endif
 endif
 endif
