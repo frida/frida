@@ -299,7 +299,7 @@ case $host_platform in
         android_host_toolchain=arm-linux-androideabi-4.9
         android_host_toolprefix=arm-linux-androideabi-
         android_host_cflags="-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16"
-        android_host_ldflags="-fuse-ld=gold -Wl,--fix-cortex-a8"
+        android_host_ldflags="-fuse-ld=gold -Wl,--fix-cortex-a8 -Wl,--icf=safe"
         android_have_unwind=yes
         ;;
       arm64)
@@ -357,7 +357,6 @@ case $host_platform in
 -Wl,-z,noexecstack \
 -Wl,-z,relro \
 -Wl,-z,now \
--Wl,--icf=safe \
 -lgcc"
     if [ "$FRIDA_ENV_SDK" != 'none' ]; then
       CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
