@@ -11,32 +11,20 @@ abi_library=$libdir/libc++abi.a
 unwind_library=$libdir/libunwind.a
 support_library=$libdir/libandroid_support.a
 
-original_argv=("$@")
-
-function have_argument {
-  local needle=$1
-  shift
-
-  for arg in "${original_argv[@]}"; do
-    if [[ $arg == $needle ]]; then
-      return 0
+argv=()
+for arg in "$@"; do
+  if [[ $arg == "-lgcc" ]]; then
+    argv+=("$cxx_library" "$abi_library")
+    if [[ $have_unwind_library == yes ]]; then
+      argv+=("$unwind_library")
     fi
-  done
+    argv+=("$support_library")
 
-  return 1
-}
-
-argv=("$@")
-if ! have_argument "-c"; then
-  argv+=("$cxx_library" "$abi_library")
-  if [[ $have_unwind_library == yes ]]; then
-    argv+=("$unwind_library")
+    if [[ $have_unwind_library == yes ]]; then
+      argv+=("-Wl,--exclude-libs,$unwind_library")
+    fi
   fi
-  argv+=("$support_library")
-
-  if [[ $have_unwind_library == yes ]]; then
-    argv+=("-Wl,--exclude-libs,$unwind_library")
-  fi
-fi
+  argv+=("$arg")
+done
 
 exec "${argv[@]}"
