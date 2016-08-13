@@ -8,8 +8,8 @@ have_unwind_library=@have_unwind_library@
 
 cxx_library=$libdir/libc++_static.a
 abi_library=$libdir/libc++abi.a
-support_library=$libdir/libandroid_support.a
 unwind_library=$libdir/libunwind.a
+support_library=$libdir/libandroid_support.a
 
 original_argv=("$@")
 
@@ -28,9 +28,14 @@ function have_argument {
 
 argv=("$@")
 if ! have_argument "-c"; then
-  argv+=("$cxx_library" "$abi_library" "$support_library")
+  argv+=("$cxx_library" "$abi_library")
   if [[ $have_unwind_library == yes ]]; then
     argv+=("$unwind_library")
   fi
+  argv+=("$support_library")
 fi
+if [[ $have_unwind_library == yes ]]; then
+  argv+=("-Wl,--exclude-libs,$unwind_library")
+fi
+
 exec "${argv[@]}"
