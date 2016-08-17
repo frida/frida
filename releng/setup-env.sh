@@ -575,6 +575,7 @@ case $host_platform in
       echo "export LIPO=\"$LIPO\""
       echo "export OBJC=\"$OBJC\""
       echo "export OBJCFLAGS=\"$CFLAGS\""
+      echo "export OBJCXXFLAGS=\"$CXXFLAGS\""
       echo "export MACOSX_DEPLOYMENT_TARGET=10.7"
     ) >> $env_rc
     ;;
