@@ -322,6 +322,7 @@ case $host_platform in
 -no-canonical-prefixes"
 
     cxx_wrapper="$FRIDA_BUILD/cxx-wrapper-${host_platform_arch}.sh"
+    mkdir -p "$FRIDA_BUILD"
     sed \
       -e "s,@libdir@,$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/libs/$android_host_abi,g" \
       -e "s,@have_unwind_library@,$android_have_unwind,g" \
