@@ -341,6 +341,7 @@ case $host_platform in
     OBJDUMP="$android_gcc_toolchain/bin/${android_host_toolprefix}objdump"
 
     CFLAGS="$android_host_cflags \
+-fPIE \
 -ffunction-sections -funwind-tables -fno-exceptions -fno-rtti \
 -DANDROID \
 -I$android_sysroot/usr/include"
@@ -352,6 +353,7 @@ case $host_platform in
     CPPFLAGS="-DANDROID \
 -I$android_sysroot/usr/include"
     LDFLAGS="$android_host_ldflags \
+-fPIE -pie \
 -Wl,--no-undefined \
 -Wl,--gc-sections \
 -Wl,-z,noexecstack \
