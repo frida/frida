@@ -48,7 +48,7 @@ def generate_devkit(kit, host, output_dir):
 
 def generate_header(package, frida_root, env_rc, umbrella_header_path):
     header_dependencies = subprocess.check_output(
-        ["(. \"{rc}\" && $CPP -M $($PKG_CONFIG --cflags {package}) \"{header}\")".format(rc=env_rc, package=package, header=umbrella_header_path)],
+        ["(. \"{rc}\" && $CPP $CFLAGS -M $($PKG_CONFIG --cflags {package}) \"{header}\")".format(rc=env_rc, package=package, header=umbrella_header_path)],
         shell=True).decode('utf-8')
     header_lines = header_dependencies.strip().split("\n")[1:]
     header_files = [line.rstrip("\\").strip() for line in header_lines]
