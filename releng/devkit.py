@@ -55,8 +55,9 @@ def generate_header(package, frida_root, env_rc, umbrella_header_path):
     header_files = [header_file for header_file in header_files if header_file.startswith(frida_root)]
 
     devkit_header_lines = []
-    processed_header_files = set()
-    ingest_header(header_files[0], header_files[1:], processed_header_files, devkit_header_lines)
+    umbrella_header = header_files[0]
+    processed_header_files = set([umbrella_header])
+    ingest_header(umbrella_header, header_files, processed_header_files, devkit_header_lines)
     return "".join(devkit_header_lines)
 
 def ingest_header(header, all_header_files, processed_header_files, result):
