@@ -205,11 +205,13 @@ case $host_platform in
     mac_sdk="macosx"
     mac_sdk_path="$(xcrun --sdk $mac_sdk --show-sdk-path)"
 
+    lto="-flto=thin"
+
     CPP="$(xcrun --sdk $mac_sdk -f clang) -E"
-    CC="$(xcrun --sdk $mac_sdk -f clang)"
-    CXX="$(xcrun --sdk $mac_sdk -f clang++)"
-    OBJC="$(xcrun --sdk $mac_sdk -f clang)"
-    LD="$(xcrun --sdk $mac_sdk -f ld)"
+    CC="$(xcrun --sdk $mac_sdk -f clang) $lto"
+    CXX="$(xcrun --sdk $mac_sdk -f clang++) $lto"
+    OBJC="$(xcrun --sdk $mac_sdk -f clang) $lto"
+    LD="$(xcrun --sdk $mac_sdk -f ld) $lto"
 
     AR="$(xcrun --sdk $mac_sdk -f ar)"
     NM="$(xcrun --sdk $mac_sdk -f nm)"
@@ -239,11 +241,13 @@ case $host_platform in
     esac
     ios_sdk_path="$(xcrun --sdk $ios_sdk --show-sdk-path)"
 
+    lto="-flto=thin"
+
     CPP="$(xcrun --sdk $ios_sdk -f clang) -E"
-    CC="$(xcrun --sdk $ios_sdk -f clang)"
-    CXX="$(xcrun --sdk $ios_sdk -f clang++)"
-    OBJC="$(xcrun --sdk $ios_sdk -f clang)"
-    LD="$(xcrun --sdk $ios_sdk -f ld)"
+    CC="$(xcrun --sdk $ios_sdk -f clang) $lto"
+    CXX="$(xcrun --sdk $ios_sdk -f clang++) $lto"
+    OBJC="$(xcrun --sdk $ios_sdk -f clang) $lto"
+    LD="$(xcrun --sdk $ios_sdk -f ld) $lto"
 
     AR="$(xcrun --sdk $ios_sdk -f ar)"
     NM="$(xcrun --sdk $ios_sdk -f nm)"
