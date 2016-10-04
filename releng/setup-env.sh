@@ -200,7 +200,7 @@ case $host_platform in
     fi
     ;;
   mac)
-    mac_minver="10.7"
+    mac_minver="10.9"
 
     mac_sdk="macosx"
     mac_sdk_path="$(xcrun --sdk $mac_sdk --show-sdk-path)"
@@ -576,7 +576,7 @@ case $host_platform in
       echo "export OBJC=\"$OBJC\""
       echo "export OBJCFLAGS=\"$CFLAGS\""
       echo "export OBJCXXFLAGS=\"$CXXFLAGS\""
-      echo "export MACOSX_DEPLOYMENT_TARGET=10.7"
+      echo "export MACOSX_DEPLOYMENT_TARGET=10.9"
     ) >> $env_rc
     ;;
 esac

@@ -340,10 +340,10 @@ ifeq ($(host_platform), android)
 	v8_libs_private := "-llog -lm"
 endif
 ifeq ($(host_platform), mac)
-	v8_host_flags := -f make-mac -D mac_deployment_target=10.7 -D clang=1
+	v8_host_flags := -f make-mac -D mac_deployment_target=10.9 -D clang=1
 endif
 ifeq ($(host_platform), ios)
-	v8_host_flags := -f make-mac -D mac_deployment_target=10.7 -D ios_deployment_target=7.0 -D clang=1
+	v8_host_flags := -f make-mac -D mac_deployment_target=10.9 -D ios_deployment_target=7.0 -D clang=1
 endif
 v8_flags := -D host_os=$(build_platform) -D werror='' -D v8_use_external_startup_data=0 -D v8_enable_gdbjit=0 -D v8_enable_i18n_support=0 $(v8_host_flags) $(v8_build_flags) $(v8_abi_flags)
 
