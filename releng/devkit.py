@@ -389,7 +389,7 @@ on_message (GumScript * script,
 #include <stdlib.h>
 #include <string.h>
 
-static void on_message (FridaScript * script, const gchar * message, const gchar * data, gint data_size, gpointer user_data);
+static void on_message (FridaScript * script, const gchar * message, GBytes * data, gpointer user_data);
 static void on_signal (int signo);
 static gboolean stop (gpointer user_data);
 
@@ -504,8 +504,7 @@ main (int argc,
 static void
 on_message (FridaScript * script,
             const gchar * message,
-            const gchar * data,
-            gint data_size,
+            GBytes * data,
             gpointer user_data)
 {
   JsonParser * parser;
