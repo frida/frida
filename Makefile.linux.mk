@@ -415,15 +415,15 @@ gadget-32: build/frida_stripped-linux-i386/lib/frida-gadget.so ##@gadget Build f
 gadget-64: build/frida_stripped-linux-x86_64/lib/frida-gadget.so ##@gadget Build for x86-64
 	mkdir -p $(BINDIST)/lib
 	cp -f $< $(BINDIST)/lib/frida-gadget-64.so
-gadget-mipsel: build/frida_stripped-linux-mipsel/lib/frida-gadget.so ##@gadget Build for mipsel
-	mkdir -p $(BINDIST)/lib
-	cp -f $< $(BINDIST)/lib/frida-gadget-mipsel.so
 gadget-arm: build/frida_stripped-linux-arm/lib/frida-gadget.so ##@gadget Build for linux-arm
 	mkdir -p $(BINDIST)/lib
 	cp -f $< $(BINDIST)/lib/frida-gadget-arm.so
 gadget-armhf: build/frida_stripped-linux-armhf/lib/frida-gadget.so ##@gadget Build for linux-armhf
 	mkdir -p $(BINDIST)/lib
 	cp -f $< $(BINDIST)/lib/frida-gadget-armhf.so
+gadget-mipsel: build/frida_stripped-linux-mipsel/lib/frida-gadget.so ##@gadget Build for mipsel
+	mkdir -p $(BINDIST)/lib
+	cp -f $< $(BINDIST)/lib/frida-gadget-mipsel.so
 
 build/frida_stripped-%/bin/frida-server: build/frida-%/bin/frida-server
 	mkdir -p $(@D)
