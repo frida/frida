@@ -285,8 +285,8 @@ if __name__ == '__main__':
             upload_file("frida-server-{version}-linux-arm", os.path.join(build_dir, "build", "frida_stripped-linux-arm", "bin", "frida-server"), upload)
             upload_file("frida-server-{version}-linux-armhf", os.path.join(build_dir, "build", "frida_stripped-linux-armhf", "bin", "frida-server"), upload)
 
-            upload_file("frida-gadget-{version}-linux-arm.so", os.path.join(build_dir, "build", "frida-linux-arm", "lib", "frida-gadget.so"), upload)
-            upload_file("frida-gadget-{version}-linux-armhf.so", os.path.join(build_dir, "build", "frida-linux-armhf", "lib", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-linux-arm.so", os.path.join(build_dir, "build", "frida_stripped-linux-arm", "lib", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-linux-armhf.so", os.path.join(build_dir, "build", "frida_stripped-linux-armhf", "lib", "frida-gadget.so"), upload)
         elif slave == 'mips':
             upload = get_github_uploader()
 
@@ -294,4 +294,4 @@ if __name__ == '__main__':
 
             upload_file("frida-server-{version}-linux-mipsel", os.path.join(build_dir, "build", "frida_stripped-linux-mipsel", "bin", "frida-server"), upload)
 
-            upload_file("frida-gadget-{version}-linux-mipsel.so", os.path.join(build_dir, "build", "frida-linux-mipsel", "lib", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-linux-mipsel.so", os.path.join(build_dir, "build", "frida_stripped-linux-mipsel", "lib", "frida-gadget.so"), upload)
