@@ -424,6 +424,12 @@ gadget-armhf: build/frida_stripped-linux-armhf/lib/frida-gadget.so ##@gadget Bui
 gadget-mipsel: build/frida_stripped-linux-mipsel/lib/frida-gadget.so ##@gadget Build for mipsel
 	mkdir -p $(BINDIST)/lib
 	cp -f $< $(BINDIST)/lib/frida-gadget-mipsel.so
+gadget-qnx-arm: build/frida_stripped-qnx-arm/lib/frida-gadget.so ##@gadget Build for qnx-arm
+	mkdir -p $(BINDIST)/lib
+	cp -f $< $(BINDIST)/lib/frida-gadget-qnx-arm.so
+gadget-qnx-armeabi: build/frida_stripped-qnx-armeabi/lib/frida-gadget.so ##@gadget Build for qnx-armeabi
+	mkdir -p $(BINDIST)/lib
+	cp -f $< $(BINDIST)/lib/frida-gadget-qnx-armeabi.so
 
 build/frida_stripped-%/bin/frida-server: build/frida-%/bin/frida-server
 	mkdir -p $(@D)
