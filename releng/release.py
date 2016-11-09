@@ -295,3 +295,14 @@ if __name__ == '__main__':
             upload_file("frida-server-{version}-linux-mipsel", os.path.join(build_dir, "build", "frida_stripped-linux-mipsel", "bin", "frida-server"), upload)
 
             upload_file("frida-gadget-{version}-linux-mipsel.so", os.path.join(build_dir, "build", "frida_stripped-linux-mipsel", "lib", "frida-gadget.so"), upload)
+        elif slave == 'qnx-arm':
+            upload = get_github_uploader()
+
+            upload_devkits("qnx-arm", upload)
+            upload_devkits("qnx-armeabi", upload)
+
+            upload_file("frida-server-{version}-qnx-arm", os.path.join(build_dir, "build", "frida_stripped-qnx-arm", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-qnx-armeabi", os.path.join(build_dir, "build", "frida_stripped-qnx-armeabi", "bin", "frida-server"), upload)
+
+            upload_file("frida-gadget-{version}-qnx-arm.so", os.path.join(build_dir, "build", "frida_stripped-qnx-arm", "lib", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-qnx-armeabi.so", os.path.join(build_dir, "build", "frida_stripped-qnx-armeabi", "lib", "frida-gadget.so"), upload)
