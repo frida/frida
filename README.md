@@ -1,7 +1,8 @@
 Inject JavaScript to explore native apps on Windows, Mac, Linux, iOS, Android, and QNX.
+Two ways to install—
 ===
 
-## Installing from prebuilt binaries
+## 1. Install from prebuilt binaries
 
 This is the recommended way to get started. All you need to do is:
 
@@ -11,7 +12,7 @@ This is the recommended way to get started. All you need to do is:
 You may also download pre-built binaries for various operating systems from
 [http://build.frida.re/frida/](http://build.frida.re/frida/).
 
-## Building
+## 2. Build your own binary
 
 ### Dependencies
 
