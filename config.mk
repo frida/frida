@@ -7,7 +7,7 @@ FRIDA_OPTIMIZATION_FLAGS ?= -Os
 FRIDA_DEBUG_FLAGS ?= -g3
 FRIDA_STRIP ?= yes
 FRIDA_DIET ?= auto
-FRIDA_MAPPER ?= no
+FRIDA_MAPPER ?= auto
 FRIDA_ASAN ?= no
 
 PYTHON ?= $(shell which python)
