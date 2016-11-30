@@ -35,9 +35,7 @@ def generate_devkit(kit, host, output_dir):
         f.write(header)
 
     library_filename = compute_library_filename(kit)
-    (library, extra_ldflags) = generate_library(package, frida_root, host)
-    with open(os.path.join(output_dir, library_filename), "wb") as f:
-        f.write(library)
+    extra_ldflags = generate_library(package, frida_root, host, output_dir, library_filename)
 
     example_filename = kit + "-example.c"
     example = generate_example(example_filename, package, frida_root, host, kit, extra_ldflags)
@@ -128,13 +126,13 @@ def ingest_header(header, all_header_files, processed_header_files, result):
             else:
                 result.append(line)
 
-def generate_library(package, frida_root, host):
+def generate_library(package, frida_root, host, output_dir, library_filename):
     if platform.system() == 'Windows':
-        return generate_library_windows(package, frida_root, host)
+        return generate_library_windows(package, frida_root, host, output_dir, library_filename)
     else:
-        return generate_library_unix(package, frida_root, host)
+        return generate_library_unix(package, frida_root, host, output_dir, library_filename)
 
-def generate_library_windows(package, frida_root, host):
+def generate_library_windows(package, frida_root, host, output_dir, library_filename):
     glib = [
         sdk_lib_path("glib-2.0.lib", frida_root, host),
         sdk_lib_path("intl.lib", frida_root, host),
@@ -186,50 +184,22 @@ def generate_library_windows(package, frida_root, host):
     else:
         raise Exception("Unhandled package")
 
-    combined_dir = tempfile.mkdtemp(prefix="devkit")
-    object_names = set()
-
-    for lib_path in [package_lib_path] + package_lib_deps:
-        archive_filenames = subprocess.check_output(
-            [msvs_lib_exe(host), "/nologo", "/list", lib_path],
-            cwd=msvs_runtime_path(host),
-            shell=False).decode('utf-8').replace("\r", "").rstrip().split("\n")
-
-        original_object_names = [name for name in archive_filenames if name.endswith(".obj")]
-
-        for original_object_name in original_object_names:
-            object_name = os.path.basename(original_object_name)
-            while object_name in object_names:
-                object_name = "_" + object_name
-            object_names.add(object_name)
-
-            object_path = os.path.join(combined_dir, object_name)
-
-            subprocess.check_output(
-                [msvs_lib_exe(host), "/nologo", "/extract:" + original_object_name, "/out:" + object_path, lib_path],
-                cwd=msvs_runtime_path(host),
-                shell=False).decode('utf-8')
-
-    library_path = os.path.join(combined_dir, "library.lib")
-
-    env = os.environ.copy()
-    env["PATH"] = msvs_runtime_path(host) + ";" + env["PATH"]
+    input_libs = [package_lib_path] + package_lib_deps
+    input_pdbs = [os.path.splitext(input_lib)[0] + ".pdb" for input_lib in input_libs]
 
     subprocess.check_output(
-        [msvs_lib_exe(host), "/nologo", "/out:library.lib", "*.obj"],
-        cwd=combined_dir,
-        env=env,
+        [msvs_lib_exe(host), "/nologo", "/out:" + os.path.join(output_dir, library_filename)] + input_libs,
+        cwd=msvs_runtime_path(host),
         shell=False)
 
-    with open(library_path, "rb") as f:
-        data = f.read()
-    extra_flags = []
+    for pdb in input_pdbs:
+        shutil.copy(pdb, output_dir)
 
-    shutil.rmtree(combined_dir)
+    extra_flags = [os.path.basename(lib_path) for lib_path in input_libs]
 
-    return (data, extra_flags)
+    return extra_flags
 
-def generate_library_unix(package, frida_root, host):
+def generate_library_unix(package, frida_root, host, output_dir, library_filename):
     rc = env_rc(frida_root, host)
 
     library_flags = subprocess.check_output(
@@ -259,20 +229,17 @@ def generate_library_unix(package, frida_root, host):
 
         shutil.rmtree(scratch_dir)
 
-    library_path = os.path.join(combined_dir, "library.a")
     subprocess.check_output(
         ["(. \"{rc}\" && $AR rcs {library_path} {object_files} 2>/dev/null)".format(
             rc=rc,
-            library_path=library_path,
+            library_path=os.path.join(output_dir, library_filename),
             object_files=" ".join([pipes.quote(object_name) for object_name in object_names]))],
         shell=True,
         cwd=combined_dir)
-    with open(library_path, "rb") as f:
-        data = f.read()
 
     shutil.rmtree(combined_dir)
 
-    return (data, extra_flags)
+    return extra_flags
 
 def infer_library_dirs(flags):
     return [flag[2:] for flag in flags if flag.startswith("-L")]
