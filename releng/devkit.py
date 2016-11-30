@@ -5,6 +5,7 @@ from collections import OrderedDict
 from glob import glob
 import os
 import pipes
+import platform
 import re
 import shutil
 import subprocess
@@ -24,35 +25,73 @@ def generate_devkit(kit, host, output_dir):
 
     frida_root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
-    env_rc = os.path.join(frida_root, "build", "frida-env-{}.rc".format(host))
-    umbrella_header_path = os.path.join(frida_root, "build", "frida-" + host, "include", *umbrella_header)
+    umbrella_header_path = compute_umbrella_header_path(frida_root, host, package, umbrella_header)
 
     header_filename = kit + ".h"
     if not os.path.exists(umbrella_header_path):
         raise Exception("Header not found: {}".format(umbrella_header_path))
-    header = generate_header(package, frida_root, env_rc, umbrella_header_path)
+    header = generate_header(package, frida_root, host, umbrella_header_path)
     with open(os.path.join(output_dir, header_filename), "w") as f:
         f.write(header)
 
-    library_filename = "lib{}.a".format(kit)
-    (library, extra_ldflags) = generate_library(package, env_rc)
+    library_filename = compute_library_filename(kit)
+    (library, extra_ldflags) = generate_library(package, frida_root, host)
     with open(os.path.join(output_dir, library_filename), "wb") as f:
         f.write(library)
 
     example_filename = kit + "-example.c"
-    example = generate_example(example_filename, package, env_rc, kit, extra_ldflags)
+    example = generate_example(example_filename, package, frida_root, host, kit, extra_ldflags)
     with open(os.path.join(output_dir, example_filename), "w") as f:
         f.write(example)
 
     return [header_filename, library_filename, example_filename]
 
-def generate_header(package, frida_root, env_rc, umbrella_header_path):
-    header_dependencies = subprocess.check_output(
-        ["(. \"{rc}\" && $CPP $CFLAGS -M $($PKG_CONFIG --cflags {package}) \"{header}\")".format(rc=env_rc, package=package, header=umbrella_header_path)],
-        shell=True).decode('utf-8')
-    header_lines = header_dependencies.strip().split("\n")[1:]
-    header_files = [line.rstrip("\\").strip() for line in header_lines]
-    header_files = [header_file for header_file in header_files if header_file.startswith(frida_root)]
+def generate_header(package, frida_root, host, umbrella_header_path):
+    if platform.system() == 'Windows':
+        include_dirs = [
+            r"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\INCLUDE",
+            r"C:\Program Files (x86)\Windows Kits\10\Include\10.0.14393.0\ucrt",
+            os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "lib", "glib-2.0", "include"),
+            os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "include", "glib-2.0"),
+            os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "include", "glib-2.0"),
+            os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "include", "json-glib-1.0"),
+            os.path.join(frida_root, "frida-gum"),
+            os.path.join(frida_root, "frida-gum", "bindings")
+        ]
+        includes = ["/I" + include_dir for include_dir in include_dirs]
+
+        preprocessor = subprocess.Popen(
+            [msvs_cl_exe(host), "/nologo", "/E", umbrella_header_path] + includes,
+            cwd=msvs_runtime_path(host),
+            shell=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        stdout, stderr = preprocessor.communicate()
+        if preprocessor.returncode != 0:
+            raise Exception("Failed to spawn preprocessor: " + stderr.decode('utf-8'))
+        lines = stdout.decode('utf-8').split('\n')
+
+        mapping_prefix = "#line "
+        header_refs = [line[line.index("\"") + 1:line.rindex("\"")].replace("\\\\", "/") for line in lines if line.startswith(mapping_prefix)]
+
+        header_files = []
+        headers_seen = set()
+        for ref in header_refs:
+            if ref in headers_seen:
+                continue
+            header_files.append(ref)
+            headers_seen.add(ref)
+
+        frida_root_slashed = frida_root.replace("\\", "/")
+        header_files = [header_file for header_file in header_files if header_file.startswith(frida_root_slashed)]
+    else:
+        rc = env_rc(frida_root, host)
+        header_dependencies = subprocess.check_output(
+            ["(. \"{rc}\" && $CPP $CFLAGS -M $($PKG_CONFIG --cflags {package}) \"{header}\")".format(rc=rc, package=package, header=umbrella_header_path)],
+            shell=True).decode('utf-8')
+        header_lines = header_dependencies.strip().split("\n")[1:]
+        header_files = [line.rstrip("\\").strip() for line in header_lines]
+        header_files = [header_file for header_file in header_files if header_file.startswith(frida_root)]
 
     devkit_header_lines = []
     umbrella_header = header_files[0]
@@ -79,9 +118,110 @@ def ingest_header(header, all_header_files, processed_header_files, result):
             else:
                 result.append(line)
 
-def generate_library(package, env_rc):
+def generate_library(package, frida_root, host):
+    if platform.system() == 'Windows':
+        return generate_library_windows(package, frida_root, host)
+    else:
+        return generate_library_unix(package, frida_root, host)
+
+def generate_library_windows(package, frida_root, host):
+    glib = [
+        sdk_lib_path("glib-2.0.lib", frida_root, host),
+    ]
+    gobject = [
+        sdk_lib_path("gobject-2.0.lib", frida_root, host),
+        sdk_lib_path("ffi.lib", frida_root, host),
+    ]
+    gio = [
+        sdk_lib_path("gio-2.0.lib", frida_root, host),
+    ]
+    gmodule = [
+        sdk_lib_path("gmodule-2.0.lib", frida_root, host),
+    ]
+
+    json_glib = [
+        sdk_lib_path("json-glib-1.0.lib", frida_root, host),
+    ]
+
+    gee = [
+        sdk_lib_path("gee-0.8.lib", frida_root, host),
+    ]
+
+    v8 = [
+        sdk_lib_path("v8_base_0.lib", frida_root, host),
+        sdk_lib_path("v8_base_1.lib", frida_root, host),
+        sdk_lib_path("v8_base_2.lib", frida_root, host),
+        sdk_lib_path("v8_base_3.lib", frida_root, host),
+        sdk_lib_path("v8_libbase.lib", frida_root, host),
+        sdk_lib_path("v8_libplatform.lib", frida_root, host),
+        sdk_lib_path("v8_libsampler.lib", frida_root, host),
+        sdk_lib_path("v8_snapshot.lib", frida_root, host),
+    ]
+
+    gum_deps = glib + gobject + gio
+    gumjs_deps = gum_deps + json_glib + v8
+    frida_core_deps = glib + gobject + gio + json_glib + gmodule + gee
+
+    if package == "frida-gum-1.0":
+        package_lib_path = internal_arch_lib_path("gum", frida_root, host)
+        package_lib_deps = gum_deps
+    elif package == "frida-gumjs-1.0":
+        package_lib_path = internal_arch_lib_path("gumjs", frida_root, host)
+        package_lib_deps = gumjs_deps
+    elif package == "frida-core-1.0":
+        package_lib_path = internal_noarch_lib_path("frida-core", frida_root, host)
+        package_lib_deps = frida_core_deps
+    else:
+        raise Exception("Unhandled package")
+
+    combined_dir = tempfile.mkdtemp(prefix="devkit")
+    object_names = set()
+
+    for lib_path in [package_lib_path] + package_lib_deps:
+        archive_filenames = subprocess.check_output(
+            [msvs_lib_exe(host), "/nologo", "/list", lib_path],
+            cwd=msvs_runtime_path(host),
+            shell=False).decode('utf-8').replace("\r", "").rstrip().split("\n")
+
+        original_object_names = [name for name in archive_filenames if name.endswith(".obj")]
+
+        for original_object_name in original_object_names:
+            object_name = os.path.basename(original_object_name)
+            while object_name in object_names:
+                object_name = "_" + object_name
+            object_names.add(object_name)
+
+            object_path = os.path.join(combined_dir, object_name)
+
+            subprocess.check_output(
+                [msvs_lib_exe(host), "/nologo", "/extract:" + original_object_name, "/out:" + object_path, lib_path],
+                cwd=msvs_runtime_path(host),
+                shell=False).decode('utf-8')
+
+    library_path = os.path.join(combined_dir, "library.lib")
+
+    env = os.environ.copy()
+    env["PATH"] = msvs_runtime_path(host) + ";" + env["PATH"]
+
+    subprocess.check_output(
+        [msvs_lib_exe(host), "/nologo", "/out:library.lib", "*.obj"],
+        cwd=combined_dir,
+        env=env,
+        shell=False)
+
+    with open(library_path, "rb") as f:
+        data = f.read()
+    extra_flags = []
+
+    shutil.rmtree(combined_dir)
+
+    return (data, extra_flags)
+
+def generate_library_unix(package, frida_root, host):
+    rc = env_rc(frida_root, host)
+
     library_flags = subprocess.check_output(
-        ["(. \"{rc}\" && $PKG_CONFIG --static --libs {package})".format(rc=env_rc, package=package)],
+        ["(. \"{rc}\" && $PKG_CONFIG --static --libs {package})".format(rc=rc, package=package)],
         shell=True).decode('utf-8').strip().split(" ")
     library_dirs = infer_library_dirs(library_flags)
     library_names = infer_library_names(library_flags)
@@ -95,7 +235,7 @@ def generate_library(package, env_rc):
         scratch_dir = tempfile.mkdtemp(prefix="devkit")
 
         subprocess.check_output(
-            ["(. \"{rc}\" && $AR x {library_path})".format(rc=env_rc, library_path=library_path)],
+            ["(. \"{rc}\" && $AR x {library_path})".format(rc=rc, library_path=library_path)],
             shell=True,
             cwd=scratch_dir)
         for object_path in glob(os.path.join(scratch_dir, "*.o")):
@@ -110,7 +250,7 @@ def generate_library(package, env_rc):
     library_path = os.path.join(combined_dir, "library.a")
     subprocess.check_output(
         ["(. \"{rc}\" && $AR rcs {library_path} {object_files} 2>/dev/null)".format(
-            rc=env_rc,
+            rc=rc,
             library_path=library_path,
             object_files=" ".join([pipes.quote(object_name) for object_name in object_names]))],
         shell=True,
@@ -147,28 +287,38 @@ def resolve_library_paths(names, dirs):
             flags.append("-l{}".format(name))
     return (list(set(paths)), flags)
 
-def generate_example(filename, package, env_rc, library_name, extra_ldflags):
-    cc = probe_env(env_rc, "echo $CC")
-    cflags = probe_env(env_rc, "echo $CFLAGS")
-    ldflags = probe_env(env_rc, "echo $LDFLAGS")
+def generate_example(filename, package, frida_root, host, library_name, extra_ldflags):
+    if platform.system() != 'Windows':
+        rc = env_rc(frida_root, host)
 
-    (cflags, ldflags) = trim_flags(cflags, " ".join([" ".join(extra_ldflags), ldflags]))
+        cc = probe_env(rc, "echo $CC")
+        cflags = probe_env(rc, "echo $CFLAGS")
+        ldflags = probe_env(rc, "echo $LDFLAGS")
 
-    params = {
-        "cc": cc,
-        "cflags": cflags,
-        "ldflags": ldflags,
-        "source_filename": filename,
-        "program_filename": os.path.splitext(filename)[0],
-        "library_name": library_name
-    }
+        (cflags, ldflags) = trim_flags(cflags, " ".join([" ".join(extra_ldflags), ldflags]))
 
-    preamble = """\
+        params = {
+            "cc": cc,
+            "cflags": cflags,
+            "ldflags": ldflags,
+            "source_filename": filename,
+            "program_filename": os.path.splitext(filename)[0],
+            "library_name": library_name
+        }
+
+        preamble = """\
 /*
  * Compile with:
  *
  * %(cc)s %(cflags)s %(source_filename)s -o %(program_filename)s -L. -l%(library_name)s %(ldflags)s
+ *
+ * See www.frida.re for documentation.
  */""" % params
+    else:
+        preamble = """\
+/*
+ * See www.frida.re for documentation.
+ */"""
 
     if package == "frida-gum-1.0":
         return r"""%(preamble)s
@@ -546,9 +696,68 @@ stop (gpointer user_data)
 }
 """ % { "preamble": preamble }
 
-def probe_env(env_rc, command):
+def env_rc(frida_root, host):
+    return os.path.join(frida_root, "build", "frida-env-{}.rc".format(host))
+
+def msvs_cl_exe(host):
+    return msvs_tool_path(host, "cl.exe")
+
+def msvs_lib_exe(host):
+    return msvs_tool_path(host, "lib.exe")
+
+def msvs_tool_path(host, tool):
+    if host == "windows-x86_64":
+        return r"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64\{0}".format(tool)
+    else:
+        return r"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64_x86\{0}".format(tool)
+
+def msvs_runtime_path(host):
+    return r"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64"
+
+def msvs_arch_config(host):
+    if host == "windows-x86_64":
+        return "x64-Release"
+    else:
+        return "Win32-Release"
+
+def msvs_arch_suffix(host):
+    if host == "windows-x86_64":
+        return "-64"
+    else:
+        return "-32"
+
+def compute_library_filename(kit):
+    if platform.system() == 'Windows':
+        return "{}.lib".format(kit)
+    else:
+        return "lib{}.a".format(kit)
+
+def compute_umbrella_header_path(frida_root, host, package, umbrella_header):
+    if platform.system() == 'Windows':
+        if package == "frida-gum-1.0":
+            return os.path.join(frida_root, "frida-gum", "gum", "gum.h")
+        elif package == "frida-gumjs-1.0":
+            return os.path.join(frida_root, "frida-gum", "bindings", "gumjs", umbrella_header[-1])
+        elif package == "frida-core-1.0":
+            return os.path.join(frida_root, "build", "tmp-windows", msvs_arch_config(host), "frida-core", "api", "frida-core.h")
+        else:
+            raise Exception("Unhandled package")
+    else:
+        return os.path.join(frida_root, "build", "frida-" + host, "include", *umbrella_header)
+
+def sdk_lib_path(name, frida_root, host):
+    return os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "lib", name)
+
+def internal_noarch_lib_path(name, frida_root, host):
+    return os.path.join(frida_root, "build", "tmp-windows", msvs_arch_config(host), name, name + ".lib")
+
+def internal_arch_lib_path(name, frida_root, host):
+    lib_name = name + msvs_arch_suffix(host)
+    return os.path.join(frida_root, "build", "tmp-windows", msvs_arch_config(host), lib_name, lib_name + ".lib")
+
+def probe_env(rc, command):
     return subprocess.check_output([
-        "(. \"{rc}\" && PACKAGE_TARNAME=frida-devkit . $CONFIG_SITE && {command})".format(rc=env_rc, command=command)
+        "(. \"{rc}\" && PACKAGE_TARNAME=frida-devkit . $CONFIG_SITE && {command})".format(rc=rc, command=command)
     ], shell=True).decode('utf-8').strip()
 
 def trim_flags(cflags, ldflags):
