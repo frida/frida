@@ -4,9 +4,6 @@
  * [Runtime Library]
  * Multi-threaded (/MT)
  *
- * [Additional Dependencies]
- * frida-core.lib;%(AdditionalDependencies)
- *
  * Visit www.frida.re to learn more about Frida.
  */
 

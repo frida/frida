@@ -30,7 +30,7 @@ def generate_devkit(kit, host, output_dir):
     header_filename = kit + ".h"
     if not os.path.exists(umbrella_header_path):
         raise Exception("Header not found: {}".format(umbrella_header_path))
-    header = generate_header(package, frida_root, host, umbrella_header_path)
+    header = generate_header(package, frida_root, host, kit, umbrella_header_path)
     with open(os.path.join(output_dir, header_filename), "w") as f:
         f.write(header)
 
@@ -42,9 +42,13 @@ def generate_devkit(kit, host, output_dir):
     with open(os.path.join(output_dir, example_filename), "w") as f:
         f.write(example)
 
+    if platform.system() == 'Windows':
+        for msvs_asset in glob(asset_path("{}-*.sln".format(kit))) + glob(asset_path("{}-*.vcxproj*".format(kit))):
+            shutil.copy(msvs_asset, output_dir)
+
     return [header_filename, library_filename, example_filename]
 
-def generate_header(package, frida_root, host, umbrella_header_path):
+def generate_header(package, frida_root, host, kit, umbrella_header_path):
     if platform.system() == 'Windows':
         include_dirs = [
             r"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\INCLUDE",
@@ -115,9 +119,10 @@ def generate_header(package, frida_root, host, umbrella_header_path):
             deps.append("shlwapi")
         deps.sort()
 
-        pragmas = "\n".join(["#pragma comment(lib, \"{}.lib\")".format(dep) for dep in deps])
+        frida_pragmas = "#pragma comment(lib, \"{}\")".format(compute_library_filename(kit))
+        dep_pragmas = "\n".join(["#pragma comment(lib, \"{}.lib\")".format(dep) for dep in deps])
 
-        config += pragmas + "\n\n"
+        config += frida_pragmas + "\n\n" + dep_pragmas + "\n\n"
 
     return config + devkit_header
 
@@ -282,14 +287,14 @@ def resolve_library_paths(names, dirs):
             flags.append("-l{}".format(name))
     return (list(set(paths)), flags)
 
-def generate_example(filename, package, frida_root, host, library_name, extra_ldflags):
+def generate_example(filename, package, frida_root, host, kit, extra_ldflags):
     if platform.system() == 'Windows':
         os_flavor = "windows"
     else:
         os_flavor = "unix"
 
     example_filename = "{}-example-{}.c".format(kit, os_flavor)
-    with open(os.path.join(os.path.dirname(__file__), "devkit-assets", example_filename), "rb") as f:
+    with open(asset_path(example_filename), "rb") as f:
         example_code = f.read()
 
     if platform.system() == 'Windows':
@@ -309,7 +314,7 @@ def generate_example(filename, package, frida_root, host, library_name, extra_ld
             "ldflags": ldflags,
             "source_filename": filename,
             "program_filename": os.path.splitext(filename)[0],
-            "library_name": library_name
+            "library_name": kit
         }
 
         preamble = """\
@@ -322,6 +327,9 @@ def generate_example(filename, package, frida_root, host, library_name, extra_ld
  */""" % params
 
         return preamble + "\n\n" + example_code
+
+def asset_path(name):
+    return os.path.join(os.path.dirname(__file__), "devkit-assets", name)
 
 def env_rc(frida_root, host):
     return os.path.join(frida_root, "build", "frida-env-{}.rc".format(host))

@@ -4,9 +4,6 @@
  * [Runtime Library]
  * Multi-threaded (/MT)
  *
- * [Additional Dependencies]
- * frida-gum.lib;%(AdditionalDependencies)
- *
  * Visit www.frida.re to learn more about Frida.
  */
 
