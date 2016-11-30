@@ -100,7 +100,14 @@ def generate_header(package, frida_root, host, umbrella_header_path):
     umbrella_header = header_files[0]
     processed_header_files = set([umbrella_header])
     ingest_header(umbrella_header, header_files, processed_header_files, devkit_header_lines)
-    return "".join(devkit_header_lines)
+    devkit_header = "".join(devkit_header_lines)
+
+    if package.startswith("gum"):
+        config = "#define GUM_STATIC\n\n"
+    else:
+        config = ""
+
+    return config + devkit_header
 
 def ingest_header(header, all_header_files, processed_header_files, result):
     with open(header, "r") as f:
@@ -130,23 +137,25 @@ def generate_library(package, frida_root, host):
 def generate_library_windows(package, frida_root, host):
     glib = [
         sdk_lib_path("glib-2.0.lib", frida_root, host),
+        sdk_lib_path("intl.lib", frida_root, host),
     ]
-    gobject = [
+    gobject = glib + [
         sdk_lib_path("gobject-2.0.lib", frida_root, host),
         sdk_lib_path("ffi.lib", frida_root, host),
     ]
-    gio = [
-        sdk_lib_path("gio-2.0.lib", frida_root, host),
-    ]
-    gmodule = [
+    gmodule = glib + [
         sdk_lib_path("gmodule-2.0.lib", frida_root, host),
     ]
+    gio = glib + gobject + gmodule + [
+        sdk_lib_path("gio-2.0.lib", frida_root, host),
+        sdk_lib_path("z.lib", frida_root, host),
+    ]
 
-    json_glib = [
+    json_glib = glib + gobject + [
         sdk_lib_path("json-glib-1.0.lib", frida_root, host),
     ]
 
-    gee = [
+    gee = glib + gobject + [
         sdk_lib_path("gee-0.8.lib", frida_root, host),
     ]
 
@@ -161,9 +170,9 @@ def generate_library_windows(package, frida_root, host):
         sdk_lib_path("v8_snapshot.lib", frida_root, host),
     ]
 
-    gum_deps = glib + gobject + gio
-    gumjs_deps = gum_deps + json_glib + v8
-    frida_core_deps = glib + gobject + gio + json_glib + gmodule + gee
+    gum_deps = deduplicate(glib + gobject + gio)
+    gumjs_deps = deduplicate(gum_deps + json_glib + v8)
+    frida_core_deps = deduplicate(glib + gobject + gio + json_glib + gmodule + gee)
 
     if package == "frida-gum-1.0":
         package_lib_path = internal_arch_lib_path("gum", frida_root, host)
@@ -320,6 +329,10 @@ def generate_example(filename, package, frida_root, host, library_name, extra_ld
     else:
         preamble = """\
 /*
+ * Link with:
+ *
+ * frida-gum.lib;dnsapi.lib;iphlpapi.lib;psapi.lib;winmm.lib;ws2_32.lib
+ *
  * See www.frida.re for documentation.
  */"""
 
