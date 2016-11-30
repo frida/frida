@@ -100,10 +100,24 @@ def generate_header(package, frida_root, host, umbrella_header_path):
     ingest_header(umbrella_header, header_files, processed_header_files, devkit_header_lines)
     devkit_header = "".join(devkit_header_lines)
 
-    if package.startswith("gum"):
-        config = "#define GUM_STATIC\n\n"
+    if package.startswith("frida-gum"):
+        config = """#ifndef GUM_STATIC
+# define GUM_STATIC
+#endif
+
+"""
     else:
         config = ""
+
+    if platform.system() == 'Windows':
+        deps = ["dnsapi", "iphlpapi", "psapi", "winmm", "ws2_32"]
+        if package == "frida-core-1.0":
+            deps.append("shlwapi")
+        deps.sort()
+
+        pragmas = "\n".join(["#pragma comment(lib, \"{}.lib\")".format(dep) for dep in deps])
+
+        config += pragmas + "\n\n"
 
     return config + devkit_header
 
@@ -168,12 +182,13 @@ def generate_library_windows(package, frida_root, host, output_dir, library_file
         sdk_lib_path("v8_snapshot.lib", frida_root, host),
     ]
 
+    gum_lib = internal_arch_lib_path("gum", frida_root, host)
     gum_deps = deduplicate(glib + gobject + gio)
-    gumjs_deps = deduplicate(gum_deps + json_glib + v8)
+    gumjs_deps = deduplicate([gum_lib] + gum_deps + json_glib + v8)
     frida_core_deps = deduplicate(glib + gobject + gio + json_glib + gmodule + gee)
 
     if package == "frida-gum-1.0":
-        package_lib_path = internal_arch_lib_path("gum", frida_root, host)
+        package_lib_path = gum_lib
         package_lib_deps = gum_deps
     elif package == "frida-gumjs-1.0":
         package_lib_path = internal_arch_lib_path("gumjs", frida_root, host)
@@ -186,6 +201,7 @@ def generate_library_windows(package, frida_root, host, output_dir, library_file
 
     input_libs = [package_lib_path] + package_lib_deps
     input_pdbs = [os.path.splitext(input_lib)[0] + ".pdb" for input_lib in input_libs]
+    input_pdbs = [input_pdb for input_pdb in input_pdbs if os.path.exists(input_pdb)]
 
     subprocess.check_output(
         [msvs_lib_exe(host), "/nologo", "/out:" + os.path.join(output_dir, library_filename)] + input_libs,
@@ -267,7 +283,18 @@ def resolve_library_paths(names, dirs):
     return (list(set(paths)), flags)
 
 def generate_example(filename, package, frida_root, host, library_name, extra_ldflags):
-    if platform.system() != 'Windows':
+    if platform.system() == 'Windows':
+        os_flavor = "windows"
+    else:
+        os_flavor = "unix"
+
+    example_filename = "{}-example-{}.c".format(kit, os_flavor)
+    with open(os.path.join(os.path.dirname(__file__), "devkit-assets", example_filename), "rb") as f:
+        example_code = f.read()
+
+    if platform.system() == 'Windows':
+        return example_code
+    else:
         rc = env_rc(frida_root, host)
 
         cc = probe_env(rc, "echo $CC")
@@ -291,393 +318,10 @@ def generate_example(filename, package, frida_root, host, library_name, extra_ld
  *
  * %(cc)s %(cflags)s %(source_filename)s -o %(program_filename)s -L. -l%(library_name)s %(ldflags)s
  *
- * See www.frida.re for documentation.
+ * Visit www.frida.re to learn more about Frida.
  */""" % params
-    else:
-        preamble = """\
-/*
- * Link with:
- *
- * frida-gum.lib;dnsapi.lib;iphlpapi.lib;psapi.lib;winmm.lib;ws2_32.lib
- *
- * See www.frida.re for documentation.
- */"""
 
-    if package == "frida-gum-1.0":
-        return r"""%(preamble)s
-
-#include "frida-gum.h"
-
-#include <fcntl.h>
-#include <unistd.h>
-
-typedef struct _ExampleListener ExampleListener;
-typedef enum _ExampleHookId ExampleHookId;
-
-struct _ExampleListener
-{
-  GObject parent;
-
-  guint num_calls;
-};
-
-enum _ExampleHookId
-{
-  EXAMPLE_HOOK_OPEN,
-  EXAMPLE_HOOK_CLOSE
-};
-
-static void example_listener_iface_init (gpointer g_iface, gpointer iface_data);
-
-#define EXAMPLE_TYPE_LISTENER (example_listener_get_type ())
-G_DECLARE_FINAL_TYPE (ExampleListener, example_listener, EXAMPLE, LISTENER, GObject)
-G_DEFINE_TYPE_EXTENDED (ExampleListener,
-                        example_listener,
-                        G_TYPE_OBJECT,
-                        0,
-                        G_IMPLEMENT_INTERFACE (GUM_TYPE_INVOCATION_LISTENER,
-                            example_listener_iface_init))
-
-int
-main (int argc,
-      char * argv[])
-{
-  GumInterceptor * interceptor;
-  GumInvocationListener * listener;
-
-  gum_init ();
-
-  interceptor = gum_interceptor_obtain ();
-  listener = g_object_new (EXAMPLE_TYPE_LISTENER, NULL);
-
-  gum_interceptor_begin_transaction (interceptor);
-  gum_interceptor_attach_listener (interceptor,
-      GSIZE_TO_POINTER (gum_module_find_export_by_name (NULL, "open")),
-      listener,
-      GSIZE_TO_POINTER (EXAMPLE_HOOK_OPEN));
-  gum_interceptor_attach_listener (interceptor,
-      GSIZE_TO_POINTER (gum_module_find_export_by_name (NULL, "close")),
-      listener,
-      GSIZE_TO_POINTER (EXAMPLE_HOOK_CLOSE));
-  gum_interceptor_end_transaction (interceptor);
-
-  close (open ("/etc/hosts", O_RDONLY));
-  close (open ("/etc/fstab", O_RDONLY));
-
-  g_print ("[*] listener got %%u calls\n", EXAMPLE_LISTENER (listener)->num_calls);
-
-  gum_interceptor_detach_listener (interceptor, listener);
-
-  close (open ("/etc/hosts", O_RDONLY));
-  close (open ("/etc/fstab", O_RDONLY));
-
-  g_print ("[*] listener still has %%u calls\n", EXAMPLE_LISTENER (listener)->num_calls);
-
-  g_object_unref (listener);
-  g_object_unref (interceptor);
-
-  return 0;
-}
-
-static void
-example_listener_on_enter (GumInvocationListener * listener,
-                           GumInvocationContext * ic)
-{
-  ExampleListener * self = EXAMPLE_LISTENER (listener);
-  ExampleHookId hook_id = GUM_LINCTX_GET_FUNC_DATA (ic, ExampleHookId);
-
-  switch (hook_id)
-  {
-    case EXAMPLE_HOOK_OPEN:
-      g_print ("[*] open(\"%%s\")\n", gum_invocation_context_get_nth_argument (ic, 0));
-      break;
-    case EXAMPLE_HOOK_CLOSE:
-      g_print ("[*] close(%%d)\n", (int) gum_invocation_context_get_nth_argument (ic, 0));
-      break;
-  }
-
-  self->num_calls++;
-}
-
-static void
-example_listener_on_leave (GumInvocationListener * listener,
-                           GumInvocationContext * ic)
-{
-}
-
-static void
-example_listener_class_init (ExampleListenerClass * klass)
-{
-  (void) EXAMPLE_IS_LISTENER;
-  (void) glib_autoptr_cleanup_ExampleListener;
-}
-
-static void
-example_listener_iface_init (gpointer g_iface,
-                             gpointer iface_data)
-{
-  GumInvocationListenerIface * iface = (GumInvocationListenerIface *) g_iface;
-
-  iface->on_enter = example_listener_on_enter;
-  iface->on_leave = example_listener_on_leave;
-}
-
-static void
-example_listener_init (ExampleListener * self)
-{
-}
-""" % { "preamble": preamble }
-    elif package == "frida-gumjs-1.0":
-        return r"""%(preamble)s
-
-#include "frida-gumjs.h"
-
-#include <fcntl.h>
-#include <string.h>
-#include <unistd.h>
-
-static void on_message (GumScript * script, const gchar * message, GBytes * data, gpointer user_data);
-
-int
-main (int argc,
-      char * argv[])
-{
-  GumScriptBackend * backend;
-  GCancellable * cancellable = NULL;
-  GError * error = NULL;
-  GumScript * script;
-  GMainContext * context;
-
-  gum_init ();
-
-  backend = gum_script_backend_obtain_duk ();
-
-  script = gum_script_backend_create_sync (backend, "example",
-      "Interceptor.attach(Module.findExportByName(null, \"open\"), {\n"
-      "  onEnter: function (args) {\n"
-      "    console.log(\"[*] open(\\\"\" + Memory.readUtf8String(args[0]) + \"\\\")\");\n"
-      "  }\n"
-      "});\n"
-      "Interceptor.attach(Module.findExportByName(null, \"close\"), {\n"
-      "  onEnter: function (args) {\n"
-      "    console.log(\"[*] close(\" + args[0].toInt32() + \")\");\n"
-      "  }\n"
-      "});",
-      cancellable, &error);
-  g_assert (error == NULL);
-
-  gum_script_set_message_handler (script, on_message, NULL, NULL);
-
-  gum_script_load_sync (script, cancellable);
-
-  close (open ("/etc/hosts", O_RDONLY));
-  close (open ("/etc/fstab", O_RDONLY));
-
-  context = g_main_context_get_thread_default ();
-  while (g_main_context_pending (context))
-    g_main_context_iteration (context, FALSE);
-
-  gum_script_unload_sync (script, cancellable);
-
-  g_object_unref (script);
-
-  return 0;
-}
-
-static void
-on_message (GumScript * script,
-            const gchar * message,
-            GBytes * data,
-            gpointer user_data)
-{
-  JsonParser * parser;
-  JsonObject * root;
-  const gchar * type;
-
-  parser = json_parser_new ();
-  json_parser_load_from_data (parser, message, -1, NULL);
-  root = json_node_get_object (json_parser_get_root (parser));
-
-  type = json_object_get_string_member (root, "type");
-  if (strcmp (type, "log") == 0)
-  {
-    const gchar * log_message;
-
-    log_message = json_object_get_string_member (root, "payload");
-    g_print ("%%s\n", log_message);
-  }
-  else
-  {
-    g_print ("on_message: %%s\n", message);
-  }
-
-  g_object_unref (parser);
-}
-""" % { "preamble": preamble }
-    elif package == "frida-core-1.0":
-        return r"""%(preamble)s
-
-#include "frida-core.h"
-
-#include <stdlib.h>
-#include <string.h>
-
-static void on_message (FridaScript * script, const gchar * message, GBytes * data, gpointer user_data);
-static void on_signal (int signo);
-static gboolean stop (gpointer user_data);
-
-static GMainLoop * loop = NULL;
-
-int
-main (int argc,
-      char * argv[])
-{
-  guint target_pid;
-  FridaDeviceManager * manager;
-  GError * error = NULL;
-  FridaDeviceList * devices;
-  gint num_devices, i;
-  FridaDevice * local_device;
-  FridaSession * session;
-
-  if (argc != 2 || (target_pid = atoi (argv[1])) == 0)
-  {
-    g_printerr ("Usage: %%s <pid>\n", argv[0]);
-    return 1;
-  }
-
-  frida_init ();
-
-  loop = g_main_loop_new (NULL, TRUE);
-
-  signal (SIGINT, on_signal);
-  signal (SIGTERM, on_signal);
-
-  manager = frida_device_manager_new ();
-
-  devices = frida_device_manager_enumerate_devices_sync (manager, &error);
-  g_assert (error == NULL);
-
-  local_device = NULL;
-  num_devices = frida_device_list_size (devices);
-  for (i = 0; i != num_devices; i++)
-  {
-    FridaDevice * device = frida_device_list_get (devices, i);
-
-    g_print ("[*] Found device: \"%%s\"\n", frida_device_get_name (device));
-
-    if (frida_device_get_dtype (device) == FRIDA_DEVICE_TYPE_LOCAL)
-      local_device = g_object_ref (device);
-
-    g_object_unref (device);
-  }
-  g_assert (local_device != NULL);
-
-  frida_unref (devices);
-  devices = NULL;
-
-  session = frida_device_attach_sync (local_device, target_pid, &error);
-  if (error == NULL)
-  {
-    FridaScript * script;
-
-    g_print ("[*] Attached\n");
-
-    script = frida_session_create_script_sync (session, "example",
-        "Interceptor.attach(Module.findExportByName(null, \"open\"), {\n"
-        "  onEnter: function (args) {\n"
-        "    console.log(\"[*] open(\\\"\" + Memory.readUtf8String(args[0]) + \"\\\")\");\n"
-        "  }\n"
-        "});\n"
-        "Interceptor.attach(Module.findExportByName(null, \"close\"), {\n"
-        "  onEnter: function (args) {\n"
-        "    console.log(\"[*] close(\" + args[0].toInt32() + \")\");\n"
-        "  }\n"
-        "});",
-        &error);
-    g_assert (error == NULL);
-
-    g_signal_connect (script, "message", G_CALLBACK (on_message), NULL);
-
-    frida_script_load_sync (script, &error);
-    g_assert (error == NULL);
-
-    g_print ("[*] Script loaded\n");
-
-    if (g_main_loop_is_running (loop))
-      g_main_loop_run (loop);
-
-    g_print ("[*] Stopped\n");
-
-    frida_script_unload_sync (script, NULL);
-    frida_unref (script);
-    g_print ("[*] Unloaded\n");
-
-    frida_session_detach_sync (session);
-    frida_unref (session);
-    g_print ("[*] Detached\n");
-  }
-  else
-  {
-    g_printerr ("Failed to attach: %%s\n", error->message);
-    g_error_free (error);
-  }
-
-  frida_unref (local_device);
-
-  frida_device_manager_close_sync (manager);
-  frida_unref (manager);
-  g_print ("[*] Closed\n");
-
-  g_main_loop_unref (loop);
-
-  return 0;
-}
-
-static void
-on_message (FridaScript * script,
-            const gchar * message,
-            GBytes * data,
-            gpointer user_data)
-{
-  JsonParser * parser;
-  JsonObject * root;
-  const gchar * type;
-
-  parser = json_parser_new ();
-  json_parser_load_from_data (parser, message, -1, NULL);
-  root = json_node_get_object (json_parser_get_root (parser));
-
-  type = json_object_get_string_member (root, "type");
-  if (strcmp (type, "log") == 0)
-  {
-    const gchar * log_message;
-
-    log_message = json_object_get_string_member (root, "payload");
-    g_print ("%%s\n", log_message);
-  }
-  else
-  {
-    g_print ("on_message: %%s\n", message);
-  }
-
-  g_object_unref (parser);
-}
-
-static void
-on_signal (int signo)
-{
-  g_idle_add (stop, NULL);
-}
-
-static gboolean
-stop (gpointer user_data)
-{
-  g_main_loop_quit (loop);
-
-  return FALSE;
-}
-""" % { "preamble": preamble }
+        return preamble + "\n\n" + example_code
 
 def env_rc(frida_root, host):
     return os.path.join(frida_root, "build", "frida-env-{}.rc".format(host))
