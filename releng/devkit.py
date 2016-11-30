@@ -74,6 +74,9 @@ def generate_header(package, frida_root, host, umbrella_header_path):
         mapping_prefix = "#line "
         header_refs = [line[line.index("\"") + 1:line.rindex("\"")].replace("\\\\", "/") for line in lines if line.startswith(mapping_prefix)]
 
+        # c:/ => C:/
+        header_refs = [ref[0].upper() + ref[1:] for ref in header_refs]
+
         header_files = []
         headers_seen = set()
         for ref in header_refs:
