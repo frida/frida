@@ -24,9 +24,11 @@ if __name__ == '__main__':
     frida_node_dir = os.path.join(build_dir, "frida-node")
 
     if system == 'Windows':
+        szip = r"C:\Program Files\7-Zip\7z.exe"
         ssh = r"C:\Program Files (x86)\PuTTY\plink.exe"
         scp = r"C:\Program Files (x86)\PuTTY\pscp.exe"
     else:
+        szip = "7z"
         ssh = "ssh"
         scp = "scp"
 
@@ -174,8 +176,13 @@ if __name__ == '__main__':
         ]
 
         for kit in kits:
-            tarball_filename = "{}-devkit-{}-{}.tar".format(kit, version, host)
-            asset_filename = tarball_filename + ".xz"
+            if host.startswith("windows-"):
+                asset_filename = "{}-devkit-{}-{}.exe".format(kit, version, host)
+                asset_mimetype = "application/octet-stream"
+            else:
+                tarball_filename = "{}-devkit-{}-{}.tar".format(kit, version, host)
+                asset_filename = tarball_filename + ".xz"
+                asset_mimetype = "application/x-xz"
 
             output_dir = tempfile.mkdtemp(prefix="frida-release")
             try:
@@ -184,17 +191,25 @@ if __name__ == '__main__':
                 except Exception as e:
                     print("Skipping: {}".format(asset_filename))
                     continue
-                subprocess.check_call(["tar", "cf", tarball_filename] + filenames, cwd=output_dir)
-                subprocess.check_call(["xz", "-T", "0", tarball_filename], cwd=output_dir)
+                if host.startswith("windows-"):
+                    subprocess.check_call([szip, "a", "-sfx7zCon.sfx", "-r", asset_filename, "."], cwd=output_dir)
+                else:
+                    subprocess.check_call(["tar", "cf", tarball_filename] + filenames, cwd=output_dir)
+                    subprocess.check_call(["xz", "-T", "0", tarball_filename], cwd=output_dir)
                 with open(os.path.join(output_dir, asset_filename), 'rb') as f:
-                    tarball = f.read()
+                    asset_data = f.read()
             finally:
                 shutil.rmtree(output_dir)
 
-            upload(asset_filename, "application/x-xz", tarball)
+            upload(asset_filename, asset_mimetype, asset_data)
 
     if int(nano) == 0:
         if slave == 'windows':
+            upload = get_github_uploader()
+
+            upload_devkits("windows-i386", upload)
+            upload_devkits("windows-x86_64", upload)
+
             upload_to_pypi(r"C:\Program Files (x86)\Python 2.7\python.exe",
                 os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "lib", "python2.7", "site-packages", "_frida.pyd"))
             upload_to_pypi(r"C:\Program Files\Python 2.7\python.exe",
