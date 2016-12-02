@@ -253,7 +253,7 @@ def generate_library_unix(package, frida_root, host, output_dir, library_filenam
     subprocess.check_output(
         ["(. \"{rc}\" && $AR rcs {library_path} {object_files} 2>/dev/null)".format(
             rc=rc,
-            library_path=os.path.join(output_dir, library_filename),
+            library_path=os.path.abspath(os.path.join(output_dir, library_filename)),
             object_files=" ".join([pipes.quote(object_name) for object_name in object_names]))],
         shell=True,
         cwd=combined_dir)
