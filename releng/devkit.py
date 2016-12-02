@@ -76,17 +76,7 @@ def generate_header(package, frida_root, host, kit, umbrella_header_path):
         mapping_prefix = "#line "
         header_refs = [line[line.index("\"") + 1:line.rindex("\"")].replace("\\\\", "/") for line in lines if line.startswith(mapping_prefix)]
 
-        # c:/ => C:/
-        header_refs = [ref[0].upper() + ref[1:] for ref in header_refs]
-
-        header_files = []
-        headers_seen = set()
-        for ref in header_refs:
-            if ref in headers_seen:
-                continue
-            header_files.append(ref)
-            headers_seen.add(ref)
-
+        header_files = deduplicate(header_refs)
         frida_root_slashed = frida_root.replace("\\", "/")
         header_files = [header_file for header_file in header_files if bool(re.match('^' + frida_root_slashed, header_file, re.I))]
     else:
@@ -253,7 +243,7 @@ def generate_library_unix(package, frida_root, host, output_dir, library_filenam
     subprocess.check_output(
         ["(. \"{rc}\" && $AR rcs {library_path} {object_files} 2>/dev/null)".format(
             rc=rc,
-            library_path=os.path.abspath(os.path.join(output_dir, library_filename)),
+            library_path=os.path.join(output_dir, library_filename),
             object_files=" ".join([pipes.quote(object_name) for object_name in object_names]))],
         shell=True,
         cwd=combined_dir)
