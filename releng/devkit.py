@@ -344,10 +344,10 @@ def msvs_tool_path(host, tool):
     if host == "windows-x86_64":
         return r"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64\{0}".format(tool)
     else:
-        return r"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64_x86\{0}".format(tool)
+        return r"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\{0}".format(tool)
 
 def msvs_runtime_path(host):
-    return r"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64"
+    return r"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin"
 
 def msvs_arch_config(host):
     if host == "windows-x86_64":
@@ -450,7 +450,7 @@ if __name__ == "__main__":
 
     kit = sys.argv[1]
     host = sys.argv[2]
-    outdir = sys.argv[3]
+    outdir = os.path.abspath(sys.argv[3])
 
     try:
         os.makedirs(outdir)
