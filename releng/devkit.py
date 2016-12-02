@@ -88,7 +88,7 @@ def generate_header(package, frida_root, host, kit, umbrella_header_path):
             headers_seen.add(ref)
 
         frida_root_slashed = frida_root.replace("\\", "/")
-        header_files = [header_file for header_file in header_files if header_file.startswith(frida_root_slashed)]
+        header_files = [header_file for header_file in header_files if bool(re.match('^' + frida_root_slashed, header_file, re.I))]
     else:
         rc = env_rc(frida_root, host)
         header_dependencies = subprocess.check_output(
