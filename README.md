@@ -1,4 +1,4 @@
-Inject JavaScript to explore native apps on Windows, Mac, Linux, iOS, Android, and QNX.
+Inject JavaScript to explore native apps on Windows, macOS, Linux, iOS, Android, and QNX.
 Two ways to install—
 ===
 
@@ -25,7 +25,7 @@ For running the Frida tools (`frida`, `frida-ls-devices`, `frida-ps`,
 
     make
 
-### Mac and iOS
+### macOS and iOS
 
 First make a trusted code-signing certificate. You can use the guide at
 https://sourceware.org/gdb/wiki/BuildingOnDarwin in the section
