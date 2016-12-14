@@ -39,7 +39,7 @@ variables `MAC_CERTID` and `IOS_CERTID` and run `make`:
     export IOS_CERTID=frida-cert
     make
 
-To ensure that OS X accepts the newly created certificate, restart the
+To ensure that macOS accepts the newly created certificate, restart the
 `taskgated` daemon:
 
     sudo killall taskgated
