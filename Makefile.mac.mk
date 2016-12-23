@@ -230,11 +230,11 @@ build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-an
 
 build/tmp-mac-%/frida-core/src/frida-helper: build/tmp-mac-%/frida-core/lib/interfaces/libfrida-interfaces.la build/tmp-mac-%/frida-core/lib/pipe/libfrida-pipe.la build/tmp-mac-%/frida-core/lib/agent/libfrida-agent-container.la
 	@$(call ensure_relink,frida-core/src/darwin/frida-helper-glue.c,build/tmp-mac-$*/frida-core/src/frida-helper-glue.lo)
-	. build/frida-env-mac-$*.rc && make -C build/tmp-mac-$*/frida-core/src libfrida-helper-types.la frida-helper.stamp
+	. build/frida-env-mac-$*.rc && make -C build/tmp-mac-$*/frida-core/src libfrida-helper-types.la libfrida-helper-backend.la frida-helper.stamp
 	@touch -c $@
 build/tmp-ios-%/frida-core/src/frida-helper: build/tmp-ios-%/frida-core/lib/interfaces/libfrida-interfaces.la build/tmp-ios-%/frida-core/lib/pipe/libfrida-pipe.la build/tmp-ios-%/frida-core/lib/agent/libfrida-agent-container.la
 	@$(call ensure_relink,frida-core/src/darwin/frida-helper-glue.c,build/tmp-ios-$*/frida-core/src/frida-helper-glue.lo)
-	. build/frida-env-ios-$*.rc && make -C build/tmp-ios-$*/frida-core/src libfrida-helper-types.la frida-helper.stamp
+	. build/frida-env-ios-$*.rc && make -C build/tmp-ios-$*/frida-core/src libfrida-helper-types.la libfrida-helper-backend.la frida-helper.stamp
 	@touch -c $@
 build/tmp-android-%/frida-core/src/frida-helper: build/tmp-android-%/frida-core/lib/selinux/libfrida-selinux.stamp build/tmp-android-%/frida-core/lib/interfaces/libfrida-interfaces.la
 	@$(call ensure_relink,frida-core/src/linux/frida-helper-glue.c,build/tmp-android-$*/frida-core/src/frida-helper-glue.lo)
