@@ -24,7 +24,7 @@ case $FRIDA_DIET in
     ;;
   *)
     case $host_platform_arch in
-      linux-arm|linux-armhf|linux-mips|linux-mipsel|qnx-*)
+      ios-*|linux-arm|linux-armhf|linux-mips|linux-mipsel|qnx-*)
         enable_diet=yes
         ;;
       *)
