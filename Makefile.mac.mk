@@ -464,7 +464,7 @@ build/frida-ios-universal/bin/frida-server: build/frida-ios-arm/bin/frida-server
 	. build/frida-env-ios-arm64.rc \
 		&& $$STRIP -Sx $(@D)/frida-server-32 $(@D)/frida-server-64 \
 		&& $$LIPO $(@D)/frida-server-32 $(@D)/frida-server-64 -create -output $@.tmp \
-		&& $$CODESIGN -f -s "$$IOS_CERTID" $@.tmp
+		&& $$CODESIGN -f -s "$$IOS_CERTID" --entitlements frida-core/server/frida-server.xcent $@.tmp
 	$(RM) $(@D)/frida-server-32 $(@D)/frida-server-64
 	mv $@.tmp $@
 build/frida_stripped-android-i386/bin/frida-server: build/frida-android-i386/bin/frida-server
