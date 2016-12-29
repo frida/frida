@@ -543,7 +543,7 @@ build/frida_thin-ios-%/bin/frida-server: build/frida_thin-ios-%/lib/pkgconfig/fr
 		&& program=build/tmp_thin-ios-$*/frida-core/frida-server \
 		&& cp build/tmp_thin-ios-$*/frida-core/server/frida-server $$program \
 		&& $$STRIP -Sx $$program \
-		&& $$CODESIGN -f -s "$$IOS_CERTID" $$program \
+		&& $$CODESIGN -f -s "$$IOS_CERTID" --entitlements frida-core/server/frida-server.xcent $$program \
 		&& cp $$program $@
 	@touch -c $@
 
