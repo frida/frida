@@ -86,13 +86,13 @@ if __name__ == '__main__':
             do([scp, package, "frida@build.frida.re:/home/frida/public_html/" + remote_path])
         reset()
 
-    def upload_ios_deb(server):
+    def upload_ios_deb(name, server):
         env = {
             'FRIDA_VERSION': version,
             'FRIDA_TOOLCHAIN': toolchain_dir
         }
         env.update(os.environ)
-        deb = os.path.join(build_dir, "frida_%s_iphoneos-arm.deb" % version)
+        deb = os.path.join(build_dir, "{}_{}_iphoneos-arm.deb".format(name, version))
         subprocess.call([os.path.join(frida_core_dir, "tools", "package-server.sh"), server, deb], env=env)
         subprocess.call([scp, deb, "frida@build.frida.re:/home/frida/public_html/debs/"])
         subprocess.call([ssh, "frida@build.frida.re", "/home/frida/cydia/sync-repo"])
@@ -252,7 +252,8 @@ if __name__ == '__main__':
 
             upload_to_npm("/opt/node-64/bin/node", publish=False)
 
-            upload_ios_deb(os.path.join(build_dir, "build", "frida-ios-universal", "bin", "frida-server"))
+            upload_ios_deb("frida", os.path.join(build_dir, "build", "frida_thin-ios-arm64", "bin", "frida-server"))
+            upload_ios_deb("frida32", os.path.join(build_dir, "build", "frida_thin-ios-arm", "bin", "frida-server"))
         elif slave == 'linux':
             upload = get_github_uploader()
 
