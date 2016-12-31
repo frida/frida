@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 if __name__ == '__main__':
     from devkit import generate_devkit
@@ -141,6 +142,7 @@ if __name__ == '__main__':
                     },
                     data=data)
                 r.raise_for_status()
+                print("Uploaded", name)
             except Exception as e:
                 print("Skipping {}: {}".format(name, e))
 
@@ -189,7 +191,7 @@ if __name__ == '__main__':
                 try:
                     filenames = generate_devkit(kit, host, output_dir)
                 except Exception as e:
-                    print("Skipping: {}".format(asset_filename))
+                    print("Skipping {}: {}".format(asset_filename, e))
                     continue
                 if host.startswith("windows-"):
                     subprocess.check_call([szip, "a", "-sfx7zCon.sfx", "-r", asset_filename, "."], cwd=output_dir)
