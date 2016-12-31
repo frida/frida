@@ -469,8 +469,9 @@ check-core-android-arm64: build/tmp_stripped-android-arm/frida-core/src/frida-he
 server-mac: build/frida-mac-universal/bin/frida-server ##@server Build for Mac
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida-mac-universal/bin/frida-server $(BINDIST)/bin/frida-server-osx
-server-ios: build/frida_thin-ios-arm/bin/frida-server build/frida_thin-ios-arm64/bin/frida-server ##@server Build for iOS
+server-ios: build/frida-ios-universal/bin/frida-server build/frida_thin-ios-arm/bin/frida-server build/frida_thin-ios-arm64/bin/frida-server ##@server Build for iOS
 	mkdir -p $(BINDIST)/bin
+	cp -f build/frida-ios-universal/bin/frida-server $(BINDIST)/bin/frida-server-ios
 	cp -f build/frida_thin-ios-arm/bin/frida-server $(BINDIST)/bin/frida-server-ios-arm
 	cp -f build/frida_thin-ios-arm64/bin/frida-server $(BINDIST)/bin/frida-server-ios-arm64
 server-android: build/frida_stripped-android-arm/bin/frida-server build/frida_stripped-android-arm64/bin/frida-server ##@server Build for Android

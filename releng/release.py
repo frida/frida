@@ -234,7 +234,8 @@ if __name__ == '__main__':
             upload_devkits("ios-arm64", upload)
 
             upload_file("frida-server-{version}-mac-universal", os.path.join(build_dir, "build", "frida-mac-universal", "bin", "frida-server"), upload)
-            upload_file("frida-server-{version}-ios-universal", os.path.join(build_dir, "build", "frida-ios-universal", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-ios-arm", os.path.join(build_dir, "build", "frida_thin-ios-arm", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-ios-arm64", os.path.join(build_dir, "build", "frida_thin-ios-arm64", "bin", "frida-server"), upload)
 
             upload_file("frida-gadget-{version}-mac-universal.dylib", os.path.join(build_dir, "build", "frida-mac-universal", "lib", "FridaGadget.dylib"), upload)
             upload_file("frida-gadget-{version}-ios-universal.dylib", os.path.join(build_dir, "build", "frida-ios-universal", "lib", "FridaGadget.dylib"), upload)
