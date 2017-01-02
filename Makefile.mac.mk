@@ -152,48 +152,43 @@ build/tmp_thin-%/frida-core/Makefile: build/frida-env-%.rc frida-core/configure 
 	mkdir -p $(@D)
 	. build/frida-env-$*.rc && cd $(@D) && ../../../frida-core/configure --prefix=$(abspath build/frida_thin-$*)
 
-build/frida-mac-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-mac-x86_64/frida-core/src/frida-helper build/tmp-mac-universal/frida-core/lib/loader/.libs/libfrida-loader.dylib build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib
+build/frida-mac-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-mac-x86_64/frida-core/src/frida-helper build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib
 	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-mac-$*/frida-core/src/libfrida_core_la-frida.lo)
 	. build/frida-env-mac-$*.rc \
 		&& cd build/tmp-mac-$*/frida-core \
 		&& make -C src install \
 			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-mac-$(build_arch)\" --toolchain=apple" \
 			HELPER=../../../../build/tmp_stripped-mac-x86_64/frida-core/src/frida-helper \
-			LOADER=../../../../build/tmp-mac-universal/frida-core/lib/loader/.libs/libfrida-loader.dylib!FridaLoader.dylib \
 			AGENT=../../../../build/tmp-mac-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib!frida-agent.dylib \
 		&& make install-data-am
 	@touch -c $@
-build/frida-ios-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-universal/frida-core/src/frida-helper build/tmp-ios-universal/frida-core/lib/loader/.libs/libfrida-loader.dylib build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib
+build/frida-ios-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-universal/frida-core/src/frida-helper build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib
 	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-ios-arm/frida-core/src/libfrida_core_la-frida.lo)
 	. build/frida-env-ios-arm.rc \
 		&& cd build/tmp-ios-arm/frida-core \
 		&& make -C src install \
 			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-mac-$(build_arch)\" --toolchain=apple" \
 			HELPER=../../../../build/tmp-ios-universal/frida-core/src/frida-helper \
-			LOADER=../../../../build/tmp-ios-universal/frida-core/lib/loader/.libs/libfrida-loader.dylib!FridaLoader.dylib \
 			AGENT=../../../../build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib!frida-agent.dylib \
 		&& make install-data-am
 	@touch -c $@
-build/frida-ios-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-universal/frida-core/src/frida-helper build/tmp-ios-universal/frida-core/lib/loader/.libs/libfrida-loader.dylib build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib
+build/frida-ios-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-universal/frida-core/src/frida-helper build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib
 	@$(call ensure_relink,frida-core/src/frida.c,build/tmp-ios-arm64/frida-core/src/libfrida_core_la-frida.lo)
 	. build/frida-env-ios-arm64.rc \
 		&& cd build/tmp-ios-arm64/frida-core \
 		&& make -C src install \
 			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-mac-$(build_arch)\" --toolchain=apple" \
 			HELPER=../../../../build/tmp_stripped-ios-arm64/frida-core/src/frida-helper \
-			LOADER=../../../../build/tmp-ios-universal/frida-core/lib/loader/.libs/libfrida-loader.dylib!FridaLoader.dylib \
 			AGENT=../../../../build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib!frida-agent.dylib \
 		&& make install-data-am
 	@touch -c $@
-build/frida_thin-ios-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-ios-arm/frida-core/Makefile build/tmp_stripped-ios-arm/frida-core/src/frida-helper build/tmp-ios-arm/frida-core/lib/loader/libfrida-loader.la build/tmp-ios-arm/frida-core/lib/agent/libfrida-agent.la
+build/frida_thin-ios-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-ios-arm/frida-core/Makefile build/tmp_stripped-ios-arm/frida-core/src/frida-helper build/tmp-ios-arm/frida-core/lib/agent/libfrida-agent.la
 	@$(call ensure_relink,frida-core/src/frida.c,build/tmp_thin-ios-arm/frida-core/src/libfrida_core_la-frida.lo)
-	. build/frida-env-ios-arm.rc \
-		&& for name in loader agent; do \
-			lib=build/tmp_thin-ios-arm/frida-core/src/libfrida-$$name.dylib; \
-			cp build/tmp-ios-arm/frida-core/lib/$$name/.libs/libfrida-$$name.dylib $$lib || exit 1; \
-			$$STRIP -Sx $$lib || exit 1; \
-			$$CODESIGN -f -s "$$IOS_CERTID" $$lib || exit 1; \
-		done
+	. build/frida-env-ios-arm.rc; \
+		lib=build/tmp_thin-ios-arm/frida-core/src/libfrida-agent.dylib; \
+		cp build/tmp-ios-arm/frida-core/lib/agent/.libs/libfrida-agent.dylib $$lib || exit 1; \
+		$$STRIP -Sx $$lib || exit 1; \
+		$$CODESIGN -f -s "$$IOS_CERTID" $$lib || exit 1
 	. build/frida-env-ios-arm.rc \
 		&& cd build/tmp_thin-ios-arm/frida-core \
 		&& make -C lib/interfaces \
@@ -202,11 +197,10 @@ build/frida_thin-ios-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-ios-arm
 		&& make -C src install \
 			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-mac-$(build_arch)\" --toolchain=apple" \
 			HELPER=../../../../build/tmp_stripped-ios-arm/frida-core/src/frida-helper \
-			LOADER=./libfrida-loader.dylib!FridaLoader.dylib \
 			AGENT=./libfrida-agent.dylib!frida-agent.dylib \
 		&& make install-data-am
 	@touch -c $@
-build/frida_thin-ios-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-ios-arm64/frida-core/Makefile build/tmp_stripped-ios-arm64/frida-core/src/frida-helper build/tmp-ios-universal/frida-core/lib/loader/.libs/libfrida-loader.dylib build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib
+build/frida_thin-ios-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-ios-arm64/frida-core/Makefile build/tmp_stripped-ios-arm64/frida-core/src/frida-helper build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib
 	@$(call ensure_relink,frida-core/src/frida.c,build/tmp_thin-ios-arm64/frida-core/src/libfrida_core_la-frida.lo)
 	. build/frida-env-ios-arm64.rc \
 		&& cd build/tmp_thin-ios-arm64/frida-core \
@@ -216,7 +210,6 @@ build/frida_thin-ios-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-ios-a
 		&& make -C src install \
 			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-mac-$(build_arch)\" --toolchain=apple" \
 			HELPER=../../../../build/tmp_stripped-ios-arm64/frida-core/src/frida-helper \
-			LOADER=../../../../build/tmp-ios-universal/frida-core/lib/loader/.libs/libfrida-loader.dylib!FridaLoader.dylib \
 			AGENT=../../../../build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib!frida-agent.dylib \
 		&& make install-data-am
 	@touch -c $@
@@ -346,28 +339,6 @@ build/tmp-%/frida-core/lib/loader/libfrida-loader.la: build/tmp-%/frida-core/Mak
 	. build/frida-env-$*.rc && make -C build/tmp-$*/frida-core/lib/loader
 	@touch -c $@
 
-build/tmp-mac-universal/frida-core/lib/loader/.libs/libfrida-loader.dylib: build/tmp-mac-i386/frida-core/lib/loader/libfrida-loader.la build/tmp-mac-x86_64/frida-core/lib/loader/libfrida-loader.la
-	@if [ -z "$$MAC_CERTID" ]; then echo "MAC_CERTID not set, see https://github.com/frida/frida#mac-and-ios"; exit 1; fi
-	mkdir -p $(@D)
-	cp build/tmp-mac-i386/frida-core/lib/loader/.libs/libfrida-loader.dylib $(@D)/libfrida-loader-32.dylib
-	cp build/tmp-mac-x86_64/frida-core/lib/loader/.libs/libfrida-loader.dylib $(@D)/libfrida-loader-64.dylib
-	. build/frida-env-mac-$(build_arch).rc \
-		&& $$STRIP -Sx $(@D)/libfrida-loader-32.dylib $(@D)/libfrida-loader-64.dylib \
-		&& $$LIPO $(@D)/libfrida-loader-32.dylib $(@D)/libfrida-loader-64.dylib -create -output $@.tmp \
-		&& $$CODESIGN -f -s "$$MAC_CERTID" $@.tmp
-	rm $(@D)/libfrida-loader-32.dylib $(@D)/libfrida-loader-64.dylib
-	mv $@.tmp $@
-build/tmp-ios-universal/frida-core/lib/loader/.libs/libfrida-loader.dylib: build/tmp-ios-arm/frida-core/lib/loader/libfrida-loader.la build/tmp-ios-arm64/frida-core/lib/loader/libfrida-loader.la
-	@if [ -z "$$IOS_CERTID" ]; then echo "IOS_CERTID not set, see https://github.com/frida/frida#mac-and-ios"; exit 1; fi
-	mkdir -p $(@D)
-	cp build/tmp-ios-arm/frida-core/lib/loader/.libs/libfrida-loader.dylib $(@D)/libfrida-loader-32.dylib
-	cp build/tmp-ios-arm64/frida-core/lib/loader/.libs/libfrida-loader.dylib $(@D)/libfrida-loader-64.dylib
-	. build/frida-env-ios-arm64.rc \
-		&& $$STRIP -Sx $(@D)/libfrida-loader-32.dylib $(@D)/libfrida-loader-64.dylib \
-		&& $$LIPO $(@D)/libfrida-loader-32.dylib $(@D)/libfrida-loader-64.dylib -create -output $@.tmp \
-		&& $$CODESIGN -f -s "$$IOS_CERTID" $@.tmp
-	rm $(@D)/libfrida-loader-32.dylib $(@D)/libfrida-loader-64.dylib
-	mv $@.tmp $@
 build/tmp_stripped-%/frida-core/lib/loader/.libs/libfrida-loader.so: build/tmp-%/frida-core/lib/loader/libfrida-loader.la
 	mkdir -p $(@D)
 	cp build/tmp-$*/frida-core/lib/loader/.libs/libfrida-loader.so $@.tmp
