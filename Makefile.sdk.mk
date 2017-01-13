@@ -5,7 +5,7 @@ MAKE_J ?= -j 8
 repo_base_url := "git://github.com/frida"
 repo_suffix := ".git"
 
-zlib_version := 1.2.8
+zlib_version := 1.2.10
 libiconv_version := 1.14
 binutils_version := 2.25
 
