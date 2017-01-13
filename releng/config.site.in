@@ -163,6 +163,7 @@ case "$PACKAGE_TARNAME" in
     with_pcre=internal
     enable_debug=minimum
     enable_dtrace=no
+    enable_libmount=no
     enable_tests=no
 
     enable_shared=no
