@@ -4,7 +4,7 @@ MAKE_J ?= -j 8
 repo_base_url = "git://github.com/frida"
 repo_suffix = ".git"
 
-m4_version := 1.4.17
+m4_version := 1.4.18
 autoconf_version := 2.69
 automake_version := 1.15
 libtool_version := 2.4.6
