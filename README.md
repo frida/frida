@@ -1,4 +1,5 @@
 Inject JavaScript to explore native apps on Windows, macOS, Linux, iOS, Android, and QNX.
+
 Two ways to install—
 ===
 
