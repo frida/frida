@@ -26,7 +26,7 @@ function Install-Python2Bits()
 
 function Install-Python3Bits()
 {
-    $version = "3.5.1"
+    $version = "3.6.0"
     $base = "https://www.python.org/ftp/python/$version/"
 
     $staging = "$pwd\staging"
