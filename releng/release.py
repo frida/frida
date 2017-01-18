@@ -149,8 +149,12 @@ if __name__ == '__main__':
         return upload
 
     def upload_file(name_template, path, upload):
-        asset_filename = (name_template + ".xz").format(version=version)
-        data = subprocess.check_output(["xz", "-z", "-c", "-T", "0", path])
+        if system == 'Windows':
+            asset_filename = (name_template + ".xz").format(version=version)
+            data = subprocess.check_output([szip, "a", "-txz", "-so", asset_filename, path])
+        else:
+            asset_filename = (name_template + ".xz").format(version=version)
+            data = subprocess.check_output(["xz", "-z", "-c", "-T", "0", path])
         upload(asset_filename, "application/x-xz", data)
 
     def upload_directory(name_template, path, upload):
@@ -211,6 +215,12 @@ if __name__ == '__main__':
 
             upload_devkits("windows-i386", upload)
             upload_devkits("windows-x86_64", upload)
+
+            upload_file("frida-server-{version}-windows-i386.exe", os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "bin", "frida-server.exe"), upload)
+            upload_file("frida-server-{version}-windows-x86_64.exe", os.path.join(build_dir, "build", "frida-windows", "x64-Release", "bin", "frida-server.exe"), upload)
+
+            upload_file("frida-gadget-{version}-windows-i386.dll", os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "bin", "frida-gadget.dll"), upload)
+            upload_file("frida-gadget-{version}-windows-x86_64.dll", os.path.join(build_dir, "build", "frida-windows", "x64-Release", "bin", "frida-gadget.dll"), upload)
 
             upload_to_pypi(r"C:\Program Files (x86)\Python 2.7\python.exe",
                 os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "lib", "python2.7", "site-packages", "_frida.pyd"))
