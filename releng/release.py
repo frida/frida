@@ -231,7 +231,7 @@ if __name__ == '__main__':
                 os.path.join(build_dir, "build", "frida-windows", "x64-Release", "lib", "python3.6", "site-packages", "_frida.pyd"), sdist=True)
 
             upload_to_npm(r"C:\Program Files (x86)\nodejs\node.exe", upload, publish=False)
-            upload_to_npm(r"C:\Program Files\nodejs\node.exe", upload, publish=True)
+            upload_to_npm(r"C:\Program Files\nodejs\node.exe", upload, publish=False)
         elif slave == 'mac':
             upload = get_github_uploader()
 
@@ -262,7 +262,7 @@ if __name__ == '__main__':
             upload_to_pypi("/usr/local/bin/python3.6",
                 os.path.join(build_dir, "build", "frida-mac-universal", "lib", "python3.6", "site-packages", "_frida.so"))
 
-            upload_to_npm("/opt/node-64/bin/node", upload, publish=False)
+            upload_to_npm("/opt/node-64/bin/node", upload, publish=True)
 
             upload_ios_deb("frida", os.path.join(build_dir, "build", "frida_thin-ios-arm64", "bin", "frida-server"))
             upload_ios_deb("frida32", os.path.join(build_dir, "build", "frida_thin-ios-arm", "bin", "frida-server"))
