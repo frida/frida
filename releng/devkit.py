@@ -211,7 +211,15 @@ def generate_library_windows(package, frida_root, host, output_dir, library_file
     return extra_flags
 
 def generate_library_unix(package, frida_root, host, output_dir, library_filename):
+    output_path = os.path.join(output_dir, library_filename)
+
+    try:
+        os.unlink(output_path)
+    except:
+        pass
+
     rc = env_rc(frida_root, host)
+    ar = probe_env(rc, "echo $AR")
 
     library_flags = subprocess.check_output(
         ["(. \"{rc}\" && $PKG_CONFIG --static --libs {package})".format(rc=rc, package=package)],
@@ -221,34 +229,38 @@ def generate_library_unix(package, frida_root, host, output_dir, library_filenam
     library_paths, extra_flags = resolve_library_paths(library_names, library_dirs)
     extra_flags += infer_linker_flags(library_flags)
 
-    combined_dir = tempfile.mkdtemp(prefix="devkit")
-    object_names = set()
+    ar_version = subprocess.Popen([ar, "--version"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0]
+    mri_supported = ar_version.startswith("GNU ar ")
 
-    for library_path in library_paths:
-        scratch_dir = tempfile.mkdtemp(prefix="devkit")
+    if mri_supported:
+        mri = ["create " + output_path]
+        mri += ["addlib " + path for path in library_paths]
+        mri += ["save", "end"]
+        raw_mri = "\n".join(mri)
+        ar = subprocess.Popen([ar, "-M"], stdin=subprocess.PIPE)
+        ar.communicate(input=raw_mri)
+        if ar.returncode != 0:
+            raise Exception("ar failed")
+    else:
+        combined_dir = tempfile.mkdtemp(prefix="devkit")
+        object_names = set()
 
-        subprocess.check_output(
-            ["(. \"{rc}\" && $AR x {library_path})".format(rc=rc, library_path=library_path)],
-            shell=True,
-            cwd=scratch_dir)
-        for object_path in glob(os.path.join(scratch_dir, "*.o")):
-            object_name = os.path.basename(object_path)
-            while object_name in object_names:
-                object_name = "_" + object_name
-            object_names.add(object_name)
-            shutil.move(object_path, os.path.join(combined_dir, object_name))
+        for library_path in library_paths:
+            scratch_dir = tempfile.mkdtemp(prefix="devkit")
 
-        shutil.rmtree(scratch_dir)
+            subprocess.check_output([ar, "x", library_path], cwd=scratch_dir)
+            for object_path in glob(os.path.join(scratch_dir, "*.o")):
+                object_name = os.path.basename(object_path)
+                while object_name in object_names:
+                    object_name = "_" + object_name
+                object_names.add(object_name)
+                shutil.move(object_path, os.path.join(combined_dir, object_name))
 
-    subprocess.check_output(
-        ["(. \"{rc}\" && $AR rcs {library_path} {object_files} 2>/dev/null)".format(
-            rc=rc,
-            library_path=os.path.join(output_dir, library_filename),
-            object_files=" ".join([pipes.quote(object_name) for object_name in object_names]))],
-        shell=True,
-        cwd=combined_dir)
+            shutil.rmtree(scratch_dir)
 
-    shutil.rmtree(combined_dir)
+        subprocess.check_output([ar, "rcs", output_path] + list(object_names), cwd=combined_dir)
+
+        shutil.rmtree(combined_dir)
 
     return extra_flags
 
