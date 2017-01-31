@@ -275,7 +275,7 @@ def resolve_library_paths(names, dirs):
             paths.append(library_path)
         else:
             flags.append("-l{}".format(name))
-    return (list(set(paths)), flags)
+    return (deduplicate(paths), flags)
 
 def generate_example(filename, package, frida_root, host, kit, extra_ldflags):
     if platform.system() == 'Windows':
