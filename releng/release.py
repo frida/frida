@@ -96,12 +96,9 @@ if __name__ == '__main__':
         deb = os.path.join(build_dir, "{}_{}_iphoneos-arm.deb".format(name, version))
         subprocess.call([os.path.join(frida_core_dir, "tools", "package-server.sh"), server, deb], env=env)
         subprocess.call([scp, deb, "frida@build.frida.re:/home/frida/public_html/debs/"])
-        subprocess.call([ssh, "frida@build.frida.re", "/home/frida/cydia/sync-repo"])
-        #subprocess.call([scp, "frida@build.frida.re:/home/frida/public_html/Release", "Release"])
-        #subprocess.call(["gpg", "-abs", "-o", "Release.gpg", "Release"])
-        #subprocess.call([scp, "Release.gpg", "frida@build.frida.re:/home/frida/public_html/Release.gpg"])
-        #os.unlink("Release")
-        #os.unlink("Release.gpg")
+        subprocess.call([ssh, "frida@build.frida.re", "cd /home/frida/public_html" +
+            " && reprepro -Vb . --confdir /home/frida/.reprepo --ignore=forbiddenchar includedeb stable debs/" + os.path.basename(deb) +
+            " && cp dists/stable/main/binary-iphoneos-arm/Packages.gz ."])
         os.unlink(deb)
 
     def get_github_uploader():
