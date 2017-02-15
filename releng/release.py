@@ -294,12 +294,18 @@ if __name__ == '__main__':
         elif slave == 'android':
             upload = get_github_uploader()
 
+            upload_devkits("android-i386", upload)
+            upload_devkits("android-x86_64", upload)
             upload_devkits("android-arm", upload)
             upload_devkits("android-arm64", upload)
 
+            upload_file("frida-server-{version}-android-i386", os.path.join(build_dir, "build", "frida_stripped-android-i386", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-android-x86_64", os.path.join(build_dir, "build", "frida_stripped-android-x86_64", "bin", "frida-server"), upload)
             upload_file("frida-server-{version}-android-arm", os.path.join(build_dir, "build", "frida_stripped-android-arm", "bin", "frida-server"), upload)
             upload_file("frida-server-{version}-android-arm64", os.path.join(build_dir, "build", "frida_stripped-android-arm64", "bin", "frida-server"), upload)
 
+            upload_file("frida-gadget-{version}-android-i386.so", os.path.join(build_dir, "build", "frida-android-i386", "lib", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-android-x86_64.so", os.path.join(build_dir, "build", "frida-android-x86_64", "lib", "frida-gadget.so"), upload)
             upload_file("frida-gadget-{version}-android-arm.so", os.path.join(build_dir, "build", "frida-android-arm", "lib", "frida-gadget.so"), upload)
             upload_file("frida-gadget-{version}-android-arm64.so", os.path.join(build_dir, "build", "frida-android-arm64", "lib", "frida-gadget.so"), upload)
         elif slave == 'arm':

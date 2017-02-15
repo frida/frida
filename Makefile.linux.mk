@@ -385,10 +385,12 @@ server-mips: build/frida_stripped-linux-mips/bin/frida-server ##@server Build fo
 server-mipsel: build/frida_stripped-linux-mipsel/bin/frida-server ##@server Build for mipsel
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida_stripped-linux-mipsel/bin/frida-server $(BINDIST)/bin/frida-server-linux-mipsel
-server-android: build/frida_stripped-android-arm/bin/frida-server build/frida_stripped-android-arm64/bin/frida-server ##@server Build for Android
+server-android: build/frida_stripped-android-i386/bin/frida-server build/frida_stripped-android-x86_64/bin/frida-server build/frida_stripped-android-arm/bin/frida-server build/frida_stripped-android-arm64/bin/frida-server ##@server Build for Android
 	mkdir -p $(BINDIST)/bin
-	cp -f build/frida_stripped-android-arm/bin/frida-server $(BINDIST)/bin/frida-server-android
-	cp -f build/frida_stripped-android-arm64/bin/frida-server $(BINDIST)/bin/frida-server-android64
+	cp -f build/frida_stripped-android-i386/bin/frida-server $(BINDIST)/bin/frida-server-android-i386
+	cp -f build/frida_stripped-android-x86_64/bin/frida-server $(BINDIST)/bin/frida-server-android-x86_64
+	cp -f build/frida_stripped-android-arm/bin/frida-server $(BINDIST)/bin/frida-server-android-arm
+	cp -f build/frida_stripped-android-arm64/bin/frida-server $(BINDIST)/bin/frida-server-android-arm64
 server-qnx-arm: build/frida_stripped-qnx-arm/bin/frida-server ##@server Build for QNX-arm
 	mkdir -p $(BINDIST)/bin
 	cp -f build/frida_stripped-qnx-arm/bin/frida-server $(BINDIST)/bin/frida-server-qnx-arm
@@ -415,6 +417,12 @@ gadget-32: build/frida_stripped-linux-i386/lib/frida-gadget.so ##@gadget Build f
 gadget-64: build/frida_stripped-linux-x86_64/lib/frida-gadget.so ##@gadget Build for x86-64
 	mkdir -p $(BINDIST)/lib
 	cp -f $< $(BINDIST)/lib/frida-gadget-64.so
+gadget-android: build/frida-android-i386/lib/frida-gadget.so build/frida-android-x86_64/lib/frida-gadget.so build/frida-android-arm/lib/frida-gadget.so build/frida-android-arm64/lib/frida-gadget.so ##@gadget Build for Android
+	mkdir -p $(BINDIST)/lib
+	cp -f build/frida-android-i386/lib/frida-gadget.so $(BINDIST)/lib/frida-gadget-android-i386.so
+	cp -f build/frida-android-x86_64/lib/frida-gadget.so $(BINDIST)/lib/frida-gadget-android-x86_64.so
+	cp -f build/frida-android-arm/lib/frida-gadget.so $(BINDIST)/lib/frida-gadget-android-arm.so
+	cp -f build/frida-android-arm64/lib/frida-gadget.so $(BINDIST)/lib/frida-gadget-android-arm64.so
 gadget-arm: build/frida_stripped-linux-arm/lib/frida-gadget.so ##@gadget Build for linux-arm
 	mkdir -p $(BINDIST)/lib
 	cp -f $< $(BINDIST)/lib/frida-gadget-arm.so
