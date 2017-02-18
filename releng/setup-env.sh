@@ -339,6 +339,7 @@ case $host_platform in
     RANLIB="$android_gcc_toolchain/bin/${android_host_toolprefix}ranlib"
     STRIP="$android_gcc_toolchain/bin/${android_host_toolprefix}strip"
 
+    OBJCOPY="$android_gcc_toolchain/bin/${android_host_toolprefix}objcopy"
     OBJDUMP="$android_gcc_toolchain/bin/${android_host_toolprefix}objdump"
 
     CFLAGS="$android_host_cflags \
@@ -560,6 +561,14 @@ env_rc=build/${FRIDA_ENV_NAME:-frida}-env-${host_platform_arch}.rc
   echo "export CONFIG_SITE=\"$CONFIG_SITE\""
   echo "unset LANG LC_COLLATE LC_CTYPE LC_MESSAGES LC_NUMERIC LC_TIME"
 ) > $env_rc
+
+case $host_platform in
+  android)
+    (
+      echo "export OBJCOPY=\"$OBJCOPY\""
+    ) >> $env_rc
+    ;;
+esac
 
 case $host_platform in
   linux|android|qnx)
