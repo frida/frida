@@ -1,1 +1,1 @@
-https://build.frida.re/toolchain-20170114-windows-i386.exe
+https://build.frida.re/toolchain-20170221-windows-i386.exe
