@@ -599,7 +599,7 @@ build/frida_stripped-%/lib/node_modules/frida: build/frida-%/lib/pkgconfig/frida
 		&& mv ../$@.tmp ../$@
 
 check-node-mac: build/frida_stripped-mac-$(build_arch)/lib/node_modules/frida ##@node Test Node.js bindings for Mac
-	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha
+	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha --timeout 60000
 
 
 install-mac: install-python-mac ##@utilities Install frida utilities (frida{-discover,-ls-devices,-ps,-trace})

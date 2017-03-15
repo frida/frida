@@ -527,9 +527,9 @@ build/frida_stripped-%/lib/node_modules/frida: build/frida-%/lib/pkgconfig/frida
 		&& mv ../$@.tmp ../$@
 
 check-node-32: build/frida_stripped-linux-i386/lib/node_modules/frida ##@node Test Node.js bindings for i386
-	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha
+	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha --timeout 60000
 check-node-64: build/frida_stripped-linux-x86_64/lib/node_modules/frida ##@node Test Node.js bindings for x86-64
-	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha
+	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha --timeout 60000
 
 
 .PHONY: \
