@@ -630,6 +630,51 @@ uninstall-mac: ##@utilities Uninstall frida utilities
 	done
 
 
+glib-mac: glib-mac-i386 glib-mac-x86_64
+glib-mac-i386:
+	@make -f Makefile.sdk.mk FRIDA_HOST=mac-i386 build/fs-mac-i386/lib/pkgconfig/glib-2.0.pc
+glib-mac-x86_64:
+	@make -f Makefile.sdk.mk FRIDA_HOST=mac-x86_64 build/fs-mac-x86_64/lib/pkgconfig/glib-2.0.pc
+
+glib-ios: glib-ios-arm glib-ios-arm64
+glib-ios-arm:
+	@make -f Makefile.sdk.mk FRIDA_HOST=ios-arm build/fs-ios-arm/lib/pkgconfig/glib-2.0.pc
+glib-ios-arm64:
+	@make -f Makefile.sdk.mk FRIDA_HOST=ios-arm64 build/fs-ios-arm64/lib/pkgconfig/glib-2.0.pc
+
+glib-symlinks:
+	@cd build; \
+	for candidate in $$(find . -type d -name "frida-*" -mindepth 1 -maxdepth 1); do \
+		host_arch=$$(echo $$candidate | cut -f2- -d"-"); \
+		if [ -d "fs-tmp-$$host_arch/glib" ]; then \
+			echo "✓ $$host_arch"; \
+			rm -rf sdk-$$host_arch/include/glib-2.0 sdk-$$host_arch/include/gio-unix-2.0 sdk-$$host_arch/lib/glib-2.0; \
+			ln -s ../../fs-$$host_arch/include/glib-2.0 sdk-$$host_arch/include/glib-2.0; \
+			ln -s ../../fs-$$host_arch/include/gio-unix-2.0 sdk-$$host_arch/include/gio-unix-2.0; \
+			ln -s ../../fs-$$host_arch/lib/glib-2.0 sdk-$$host_arch/lib/glib-2.0; \
+			for name in glib gthread gmodule gobject gio; do \
+				libname=lib$$name-2.0.a; \
+				rm -f sdk-$$host_arch/lib/$$libname; \
+				ln -s ../../fs-tmp-$$host_arch/glib/$$name/.libs/$$libname sdk-$$host_arch/lib/$$libname; \
+				pcname=$$name-2.0.pc; \
+				rm -f sdk-$$host_arch/lib/pkgconfig/$$pcname; \
+				ln -s ../../../fs-$$host_arch/lib/pkgconfig/$$pcname sdk-$$host_arch/lib/pkgconfig/$$pcname; \
+			done; \
+			for name in gmodule-export gmodule-no-export gio-unix; do \
+				pcname=$$name-2.0.pc; \
+				rm -f sdk-$$host_arch/lib/pkgconfig/$$pcname; \
+				ln -s ../../../fs-$$host_arch/lib/pkgconfig/$$pcname sdk-$$host_arch/lib/pkgconfig/$$pcname; \
+			done; \
+			for name in glib-2.0.m4 glib-gettext.m4 gsettings.m4; do \
+				rm -f sdk-$$host_arch/share/aclocal/$$name; \
+				ln -s ../../../fs-$$host_arch/share/aclocal/$$name sdk-$$host_arch/share/aclocal/$$name; \
+			done; \
+			rm -rf sdk-$$host_arch/share/glib-2.0; \
+			ln -s ../../fs-$$host_arch/share/glib-2.0 sdk-$$host_arch/share/glib-2.0; \
+		fi; \
+	done
+
+
 .PHONY: \
 	distclean clean clean-submodules git-submodules git-submodule-stamps \
 	capstone-update-submodule-stamp \
@@ -639,5 +684,6 @@ uninstall-mac: ##@utilities Uninstall frida utilities
 	gadget-mac gadget-ios gadget-android \
 	python-mac check-python-mac install-python-mac uninstall-python-mac frida-python-update-submodule-stamp \
 	node-mac check-node-mac frida-node-update-submodule-stamp \
-	install-mac uninstall-mac
+	install-mac uninstall-mac \
+	glib-mac glib-mac-i386 glib-mac-x86_64 glib-ios glib-ios-arm glib-ios-arm64 glib-symlinks
 .SECONDARY:
