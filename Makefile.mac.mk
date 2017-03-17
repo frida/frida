@@ -630,18 +630,8 @@ uninstall-mac: ##@utilities Uninstall frida utilities
 	done
 
 
-glib-mac: glib-mac-i386 glib-mac-x86_64
-glib-mac-i386:
-	@make -f Makefile.sdk.mk FRIDA_HOST=mac-i386 build/fs-mac-i386/lib/pkgconfig/glib-2.0.pc
-glib-mac-x86_64:
-	@make -f Makefile.sdk.mk FRIDA_HOST=mac-x86_64 build/fs-mac-x86_64/lib/pkgconfig/glib-2.0.pc
-
-glib-ios: glib-ios-arm glib-ios-arm64
-glib-ios-arm:
-	@make -f Makefile.sdk.mk FRIDA_HOST=ios-arm build/fs-ios-arm/lib/pkgconfig/glib-2.0.pc
-glib-ios-arm64:
-	@make -f Makefile.sdk.mk FRIDA_HOST=ios-arm64 build/fs-ios-arm64/lib/pkgconfig/glib-2.0.pc
-
+glib:
+	@make -f Makefile.sdk.mk FRIDA_HOST=$(GLIB_HOST) build/fs-$(GLIB_HOST)/lib/pkgconfig/glib-2.0.pc
 glib-symlinks:
 	@cd build; \
 	for candidate in $$(find . -type d -name "frida-*" -mindepth 1 -maxdepth 1); do \
@@ -685,5 +675,5 @@ glib-symlinks:
 	python-mac check-python-mac install-python-mac uninstall-python-mac frida-python-update-submodule-stamp \
 	node-mac check-node-mac frida-node-update-submodule-stamp \
 	install-mac uninstall-mac \
-	glib-mac glib-mac-i386 glib-mac-x86_64 glib-ios glib-ios-arm glib-ios-arm64 glib-symlinks
+	glib glib-shell glib-symlinks
 .SECONDARY:
