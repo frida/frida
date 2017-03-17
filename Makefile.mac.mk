@@ -632,6 +632,8 @@ uninstall-mac: ##@utilities Uninstall frida utilities
 
 glib:
 	@make -f Makefile.sdk.mk FRIDA_HOST=$(GLIB_HOST) build/fs-$(GLIB_HOST)/lib/pkgconfig/glib-2.0.pc
+glib-shell:
+	@. build/fs-env-$(GLIB_HOST).rc && cd build/fs-tmp-$(GLIB_HOST)/glib && bash
 glib-symlinks:
 	@cd build; \
 	for candidate in $$(find . -type d -name "frida-*" -mindepth 1 -maxdepth 1); do \
