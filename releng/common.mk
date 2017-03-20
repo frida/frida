@@ -51,3 +51,39 @@ build/frida-version.h: releng/generate-version-header.py .git/refs/heads/master
 	@mv $@.tmp $@
 
 ensure_relink = test $(1) -nt $(2) || touch -c $(2)
+
+glib:
+	@make -f Makefile.sdk.mk FRIDA_HOST=$(GLIB_HOST) build/fs-$(GLIB_HOST)/lib/pkgconfig/glib-2.0.pc
+glib-shell:
+	@. build/fs-env-$(GLIB_HOST).rc && cd build/fs-tmp-$(GLIB_HOST)/glib && bash
+glib-symlinks:
+	@cd build; \
+	for candidate in $$(find . -mindepth 1 -maxdepth 1 -type d -name "frida-*"); do \
+		host_arch=$$(echo $$candidate | cut -f2- -d"-"); \
+		if [ -d "fs-tmp-$$host_arch/glib" ]; then \
+			echo "✓ $$host_arch"; \
+			rm -rf sdk-$$host_arch/include/glib-2.0 sdk-$$host_arch/include/gio-unix-2.0 sdk-$$host_arch/lib/glib-2.0; \
+			ln -s ../../fs-$$host_arch/include/glib-2.0 sdk-$$host_arch/include/glib-2.0; \
+			ln -s ../../fs-$$host_arch/include/gio-unix-2.0 sdk-$$host_arch/include/gio-unix-2.0; \
+			ln -s ../../fs-$$host_arch/lib/glib-2.0 sdk-$$host_arch/lib/glib-2.0; \
+			for name in glib gthread gmodule gobject gio; do \
+				libname=lib$$name-2.0.a; \
+				rm -f sdk-$$host_arch/lib/$$libname; \
+				ln -s ../../fs-tmp-$$host_arch/glib/$$name/.libs/$$libname sdk-$$host_arch/lib/$$libname; \
+				pcname=$$name-2.0.pc; \
+				rm -f sdk-$$host_arch/lib/pkgconfig/$$pcname; \
+				ln -s ../../../fs-$$host_arch/lib/pkgconfig/$$pcname sdk-$$host_arch/lib/pkgconfig/$$pcname; \
+			done; \
+			for name in gmodule-export gmodule-no-export gio-unix; do \
+				pcname=$$name-2.0.pc; \
+				rm -f sdk-$$host_arch/lib/pkgconfig/$$pcname; \
+				ln -s ../../../fs-$$host_arch/lib/pkgconfig/$$pcname sdk-$$host_arch/lib/pkgconfig/$$pcname; \
+			done; \
+			for name in glib-2.0.m4 glib-gettext.m4 gsettings.m4; do \
+				rm -f sdk-$$host_arch/share/aclocal/$$name; \
+				ln -s ../../../fs-$$host_arch/share/aclocal/$$name sdk-$$host_arch/share/aclocal/$$name; \
+			done; \
+			rm -rf sdk-$$host_arch/share/glib-2.0; \
+			ln -s ../../fs-$$host_arch/share/glib-2.0 sdk-$$host_arch/share/glib-2.0; \
+		fi; \
+	done

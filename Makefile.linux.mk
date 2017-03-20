@@ -540,5 +540,6 @@ check-node-64: build/frida_stripped-linux-x86_64/lib/node_modules/frida ##@node 
 	core-32 core-64 core-android check-core-32 check-core-64 frida-core-update-submodule-stamp \
 	server-32 server-64 server-android server-qnx-arm server-qnx-armeabi \
 	python-32 python-64 check-python-32 check-python-64 frida-python-update-submodule-stamp \
-	node-32 node-64 check-node-32 check-node-64 frida-node-update-submodule-stamp
+	node-32 node-64 check-node-32 check-node-64 frida-node-update-submodule-stamp \
+	glib glib-shell glib-symlinks
 .SECONDARY:
