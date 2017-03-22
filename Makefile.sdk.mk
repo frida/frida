@@ -125,7 +125,7 @@ build/fs-tmp-%/zlib/Makefile: build/fs-env-%.rc build/.zlib-stamp
 	. $< \
 		&& export PACKAGE_TARNAME=zlib \
 		&& . $$CONFIG_SITE \
-		&& export CFLAGS CXXFLAGS OBJCFLAGS \
+		&& export CC CFLAGS \
 		&& case "$*" in \
 			linux-arm) \
 				export PATH="$$(dirname $$NM):$$PATH"; \
