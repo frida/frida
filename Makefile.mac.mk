@@ -104,7 +104,7 @@ build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/capstone-sub
 			*-i386)   capstone_archs="x86"     ;; \
 			*-x86_64) capstone_archs="x86"     ;; \
 			*-arm)    capstone_archs="arm"     ;; \
-			*-arm64)  capstone_archs="aarch64" ;; \
+			*-arm64)  capstone_archs="aarch64 arm" ;; \
 		esac \
 		&& make -C capstone \
 			PREFIX=$$frida_prefix \
