@@ -11,7 +11,7 @@ This is the recommended way to get started. All you need to do is:
     npm install frida # Node.js bindings
 
 You may also download pre-built binaries for various operating systems from
-[http://build.frida.re/frida/](http://build.frida.re/frida/).
+[https://build.frida.re/frida/](https://build.frida.re/frida/).
 
 ## 2. Build your own binary
 
@@ -51,9 +51,9 @@ To ensure that macOS accepts the newly created certificate, restart the
 
 (Requires Visual Studio 2015.)
 
-See [http://www.frida.re/docs/building/](http://www.frida.re/docs/building/)
+See [https://www.frida.re/docs/building/](https://www.frida.re/docs/building/)
 for details.
 
 ## Learn more
 
-Have a look at our [documentation](http://www.frida.re/docs/home/).
+Have a look at our [documentation](https://www.frida.re/docs/home/).
