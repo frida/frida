@@ -261,7 +261,7 @@ build/fs-tmp-%/binutils/bfd/libbfd.a: build/fs-env-%.rc build/fs-tmp-%/binutils/
 	. $< && make -C $(@D) $(MAKE_J)
 
 
-define make-git-module-rules
+define make-git-autotools-module-rules
 build/.$1-stamp:
 	$(RM) -r $1
 	git clone $(repo_base_url)/$1$(repo_suffix)
@@ -286,17 +286,41 @@ $2: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
 	@touch $$@
 endef
 
-$(eval $(call make-git-module-rules,xz,build/fs-%/lib/pkgconfig/liblzma.pc,))
+define make-git-meson-module-rules
+build/.$1-stamp:
+	$(RM) -r $1
+	git clone $(repo_base_url)/$1$(repo_suffix)
+	@mkdir -p $$(@D)
+	@touch $$@
 
-$(eval $(call make-git-module-rules,libunwind,build/fs-%/lib/pkgconfig/libunwind.pc,build/fs-%/lib/pkgconfig/liblzma.pc))
+build/fs-tmp-%/$1/build.ninja: build/fs-env-%.rc $3
+	$(RM) -r $$(@D)
+	(. $$< \
+		&& . build/fs-config-$(build_platform_arch).site \
+		&& meson \
+			--prefix $$$$frida_prefix \
+			--default-library static \
+			--buildtype minsize \
+			$$(@D) \
+			$1)
 
-$(eval $(call make-git-module-rules,libffi,build/fs-%/lib/pkgconfig/libffi.pc,))
+$2: build/fs-env-%.rc build/fs-tmp-%/$1/build.ninja
+	(. $$< \
+		&& ninja -C build/fs-tmp-$$*/$1 install)
+	@touch $$@
+endef
 
-$(eval $(call make-git-module-rules,glib,build/fs-%/lib/pkgconfig/glib-2.0.pc,build/fs-%/lib/pkgconfig/libffi.pc $(iconv) build/fs-%/lib/libz.a))
+$(eval $(call make-git-autotools-module-rules,xz,build/fs-%/lib/pkgconfig/liblzma.pc,))
 
-$(eval $(call make-git-module-rules,libgee,build/fs-%/lib/pkgconfig/gee-0.8.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc))
+$(eval $(call make-git-autotools-module-rules,libunwind,build/fs-%/lib/pkgconfig/libunwind.pc,build/fs-%/lib/pkgconfig/liblzma.pc))
 
-$(eval $(call make-git-module-rules,json-glib,build/fs-%/lib/pkgconfig/json-glib-1.0.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc))
+$(eval $(call make-git-autotools-module-rules,libffi,build/fs-%/lib/pkgconfig/libffi.pc,))
+
+$(eval $(call make-git-autotools-module-rules,glib,build/fs-%/lib/pkgconfig/glib-2.0.pc,build/fs-%/lib/pkgconfig/libffi.pc $(iconv) build/fs-%/lib/libz.a))
+
+$(eval $(call make-git-autotools-module-rules,libgee,build/fs-%/lib/pkgconfig/gee-0.8.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc))
+
+$(eval $(call make-git-meson-module-rules,json-glib,build/fs-%/lib/pkgconfig/json-glib-1.0.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc))
 
 
 ifeq ($(host_arch), i386)
