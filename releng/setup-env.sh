@@ -447,7 +447,7 @@ ACLOCAL_FLAGS="$ACLOCAL_FLAGS -I $FRIDA_TOOLROOT/share/aclocal"
 ACLOCAL="aclocal $ACLOCAL_FLAGS"
 CONFIG_SITE="$FRIDA_BUILD/${frida_env_name_prefix}config-${host_platform_arch}.site"
 
-PKG_CONFIG="$FRIDA_TOOLROOT/bin/pkg-config --static"
+PKG_CONFIG="$FRIDA_TOOLROOT/bin/pkg-config"
 PKG_CONFIG_PATH="$FRIDA_PREFIX_LIB/pkgconfig"
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   PKG_CONFIG="$PKG_CONFIG --define-variable=frida_sdk_prefix=$FRIDA_SDKROOT"
