@@ -367,7 +367,7 @@ ifeq ($(host_platform), mac)
 	v8_host_flags := -f make-mac -D mac_deployment_target=10.9 -D clang=1
 endif
 ifeq ($(host_platform), ios)
-	v8_host_flags := -f make-mac -D mac_deployment_target=10.9 -D ios_deployment_target=7.0 -D clang=1 -D want_separate_host_toolset=1 -D want_separate_host_toolset_mkpeephole=1
+	v8_host_flags := -f make-mac -D mac_deployment_target=10.9 -D ios_deployment_target=7.0 -D clang=1 -D want_separate_host_toolset=1
 endif
 v8_flags := -D host_os=$(build_platform) -D werror='' -D v8_use_external_startup_data=0 -D v8_enable_gdbjit=0 -D v8_enable_i18n_support=0 -D v8_enable_inspector=1 $(v8_host_flags) $(v8_build_flags) $(v8_abi_flags)
 
@@ -482,7 +482,7 @@ build/fs-%/lib/pkgconfig/v8.pc: build/fs-tmp-%/.v8-build-stamp
 	echo "" >> $@.tmp
 	echo "Name: V8" >> $@.tmp
 	echo "Description: V8 JavaScript Engine" >> $@.tmp
-	echo "Version: 5.8.60.0" >> $@.tmp
+	echo "Version: 6.0.124.0" >> $@.tmp
 	echo "Libs: -L\$${libdir} -lv8_base -lv8_snapshot -lv8_libplatform -lv8_libsampler -lv8_libbase" >> $@.tmp
 ifdef v8_libs_private
 	echo Libs.private: $(v8_libs_private) >> $@.tmp
