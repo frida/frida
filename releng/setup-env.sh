@@ -454,11 +454,12 @@ if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$FRIDA_SDKROOT/lib/pkgconfig"
 fi
 
-VALAC="$FRIDA_TOOLROOT/bin/valac-0.36 --target-glib=2.53 --vapidir=\"$FRIDA_TOOLROOT/share/vala-0.36/vapi\""
+VALAC="$FRIDA_TOOLROOT/bin/valac-0.36"
+VALAFLAGS="--target-glib=2.53 --vapidir=\"$FRIDA_TOOLROOT/share/vala-0.36/vapi\""
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
-  VALAC="$VALAC --vapidir=\"$FRIDA_SDKROOT/share/vala/vapi\""
+  VALAFLAGS="$VALAFLAGS --vapidir=\"$FRIDA_SDKROOT/share/vala/vapi\""
 fi
-VALAC="$VALAC --vapidir=\"$FRIDA_PREFIX/share/vala/vapi\""
+VALAFLAGS="$VALAFLAGS --vapidir=\"$FRIDA_PREFIX/share/vala/vapi\""
 
 [ ! -d "$FRIDA_PREFIX/share/aclocal}" ] && mkdir -p "$FRIDA_PREFIX/share/aclocal"
 [ ! -d "$FRIDA_PREFIX/lib}" ] && mkdir -p "$FRIDA_PREFIX/lib"
@@ -540,6 +541,7 @@ env_rc=build/${FRIDA_ENV_NAME:-frida}-env-${host_platform_arch}.rc
   echo "export PKG_CONFIG=\"$PKG_CONFIG\""
   echo "export PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\""
   echo "export VALAC=\"$VALAC\""
+  echo "export VALAFLAGS=\"$VALAFLAGS\""
   echo "export CPP=\"$CPP\""
   echo "export CPPFLAGS=\"$CPPFLAGS\""
   echo "export CC=\"$CC\""
