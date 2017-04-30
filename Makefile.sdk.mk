@@ -296,7 +296,7 @@ build/.$1-stamp:
 build/fs-tmp-%/$1/build.ninja: build/fs-env-%.rc $3
 	$(RM) -r $$(@D)
 	(. $$< \
-		&& . build/fs-config-$(build_platform_arch).site \
+		&& . build/fs-config-$$*.site \
 		&& meson \
 			--prefix $$$$frida_prefix \
 			--default-library static \
