@@ -9,7 +9,7 @@ autoconf_version := 2.69
 automake_version := 1.15
 libtool_version := 2.4.6
 gettext_version := 0.19.8.1
-pkg_config_version := 0.29.1
+pkg_config_version := 0.29.2
 
 
 build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,mac,')
