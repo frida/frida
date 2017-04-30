@@ -561,7 +561,8 @@ env_rc=build/${FRIDA_ENV_NAME:-frida}-env-${host_platform_arch}.rc
   echo "export ACLOCAL_FLAGS=\"$ACLOCAL_FLAGS\""
   echo "export ACLOCAL=\"$ACLOCAL\""
   echo "export CONFIG_SITE=\"$CONFIG_SITE\""
-  echo "unset LANG LC_COLLATE LC_CTYPE LC_MESSAGES LC_NUMERIC LC_TIME"
+  echo "unset LANG LC_ALL LC_COLLATE LC_CTYPE LC_MESSAGES LC_NUMERIC LC_TIME"
+  echo "export LC_ALL=en_US.UTF-8"
 ) > $env_rc
 
 case $host_platform in
