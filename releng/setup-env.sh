@@ -117,7 +117,7 @@ fi
 
 prompt_color=33
 
-toolchain_version=20170314
+toolchain_version=20170501
 sdk_version=20170324
 if [ $enable_asan = yes ]; then
   sdk_version="$sdk_version-asan"
@@ -454,8 +454,8 @@ if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$FRIDA_SDKROOT/lib/pkgconfig"
 fi
 
-VALAC="$FRIDA_TOOLROOT/bin/valac-0.36"
-VALAFLAGS="--target-glib=2.53 --vapidir=\"$FRIDA_TOOLROOT/share/vala-0.36/vapi\""
+VALAC="$FRIDA_TOOLROOT/bin/valac-0.38"
+VALAFLAGS="--target-glib=2.53 --vapidir=\"$FRIDA_TOOLROOT/share/vala-0.38/vapi\""
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   VALAFLAGS="$VALAFLAGS --vapidir=\"$FRIDA_SDKROOT/share/vala/vapi\""
 fi
