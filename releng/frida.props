@@ -5,7 +5,7 @@
     <OutDir>$(SolutionDir)build\frida-windows\$(PlatformName)-$(Configuration)\bin\</OutDir>
     <IntDir>$(SolutionDir)build\tmp-windows\$(PlatformName)-$(Configuration)\$(ProjectName)\</IntDir>
     <ValaCompiler>$(SolutionDir)build\toolchain-windows\bin\valac-0.36.exe</ValaCompiler>
-    <ValaFlags>--vapidir="$(SolutionDir)frida-core\vapi" --vapidir="$(SolutionDir)frida-gum\vapi" --vapidir="$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\share\vala\vapi"</ValaFlags>
+    <ValaFlags>--target-glib=2.53 --vapidir="$(SolutionDir)frida-core\vapi" --vapidir="$(SolutionDir)frida-gum\vapi" --vapidir="$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\share\vala\vapi"</ValaFlags>
     <V8Arch Condition=" '$(Platform)' == 'Win32' ">ia32</V8Arch>
     <V8Arch Condition=" '$(Platform)' == 'x64' ">x64</V8Arch>
     <Python27InstallPath32>$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Python\PythonCore\2.7\InstallPath)</Python27InstallPath32>

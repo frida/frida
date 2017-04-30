@@ -454,7 +454,7 @@ if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$FRIDA_SDKROOT/lib/pkgconfig"
 fi
 
-VALAC="$FRIDA_TOOLROOT/bin/valac-0.36 --vapidir=\"$FRIDA_TOOLROOT/share/vala-0.36/vapi\""
+VALAC="$FRIDA_TOOLROOT/bin/valac-0.36 --target-glib=2.53 --vapidir=\"$FRIDA_TOOLROOT/share/vala-0.36/vapi\""
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   VALAC="$VALAC --vapidir=\"$FRIDA_SDKROOT/share/vala/vapi\""
 fi
