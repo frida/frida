@@ -694,18 +694,19 @@ if [ "$FRIDA_ENV_SDK" != 'none' ] && ! grep -Eq "^$sdk_version\$" "$FRIDA_SDKROO
   echo $sdk_version > "$FRIDA_SDKROOT/.version"
 fi
 
-PKG_CONFIG=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-pkgconfig
+PKG_CONFIG=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-pkg-config
 
 pkg_config="$FRIDA_TOOLROOT/bin/pkg-config"
+pkg_config_flags=""
 pkg_config_path="$FRIDA_PREFIX_LIB/pkgconfig"
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
-  pkg_config="$pkg_config --define-variable=frida_sdk_prefix=$FRIDA_SDKROOT"
+  pkg_config_flags=" --define-variable=frida_sdk_prefix=$FRIDA_SDKROOT"
   pkg_config_path="$pkg_config_path:$FRIDA_SDKROOT/lib/pkgconfig"
 fi
 (
   echo "#!/bin/sh"
   echo "export PKG_CONFIG_PATH=\"$pkg_config_path\""
-  echo "exec \"$pkg_config\" \"\$@\""
+  echo "exec \"$pkg_config\"$pkg_config_flags \"\$@\""
 ) > $PKG_CONFIG
 chmod 755 $PKG_CONFIG
 
