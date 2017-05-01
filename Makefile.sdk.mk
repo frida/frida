@@ -293,14 +293,15 @@ build/.$1-stamp:
 	@mkdir -p $$(@D)
 	@touch $$@
 
-build/fs-tmp-%/$1/build.ninja: build/fs-env-%.rc build/.$1-stamp $3
+build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_platform_arch).rc build/fs-env-%.rc build/.$1-stamp $3
 	$(RM) -r $$(@D)
 	(. $$< \
 		&& . build/fs-config-$$*.site \
-		&& meson \
+		&& CPPFLAGS= CFLAGS= CXXFLAGS= OBJCFLAGS= OBJCXXFLAGS= LDFLAGS= meson \
 			--prefix $$$$frida_prefix \
 			--default-library static \
 			--buildtype minsize \
+			--cross-file build/fs-$$*.txt \
 			$$(@D) \
 			$1)
 

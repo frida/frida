@@ -18,6 +18,23 @@ else
 fi
 host_platform_arch=${host_platform}-${host_arch}
 
+meson_host_system=$(echo $host_platform | sed 's,^mac$,darwin,' | sed 's,^ios$,darwin,')
+case $host_arch in
+  i?86)
+    meson_host_cpu_family=x86
+    meson_host_cpu=i686
+    ;;
+  arm)
+    meson_host_cpu_family=arm
+    meson_host_cpu=armv7
+    ;;
+  *)
+    meson_host_cpu_family=$host_arch
+    meson_host_cpu=$host_arch
+    ;;
+esac
+meson_host_endian=little
+
 case $FRIDA_DIET in
   yes|no)
     enable_diet=$FRIDA_DIET
@@ -143,6 +160,19 @@ CXXFLAGS=""
 CPPFLAGS=""
 LDFLAGS=""
 
+meson_root=""
+
+meson_objc=""
+meson_objcpp=""
+
+flags_to_args () {
+  if [ -n "$1" ]; then
+    echo "'$(echo "$1" | sed "s/ /', '/g")'"
+  else
+    echo ""
+  fi
+}
+
 case $host_platform in
   linux)
     case $host_arch in
@@ -157,18 +187,26 @@ case $host_platform in
       arm)
         host_arch_flags="-march=armv5t"
         host_toolprefix="arm-linux-gnueabi-"
+
+        meson_host_cpu="armv5t"
         ;;
       armhf)
         host_arch_flags="-march=armv6"
         host_toolprefix="arm-linux-gnueabihf-"
+
+        meson_host_cpu="armv6"
         ;;
       mips)
         host_arch_flags="-march=mips1"
         host_toolprefix="mips-unknown-linux-uclibc-"
+
+        meson_host_cpu="mips1"
         ;;
       mipsel)
         host_arch_flags="-march=mips1"
         host_toolprefix="mipsel-unknown-linux-uclibc-"
+
+        meson_host_cpu="mips1"
         ;;
     esac
     CPP="${host_toolprefix}cpp"
@@ -183,6 +221,8 @@ case $host_platform in
 
     OBJDUMP="${host_toolprefix}objdump"
 
+    extra_cpp_args=""
+
     CFLAGS="$host_arch_flags -ffunction-sections -fdata-sections"
     case $host_arch in
       mips|mipsel)
@@ -190,6 +230,7 @@ case $host_platform in
         ;;
       *)
         CXXFLAGS="-std=c++11"
+        extra_cpp_args="$extra_cpp_args, '-std=c++11'"
         ;;
     esac
     LDFLAGS="$host_arch_flags -Wl,--no-undefined -Wl,--gc-sections"
@@ -198,6 +239,21 @@ case $host_platform in
       CPPFLAGS="-I$FRIDA_SDKROOT/include"
       LDFLAGS="$LDFLAGS -L$FRIDA_SDKROOT/lib"
     fi
+
+    arch_args=$(flags_to_args $host_arch_flags)
+
+    base_toolchain_args="$arch_args, '-static-libgcc'"
+    base_compiler_args="$base_toolchain_args, '-ffunction-sections', '-fdata-sections'"
+    base_linker_args="$base_toolchain_args, '-Wl,--no-undefined', '-Wl,--gc-sections'"
+
+    meson_c="${host_toolprefix}gcc"
+    meson_cpp="${host_toolprefix}g++"
+
+    meson_c_args="[$base_compiler_args]"
+    meson_cpp_args="[$base_compiler_args, '-static-libstdc++'$extra_cpp_args]"
+
+    meson_c_link_args="[$base_linker_args]"
+    meson_cpp_link_args="[$base_linker_args, '-static-libstdc++']"
     ;;
   mac)
     mac_minver="10.9"
@@ -225,6 +281,27 @@ case $host_platform in
     CFLAGS="-isysroot $mac_sdk_path -mmacosx-version-min=$mac_minver -arch $host_arch"
     CXXFLAGS="-std=c++11 -stdlib=libc++"
     LDFLAGS="-isysroot $mac_sdk_path -Wl,-macosx_version_min,$mac_minver -arch $host_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
+
+    meson_root="$mac_sdk_path"
+
+    base_toolchain_args="'-isysroot', '$mac_sdk_path', '-mmacosx-version-min=$mac_minver', '-arch', '$host_arch'"
+    base_compiler_args="$base_toolchain_args"
+    base_linker_args="$base_toolchain_args, '-Wl,-dead_strip', '-Wl,-no_compact_unwind'"
+
+    meson_c="$CC"
+    meson_cpp="$CXX"
+    meson_objc="$CC"
+    meson_objcpp="$CXX"
+
+    meson_c_args="[$base_compiler_args]"
+    meson_cpp_args="[$base_compiler_args, '-std=c++11', '-stdlib=libc++']"
+    meson_objc_args="[$base_compiler_args]"
+    meson_objcpp_args="[$base_compiler_args, '-std=c++11', '-stdlib=libc++']"
+
+    meson_c_link_args="[$base_linker_args]"
+    meson_cpp_link_args="[$base_linker_args, '-stdlib=libc++']"
+    meson_objc_link_args="[$base_linker_args]"
+    meson_objcpp_link_args="[$base_linker_args, '-stdlib=libc++']"
     ;;
   ios)
     ios_minver="7.0"
@@ -268,11 +345,33 @@ case $host_platform in
     CFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch -fembed-bitcode-marker"
     CXXFLAGS="-std=c++11 -stdlib=libc++"
     LDFLAGS="-isysroot $ios_sdk_path -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -fembed-bitcode-marker -Wl,-dead_strip"
+
+    meson_root="$ios_sdk_path"
+
+    base_toolchain_args="'-isysroot', '$ios_sdk_path', '-miphoneos-version-min=$ios_minver', '-arch', '$ios_arch', '-fembed-bitcode-marker'"
+    base_compiler_args="$base_toolchain_args"
+    base_linker_args="$base_toolchain_args, '-Wl,-dead_strip'"
+
+    meson_c="$CC"
+    meson_cpp="$CXX"
+    meson_objc="$CC"
+    meson_objcpp="$CXX"
+
+    meson_c_args="[$base_compiler_args]"
+    meson_cpp_args="[$base_compiler_args, '-std=c++11', '-stdlib=libc++']"
+    meson_objc_args="[$base_compiler_args]"
+    meson_objcpp_args="[$base_compiler_args, '-std=c++11', '-stdlib=libc++']"
+
+    meson_c_link_args="[$base_linker_args]"
+    meson_cpp_link_args="[$base_linker_args, '-stdlib=libc++']"
+    meson_objc_link_args="[$base_linker_args]"
+    meson_objcpp_link_args="[$base_linker_args, '-stdlib=libc++']"
     ;;
   android)
     android_build_platform=$(echo ${build_platform} | sed 's,^mac$,darwin,')
     android_host_arch=$(echo ${host_arch} | sed 's,^i386$,x86,')
     android_have_unwind=no
+
     case $android_host_arch in
       x86)
         android_target_platform=14
@@ -344,7 +443,7 @@ case $host_platform in
 
     CFLAGS="$android_host_cflags \
 -fPIE \
--ffunction-sections -funwind-tables -fno-exceptions -fno-rtti \
+-ffunction-sections -fdata-sections -funwind-tables -fno-exceptions -fno-rtti \
 -DANDROID \
 -I$android_sysroot/usr/include"
     CXXFLAGS="\
@@ -362,27 +461,78 @@ case $host_platform in
 -Wl,-z,relro \
 -Wl,-z,now \
 -lgcc"
+
     if [ "$FRIDA_ENV_SDK" != 'none' ]; then
       CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
       CPPFLAGS="$CPPFLAGS -I$FRIDA_SDKROOT/include"
       LDFLAGS="$LDFLAGS -L$FRIDA_SDKROOT/lib"
     fi
+
+    meson_root="$android_sysroot"
+
+    arch_args=$(flags_to_args $android_host_cflags)
+    arch_linker_args=$(flags_to_args $android_host_ldflags)
+
+    base_toolchain_args="\
+'--sysroot=$android_sysroot', \
+'--gcc-toolchain=$android_gcc_toolchain', \
+'--target=$android_host_target', \
+'-no-canonical-prefixes'"
+    [ -n "$arch_args" ] && base_toolchain_args="$base_toolchain_args, $arch_args"
+    base_compiler_args="\
+$base_toolchain_args, \
+'-fPIE', \
+'-ffunction-sections', '-fdata-sections', \
+'-DANDROID', \
+'-I$android_sysroot/usr/include'"
+    base_linker_args="\
+$base_toolchain_args, \
+'-fPIE', '-pie', \
+'-Wl,--no-undefined', \
+'-Wl,--gc-sections', \
+'-Wl,-z,noexecstack', \
+'-Wl,-z,relro', \
+'-Wl,-z,now', \
+'-lgcc', \
+$arch_linker_args"
+
+    meson_c="$android_clang_prefix/bin/clang"
+    meson_cpp="$cxx_wrapper"
+
+    meson_c_args="[$base_compiler_args]"
+    meson_cpp_args="['$android_clang_prefix/bin/clang++', $base_compiler_args, \
+'-std=c++11', \
+'-funwind-tables', '-fno-exceptions', '-fno-rtti', \
+'-I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/include', \
+'-I$ANDROID_NDK_ROOT/sources/cxx-stl/gabi++/include', \
+'-I$ANDROID_NDK_ROOT/sources/android/support/include']"
+
+    meson_c_link_args="[$base_linker_args]"
+    meson_cpp_link_args="[$base_linker_args]"
     ;;
   qnx)
     case $host_arch in
       i386)
         qnx_host=i486-pc-nto-qnx6.6.0
         qnx_sysroot=$QNX_TARGET/x86
+
+        host_arch_flags="-march=i686"
         ;;
       armeabi)
         qnx_host=arm-unknown-nto-qnx6.5.0eabi
         qnx_sysroot=$QNX_TARGET/armle-v7
-        qnx_march=armv7-a
+
+        host_arch_flags="-march=armv7-a -mno-unaligned-access"
+
+        meson_host_cpu="armv7"
         ;;
       arm)
         qnx_host=arm-unknown-nto-qnx6.5.0
         qnx_sysroot=$QNX_TARGET/armle
-        qnx_march=armv6
+
+        host_arch_flags="-march=armv6 -mno-unaligned-access"
+
+        meson_host_cpu="armv6"
         ;;
       *)
         echo "Unsupported QNX architecture" > /dev/stderr
@@ -396,9 +546,10 @@ case $host_platform in
 
     PATH="$qnx_toolchain_dir:$PATH"
 
-    CPP="$qnx_toolchain_prefix-cpp -march=$qnx_march -mno-unaligned-access --sysroot=$qnx_sysroot $qnx_preprocessor_flags"
-    CC="$FRIDA_ROOT/releng/cxx-wrapper-qnx.sh $qnx_toolchain_prefix-gcc -march=$qnx_march -mno-unaligned-access --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc"
-    CXX="$FRIDA_ROOT/releng/cxx-wrapper-qnx.sh $qnx_toolchain_prefix-g++ -march=$qnx_march -mno-unaligned-access --sysroot=$qnx_sysroot $qnx_preprocessor_flags -static-libgcc -static-libstdc++ -std=c++11"
+    toolchain_flags="--sysroot=$qnx_sysroot $host_arch_flags $qnx_preprocessor_flags"
+    CPP="$qnx_toolchain_prefix-cpp $toolchain_flags"
+    CC="$FRIDA_ROOT/releng/cxx-wrapper-qnx.sh $qnx_toolchain_prefix-gcc $toolchain_flags -static-libgcc"
+    CXX="$FRIDA_ROOT/releng/cxx-wrapper-qnx.sh $qnx_toolchain_prefix-g++ $toolchain_flags -static-libgcc -static-libstdc++ -std=c++11"
     LD="$qnx_toolchain_prefix-ld --sysroot=$qnx_sysroot"
 
     AR="$qnx_toolchain_prefix-ar"
@@ -418,6 +569,23 @@ case $host_platform in
     else
       LDFLAGS="$LDFLAGS -L$FRIDA_PREFIX/lib"
     fi
+
+    meson_root="$qnx_sysroot"
+
+    arch_args=$(flags_to_args $host_arch_flags)
+
+    base_toolchain_args="'--sysroot=$qnx_sysroot', $arch_args, '-static-libgcc'"
+    base_compiler_args="$base_toolchain_args, '-ffunction-sections', '-fdata-sections'"
+    base_linker_args="$base_toolchain_args, '-Wl,--no-undefined', '-Wl,--gc-sections'"
+
+    meson_c="$qnx_toolchain_prefix-gcc"
+    meson_cpp="$qnx_toolchain_prefix-g++"
+
+    meson_c_args="[$base_compiler_args]"
+    meson_cpp_args="[$base_compiler_args, '-static-libstdc++', '-std=c++11']"
+
+    meson_c_link_args="[$base_linker_args]"
+    meson_cpp_link_args="[$base_linker_args, '-static-libstdc++', '-L$(dirname $qnx_sysroot/lib/gcc/4.8.3/libstdc++.a)']"
     ;;
 esac
 
@@ -446,13 +614,6 @@ fi
 ACLOCAL_FLAGS="$ACLOCAL_FLAGS -I $FRIDA_TOOLROOT/share/aclocal"
 ACLOCAL="aclocal $ACLOCAL_FLAGS"
 CONFIG_SITE="$FRIDA_BUILD/${frida_env_name_prefix}config-${host_platform_arch}.site"
-
-PKG_CONFIG="$FRIDA_TOOLROOT/bin/pkg-config"
-PKG_CONFIG_PATH="$FRIDA_PREFIX_LIB/pkgconfig"
-if [ "$FRIDA_ENV_SDK" != 'none' ]; then
-  PKG_CONFIG="$PKG_CONFIG --define-variable=frida_sdk_prefix=$FRIDA_SDKROOT"
-  PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$FRIDA_SDKROOT/lib/pkgconfig"
-fi
 
 VALAC="$FRIDA_TOOLROOT/bin/valac-0.38"
 VALAFLAGS="--target-glib=2.53 --vapidir=\"$FRIDA_TOOLROOT/share/vala-0.38/vapi\""
@@ -533,13 +694,28 @@ if [ "$FRIDA_ENV_SDK" != 'none' ] && ! grep -Eq "^$sdk_version\$" "$FRIDA_SDKROO
   echo $sdk_version > "$FRIDA_SDKROOT/.version"
 fi
 
+PKG_CONFIG=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-pkgconfig
+
+pkg_config="$FRIDA_TOOLROOT/bin/pkg-config"
+pkg_config_path="$FRIDA_PREFIX_LIB/pkgconfig"
+if [ "$FRIDA_ENV_SDK" != 'none' ]; then
+  pkg_config="$pkg_config --define-variable=frida_sdk_prefix=$FRIDA_SDKROOT"
+  pkg_config_path="$pkg_config_path:$FRIDA_SDKROOT/lib/pkgconfig"
+fi
+(
+  echo "#!/bin/sh"
+  echo "export PKG_CONFIG_PATH=\"$pkg_config_path\""
+  echo "exec \"$pkg_config\" \"\$@\""
+) > $PKG_CONFIG
+chmod 755 $PKG_CONFIG
+
 env_rc=build/${FRIDA_ENV_NAME:-frida}-env-${host_platform_arch}.rc
 
 (
   echo "export PATH=\"$FRIDA_TOOLROOT/bin:\$PATH\""
   echo "export PS1=\"\e[0;${prompt_color}m[\u@\h \w \e[m\e[1;${prompt_color}mfrida-${host_platform_arch}\e[m\e[0;${prompt_color}m]\e[m\n\$ \""
   echo "export PKG_CONFIG=\"$PKG_CONFIG\""
-  echo "export PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\""
+  echo "export PKG_CONFIG_PATH=\"\""
   echo "export VALAC=\"$VALAC\""
   echo "export VALAFLAGS=\"$VALAFLAGS\""
   echo "export CPP=\"$CPP\""
@@ -603,6 +779,51 @@ sed \
   -e "s,@frida_enable_diet@,$enable_diet,g" \
   -e "s,@frida_enable_mapper@,$enable_mapper,g" \
   $releng_path/config.site.in > "$CONFIG_SITE"
+
+meson_cross_file=build/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}.txt
+
+(
+  echo "[binaries]"
+  echo "c = '$meson_c'"
+  echo "cpp = '$meson_cpp'"
+  if [ -n "$meson_objc" ]; then
+    echo "objc = '$meson_objc'"
+  fi
+  if [ -n "$meson_objcpp" ]; then
+    echo "objcpp = '$meson_objcpp'"
+  fi
+  echo "ar = '$AR'"
+  echo "strip = '$STRIP'"
+  echo "pkgconfig = '$PKG_CONFIG'"
+  echo ""
+  echo "[properties]"
+  if [ -n "$meson_root" ]; then
+    echo "root = '$meson_root'"
+    echo ""
+  fi
+  echo "c_args = $meson_c_args"
+  echo "cpp_args = $meson_cpp_args"
+  if [ -n "$meson_objc" ]; then
+    echo "objc_args = $meson_objc_args"
+  fi
+  if [ -n "$meson_objcpp" ]; then
+    echo "objcpp_args = $meson_objcpp_args"
+  fi
+  echo "c_link_args = $meson_c_link_args"
+  echo "cpp_link_args = $meson_cpp_link_args"
+  if [ -n "$meson_objc" ]; then
+    echo "objc_link_args = $meson_objc_link_args"
+  fi
+  if [ -n "$meson_objcpp" ]; then
+    echo "objcpp_link_args = $meson_objcpp_link_args"
+  fi
+  echo ""
+  echo "[host_machine]"
+  echo "system = '$meson_host_system'"
+  echo "cpu_family = '$meson_host_cpu_family'"
+  echo "cpu = '$meson_host_cpu'"
+  echo "endian = '$meson_host_endian'"
+) > $meson_cross_file
 
 echo "Environment created. To enter:"
 echo "# source ${FRIDA_ROOT}/$env_rc"

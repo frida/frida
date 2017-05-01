@@ -43,9 +43,12 @@ distclean: clean-submodules
 	rm -rf build/
 
 clean: clean-submodules
-	rm -f build/*.rc
-	rm -f build/*.site
+	rm -f build/*-pkgconfig
 	rm -f build/*-stamp
+	rm -f build/*.rc
+	rm -f build/*.sh
+	rm -f build/*.site
+	rm -f build/*.txt
 	rm -f build/frida-version.h
 	rm -rf build/frida-mac-i386
 	rm -rf build/frida-mac-x86_64
