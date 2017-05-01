@@ -18,7 +18,7 @@ else
 fi
 host_platform_arch=${host_platform}-${host_arch}
 
-meson_host_system=$(echo $host_platform | sed 's,^mac$,darwin,' | sed 's,^ios$,darwin,')
+meson_host_system=$(echo $host_platform | sed 's,^mac$,macos,')
 case $host_arch in
   i?86)
     meson_host_cpu_family=x86
