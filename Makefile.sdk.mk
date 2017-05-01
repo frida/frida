@@ -293,7 +293,7 @@ build/.$1-stamp:
 	@mkdir -p $$(@D)
 	@touch $$@
 
-build/fs-tmp-%/$1/build.ninja: build/fs-env-%.rc $3
+build/fs-tmp-%/$1/build.ninja: build/fs-env-%.rc build/.$1-stamp $3
 	$(RM) -r $$(@D)
 	(. $$< \
 		&& . build/fs-config-$$*.site \
