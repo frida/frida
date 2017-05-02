@@ -43,7 +43,7 @@ distclean: clean-submodules
 	rm -rf build/
 
 clean: clean-submodules
-	rm -f build/*-pkgconfig
+	rm -f build/*-pkg-config
 	rm -f build/*-stamp
 	rm -f build/*.rc
 	rm -f build/*.sh
