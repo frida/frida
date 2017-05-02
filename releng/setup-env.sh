@@ -268,7 +268,7 @@ case $host_platform in
     LD="$(xcrun --sdk $mac_sdk -f ld)"
 
     AR="$(xcrun --sdk $mac_sdk -f ar)"
-    NM="$(xcrun --sdk $mac_sdk -f nm)"
+    NM="$FRIDA_ROOT/releng/llvm-nm-mac-x86_64"
     RANLIB="$(xcrun --sdk $mac_sdk -f ranlib)"
     STRIP="$(xcrun --sdk $mac_sdk -f strip)"
 
@@ -323,7 +323,7 @@ case $host_platform in
     LD="$(xcrun --sdk $ios_sdk -f ld)"
 
     AR="$(xcrun --sdk $ios_sdk -f ar)"
-    NM="$(xcrun --sdk $ios_sdk -f nm)"
+    NM="$FRIDA_ROOT/releng/llvm-nm-mac-x86_64"
     RANLIB="$(xcrun --sdk $ios_sdk -f ranlib)"
     STRIP="$(xcrun --sdk $ios_sdk -f strip)"
 
