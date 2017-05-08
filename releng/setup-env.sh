@@ -249,11 +249,11 @@ case $host_platform in
     meson_c="${host_toolprefix}gcc"
     meson_cpp="${host_toolprefix}g++"
 
-    meson_c_args="[$base_compiler_args]"
-    meson_cpp_args="[$base_compiler_args, '-static-libstdc++'$extra_cpp_args]"
+    meson_c_args="$base_compiler_args"
+    meson_cpp_args="$base_compiler_args, '-static-libstdc++'$extra_cpp_args"
 
-    meson_c_link_args="[$base_linker_args]"
-    meson_cpp_link_args="[$base_linker_args, '-static-libstdc++']"
+    meson_c_link_args="$base_linker_args"
+    meson_cpp_link_args="$base_linker_args, '-static-libstdc++'"
     ;;
   mac)
     mac_minver="10.9"
@@ -293,15 +293,15 @@ case $host_platform in
     meson_objc="$CC"
     meson_objcpp="$CXX"
 
-    meson_c_args="[$base_compiler_args]"
-    meson_cpp_args="[$base_compiler_args, '-std=c++11', '-stdlib=libc++']"
-    meson_objc_args="[$base_compiler_args]"
-    meson_objcpp_args="[$base_compiler_args, '-std=c++11', '-stdlib=libc++']"
+    meson_c_args="$base_compiler_args"
+    meson_cpp_args="$base_compiler_args, '-std=c++11', '-stdlib=libc++'"
+    meson_objc_args="$base_compiler_args"
+    meson_objcpp_args="$base_compiler_args, '-std=c++11', '-stdlib=libc++'"
 
-    meson_c_link_args="[$base_linker_args]"
-    meson_cpp_link_args="[$base_linker_args, '-stdlib=libc++']"
-    meson_objc_link_args="[$base_linker_args]"
-    meson_objcpp_link_args="[$base_linker_args, '-stdlib=libc++']"
+    meson_c_link_args="$base_linker_args"
+    meson_cpp_link_args="$base_linker_args, '-stdlib=libc++'"
+    meson_objc_link_args="$base_linker_args"
+    meson_objcpp_link_args="$base_linker_args, '-stdlib=libc++'"
     ;;
   ios)
     ios_minver="7.0"
@@ -357,15 +357,15 @@ case $host_platform in
     meson_objc="$CC"
     meson_objcpp="$CXX"
 
-    meson_c_args="[$base_compiler_args]"
-    meson_cpp_args="[$base_compiler_args, '-std=c++11', '-stdlib=libc++']"
-    meson_objc_args="[$base_compiler_args]"
-    meson_objcpp_args="[$base_compiler_args, '-std=c++11', '-stdlib=libc++']"
+    meson_c_args="$base_compiler_args"
+    meson_cpp_args="$base_compiler_args, '-std=c++11', '-stdlib=libc++'"
+    meson_objc_args="$base_compiler_args"
+    meson_objcpp_args="$base_compiler_args, '-std=c++11', '-stdlib=libc++'"
 
-    meson_c_link_args="[$base_linker_args]"
-    meson_cpp_link_args="[$base_linker_args, '-stdlib=libc++']"
-    meson_objc_link_args="[$base_linker_args]"
-    meson_objcpp_link_args="[$base_linker_args, '-stdlib=libc++']"
+    meson_c_link_args="$base_linker_args"
+    meson_cpp_link_args="$base_linker_args, '-stdlib=libc++'"
+    meson_objc_link_args="$base_linker_args"
+    meson_objcpp_link_args="$base_linker_args, '-stdlib=libc++'"
     ;;
   android)
     android_build_platform=$(echo ${build_platform} | sed 's,^mac$,darwin,')
@@ -499,16 +499,16 @@ $arch_linker_args"
     meson_c="$android_clang_prefix/bin/clang"
     meson_cpp="$cxx_wrapper"
 
-    meson_c_args="[$base_compiler_args]"
-    meson_cpp_args="['$android_clang_prefix/bin/clang++', $base_compiler_args, \
+    meson_c_args="$base_compiler_args"
+    meson_cpp_args="'$android_clang_prefix/bin/clang++', $base_compiler_args, \
 '-std=c++11', \
 '-funwind-tables', '-fno-exceptions', '-fno-rtti', \
 '-I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/include', \
 '-I$ANDROID_NDK_ROOT/sources/cxx-stl/gabi++/include', \
-'-I$ANDROID_NDK_ROOT/sources/android/support/include']"
+'-I$ANDROID_NDK_ROOT/sources/android/support/include'"
 
-    meson_c_link_args="[$base_linker_args]"
-    meson_cpp_link_args="[$base_linker_args]"
+    meson_c_link_args="$base_linker_args"
+    meson_cpp_link_args="$base_linker_args"
     ;;
   qnx)
     case $host_arch in
@@ -581,11 +581,11 @@ $arch_linker_args"
     meson_c="$qnx_toolchain_prefix-gcc"
     meson_cpp="$qnx_toolchain_prefix-g++"
 
-    meson_c_args="[$base_compiler_args]"
-    meson_cpp_args="[$base_compiler_args, '-static-libstdc++', '-std=c++11']"
+    meson_c_args="$base_compiler_args"
+    meson_cpp_args="$base_compiler_args, '-static-libstdc++', '-std=c++11'"
 
-    meson_c_link_args="[$base_linker_args]"
-    meson_cpp_link_args="[$base_linker_args, '-static-libstdc++', '-L$(dirname $qnx_sysroot/lib/gcc/4.8.3/libstdc++.a)']"
+    meson_c_link_args="$base_linker_args"
+    meson_cpp_link_args="$base_linker_args, '-static-libstdc++', '-L$(dirname $qnx_sysroot/lib/gcc/4.8.3/libstdc++.a)'"
     ;;
 esac
 
@@ -605,6 +605,10 @@ if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   version_include="-include $FRIDA_BUILD/frida-version.h"
   CPPFLAGS="$version_include $CPPFLAGS"
   CFLAGS="$version_include $CFLAGS"
+
+  meson_version_include=", '-include', '$FRIDA_BUILD/frida-version.h'"
+else
+  meson_version_include=""
 fi
 
 ACLOCAL_FLAGS="-I $FRIDA_PREFIX/share/aclocal"
@@ -802,21 +806,21 @@ meson_cross_file=build/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}.txt
     echo "root = '$meson_root'"
     echo ""
   fi
-  echo "c_args = $meson_c_args"
-  echo "cpp_args = $meson_cpp_args"
+  echo "c_args = [${meson_c_args}${meson_version_include}]"
+  echo "cpp_args = [${meson_cpp_args}${meson_version_include}]"
   if [ -n "$meson_objc" ]; then
-    echo "objc_args = $meson_objc_args"
+    echo "objc_args = [${meson_objc_args}${meson_version_include}]"
   fi
   if [ -n "$meson_objcpp" ]; then
-    echo "objcpp_args = $meson_objcpp_args"
+    echo "objcpp_args = [${meson_objcpp_args}${meson_version_include}]"
   fi
-  echo "c_link_args = $meson_c_link_args"
-  echo "cpp_link_args = $meson_cpp_link_args"
+  echo "c_link_args = [$meson_c_link_args]"
+  echo "cpp_link_args = [$meson_cpp_link_args]"
   if [ -n "$meson_objc" ]; then
-    echo "objc_link_args = $meson_objc_link_args"
+    echo "objc_link_args = [$meson_objc_link_args]"
   fi
   if [ -n "$meson_objcpp" ]; then
-    echo "objcpp_link_args = $meson_objcpp_link_args"
+    echo "objcpp_link_args = [$meson_objcpp_link_args]"
   fi
   echo ""
   echo "[host_machine]"
