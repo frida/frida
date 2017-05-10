@@ -240,7 +240,7 @@ case $host_platform in
       LDFLAGS="$LDFLAGS -L$FRIDA_SDKROOT/lib"
     fi
 
-    arch_args=$(flags_to_args $host_arch_flags)
+    arch_args=$(flags_to_args "$host_arch_flags")
 
     base_toolchain_args="$arch_args, '-static-libgcc'"
     base_compiler_args="$base_toolchain_args, '-ffunction-sections', '-fdata-sections'"
@@ -470,8 +470,8 @@ case $host_platform in
 
     meson_root="$android_sysroot"
 
-    arch_args=$(flags_to_args $android_host_cflags)
-    arch_linker_args=$(flags_to_args $android_host_ldflags)
+    arch_args=$(flags_to_args "$android_host_cflags")
+    arch_linker_args=$(flags_to_args "$android_host_ldflags")
 
     base_toolchain_args="\
 '--sysroot=$android_sysroot', \
@@ -572,7 +572,7 @@ $arch_linker_args"
 
     meson_root="$qnx_sysroot"
 
-    arch_args=$(flags_to_args $host_arch_flags)
+    arch_args=$(flags_to_args "$host_arch_flags")
 
     base_toolchain_args="'--sysroot=$qnx_sysroot', $arch_args, '-static-libgcc'"
     base_compiler_args="$base_toolchain_args, '-ffunction-sections', '-fdata-sections'"
