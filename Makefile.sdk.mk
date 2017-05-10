@@ -10,7 +10,7 @@ libiconv_version := 1.14
 binutils_version := 2.25
 
 
-build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,mac,')
+build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos,')
 build_arch := $(shell releng/detect-arch.sh)
 build_platform_arch := $(build_platform)-$(build_arch)
 
@@ -35,7 +35,7 @@ host_platform_arch := $(host_platform)-$(host_arch)
 enable_diet := $(shell echo $(host_platform_arch) | egrep -q "^(linux-arm|linux-armhf|linux-mips|linux-mipsel|qnx-.+)$$" && echo 1 || echo 0)
 
 
-ifeq ($(host_platform), mac)
+ifeq ($(host_platform), macos)
 	iconv := build/fs-%/lib/libiconv.a
 endif
 ifeq ($(host_platform), ios)
@@ -353,7 +353,7 @@ ifeq ($(host_arch), arm64)
 	android_target_platform := 21
 endif
 
-ifeq ($(build_platform), mac)
+ifeq ($(build_platform), macos)
 	v8_build_flags := -D clang_xcode=1
 endif
 ifeq ($(host_platform), linux)
@@ -365,7 +365,7 @@ ifeq ($(host_platform), android)
 	v8_host_flags := -f make-android -D android_ndk_root=$(ANDROID_NDK_ROOT) -D android_sysroot=$(ANDROID_NDK_ROOT) -D android_target_platform=$(android_target_platform) -D clang=1
 	v8_libs_private := "-llog -lm"
 endif
-ifeq ($(host_platform), mac)
+ifeq ($(host_platform), macos)
 	v8_host_flags := -f make-mac -D mac_deployment_target=10.9 -D clang=1
 endif
 ifeq ($(host_platform), ios)
@@ -375,8 +375,8 @@ v8_flags := -D host_os=$(build_platform) -D werror='' -D v8_use_external_startup
 
 v8_target := $(v8_flavor_prefix)$(v8_arch).release
 
-ifeq ($(build_platform), mac)
-ifeq ($(host_platform), mac)
+ifeq ($(build_platform), macos)
+ifeq ($(host_platform), macos)
 	v8_env_vars := \
 		MACOSX_DEPLOYMENT_TARGET="" \
 		CXX="$$CXX -stdlib=libc++" \
@@ -385,25 +385,25 @@ ifeq ($(host_platform), mac)
 		LINK="$$CXX -stdlib=libc++"
 endif
 ifeq ($(host_platform), ios)
-	mac_sdk_path := $$(xcrun --sdk macosx --show-sdk-path)
+	macos_sdk_path := $$(xcrun --sdk macosx --show-sdk-path)
 	v8_env_vars := \
 		GYP_CROSSCOMPILE=1 \
 		MACOSX_DEPLOYMENT_TARGET="" \
 		CXX="$$CXX -stdlib=libc++" \
-		CXX_host="$$(xcrun --sdk macosx -f clang++) -isysroot $(mac_sdk_path) -stdlib=libc++" \
+		CXX_host="$$(xcrun --sdk macosx -f clang++) -isysroot $(macos_sdk_path) -stdlib=libc++" \
 		CXX_target="$$CXX -stdlib=libc++" \
 		LINK="$$CXX -stdlib=libc++" \
-		LINK_host="$$(xcrun --sdk macosx -f clang++) -isysroot $(mac_sdk_path) -stdlib=libc++"
+		LINK_host="$$(xcrun --sdk macosx -f clang++) -isysroot $(macos_sdk_path) -stdlib=libc++"
 endif
 ifeq ($(host_platform), android)
-	mac_sdk_path := $$(xcrun --sdk macosx --show-sdk-path)
+	macos_sdk_path := $$(xcrun --sdk macosx --show-sdk-path)
 	v8_env_vars := \
 		MACOSX_DEPLOYMENT_TARGET="" \
 		CXX="$$CXX" \
-		CXX_host="$$(xcrun --sdk macosx -f clang++) -isysroot $(mac_sdk_path) -stdlib=libc++" \
+		CXX_host="$$(xcrun --sdk macosx -f clang++) -isysroot $(macos_sdk_path) -stdlib=libc++" \
 		CXX_target="$$CXX" \
 		LINK="$$CXX" \
-		LINK_host="$$(xcrun --sdk macosx -f clang++) -isysroot $(mac_sdk_path) -stdlib=libc++" \
+		LINK_host="$$(xcrun --sdk macosx -f clang++) -isysroot $(macos_sdk_path) -stdlib=libc++" \
 		CFLAGS="" \
 		CXXFLAGS="" \
 		CPPFLAGS="" \

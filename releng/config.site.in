@@ -95,7 +95,7 @@ case $frida_host_platform_arch in
     fi
     cross_compiling=yes
     ;;
-  mac-i386|ios-i386)
+  macos-i386|ios-i386)
     host_alias="i686-apple-darwin"
     cross_compiling=yes
     ;;
@@ -187,13 +187,13 @@ case "$PACKAGE_TARNAME" in
       linux)
         glib_cv_have_qsort_r=yes
         ;;
-      mac|ios|android|qnx)
+      macos|ios|android|qnx)
         glib_cv_have_qsort_r=no
         ;;
     esac
 
     case $frida_host_platform in
-      linux|android|mac|ios|qnx)
+      linux|android|macos|ios|qnx)
         enable_proxy_libintl=yes
         ;;
     esac

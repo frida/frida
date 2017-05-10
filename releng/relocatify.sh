@@ -4,10 +4,10 @@ package=$1
 prefix=$2
 [ -z "$package" -o -z "$prefix" ] && exit 1
 
-build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,mac,')
+build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,macos,')
 
 shopt -s expand_aliases
-if [ "$build_platform" = "mac" ]; then
+if [ "$build_platform" = "macos" ]; then
   alias sed_inplace='sed -i ""'
 else
   alias sed_inplace='sed -i'

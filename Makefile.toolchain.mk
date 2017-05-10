@@ -12,7 +12,7 @@ gettext_version := 0.19.8.1
 pkg_config_version := 0.29.2
 
 
-build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,mac,')
+build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos,')
 build_arch := $(shell releng/detect-arch.sh)
 build_platform_arch := $(build_platform)-$(build_arch)
 
@@ -43,7 +43,7 @@ endif
 ifeq ($(host_platform), android)
 strip_all := --strip-all
 endif
-ifeq ($(host_platform), mac)
+ifeq ($(host_platform), macos)
 strip_all := -Sx
 endif
 ifeq ($(host_platform), ios)
@@ -51,7 +51,7 @@ strip_all := -Sx
 endif
 
 
-ifeq ($(host_platform), mac)
+ifeq ($(host_platform), macos)
 	dpkg_deb := build/ft-%/bin/dpkg-deb
 endif
 

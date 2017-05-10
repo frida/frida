@@ -2,7 +2,7 @@
 
 releng_path=`dirname $0`
 
-build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,mac,')
+build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,macos,')
 build_arch=$($releng_path/detect-arch.sh)
 build_platform_arch=${build_platform}-${build_arch}
 
@@ -18,7 +18,7 @@ else
 fi
 host_platform_arch=${host_platform}-${host_arch}
 
-meson_host_system=$(echo $host_platform | sed 's,^mac$,darwin,' | sed 's,^ios$,darwin,' | sed 's,^android$,linux,')
+meson_host_system=$(echo $host_platform | sed 's,^macos$,darwin,' | sed 's,^ios$,darwin,' | sed 's,^android$,linux,')
 case $host_arch in
   i?86)
     meson_host_cpu_family=x86
@@ -74,7 +74,7 @@ case $build_platform in
     download_command="wget -O - -q"
     tar_stdin=""
     ;;
-  mac)
+  macos)
     download_command="curl -sS"
     tar_stdin="-"
     ;;
@@ -255,36 +255,36 @@ case $host_platform in
     meson_c_link_args="$base_linker_args"
     meson_cpp_link_args="$base_linker_args, '-static-libstdc++'"
     ;;
-  mac)
-    mac_minver="10.9"
+  macos)
+    macos_minver="10.9"
 
-    mac_sdk="macosx"
-    mac_sdk_path="$(xcrun --sdk $mac_sdk --show-sdk-path)"
+    macos_sdk="macosx"
+    macos_sdk_path="$(xcrun --sdk $macos_sdk --show-sdk-path)"
 
-    CPP="$(xcrun --sdk $mac_sdk -f clang) -E"
-    CC="$(xcrun --sdk $mac_sdk -f clang)"
-    CXX="$(xcrun --sdk $mac_sdk -f clang++)"
-    OBJC="$(xcrun --sdk $mac_sdk -f clang)"
-    LD="$(xcrun --sdk $mac_sdk -f ld)"
+    CPP="$(xcrun --sdk $macos_sdk -f clang) -E"
+    CC="$(xcrun --sdk $macos_sdk -f clang)"
+    CXX="$(xcrun --sdk $macos_sdk -f clang++)"
+    OBJC="$(xcrun --sdk $macos_sdk -f clang)"
+    LD="$(xcrun --sdk $macos_sdk -f ld)"
 
-    AR="$(xcrun --sdk $mac_sdk -f ar)"
-    NM="$FRIDA_ROOT/releng/llvm-nm-mac-x86_64"
-    RANLIB="$(xcrun --sdk $mac_sdk -f ranlib)"
-    STRIP="$(xcrun --sdk $mac_sdk -f strip)"
+    AR="$(xcrun --sdk $macos_sdk -f ar)"
+    NM="$FRIDA_ROOT/releng/llvm-nm-macos-x86_64"
+    RANLIB="$(xcrun --sdk $macos_sdk -f ranlib)"
+    STRIP="$(xcrun --sdk $macos_sdk -f strip)"
 
-    INSTALL_NAME_TOOL="$(xcrun --sdk $mac_sdk -f install_name_tool)"
-    OTOOL="$(xcrun --sdk $mac_sdk -f otool)"
-    CODESIGN="$(xcrun --sdk $mac_sdk -f codesign)"
-    LIPO="$(xcrun --sdk $mac_sdk -f lipo)"
+    INSTALL_NAME_TOOL="$(xcrun --sdk $macos_sdk -f install_name_tool)"
+    OTOOL="$(xcrun --sdk $macos_sdk -f otool)"
+    CODESIGN="$(xcrun --sdk $macos_sdk -f codesign)"
+    LIPO="$(xcrun --sdk $macos_sdk -f lipo)"
 
-    CPPFLAGS="-isysroot $mac_sdk_path -mmacosx-version-min=$mac_minver -arch $host_arch"
-    CFLAGS="-isysroot $mac_sdk_path -mmacosx-version-min=$mac_minver -arch $host_arch"
+    CPPFLAGS="-isysroot $macos_sdk_path -mmacosx-version-min=$macos_minver -arch $host_arch"
+    CFLAGS="-isysroot $macos_sdk_path -mmacosx-version-min=$macos_minver -arch $host_arch"
     CXXFLAGS="-std=c++11 -stdlib=libc++"
-    LDFLAGS="-isysroot $mac_sdk_path -Wl,-macosx_version_min,$mac_minver -arch $host_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
+    LDFLAGS="-isysroot $macos_sdk_path -Wl,-macosx_version_min,$macos_minver -arch $host_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
 
-    meson_root="$mac_sdk_path"
+    meson_root="$macos_sdk_path"
 
-    base_toolchain_args="'-isysroot', '$mac_sdk_path', '-mmacosx-version-min=$mac_minver', '-arch', '$host_arch'"
+    base_toolchain_args="'-isysroot', '$macos_sdk_path', '-mmacosx-version-min=$macos_minver', '-arch', '$host_arch'"
     base_compiler_args="$base_toolchain_args"
     base_linker_args="$base_toolchain_args, '-Wl,-dead_strip', '-Wl,-no_compact_unwind'"
 
@@ -323,7 +323,7 @@ case $host_platform in
     LD="$(xcrun --sdk $ios_sdk -f ld)"
 
     AR="$(xcrun --sdk $ios_sdk -f ar)"
-    NM="$FRIDA_ROOT/releng/llvm-nm-mac-x86_64"
+    NM="$FRIDA_ROOT/releng/llvm-nm-macos-x86_64"
     RANLIB="$(xcrun --sdk $ios_sdk -f ranlib)"
     STRIP="$(xcrun --sdk $ios_sdk -f strip)"
 
@@ -368,7 +368,7 @@ case $host_platform in
     meson_objcpp_link_args="$base_linker_args, '-stdlib=libc++'"
     ;;
   android)
-    android_build_platform=$(echo ${build_platform} | sed 's,^mac$,darwin,')
+    android_build_platform=$(echo ${build_platform} | sed 's,^macos$,darwin,')
     android_host_arch=$(echo ${host_arch} | sed 's,^i386$,x86,')
     android_have_unwind=no
 
@@ -760,7 +760,7 @@ case $host_platform in
       echo "export OBJDUMP=\"$OBJDUMP\""
     ) >> $env_rc
     ;;
-  mac|ios)
+  macos|ios)
     (
       echo "export INSTALL_NAME_TOOL=\"$INSTALL_NAME_TOOL\""
       echo "export OTOOL=\"$OTOOL\""

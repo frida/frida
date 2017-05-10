@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     build_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     if system == 'Darwin':
-        build_os = 'mac-x86_64'
+        build_os = 'macos-x86_64'
     else:
         build_os = system.lower()
     toolchain_dir = os.path.join(build_dir, "build", "toolchain-" + build_os)
@@ -230,35 +230,35 @@ if __name__ == '__main__':
 
             upload_to_npm(r"C:\Program Files (x86)\nodejs\node.exe", upload, publish=False)
             upload_to_npm(r"C:\Program Files\nodejs\node.exe", upload, publish=False)
-        elif slave == 'mac':
+        elif slave == 'macos':
             upload = get_github_uploader()
 
-            upload_devkits("mac-i386", upload)
-            upload_devkits("mac-x86_64", upload)
+            upload_devkits("macos-i386", upload)
+            upload_devkits("macos-x86_64", upload)
             upload_devkits("ios-i386", upload)
             upload_devkits("ios-x86_64", upload)
             upload_devkits("ios-arm", upload)
             upload_devkits("ios-arm64", upload)
 
-            upload_file("frida-server-{version}-mac-universal", os.path.join(build_dir, "build", "frida-mac-universal", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-macos-universal", os.path.join(build_dir, "build", "frida-macos-universal", "bin", "frida-server"), upload)
             upload_file("frida-server-{version}-ios-arm", os.path.join(build_dir, "build", "frida_thin-ios-arm", "bin", "frida-server"), upload)
             upload_file("frida-server-{version}-ios-arm64", os.path.join(build_dir, "build", "frida_thin-ios-arm64", "bin", "frida-server"), upload)
 
-            upload_file("frida-gadget-{version}-mac-universal.dylib", os.path.join(build_dir, "build", "frida-mac-universal", "lib", "FridaGadget.dylib"), upload)
+            upload_file("frida-gadget-{version}-macos-universal.dylib", os.path.join(build_dir, "build", "frida-macos-universal", "lib", "FridaGadget.dylib"), upload)
             upload_file("frida-gadget-{version}-ios-universal.dylib", os.path.join(build_dir, "build", "frida-ios-universal", "lib", "FridaGadget.dylib"), upload)
 
-            upload_directory("frida-swift-{version}-mac-x86_64", os.path.join(build_dir, "frida-swift", "build", "Release"), upload)
+            upload_directory("frida-swift-{version}-macos-x86_64", os.path.join(build_dir, "frida-swift", "build", "Release"), upload)
 
-            upload_directory("frida-qml-{version}-mac-x86_64", os.path.join(build_dir, "build", "frida-mac-x86_64", "lib", "qt5", "qml"), upload)
+            upload_directory("frida-qml-{version}-macos-x86_64", os.path.join(build_dir, "build", "frida-macos-x86_64", "lib", "qt5", "qml"), upload)
 
             upload_to_pypi("/usr/bin/python2.6",
-                os.path.join(build_dir, "build", "frida-mac-universal", "lib", "python2.6", "site-packages", "_frida.so"))
+                os.path.join(build_dir, "build", "frida-macos-universal", "lib", "python2.6", "site-packages", "_frida.so"))
             for osx_minor in xrange(9, 13):
                 upload_to_pypi("/usr/bin/python2.7",
-                    os.path.join(build_dir, "build", "frida-mac-universal", "lib", "python2.7", "site-packages", "_frida.so"),
+                    os.path.join(build_dir, "build", "frida-macos-universal", "lib", "python2.7", "site-packages", "_frida.so"),
                     { '_PYTHON_HOST_PLATFORM': "macosx-10.%d-intel" % osx_minor })
             upload_to_pypi("/usr/local/bin/python3.6",
-                os.path.join(build_dir, "build", "frida-mac-universal", "lib", "python3.6", "site-packages", "_frida.so"))
+                os.path.join(build_dir, "build", "frida-macos-universal", "lib", "python3.6", "site-packages", "_frida.so"))
 
             upload_to_npm("/opt/node-64/bin/node", upload, publish=True)
 
