@@ -1,6 +1,6 @@
 FRIDA_VERSION := $(shell git describe --tags --always --long | sed 's,-,.,g' | cut -f1-3 -d'.')
 
-build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,mac,')
+build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos,')
 build_arch := $(shell releng/detect-arch.sh)
 build_platform_arch := $(build_platform)-$(build_arch)
 
