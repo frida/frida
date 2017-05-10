@@ -715,6 +715,7 @@ fi
 chmod 755 $PKG_CONFIG
 
 env_rc=build/${FRIDA_ENV_NAME:-frida}-env-${host_platform_arch}.rc
+meson_env_rc=build/${FRIDA_ENV_NAME:-frida}-meson-env-${host_platform_arch}.rc
 
 (
   echo "export PATH=\"$FRIDA_TOOLROOT/bin:\$PATH\""
@@ -773,6 +774,9 @@ case $host_platform in
     ) >> $env_rc
     ;;
 esac
+
+# Work around: https://github.com/mesonbuild/meson/issues/1772
+grep -v "FLAGS=" "$env_rc" > "$meson_env_rc"
 
 sed \
   -e "s,@frida_host_platform@,$host_platform,g" \

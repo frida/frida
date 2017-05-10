@@ -295,9 +295,9 @@ build/.$1-stamp:
 
 build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_platform_arch).rc build/fs-env-%.rc build/.$1-stamp $3
 	$(RM) -r $$(@D)
-	(. $$< \
+	(. build/fs-meson-env-$(build_platform_arch).rc \
 		&& . build/fs-config-$$*.site \
-		&& CPPFLAGS= CFLAGS= CXXFLAGS= OBJCFLAGS= OBJCXXFLAGS= LDFLAGS= meson \
+		&& meson \
 			--prefix $$$$frida_prefix \
 			--libdir $$$$frida_prefix/lib \
 			--default-library static \
