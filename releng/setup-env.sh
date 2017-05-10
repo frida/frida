@@ -695,6 +695,14 @@ if [ "$FRIDA_ENV_SDK" != 'none' ] && ! grep -Eq "^$sdk_version\$" "$FRIDA_SDKROO
     fi
   done
 
+  # Work around: https://github.com/mesonbuild/meson/issues/1771
+  mkdir -p "$FRIDA_SDKROOT/bin"
+  (
+    echo "#!/bin/sh"
+    echo "exec \"$VALAC\" $VALAFLAGS \"\$@\""
+  ) > "$FRIDA_SDKROOT/bin/valac"
+  chmod 755 "$FRIDA_SDKROOT/bin/valac"
+
   echo $sdk_version > "$FRIDA_SDKROOT/.version"
 fi
 
@@ -717,8 +725,14 @@ chmod 755 $PKG_CONFIG
 env_rc=build/${FRIDA_ENV_NAME:-frida}-env-${host_platform_arch}.rc
 meson_env_rc=build/${FRIDA_ENV_NAME:-frida}-meson-env-${host_platform_arch}.rc
 
+if [ "$FRIDA_ENV_SDK" != 'none' ]; then
+  env_path_sdk="$FRIDA_SDKROOT/bin:"
+else
+  env_path_sdk=""
+fi
+
 (
-  echo "export PATH=\"$FRIDA_TOOLROOT/bin:\$PATH\""
+  echo "export PATH=\"${env_path_sdk}${FRIDA_TOOLROOT}/bin:\$PATH\""
   echo "export PS1=\"\e[0;${prompt_color}m[\u@\h \w \e[m\e[1;${prompt_color}mfrida-${host_platform_arch}\e[m\e[0;${prompt_color}m]\e[m\n\$ \""
   echo "export PKG_CONFIG=\"$PKG_CONFIG\""
   echo "export PKG_CONFIG_PATH=\"\""
