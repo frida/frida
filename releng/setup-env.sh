@@ -234,11 +234,6 @@ case $host_platform in
         ;;
     esac
     LDFLAGS="$host_arch_flags -Wl,--no-undefined -Wl,--gc-sections"
-    if [ "$FRIDA_ENV_SDK" != 'none' ]; then
-      CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
-      CPPFLAGS="-I$FRIDA_SDKROOT/include"
-      LDFLAGS="$LDFLAGS -L$FRIDA_SDKROOT/lib"
-    fi
 
     arch_args=$(flags_to_args "$host_arch_flags")
 
@@ -462,12 +457,6 @@ case $host_platform in
 -Wl,-z,now \
 -lgcc"
 
-    if [ "$FRIDA_ENV_SDK" != 'none' ]; then
-      CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
-      CPPFLAGS="$CPPFLAGS -I$FRIDA_SDKROOT/include"
-      LDFLAGS="$LDFLAGS -L$FRIDA_SDKROOT/lib"
-    fi
-
     meson_root="$android_sysroot"
 
     arch_args=$(flags_to_args "$android_host_cflags")
@@ -562,14 +551,6 @@ $arch_linker_args"
     CFLAGS="-ffunction-sections -fdata-sections"
     LDFLAGS="-Wl,--no-undefined -Wl,--gc-sections -L$(dirname $qnx_sysroot/lib/gcc/4.8.3/libstdc++.a)"
 
-    if [ "$FRIDA_ENV_SDK" != 'none' ]; then
-      CFLAGS="$CFLAGS -I$FRIDA_SDKROOT/include"
-      CPPFLAGS="-I$FRIDA_SDKROOT/include"
-      LDFLAGS="$LDFLAGS -L$FRIDA_SDKROOT/lib"
-    else
-      LDFLAGS="$LDFLAGS -L$FRIDA_PREFIX/lib"
-    fi
-
     meson_root="$qnx_sysroot"
 
     arch_args=$(flags_to_args "$host_arch_flags")
@@ -588,6 +569,24 @@ $arch_linker_args"
     meson_cpp_link_args="$base_linker_args, '-static-libstdc++', '-L$(dirname $qnx_sysroot/lib/gcc/4.8.3/libstdc++.a)'"
     ;;
 esac
+
+# We need these legacy paths for dependencies that don't use pkg-config
+legacy_includes="-I$FRIDA_PREFIX/include"
+legacy_libpaths="-L$FRIDA_PREFIX/lib"
+if [ "$FRIDA_ENV_SDK" != 'none' ]; then
+  legacy_includes="$legacy_includes -I$FRIDA_SDKROOT/include"
+  legacy_libpaths="$legacy_libpaths -L$FRIDA_SDKROOT/lib"
+fi
+CFLAGS="$CFLAGS $legacy_includes"
+CPPFLAGS="$CPPFLAGS $legacy_includes"
+LDFLAGS="$LDFLAGS $legacy_libpaths"
+
+meson_legacy_includes=$(flags_to_args "$legacy_includes")
+meson_legacy_libpaths=$(flags_to_args "$legacy_libpaths")
+meson_c_args="$meson_c_args, $meson_legacy_includes"
+meson_cpp_args="$meson_cpp_args, $meson_legacy_includes"
+meson_c_link_args="$meson_c_link_args, $meson_legacy_libpaths"
+meson_cpp_link_args="$meson_cpp_link_args, $meson_legacy_libpaths"
 
 if [ $enable_asan = yes ]; then
   CC="$CC -fsanitize=address"
