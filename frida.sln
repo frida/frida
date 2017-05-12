@@ -11,7 +11,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-core", "frida-core\fr
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-tests", "frida-core\tests\frida-tests.vcxproj", "{BCCDA8EB-F0DF-4DD0-B233-7410079531AB}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "resource-compiler", "frida-core\tools\resource-compiler.vcxproj", "{81B3E411-8676-41EB-84C6-1E5307F0C5FF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-resource-compiler", "frida-core\tools\frida-resource-compiler.vcxproj", "{81B3E411-8676-41EB-84C6-1E5307F0C5FF}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-builddeps", "releng\frida-builddeps.vcxproj", "{4AFCE7C4-6D9A-4663-B43C-D2E518486910}"
 EndProject

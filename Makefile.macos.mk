@@ -160,7 +160,7 @@ build/frida-macos-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-macos-x8
 	. build/frida-env-macos-$*.rc \
 		&& cd build/tmp-macos-$*/frida-core \
 		&& make -C src install \
-			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-macos-$(build_arch)\" --toolchain=apple" \
+			RESOURCE_COMPILER="\"$(FRIDA)/releng/frida-resource-compiler-macos-$(build_arch)\" --toolchain=apple" \
 			HELPER=../../../../build/tmp_stripped-macos-x86_64/frida-core/src/frida-helper \
 			AGENT=../../../../build/tmp-macos-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib!frida-agent.dylib \
 		&& make install-data-am
@@ -170,7 +170,7 @@ build/frida-ios-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-universal/fri
 	. build/frida-env-ios-arm.rc \
 		&& cd build/tmp-ios-arm/frida-core \
 		&& make -C src install \
-			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-macos-$(build_arch)\" --toolchain=apple" \
+			RESOURCE_COMPILER="\"$(FRIDA)/releng/frida-resource-compiler-macos-$(build_arch)\" --toolchain=apple" \
 			HELPER=../../../../build/tmp-ios-universal/frida-core/src/frida-helper \
 			AGENT=../../../../build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib!frida-agent.dylib \
 		&& make install-data-am
@@ -180,7 +180,7 @@ build/frida-ios-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-universal/f
 	. build/frida-env-ios-arm64.rc \
 		&& cd build/tmp-ios-arm64/frida-core \
 		&& make -C src install \
-			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-macos-$(build_arch)\" --toolchain=apple" \
+			RESOURCE_COMPILER="\"$(FRIDA)/releng/frida-resource-compiler-macos-$(build_arch)\" --toolchain=apple" \
 			HELPER=../../../../build/tmp_stripped-ios-arm64/frida-core/src/frida-helper \
 			AGENT=../../../../build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib!frida-agent.dylib \
 		&& make install-data-am
@@ -198,7 +198,7 @@ build/frida_thin-ios-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-ios-arm
 		&& make -C lib/pipe \
 		&& make -C lib/agent \
 		&& make -C src install \
-			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-macos-$(build_arch)\" --toolchain=apple" \
+			RESOURCE_COMPILER="\"$(FRIDA)/releng/frida-resource-compiler-macos-$(build_arch)\" --toolchain=apple" \
 			HELPER=../../../../build/tmp_stripped-ios-arm/frida-core/src/frida-helper \
 			AGENT=./libfrida-agent.dylib!frida-agent.dylib \
 		&& make install-data-am
@@ -211,7 +211,7 @@ build/frida_thin-ios-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-ios-a
 		&& make -C lib/pipe \
 		&& make -C lib/agent \
 		&& make -C src install \
-			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-macos-$(build_arch)\" --toolchain=apple" \
+			RESOURCE_COMPILER="\"$(FRIDA)/releng/frida-resource-compiler-macos-$(build_arch)\" --toolchain=apple" \
 			HELPER=../../../../build/tmp_stripped-ios-arm64/frida-core/src/frida-helper \
 			AGENT=../../../../build/tmp-ios-universal/frida-core/lib/agent/.libs/libfrida-agent.dylib!frida-agent.dylib \
 		&& make install-data-am
@@ -221,7 +221,7 @@ build/frida-android-i386/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-and
 	. build/frida-env-android-i386.rc \
 		&& cd build/tmp-android-i386/frida-core \
 		&& make -C src install \
-			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-macos-$(build_arch)\" --toolchain=gnu" \
+			RESOURCE_COMPILER="\"$(FRIDA)/releng/frida-resource-compiler-macos-$(build_arch)\" --toolchain=gnu" \
 			HELPER32=../../../../build/tmp_stripped-android-i386/frida-core/src/frida-helper!frida-helper-32 \
 			LOADER32=../../../../build/tmp_stripped-android-i386/frida-core/lib/loader/.libs/libfrida-loader.so!frida-loader-32.so \
 			AGENT32=../../../../build/tmp_stripped-android-i386/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent-32.so \
@@ -232,7 +232,7 @@ build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-a
 	. build/frida-env-android-x86_64.rc \
 		&& cd build/tmp-android-x86_64/frida-core \
 		&& make -C src install \
-			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-macos-$(build_arch)\" --toolchain=gnu" \
+			RESOURCE_COMPILER="\"$(FRIDA)/releng/frida-resource-compiler-macos-$(build_arch)\" --toolchain=gnu" \
 			HELPER32=../../../../build/tmp_stripped-android-i386/frida-core/src/frida-helper!frida-helper-32 \
 			HELPER64=../../../../build/tmp_stripped-android-x86_64/frida-core/src/frida-helper!frida-helper-64 \
 			LOADER32=../../../../build/tmp_stripped-android-i386/frida-core/lib/loader/.libs/libfrida-loader.so!frida-loader-32.so \
@@ -246,7 +246,7 @@ build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-andr
 	. build/frida-env-android-arm.rc \
 		&& cd build/tmp-android-arm/frida-core \
 		&& make -C src install \
-			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-macos-$(build_arch)\" --toolchain=gnu" \
+			RESOURCE_COMPILER="\"$(FRIDA)/releng/frida-resource-compiler-macos-$(build_arch)\" --toolchain=gnu" \
 			HELPER32=../../../../build/tmp_stripped-android-arm/frida-core/src/frida-helper!frida-helper-32 \
 			LOADER32=../../../../build/tmp_stripped-android-arm/frida-core/lib/loader/.libs/libfrida-loader.so!frida-loader-32.so \
 			AGENT32=../../../../build/tmp_stripped-android-arm/frida-core/lib/agent/.libs/libfrida-agent.so!frida-agent-32.so \
@@ -257,7 +257,7 @@ build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp_stripped-an
 	. build/frida-env-android-arm64.rc \
 		&& cd build/tmp-android-arm64/frida-core \
 		&& make -C src install \
-			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-macos-$(build_arch)\" --toolchain=gnu" \
+			RESOURCE_COMPILER="\"$(FRIDA)/releng/frida-resource-compiler-macos-$(build_arch)\" --toolchain=gnu" \
 			HELPER32=../../../../build/tmp_stripped-android-arm/frida-core/src/frida-helper!frida-helper-32 \
 			HELPER64=../../../../build/tmp_stripped-android-arm64/frida-core/src/frida-helper!frida-helper-64 \
 			LOADER32=../../../../build/tmp_stripped-android-arm/frida-core/lib/loader/.libs/libfrida-loader.so!frida-loader-32.so \
@@ -432,7 +432,7 @@ check-core-android-arm64: build/tmp_stripped-android-arm/frida-core/src/frida-he
 	. build/frida-env-android-arm64.rc \
 		&& cd build/tmp-android-arm64/frida-core \
 		&& make check \
-			RESOURCE_COMPILER="\"$(FRIDA)/releng/resource-compiler-macos-$(build_arch)\" --toolchain=gnu" \
+			RESOURCE_COMPILER="\"$(FRIDA)/releng/frida-resource-compiler-macos-$(build_arch)\" --toolchain=gnu" \
 			HELPER32=../../../../build/tmp_stripped-android-arm/frida-core/src/frida-helper!frida-helper-32 \
 			HELPER64=../../../../build/tmp_stripped-android-arm64/frida-core/src/frida-helper!frida-helper-64 \
 			LOADER32=../../../../build/tmp_stripped-android-arm/frida-core/lib/loader/.libs/libfrida-loader.so!frida-loader-32.so \
