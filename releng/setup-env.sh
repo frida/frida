@@ -649,6 +649,8 @@ if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/.version" 2>/dev/null; th
       "$template" > "$target"
   done
 
+  ln -s "${FRIDA_ROOT}/releng/frida-resource-compiler-${build_platform_arch}" "$FRIDA_TOOLROOT/bin/frida-resource-compiler"
+
   echo $toolchain_version > "$FRIDA_TOOLROOT/.version"
 fi
 
