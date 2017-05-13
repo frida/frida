@@ -791,7 +791,7 @@ case $host_platform in
 esac
 
 # Work around: https://github.com/mesonbuild/meson/issues/1772
-grep -v "FLAGS=" "$env_rc" > "$meson_env_rc"
+egrep -v "FLAGS=|^export LD=|^export ACLOCAL" "$env_rc" > "$meson_env_rc"
 
 sed \
   -e "s,@frida_host_platform@,$host_platform,g" \
