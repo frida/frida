@@ -22,3 +22,6 @@
 [submodule "frida-qml"]
 	path = frida-qml
 	url = git://github.com/frida/frida-qml.git
+[submodule "releng/meson"]
+	path = releng/meson
+	url = git://github.com/frida/meson.git
