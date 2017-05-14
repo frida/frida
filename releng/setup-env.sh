@@ -769,6 +769,7 @@ fi
   else
     echo "export STRIP=\"echo # $STRIP\""
   fi
+  echo "export STRIP_FLAGS=\"$STRIP_FLAGS\""
   echo "export ACLOCAL_FLAGS=\"$ACLOCAL_FLAGS\""
   echo "export ACLOCAL=\"$ACLOCAL\""
   echo "export CONFIG_SITE=\"$CONFIG_SITE\""
@@ -805,7 +806,7 @@ case $host_platform in
 esac
 
 # Work around: https://github.com/mesonbuild/meson/issues/1772
-egrep -v "FLAGS=|^export LD=|^export ACLOCAL" "$env_rc" > "$meson_env_rc"
+egrep -v "[^_]FLAGS=|^export LD=|^export ACLOCAL" "$env_rc" > "$meson_env_rc"
 
 sed \
   -e "s,@frida_host_platform@,$host_platform,g" \
