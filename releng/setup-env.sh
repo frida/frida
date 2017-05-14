@@ -720,8 +720,8 @@ fi
   echo "#!/bin/sh"
   echo "export PKG_CONFIG_PATH=\"$pkg_config_path\""
   echo "exec \"$pkg_config\"$pkg_config_flags --static \"\$@\""
-) > $PKG_CONFIG
-chmod 755 $PKG_CONFIG
+) > "$PKG_CONFIG"
+chmod 755 "$PKG_CONFIG"
 
 env_rc=build/${FRIDA_ENV_NAME:-frida}-env-${host_platform_arch}.rc
 meson_env_rc=build/${FRIDA_ENV_NAME:-frida}-meson-env-${host_platform_arch}.rc
