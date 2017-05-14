@@ -6,8 +6,8 @@ function Install-Python2Bits()
     $staging = "$pwd\staging"
     mkdir $staging | Out-Null
 
-    wget "$base/python-$version.msi" -out "$staging\python-$version.msi"
-    wget "$base/python-$version.amd64.msi" -out "$staging\python-$version.amd64.msi"
+    & "$pwd\releng\wget" "$base/python-$version.msi" --ca-certificate "$pwd\releng\ca-bundle.crt" -O "$staging\python-$version.msi"
+    & "$pwd\releng\wget" "$base/python-$version.amd64.msi" --ca-certificate "$pwd\releng\ca-bundle.crt" -O "$staging\python-$version.amd64.msi"
 
     $targetBase = "$pwd\python\$($version.Substring(0, 3))\"
     msiexec /qb /a $staging\python-$version.msi TARGETDIR="$staging\stage2\x86" | Out-Null
@@ -32,8 +32,8 @@ function Install-Python3Bits()
     $staging = "$pwd\staging"
     mkdir $staging | Out-Null
 
-    wget "$base/win32/dev.msi" -out "$staging\dev.msi"
-    wget "$base/amd64/dev.msi" -out "$staging\dev.amd64.msi"
+    & "$pwd\releng\wget" "$base/win32/dev.msi" --ca-certificate "$pwd\releng\ca-bundle.crt" -O "$staging\dev.msi"
+    & "$pwd\releng\wget" "$base/amd64/dev.msi" --ca-certificate "$pwd\releng\ca-bundle.crt" -O "$staging\dev.amd64.msi"
 
     $targetBase = "$pwd\python\$($version.Substring(0, 3))"
     msiexec /qb /a $staging\dev.msi TARGETDIR="$targetBase\x86" | Out-Null
