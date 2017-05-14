@@ -155,6 +155,8 @@ FRIDA_PREFIX_LIB="$FRIDA_PREFIX/lib"
 FRIDA_TOOLROOT="$FRIDA_BUILD/${frida_env_name_prefix}toolchain-${build_platform_arch}"
 FRIDA_SDKROOT="$FRIDA_BUILD/${frida_env_name_prefix}sdk-${host_platform_arch}"
 
+STRIP_FLAGS=""
+
 CFLAGS=""
 CXXFLAGS=""
 CPPFLAGS=""
@@ -218,6 +220,7 @@ case $host_platform in
     NM="${host_toolprefix}nm"
     RANLIB="${host_toolprefix}ranlib"
     STRIP="${host_toolprefix}strip"
+    STRIP_FLAGS="--strip-all"
 
     OBJDUMP="${host_toolprefix}objdump"
 
@@ -266,6 +269,7 @@ case $host_platform in
     NM="$FRIDA_ROOT/releng/llvm-nm-macos-x86_64"
     RANLIB="$(xcrun --sdk $macos_sdk -f ranlib)"
     STRIP="$(xcrun --sdk $macos_sdk -f strip)"
+    STRIP_FLAGS="-Sx"
 
     INSTALL_NAME_TOOL="$(xcrun --sdk $macos_sdk -f install_name_tool)"
     OTOOL="$(xcrun --sdk $macos_sdk -f otool)"
@@ -321,6 +325,7 @@ case $host_platform in
     NM="$FRIDA_ROOT/releng/llvm-nm-macos-x86_64"
     RANLIB="$(xcrun --sdk $ios_sdk -f ranlib)"
     STRIP="$(xcrun --sdk $ios_sdk -f strip)"
+    STRIP_FLAGS="-Sx"
 
     INSTALL_NAME_TOOL="$(xcrun --sdk $ios_sdk -f install_name_tool)"
     OTOOL="$(xcrun --sdk $ios_sdk -f otool)"
@@ -432,6 +437,7 @@ case $host_platform in
     NM="$android_gcc_toolchain/bin/${android_host_toolprefix}nm"
     RANLIB="$android_gcc_toolchain/bin/${android_host_toolprefix}ranlib"
     STRIP="$android_gcc_toolchain/bin/${android_host_toolprefix}strip"
+    STRIP_FLAGS="--strip-all"
 
     OBJCOPY="$android_gcc_toolchain/bin/${android_host_toolprefix}objcopy"
     OBJDUMP="$android_gcc_toolchain/bin/${android_host_toolprefix}objdump"
@@ -545,6 +551,7 @@ $arch_linker_args"
     NM="$qnx_toolchain_prefix-nm"
     RANLIB="$qnx_toolchain_prefix-ranlib"
     STRIP="$qnx_toolchain_prefix-strip"
+    STRIP_FLAGS="--strip-all"
 
     OBJDUMP="$qnx_toolchain_prefix-objdump"
 
@@ -707,6 +714,13 @@ if [ "$FRIDA_ENV_SDK" != 'none' ] && ! grep -Eq "^$sdk_version\$" "$FRIDA_SDKROO
   echo $sdk_version > "$FRIDA_SDKROOT/.version"
 fi
 
+strip_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-strip
+(
+  echo "#!/bin/sh"
+  echo "exec \"$STRIP\" $STRIP_FLAGS \"\$@\""
+) > "$strip_wrapper"
+chmod 755 "$strip_wrapper"
+
 PKG_CONFIG=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-pkg-config
 
 pkg_config="$FRIDA_TOOLROOT/bin/pkg-config"
@@ -817,7 +831,7 @@ meson_cross_file=build/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}.txt
     echo "objcpp = '$meson_objcpp'"
   fi
   echo "ar = '$AR'"
-  echo "strip = '$STRIP'"
+  echo "strip = '$strip_wrapper'"
   echo "pkgconfig = '$PKG_CONFIG'"
   echo ""
   echo "[properties]"
