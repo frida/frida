@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# This wrapper script is necessary in order to avoid polluting the build
+# systems with Android-specific quirks to:
+# - Add -Wl,-pie when linking programs.
+# - Clean up the ELF files to avoid dynamic linker warnings at runtime.
+
+output_type=executable
+output_path=
+
+argv=()
+while [[ $# > 0 ]]; do
+  arg="$1"
+
+  case "$arg" in
+    -E)
+      output_type=code
+      ;;
+    -c)
+      output_type=object
+      ;;
+    -shared)
+      output_type=library
+      ;;
+    -o)
+      argv+=("-o")
+      shift
+
+      arg="$1"
+
+      output_path="$arg"
+      ;;
+  esac
+
+  argv+=("$arg")
+  shift
+done
+
+if [[ $output_type = executable ]]; then
+  argv+=("-Wl,-pie")
+fi
+
+"@linker@" "${argv[@]}" || exit $?
+
+case $output_type in
+  executable|library)
+    "@elf_cleaner@" "$output_path"
+    ;;
+esac
