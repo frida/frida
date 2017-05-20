@@ -276,7 +276,7 @@ $1/configure: build/fs-env-$(build_platform_arch).rc build/.$1-stamp
 build/fs-tmp-%/$1/Makefile: build/fs-env-%.rc $1/configure $3
 	$(RM) -r $$(@D)
 	mkdir -p $$(@D)
-	. $$< && cd $$(@D) && ../../../$1/configure
+	. $$< && cd $$(@D) && VALAFLAGS="$$$$VALAFLAGS --target-glib=2.53" ../../../$1/configure
 
 $2: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
 	. $$< \
@@ -497,9 +497,6 @@ build/fs-env-%.rc:
 	FRIDA_HOST=$* \
 		FRIDA_OPTIMIZATION_FLAGS="$(FRIDA_OPTIMIZATION_FLAGS)" \
 		FRIDA_DEBUG_FLAGS="$(FRIDA_DEBUG_FLAGS)" \
-		FRIDA_STRIP=$(FRIDA_STRIP) \
-		FRIDA_DIET=$(FRIDA_DIET) \
-		FRIDA_MAPPER=$(FRIDA_MAPPER) \
 		FRIDA_ASAN=$(FRIDA_ASAN) \
 		FRIDA_ENV_NAME=fs \
 		FRIDA_ENV_SDK=none \

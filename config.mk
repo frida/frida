@@ -1,13 +1,15 @@
-BINDIST = build/bindist
 DESTDIR ?=
 PREFIX ?= /usr
 
 FRIDA := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+
+FRIDA_COMMON_FLAGS := --buildtype minsize --strip
+FRIDA_DIET_FLAGS := -Denable_diet=auto
+FRIDA_MAPPER_FLAGS := -Denable_mapper=auto
+
 FRIDA_OPTIMIZATION_FLAGS ?= -Os
 FRIDA_DEBUG_FLAGS ?= -g3
-FRIDA_STRIP ?= yes
-FRIDA_DIET ?= auto
-FRIDA_MAPPER ?= yes
+
 FRIDA_ASAN ?= no
 
 PYTHON ?= $(shell which python)

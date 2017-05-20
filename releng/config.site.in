@@ -7,8 +7,6 @@ frida_prefix=@frida_prefix@
 
 test "$prefix" = NONE && prefix="$frida_prefix"
 
-enable_diet=@frida_enable_diet@
-enable_mapper=@frida_enable_mapper@
 enable_nls=no
 enable_silent_rules=yes
 
