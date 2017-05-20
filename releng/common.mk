@@ -52,7 +52,7 @@ build/frida-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida-vers
 		FRIDA_ASAN=$(FRIDA_ASAN) \
 		./releng/setup-env.sh
 
-build/frida-version.h: releng/generate-version-header.py .git/refs/heads/feature/meson
+build/frida-version.h: releng/generate-version-header.py .git/refs/heads/master
 	@python releng/generate-version-header.py > $@.tmp
 	@mv $@.tmp $@
 
