@@ -211,13 +211,13 @@ case $host_platform in
         extra_cpp_args="$extra_cpp_args, '-std=c++11'"
         ;;
     esac
-    LDFLAGS="$host_arch_flags -Wl,--no-undefined -Wl,--gc-sections"
+    LDFLAGS="$host_arch_flags -Wl,--gc-sections"
 
     arch_args=$(flags_to_args "$host_arch_flags")
 
     base_toolchain_args="$arch_args, '-static-libgcc'"
     base_compiler_args="$base_toolchain_args, '-ffunction-sections', '-fdata-sections'"
-    base_linker_args="$base_toolchain_args, '-Wl,--no-undefined', '-Wl,--gc-sections'"
+    base_linker_args="$base_toolchain_args, '-Wl,--gc-sections'"
 
     meson_c="${host_toolprefix}gcc"
     meson_cpp="${host_toolprefix}g++"
@@ -450,7 +450,6 @@ case $host_platform in
 -I$android_sysroot/usr/include"
     LDFLAGS="$android_host_ldflags \
 -fPIE -pie \
--Wl,--no-undefined \
 -Wl,--gc-sections \
 -Wl,-z,noexecstack \
 -Wl,-z,relro \
@@ -475,7 +474,6 @@ $base_toolchain_args, \
 '-I$android_sysroot/usr/include'"
     base_linker_args="\
 $base_toolchain_args, \
-'-Wl,--no-undefined', \
 '-Wl,--gc-sections', \
 '-Wl,-z,noexecstack', \
 '-Wl,-z,relro', \
@@ -555,7 +553,7 @@ $arch_linker_args"
     OBJDUMP="$qnx_toolchain_prefix-objdump"
 
     CFLAGS="-ffunction-sections -fdata-sections"
-    LDFLAGS="-Wl,--no-undefined -Wl,--gc-sections -L$(dirname $qnx_sysroot/lib/gcc/4.8.3/libstdc++.a)"
+    LDFLAGS="-Wl,--gc-sections -L$(dirname $qnx_sysroot/lib/gcc/4.8.3/libstdc++.a)"
 
     meson_root="$qnx_sysroot"
 
@@ -563,7 +561,7 @@ $arch_linker_args"
 
     base_toolchain_args="'--sysroot=$qnx_sysroot', $arch_args, '-static-libgcc'"
     base_compiler_args="$base_toolchain_args, '-ffunction-sections', '-fdata-sections'"
-    base_linker_args="$base_toolchain_args, '-Wl,--no-undefined', '-Wl,--gc-sections'"
+    base_linker_args="$base_toolchain_args, '-Wl,--gc-sections'"
 
     meson_c="$qnx_toolchain_prefix-gcc"
     meson_cpp="$qnx_toolchain_prefix-g++"
