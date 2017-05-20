@@ -20,7 +20,4 @@ NODE ?= $(shell which node)
 NODE_BIN_DIR := $(shell dirname $(NODE) 2>/dev/null)
 NPM ?= $(NODE_BIN_DIR)/npm
 
-MESON ?= python3 $(FRIDA)/releng/meson/meson.py
-NINJA ?= ninja
-
 tests ?=

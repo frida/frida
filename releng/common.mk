@@ -6,10 +6,14 @@ build_platform_arch := $(build_platform)-$(build_arch)
 
 GLIB_HOST ?= $(build_platform_arch)
 
+MESON := python3 $(FRIDA)/releng/meson/meson.py
+NINJA := $(FRIDA)/releng/ninja-$(build_platform_arch)
+
 frida_gum_flags := --default-library static $(FRIDA_COMMON_FLAGS) $(FRIDA_DIET_FLAGS)
 frida_core_flags := --default-library static $(FRIDA_COMMON_FLAGS) $(FRIDA_DIET_FLAGS) $(FRIDA_MAPPER_FLAGS)
 
 frida_python_tools := frida frida-discover frida-kill frida-ls-devices frida-ps frida-trace
+
 
 modules = capstone frida-gum frida-core frida-python frida-node
 
