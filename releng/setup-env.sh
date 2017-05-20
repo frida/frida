@@ -661,6 +661,7 @@ if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/.version" 2>/dev/null; th
   ) > "$vala_wrapper"
   chmod 755 "$vala_wrapper"
 
+  ln -s "${FRIDA_ROOT}/releng/ninja-${build_platform_arch}" "$FRIDA_TOOLROOT/bin/ninja"
   ln -s "${FRIDA_ROOT}/releng/frida-resource-compiler-${build_platform_arch}" "$FRIDA_TOOLROOT/bin/frida-resource-compiler"
 
   echo $toolchain_version > "$FRIDA_TOOLROOT/.version"
