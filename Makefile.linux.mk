@@ -397,6 +397,7 @@ build/tmp-%/frida-$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-sta
 		mkdir -p $$builddir; \
 		$(MESON) \
 			--prefix $(FRIDA)/build/frida-$* \
+			--libdir $(FRIDA)/build/frida-$*/lib \
 			--cross-file build/frida-$*.txt \
 			-Dwith-python=$(PYTHON) \
 			frida-python $$builddir || exit 1; \
