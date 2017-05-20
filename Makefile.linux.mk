@@ -358,9 +358,9 @@ build/tmp-%/frida-core/.frida-helper-loader-and-agent-stamp: build/tmp-%/frida-c
 	@touch $@
 
 check-core-32: build/frida-linux-i386/lib/pkgconfig/frida-core-1.0.pc ##@core Run tests for i386
-	$< $(test_args)
+	build/tmp-linux-i386/frida-core/tests/frida-tests $(test_args)
 check-core-64: build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Run tests for x86-64
-	$< $(test_args)
+	build/tmp-linux-x86_64/frida-core/tests/frida-tests $(test_args)
 
 server-32: build/frida-linux-i386/lib/pkgconfig/frida-core-1.0.pc ##@server Build for i386
 server-64: build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for x86-64
