@@ -114,6 +114,7 @@ build/frida-%/lib/pkgconfig/frida-gum-1.0.pc: build/.frida-gum-submodule-stamp b
 		mkdir -p $$builddir; \
 		$(MESON) \
 			--prefix $(FRIDA)/build/frida-$* \
+			--libdir $(FRIDA)/build/frida-$*/lib \
 			--cross-file build/frida-$*.txt \
 			$(frida_gum_flags) \
 			frida-gum $$builddir || exit 1; \
@@ -142,6 +143,7 @@ build/tmp-linux-i386/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-
 		mkdir -p $$builddir; \
 		$(MESON) \
 			--prefix $(FRIDA)/build/frida-linux-i386 \
+			--libdir $(FRIDA)/build/frida-linux-i386/lib \
 			--cross-file build/frida-linux-i386.txt \
 			$(frida_core_flags) \
 			-Dwith-32bit-helper=$(FRIDA)/build/tmp-linux-i386/frida-core/src/frida-helper \
@@ -158,6 +160,7 @@ build/tmp-linux-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submodul
 		mkdir -p $$builddir; \
 		$(MESON) \
 			--prefix $(FRIDA)/build/frida-linux-x86_64 \
+			--libdir $(FRIDA)/build/frida-linux-x86_64/lib \
 			--cross-file build/frida-linux-x86_64.txt \
 			$(frida_core_flags) \
 			-Dwith-32bit-helper=$(FRIDA)/build/tmp-linux-i386/frida-core/src/frida-helper \
@@ -174,6 +177,7 @@ build/tmp-linux-arm/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-s
 		mkdir -p $$builddir; \
 		$(MESON) \
 			--prefix $(FRIDA)/build/frida-linux-arm \
+			--libdir $(FRIDA)/build/frida-linux-arm/lib \
 			--cross-file build/frida-linux-arm.txt \
 			$(frida_core_flags) \
 			frida-core $$builddir || exit 1; \
@@ -186,6 +190,7 @@ build/tmp-linux-armhf/frida-core/.frida-ninja-stamp: build/.frida-core-submodule
 		mkdir -p $$builddir; \
 		$(MESON) \
 			--prefix $(FRIDA)/build/frida-linux-armhf \
+			--libdir $(FRIDA)/build/frida-linux-armhf/lib \
 			--cross-file build/frida-linux-armhf.txt \
 			$(frida_core_flags) \
 			frida-core $$builddir || exit 1; \
@@ -198,6 +203,7 @@ build/tmp-linux-mips/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-
 		mkdir -p $$builddir; \
 		$(MESON) \
 			--prefix $(FRIDA)/build/frida-linux-mips \
+			--libdir $(FRIDA)/build/frida-linux-mips/lib \
 			--cross-file build/frida-linux-mips.txt \
 			$(frida_core_flags) \
 			frida-core $$builddir || exit 1; \
@@ -210,6 +216,7 @@ build/tmp-linux-mipsel/frida-core/.frida-ninja-stamp: build/.frida-core-submodul
 		mkdir -p $$builddir; \
 		$(MESON) \
 			--prefix $(FRIDA)/build/frida-linux-mipsel \
+			--libdir $(FRIDA)/build/frida-linux-mipsel/lib \
 			--cross-file build/frida-linux-mipsel.txt \
 			$(frida_core_flags) \
 			frida-core $$builddir || exit 1; \
@@ -222,6 +229,7 @@ build/tmp-android-i386/frida-core/.frida-ninja-stamp: build/.frida-core-submodul
 		mkdir -p $$builddir; \
 		$(MESON) \
 			--prefix $(FRIDA)/build/frida-android-i386 \
+			--libdir $(FRIDA)/build/frida-android-i386/lib \
 			--cross-file build/frida-android-i386.txt \
 			$(frida_core_flags) \
 			frida-core $$builddir || exit 1; \
@@ -234,6 +242,7 @@ build/tmp-android-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submod
 		mkdir -p $$builddir; \
 		$(MESON) \
 			--prefix $(FRIDA)/build/frida-android-x86_64 \
+			--libdir $(FRIDA)/build/frida-android-x86_64/lib \
 			--cross-file build/frida-android-x86_64.txt \
 			$(frida_core_flags) \
 			-Dwith-32bit-helper=$(FRIDA)/build/tmp-android-i386/frida-core/src/frida-helper \
@@ -252,6 +261,7 @@ build/tmp-android-arm/frida-core/.frida-ninja-stamp: build/.frida-core-submodule
 		mkdir -p $$builddir; \
 		$(MESON) \
 			--prefix $(FRIDA)/build/frida-android-arm \
+			--libdir $(FRIDA)/build/frida-android-arm/lib \
 			--cross-file build/frida-android-arm.txt \
 			$(frida_core_flags) \
 			frida-core $$builddir || exit 1; \
@@ -264,6 +274,7 @@ build/tmp-android-arm64/frida-core/.frida-ninja-stamp: build/.frida-core-submodu
 		mkdir -p $$builddir; \
 		$(MESON) \
 			--prefix $(FRIDA)/build/frida-android-arm64 \
+			--libdir $(FRIDA)/build/frida-android-arm64/lib \
 			--cross-file build/frida-android-arm64.txt \
 			$(frida_core_flags) \
 			-Dwith-32bit-helper=$(FRIDA)/build/tmp-android-arm/frida-core/src/frida-helper \
@@ -282,6 +293,7 @@ build/tmp-qnx-arm/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-sta
 		mkdir -p $$builddir; \
 		$(MESON) \
 			--prefix $(FRIDA)/build/frida-qnx-arm \
+			--libdir $(FRIDA)/build/frida-qnx-arm/lib \
 			--cross-file build/frida-qnx-arm.txt \
 			$(frida_core_flags) \
 			frida-core $$builddir || exit 1; \
@@ -294,6 +306,7 @@ build/tmp-qnx-armeabi/frida-core/.frida-ninja-stamp: build/.frida-core-submodule
 		mkdir -p $$builddir; \
 		$(MESON) \
 			--prefix $(FRIDA)/build/frida-qnx-armeabi \
+			--libdir $(FRIDA)/build/frida-qnx-armeabi/lib \
 			--cross-file build/frida-qnx-armeabi.txt \
 			$(frida_core_flags) \
 			frida-core $$builddir || exit 1; \
