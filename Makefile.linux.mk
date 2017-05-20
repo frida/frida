@@ -141,8 +141,8 @@ build/tmp-linux-i386/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
 		$(MESON) \
-			--prefix $(FRIDA)/build/frida-linux-$* \
-			--cross-file build/frida-linux-$*.txt \
+			--prefix $(FRIDA)/build/frida-linux-i386 \
+			--cross-file build/frida-linux-i386.txt \
 			$(frida_core_flags) \
 			-Dwith-32bit-helper=$(FRIDA)/build/tmp-linux-i386/frida-core/src/frida-helper \
 			-Dwith-64bit-helper=$(FRIDA)/build/tmp-linux-x86_64/frida-core/src/frida-helper \
@@ -157,8 +157,8 @@ build/tmp-linux-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submodul
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
 		$(MESON) \
-			--prefix $(FRIDA)/build/frida-linux-$* \
-			--cross-file build/frida-linux-$*.txt \
+			--prefix $(FRIDA)/build/frida-linux-x86_64 \
+			--cross-file build/frida-linux-x86_64.txt \
 			$(frida_core_flags) \
 			-Dwith-32bit-helper=$(FRIDA)/build/tmp-linux-i386/frida-core/src/frida-helper \
 			-Dwith-64bit-helper=$(FRIDA)/build/tmp-linux-x86_64/frida-core/src/frida-helper \
