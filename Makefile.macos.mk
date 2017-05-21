@@ -427,9 +427,9 @@ check-node-macos: build/frida-macos-$(build_arch)/lib/node_modules/frida ##@node
 
 
 install-macos: install-python-macos ##@utilities Install frida utilities (frida{-discover,-kill,-ls-devices,-ps,-trace})
-	for n in $(frida_python_tools); do \
-		b="build/frida-macos-universal/bin/$$n"; \
-		p="$(PREFIX)/bin/$$n"; \
+	for tool in $(frida_python_tools); do \
+		b="build/frida-macos-universal/bin/$$tool"; \
+		p="$(PREFIX)/bin/$$tool"; \
 		t="$$(mktemp -t frida)"; \
 		grep -v 'sys.path.insert' "$$b" > "$$t"; \
 		chmod +x "$$t"; \
@@ -441,9 +441,9 @@ install-macos: install-python-macos ##@utilities Install frida utilities (frida{
 	done
 
 uninstall-macos: uninstall-python-macos ##@utilities Uninstall frida utilities
-	@for n in $(frida_python_tools); do \
-		if which "$$n" &> /dev/null; then \
-			p=`which "$$n"`; \
+	@for tool in $(frida_python_tools); do \
+		if which "$$tool" &> /dev/null; then \
+			p=`which "$$tool"`; \
 			if [ -w "$$(dirname "$$p")" ]; then \
 				rm -f "$$p"; \
 			else \
