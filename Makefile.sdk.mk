@@ -143,7 +143,7 @@ build/fs-tmp-%/zlib/Makefile: build/fs-env-%.rc build/.zlib-stamp
 				export PATH="$$(dirname $$NM):$$PATH"; \
 				export CHOST="mipsel-linux"; \
 				;; \
-			android-i386) \
+			android-x86) \
 				export PATH="$$(dirname $$NM):$$PATH"; \
 				export CHOST="i686-linux-android"; \
 				;; \
@@ -159,7 +159,7 @@ build/fs-tmp-%/zlib/Makefile: build/fs-env-%.rc build/.zlib-stamp
 				export PATH="$$(dirname $$NM):$$PATH"; \
 				export CHOST="aarch64-linux-android"; \
 				;; \
-			qnx-i386) \
+			qnx-x86) \
 				export PATH="$$(dirname $$NM):$$PATH"; \
 				export CHOST="i486-pc-nto-qnx6.6.0"; \
 				;; \
@@ -325,7 +325,7 @@ $(eval $(call make-git-autotools-module-rules,libgee,build/fs-%/lib/pkgconfig/ge
 $(eval $(call make-git-meson-module-rules,json-glib,build/fs-%/lib/pkgconfig/json-glib-1.0.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc))
 
 
-ifeq ($(host_arch), i386)
+ifeq ($(host_arch), x86)
 	v8_arch := ia32
 	android_target_platform := 14
 endif

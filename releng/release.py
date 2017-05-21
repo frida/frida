@@ -210,13 +210,13 @@ if __name__ == '__main__':
         if slave == 'windows':
             upload = get_github_uploader()
 
-            upload_devkits("windows-i386", upload)
+            upload_devkits("windows-x86", upload)
             upload_devkits("windows-x86_64", upload)
 
-            upload_file("frida-server-{version}-windows-i386.exe", os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "bin", "frida-server.exe"), upload)
+            upload_file("frida-server-{version}-windows-x86.exe", os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "bin", "frida-server.exe"), upload)
             upload_file("frida-server-{version}-windows-x86_64.exe", os.path.join(build_dir, "build", "frida-windows", "x64-Release", "bin", "frida-server.exe"), upload)
 
-            upload_file("frida-gadget-{version}-windows-i386.dll", os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "bin", "frida-gadget.dll"), upload)
+            upload_file("frida-gadget-{version}-windows-x86.dll", os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "bin", "frida-gadget.dll"), upload)
             upload_file("frida-gadget-{version}-windows-x86_64.dll", os.path.join(build_dir, "build", "frida-windows", "x64-Release", "bin", "frida-gadget.dll"), upload)
 
             upload_to_pypi(r"C:\Program Files (x86)\Python 2.7\python.exe",
@@ -233,9 +233,9 @@ if __name__ == '__main__':
         elif slave == 'macos':
             upload = get_github_uploader()
 
-            upload_devkits("macos-i386", upload)
+            upload_devkits("macos-x86", upload)
             upload_devkits("macos-x86_64", upload)
-            upload_devkits("ios-i386", upload)
+            upload_devkits("ios-x86", upload)
             upload_devkits("ios-x86_64", upload)
             upload_devkits("ios-arm", upload)
             upload_devkits("ios-arm64", upload)
@@ -267,23 +267,23 @@ if __name__ == '__main__':
         elif slave == 'linux':
             upload = get_github_uploader()
 
-            upload_devkits("linux-i386", upload)
+            upload_devkits("linux-x86", upload)
             upload_devkits("linux-x86_64", upload)
 
-            upload_file("frida-server-{version}-linux-i386", os.path.join(build_dir, "build", "frida_stripped-linux-i386", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-linux-x86", os.path.join(build_dir, "build", "frida_stripped-linux-x86", "bin", "frida-server"), upload)
             upload_file("frida-server-{version}-linux-x86_64", os.path.join(build_dir, "build", "frida_stripped-linux-x86_64", "bin", "frida-server"), upload)
 
-            upload_file("frida-gadget-{version}-linux-i386.so", os.path.join(build_dir, "build", "frida_stripped-linux-i386", "lib", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-linux-x86.so", os.path.join(build_dir, "build", "frida_stripped-linux-x86", "lib", "frida-gadget.so"), upload)
             upload_file("frida-gadget-{version}-linux-x86_64.so", os.path.join(build_dir, "build", "frida_stripped-linux-x86_64", "lib", "frida-gadget.so"), upload)
 
             upload_to_pypi("/opt/python27-32/bin/python2.7",
-                os.path.join(build_dir, "build", "frida_stripped-linux-i386", "lib", "python2.7", "site-packages", "_frida.so"),
+                os.path.join(build_dir, "build", "frida_stripped-linux-x86", "lib", "python2.7", "site-packages", "_frida.so"),
                 { 'LD_LIBRARY_PATH': "/opt/python27-32/lib", '_PYTHON_HOST_PLATFORM': "linux-i686" })
             upload_to_pypi("/opt/python27-64/bin/python2.7",
                 os.path.join(build_dir, "build", "frida_stripped-linux-x86_64", "lib", "python2.7", "site-packages", "_frida.so"),
                 { 'LD_LIBRARY_PATH': "/opt/python27-64/lib", '_PYTHON_HOST_PLATFORM': "linux-x86_64" })
             upload_to_pypi("/opt/python36-32/bin/python3.6",
-                os.path.join(build_dir, "build", "frida_stripped-linux-i386", "lib", "python3.6", "site-packages", "_frida.so"),
+                os.path.join(build_dir, "build", "frida_stripped-linux-x86", "lib", "python3.6", "site-packages", "_frida.so"),
                 { 'LD_LIBRARY_PATH': "/opt/python36-32/lib", '_PYTHON_HOST_PLATFORM': "linux-i686" })
             upload_to_pypi("/opt/python36-64/bin/python3.6",
                 os.path.join(build_dir, "build", "frida_stripped-linux-x86_64", "lib", "python3.6", "site-packages", "_frida.so"),
@@ -294,17 +294,17 @@ if __name__ == '__main__':
         elif slave == 'android':
             upload = get_github_uploader()
 
-            upload_devkits("android-i386", upload)
+            upload_devkits("android-x86", upload)
             upload_devkits("android-x86_64", upload)
             upload_devkits("android-arm", upload)
             upload_devkits("android-arm64", upload)
 
-            upload_file("frida-server-{version}-android-i386", os.path.join(build_dir, "build", "frida_stripped-android-i386", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-android-x86", os.path.join(build_dir, "build", "frida_stripped-android-x86", "bin", "frida-server"), upload)
             upload_file("frida-server-{version}-android-x86_64", os.path.join(build_dir, "build", "frida_stripped-android-x86_64", "bin", "frida-server"), upload)
             upload_file("frida-server-{version}-android-arm", os.path.join(build_dir, "build", "frida_stripped-android-arm", "bin", "frida-server"), upload)
             upload_file("frida-server-{version}-android-arm64", os.path.join(build_dir, "build", "frida_stripped-android-arm64", "bin", "frida-server"), upload)
 
-            upload_file("frida-gadget-{version}-android-i386.so", os.path.join(build_dir, "build", "frida-android-i386", "lib", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-android-x86.so", os.path.join(build_dir, "build", "frida-android-x86", "lib", "frida-gadget.so"), upload)
             upload_file("frida-gadget-{version}-android-x86_64.so", os.path.join(build_dir, "build", "frida-android-x86_64", "lib", "frida-gadget.so"), upload)
             upload_file("frida-gadget-{version}-android-arm.so", os.path.join(build_dir, "build", "frida-android-arm", "lib", "frida-gadget.so"), upload)
             upload_file("frida-gadget-{version}-android-arm64.so", os.path.join(build_dir, "build", "frida-android-arm64", "lib", "frida-gadget.so"), upload)

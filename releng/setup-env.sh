@@ -153,7 +153,7 @@ flags_to_args () {
 case $host_platform in
   linux)
     case $host_arch in
-      i386)
+      x86)
         host_arch_flags="-m32"
         host_toolprefix="/usr/bin/"
         ;;
@@ -282,7 +282,7 @@ case $host_platform in
     ios_minver="7.0"
 
     case $host_arch in
-      i386|x86_64)
+      x86|x86_64)
         ios_sdk="iphonesimulator"
         ;;
       *)
@@ -346,10 +346,9 @@ case $host_platform in
     ;;
   android)
     android_build_platform=$(echo ${build_platform} | sed 's,^macos$,darwin,')
-    android_host_arch=$(echo ${host_arch} | sed 's,^i386$,x86,')
     android_have_unwind=no
 
-    case $android_host_arch in
+    case $host_arch in
       x86)
         android_target_platform=14
         android_host_abi=x86
@@ -391,7 +390,7 @@ case $host_platform in
 
     android_clang_prefix="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/${android_build_platform}-x86_64"
     android_gcc_toolchain="$ANDROID_NDK_ROOT/toolchains/${android_host_toolchain}/prebuilt/${android_build_platform}-x86_64"
-    android_sysroot="$ANDROID_NDK_ROOT/platforms/android-${android_target_platform}/arch-${android_host_arch}"
+    android_sysroot="$ANDROID_NDK_ROOT/platforms/android-${android_target_platform}/arch-${host_arch}"
     toolflags="--sysroot=$android_sysroot \
 --gcc-toolchain=$android_gcc_toolchain \
 --target=$android_host_target \
@@ -504,7 +503,7 @@ $arch_linker_args"
     ;;
   qnx)
     case $host_arch in
-      i386)
+      x86)
         qnx_host=i486-pc-nto-qnx6.6.0
         qnx_sysroot=$QNX_TARGET/x86
 

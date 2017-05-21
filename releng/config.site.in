@@ -39,7 +39,7 @@ case $frida_host_platform_arch in
     host_alias="mipsel-linux-uclibc"
     cross_compiling=yes
     ;;
-  linux-i386)
+  linux-x86)
     host_alias="i686-linux-gnu"
     cross_compiling=yes
     ;;
@@ -47,7 +47,7 @@ case $frida_host_platform_arch in
     host_alias="x86_64-linux-gnu"
     cross_compiling=no
     ;;
-  qnx-i386)
+  qnx-x86)
     host_alias="i486-pc-nto-qnx6.6.0"
     cross_compiling=yes
     ;;
@@ -59,7 +59,7 @@ case $frida_host_platform_arch in
     host_alias="arm-unknown-nto-qnx6.5.0"
     cross_compiling=yes
     ;;
-  android-i386)
+  android-x86)
     if [ -n "$FRIDA_LEGACY_AUTOTOOLS" ]; then
       host_alias="i686-linux-gnu"
     else
@@ -93,7 +93,7 @@ case $frida_host_platform_arch in
     fi
     cross_compiling=yes
     ;;
-  macos-i386|ios-i386)
+  macos-x86|ios-x86)
     host_alias="i686-apple-darwin"
     cross_compiling=yes
     ;;
@@ -214,11 +214,6 @@ case "$PACKAGE_TARNAME" in
   'capstone')
     enable_shared=no
     enable_static=yes
-    enable_maintainer_mode=yes
-    frida_flags="$frida_warning_flags $frida_flags"
-    ;;
-  frida-*)
-    enable_maintainer_mode=yes
     frida_flags="$frida_warning_flags $frida_flags"
     ;;
   *)
