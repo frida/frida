@@ -837,6 +837,10 @@ meson_cross_file=build/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}.txt
   echo "pkgconfig = '$PKG_CONFIG'"
   echo ""
   echo "[properties]"
+  if [ $host_platform != $build_platform ]; then
+    echo "needs_exe_wrapper = true"
+    echo ""
+  fi
   if [ -n "$meson_root" ]; then
     echo "root = '$meson_root'"
     echo ""
