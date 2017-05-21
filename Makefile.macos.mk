@@ -379,8 +379,10 @@ build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so: build/tm
 	rm $(@D)/_frida-32.so $(@D)/_frida-64.so
 
 build/frida-macos-universal/bin/frida: build/tmp-macos-x86_64/frida-$(PYTHON_NAME)/.frida-stamp
-	mkdir -p build/frida-macos-universal/bin \
-		&& cp -r build/frida-macos-x86_64/bin/ build/frida-macos-universal/bin
+	mkdir -p build/frida-macos-universal/bin
+	for tool in $(frida_python_tools); do \
+		cp build/frida-macos-x86_64/bin/$$tool build/frida-macos-universal/bin/; \
+	done
 
 check-python-macos: python-macos ##@python Test Python bindings for macOS
 	export PYTHONPATH="$(shell pwd)/build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages" \
