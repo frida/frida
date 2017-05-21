@@ -16,6 +16,7 @@ if [ -n "$FRIDA_HOST" ]; then
 else
   host_arch=$build_arch
 fi
+host_clang_arch=$(echo -n $host_arch | sed 's,^x86$,i386,')
 host_platform_arch=${host_platform}-${host_arch}
 
 case $host_arch in
@@ -252,14 +253,14 @@ case $host_platform in
     CODESIGN="$(xcrun --sdk $macos_sdk -f codesign)"
     LIPO="$(xcrun --sdk $macos_sdk -f lipo)"
 
-    CPPFLAGS="-isysroot $macos_sdk_path -mmacosx-version-min=$macos_minver -arch $host_arch"
-    CFLAGS="-isysroot $macos_sdk_path -mmacosx-version-min=$macos_minver -arch $host_arch"
+    CPPFLAGS="-isysroot $macos_sdk_path -mmacosx-version-min=$macos_minver -arch $host_clang_arch"
+    CFLAGS="-isysroot $macos_sdk_path -mmacosx-version-min=$macos_minver -arch $host_clang_arch"
     CXXFLAGS="-std=c++11 -stdlib=libc++"
-    LDFLAGS="-isysroot $macos_sdk_path -Wl,-macosx_version_min,$macos_minver -arch $host_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
+    LDFLAGS="-isysroot $macos_sdk_path -Wl,-macosx_version_min,$macos_minver -arch $host_clang_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
 
     meson_root="$macos_sdk_path"
 
-    base_toolchain_args="'-isysroot', '$macos_sdk_path', '-mmacosx-version-min=$macos_minver', '-arch', '$host_arch'"
+    base_toolchain_args="'-isysroot', '$macos_sdk_path', '-mmacosx-version-min=$macos_minver', '-arch', '$host_clang_arch'"
     base_compiler_args="$base_toolchain_args"
     base_linker_args="$base_toolchain_args, '-Wl,-dead_strip', '-Wl,-no_compact_unwind'"
 
@@ -309,12 +310,12 @@ case $host_platform in
     CODESIGN="$(xcrun --sdk $ios_sdk -f codesign)"
     LIPO="$(xcrun --sdk $ios_sdk -f lipo)"
 
-    case $host_arch in
+    case $host_clang_arch in
       arm)
         ios_arch=armv7
         ;;
       *)
-        ios_arch=$host_arch
+        ios_arch=$host_clang_arch
         ;;
     esac
 
