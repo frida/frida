@@ -270,23 +270,23 @@ if __name__ == '__main__':
             upload_devkits("linux-x86", upload)
             upload_devkits("linux-x86_64", upload)
 
-            upload_file("frida-server-{version}-linux-x86", os.path.join(build_dir, "build", "frida_stripped-linux-x86", "bin", "frida-server"), upload)
-            upload_file("frida-server-{version}-linux-x86_64", os.path.join(build_dir, "build", "frida_stripped-linux-x86_64", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-linux-x86", os.path.join(build_dir, "build", "frida-linux-x86", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-linux-x86_64", os.path.join(build_dir, "build", "frida-linux-x86_64", "bin", "frida-server"), upload)
 
-            upload_file("frida-gadget-{version}-linux-x86.so", os.path.join(build_dir, "build", "frida_stripped-linux-x86", "lib", "frida-gadget.so"), upload)
-            upload_file("frida-gadget-{version}-linux-x86_64.so", os.path.join(build_dir, "build", "frida_stripped-linux-x86_64", "lib", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-linux-x86.so", os.path.join(build_dir, "build", "frida-linux-x86", "lib", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-linux-x86_64.so", os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "frida-gadget.so"), upload)
 
             upload_to_pypi("/opt/python27-32/bin/python2.7",
-                os.path.join(build_dir, "build", "frida_stripped-linux-x86", "lib", "python2.7", "site-packages", "_frida.so"),
+                os.path.join(build_dir, "build", "frida-linux-x86", "lib", "python2.7", "site-packages", "_frida.so"),
                 { 'LD_LIBRARY_PATH': "/opt/python27-32/lib", '_PYTHON_HOST_PLATFORM': "linux-i686" })
             upload_to_pypi("/opt/python27-64/bin/python2.7",
-                os.path.join(build_dir, "build", "frida_stripped-linux-x86_64", "lib", "python2.7", "site-packages", "_frida.so"),
+                os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python2.7", "site-packages", "_frida.so"),
                 { 'LD_LIBRARY_PATH': "/opt/python27-64/lib", '_PYTHON_HOST_PLATFORM': "linux-x86_64" })
             upload_to_pypi("/opt/python36-32/bin/python3.6",
-                os.path.join(build_dir, "build", "frida_stripped-linux-x86", "lib", "python3.6", "site-packages", "_frida.so"),
+                os.path.join(build_dir, "build", "frida-linux-x86", "lib", "python3.6", "site-packages", "_frida.so"),
                 { 'LD_LIBRARY_PATH': "/opt/python36-32/lib", '_PYTHON_HOST_PLATFORM': "linux-i686" })
             upload_to_pypi("/opt/python36-64/bin/python3.6",
-                os.path.join(build_dir, "build", "frida_stripped-linux-x86_64", "lib", "python3.6", "site-packages", "_frida.so"),
+                os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python3.6", "site-packages", "_frida.so"),
                 { 'LD_LIBRARY_PATH': "/opt/python36-64/lib", '_PYTHON_HOST_PLATFORM': "linux-x86_64" })
 
             upload_to_npm("/opt/node-32/bin/node", upload, publish=False)
@@ -299,10 +299,10 @@ if __name__ == '__main__':
             upload_devkits("android-arm", upload)
             upload_devkits("android-arm64", upload)
 
-            upload_file("frida-server-{version}-android-x86", os.path.join(build_dir, "build", "frida_stripped-android-x86", "bin", "frida-server"), upload)
-            upload_file("frida-server-{version}-android-x86_64", os.path.join(build_dir, "build", "frida_stripped-android-x86_64", "bin", "frida-server"), upload)
-            upload_file("frida-server-{version}-android-arm", os.path.join(build_dir, "build", "frida_stripped-android-arm", "bin", "frida-server"), upload)
-            upload_file("frida-server-{version}-android-arm64", os.path.join(build_dir, "build", "frida_stripped-android-arm64", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-android-x86", os.path.join(build_dir, "build", "frida-android-x86", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-android-x86_64", os.path.join(build_dir, "build", "frida-android-x86_64", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-android-arm", os.path.join(build_dir, "build", "frida-android-arm", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-android-arm64", os.path.join(build_dir, "build", "frida-android-arm64", "bin", "frida-server"), upload)
 
             upload_file("frida-gadget-{version}-android-x86.so", os.path.join(build_dir, "build", "frida-android-x86", "lib", "frida-gadget.so"), upload)
             upload_file("frida-gadget-{version}-android-x86_64.so", os.path.join(build_dir, "build", "frida-android-x86_64", "lib", "frida-gadget.so"), upload)
@@ -314,27 +314,27 @@ if __name__ == '__main__':
             upload_devkits("linux-arm", upload)
             upload_devkits("linux-armhf", upload)
 
-            upload_file("frida-server-{version}-linux-arm", os.path.join(build_dir, "build", "frida_stripped-linux-arm", "bin", "frida-server"), upload)
-            upload_file("frida-server-{version}-linux-armhf", os.path.join(build_dir, "build", "frida_stripped-linux-armhf", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-linux-arm", os.path.join(build_dir, "build", "frida-linux-arm", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-linux-armhf", os.path.join(build_dir, "build", "frida-linux-armhf", "bin", "frida-server"), upload)
 
-            upload_file("frida-gadget-{version}-linux-arm.so", os.path.join(build_dir, "build", "frida_stripped-linux-arm", "lib", "frida-gadget.so"), upload)
-            upload_file("frida-gadget-{version}-linux-armhf.so", os.path.join(build_dir, "build", "frida_stripped-linux-armhf", "lib", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-linux-arm.so", os.path.join(build_dir, "build", "frida-linux-arm", "lib", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-linux-armhf.so", os.path.join(build_dir, "build", "frida-linux-armhf", "lib", "frida-gadget.so"), upload)
         elif slave == 'mips':
             upload = get_github_uploader()
 
             upload_devkits("linux-mipsel", upload)
 
-            upload_file("frida-server-{version}-linux-mipsel", os.path.join(build_dir, "build", "frida_stripped-linux-mipsel", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-linux-mipsel", os.path.join(build_dir, "build", "frida-linux-mipsel", "bin", "frida-server"), upload)
 
-            upload_file("frida-gadget-{version}-linux-mipsel.so", os.path.join(build_dir, "build", "frida_stripped-linux-mipsel", "lib", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-linux-mipsel.so", os.path.join(build_dir, "build", "frida-linux-mipsel", "lib", "frida-gadget.so"), upload)
         elif slave == 'qnx-arm':
             upload = get_github_uploader()
 
             upload_devkits("qnx-arm", upload)
             upload_devkits("qnx-armeabi", upload)
 
-            upload_file("frida-server-{version}-qnx-arm", os.path.join(build_dir, "build", "frida_stripped-qnx-arm", "bin", "frida-server"), upload)
-            upload_file("frida-server-{version}-qnx-armeabi", os.path.join(build_dir, "build", "frida_stripped-qnx-armeabi", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-qnx-arm", os.path.join(build_dir, "build", "frida-qnx-arm", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-qnx-armeabi", os.path.join(build_dir, "build", "frida-qnx-armeabi", "bin", "frida-server"), upload)
 
-            upload_file("frida-gadget-{version}-qnx-arm.so", os.path.join(build_dir, "build", "frida_stripped-qnx-arm", "lib", "frida-gadget.so"), upload)
-            upload_file("frida-gadget-{version}-qnx-armeabi.so", os.path.join(build_dir, "build", "frida_stripped-qnx-armeabi", "lib", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-qnx-arm.so", os.path.join(build_dir, "build", "frida-qnx-arm", "lib", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-qnx-armeabi.so", os.path.join(build_dir, "build", "frida-qnx-armeabi", "lib", "frida-gadget.so"), upload)
