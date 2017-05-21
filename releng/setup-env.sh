@@ -19,6 +19,7 @@ fi
 host_clang_arch=$(echo -n $host_arch | sed 's,^x86$,i386,')
 host_platform_arch=${host_platform}-${host_arch}
 
+meson_host_system=$(echo $host_platform | sed 's,^macos$,darwin,' | sed 's,^ios$,darwin,' | sed 's,^android$,linux,')
 case $host_arch in
   i?86)
     meson_host_cpu_family=x86
@@ -859,7 +860,7 @@ meson_cross_file=build/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}.txt
   fi
   echo ""
   echo "[host_machine]"
-  echo "system = '$host_platform'"
+  echo "system = '$meson_host_system'"
   echo "cpu_family = '$meson_host_cpu_family'"
   echo "cpu = '$meson_host_cpu'"
   echo "endian = '$meson_host_endian'"
