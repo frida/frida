@@ -18,7 +18,7 @@ frida_python_tools := frida frida-discover frida-kill frida-ls-devices frida-ps 
 modules = capstone frida-gum frida-core frida-python frida-node
 
 git-submodules:
-	@if [ ! -f frida-core/configure.ac ]; then \
+	@if [ ! -f frida-core/meson.build ]; then \
 		git submodule init; \
 		git submodule update; \
 	fi
