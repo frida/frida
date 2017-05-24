@@ -294,7 +294,7 @@ build/.$1-stamp:
 	@mkdir -p $$(@D)
 	@touch $$@
 
-build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_platform_arch).rc build/fs-env-%.rc build/.$1-stamp $3
+build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_platform_arch).rc build/fs-env-%.rc build/.$1-stamp $3 releng/meson/meson.py
 	$(RM) -r $$(@D)
 	(. build/fs-meson-env-$(build_platform_arch).rc \
 		&& . build/fs-config-$$*.site \
@@ -503,6 +503,11 @@ build/fs-env-%.rc:
 		FRIDA_ENV_NAME=fs \
 		FRIDA_ENV_SDK=none \
 		./releng/setup-env.sh
+
+releng/meson/meson.py:
+	git submodule init releng/meson
+	git submodule update releng/meson
+	@touch $@
 
 
 .PHONY: all
