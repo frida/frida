@@ -1,5 +1,5 @@
---- bfd/bfd-in.h-orig	2017-05-24 17:03:08.000000000 +0200
-+++ bfd/bfd-in.h	2017-05-24 17:03:25.000000000 +0200
+--- binutils-old/bfd/bfd-in.h	2017-05-24 17:03:08.000000000 +0200
++++ binutils/bfd/bfd-in.h	2017-05-24 17:03:25.000000000 +0200
 @@ -23,11 +23,6 @@
  #ifndef __BFD_H_SEEN__
  #define __BFD_H_SEEN__
@@ -12,8 +12,8 @@
  #ifdef __cplusplus
  extern "C" {
  #endif
---- bfd/bfd-in2.h-orig	2017-05-24 17:03:14.000000000 +0200
-+++ bfd/bfd-in2.h	2017-05-24 17:03:32.000000000 +0200
+--- binutils-old/bfd/bfd-in2.h	2017-05-24 17:03:14.000000000 +0200
++++ binutils/bfd/bfd-in2.h	2017-05-24 17:03:32.000000000 +0200
 @@ -30,11 +30,6 @@
  #ifndef __BFD_H_SEEN__
  #define __BFD_H_SEEN__
