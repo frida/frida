@@ -43,6 +43,7 @@ distclean: clean-submodules
 	rm -rf build/
 
 clean: clean-submodules
+	rm -f build/.frida-gum-npm-stamp
 	rm -f build/*-clang*
 	rm -f build/*-pkg-config
 	rm -f build/*-stamp
