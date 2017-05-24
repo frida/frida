@@ -215,21 +215,9 @@ case $host_platform in
     RANLIB="${host_toolprefix}ranlib"
     STRIP="${host_toolprefix}strip"
     STRIP_FLAGS="--strip-all"
-
     OBJDUMP="${host_toolprefix}objdump"
 
-    extra_cpp_args=""
-
     CFLAGS="$host_arch_flags -ffunction-sections -fdata-sections"
-    case $host_arch in
-      mips|mipsel)
-        CXXFLAGS=""
-        ;;
-      *)
-        CXXFLAGS="-std=c++11"
-        extra_cpp_args="$extra_cpp_args, '-std=c++11'"
-        ;;
-    esac
     LDFLAGS="$host_arch_flags -Wl,--gc-sections"
 
     arch_args=$(flags_to_args "$host_arch_flags")
@@ -242,7 +230,7 @@ case $host_platform in
     meson_cpp="${host_toolprefix}g++"
 
     meson_c_args="$base_compiler_args"
-    meson_cpp_args="$base_compiler_args, '-static-libstdc++'$extra_cpp_args"
+    meson_cpp_args="$base_compiler_args, '-static-libstdc++'"
 
     meson_c_link_args="$base_linker_args"
     meson_cpp_link_args="$base_linker_args, '-static-libstdc++'"
@@ -273,7 +261,7 @@ case $host_platform in
 
     CPPFLAGS="-isysroot $macos_sdk_path -mmacosx-version-min=$macos_minver -arch $host_clang_arch"
     CFLAGS="-isysroot $macos_sdk_path -mmacosx-version-min=$macos_minver -arch $host_clang_arch"
-    CXXFLAGS="-std=c++11 -stdlib=libc++"
+    CXXFLAGS="-stdlib=libc++"
     LDFLAGS="-isysroot $macos_sdk_path -Wl,-macosx_version_min,$macos_minver -arch $host_clang_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
 
     meson_root="$macos_sdk_path"
@@ -288,9 +276,9 @@ case $host_platform in
     meson_objcpp="$CXX"
 
     meson_c_args="$base_compiler_args"
-    meson_cpp_args="$base_compiler_args, '-std=c++11', '-stdlib=libc++'"
+    meson_cpp_args="$base_compiler_args, '-stdlib=libc++'"
     meson_objc_args="$base_compiler_args"
-    meson_objcpp_args="$base_compiler_args, '-std=c++11', '-stdlib=libc++'"
+    meson_objcpp_args="$base_compiler_args, '-stdlib=libc++'"
 
     meson_c_link_args="$base_linker_args"
     meson_cpp_link_args="$base_linker_args, '-stdlib=libc++'"
@@ -339,7 +327,7 @@ case $host_platform in
 
     CPPFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch -fembed-bitcode-marker"
     CFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch -fembed-bitcode-marker"
-    CXXFLAGS="-std=c++11 -stdlib=libc++"
+    CXXFLAGS="-stdlib=libc++"
     LDFLAGS="-isysroot $ios_sdk_path -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -fembed-bitcode-marker -Wl,-dead_strip"
 
     meson_root="$ios_sdk_path"
@@ -354,9 +342,9 @@ case $host_platform in
     meson_objcpp="$CXX"
 
     meson_c_args="$base_compiler_args"
-    meson_cpp_args="$base_compiler_args, '-std=c++11', '-stdlib=libc++'"
+    meson_cpp_args="$base_compiler_args, '-stdlib=libc++'"
     meson_objc_args="$base_compiler_args"
-    meson_objcpp_args="$base_compiler_args, '-std=c++11', '-stdlib=libc++'"
+    meson_objcpp_args="$base_compiler_args, '-stdlib=libc++'"
 
     meson_c_link_args="$base_linker_args"
     meson_cpp_link_args="$base_linker_args, '-stdlib=libc++'"
@@ -450,7 +438,6 @@ case $host_platform in
     RANLIB="$android_gcc_toolchain/bin/${android_host_toolprefix}ranlib"
     STRIP="$android_gcc_toolchain/bin/${android_host_toolprefix}strip"
     STRIP_FLAGS="--strip-all"
-
     OBJCOPY="$android_gcc_toolchain/bin/${android_host_toolprefix}objcopy"
     OBJDUMP="$android_gcc_toolchain/bin/${android_host_toolprefix}objdump"
 
@@ -460,7 +447,6 @@ case $host_platform in
 -DANDROID \
 -I$android_sysroot/usr/include"
     CXXFLAGS="\
--std=c++11 \
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/include \
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/gabi++/include \
 -I$ANDROID_NDK_ROOT/sources/android/support/include"
@@ -504,7 +490,6 @@ $arch_linker_args"
 
     meson_c_args="$base_compiler_args"
     meson_cpp_args="$base_compiler_args, \
-'-std=c++11', \
 '-funwind-tables', '-fno-exceptions', '-fno-rtti', \
 '-I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/include', \
 '-I$ANDROID_NDK_ROOT/sources/cxx-stl/gabi++/include', \
@@ -559,7 +544,7 @@ $arch_linker_args"
     toolchain_flags="--sysroot=$qnx_sysroot $host_arch_flags $qnx_preprocessor_flags"
     CPP="$qnx_toolchain_prefix-cpp $toolchain_flags"
     CC="$FRIDA_ROOT/releng/cxx-wrapper-qnx.sh $qnx_toolchain_prefix-gcc $toolchain_flags -static-libgcc"
-    CXX="$FRIDA_ROOT/releng/cxx-wrapper-qnx.sh $qnx_toolchain_prefix-g++ $toolchain_flags -static-libgcc -static-libstdc++ -std=c++11"
+    CXX="$FRIDA_ROOT/releng/cxx-wrapper-qnx.sh $qnx_toolchain_prefix-g++ $toolchain_flags -static-libgcc -static-libstdc++"
     LD="$qnx_toolchain_prefix-ld --sysroot=$qnx_sysroot"
 
     AR="$qnx_toolchain_prefix-ar"
@@ -567,7 +552,6 @@ $arch_linker_args"
     RANLIB="$qnx_toolchain_prefix-ranlib"
     STRIP="$qnx_toolchain_prefix-strip"
     STRIP_FLAGS="--strip-all"
-
     OBJDUMP="$qnx_toolchain_prefix-objdump"
 
     CFLAGS="-ffunction-sections -fdata-sections"
@@ -585,7 +569,7 @@ $arch_linker_args"
     meson_cpp="$qnx_toolchain_prefix-g++"
 
     meson_c_args="$base_compiler_args"
-    meson_cpp_args="$base_compiler_args, '-static-libstdc++', '-std=c++11'"
+    meson_cpp_args="$base_compiler_args, '-static-libstdc++'"
 
     meson_c_link_args="$base_linker_args"
     meson_cpp_link_args="$base_linker_args, '-static-libstdc++', '-L$(dirname $qnx_sysroot/lib/gcc/4.8.3/libstdc++.a)'"
