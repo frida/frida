@@ -279,28 +279,15 @@ build/tmp-android-arm64/frida-core/.frida-ninja-stamp: build/.frida-core-submodu
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
-build/tmp-qnx-arm/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-qnx-arm/lib/pkgconfig/frida-gum-1.0.pc
+build/tmp-qnx-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-qnx-%/lib/pkgconfig/frida-gum-1.0.pc
 	. build/frida-meson-env-linux-$(build_arch).rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
 		$(MESON) \
-			--prefix $(FRIDA)/build/frida-qnx-arm \
-			--libdir $(FRIDA)/build/frida-qnx-arm/lib \
-			--cross-file build/frida-qnx-arm.txt \
-			$(frida_core_flags) \
-			frida-core $$builddir || exit 1; \
-	fi
-	@touch $@
-build/tmp-qnx-armeabi/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-qnx-armeabi/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-linux-$(build_arch).rc; \
-	builddir=$(@D); \
-	if [ ! -f $$builddir/build.ninja ]; then \
-		mkdir -p $$builddir; \
-		$(MESON) \
-			--prefix $(FRIDA)/build/frida-qnx-armeabi \
-			--libdir $(FRIDA)/build/frida-qnx-armeabi/lib \
-			--cross-file build/frida-qnx-armeabi.txt \
+			--prefix $(FRIDA)/build/frida-qnx-$* \
+			--libdir $(FRIDA)/build/frida-qnx-$*/lib \
+			--cross-file build/frida-qnx-$*.txt \
 			$(frida_core_flags) \
 			frida-core $$builddir || exit 1; \
 	fi
@@ -336,11 +323,8 @@ build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/f
 build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/frida-core/.frida-helper-loader-and-agent-stamp build/tmp-android-arm64/frida-core/.frida-helper-loader-and-agent-stamp
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-android-arm64/frida-core install
 	@touch $@
-build/frida-qnx-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-qnx-arm/frida-core/.frida-helper-and-agent-stamp
-	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-qnx-arm/frida-core install
-	@touch $@
-build/frida-qnx-armeabi/lib/pkgconfig/frida-core-1.0.pc: build/tmp-qnx-armeabi/frida-core/.frida-helper-and-agent-stamp
-	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-qnx-armeabi/frida-core install
+build/frida-qnx-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-qnx-%/frida-core/.frida-ninja-stamp
+	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-qnx-$*/frida-core install
 	@touch $@
 
 build/tmp-%/frida-core/.frida-helper-and-agent-stamp: build/tmp-%/frida-core/.frida-ninja-stamp
