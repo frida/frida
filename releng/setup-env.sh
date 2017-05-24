@@ -24,17 +24,34 @@ case $host_arch in
   i?86)
     meson_host_cpu_family=x86
     meson_host_cpu=i686
+    meson_host_endian=little
     ;;
   arm)
     meson_host_cpu_family=arm
     meson_host_cpu=armv7
+    meson_host_endian=little
+    ;;
+  armhf)
+    meson_host_cpu_family=arm
+    meson_host_cpu=armv7hf
+    meson_host_endian=little
+    ;;
+  mips)
+    meson_host_cpu_family=mips
+    meson_host_cpu=mips
+    meson_host_endian=big
+    ;;
+  mipsel)
+    meson_host_cpu_family=mips
+    meson_host_cpu=mips
+    meson_host_endian=little
     ;;
   *)
     meson_host_cpu_family=$host_arch
     meson_host_cpu=$host_arch
+    meson_host_endian=little
     ;;
 esac
-meson_host_endian=little
 
 case $FRIDA_ASAN in
   yes|no)
