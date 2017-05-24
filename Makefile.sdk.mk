@@ -1,4 +1,5 @@
 include config.mk
+include releng/common.mk
 
 MAKE_J ?= -j 8
 
@@ -298,7 +299,7 @@ build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_platform_arch).rc build/fs-e
 	$(RM) -r $$(@D)
 	(. build/fs-meson-env-$(build_platform_arch).rc \
 		&& . build/fs-config-$$*.site \
-		&& meson \
+		&& $(MESON) \
 			--prefix $$$$frida_prefix \
 			--libdir $$$$frida_prefix/lib \
 			--default-library static \
