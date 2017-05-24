@@ -1,5 +1,4 @@
 include config.mk
-include releng/common.mk
 
 MAKE_J ?= -j 8
 
@@ -68,6 +67,7 @@ all: build/sdk-$(host_platform)-$(host_arch).tar.bz2
 	@echo "It will be picked up automatically if you now proceed to build Frida."
 	@echo ""
 
+include releng/common.mk
 
 build/sdk-$(host_platform)-$(host_arch).tar.bz2: build/fs-tmp-$(host_platform_arch)/.package-stamp
 	tar \
