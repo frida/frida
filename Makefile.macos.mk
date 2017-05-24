@@ -52,28 +52,12 @@ clean: clean-submodules
 	rm -f build/*.site
 	rm -f build/*.txt
 	rm -f build/frida-version.h
-	rm -rf build/frida-macos-x86
-	rm -rf build/frida-macos-x86_64
-	rm -rf build/frida-macos-universal
-	rm -rf build/frida-ios-universal
-	rm -rf build/frida-ios-x86
-	rm -rf build/frida-ios-x86_64
-	rm -rf build/frida-ios-arm
-	rm -rf build/frida-ios-arm64
-	rm -rf build/frida-android-x86
-	rm -rf build/frida-android-arm
-	rm -rf build/frida-android-arm64
-	rm -rf build/tmp-macos-x86
-	rm -rf build/tmp-macos-x86_64
-	rm -rf build/tmp-macos-universal
-	rm -rf build/tmp-ios-x86
-	rm -rf build/tmp-ios-x86_64
-	rm -rf build/tmp-ios-arm
-	rm -rf build/tmp-ios-arm64
-	rm -rf build/tmp-ios-universal
-	rm -rf build/tmp-android-x86
-	rm -rf build/tmp-android-arm
-	rm -rf build/tmp-android-arm64
+	rm -rf build/frida-*-*
+	rm -rf build/fs-*-*
+	rm -rf build/ft-*-*
+	rm -rf build/tmp-*-*
+	rm -rf build/fs-tmp-*-*
+	rm -rf build/ft-tmp-*-*
 
 clean-submodules:
 	cd capstone && git clean -xfd
