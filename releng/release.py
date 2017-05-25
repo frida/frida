@@ -240,9 +240,9 @@ if __name__ == '__main__':
             upload_devkits("ios-arm", upload)
             upload_devkits("ios-arm64", upload)
 
-            upload_file("frida-server-{version}-macos-universal", os.path.join(build_dir, "build", "frida-macos-universal", "bin", "frida-server"), upload)
-            upload_file("frida-server-{version}-ios-arm", os.path.join(build_dir, "build", "frida_thin-ios-arm", "bin", "frida-server"), upload)
-            upload_file("frida-server-{version}-ios-arm64", os.path.join(build_dir, "build", "frida_thin-ios-arm64", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-macos-x86_64", os.path.join(build_dir, "build", "frida-macos-x86_64", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-ios-arm", os.path.join(build_dir, "build", "frida-ios-arm", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-ios-arm64", os.path.join(build_dir, "build", "frida-ios-arm64", "bin", "frida-server"), upload)
 
             upload_file("frida-gadget-{version}-macos-universal.dylib", os.path.join(build_dir, "build", "frida-macos-universal", "lib", "FridaGadget.dylib"), upload)
             upload_file("frida-gadget-{version}-ios-universal.dylib", os.path.join(build_dir, "build", "frida-ios-universal", "lib", "FridaGadget.dylib"), upload)
@@ -262,8 +262,8 @@ if __name__ == '__main__':
 
             upload_to_npm("/opt/node-64/bin/node", upload, publish=True)
 
-            upload_ios_deb("frida", os.path.join(build_dir, "build", "frida_thin-ios-arm64", "bin", "frida-server"))
-            upload_ios_deb("frida32", os.path.join(build_dir, "build", "frida_thin-ios-arm", "bin", "frida-server"))
+            upload_ios_deb("frida", os.path.join(build_dir, "build", "frida-ios-arm64", "bin", "frida-server"))
+            upload_ios_deb("frida32", os.path.join(build_dir, "build", "frida-ios-arm", "bin", "frida-server"))
         elif slave == 'linux':
             upload = get_github_uploader()
 
