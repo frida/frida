@@ -330,14 +330,14 @@ case $host_platform in
         ;;
     esac
 
-    CPPFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch -fembed-bitcode-marker"
-    CFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch -fembed-bitcode-marker"
+    CPPFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch"
+    CFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch"
     CXXFLAGS="-stdlib=libc++"
-    LDFLAGS="-isysroot $ios_sdk_path -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -fembed-bitcode-marker -Wl,-dead_strip"
+    LDFLAGS="-isysroot $ios_sdk_path -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -Wl,-dead_strip"
 
     meson_root="$ios_sdk_path"
 
-    base_toolchain_args="'-isysroot', '$ios_sdk_path', '-miphoneos-version-min=$ios_minver', '-arch', '$ios_arch', '-fembed-bitcode-marker'"
+    base_toolchain_args="'-isysroot', '$ios_sdk_path', '-miphoneos-version-min=$ios_minver', '-arch', '$ios_arch'"
     base_compiler_args="$base_toolchain_args"
     base_linker_args="$base_toolchain_args, '-Wl,-dead_strip'"
 
