@@ -31,6 +31,11 @@ case $host_arch in
     meson_host_cpu=armv7
     meson_host_endian=little
     ;;
+  armeabi)
+    meson_host_cpu_family=arm
+    meson_host_cpu=armv7eabi
+    meson_host_endian=little
+    ;;
   armhf)
     meson_host_cpu_family=arm
     meson_host_cpu=armv7hf
