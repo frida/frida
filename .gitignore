@@ -1,11 +1,4 @@
-*.VC.*
-*.opensdf
-*.pyc
-*.sdf
-*.suo
-*.swp
-*.user
-*~
+/.vs
 /autoconf
 /automake
 /binutils
