@@ -3,6 +3,7 @@ from __future__ import print_function
 
 if __name__ == '__main__':
     from devkit import generate_devkit
+    from distutils.spawn import find_executable
     import glob
     import os
     import platform
@@ -319,6 +320,8 @@ if __name__ == '__main__':
 
             upload_file("frida-gadget-{version}-linux-arm.so", os.path.join(build_dir, "build", "frida-linux-arm", "lib", "frida-gadget.so"), upload)
             upload_file("frida-gadget-{version}-linux-armhf.so", os.path.join(build_dir, "build", "frida-linux-armhf", "lib", "frida-gadget.so"), upload)
+
+            upload_to_npm(find_executable("node"), upload, publish=False)
         elif slave == 'mips':
             upload = get_github_uploader()
 
