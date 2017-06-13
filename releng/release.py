@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
         subprocess.call([interpreter, "setup.py"] + targets, cwd=os.path.join(frida_python_dir, "src"), env=env)
 
-    def upload_to_npm(node, upload_to_github, publish):
+    def upload_to_npm(node, upload_to_github, publish, extra_build_args=[], extra_build_env=None):
         node_bin_dir = os.path.dirname(node)
         npm = os.path.join(node_bin_dir, "npm")
         if system == 'Windows':
@@ -65,10 +65,14 @@ if __name__ == '__main__':
             'PATH': node_bin_dir + os.pathsep + os.getenv('PATH'),
             'FRIDA': build_dir
         })
-        def do(args):
-            exit_code = subprocess.call(args, cwd=frida_node_dir, env=env)
+        def do(args, **kwargs):
+            command = " ".join(args)
+            exit_code = subprocess.call(command, cwd=frida_node_dir, env=env, shell=True, **kwargs)
             if exit_code != 0:
-                raise RuntimeError("Failed to run: " + " ".join(args))
+                raise RuntimeError("Failed to run: " + command)
+        def do_build_command(args):
+            env_args = [". " + extra_build_env, "&&"] if extra_build_env is not None else []
+            do(env_args + args + extra_build_args)
         def reset():
             tags = [tag.strip() for tag in subprocess.check_output(["git", "tag", "-l"], cwd=frida_node_dir, env=env).split("\n") if len(tag.strip()) > 0]
             for tag in tags:
@@ -79,9 +83,9 @@ if __name__ == '__main__':
         do([npm, "version", version])
         if publish:
             do([npm, "publish"])
-        do([npm, "install"])
-        do([npm, "run", "prebuild", "--", "-t", "6.0.0", "-t", "7.0.0", "-t", "8.0.0"])
-        do([npm, "run", "prebuild", "--", "-t", "1.6.0", "-r", "electron"])
+        do_build_command([npm, "install"])
+        do_build_command([npm, "run", "prebuild", "--", "-t", "6.0.0", "-t", "7.0.0", "-t", "8.0.0"])
+        do_build_command([npm, "run", "prebuild", "--", "-t", "1.6.0", "-r", "electron"])
         packages = glob.glob(os.path.join(frida_node_dir, "prebuilds", "*.tar.gz"))
         for package in packages:
             with open(package, 'rb') as package_file:
@@ -292,6 +296,10 @@ if __name__ == '__main__':
 
             upload_to_npm("/opt/node-32/bin/node", upload, publish=False)
             upload_to_npm("/opt/node-64/bin/node", upload, publish=False)
+        elif slave == 'pi':
+            upload_to_npm(find_executable("node"), upload, publish=False,
+                    extra_build_args=["--arch=arm"],
+                    extra_build_env=os.path.join(build_dir, "build", "frida-env-linux-armhf.rc"))
         elif slave == 'android':
             upload = get_github_uploader()
 
@@ -320,8 +328,6 @@ if __name__ == '__main__':
 
             upload_file("frida-gadget-{version}-linux-arm.so", os.path.join(build_dir, "build", "frida-linux-arm", "lib", "frida-gadget.so"), upload)
             upload_file("frida-gadget-{version}-linux-armhf.so", os.path.join(build_dir, "build", "frida-linux-armhf", "lib", "frida-gadget.so"), upload)
-
-            upload_to_npm(find_executable("node"), upload, publish=False)
         elif slave == 'mips':
             upload = get_github_uploader()
 
