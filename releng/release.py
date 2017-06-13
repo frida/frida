@@ -297,6 +297,8 @@ if __name__ == '__main__':
             upload_to_npm("/opt/node-32/bin/node", upload, publish=False)
             upload_to_npm("/opt/node-64/bin/node", upload, publish=False)
         elif slave == 'pi':
+            upload = get_github_uploader()
+
             upload_to_npm(find_executable("node"), upload, publish=False,
                     extra_build_args=["--arch=arm"],
                     extra_build_env=os.path.join(build_dir, "build", "frida-env-linux-armhf.rc"))
