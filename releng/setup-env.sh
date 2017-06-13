@@ -195,7 +195,7 @@ case $host_platform in
         host_arch_flags="-march=armv6"
         host_toolprefix="arm-linux-gnueabihf-"
 
-        meson_host_cpu="armv6"
+        meson_host_cpu="armv6hf"
         ;;
       mips)
         host_arch_flags="-march=mips1"
