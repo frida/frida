@@ -17,8 +17,8 @@ You may also download pre-built binaries for various operating systems from
 
 ### Dependencies
 
-For running the Frida CLI tools (`frida`, `frida-ls-devices`, `frida-ps`,
-`frida-kill`, `frida-trace`, and `frida-discover`) you need Python plus a
+For running the Frida CLI tools, i.e. `frida`, `frida-ls-devices`, `frida-ps`,
+`frida-kill`, `frida-trace`, and `frida-discover`, you need Python plus a
 few packages:
 
     pip3 install colorama prompt-toolkit pygments
