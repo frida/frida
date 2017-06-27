@@ -66,7 +66,14 @@ if __name__ == '__main__':
             'FRIDA': build_dir
         })
         def do(args, **kwargs):
-            command = " ".join(args)
+            quoted_args = []
+            for arg in args:
+                if " " in arg:
+                    # Assumes none of our arguments contain quotes
+                    quoted_args.append('"{}"'.format(arg))
+                else:
+                    quoted_args.append(arg)
+            command = " ".join(quoted_args)
             exit_code = subprocess.call(command, cwd=frida_node_dir, env=env, shell=True, **kwargs)
             if exit_code != 0:
                 raise RuntimeError("Failed to run: " + command)
