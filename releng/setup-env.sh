@@ -67,13 +67,19 @@ case $FRIDA_ASAN in
     ;;
 esac
 
+if which curl &>/dev/null; then
+  download_command="curl -sS"
+elif which wget &>/dev/null; then
+  download_command="wget -O - -q"
+else
+  echo "Please install curl or wget: required for downloading SDK and toolchain." > /dev/stderr
+  exit 1
+fi
 case $build_platform in
   linux)
-    download_command="wget -O - -q"
     tar_stdin=""
     ;;
   macos)
-    download_command="curl -sS"
     tar_stdin="-"
     ;;
   *)
