@@ -42,24 +42,24 @@ $(foreach m,$(modules),$(eval $(call make-update-submodule-stamp,$m)))
 git-submodule-stamps: $(foreach m,$(modules),$m-update-submodule-stamp)
 -include git-submodule-stamps
 
-define make-env-rule
-build/$1-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida-version.h
-	FRIDA_HOST=$$* \
-		FRIDA_OPTIMIZATION_FLAGS="$$(FRIDA_OPTIMIZATION_FLAGS)" \
-		FRIDA_DEBUG_FLAGS="$$(FRIDA_DEBUG_FLAGS)" \
-		FRIDA_ASAN=$$(FRIDA_ASAN) \
-		FRIDA_ENV_NAME=$1 \
+build/frida-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida-version.h
+	FRIDA_HOST=$* \
+		FRIDA_OPTIMIZATION_FLAGS="$(FRIDA_OPTIMIZATION_FLAGS)" \
+		FRIDA_DEBUG_FLAGS="$(FRIDA_DEBUG_FLAGS)" \
+		FRIDA_ASAN=$(FRIDA_ASAN) \
+		./releng/setup-env.sh
+build/frida_thin-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida-version.h
+	FRIDA_HOST=$* \
+		FRIDA_OPTIMIZATION_FLAGS="$(FRIDA_OPTIMIZATION_FLAGS)" \
+		FRIDA_DEBUG_FLAGS="$(FRIDA_DEBUG_FLAGS)" \
+		FRIDA_ASAN=$(FRIDA_ASAN) \
+		FRIDA_ENV_NAME=frida_thin \
 		./releng/setup-env.sh
 	@# FIXME: We need this kludge because frida-node hard-codes these names
-	@if [ $1 = frida_thin -a ! -e "$$(FRIDA)/build/frida-$$*" ]; then \
-		cd $$(FRIDA)/build/; \
-		ln -s frida_thin-$$* frida-$$*; \
-		ln -s frida_thin-sdk-$$* sdk-$$*; \
-		ln -s frida_thin-toolchain-$$* toolchain-$$*; \
-	fi
-endef
-$(eval $(call make-env-rule,frida))
-$(eval $(call make-env-rule,frida_thin))
+	cd $(FRIDA)/build/; \
+	ln -s frida_thin-$* frida-$*; \
+	ln -s frida_thin-sdk-$* sdk-$*; \
+	ln -s frida_thin-toolchain-$* toolchain-$*; \
 
 build/frida-version.h: releng/generate-version-header.py .git/refs/heads/master
 	@python releng/generate-version-header.py > $@.tmp
