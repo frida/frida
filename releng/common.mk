@@ -51,7 +51,7 @@ build/$1-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida-version
 		FRIDA_ENV_NAME=$1 \
 		./releng/setup-env.sh
 	@# FIXME: We need this kludge because frida-node hard-codes these names
-	@if [ $1 == frida_thin -a ! -e "$$(FRIDA)/build/frida-$$*" ]; then \
+	@if [ $1 = frida_thin -a ! -e "$$(FRIDA)/build/frida-$$*" ]; then \
 		cd $$(FRIDA)/build/; \
 		ln -s frida_thin-$$* frida-$$*; \
 		ln -s frida_thin-sdk-$$* sdk-$$*; \
