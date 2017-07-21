@@ -486,7 +486,7 @@ build/fs-%/lib/pkgconfig/v8.pc: build/fs-tmp-%/.v8-build-stamp
 	echo "" >> $@.tmp
 	echo "Name: V8" >> $@.tmp
 	echo "Description: V8 JavaScript Engine" >> $@.tmp
-	echo "Version: 6.0.124.0" >> $@.tmp
+	echo "Version: 6.2.2.0" >> $@.tmp
 	echo "Libs: -L\$${libdir} -lv8_base -lv8_snapshot -lv8_libplatform -lv8_libsampler -lv8_libbase" >> $@.tmp
 ifdef v8_libs_private
 	echo Libs.private: $(v8_libs_private) >> $@.tmp
