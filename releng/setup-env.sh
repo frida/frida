@@ -92,8 +92,8 @@ if [ -z "$FRIDA_HOST" ]; then
 fi
 
 if [ $host_platform = android ]; then
-  ndk_required_name=r13b
-  ndk_required_version=13.1.3345770
+  ndk_required_name=r15b
+  ndk_required_version=15.1.4119039
   if [ -n "$ANDROID_NDK_ROOT" ]; then
     if [ -f "$ANDROID_NDK_ROOT/source.properties" ]; then
       ndk_installed_version=$(grep Pkg.Revision "$ANDROID_NDK_ROOT/source.properties" | awk '{ print $NF; }')
@@ -109,7 +109,7 @@ if [ $host_platform = android ]; then
           echo "Unsupported NDK version $ndk_installed_version. Please install NDK $ndk_required_name ($ndk_required_version)."
           echo ""
           echo "Frida's SDK - the prebuilt dependencies snapshot - was compiled against $ndk_required_name,"
-          echo "and as we have observed the NDK ABI breaking over time, we ask you to install"
+          echo "and as we have observed the NDK ABI breaking over time, we ask that you install"
           echo "the exact same version."
           echo ""
           echo "However, if you'd like to take the risk and use a different NDK, you may edit"
@@ -372,7 +372,7 @@ case $host_platform in
         android_host_abi=x86
         android_host_target=i686-none-linux-android
         android_host_toolchain=x86-4.9
-        android_host_toolprefix=i686-linux-android-
+        android_host_triple=i686-linux-android
         android_host_cflags="-march=i686"
         android_host_ldflags="-fuse-ld=gold"
         ;;
@@ -381,7 +381,7 @@ case $host_platform in
         android_host_abi=x86_64
         android_host_target=x86_64-none-linux-android
         android_host_toolchain=x86_64-4.9
-        android_host_toolprefix=x86_64-linux-android-
+        android_host_triple=x86_64-linux-android
         android_host_cflags=""
         android_host_ldflags="-fuse-ld=gold"
         ;;
@@ -390,7 +390,7 @@ case $host_platform in
         android_host_abi=armeabi-v7a
         android_host_target=armv7-none-linux-androideabi
         android_host_toolchain=arm-linux-androideabi-4.9
-        android_host_toolprefix=arm-linux-androideabi-
+        android_host_triple=arm-linux-androideabi
         android_host_cflags="-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16"
         android_host_ldflags="-fuse-ld=gold -Wl,--fix-cortex-a8 -Wl,--icf=safe"
         android_have_unwind=yes
@@ -400,24 +400,38 @@ case $host_platform in
         android_host_abi=arm64-v8a
         android_host_target=aarch64-none-linux-android
         android_host_toolchain=aarch64-linux-android-4.9
-        android_host_toolprefix=aarch64-linux-android-
+        android_host_triple=aarch64-linux-android
         android_host_cflags=""
         android_host_ldflags="-fuse-ld=gold"
         ;;
     esac
+    android_host_toolprefix="$android_host_triple-"
 
     android_clang_prefix="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/${android_build_platform}-x86_64"
     android_gcc_toolchain="$ANDROID_NDK_ROOT/toolchains/${android_host_toolchain}/prebuilt/${android_build_platform}-x86_64"
-    android_sysroot="$ANDROID_NDK_ROOT/platforms/android-${android_target_platform}/arch-${host_arch}"
-    toolflags="--sysroot=$android_sysroot \
---gcc-toolchain=$android_gcc_toolchain \
+    android_sysroot_compile="$ANDROID_NDK_ROOT/sysroot"
+    android_sysroot_link="$ANDROID_NDK_ROOT/platforms/android-${android_target_platform}/arch-${host_arch}"
+    android_sysinc="$android_sysroot_compile/usr/include/$android_host_triple"
+    toolflags="--gcc-toolchain=$android_gcc_toolchain \
 --target=$android_host_target \
 -no-canonical-prefixes"
 
+    mkdir -p "$FRIDA_BUILD"
+
+    cc_wrapper="$FRIDA_BUILD/cc-wrapper-${host_platform_arch}.sh"
+    sed \
+      -e "s,@sysinc@,$android_sysinc,g" \
+      -e "s,@sysroot_compile@,$android_sysroot_compile,g" \
+      -e "s,@sysroot_link@,$android_sysroot_link,g" \
+      "$releng_path/cc-wrapper-android.sh.in" > "$cc_wrapper"
+    chmod +x "$cc_wrapper"
+
     cxx_wrapper="$FRIDA_BUILD/cxx-wrapper-${host_platform_arch}.sh"
     cxx_libdir="$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/libs/$android_host_abi"
-    mkdir -p "$FRIDA_BUILD"
     sed \
+      -e "s,@sysinc@,$android_sysinc,g" \
+      -e "s,@sysroot_compile@,$android_sysroot_compile,g" \
+      -e "s,@sysroot_link@,$android_sysroot_link,g" \
       -e "s,@libdir@,$cxx_libdir,g" \
       -e "s,@have_unwind_library@,$android_have_unwind,g" \
       "$releng_path/cxx-wrapper-android.sh.in" > "$cxx_wrapper"
@@ -439,10 +453,10 @@ case $host_platform in
       "$releng_path/link-wrapper-android.sh.in" > "$cxx_link_wrapper"
     chmod +x "$cxx_link_wrapper"
 
-    CPP="$android_gcc_toolchain/bin/${android_host_toolprefix}cpp --sysroot=$android_sysroot"
-    CC="$android_clang_prefix/bin/clang $toolflags"
+    CPP="$android_gcc_toolchain/bin/${android_host_toolprefix}cpp --sysroot=$android_sysroot_compile -isystem $android_sysinc"
+    CC="$cc_wrapper $android_clang_prefix/bin/clang $toolflags"
     CXX="$cxx_wrapper $android_clang_prefix/bin/clang++ $toolflags"
-    LD="$android_gcc_toolchain/bin/${android_host_toolprefix}ld --sysroot=$android_sysroot"
+    LD="$android_gcc_toolchain/bin/${android_host_toolprefix}ld --sysroot=$android_sysroot_link"
 
     AR="$android_gcc_toolchain/bin/${android_host_toolprefix}ar"
     NM="$android_gcc_toolchain/bin/${android_host_toolprefix}nm"
@@ -454,15 +468,13 @@ case $host_platform in
 
     CFLAGS="$android_host_cflags \
 -fPIE \
--ffunction-sections -fdata-sections -funwind-tables -fno-exceptions -fno-rtti \
--DANDROID \
--I$android_sysroot/usr/include"
+-ffunction-sections -fdata-sections -fno-integrated-as -funwind-tables -fno-exceptions -fno-rtti \
+-DANDROID -D__ANDROID_API__=$android_target_platform"
     CXXFLAGS="\
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/include \
--I$ANDROID_NDK_ROOT/sources/cxx-stl/gabi++/include \
+-I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++abi/include \
 -I$ANDROID_NDK_ROOT/sources/android/support/include"
-    CPPFLAGS="-DANDROID \
--I$android_sysroot/usr/include"
+    CPPFLAGS="-DANDROID -D__ANDROID_API__=$android_target_platform"
     LDFLAGS="$android_host_ldflags \
 -fPIE -pie \
 -Wl,--gc-sections \
@@ -471,24 +483,27 @@ case $host_platform in
 -Wl,-z,now \
 -lgcc"
 
-    meson_root="$android_sysroot"
+    meson_root="$android_sysroot_compile"
 
     arch_args=$(flags_to_args "$android_host_cflags")
     arch_linker_args=$(flags_to_args "$android_host_ldflags")
 
     base_toolchain_args="\
-'--sysroot=$android_sysroot', \
 '--gcc-toolchain=$android_gcc_toolchain', \
 '--target=$android_host_target', \
 '-no-canonical-prefixes'"
     [ -n "$arch_args" ] && base_toolchain_args="$base_toolchain_args, $arch_args"
     base_compiler_args="\
 $base_toolchain_args, \
+'--sysroot=$android_sysroot_compile', \
+'-isystem', '$android_sysinc', \
 '-ffunction-sections', '-fdata-sections', \
+'-fno-integrated-as', \
 '-DANDROID', \
-'-I$android_sysroot/usr/include'"
+'-D__ANDROID_API__=$android_target_platform'"
     base_linker_args="\
 $base_toolchain_args, \
+'--sysroot=$android_sysroot_link', \
 '-Wl,--gc-sections', \
 '-Wl,-z,noexecstack', \
 '-Wl,-z,relro', \

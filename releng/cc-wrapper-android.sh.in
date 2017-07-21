@@ -6,13 +6,6 @@
 sysroot_compile=@sysroot_compile@
 sysroot_link=@sysroot_link@
 sysinc=@sysinc@
-libdir=@libdir@
-have_unwind_library=@have_unwind_library@
-
-cxx_library=$libdir/libc++_static.a
-abi_library=$libdir/libc++abi.a
-unwind_library=$libdir/libunwind.a
-support_library=$libdir/libandroid_support.a
 
 argv=()
 mode=link
@@ -21,17 +14,6 @@ for arg in "$@"; do
   case "$arg" in
     -E|-c)
       mode=compile
-      ;;
-    -lgcc)
-      argv+=("$cxx_library" "$abi_library")
-      if [[ $have_unwind_library == yes ]]; then
-        argv+=("$unwind_library")
-      fi
-      argv+=("$support_library")
-
-      if [[ $have_unwind_library == yes ]]; then
-        argv+=("-Wl,--exclude-libs,$unwind_library")
-      fi
       ;;
   esac
 
