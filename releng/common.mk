@@ -4,7 +4,7 @@ build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos
 build_arch := $(shell releng/detect-arch.sh)
 build_platform_arch := $(build_platform)-$(build_arch)
 
-GLIB_HOST ?= $(build_platform_arch)
+FOR_HOST ?= $(build_platform_arch)
 
 frida_gum_flags := --default-library static $(FRIDA_COMMON_FLAGS) $(FRIDA_DIET_FLAGS)
 frida_core_flags := --default-library static $(FRIDA_COMMON_FLAGS) $(FRIDA_DIET_FLAGS) $(FRIDA_MAPPER_FLAGS)
@@ -66,9 +66,9 @@ build/frida-version.h: releng/generate-version-header.py .git/refs/heads/master
 	@mv $@.tmp $@
 
 glib:
-	@make -f Makefile.sdk.mk FRIDA_HOST=$(GLIB_HOST) build/fs-$(GLIB_HOST)/lib/pkgconfig/glib-2.0.pc
+	@make -f Makefile.sdk.mk FRIDA_HOST=$(FOR_HOST) build/fs-$(FOR_HOST)/lib/pkgconfig/glib-2.0.pc
 glib-shell:
-	@. build/fs-env-$(GLIB_HOST).rc && cd build/fs-tmp-$(GLIB_HOST)/glib && bash
+	@. build/fs-env-$(FOR_HOST).rc && cd build/fs-tmp-$(FOR_HOST)/glib && bash
 glib-symlinks:
 	@cd build; \
 	for candidate in $$(find . -mindepth 1 -maxdepth 1 -type d -name "frida-*"); do \
@@ -98,5 +98,28 @@ glib-symlinks:
 			done; \
 			rm -rf sdk-$$host_arch/share/glib-2.0; \
 			ln -s ../../fs-$$host_arch/share/glib-2.0 sdk-$$host_arch/share/glib-2.0; \
+		fi; \
+	done
+
+v8:
+	@rm -f build/fs-$(FOR_HOST)/lib/pkgconfig/v8.pc build/fs-tmp-$(FOR_HOST)/.v8-build-stamp
+	@make -f Makefile.sdk.mk FRIDA_HOST=$(FOR_HOST) build/fs-$(FOR_HOST)/lib/pkgconfig/v8.pc
+v8-symlinks:
+	@cd build; \
+	for candidate in $$(find . -mindepth 1 -maxdepth 1 -type d -name "frida-*"); do \
+		host_arch=$$(echo $$candidate | cut -f2- -d"-"); \
+		if [ -d "fs-tmp-$$host_arch/v8" ]; then \
+			echo "✓ $$host_arch"; \
+			rm -rf sdk-$$host_arch/include/v8/include; \
+			ln -s ../../../fs-tmp-$$host_arch/v8/include sdk-$$host_arch/include/v8/include; \
+			v8_target=$$(basename $$(cd fs-tmp-$$host_arch/v8/out/*.release/ && pwd)); \
+			for name in libbase base libplatform libsampler snapshot; do \
+				libname=libv8_$$name.a; \
+				rm -f sdk-$$host_arch/lib/$$libname; \
+				ln -s ../../fs-tmp-$$host_arch/v8/out/$$v8_target/$$libname sdk-$$host_arch/lib/$$libname; \
+			done; \
+			pcname=v8.pc; \
+			rm -f sdk-$$host_arch/lib/pkgconfig/$$pcname; \
+			ln -s ../../../fs-$$host_arch/lib/pkgconfig/$$pcname sdk-$$host_arch/lib/pkgconfig/$$pcname; \
 		fi; \
 	done

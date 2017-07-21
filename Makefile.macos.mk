@@ -450,5 +450,6 @@ uninstall-macos: uninstall-python-macos ##@utilities Uninstall frida utilities
 	python-macos check-python-macos install-python-macos uninstall-python-macos frida-python-update-submodule-stamp \
 	node-macos check-node-macos frida-node-update-submodule-stamp \
 	install-macos uninstall-macos \
-	glib glib-shell glib-symlinks
+	glib glib-shell glib-symlinks \
+	v8 v8-symlinks
 .SECONDARY:

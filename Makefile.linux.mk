@@ -484,5 +484,6 @@ check-node-64-thin: build/frida_thin-linux-x86_64/lib/node_modules/frida ##@node
 	server-32 server-64 server-32-thin server-64-thin server-android server-qnx-arm server-qnx-armeabi \
 	python-32 python-64 python-32-thin python-64-thin check-python-32 check-python-64 check-python-32-thin check-python-64-thin frida-python-update-submodule-stamp \
 	node-32 node-64 node-32-thin node-64-thin check-node-32 check-node-64 check-node-32-thin check-node-64-thin frida-node-update-submodule-stamp \
-	glib glib-shell glib-symlinks
+	glib glib-shell glib-symlinks \
+	v8 v8-symlinks
 .SECONDARY:
