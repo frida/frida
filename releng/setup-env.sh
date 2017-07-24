@@ -418,7 +418,7 @@ case $host_platform in
 
     mkdir -p "$FRIDA_BUILD"
 
-    cc_wrapper="$FRIDA_BUILD/cc-wrapper-${host_platform_arch}.sh"
+    cc_wrapper="$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-cc-wrapper-${host_platform_arch}.sh"
     sed \
       -e "s,@sysinc@,$android_sysinc,g" \
       -e "s,@sysroot_compile@,$android_sysroot_compile,g" \
@@ -426,7 +426,7 @@ case $host_platform in
       "$releng_path/cc-wrapper-android.sh.in" > "$cc_wrapper"
     chmod +x "$cc_wrapper"
 
-    cxx_wrapper="$FRIDA_BUILD/cxx-wrapper-${host_platform_arch}.sh"
+    cxx_wrapper="$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-cxx-wrapper-${host_platform_arch}.sh"
     cxx_libdir="$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/libs/$android_host_abi"
     sed \
       -e "s,@sysinc@,$android_sysinc,g" \
