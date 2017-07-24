@@ -439,19 +439,19 @@ case $host_platform in
 
     elf_cleaner=${FRIDA_ROOT}/releng/frida-elf-cleaner-${build_platform_arch}
 
-    c_link_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang
+    meson_cc_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang
     sed \
       -e "s,@linker@,$android_clang_prefix/bin/clang,g" \
       -e "s,@elf_cleaner@,$elf_cleaner,g" \
-      "$releng_path/link-wrapper-android.sh.in" > "$c_link_wrapper"
-    chmod +x "$c_link_wrapper"
+      "$releng_path/meson-driver-wrapper-android.sh.in" > "$meson_cc_wrapper"
+    chmod +x "$meson_cc_wrapper"
 
-    cxx_link_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang++
+    meson_cxx_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang++
     sed \
       -e "s,@linker@,$android_clang_prefix/bin/clang++,g" \
       -e "s,@elf_cleaner@,$elf_cleaner,g" \
-      "$releng_path/link-wrapper-android.sh.in" > "$cxx_link_wrapper"
-    chmod +x "$cxx_link_wrapper"
+      "$releng_path/meson-driver-wrapper-android.sh.in" > "$meson_cxx_wrapper"
+    chmod +x "$meson_cxx_wrapper"
 
     CPP="$android_gcc_toolchain/bin/${android_host_toolprefix}cpp --sysroot=$android_sysroot_compile -isystem $android_sysinc"
     CC="$cc_wrapper $android_clang_prefix/bin/clang $toolflags"
@@ -511,8 +511,8 @@ $base_toolchain_args, \
 '-lgcc', \
 $arch_linker_args"
 
-    meson_c="$c_link_wrapper"
-    meson_cpp="$cxx_link_wrapper"
+    meson_c="$meson_cc_wrapper"
+    meson_cpp="$meson_cxx_wrapper"
 
     meson_c_args="$base_compiler_args"
     meson_cpp_args="$base_compiler_args, \

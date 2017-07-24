@@ -2,6 +2,8 @@
 
 # This wrapper script is necessary in order to avoid polluting the build
 # systems with Android-specific quirks to:
+# - Skip -D_FILE_OFFSET_BITS=64 until NDK r15c is available:
+#   https://github.com/android-ndk/ndk/issues/449
 # - Add -Wl,-pie when linking programs.
 # - Clean up the ELF files to avoid dynamic linker warnings at runtime.
 
@@ -13,27 +15,35 @@ while [[ $# > 0 ]]; do
   arg="$1"
 
   case "$arg" in
-    -E)
-      output_type=code
+    *-D_FILE_OFFSET_BITS=64*)
+      shift
       ;;
-    -c)
-      output_type=object
-      ;;
-    -shared)
-      output_type=library
-      ;;
-    -o)
-      argv+=("-o")
+    *)
+      case "$arg" in
+        -E)
+          output_type=code
+          ;;
+        -c)
+          output_type=object
+          ;;
+        -shared)
+          output_type=library
+          ;;
+        -o)
+          argv+=("-o")
+          shift
+
+          arg="$1"
+
+          output_path="$arg"
+          ;;
+      esac
+
+      argv+=("$arg")
       shift
 
-      arg="$1"
-
-      output_path="$arg"
       ;;
   esac
-
-  argv+=("$arg")
-  shift
 done
 
 if [[ $output_type = executable ]]; then
