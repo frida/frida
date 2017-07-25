@@ -229,6 +229,7 @@ case $host_platform in
     OBJDUMP="${host_toolprefix}objdump"
 
     CFLAGS="$host_arch_flags -ffunction-sections -fdata-sections"
+    CXXFLAGS="-fno-rtti"
     LDFLAGS="$host_arch_flags -Wl,--gc-sections"
 
     arch_args=$(flags_to_args "$host_arch_flags")
@@ -241,7 +242,7 @@ case $host_platform in
     meson_cpp="${host_toolprefix}g++"
 
     meson_c_args="$base_compiler_args"
-    meson_cpp_args="$base_compiler_args, '-static-libstdc++'"
+    meson_cpp_args="$base_compiler_args, '-static-libstdc++', '-fno-rtti'"
 
     meson_c_link_args="$base_linker_args"
     meson_cpp_link_args="$base_linker_args, '-static-libstdc++'"
@@ -272,7 +273,7 @@ case $host_platform in
 
     CPPFLAGS="-isysroot $macos_sdk_path -mmacosx-version-min=$macos_minver -arch $host_clang_arch"
     CFLAGS="-isysroot $macos_sdk_path -mmacosx-version-min=$macos_minver -arch $host_clang_arch"
-    CXXFLAGS="-stdlib=libc++"
+    CXXFLAGS="-stdlib=libc++ -fno-rtti"
     LDFLAGS="-isysroot $macos_sdk_path -Wl,-macosx_version_min,$macos_minver -arch $host_clang_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
 
     meson_root="$macos_sdk_path"
@@ -287,9 +288,9 @@ case $host_platform in
     meson_objcpp="$CXX"
 
     meson_c_args="$base_compiler_args"
-    meson_cpp_args="$base_compiler_args, '-stdlib=libc++'"
+    meson_cpp_args="$base_compiler_args, '-stdlib=libc++', '-fno-rtti'"
     meson_objc_args="$base_compiler_args"
-    meson_objcpp_args="$base_compiler_args, '-stdlib=libc++'"
+    meson_objcpp_args="$base_compiler_args, '-stdlib=libc++', '-fno-rtti'"
 
     meson_c_link_args="$base_linker_args"
     meson_cpp_link_args="$base_linker_args, '-stdlib=libc++'"
@@ -338,7 +339,7 @@ case $host_platform in
 
     CPPFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch"
     CFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch"
-    CXXFLAGS="-stdlib=libc++"
+    CXXFLAGS="-stdlib=libc++ -fno-rtti"
     LDFLAGS="-isysroot $ios_sdk_path -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -Wl,-dead_strip"
 
     meson_root="$ios_sdk_path"
@@ -353,9 +354,9 @@ case $host_platform in
     meson_objcpp="$CXX"
 
     meson_c_args="$base_compiler_args"
-    meson_cpp_args="$base_compiler_args, '-stdlib=libc++'"
+    meson_cpp_args="$base_compiler_args, '-stdlib=libc++', '-fno-rtti'"
     meson_objc_args="$base_compiler_args"
-    meson_objcpp_args="$base_compiler_args, '-stdlib=libc++'"
+    meson_objcpp_args="$base_compiler_args, '-stdlib=libc++', '-fno-rtti'"
 
     meson_c_link_args="$base_linker_args"
     meson_cpp_link_args="$base_linker_args, '-stdlib=libc++'"
@@ -468,9 +469,10 @@ case $host_platform in
 
     CFLAGS="$android_host_cflags \
 -fPIE \
--ffunction-sections -fdata-sections -fno-integrated-as -funwind-tables -fno-exceptions -fno-rtti \
+-ffunction-sections -fdata-sections -fno-integrated-as \
 -DANDROID -D__ANDROID_API__=$android_target_platform"
     CXXFLAGS="\
+-funwind-tables -fno-rtti \
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/include \
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++abi/include \
 -I$ANDROID_NDK_ROOT/sources/android/support/include"
@@ -516,7 +518,7 @@ $arch_linker_args"
 
     meson_c_args="$base_compiler_args"
     meson_cpp_args="$base_compiler_args, \
-'-funwind-tables', '-fno-exceptions', '-fno-rtti', \
+'-funwind-tables', '-fno-rtti', \
 '-I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/include', \
 '-I$ANDROID_NDK_ROOT/sources/cxx-stl/gabi++/include', \
 '-I$ANDROID_NDK_ROOT/sources/android/support/include'"
@@ -581,6 +583,7 @@ $arch_linker_args"
     OBJDUMP="$qnx_toolchain_prefix-objdump"
 
     CFLAGS="-ffunction-sections -fdata-sections"
+    CXXFLAGS="-fno-rtti"
     LDFLAGS="-Wl,--gc-sections -L$(dirname $qnx_sysroot/lib/gcc/4.8.3/libstdc++.a)"
 
     meson_root="$qnx_sysroot"
@@ -595,7 +598,7 @@ $arch_linker_args"
     meson_cpp="$qnx_toolchain_prefix-g++"
 
     meson_c_args="$base_compiler_args"
-    meson_cpp_args="$base_compiler_args, '-static-libstdc++'"
+    meson_cpp_args="$base_compiler_args, '-static-libstdc++', '-fno-rtti'"
 
     meson_c_link_args="$base_linker_args"
     meson_cpp_link_args="$base_linker_args, '-static-libstdc++', '-L$(dirname $qnx_sysroot/lib/gcc/4.8.3/libstdc++.a)'"
