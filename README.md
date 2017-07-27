@@ -7,8 +7,8 @@ Two ways to install—
 
 This is the recommended way to get started. All you need to do is:
 
-    pip install frida # CLI tools and Python bindings
-    npm install frida # Node.js bindings
+    pip install --user frida    # CLI tools and Python bindings
+    npm install frida           # Node.js bindings
 
 You may also download pre-built binaries for various operating systems from
 [https://build.frida.re/frida/](https://build.frida.re/frida/).
