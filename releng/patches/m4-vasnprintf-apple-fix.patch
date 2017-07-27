@@ -1,0 +1,11 @@
+--- m4/lib/vasnprintf.c-orig	2017-07-27 04:05:45.000000000 +0200
++++ m4/lib/vasnprintf.c	2017-07-27 04:05:56.000000000 +0200
+@@ -4858,7 +4858,7 @@
+ #endif
+                   *fbp = dp->conversion;
+ #if USE_SNPRINTF
+-# if !(((__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)) && !defined __UCLIBC__) || ((defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__))
++# if !(((__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)) && !defined __UCLIBC__) || ((defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__) || defined __APPLE__)
+                 fbp[1] = '%';
+                 fbp[2] = 'n';
+                 fbp[3] = '\0';

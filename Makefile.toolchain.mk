@@ -176,7 +176,7 @@ $2: build/ft-env-%.rc build/ft-tmp-%/$1/Makefile
 endef
 
 
-$(eval $(call make-tarball-module-rules,m4,http://gnuftp.uib.no/m4/m4-$(m4_version).tar.gz,build/ft-%/bin/m4,))
+$(eval $(call make-tarball-module-rules,m4,http://gnuftp.uib.no/m4/m4-$(m4_version).tar.gz,build/ft-%/bin/m4,,m4-vasnprintf-apple-fix.patch))
 
 $(eval $(call make-tarball-module-rules,autoconf,http://gnuftp.uib.no/autoconf/autoconf-$(autoconf_version).tar.gz,build/ft-%/bin/autoconf,build/ft-%/bin/m4))
 
