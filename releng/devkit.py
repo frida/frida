@@ -120,9 +120,19 @@ def generate_header(package, frida_root, host, kit, umbrella_header_path, thirdp
         config += frida_pragmas + "\n\n" + dep_pragmas + "\n\n"
 
     if len(thirdparty_symbol_mappings) > 0:
+        public_mappings = []
+        for original, renamed in extract_public_thirdparty_symbol_mappings(thirdparty_symbol_mappings):
+            public_mappings.append((original, renamed))
+            if not "define {0}".format(original) in devkit_header:
+                continue
+            def fixup_macro(match):
+                prefix = match.group(1)
+                suffix = re.sub(r"\b{0}\b".format(original), renamed, match.group(2))
+                return "#undef {0}\n".format(original) + prefix + original + suffix
+            devkit_header = re.sub(r"^([ \t]*#[ \t]*define[ \t]*){0}\b((.*\\\n)*.*)$".format(original), fixup_macro, devkit_header, flags=re.MULTILINE)
+
         config += "#ifndef __FRIDA_SYMBOL_MAPPINGS__\n"
         config += "#define __FRIDA_SYMBOL_MAPPINGS__\n\n"
-        public_mappings = extract_public_thirdparty_symbol_mappings(thirdparty_symbol_mappings)
         config += "\n".join(["#define {0} {1}".format(original, renamed) for original, renamed in public_mappings]) + "\n\n"
         config += "#endif\n\n"
 
