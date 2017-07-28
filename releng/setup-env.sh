@@ -226,6 +226,7 @@ case $host_platform in
     RANLIB="${host_toolprefix}ranlib"
     STRIP="${host_toolprefix}strip"
     STRIP_FLAGS="--strip-all"
+    OBJCOPY="${host_toolprefix}objcopy"
     OBJDUMP="${host_toolprefix}objdump"
 
     CFLAGS="$host_arch_flags -ffunction-sections -fdata-sections"
@@ -580,6 +581,7 @@ $arch_linker_args"
     RANLIB="$qnx_toolchain_prefix-ranlib"
     STRIP="$qnx_toolchain_prefix-strip"
     STRIP_FLAGS="--strip-all"
+    OBJCOPY="$qnx_toolchain_prefix-objcopy"
     OBJDUMP="$qnx_toolchain_prefix-objdump"
 
     CFLAGS="-ffunction-sections -fdata-sections"
@@ -798,7 +800,7 @@ fi
 ) > $env_rc
 
 case $host_platform in
-  android)
+  linux|android|qnx)
     (
       echo "export OBJCOPY=\"$OBJCOPY\""
     ) >> $env_rc
