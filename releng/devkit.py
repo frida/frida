@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
+import codecs
 from collections import OrderedDict
 from glob import glob
 import os
@@ -233,7 +234,7 @@ def generate_library_unix(package, frida_root, host, output_dir, library_filenam
     library_paths, extra_flags = resolve_library_paths(library_names, library_dirs)
     extra_flags += infer_linker_flags(library_flags)
 
-    ar_version = subprocess.Popen([ar, "--version"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0]
+    ar_version = subprocess.Popen([ar, "--version"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8')
     mri_supported = ar_version.startswith("GNU ar ")
 
     if mri_supported:
@@ -242,7 +243,7 @@ def generate_library_unix(package, frida_root, host, output_dir, library_filenam
         mri += ["save", "end"]
         raw_mri = "\n".join(mri)
         ar = subprocess.Popen([ar, "-M"], stdin=subprocess.PIPE)
-        ar.communicate(input=raw_mri)
+        ar.communicate(input=raw_mri.encode('utf-8'))
         if ar.returncode != 0:
             raise Exception("ar failed")
     else:
@@ -300,7 +301,7 @@ def generate_example(filename, package, frida_root, host, kit, extra_ldflags):
         os_flavor = "unix"
 
     example_filename = "{}-example-{}.c".format(kit, os_flavor)
-    with open(asset_path(example_filename), "rb") as f:
+    with codecs.open(asset_path(example_filename), "rb", 'utf-8') as f:
         example_code = f.read()
 
     if platform.system() == 'Windows':
