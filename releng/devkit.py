@@ -30,17 +30,17 @@ def generate_devkit(kit, host, output_dir):
 
     frida_root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
+    library_filename = compute_library_filename(kit)
+    (extra_ldflags, thirdparty_symbol_mappings) = generate_library(package, frida_root, host, output_dir, library_filename)
+
     umbrella_header_path = compute_umbrella_header_path(frida_root, host, package, umbrella_header)
 
     header_filename = kit + ".h"
     if not os.path.exists(umbrella_header_path):
         raise Exception("Header not found: {}".format(umbrella_header_path))
-    header = generate_header(package, frida_root, host, kit, umbrella_header_path)
+    header = generate_header(package, frida_root, host, kit, umbrella_header_path, thirdparty_symbol_mappings)
     with open(os.path.join(output_dir, header_filename), "w") as f:
         f.write(header)
-
-    library_filename = compute_library_filename(kit)
-    extra_ldflags = generate_library(package, frida_root, host, output_dir, library_filename)
 
     example_filename = kit + "-example.c"
     example = generate_example(example_filename, package, frida_root, host, kit, extra_ldflags)
@@ -53,7 +53,7 @@ def generate_devkit(kit, host, output_dir):
 
     return [header_filename, library_filename, example_filename]
 
-def generate_header(package, frida_root, host, kit, umbrella_header_path):
+def generate_header(package, frida_root, host, kit, umbrella_header_path, thirdparty_symbol_mappings):
     if platform.system() == 'Windows':
         include_dirs = [
             MSVS_DIR + r"\VC\Tools\MSVC\14.10.25017\include",
@@ -118,6 +118,13 @@ def generate_header(package, frida_root, host, kit, umbrella_header_path):
         dep_pragmas = "\n".join(["#pragma comment(lib, \"{}.lib\")".format(dep) for dep in deps])
 
         config += frida_pragmas + "\n\n" + dep_pragmas + "\n\n"
+
+    if len(thirdparty_symbol_mappings) > 0:
+        config += "#ifndef __FRIDA_SYMBOL_MAPPINGS__\n"
+        config += "#define __FRIDA_SYMBOL_MAPPINGS__\n\n"
+        public_mappings = extract_public_thirdparty_symbol_mappings(thirdparty_symbol_mappings)
+        config += "\n".join(["#define {0} {1}".format(original, renamed) for original, renamed in public_mappings]) + "\n\n"
+        config += "#endif\n\n"
 
     return config + devkit_header
 
@@ -212,8 +219,9 @@ def generate_library_windows(package, frida_root, host, output_dir, library_file
         shutil.copy(pdb, output_dir)
 
     extra_flags = [os.path.basename(lib_path) for lib_path in input_libs]
+    thirdparty_symbol_mappings = []
 
-    return extra_flags
+    return (extra_flags, thirdparty_symbol_mappings)
 
 def generate_library_unix(package, frida_root, host, output_dir, library_filename):
     output_path = os.path.join(output_dir, library_filename)
@@ -267,7 +275,49 @@ def generate_library_unix(package, frida_root, host, output_dir, library_filenam
 
         shutil.rmtree(combined_dir)
 
-    return extra_flags
+    objcopy = probe_env(rc, "echo $OBJCOPY")
+    if len(objcopy) > 0:
+        thirdparty_symbol_mappings = get_thirdparty_symbol_mappings(output_path, rc)
+
+        renames = "\n".join(["{0} {1}".format(original, renamed) for original, renamed in thirdparty_symbol_mappings]) + "\n"
+        with tempfile.NamedTemporaryFile() as renames_file:
+            renames_file.write(renames.encode('utf-8'))
+            renames_file.flush()
+            subprocess.check_call([objcopy, "--redefine-syms=" + renames_file.name, output_path])
+    else:
+        thirdparty_symbol_mappings = []
+
+    return (extra_flags, thirdparty_symbol_mappings)
+
+def extract_public_thirdparty_symbol_mappings(mappings):
+    public_prefixes = ['g_', 'gee_', 'json_']
+    return [(original, renamed) for original, renamed in mappings if any([original.startswith(prefix) for prefix in public_prefixes])]
+
+def get_thirdparty_symbol_mappings(library, rc):
+    return [(name, "_frida_" + name) for name in get_thirdparty_symbol_names(library, rc)]
+
+def get_thirdparty_symbol_names(library, rc):
+    visible_names = [name for kind, name in get_symbols(library, rc) if kind == 'T']
+
+    frida_prefixes = ["frida", "_frida", "gum", "_gum"]
+    thirdparty_names = [name for name in visible_names if not any([name.startswith(prefix) for prefix in frida_prefixes])]
+    thirdparty_names.sort()
+
+    return thirdparty_names
+
+def get_symbols(library, rc):
+    result = []
+
+    nm = probe_env(rc, "echo $NM")
+
+    for line in subprocess.check_output([nm, library]).decode('utf-8').split("\n"):
+        tokens = line.split(" ")
+        if len(tokens) < 3:
+            continue
+        (kind, name) = tokens[-2:]
+        result.append((kind, name))
+
+    return result
 
 def infer_library_dirs(flags):
     return [flag[2:] for flag in flags if flag.startswith("-L")]
