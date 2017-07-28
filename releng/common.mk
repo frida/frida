@@ -55,11 +55,11 @@ build/frida_thin-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida
 		FRIDA_ASAN=$(FRIDA_ASAN) \
 		FRIDA_ENV_NAME=frida_thin \
 		./releng/setup-env.sh
-	@# FIXME: We need this kludge because frida-node hard-codes these names
 	cd $(FRIDA)/build/; \
+	ln -s frida_thin-env-$*.rc frida-env-$*.rc; \
 	ln -s frida_thin-$* frida-$*; \
 	ln -s frida_thin-sdk-$* sdk-$*; \
-	ln -s frida_thin-toolchain-$* toolchain-$*; \
+	ln -s frida_thin-toolchain-$* toolchain-$*
 
 build/frida-version.h: releng/generate-version-header.py .git/refs/heads/master
 	@python releng/generate-version-header.py > $@.tmp
