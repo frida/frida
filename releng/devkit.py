@@ -297,11 +297,11 @@ def get_thirdparty_symbol_mappings(library, rc):
     return [(name, "_frida_" + name) for name in get_thirdparty_symbol_names(library, rc)]
 
 def get_thirdparty_symbol_names(library, rc):
-    visible_names = [name for kind, name in get_symbols(library, rc) if kind == 'T']
+    visible_names = list(set([name for kind, name in get_symbols(library, rc) if kind in ('T', 'D', 'B', 'R', 'C')]))
+    visible_names.sort()
 
     frida_prefixes = ["frida", "_frida", "gum", "_gum"]
     thirdparty_names = [name for name in visible_names if not any([name.startswith(prefix) for prefix in frida_prefixes])]
-    thirdparty_names.sort()
 
     return thirdparty_names
 
