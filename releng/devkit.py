@@ -109,7 +109,7 @@ def generate_header(package, frida_root, host, kit, umbrella_header_path):
         config = ""
 
     if platform.system() == 'Windows':
-        deps = ["dnsapi", "iphlpapi", "psapi", "winmm", "ws2_32"]
+        deps = ["dnsapi", "iphlpapi", "kernel32", "psapi", "winmm", "ws2_32"]
         if package == "frida-core-1.0":
             deps.append("shlwapi")
         deps.sort()
