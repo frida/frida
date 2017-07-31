@@ -39,12 +39,12 @@ def generate_devkit(kit, host, output_dir):
     if not os.path.exists(umbrella_header_path):
         raise Exception("Header not found: {}".format(umbrella_header_path))
     header = generate_header(package, frida_root, host, kit, umbrella_header_path, thirdparty_symbol_mappings)
-    with open(os.path.join(output_dir, header_filename), "w") as f:
+    with codecs.open(os.path.join(output_dir, header_filename), "w", 'utf-8') as f:
         f.write(header)
 
     example_filename = kit + "-example.c"
     example = generate_example(example_filename, package, frida_root, host, kit, extra_ldflags)
-    with open(os.path.join(output_dir, example_filename), "w") as f:
+    with codecs.open(os.path.join(output_dir, example_filename), "w", 'utf-8') as f:
         f.write(example)
 
     if platform.system() == 'Windows':
@@ -97,7 +97,7 @@ def generate_header(package, frida_root, host, kit, umbrella_header_path, thirdp
     umbrella_header = header_files[0]
     processed_header_files = set([umbrella_header])
     ingest_header(umbrella_header, header_files, processed_header_files, devkit_header_lines)
-    devkit_header = "".join(devkit_header_lines)
+    devkit_header = u"".join(devkit_header_lines)
 
     if package.startswith("frida-gum"):
         config = """#ifndef GUM_STATIC
@@ -139,7 +139,7 @@ def generate_header(package, frida_root, host, kit, umbrella_header_path, thirdp
     return config + devkit_header
 
 def ingest_header(header, all_header_files, processed_header_files, result):
-    with open(header, "r") as f:
+    with codecs.open(header, "r", 'utf-8') as f:
         for line in f:
             match = INCLUDE_PATTERN.match(line.strip())
             if match is not None:
