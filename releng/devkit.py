@@ -109,9 +109,9 @@ def generate_header(package, frida_root, host, kit, umbrella_header_path, thirdp
         config = ""
 
     if platform.system() == 'Windows':
-        deps = ["dnsapi", "iphlpapi", "kernel32", "psapi", "winmm", "ws2_32"]
+        deps = ["dnsapi", "iphlpapi", "psapi", "winmm", "ws2_32"]
         if package == "frida-core-1.0":
-            deps.append("shlwapi")
+            deps.extend(["advapi32", "gdi32", "kernel32", "ole32", "shell32", "shlwapi", "user32"])
         deps.sort()
 
         frida_pragmas = "#pragma comment(lib, \"{}\")".format(compute_library_filename(kit))
