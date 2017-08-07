@@ -470,7 +470,7 @@ case $host_platform in
 
     CFLAGS="$android_host_cflags \
 -fPIE \
--ffunction-sections -fdata-sections -fno-integrated-as \
+-ffunction-sections -fdata-sections \
 -DANDROID -D__ANDROID_API__=$android_target_platform"
     CXXFLAGS="\
 -funwind-tables -fno-rtti \
@@ -501,7 +501,6 @@ $base_toolchain_args, \
 '--sysroot=$android_sysroot_compile', \
 '-isystem', '$android_sysinc', \
 '-ffunction-sections', '-fdata-sections', \
-'-fno-integrated-as', \
 '-DANDROID', \
 '-D__ANDROID_API__=$android_target_platform'"
     base_linker_args="\
