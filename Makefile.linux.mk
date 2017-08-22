@@ -88,6 +88,7 @@ build/$1-%/lib/pkgconfig/capstone.pc: build/$1-env-%.rc build/.capstone-submodul
 		&& make -C capstone \
 			PREFIX=$$$$frida_prefix \
 			BUILDDIR=../build/$2-$$*/capstone \
+			CAPSTONE_BUILD_CORE_ONLY=yes \
 			CAPSTONE_ARCHS="$$$$capstone_archs" \
 			CAPSTONE_SHARED=$$$$enable_shared \
 			CAPSTONE_STATIC=$$$$enable_static \

@@ -81,6 +81,7 @@ build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/.capstone-su
 		&& make -C capstone \
 			PREFIX=$$frida_prefix \
 			BUILDDIR=../build/tmp-$*/capstone \
+			CAPSTONE_BUILD_CORE_ONLY=yes \
 			CAPSTONE_ARCHS="$$capstone_archs" \
 			CAPSTONE_SHARED=$$enable_shared \
 			CAPSTONE_STATIC=$$enable_static \
