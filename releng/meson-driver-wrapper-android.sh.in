@@ -2,8 +2,8 @@
 
 # This wrapper script is necessary in order to avoid polluting the build
 # systems with Android-specific quirks to:
-# - Skip -D_FILE_OFFSET_BITS=64 until NDK r15c is available:
-#   https://github.com/android-ndk/ndk/issues/449
+# - Skip -D_FILE_OFFSET_BITS=64, which is still broken in r15c. It results in
+#   mmap() declaration getting omitted when building for older platform levels.
 # - Add -Wl,-pie when linking programs.
 # - Clean up the ELF files to avoid dynamic linker warnings at runtime.
 

@@ -114,11 +114,8 @@ case $frida_host_platform_arch in
 esac
 
 case $frida_host_platform_arch in
-  linux-arm|linux-armhf|linux-mips|linux-mipsel|qnx-*)
-    enable_gumpp=no
-    ;;
-  *)
-    enable_gumpp=yes
+  android-*)
+    ac_cv_sys_file_offset_bits=no
     ;;
 esac
 
