@@ -13,7 +13,7 @@ This is the recommended way to get started. All you need to do is:
 You may also download pre-built binaries for various operating systems from
 [https://build.frida.re/frida/](https://build.frida.re/frida/).
 
-## 2. Build your own binary
+## 2. Build your own binaries
 
 ### Dependencies
 
