@@ -625,12 +625,27 @@ meson_c_link_args="$meson_c_link_args, $meson_legacy_libpaths"
 meson_cpp_link_args="$meson_cpp_link_args, $meson_legacy_libpaths"
 
 if [ $enable_asan = yes ]; then
-  CC="$CC -fsanitize=address"
-  CXX="$CXX -fsanitize=address"
+  sanitizer_flag="-fsanitize=address"
+
+  CC="$CC $sanitizer_flag"
+  CXX="$CXX $sanitizer_flag"
   if [ -n "$OBJC" ]; then
-    OBJC="$OBJC -fsanitize=address"
+    OBJC="$OBJC $sanitizer_flag"
   fi
-  LD="$LD -fsanitize=address"
+  LD="$LD $sanitizer_flag"
+
+  meson_c_args="'$sanitizer_flag', $meson_c_args"
+  meson_cpp_args="'$sanitizer_flag', $meson_cpp_args"
+  meson_c_link_args="'$sanitizer_flag', $meson_c_link_args"
+  meson_cpp_link_args="'$sanitizer_flag', $meson_cpp_link_args"
+  if [ -n "$meson_objc" ]; then
+    meson_objc_args="'$sanitizer_flag', $meson_objc_args"
+    meson_objc_link_args="'$sanitizer_flag', $meson_objc_link_args"
+  fi
+  if [ -n "$meson_objcpp" ]; then
+    meson_objcpp_args="'$sanitizer_flag', $meson_objcpp_args"
+    meson_objcpp_link_args="'$sanitizer_flag', $meson_objcpp_link_args"
+  fi
 fi
 
 CFLAGS="-fPIC $CFLAGS"
