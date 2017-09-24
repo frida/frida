@@ -6,7 +6,7 @@ repo_suffix = ".git"
 
 m4_version := 1.4.18
 autoconf_version := 2.69
-automake_version := 1.15
+automake_version := 1.15.1
 libtool_version := 2.4.6
 gettext_version := 0.19.8.1
 pkg_config_version := 0.29.2
