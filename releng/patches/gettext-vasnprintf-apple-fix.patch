@@ -1,0 +1,24 @@
+diff -Nur gettext-0.19.8.1-orig/gettext-tools/gnulib-lib/vasnprintf.c gettext-0.19.8.1/gettext-tools/gnulib-lib/vasnprintf.c
+--- gettext-0.19.8.1-orig/gettext-tools/gnulib-lib/vasnprintf.c	2016-06-11 13:00:02.000000000 +0000
++++ gettext-0.19.8.1/gettext-tools/gnulib-lib/vasnprintf.c	2017-09-24 17:17:10.515030778 +0000
+@@ -4858,7 +4858,7 @@
+ #endif
+                   *fbp = dp->conversion;
+ #if USE_SNPRINTF
+-# if !(((__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)) && !defined __UCLIBC__) || ((defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__))
++# if !(((__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)) && !defined __UCLIBC__) || ((defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__) || defined __APPLE__)
+                 fbp[1] = '%';
+                 fbp[2] = 'n';
+                 fbp[3] = '\0';
+diff -Nur gettext-0.19.8.1-orig/gettext-tools/libgettextpo/vasnprintf.c gettext-0.19.8.1/gettext-tools/libgettextpo/vasnprintf.c
+--- gettext-0.19.8.1-orig/gettext-tools/libgettextpo/vasnprintf.c	2016-06-11 13:00:34.000000000 +0000
++++ gettext-0.19.8.1/gettext-tools/libgettextpo/vasnprintf.c	2017-09-24 17:17:39.266743237 +0000
+@@ -4858,7 +4858,7 @@
+ #endif
+                   *fbp = dp->conversion;
+ #if USE_SNPRINTF
+-# if !(((__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)) && !defined __UCLIBC__) || ((defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__))
++# if !(((__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)) && !defined __UCLIBC__) || ((defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__) || defined __APPLE__)
+                 fbp[1] = '%';
+                 fbp[2] = 'n';
+                 fbp[3] = '\0';
