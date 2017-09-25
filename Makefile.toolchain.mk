@@ -58,7 +58,7 @@ endif
 
 all: build/toolchain-$(host_platform)-$(host_arch).tar.bz2
 	@echo ""
-	@echo "\033[0;32mSuccess!\033[0;39m Here's your toolchain: \033[1m$<\033[0m"
+	@echo -e "\033[0;32mSuccess!\033[0;39m Here's your toolchain: \033[1m$<\033[0m"
 	@echo ""
 	@echo "It will be picked up automatically if you now proceed to build Frida."
 	@echo ""
