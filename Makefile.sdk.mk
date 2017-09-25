@@ -7,7 +7,8 @@ repo_suffix := ".git"
 
 zlib_version := 1.2.11
 libiconv_version := 1.14
-binutils_version := 2.25
+elfutils_version := 0.170
+libdwarf_version := 20170709
 
 
 build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos,')
@@ -43,17 +44,20 @@ ifeq ($(host_platform), ios)
 endif
 ifeq ($(host_platform), linux)
 	unwind := build/fs-%/lib/pkgconfig/libunwind.pc
-	bfd := build/fs-%/lib/libbfd.a
+	elf := build/fs-%/lib/libelf.a
+	dwarf := build/fs-%/lib/libdwarf.a
 endif
 ifeq ($(host_platform), android)
 	unwind := build/fs-%/lib/pkgconfig/libunwind.pc
 	iconv := build/fs-%/lib/libiconv.a
-	bfd := build/fs-%/lib/libbfd.a
+	elf := build/fs-%/lib/libelf.a
+	dwarf := build/fs-%/lib/libdwarf.a
 endif
 ifeq ($(host_platform), qnx)
 	unwind := build/fs-%/lib/pkgconfig/libunwind.pc
 	iconv := build/fs-%/lib/libiconv.a
-	bfd := build/fs-%/lib/libbfd.a
+	elf := build/fs-%/lib/libelf.a
+	dwarf := build/fs-%/lib/libdwarf.a
 endif
 ifeq ($(enable_diet), 0)
 	v8 := build/fs-%/lib/pkgconfig/v8.pc
@@ -80,7 +84,8 @@ build/fs-tmp-%/.package-stamp: \
 		build/fs-%/lib/pkgconfig/liblzma.pc \
 		$(unwind) \
 		$(iconv) \
-		$(bfd) \
+		$(elf) \
+		$(dwarf) \
 		build/fs-%/lib/pkgconfig/libffi.pc \
 		build/fs-%/lib/pkgconfig/glib-2.0.pc \
 		build/fs-%/lib/pkgconfig/gee-0.8.pc \
@@ -214,52 +219,55 @@ build/fs-%/lib/libiconv.a: build/fs-env-%.rc build/fs-tmp-%/libiconv/Makefile
 	@touch $@
 
 
-build/.binutils-stamp:
-	$(RM) -r binutils
-	mkdir binutils
-	cd binutils \
-		&& $(download) http://gnuftp.uib.no/binutils/binutils-$(binutils_version).tar.bz2 | tar -xj --strip-components 1 \
-		&& patch -p1 < ../releng/patches/binutils-bfd-header.patch \
-		&& patch -p1 < ../releng/patches/binutils-warnings.patch \
-		&& patch -p1 < ../releng/patches/binutils-android.patch \
-		&& patch -p1 < ../releng/patches/binutils-qnx.patch
+build/.elfutils-stamp:
+	$(RM) -r elfutils
+	mkdir elfutils
+	cd elfutils \
+		&& $(download) https://sourceware.org/pub/elfutils/$(elfutils_version)/elfutils-$(elfutils_version).tar.bz2 | tar -xj --strip-components 1
 	@mkdir -p $(@D)
 	@touch $@
 
-build/fs-tmp-%/binutils/libiberty/Makefile: build/fs-env-%.rc build/.binutils-stamp
+build/fs-tmp-%/elfutils/Makefile: build/fs-env-%.rc build/.elfutils-stamp build/fs-%/lib/pkgconfig/liblzma.pc
 	$(RM) -r $(@D)
 	mkdir -p $(@D)
-	. $< && cd $(@D) && ../../../../binutils/libiberty/configure
+	. $< && cd $(@D) && ../../../elfutils/configure
 
-build/fs-tmp-%/binutils/bfd/Makefile: build/fs-env-%.rc build/.binutils-stamp
-	$(RM) -r $(@D)
-	mkdir -p $(@D)
-	. $< && cd $(@D) && ../../../../binutils/bfd/configure
-
-build/fs-%/lib/libbfd.a: \
-		build/fs-env-%.rc \
-		build/fs-%/include/bfd.h \
-		build/fs-tmp-%/binutils/libiberty/libiberty.a \
-		build/fs-tmp-%/binutils/bfd/libbfd.a
-	mkdir -p $(@D)
-	$(RM) -r build/fs-tmp-$*/binutils/tmp
-	mkdir build/fs-tmp-$*/binutils/tmp
+build/fs-%/lib/libelf.a: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
 	. $< \
-		&& cd build/fs-tmp-$*/binutils/tmp \
-		&& $$AR x ../libiberty/libiberty.a \
-		&& $$AR x ../bfd/libbfd.a \
-		&& $$AR r libbfd-full.a *.o \
-		&& $$RANLIB libbfd-full.a \
-		&& install -m 644 libbfd-full.a ../../../../$@
+		&& cd build/fs-tmp-$*/elfutils \
+		&& make $(MAKE_J) -C libelf libelf.a
+	install -d build/fs-$*/include
+	install -m 644 elfutils/libelf/libelf.h build/fs-$*/include
+	install -m 644 elfutils/libelf/gelf.h build/fs-$*/include
+	install -m 644 elfutils/libelf/nlist.h build/fs-$*/include
+	install -d build/fs-$*/lib
+	install -m 644 build/fs-tmp-$*/elfutils/libelf/libelf.a build/fs-$*/lib
+	@touch $@
 
-build/fs-%/include/bfd.h: build/fs-env-%.rc build/fs-tmp-%/binutils/bfd/Makefile
-	. $< && make -C build/fs-tmp-$*/binutils/bfd $(MAKE_J) install-bfdincludeHEADERS
 
-build/fs-tmp-%/binutils/libiberty/libiberty.a: build/fs-env-%.rc build/fs-tmp-%/binutils/libiberty/Makefile
-	. $< && make -C $(@D) $(MAKE_J)
+build/.libdwarf-stamp:
+	$(RM) -r libdwarf
+	mkdir libdwarf
+	cd libdwarf \
+		&& $(download) https://www.prevanders.net/libdwarf-$(libdwarf_version).tar.gz | tar -xz --strip-components 1
+	@mkdir -p $(@D)
+	@touch $@
 
-build/fs-tmp-%/binutils/bfd/libbfd.a: build/fs-env-%.rc build/fs-tmp-%/binutils/bfd/Makefile
-	. $< && make -C $(@D) $(MAKE_J)
+build/fs-tmp-%/libdwarf/Makefile: build/fs-env-%.rc build/.libdwarf-stamp build/fs-%/lib/libelf.a
+	$(RM) -r $(@D)
+	mkdir -p $(@D)
+	. $< && cd $(@D) && ../../../libdwarf/configure
+
+build/fs-%/lib/libdwarf.a: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
+	. $< \
+		&& cd build/fs-tmp-$*/libdwarf \
+		&& make $(MAKE_J)
+	install -d build/fs-$*/include
+	install -m 644 libdwarf/libdwarf/dwarf.h build/fs-$*/include
+	install -m 644 build/fs-tmp-$*/libdwarf/libdwarf/libdwarf.h build/fs-$*/include
+	install -d build/fs-$*/lib
+	install -m 644 build/fs-tmp-$*/libdwarf/libdwarf/libdwarf.a build/fs-$*/lib
+	@touch $@
 
 
 define make-git-autotools-module-rules

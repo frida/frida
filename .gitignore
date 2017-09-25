@@ -1,12 +1,13 @@
 /.vs
 /autoconf
 /automake
-/binutils
 /build
+/elfutils
 /gettext
 /glib
 /ipch
 /json-glib
+/libdwarf
 /libffi
 /libgee
 /libiconv
