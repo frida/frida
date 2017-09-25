@@ -230,7 +230,6 @@ case $host_platform in
     OBJDUMP="${host_toolprefix}objdump"
 
     CFLAGS="$host_arch_flags -ffunction-sections -fdata-sections"
-    CXXFLAGS="-fno-rtti"
     LDFLAGS="$host_arch_flags -Wl,--gc-sections"
 
     arch_args=$(flags_to_args "$host_arch_flags")
@@ -274,7 +273,7 @@ case $host_platform in
 
     CPPFLAGS="-isysroot $macos_sdk_path -mmacosx-version-min=$macos_minver -arch $host_clang_arch"
     CFLAGS="-isysroot $macos_sdk_path -mmacosx-version-min=$macos_minver -arch $host_clang_arch"
-    CXXFLAGS="-stdlib=libc++ -fno-rtti"
+    CXXFLAGS="-stdlib=libc++"
     LDFLAGS="-isysroot $macos_sdk_path -Wl,-macosx_version_min,$macos_minver -arch $host_clang_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
 
     meson_root="$macos_sdk_path"
@@ -340,7 +339,7 @@ case $host_platform in
 
     CPPFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch"
     CFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch"
-    CXXFLAGS="-stdlib=libc++ -fno-rtti"
+    CXXFLAGS="-stdlib=libc++"
     LDFLAGS="-isysroot $ios_sdk_path -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -Wl,-dead_strip"
 
     meson_root="$ios_sdk_path"
@@ -473,7 +472,7 @@ case $host_platform in
 -ffunction-sections -fdata-sections \
 -DANDROID -D__ANDROID_API__=$android_target_platform"
     CXXFLAGS="\
--funwind-tables -fno-rtti \
+-funwind-tables \
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/include \
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++abi/include \
 -I$ANDROID_NDK_ROOT/sources/android/support/include"
@@ -584,7 +583,6 @@ $arch_linker_args"
     OBJDUMP="$qnx_toolchain_prefix-objdump"
 
     CFLAGS="-ffunction-sections -fdata-sections"
-    CXXFLAGS="-fno-rtti"
     LDFLAGS="-Wl,--gc-sections -L$(dirname $qnx_sysroot/lib/gcc/4.8.3/libstdc++.a)"
 
     meson_root="$qnx_sysroot"
