@@ -460,9 +460,14 @@ build/fs-tmp-%/.v8-source-stamp: build/.v8-stamp
 	@touch $@
 
 build/fs-tmp-%/.v8-build-stamp: build/fs-env-%.rc build/fs-tmp-%/.v8-source-stamp
+	if test -f /usr/bin/python2.7; then \
+		ln -sf /usr/bin/python2.7 $(@D)/python; \
+	else \
+		ln -sf /usr/bin/python2.6 $(@D)/python; \
+	fi
 	. $< \
 		&& cd build/fs-tmp-$*/v8 \
-		&& PATH="/usr/bin:/bin:/usr/sbin:/sbin:$$PATH" \
+		&& PATH="$(abspath $(@D)):/usr/bin:/bin:/usr/sbin:/sbin:$$PATH" \
 			$(v8_env_vars) \
 			make $(MAKE_J) $(v8_target) GYPFLAGS="$(v8_flags)"
 	@touch $@
