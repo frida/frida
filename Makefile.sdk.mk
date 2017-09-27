@@ -224,7 +224,7 @@ build/.elfutils-stamp:
 	mkdir elfutils
 	cd elfutils \
 		&& $(download) https://sourceware.org/pub/elfutils/$(elfutils_version)/elfutils-$(elfutils_version).tar.bz2 | tar -xj --strip-components 1 \
-		&& patch -p1 < ../releng/patches/elfutils-android-hacks.patch
+		&& patch -p1 < ../releng/patches/elfutils-android.patch
 	@mkdir -p $(@D)
 	@touch $@
 
@@ -244,6 +244,7 @@ build/fs-%/lib/libelf.a: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
 		&& make $(MAKE_J) -C libelf libelf.a
 	install -d build/fs-$*/include
 	install -m 644 elfutils/libelf/libelf.h build/fs-$*/include
+	install -m 644 elfutils/libelf/elf.h build/fs-$*/include
 	install -m 644 elfutils/libelf/gelf.h build/fs-$*/include
 	install -m 644 elfutils/libelf/nlist.h build/fs-$*/include
 	install -d build/fs-$*/lib
