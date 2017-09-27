@@ -159,6 +159,7 @@ FRIDA_PREFIX_LIB="$FRIDA_PREFIX/lib"
 FRIDA_TOOLROOT="$FRIDA_BUILD/${frida_env_name_prefix}toolchain-${build_platform_arch}"
 FRIDA_SDKROOT="$FRIDA_BUILD/${frida_env_name_prefix}sdk-${host_platform_arch}"
 
+GCC=""
 LIBTOOL=""
 STRIP_FLAGS=""
 
@@ -456,6 +457,7 @@ case $host_platform in
 
     CPP="$android_gcc_toolchain/bin/${android_host_toolprefix}cpp --sysroot=$android_sysroot_compile -isystem $android_sysinc"
     CC="$cc_wrapper $android_clang_prefix/bin/clang $toolflags"
+    GCC="$cc_wrapper $android_gcc_toolchain/bin/${android_host_toolprefix}gcc"
     CXX="$cxx_wrapper $android_clang_prefix/bin/clang++ $toolflags"
     LD="$android_gcc_toolchain/bin/${android_host_toolprefix}ld --sysroot=$android_sysroot_link"
 
@@ -794,6 +796,9 @@ fi
   echo "export CPP=\"$CPP\""
   echo "export CPPFLAGS=\"$CPPFLAGS\""
   echo "export CC=\"$CC\""
+  if [ -n "$GCC" ]; then
+    echo "export FRIDA_GCC=\"$GCC\""
+  fi
   echo "export CFLAGS=\"$CFLAGS\""
   echo "export CXX=\"$CXX\""
   echo "export CXXFLAGS=\"$CXXFLAGS\""

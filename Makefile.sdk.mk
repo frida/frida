@@ -223,14 +223,20 @@ build/.elfutils-stamp:
 	$(RM) -r elfutils
 	mkdir elfutils
 	cd elfutils \
-		&& $(download) https://sourceware.org/pub/elfutils/$(elfutils_version)/elfutils-$(elfutils_version).tar.bz2 | tar -xj --strip-components 1
+		&& $(download) https://sourceware.org/pub/elfutils/$(elfutils_version)/elfutils-$(elfutils_version).tar.bz2 | tar -xj --strip-components 1 \
+		&& patch -p1 < ../releng/patches/elfutils-android-hacks.patch
 	@mkdir -p $(@D)
 	@touch $@
 
 build/fs-tmp-%/elfutils/Makefile: build/fs-env-%.rc build/.elfutils-stamp build/fs-%/lib/pkgconfig/liblzma.pc
 	$(RM) -r $(@D)
 	mkdir -p $(@D)
-	. $< && cd $(@D) && ../../../elfutils/configure
+	. $< \
+		&& cd $(@D) \
+		&& if [ -n "$$FRIDA_GCC" ]; then \
+			export CC="$$FRIDA_GCC"; \
+		fi \
+		&& ../../../elfutils/configure
 
 build/fs-%/lib/libelf.a: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
 	. $< \
@@ -256,17 +262,17 @@ build/.libdwarf-stamp:
 build/fs-tmp-%/libdwarf/Makefile: build/fs-env-%.rc build/.libdwarf-stamp build/fs-%/lib/libelf.a
 	$(RM) -r $(@D)
 	mkdir -p $(@D)
-	. $< && cd $(@D) && ../../../libdwarf/configure
+	. $< && cd $(@D) && ../../../libdwarf/libdwarf/configure
 
 build/fs-%/lib/libdwarf.a: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
 	. $< \
 		&& cd build/fs-tmp-$*/libdwarf \
-		&& make $(MAKE_J)
+		&& make $(MAKE_J) HOSTCC="gcc" HOSTCFLAGS="" libdwarf.a
 	install -d build/fs-$*/include
 	install -m 644 libdwarf/libdwarf/dwarf.h build/fs-$*/include
-	install -m 644 build/fs-tmp-$*/libdwarf/libdwarf/libdwarf.h build/fs-$*/include
+	install -m 644 build/fs-tmp-$*/libdwarf/libdwarf.h build/fs-$*/include
 	install -d build/fs-$*/lib
-	install -m 644 build/fs-tmp-$*/libdwarf/libdwarf/libdwarf.a build/fs-$*/lib
+	install -m 644 build/fs-tmp-$*/libdwarf/libdwarf.a build/fs-$*/lib
 	@touch $@
 
 

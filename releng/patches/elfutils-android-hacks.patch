@@ -1,0 +1,168 @@
+diff -Nur elfutils-orig/configure elfutils/configure
+--- elfutils-orig/configure	2017-08-02 21:20:00.000000000 +0200
++++ elfutils/configure	2017-09-27 02:44:01.000000000 +0200
+@@ -6113,7 +6113,7 @@
+ 
+ 
+ 	if test "$have_argp" = "false"; then
+-		as_fn_error $? "\"no libargp found\"" "$LINENO" 5
++		argp_LDADD=""
+ 	else
+ 		argp_LDADD="-largp"
+ 	fi
+diff -Nur elfutils-orig/configure.ac elfutils/configure.ac
+--- elfutils-orig/configure.ac	2017-08-02 18:28:57.000000000 +0200
++++ elfutils/configure.ac	2017-09-27 02:43:48.000000000 +0200
+@@ -376,7 +376,7 @@
+ 	AC_CHECK_LIB([argp], [argp_parse], [have_argp="true"], [have_argp="false"])
+ 
+ 	if test "$have_argp" = "false"; then
+-		AC_MSG_ERROR("no libargp found")
++		argp_LDADD=""
+ 	else
+ 		argp_LDADD="-largp"
+ 	fi
+diff -Nur elfutils-orig/libelf/libelf.h elfutils/libelf/libelf.h
+--- elfutils-orig/libelf/libelf.h	2017-06-19 16:45:16.000000000 +0200
++++ elfutils/libelf/libelf.h	2017-09-27 03:15:51.000000000 +0200
+@@ -35,6 +35,64 @@
+ /* Get the ELF types.  */
+ #include <elf.h>
+ 
++#ifdef __ANDROID__
++
++typedef uint64_t Elf32_Xword;
++typedef uint64_t Elf64_Xword;
++
++typedef uint16_t Elf32_Section;
++typedef uint16_t Elf64_Section;
++
++typedef struct
++{
++  Elf32_Half si_boundto;
++  Elf32_Half si_flags;
++} Elf32_Syminfo;
++
++typedef struct
++{
++  Elf64_Half si_boundto;
++  Elf64_Half si_flags;
++} Elf64_Syminfo;
++
++typedef struct
++{
++  Elf32_Xword m_value;
++  Elf32_Word m_info;
++  Elf32_Word m_poffset;
++  Elf32_Half m_repeat;
++  Elf32_Half m_stride;
++} Elf32_Move;
++
++typedef struct
++{
++  Elf64_Xword m_value;
++  Elf64_Xword m_info;
++  Elf64_Xword m_poffset;
++  Elf64_Half m_repeat;
++  Elf64_Half m_stride;
++} Elf64_Move;
++
++typedef struct
++{
++  Elf32_Word l_name;
++  Elf32_Word l_time_stamp;
++  Elf32_Word l_checksum;
++  Elf32_Word l_version;
++  Elf32_Word l_flags;
++} Elf32_Lib;
++
++typedef struct
++{
++  Elf64_Word l_name;
++  Elf64_Word l_time_stamp;
++  Elf64_Word l_checksum;
++  Elf64_Word l_version;
++  Elf64_Word l_flags;
++} Elf64_Lib;
++
++#endif
++
+ #ifndef SHF_COMPRESSED
+  /* Older glibc elf.h might not yet define the ELF compression types.  */
+  #define SHF_COMPRESSED      (1 << 11)  /* Section with compressed data. */
+diff -Nur elfutils-orig/libelf/elf_getaroff.c elfutils/libelf/elf_getaroff.c
+--- elfutils-orig/libelf/elf_getaroff.c	2017-06-19 16:45:16.000000000 +0200
++++ elfutils/libelf/elf_getaroff.c	2017-09-27 02:53:14.000000000 +0200
+@@ -38,7 +38,7 @@
+ #include "libelfP.h"
+ 
+ 
+-off_t
++int64_t
+ elf_getaroff (Elf *elf)
+ {
+   /* Be gratious, the specs demand it.  */
+diff -Nur elfutils-orig/libelf/elf_getbase.c elfutils/libelf/elf_getbase.c
+--- elfutils-orig/libelf/elf_getbase.c	2017-06-19 16:45:16.000000000 +0200
++++ elfutils/libelf/elf_getbase.c	2017-09-27 02:50:21.000000000 +0200
+@@ -37,7 +37,7 @@
+ #include "libelfP.h"
+ 
+ 
+-off_t
++int64_t
+ elf_getbase (Elf *elf)
+ {
+   return elf == NULL ? (off_t) -1 : elf->start_offset;
+diff -Nur elfutils-orig/libelf/elf_getdata_rawchunk.c elfutils/libelf/elf_getdata_rawchunk.c
+--- elfutils-orig/libelf/elf_getdata_rawchunk.c	2017-06-19 16:45:16.000000000 +0200
++++ elfutils/libelf/elf_getdata_rawchunk.c	2017-09-27 02:51:12.000000000 +0200
+@@ -41,7 +41,7 @@
+ #include "common.h"
+ 
+ Elf_Data *
+-elf_getdata_rawchunk (Elf *elf, off_t offset, size_t size, Elf_Type type)
++elf_getdata_rawchunk (Elf *elf, int64_t offset, size_t size, Elf_Type type)
+ {
+   if (unlikely (elf == NULL))
+     return NULL;
+diff -Nur elfutils-orig/libelf/elf_update.c elfutils/libelf/elf_update.c
+--- elfutils-orig/libelf/elf_update.c	2017-06-19 16:45:16.000000000 +0200
++++ elfutils/libelf/elf_update.c	2017-09-27 02:53:01.000000000 +0200
+@@ -91,6 +91,7 @@
+ 	 fallback case might fail (with unexpected errnos) in some cases.
+ 	 So we only report an error when the call fails and errno is
+ 	 ENOSPC. Otherwise we ignore the error and treat it as just hint.  */
++#if 0
+       if (elf->parent == NULL
+ 	  && (elf->maximum_size == ~((size_t) 0)
+ 	      || (size_t) size > elf->maximum_size)
+@@ -100,6 +101,7 @@
+ 	    __libelf_seterrno (ELF_E_WRITE_ERROR);
+ 	    return -1;
+ 	  }
++#endif
+ 
+       /* The file is mmaped.  */
+       if ((class == ELFCLASS32
+@@ -148,7 +150,7 @@
+ }
+ 
+ 
+-off_t
++int64_t
+ elf_update (Elf *elf, Elf_Cmd cmd)
+ {
+   size_t shnum;
+diff -Nur elfutils-orig/libelf/libelfP.h elfutils/libelf/libelfP.h
+--- elfutils-orig/libelf/libelfP.h	2017-06-19 16:45:16.000000000 +0200
++++ elfutils/libelf/libelfP.h	2017-09-27 02:49:35.000000000 +0200
+@@ -40,7 +40,7 @@
+ #include <string.h>
+ 
+ /* gettext helper macros.  */
+-#define _(Str) dgettext ("elfutils", Str)
++#define _(Str) Str
+ 
+ 
+ /* Helper Macros to write 32 bit and 64 bit functions.  */
