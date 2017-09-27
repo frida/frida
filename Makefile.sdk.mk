@@ -267,7 +267,7 @@ build/fs-tmp-%/libdwarf/Makefile: build/fs-env-%.rc build/.libdwarf-stamp build/
 build/fs-%/lib/libdwarf.a: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
 	. $< \
 		&& cd build/fs-tmp-$*/libdwarf \
-		&& make $(MAKE_J) HOSTCC="gcc" HOSTCFLAGS="" libdwarf.a
+		&& make $(MAKE_J) HOSTCC="gcc" HOSTCFLAGS="" HOSTLDFLAGS="" libdwarf.a
 	install -d build/fs-$*/include
 	install -m 644 libdwarf/libdwarf/dwarf.h build/fs-$*/include
 	install -m 644 build/fs-tmp-$*/libdwarf/libdwarf.h build/fs-$*/include
