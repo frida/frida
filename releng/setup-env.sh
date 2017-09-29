@@ -606,6 +606,19 @@ $arch_linker_args"
     ;;
 esac
 
+case $host_platform_arch in
+  android-arm|ios-arm)
+    meson_c_args="$meson_c_args, '-mthumb'"
+    meson_cpp_args="$meson_cpp_args, '-mthumb'"
+    if [ -n "$meson_objc" ]; then
+      meson_objc_args="$meson_objc_args, '-mthumb'"
+    fi
+    if [ -n "$meson_objcpp" ]; then
+      meson_objcpp_args="$meson_objcpp_args, '-mthumb'"
+    fi
+    ;;
+esac
+
 # We need these legacy paths for dependencies that don't use pkg-config
 legacy_includes="-I$FRIDA_PREFIX/include"
 legacy_libpaths="-L$FRIDA_PREFIX/lib"
