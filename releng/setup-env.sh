@@ -470,7 +470,6 @@ case $host_platform in
     OBJDUMP="$android_gcc_toolchain/bin/${android_host_toolprefix}objdump"
 
     CFLAGS="$android_host_cflags \
--fPIE \
 -ffunction-sections -fdata-sections \
 -DANDROID -D__ANDROID_API__=$android_target_platform"
     CXXFLAGS="\
@@ -480,7 +479,6 @@ case $host_platform in
 -I$ANDROID_NDK_ROOT/sources/android/support/include"
     CPPFLAGS="-DANDROID -D__ANDROID_API__=$android_target_platform"
     LDFLAGS="$android_host_ldflags \
--fPIE -pie \
 -Wl,--gc-sections \
 -Wl,-z,noexecstack \
 -Wl,-z,relro \

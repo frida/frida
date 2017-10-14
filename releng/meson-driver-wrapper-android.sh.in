@@ -27,7 +27,7 @@ while [[ $# > 0 ]]; do
           output_type=object
           ;;
         -shared)
-          output_type=library
+          output_type=shlib
           ;;
         -o)
           argv+=("-o")
@@ -53,7 +53,7 @@ fi
 "@linker@" "${argv[@]}" || exit $?
 
 case $output_type in
-  executable|library)
+  executable|shlib)
     "@elf_cleaner@" "$output_path"
     ;;
 esac

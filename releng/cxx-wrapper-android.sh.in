@@ -16,11 +16,20 @@ support_library=$libdir/libandroid_support.a
 
 argv=()
 mode=link
+output_type=executable
 
 for arg in "$@"; do
   case "$arg" in
-    -E|-c)
+    -E)
       mode=compile
+      output_type=code
+      ;;
+    -c)
+      mode=compile
+      output_type=object
+      ;;
+    -shared)
+      output_type=shlib
       ;;
     -lgcc)
       argv+=("$cxx_library" "$abi_library")
@@ -46,5 +55,9 @@ case $mode in
     argv+=("--sysroot=$sysroot_link")
     ;;
 esac
+
+if [[ $output_type = executable ]]; then
+  argv+=("-Wl,-pie")
+fi
 
 exec "${argv[@]}"
