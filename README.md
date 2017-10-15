@@ -1,4 +1,5 @@
-Inject JavaScript to explore native apps on Windows, macOS, Linux, iOS, Android, and QNX.
+Dynamic instrumentation toolkit for developers, reverse-engineers, and security
+researchers.
 
 Two ways to install—
 ===
