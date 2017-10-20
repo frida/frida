@@ -22,7 +22,7 @@ DEVKITS = {
 }
 
 # TODO: auto-detect these:
-MSVS_DIR = r"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise"
+MSVS_DIR = r"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community"
 WINDOWS_SDK_DIR = r"C:\Program Files (x86)\Windows Kits\10"
 
 def generate_devkit(kit, host, output_dir):
@@ -56,7 +56,7 @@ def generate_devkit(kit, host, output_dir):
 def generate_header(package, frida_root, host, kit, umbrella_header_path, thirdparty_symbol_mappings):
     if platform.system() == 'Windows':
         include_dirs = [
-            MSVS_DIR + r"\VC\Tools\MSVC\14.10.25017\include",
+            MSVS_DIR + r"\VC\Tools\MSVC\14.11.25503\include",
             WINDOWS_SDK_DIR + r"\Include\10.0.14393.0\ucrt",
             os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "lib", "glib-2.0", "include"),
             os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "include", "glib-2.0"),
@@ -409,12 +409,12 @@ def msvs_lib_exe(host):
 
 def msvs_tool_path(host, tool):
     if host == "windows-x86_64":
-        return MSVS_DIR + r"\VC\Tools\MSVC\14.10.25017\bin\HostX86\x64\{0}".format(tool)
+        return MSVS_DIR + r"\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\{0}".format(tool)
     else:
-        return MSVS_DIR + r"\VC\Tools\MSVC\14.10.25017\bin\HostX86\x86\{0}".format(tool)
+        return MSVS_DIR + r"\VC\Tools\MSVC\14.11.25503\bin\HostX86\x86\{0}".format(tool)
 
 def msvs_runtime_path(host):
-    return MSVS_DIR + r"\VC\Tools\MSVC\14.10.25017\bin\HostX86\x86"
+    return MSVS_DIR + r"\VC\Tools\MSVC\14.11.25503\bin\HostX86\x86"
 
 def msvs_arch_config(host):
     if host == "windows-x86_64":
