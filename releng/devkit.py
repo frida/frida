@@ -98,6 +98,9 @@ def generate_header(package, frida_root, host, kit, umbrella_header_path, thirdp
     umbrella_header = header_files[0]
     processed_header_files = set([umbrella_header])
     ingest_header(umbrella_header, header_files, processed_header_files, devkit_header_lines)
+    if kit == "frida-core" and host.startswith("android-"):
+        selinux_header = os.path.join(os.path.dirname(umbrella_header_path), "frida-selinux.h")
+        ingest_header(selinux_header, header_files, processed_header_files, devkit_header_lines)
     devkit_header = u"".join(devkit_header_lines)
 
     if package.startswith("frida-gum"):
