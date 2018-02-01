@@ -231,13 +231,13 @@ case $host_platform in
     OBJDUMP="${host_toolprefix}objdump"
 
     CFLAGS="$host_arch_flags -ffunction-sections -fdata-sections"
-    LDFLAGS="$host_arch_flags -Wl,--gc-sections"
+    LDFLAGS="$host_arch_flags -Wl,--gc-sections -Wl,-z,noexecstack"
 
     arch_args=$(flags_to_args "$host_arch_flags")
 
     base_toolchain_args="$arch_args, '-static-libgcc'"
     base_compiler_args="$base_toolchain_args, '-ffunction-sections', '-fdata-sections'"
-    base_linker_args="$base_toolchain_args, '-Wl,--gc-sections'"
+    base_linker_args="$base_toolchain_args, '-Wl,--gc-sections', '-Wl,-z,noexecstack'"
 
     meson_c="${host_toolprefix}gcc"
     meson_cpp="${host_toolprefix}g++"
