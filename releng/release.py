@@ -263,8 +263,6 @@ if __name__ == '__main__':
 
             upload_directory("frida-qml-{version}-macos-x86_64", os.path.join(build_dir, "build", "frida-macos-x86_64", "lib", "qt5", "qml"), upload)
 
-            upload_to_pypi("/usr/bin/python2.6",
-                os.path.join(build_dir, "build", "frida-macos-universal", "lib", "python2.6", "site-packages", "_frida.so"))
             for osx_minor in xrange(9, 13):
                 upload_to_pypi("/usr/bin/python2.7",
                     os.path.join(build_dir, "build", "frida-macos-universal", "lib", "python2.7", "site-packages", "_frida.so"),
