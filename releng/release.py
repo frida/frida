@@ -2,11 +2,14 @@
 from __future__ import print_function
 
 if __name__ == '__main__':
+    from contextlib import contextmanager
     from devkit import generate_devkit
     from distutils.spawn import find_executable
+    import codecs
     import glob
     import os
     import platform
+    import re
     import shutil
     import subprocess
     import sys
@@ -55,7 +58,7 @@ if __name__ == '__main__':
 
         subprocess.call([interpreter, "setup.py"] + targets, cwd=os.path.join(frida_python_dir, "src"), env=env)
 
-    def upload_to_npm(node, upload_to_github, publish, extra_build_args=[], extra_build_env=None):
+    def upload_node_bindings_to_npm(node, upload_to_github, publish, extra_build_args=[], extra_build_env=None):
         node_bin_dir = os.path.dirname(node)
         npm = os.path.join(node_bin_dir, "npm")
         if system == 'Windows':
@@ -81,23 +84,43 @@ if __name__ == '__main__':
             env_args = [". " + extra_build_env, "&&"] if extra_build_env is not None else []
             do(env_args + args + extra_build_args)
         def reset():
-            tags = [tag.strip() for tag in subprocess.check_output(["git", "tag", "-l"], cwd=frida_node_dir, env=env).split("\n") if len(tag.strip()) > 0]
-            for tag in tags:
-                do(["git", "tag", "-d", tag])
-            do(["git", "reset", "--hard", "origin/master"])
             do(["git", "clean", "-xffd"])
         reset()
-        do([npm, "version", version])
-        if publish:
-            do([npm, "publish"])
-        do_build_command([npm, "install"])
-        do_build_command([npm, "run", "prebuild", "--", "-t", "8.0.0", "-t", "9.0.0"])
-        do_build_command([npm, "run", "prebuild", "--", "-t", "1.7.9", "-t", "1.8.2-beta.1", "-r", "electron"])
-        packages = glob.glob(os.path.join(frida_node_dir, "prebuilds", "*.tar.gz"))
-        for package in packages:
-            with open(package, 'rb') as package_file:
-                upload_to_github(os.path.basename(package), "application/gzip", package_file.read())
+        with package_version_temporarily_set_to(version, os.path.join(frida_node_dir, "package.json")):
+            if publish:
+                do([npm, "publish"])
+            do_build_command([npm, "install"])
+            do_build_command([npm, "run", "prebuild", "--", "-t", "8.0.0", "-t", "9.0.0"])
+            do_build_command([npm, "run", "prebuild", "--", "-t", "1.7.9", "-t", "1.8.2-beta.1", "-r", "electron"])
+            packages = glob.glob(os.path.join(frida_node_dir, "prebuilds", "*.tar.gz"))
+            for package in packages:
+                with open(package, 'rb') as package_file:
+                    upload_to_github(os.path.basename(package), "application/gzip", package_file.read())
         reset()
+
+    def upload_meta_modules_to_npm(node):
+        for module in ["frida-gadget-ios"]:
+            upload_meta_module_to_npm(node, module)
+
+    def upload_meta_module_to_npm(node, module_name):
+        module_dir = os.path.join(build_dir, "releng", "modules", module_name)
+        with package_version_temporarily_set_to(version, os.path.join(module_dir, "package.json")):
+            subprocess.check_call(["npm", "publish"], cwd=module_dir)
+
+    @contextmanager
+    def package_version_temporarily_set_to(version, package_json_path):
+        with codecs.open(package_json_path, "rb", 'utf-8') as f:
+            package_json_original = f.read()
+
+        package_json_versioned = re.sub(r'"version": "(.+)",', r'"version": "{}",'.format(version), package_json_original)
+        with codecs.open(package_json_path, "wb", 'utf-8') as f:
+            f.write(package_json_versioned)
+
+        try:
+            yield
+        finally:
+            with codecs.open(package_json_path, "wb", 'utf-8') as f:
+                f.write(package_json_original)
 
     def upload_ios_deb(name, server):
         env = {
@@ -240,8 +263,8 @@ if __name__ == '__main__':
             upload_to_pypi(r"C:\Program Files\Python 3.6\python.exe",
                 os.path.join(build_dir, "build", "frida-windows", "x64-Release", "lib", "python3.6", "site-packages", "_frida.pyd"), sdist=True)
 
-            upload_to_npm(r"C:\Program Files (x86)\nodejs\node.exe", upload, publish=False)
-            upload_to_npm(r"C:\Program Files\nodejs\node.exe", upload, publish=False)
+            upload_node_bindings_to_npm(r"C:\Program Files (x86)\nodejs\node.exe", upload, publish=False)
+            upload_node_bindings_to_npm(r"C:\Program Files\nodejs\node.exe", upload, publish=False)
         elif slave == 'macos':
             upload = get_github_uploader()
 
@@ -270,7 +293,8 @@ if __name__ == '__main__':
             upload_to_pypi("/usr/local/bin/python3.6",
                 os.path.join(build_dir, "build", "frida-macos-universal", "lib", "python3.6", "site-packages", "_frida.so"))
 
-            upload_to_npm("/opt/node-64/bin/node", upload, publish=True)
+            upload_node_bindings_to_npm("/opt/node-64/bin/node", upload, publish=True)
+            upload_meta_modules_to_npm("/opt/node-64/bin/node")
 
             upload_ios_deb("frida", os.path.join(build_dir, "build", "frida-ios-arm64", "bin", "frida-server"))
             upload_ios_deb("frida32", os.path.join(build_dir, "build", "frida-ios-arm", "bin", "frida-server"))
@@ -299,12 +323,12 @@ if __name__ == '__main__':
                 os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python3.6", "site-packages", "_frida.so"),
                 { 'LD_LIBRARY_PATH': "/opt/python36-64/lib", '_PYTHON_HOST_PLATFORM': "linux-x86_64" })
 
-            upload_to_npm("/opt/node-32/bin/node", upload, publish=False)
-            upload_to_npm("/opt/node-64/bin/node", upload, publish=False)
+            upload_node_bindings_to_npm("/opt/node-32/bin/node", upload, publish=False)
+            upload_node_bindings_to_npm("/opt/node-64/bin/node", upload, publish=False)
         elif slave == 'pi':
             upload = get_github_uploader()
 
-            upload_to_npm(find_executable("node"), upload, publish=False,
+            upload_node_bindings_to_npm(find_executable("node"), upload, publish=False,
                     extra_build_args=["--arch=arm"],
                     extra_build_env=os.path.join(build_dir, "build", "frida-env-linux-armhf.rc"))
         elif slave == 'android':
