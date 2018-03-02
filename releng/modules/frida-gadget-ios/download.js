@@ -3,6 +3,7 @@
 const fs = require('fs');
 const gadget = require('.');
 const _glob = require('glob');
+const lzma = require('lzma-native');
 const _simpleGet = require('simple-get');
 const path = require('path');
 const _pump = require('pump');
@@ -43,7 +44,7 @@ async function download() {
 
   const tempGadgetPath = gadget.path + '.download';
   const tempGadgetStream = fs.createWriteStream(tempGadgetPath);
-  await pump(response, tempGadgetStream);
+  await pump(response, lzma.createDecompressor(), tempGadgetStream);
 
   await rename(tempGadgetPath, gadget.path);
 }
