@@ -4,7 +4,7 @@
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <OutDir>$(SolutionDir)build\frida-windows\$(PlatformName)-$(Configuration)\bin\</OutDir>
     <IntDir>$(SolutionDir)build\tmp-windows\$(PlatformName)-$(Configuration)\$(ProjectName)\</IntDir>
-    <ValaCompiler>$(SolutionDir)build\toolchain-windows\bin\valac-0.38.exe</ValaCompiler>
+    <ValaCompiler>$(SolutionDir)build\toolchain-windows\bin\valac-0.42.exe</ValaCompiler>
     <ValaFlags>--target-glib=2.53 --vapidir="$(SolutionDir)frida-core\vapi" --vapidir="$(SolutionDir)frida-gum\vapi" --vapidir="$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\share\vala\vapi"</ValaFlags>
     <V8Arch Condition=" '$(Platform)' == 'Win32' ">ia32</V8Arch>
     <V8Arch Condition=" '$(Platform)' == 'x64' ">x64</V8Arch>
