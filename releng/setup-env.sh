@@ -138,8 +138,8 @@ fi
 
 prompt_color=33
 
-toolchain_version=20180331
-sdk_version=20180331
+toolchain_version=20180411
+sdk_version=20180411
 if [ $enable_asan = yes ]; then
   sdk_version="$sdk_version-asan"
 fi
