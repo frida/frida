@@ -260,8 +260,6 @@ build/tmp-android-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submod
 			$(frida_core_flags) \
 			-Dwith-32bit-helper=$(FRIDA)/build/tmp-android-x86/frida-core/src/frida-helper \
 			-Dwith-64bit-helper=$(FRIDA)/build/tmp-android-x86_64/frida-core/src/frida-helper \
-			-Dwith-32bit-loader=$(FRIDA)/build/tmp-android-x86/frida-core/lib/loader/frida-loader.so \
-			-Dwith-64bit-loader=$(FRIDA)/build/tmp-android-x86_64/frida-core/lib/loader/frida-loader.so \
 			-Dwith-32bit-agent=$(FRIDA)/build/tmp-android-x86/frida-core/lib/agent/frida-agent.so \
 			-Dwith-64bit-agent=$(FRIDA)/build/tmp-android-x86_64/frida-core/lib/agent/frida-agent.so \
 			frida-core $$builddir || exit 1; \
@@ -292,8 +290,6 @@ build/tmp-android-arm64/frida-core/.frida-ninja-stamp: build/.frida-core-submodu
 			$(frida_core_flags) \
 			-Dwith-32bit-helper=$(FRIDA)/build/tmp-android-arm/frida-core/src/frida-helper \
 			-Dwith-64bit-helper=$(FRIDA)/build/tmp-android-arm64/frida-core/src/frida-helper \
-			-Dwith-32bit-loader=$(FRIDA)/build/tmp-android-arm/frida-core/lib/loader/frida-loader.so \
-			-Dwith-64bit-loader=$(FRIDA)/build/tmp-android-arm64/frida-core/lib/loader/frida-loader.so \
 			-Dwith-32bit-agent=$(FRIDA)/build/tmp-android-arm/frida-core/lib/agent/frida-agent.so \
 			-Dwith-64bit-agent=$(FRIDA)/build/tmp-android-arm64/frida-core/lib/agent/frida-agent.so \
 			frida-core $$builddir || exit 1; \
@@ -347,13 +343,13 @@ build/frida-linux-mipsel/lib/pkgconfig/frida-core-1.0.pc: build/tmp-linux-mipsel
 build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x86/frida-core/.frida-helper-and-agent-stamp
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-android-x86/frida-core install
 	@touch $@
-build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x86/frida-core/.frida-helper-loader-and-agent-stamp build/tmp-android-x86_64/frida-core/.frida-helper-loader-and-agent-stamp
+build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x86/frida-core/.frida-helper-and-agent-stamp build/tmp-android-x86_64/frida-core/.frida-helper-and-agent-stamp
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-android-x86_64/frida-core install
 	@touch $@
 build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/frida-core/.frida-helper-and-agent-stamp
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-android-arm/frida-core install
 	@touch $@
-build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/frida-core/.frida-helper-loader-and-agent-stamp build/tmp-android-arm64/frida-core/.frida-helper-loader-and-agent-stamp
+build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/frida-core/.frida-helper-and-agent-stamp build/tmp-android-arm64/frida-core/.frida-helper-and-agent-stamp
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-android-arm64/frida-core install
 	@touch $@
 build/frida-qnx-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-qnx-%/frida-core/.frida-ninja-stamp
@@ -365,9 +361,6 @@ build/frida_thin-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-%/frida-core/
 
 build/tmp-%/frida-core/.frida-helper-and-agent-stamp: build/tmp-%/frida-core/.frida-ninja-stamp
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-$*/frida-core src/frida-helper lib/agent/frida-agent.so
-	@touch $@
-build/tmp-%/frida-core/.frida-helper-loader-and-agent-stamp: build/tmp-%/frida-core/.frida-ninja-stamp
-	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-$*/frida-core src/frida-helper lib/loader/frida-loader.so lib/agent/frida-agent.so
 	@touch $@
 
 check-core-32: build/frida-linux-x86/lib/pkgconfig/frida-core-1.0.pc ##@core Run tests for x86
