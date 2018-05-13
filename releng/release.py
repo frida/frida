@@ -91,7 +91,7 @@ if __name__ == '__main__':
                 do([npm, "publish"])
             do_build_command([npm, "install"])
             do_build_command([npm, "run", "prebuild", "--", "-t", "8.0.0", "-t", "9.0.0", "-t", "10.0.0"])
-            do_build_command([npm, "run", "prebuild", "--", "-t", "1.8.6", "-t", "2.0.0-beta.8", "-r", "electron"])
+            do_build_command([npm, "run", "prebuild", "--", "-t", "2.0.0", "-r", "electron"])
             packages = glob.glob(os.path.join(frida_node_dir, "prebuilds", "*.tar.gz"))
             for package in packages:
                 with open(package, 'rb') as package_file:
