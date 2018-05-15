@@ -9,6 +9,7 @@ zlib_version := 1.2.11
 libiconv_version := 1.14
 elfutils_version := 0.170
 libdwarf_version := 20170709
+openssl_version := 1.1.0h
 
 
 build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos,')
@@ -38,6 +39,14 @@ enable_diet := $(shell echo $(host_platform_arch) | egrep -q "^(linux-arm|linux-
 
 ifeq ($(host_platform), macos)
 	iconv := build/fs-%/lib/libiconv.a
+	glib_tls_provider := build/fs-%/lib/pkgconfig/glib-openssl-static.pc
+	glib_tls_args := -Dca_certificates=no
+ifeq ($(host_arch), x86)
+	openssl_arch_args := darwin-i386-cc
+endif
+ifeq ($(host_arch), x86_64)
+	openssl_arch_args := darwin64-x86_64-cc enable-ec_nistp_64_gcc_128
+endif
 endif
 ifeq ($(host_platform), ios)
 	iconv := build/fs-%/lib/libiconv.a
@@ -46,6 +55,14 @@ ifeq ($(host_platform), linux)
 	unwind := build/fs-%/lib/pkgconfig/libunwind.pc
 	elf := build/fs-%/lib/libelf.a
 	dwarf := build/fs-%/lib/libdwarf.a
+	glib_tls_provider := build/fs-%/lib/pkgconfig/glib-openssl-static.pc
+	glib_tls_args := -Dca_certificates=no
+ifeq ($(host_arch), x86)
+	openssl_arch_args := linux-x86
+endif
+ifeq ($(host_arch), x86_64)
+	openssl_arch_args := linux-x86_64
+endif
 endif
 ifeq ($(host_platform), android)
 	unwind := build/fs-%/lib/pkgconfig/libunwind.pc
@@ -88,6 +105,7 @@ build/fs-tmp-%/.package-stamp: \
 		$(dwarf) \
 		build/fs-%/lib/pkgconfig/libffi.pc \
 		build/fs-%/lib/pkgconfig/glib-2.0.pc \
+		$(glib_tls_provider) \
 		build/fs-%/lib/pkgconfig/gee-0.8.pc \
 		build/fs-%/lib/pkgconfig/json-glib-1.0.pc \
 		$(v8)
@@ -319,7 +337,7 @@ build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_platform_arch).rc build/fs-e
 			--default-library static \
 			--buildtype minsize \
 			--cross-file build/fs-$$*.txt \
-			-Dintrospection=false \
+			$4 \
 			$$(@D) \
 			$1)
 
@@ -337,9 +355,43 @@ $(eval $(call make-git-autotools-module-rules,libffi,build/fs-%/lib/pkgconfig/li
 
 $(eval $(call make-git-autotools-module-rules,glib,build/fs-%/lib/pkgconfig/glib-2.0.pc,build/fs-%/lib/pkgconfig/libffi.pc $(iconv) build/fs-%/lib/libz.a))
 
+build/.openssl-stamp:
+	$(RM) -r openssl
+	mkdir openssl
+	$(download) https://www.openssl.org/source/openssl-$(openssl_version).tar.gz | tar -C openssl -xz --strip-components 1
+	@mkdir -p $(@D)
+	@touch $@
+
+build/fs-tmp-%/openssl/Configure: build/.openssl-stamp
+	$(RM) -r $(@D)
+	mkdir -p build/fs-tmp-$*
+	cp -a openssl $(@D)
+	@touch $@
+
+build/fs-%/lib/pkgconfig/openssl.pc: build/fs-env-%.rc build/fs-tmp-%/openssl/Configure
+	. $< \
+		&& . $$CONFIG_SITE \
+		&& export CC CFLAGS \
+		&& cd build/fs-tmp-$*/openssl \
+		&& perl Configure \
+			--prefix=$$frida_prefix \
+			--openssldir=/etc/ssl \
+			no-comp \
+			no-ssl2 \
+			no-ssl3 \
+			no-zlib \
+			no-shared \
+			enable-cms \
+			$(openssl_arch_args) \
+		&& make depend \
+		&& make \
+		&& make install_sw
+
+$(eval $(call make-git-meson-module-rules,glib-openssl,build/fs-%/lib/pkgconfig/glib-openssl-static.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/openssl.pc,$(glib_tls_args)))
+
 $(eval $(call make-git-autotools-module-rules,libgee,build/fs-%/lib/pkgconfig/gee-0.8.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc))
 
-$(eval $(call make-git-meson-module-rules,json-glib,build/fs-%/lib/pkgconfig/json-glib-1.0.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc))
+$(eval $(call make-git-meson-module-rules,json-glib,build/fs-%/lib/pkgconfig/json-glib-1.0.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc,-Dintrospection=false))
 
 
 ifeq ($(host_arch), x86)
