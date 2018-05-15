@@ -112,6 +112,7 @@ build/fs-tmp-%/.package-stamp: \
 	$(RM) -r $(@D)/package
 	mkdir -p $(@D)/package
 	cd build/fs-$* \
+		&& [ -d lib/gio/modules ] && gio_modules=lib/gio/modules/*.a || gio_modules= \
 		&& [ -d lib32 ] && lib32=lib32 || lib32= \
 		&& [ -d lib64 ] && lib64=lib64 || lib64= \
 		&& tar -c \
@@ -121,6 +122,7 @@ build/fs-tmp-%/.package-stamp: \
 			lib/glib-2.0 \
 			lib/libffi* \
 			lib/pkgconfig \
+			$$gio_modules \
 			$$lib32 \
 			$$lib64 \
 			share/aclocal \
