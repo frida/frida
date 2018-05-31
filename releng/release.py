@@ -37,7 +37,7 @@ if __name__ == '__main__':
         ssh = "ssh"
         scp = "scp"
 
-    raw_version = subprocess.check_output(["git", "describe", "--tags", "--always", "--long"], cwd=build_dir).strip().replace("-", ".")
+    raw_version = subprocess.check_output(["git", "describe", "--tags", "--always", "--long"], cwd=build_dir).decode('utf-8').strip().replace("-", ".")
     (major, minor, micro, nano, commit) = raw_version.split(".")
     version = "%d.%d.%d" % (int(major), int(minor), int(micro))
     tag_name = str(version)
