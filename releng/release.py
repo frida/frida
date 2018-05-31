@@ -137,13 +137,13 @@ if __name__ == '__main__':
         os.unlink(deb)
 
     def get_github_uploader():
-        from agithub import Github
+        from agithub.GitHub import GitHub
         import requests
 
         with open(os.path.expanduser("~/.frida-release-github-token"), "r") as f:
             token = f.read().strip()
 
-        g = Github(token=token)
+        g = GitHub(token=token)
         def repo():
             return g.repos.frida.frida
 
