@@ -136,16 +136,20 @@ if __name__ == '__main__':
             for package in packages:
                 os.unlink(package)
 
-    def upload_node_bindings_to_npm(node, upload_to_github, publish, extra_build_args=[], extra_build_env=None):
+    def upload_node_bindings_to_npm(node, upload_to_github, publish, python2_interpreter=None, extra_build_args=[], extra_build_env=None):
         node_bin_dir = os.path.dirname(node)
         npm = os.path.join(node_bin_dir, "npm")
         if system == 'Windows':
             npm += '.cmd'
+
         env = dict(os.environ)
         env.update({
             'PATH': node_bin_dir + os.pathsep + os.getenv('PATH'),
             'FRIDA': build_dir
         })
+        if python2_interpreter is not None:
+            env['PYTHON'] = python2_interpreter
+
         def do(args, **kwargs):
             quoted_args = []
             for arg in args:
@@ -341,8 +345,9 @@ if __name__ == '__main__':
             upload_python_bindings_to_pypi(r"C:\Program Files\Python 3.6\python.exe",
                 os.path.join(build_dir, "build", "frida-windows", "x64-Release", "lib", "python3.6", "site-packages", "_frida.pyd"), sdist=True)
 
-            upload_node_bindings_to_npm(r"C:\Program Files (x86)\nodejs\node.exe", upload, publish=False)
-            upload_node_bindings_to_npm(r"C:\Program Files\nodejs\node.exe", upload, publish=False)
+            python2_interpreter=r"C:\Program Files\Python 2.7\python.exe"
+            upload_node_bindings_to_npm(r"C:\Program Files (x86)\nodejs\node.exe", upload, publish=False, python2_interpreter=python2_interpreter)
+            upload_node_bindings_to_npm(r"C:\Program Files\nodejs\node.exe", upload, publish=False, python2_interpreter=python2_interpreter)
         elif slave == 'macos':
             upload = get_github_uploader()
 
@@ -364,7 +369,7 @@ if __name__ == '__main__':
 
             upload_directory("frida-qml-{version}-macos-x86_64", os.path.join(build_dir, "build", "frida-macos-x86_64", "lib", "qt5", "qml"), upload)
 
-            for osx_minor in xrange(9, 13):
+            for osx_minor in range(9, 13):
                 upload_python_bindings_to_pypi("/usr/bin/python2.7",
                     os.path.join(build_dir, "build", "frida-macos-universal", "lib", "python2.7", "site-packages", "_frida.so"),
                     { '_PYTHON_HOST_PLATFORM': "macosx-10.%d-intel" % osx_minor })
