@@ -449,6 +449,11 @@ if __name__ == '__main__':
             upload_file("frida-server-{version}-android-arm", os.path.join(build_dir, "build", "frida-android-arm", "bin", "frida-server"), upload)
             upload_file("frida-server-{version}-android-arm64", os.path.join(build_dir, "build", "frida-android-arm64", "bin", "frida-server"), upload)
 
+            upload_file("frida-inject-{version}-android-x86", os.path.join(build_dir, "build", "frida-android-x86", "bin", "frida-inject"), upload)
+            upload_file("frida-inject-{version}-android-x86_64", os.path.join(build_dir, "build", "frida-android-x86_64", "bin", "frida-inject"), upload)
+            upload_file("frida-inject-{version}-android-arm", os.path.join(build_dir, "build", "frida-android-arm", "bin", "frida-inject"), upload)
+            upload_file("frida-inject-{version}-android-arm64", os.path.join(build_dir, "build", "frida-android-arm64", "bin", "frida-inject"), upload)
+
             upload_file("frida-gadget-{version}-android-x86.so", os.path.join(build_dir, "build", "frida-android-x86", "lib", "frida-gadget.so"), upload)
             upload_file("frida-gadget-{version}-android-x86_64.so", os.path.join(build_dir, "build", "frida-android-x86_64", "lib", "frida-gadget.so"), upload)
             upload_file("frida-gadget-{version}-android-arm.so", os.path.join(build_dir, "build", "frida-android-arm", "lib", "frida-gadget.so"), upload)
