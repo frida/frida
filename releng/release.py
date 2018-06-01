@@ -372,10 +372,10 @@ if __name__ == '__main__':
             upload = get_github_uploader()
 
             upload_python_bindings_deb("ubuntu-bionic", "python", "/usr/bin/python2.7",
-                os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python2.7", "site-packages", "_frida.so"),
+                os.path.join(build_dir, "build", "frida_thin-linux-x86_64", "lib", "python2.7", "site-packages", "_frida.so"),
                 upload)
             upload_python_bindings_deb("ubuntu-bionic", "python3", "/usr/bin/python3.6",
-                os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python3.6", "site-packages", "_frida.so"),
+                os.path.join(build_dir, "build", "frida_thin-linux-x86_64", "lib", "python3.6", "site-packages", "_frida.so"),
                 upload)
         elif slave == 'pi':
             upload = get_github_uploader()
