@@ -92,6 +92,50 @@ if __name__ == '__main__':
             for package in packages:
                 os.unlink(package)
 
+    def upload_python_bindings_rpm(distro_name, package_name_prefix, interpreter, extension, upload):
+        src_dir = os.path.join(frida_python_dir, "src")
+
+        env = {}
+        env.update(os.environ)
+        env.update({
+            'FRIDA_VERSION': version,
+            'FRIDA_EXTENSION': extension
+        })
+
+        subprocess.check_call([
+            "fpm",
+            "--iteration=1." + distro_name,
+            "--maintainer=Ole André Vadla Ravnås <oleavr@frida.re>",
+            "--vendor=Frida",
+            "--python-bin=" + interpreter,
+            "--python-package-name-prefix=" + package_name_prefix,
+            "-s", "python",
+            "-t", "rpm",
+            "setup.py"
+        ], cwd=src_dir, env=env)
+
+        subprocess.check_call([
+            "fpm",
+            "--name={}-prompt-toolkit".format(package_name_prefix),
+            "--iteration=1." + distro_name,
+            "--maintainer=Ole André Vadla Ravnås <oleavr@frida.re>",
+            "--vendor=Frida",
+            "--python-bin=" + interpreter,
+            "--python-package-name-prefix=" + package_name_prefix,
+            "-s", "python",
+            "-t", "rpm",
+            "prompt-toolkit"
+        ], cwd=src_dir)
+
+        packages = glob.glob(os.path.join(src_dir, "*.rpm"))
+        try:
+            for package in packages:
+                with open(package, "rb") as f:
+                    upload(os.path.basename(package), "application/x-rpm", f)
+        finally:
+            for package in packages:
+                os.unlink(package)
+
     def upload_node_bindings_to_npm(node, upload_to_github, publish, extra_build_args=[], extra_build_env=None):
         node_bin_dir = os.path.dirname(node)
         npm = os.path.join(node_bin_dir, "npm")
@@ -376,6 +420,15 @@ if __name__ == '__main__':
                 upload)
             upload_python_bindings_deb("ubuntu-bionic", "python3", "/usr/bin/python3.6",
                 os.path.join(build_dir, "build", "frida_thin-linux-x86_64", "lib", "python3.6", "site-packages", "_frida.so"),
+                upload)
+        elif slave == 'fedora_28-x86_64':
+            upload = get_github_uploader()
+
+            upload_python_bindings_rpm("fc28", "python2", "/usr/bin/python2.7",
+                os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python2.7", "site-packages", "_frida.so"),
+                upload)
+            upload_python_bindings_rpm("fc28", "python3", "/usr/bin/python3.6",
+                os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python3.6", "site-packages", "_frida.so"),
                 upload)
         elif slave == 'pi':
             upload = get_github_uploader()
