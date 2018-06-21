@@ -68,56 +68,70 @@ clean-submodules:
 	cd frida-node && git clean -xfd
 
 
-build/frida-%/lib/pkgconfig/capstone.pc: build/frida-env-%.rc build/.capstone-submodule-stamp
-	. build/frida-env-$*.rc \
+define make-capstone-rule
+build/$1-%/lib/pkgconfig/capstone.pc: build/$1-env-%.rc build/.capstone-submodule-stamp
+	. build/$1-env-$$*.rc \
 		&& export PACKAGE_TARNAME=capstone \
-		&& . $$CONFIG_SITE \
-		&& case $* in \
+		&& . $$$$CONFIG_SITE \
+		&& case $$* in \
 			*-x86)    capstone_archs="x86"         ;; \
 			*-x86_64) capstone_archs="x86"         ;; \
 			*-arm)    capstone_archs="arm"         ;; \
 			*-arm64)  capstone_archs="aarch64 arm" ;; \
 		esac \
 		&& make -C capstone \
-			PREFIX=$$frida_prefix \
-			BUILDDIR=../build/tmp-$*/capstone \
+			PREFIX=$$$$frida_prefix \
+			BUILDDIR=../build/$2-$$*/capstone \
 			CAPSTONE_BUILD_CORE_ONLY=yes \
-			CAPSTONE_ARCHS="$$capstone_archs" \
-			CAPSTONE_SHARED=$$enable_shared \
-			CAPSTONE_STATIC=$$enable_static \
+			CAPSTONE_ARCHS="$$$$capstone_archs" \
+			CAPSTONE_SHARED=$$$$enable_shared \
+			CAPSTONE_STATIC=$$$$enable_static \
 			install
+endef
+$(eval $(call make-capstone-rule,frida,tmp))
+$(eval $(call make-capstone-rule,frida_thin,tmp_thin))
 
 
 gum-macos: build/frida-macos-x86/lib/pkgconfig/frida-gum-1.0.pc build/frida-macos-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for macOS
+gum-macos-thin: build/frida_thin-macos-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for macOS without cross-arch support
 gum-ios: build/frida-ios-arm/lib/pkgconfig/frida-gum-1.0.pc build/frida-ios-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for iOS
+gum-ios-thin: build/frida_thin-ios-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for iOS without cross-arch support
 gum-android: build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android
 
-build/.frida-gum-npm-stamp: build/frida-env-macos-$(build_arch).rc
-	@$(NPM) --version &>/dev/null || (echo -e "\033[31mOops. It appears Node.js is not installed.\nWe need it for processing JavaScript code at build-time.\nCheck PATH or set NODE to the absolute path of your Node.js binary.\033[0m"; exit 1;)
-	. build/frida-env-macos-$(build_arch).rc && cd frida-gum/bindings/gumjs && npm install
-	@touch $@
+define make-gum-rules
+build/.$1-gum-npm-stamp: build/$1-env-macos-$$(build_arch).rc
+	@$$(NPM) --version &>/dev/null || (echo -e "\033[31mOops. It appears Node.js is not installed.\nWe need it for processing JavaScript code at build-time.\nCheck PATH or set NODE to the absolute path of your Node.js binary.\033[0m"; exit 1;)
+	. build/$1-env-macos-$$(build_arch).rc && cd frida-gum/bindings/gumjs && npm install
+	@touch $$@
 
-build/frida-%/lib/pkgconfig/frida-gum-1.0.pc: build/.frida-gum-submodule-stamp build/.frida-gum-npm-stamp build/frida-%/lib/pkgconfig/capstone.pc
-	. build/frida-meson-env-macos-$(build_arch).rc; \
-	builddir=build/tmp-$*/frida-gum; \
-	if [ ! -f $$builddir/build.ninja ]; then \
-		mkdir -p $$builddir; \
-		$(MESON) \
-			--prefix $(FRIDA)/build/frida-$* \
-			--cross-file build/frida-$*.txt \
-			$(frida_gum_flags) \
-			frida-gum $$builddir || exit 1; \
+build/$1-%/lib/pkgconfig/frida-gum-1.0.pc: build/.frida-gum-submodule-stamp build/.$1-gum-npm-stamp build/$1-%/lib/pkgconfig/capstone.pc
+	. build/$1-meson-env-macos-$$(build_arch).rc; \
+	builddir=build/$2-$$*/frida-gum; \
+	if [ ! -f $$$$builddir/build.ninja ]; then \
+		mkdir -p $$$$builddir; \
+		$$(MESON) \
+			--prefix $$(FRIDA)/build/$1-$$* \
+			--cross-file build/$1-$$*.txt \
+			$$(frida_gum_flags) \
+			frida-gum $$$$builddir || exit 1; \
 	fi; \
-	$(NINJA) -C $$builddir install || exit 1
-	@touch -c $@
+	$$(NINJA) -C $$$$builddir install || exit 1
+	@touch -c $$@
+endef
+$(eval $(call make-gum-rules,frida,tmp))
+$(eval $(call make-gum-rules,frida_thin,tmp_thin))
 
 check-gum-macos: build/frida-macos-x86/lib/pkgconfig/frida-gum-1.0.pc build/frida-macos-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Run tests for macOS
 	build/tmp-macos-x86/frida-gum/tests/gum-tests $(test_args)
 	build/tmp-macos-x86_64/frida-gum/tests/gum-tests $(test_args)
+check-gum-macos-thin: build/frida_thin-macos-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Run tests for macOS without cross-arch support
+	build/tmp_thin-macos-x86_64/frida-gum/tests/gum-tests $(test_args)
 
 
 core-macos: build/frida-macos-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for macOS
+core-macos-thin: build/frida_thin-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for macOS without cross-arch support
 core-ios: build/frida-ios-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-ios-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for iOS
+core-ios-thin: build/frida_thin-ios-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for iOS without cross-arch support
 core-android: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android
 
 build/tmp-macos-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-macos-%/lib/pkgconfig/frida-gum-1.0.pc
@@ -245,6 +259,18 @@ build/tmp-android-arm64/frida-core/.frida-ninja-stamp: build/.frida-core-submodu
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
+build/tmp_thin-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida_thin-%/lib/pkgconfig/frida-gum-1.0.pc
+	. build/frida_thin-meson-env-macos-$(build_arch).rc; \
+	builddir=$(@D); \
+	if [ ! -f $$builddir/build.ninja ]; then \
+		mkdir -p $$builddir; \
+		$(MESON) \
+			--prefix $(FRIDA)/build/frida_thin-$* \
+			--cross-file build/frida_thin-$*.txt \
+			$(frida_core_flags) \
+			frida-core $$builddir || exit 1; \
+	fi
+	@touch $@
 
 build/frida-macos-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-macos-x86/frida-core/.frida-agent-stamp build/tmp-macos-x86_64/frida-core/.frida-helper-and-agent-stamp
 	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-macos-$*/frida-core install
@@ -272,6 +298,9 @@ build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/f
 	@touch $@
 build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/frida-core/.frida-helper-and-agent-stamp build/tmp-android-arm64/frida-core/.frida-helper-and-agent-stamp
 	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-android-arm64/frida-core install
+	@touch $@
+build/frida_thin-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-%/frida-core/.frida-ninja-stamp
+	. build/frida_thin-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp_thin-$*/frida-core install
 	@touch $@
 
 build/tmp-macos-%/frida-core/.frida-helper-and-agent-stamp: build/tmp-macos-%/frida-core/.frida-ninja-stamp
@@ -302,6 +331,15 @@ build/frida-macos-universal/lib/FridaGadget.dylib: build/frida-macos-x86/lib/pkg
 		&& $$CODESIGN -f -s "$$MAC_CERTID" $@.tmp
 	rm $(@D)/FridaGadget-*.dylib
 	mv $@.tmp $@
+build/frida_thin-macos-%/lib/FridaGadget.dylib: build/frida_thin-macos-%/lib/pkgconfig/frida-core-1.0.pc
+	@if [ -z "$$MAC_CERTID" ]; then echo "MAC_CERTID not set, see https://github.com/frida/frida#macos-and-macos"; exit 1; fi
+	mkdir -p $(@D)
+	cp build/frida_thin-macos-$*/lib/FridaGadget.dylib $@.tmp
+	. build/frida_thin-env-macos-$*.rc \
+		&& $$STRIP $$STRIP_FLAGS $@.tmp \
+		&& $$INSTALL_NAME_TOOL -id @executable_path/../Frameworks/FridaGadget.dylib $@.tmp \
+		&& $$CODESIGN -f -s "$$MAC_CERTID" $@.tmp
+	mv $@.tmp $@
 build/frida-ios-universal/lib/FridaGadget.dylib: build/frida-ios-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-ios-x86_64/lib/pkgconfig/frida-core-1.0.pc build/frida-ios-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-ios-arm64/lib/pkgconfig/frida-core-1.0.pc
 	@if [ -z "$$IOS_CERTID" ]; then echo "IOS_CERTID not set, see https://github.com/frida/frida#macos-and-ios"; exit 1; fi
 	mkdir -p $(@D)
@@ -316,34 +354,54 @@ build/frida-ios-universal/lib/FridaGadget.dylib: build/frida-ios-x86/lib/pkgconf
 		&& $$CODESIGN -f -s "$$IOS_CERTID" $@.tmp
 	rm $(@D)/FridaGadget-*.dylib
 	mv $@.tmp $@
+build/frida_thin-ios-%/lib/FridaGadget.dylib: build/frida_thin-ios-%/lib/pkgconfig/frida-core-1.0.pc
+	@if [ -z "$$IOS_CERTID" ]; then echo "IOS_CERTID not set, see https://github.com/frida/frida#ios-and-ios"; exit 1; fi
+	mkdir -p $(@D)
+	cp build/frida_thin-ios-$*/lib/FridaGadget.dylib $@.tmp
+	. build/frida_thin-env-ios-$*.rc \
+		&& $$STRIP $$STRIP_FLAGS $@.tmp \
+		&& $$INSTALL_NAME_TOOL -id @executable_path/../Frameworks/FridaGadget.dylib $@.tmp \
+		&& $$CODESIGN -f -s "$$IOS_CERTID" $@.tmp
+	mv $@.tmp $@
 
 check-core-macos: build/frida-macos-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Run tests for macOS
 	build/tmp-macos-x86/frida-core/tests/frida-tests $(test_args)
 	build/tmp-macos-x86_64/frida-core/tests/frida-tests $(test_args)
+check-core-macos-thin: build/frida_thin-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Run tests for macOS without cross-arch support
+	build/tmp_thin-macos-x86_64/frida-core/tests/frida-tests $(test_args)
 
 server-macos: build/frida-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for macOS
+server-macos-thin: build/frida_thin-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for macOS without cross-arch support
 server-ios: build/frida-ios-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-ios-arm64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for iOS
+server-ios-thin: build/frida_thin-ios-arm64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for iOS without cross-arch support
 server-android: build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for Android
 
 gadget-macos: build/frida-macos-universal/lib/FridaGadget.dylib ##@gadget Build for macOS
+gadget-macos-thin: build/frida_thin-macos-x86_64/lib/FridaGadget.dylib ##@gadget Build for macOS without cross-arch support
 gadget-ios: build/frida-ios-universal/lib/FridaGadget.dylib ##@gadget Build for iOS
+gadget-ios-thin: build/frida_thin-ios-arm64/lib/FridaGadget.dylib ##@gadget Build for iOS without cross-arch support
 gadget-android: build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@gadget Build for Android
 
 python-macos: build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/frida build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so build/frida-macos-universal/bin/frida ##@python Build Python bindings for macOS
+python-macos-thin: build/tmp_thin-macos-x86_64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for macOS without cross-arch support
 
-build/tmp-%/frida-$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-stamp build/frida-%/lib/pkgconfig/frida-core-1.0.pc
-	. build/frida-meson-env-macos-$(build_arch).rc; \
-	builddir=$(@D); \
-	if [ ! -f $$builddir/build.ninja ]; then \
-		mkdir -p $$builddir; \
-		$(MESON) \
-			--prefix $(FRIDA)/build/frida-$* \
-			--cross-file build/frida-$*.txt \
-			-Dwith-python=$(PYTHON) \
-			frida-python $$builddir || exit 1; \
+define make-python-rule
+build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-stamp build/$1-%/lib/pkgconfig/frida-core-1.0.pc
+	. build/$1-meson-env-macos-$$(build_arch).rc; \
+	builddir=$$(@D); \
+	if [ ! -f $$$$builddir/build.ninja ]; then \
+		mkdir -p $$$$builddir; \
+		$$(MESON) \
+			--prefix $$(FRIDA)/build/$1-$$* \
+			--cross-file build/$1-$$*.txt \
+			-Dwith-python=$$(PYTHON) \
+			frida-python $$$$builddir || exit 1; \
 	fi; \
-	$(NINJA) -C $$builddir install || exit 1
-	@touch $@
+	$$(NINJA) -C $$$$builddir install || exit 1
+	@touch $$@
+endef
+$(eval $(call make-python-rule,frida,tmp))
+$(eval $(call make-python-rule,frida_thin,tmp_thin))
 
 build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/frida: build/tmp-macos-x86_64/frida-$(PYTHON_NAME)/.frida-stamp
 	rm -rf $@
@@ -368,11 +426,11 @@ build/frida-macos-universal/bin/frida: build/tmp-macos-x86_64/frida-$(PYTHON_NAM
 check-python-macos: python-macos ##@python Test Python bindings for macOS
 	export PYTHONPATH="$(shell pwd)/build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
-		&& if $(PYTHON) -c "import sys; v = sys.version_info; can_execute_modules = v[0] > 2 or (v[0] == 2 and v[1] >= 7); sys.exit(0 if can_execute_modules else 1)"; then \
-			$(PYTHON) -m unittest discover; \
-		else \
-			unit2 discover; \
-		fi
+		&& $(PYTHON) -m unittest discover
+check-python-macos-thin: python-macos-thin ##@python Test Python bindings for macOS without cross-arch support
+	export PYTHONPATH="$(shell pwd)/build/frida_thin-macos-x86_64/lib/$(PYTHON_NAME)/site-packages" \
+		&& cd frida-python \
+		&& $(PYTHON) -m unittest discover
 
 install-python-macos: python-macos ##@python Install Python bindings for macOS
 	@awk '/install_requires=\[/,/\],/' frida-python/src/setup.py | sed -n 's/.*"\(.*\)".*/\1/p' | $(PYTHON) -mpip install -r /dev/stdin
@@ -385,25 +443,32 @@ uninstall-python-macos: ##@python Uninstall Python bindings for macos
 
 
 node-macos: build/frida-macos-$(build_arch)/lib/node_modules/frida build/.frida-node-submodule-stamp ##@node Build Node.js bindings for macOS
+node-macos-thin: build/frida_thin-macos-x86_64/lib/node_modules/frida build/.frida-node-submodule-stamp ##@node Build Node.js bindings for macOS without cross-arch support
 
-build/frida-%/lib/node_modules/frida: build/frida-%/lib/pkgconfig/frida-core-1.0.pc build/.frida-node-submodule-stamp
-	@$(NPM) --version &>/dev/null || (echo "\033[31mOops. It appears Node.js is not installed.\nCheck PATH or set NODE to the absolute path of your Node.js binary.\033[0m"; exit 1;)
-	export PATH=$(NODE_BIN_DIR):$$PATH FRIDA=$(FRIDA) \
+define make-node-rule
+build/$1-%/lib/node_modules/frida: build/$1-%/lib/pkgconfig/frida-core-1.0.pc build/.frida-node-submodule-stamp
+	@$$(NPM) --version &>/dev/null || (echo -e "\033[31mOops. It appears Node.js is not installed.\nCheck PATH or set NODE to the absolute path of your Node.js binary.\033[0m"; exit 1;)
+	export PATH=$$(NODE_BIN_DIR):$$$$PATH FRIDA=$$(FRIDA) \
 		&& cd frida-node \
 		&& rm -rf frida-0.0.0.tgz build node_modules \
-		&& $(NPM) install \
-		&& $(NPM) pack \
-		&& rm -rf ../$@/ ../$@.tmp/ \
-		&& mkdir -p ../$@.tmp/build/ \
-		&& tar -C ../$@.tmp/ --strip-components 1 -x -f frida-0.0.0.tgz \
+		&& $$(NPM) install \
+		&& $$(NPM) pack \
+		&& rm -rf ../$$@/ ../$$@.tmp/ \
+		&& mkdir -p ../$$@.tmp/build/ \
+		&& tar -C ../$$@.tmp/ --strip-components 1 -x -f frida-0.0.0.tgz \
 		&& rm frida-0.0.0.tgz \
-		&& mv build/Release/frida_binding.node ../$@.tmp/build/ \
+		&& mv build/Release/frida_binding.node ../$$@.tmp/build/ \
 		&& rm -rf build \
-		&& mv node_modules ../$@.tmp/ \
-		&& . ../build/frida-env-macos-$(build_arch).rc && $$STRIP $$STRIP_FLAGS ../$@.tmp/build/frida_binding.node \
-		&& mv ../$@.tmp ../$@
+		&& mv node_modules ../$$@.tmp/ \
+		&& . ../build/$1-env-macos-$$(build_arch).rc && $$$$STRIP $$$$STRIP_FLAGS ../$$@.tmp/build/frida_binding.node \
+		&& mv ../$$@.tmp ../$$@
+endef
+$(eval $(call make-node-rule,frida,tmp))
+$(eval $(call make-node-rule,frida_thin,tmp_thin))
 
 check-node-macos: build/frida-macos-$(build_arch)/lib/node_modules/frida ##@node Test Node.js bindings for macOS
+	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha --timeout 60000
+check-node-macos-thin: build/frida_thin-macos-$(build_arch)/lib/node_modules/frida ##@node Test Node.js bindings for macOS without cross-arch support
 	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha --timeout 60000
 
 
@@ -437,12 +502,12 @@ uninstall-macos: uninstall-python-macos ##@utilities Uninstall frida utilities
 .PHONY: \
 	distclean clean clean-submodules git-submodules git-submodule-stamps \
 	capstone-update-submodule-stamp \
-	gum-macos gum-ios gum-android check-gum-macos frida-gum-update-submodule-stamp \
-	core-macos core-ios core-android check-core-macos check-core-android-arm64 frida-core-update-submodule-stamp \
-	server-macos server-ios server-android \
-	gadget-macos gadget-ios gadget-android \
-	python-macos check-python-macos install-python-macos uninstall-python-macos frida-python-update-submodule-stamp \
-	node-macos check-node-macos frida-node-update-submodule-stamp \
+	gum-macos gum-macos-thin gum-ios gum-ios-thin gum-android check-gum-macos check-gum-macos-thin frida-gum-update-submodule-stamp \
+	core-macos core-macos-thin core-ios core-ios-thin core-android check-core-macos check-core-macos-thin check-core-android-arm64 frida-core-update-submodule-stamp \
+	server-macos server-macos-thin server-ios server-ios-thin server-android \
+	gadget-macos gadget-macos-thin gadget-ios gadget-ios-thin gadget-android \
+	python-macos python-macos-thin check-python-macos check-python-macos-thin install-python-macos uninstall-python-macos frida-python-update-submodule-stamp \
+	node-macos node-macos-thin check-node-macos check-node-macos-thin frida-node-update-submodule-stamp \
 	install-macos uninstall-macos \
 	glib glib-shell glib-symlinks \
 	v8 v8-symlinks

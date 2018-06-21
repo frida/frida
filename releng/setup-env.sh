@@ -254,10 +254,29 @@ case $host_platform in
     macos_sdk="macosx"
     macos_sdk_path="$(xcrun --sdk $macos_sdk --show-sdk-path)"
 
-    CPP="$(xcrun --sdk $macos_sdk -f clang) -E"
-    CC="$(xcrun --sdk $macos_sdk -f clang)"
-    CXX="$(xcrun --sdk $macos_sdk -f clang++)"
-    OBJC="$(xcrun --sdk $macos_sdk -f clang)"
+    clang_cc="$(xcrun --sdk $macos_sdk -f clang)"
+    clang_cxx="$(xcrun --sdk $macos_sdk -f clang++)"
+
+    cc_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang
+    sed \
+      -e "s,@driver@,$clang_cc,g" \
+      -e "s,@sysroot@,$macos_sdk_path,g" \
+      -e "s,@arch@,$host_clang_arch,g" \
+      "$releng_path/driver-wrapper-xcode.sh.in" > "$cc_wrapper"
+    chmod +x "$cc_wrapper"
+
+    cxx_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang++
+    sed \
+      -e "s,@driver@,$clang_cxx,g" \
+      -e "s,@sysroot@,$macos_sdk_path,g" \
+      -e "s,@arch@,$host_clang_arch,g" \
+      "$releng_path/driver-wrapper-xcode.sh.in" > "$cxx_wrapper"
+    chmod +x "$cxx_wrapper"
+
+    CPP="$cc_wrapper -E"
+    CC="$cc_wrapper"
+    CXX="$cxx_wrapper"
+    OBJC="$cc_wrapper"
     LD="$(xcrun --sdk $macos_sdk -f ld)"
 
     AR="$(xcrun --sdk $macos_sdk -f ar)"
@@ -272,14 +291,14 @@ case $host_platform in
     CODESIGN="$(xcrun --sdk $macos_sdk -f codesign)"
     LIPO="$(xcrun --sdk $macos_sdk -f lipo)"
 
-    CPPFLAGS="-isysroot $macos_sdk_path -mmacosx-version-min=$macos_minver -arch $host_clang_arch"
-    CFLAGS="-isysroot $macos_sdk_path -mmacosx-version-min=$macos_minver -arch $host_clang_arch"
+    CPPFLAGS="-mmacosx-version-min=$macos_minver"
+    CFLAGS="-mmacosx-version-min=$macos_minver"
     CXXFLAGS="-stdlib=libc++"
     LDFLAGS="-isysroot $macos_sdk_path -Wl,-macosx_version_min,$macos_minver -arch $host_clang_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
 
     meson_root="$macos_sdk_path"
 
-    base_toolchain_args="'-isysroot', '$macos_sdk_path', '-mmacosx-version-min=$macos_minver', '-arch', '$host_clang_arch'"
+    base_toolchain_args="'-mmacosx-version-min=$macos_minver'"
     base_compiler_args="$base_toolchain_args"
     base_linker_args="$base_toolchain_args, '-Wl,-dead_strip', '-Wl,-no_compact_unwind'"
 
@@ -311,10 +330,38 @@ case $host_platform in
     esac
     ios_sdk_path="$(xcrun --sdk $ios_sdk --show-sdk-path)"
 
-    CPP="$(xcrun --sdk $ios_sdk -f clang) -E"
-    CC="$(xcrun --sdk $ios_sdk -f clang)"
-    CXX="$(xcrun --sdk $ios_sdk -f clang++)"
-    OBJC="$(xcrun --sdk $ios_sdk -f clang)"
+    clang_cc="$(xcrun --sdk $ios_sdk -f clang)"
+    clang_cxx="$(xcrun --sdk $ios_sdk -f clang++)"
+
+    case $host_clang_arch in
+      arm)
+        ios_arch=armv7
+        ;;
+      *)
+        ios_arch=$host_clang_arch
+        ;;
+    esac
+
+    cc_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang
+    sed \
+      -e "s,@driver@,$clang_cc,g" \
+      -e "s,@sysroot@,$ios_sdk_path,g" \
+      -e "s,@arch@,$ios_arch,g" \
+      "$releng_path/driver-wrapper-xcode.sh.in" > "$cc_wrapper"
+    chmod +x "$cc_wrapper"
+
+    cxx_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang++
+    sed \
+      -e "s,@driver@,$clang_cxx,g" \
+      -e "s,@sysroot@,$ios_sdk_path,g" \
+      -e "s,@arch@,$ios_arch,g" \
+      "$releng_path/driver-wrapper-xcode.sh.in" > "$cxx_wrapper"
+    chmod +x "$cxx_wrapper"
+
+    CPP="$cc_wrapper -E"
+    CC="$cc_wrapper"
+    CXX="$cxx_wrapper"
+    OBJC="$cc_wrapper"
     LD="$(xcrun --sdk $ios_sdk -f ld)"
 
     AR="$(xcrun --sdk $ios_sdk -f ar)"
@@ -329,23 +376,14 @@ case $host_platform in
     CODESIGN="$(xcrun --sdk $ios_sdk -f codesign)"
     LIPO="$(xcrun --sdk $ios_sdk -f lipo)"
 
-    case $host_clang_arch in
-      arm)
-        ios_arch=armv7
-        ;;
-      *)
-        ios_arch=$host_clang_arch
-        ;;
-    esac
-
-    CPPFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch"
-    CFLAGS="-isysroot $ios_sdk_path -miphoneos-version-min=$ios_minver -arch $ios_arch"
+    CPPFLAGS="-miphoneos-version-min=$ios_minver"
+    CFLAGS="-miphoneos-version-min=$ios_minver"
     CXXFLAGS="-stdlib=libc++"
     LDFLAGS="-isysroot $ios_sdk_path -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -Wl,-dead_strip"
 
     meson_root="$ios_sdk_path"
 
-    base_toolchain_args="'-isysroot', '$ios_sdk_path', '-miphoneos-version-min=$ios_minver', '-arch', '$ios_arch'"
+    base_toolchain_args="'-miphoneos-version-min=$ios_minver'"
     base_compiler_args="$base_toolchain_args"
     base_linker_args="$base_toolchain_args, '-Wl,-dead_strip'"
 
@@ -850,6 +888,13 @@ case $host_platform in
       echo "export OBJC=\"$OBJC\""
       echo "export OBJCFLAGS=\"$CFLAGS\""
       echo "export OBJCXXFLAGS=\"$CXXFLAGS\""
+    ) >> $env_rc
+    ;;
+esac
+
+case $host_platform in
+  macos)
+    (
       echo "export MACOSX_DEPLOYMENT_TARGET=10.9"
     ) >> $env_rc
     ;;
