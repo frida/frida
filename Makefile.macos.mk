@@ -467,9 +467,25 @@ $(eval $(call make-node-rule,frida,tmp))
 $(eval $(call make-node-rule,frida_thin,tmp_thin))
 
 check-node-macos: build/frida-macos-$(build_arch)/lib/node_modules/frida ##@node Test Node.js bindings for macOS
-	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha --timeout 60000
+	export FRIDA=$(FRIDA) \
+		&& cd frida-node \
+		&& npm install \
+		&& $(NODE) \
+			--expose-gc \
+			../build/frida-macos-$(build_arch)/lib/node_modules/frida/node_modules/.bin/_mocha \
+			-r ts-node/register \
+			--timeout 60000 \
+			test/*.ts
 check-node-macos-thin: build/frida_thin-macos-$(build_arch)/lib/node_modules/frida ##@node Test Node.js bindings for macOS without cross-arch support
-	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha --timeout 60000
+	export FRIDA=$(FRIDA) \
+		&& cd frida-node \
+		&& npm install \
+		&& $(NODE) \
+			--expose-gc \
+			../build/frida_thin-macos-$(build_arch)/lib/node_modules/frida/node_modules/.bin/_mocha \
+			-r ts-node/register \
+			--timeout 60000 \
+			test/*.ts
 
 
 install-macos: install-python-macos ##@utilities Install frida utilities (frida{-discover,-kill,-ls-devices,-ps,-trace})
