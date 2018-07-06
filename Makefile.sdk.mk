@@ -64,7 +64,7 @@ ifeq ($(host_arch), x86_64)
 	openssl_arch_args := linux-x86_64
 endif
 ifeq ($(host_arch), arm)
-	openssl_arch_args := linux-arm
+	openssl_arch_args := linux-armv4
 endif
 endif
 ifeq ($(host_platform), android)
