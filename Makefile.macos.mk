@@ -466,26 +466,21 @@ endef
 $(eval $(call make-node-rule,frida,tmp))
 $(eval $(call make-node-rule,frida_thin,tmp_thin))
 
-check-node-macos: build/frida-macos-$(build_arch)/lib/node_modules/frida ##@node Test Node.js bindings for macOS
-	export FRIDA=$(FRIDA) \
+define run-node-tests
+	export FRIDA=$2 \
 		&& cd frida-node \
-		&& npm install \
-		&& $(NODE) \
+		&& $4 install \
+		&& $3 \
 			--expose-gc \
-			../build/frida-macos-$(build_arch)/lib/node_modules/frida/node_modules/.bin/_mocha \
+			../build/$1/lib/node_modules/frida/node_modules/.bin/_mocha \
 			-r ts-node/register \
 			--timeout 60000 \
 			test/*.ts
-check-node-macos-thin: build/frida_thin-macos-$(build_arch)/lib/node_modules/frida ##@node Test Node.js bindings for macOS without cross-arch support
-	export FRIDA=$(FRIDA) \
-		&& cd frida-node \
-		&& npm install \
-		&& $(NODE) \
-			--expose-gc \
-			../build/frida_thin-macos-$(build_arch)/lib/node_modules/frida/node_modules/.bin/_mocha \
-			-r ts-node/register \
-			--timeout 60000 \
-			test/*.ts
+endef
+check-node-macos: node-macos ##@node Test Node.js bindings for macOS
+	$(call run-node-tests,frida-macos-$(build_arch),$(FRIDA),$(NODE),$(NPM))
+check-node-macos-thin: node-macos-thin ##@node Test Node.js bindings for macOS without cross-arch support
+	$(call run-node-tests,frida_thin-macos-$(build_arch),$(FRIDA),$(NODE),$(NPM))
 
 
 install-macos: install-python-macos ##@utilities Install frida utilities (frida{-discover,-kill,-ls-devices,-ps,-trace})
