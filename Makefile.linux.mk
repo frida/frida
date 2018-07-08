@@ -467,14 +467,25 @@ endef
 $(eval $(call make-node-rule,frida,tmp))
 $(eval $(call make-node-rule,frida_thin,tmp_thin))
 
+define run-node-tests
+	export FRIDA=$2 \
+		&& cd frida-node \
+		&& $4 install \
+		&& $3 \
+			--expose-gc \
+			../build/$1/lib/node_modules/frida/node_modules/.bin/_mocha \
+			-r ts-node/register \
+			--timeout 60000 \
+			test/*.ts
+endef
 check-node-32: build/frida-linux-x86/lib/node_modules/frida ##@node Test Node.js bindings for x86
-	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha --timeout 60000
+	$(call run-node-tests,frida-linux-x86,$(FRIDA),$(NODE),$(NPM))
 check-node-64: build/frida-linux-x86_64/lib/node_modules/frida ##@node Test Node.js bindings for x86-64
-	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha --timeout 60000
+	$(call run-node-tests,frida-linux-x86_64,$(FRIDA),$(NODE),$(NPM))
 check-node-32-thin: build/frida_thin-linux-x86/lib/node_modules/frida ##@node Test Node.js bindings for x86 without cross-arch support
-	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha --timeout 60000
+	$(call run-node-tests,frida_thin-linux-x86,$(FRIDA),$(NODE),$(NPM))
 check-node-64-thin: build/frida_thin-linux-x86_64/lib/node_modules/frida ##@node Test Node.js bindings for x86-64 without cross-arch support
-	cd $< && $(NODE) --expose-gc node_modules/mocha/bin/_mocha --timeout 60000
+	$(call run-node-tests,frida_thin-linux-x86_64,$(FRIDA),$(NODE),$(NPM))
 
 
 .PHONY: \
