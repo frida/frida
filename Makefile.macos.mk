@@ -467,10 +467,11 @@ $(eval $(call make-node-rule,frida,tmp))
 $(eval $(call make-node-rule,frida_thin,tmp_thin))
 
 define run-node-tests
-	export FRIDA=$2 \
+	export PATH=$3:$$PATH FRIDA=$2 \
 		&& cd frida-node \
-		&& $4 install \
-		&& $3 \
+		&& git clean -xfd \
+		&& $5 install \
+		&& $4 \
 			--expose-gc \
 			../build/$1/lib/node_modules/frida/node_modules/.bin/_mocha \
 			-r ts-node/register \
@@ -478,9 +479,9 @@ define run-node-tests
 			test/*.ts
 endef
 check-node-macos: node-macos ##@node Test Node.js bindings for macOS
-	$(call run-node-tests,frida-macos-$(build_arch),$(FRIDA),$(NODE),$(NPM))
+	$(call run-node-tests,frida-macos-$(build_arch),$(FRIDA),$(NODE_BIN_DIR),$(NODE),$(NPM))
 check-node-macos-thin: node-macos-thin ##@node Test Node.js bindings for macOS without cross-arch support
-	$(call run-node-tests,frida_thin-macos-$(build_arch),$(FRIDA),$(NODE),$(NPM))
+	$(call run-node-tests,frida_thin-macos-$(build_arch),$(FRIDA),$(NODE_BIN_DIR),$(NODE),$(NPM))
 
 
 install-macos: install-python-macos ##@utilities Install frida utilities (frida{-discover,-kill,-ls-devices,-ps,-trace})
