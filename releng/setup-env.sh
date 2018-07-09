@@ -6,6 +6,8 @@ build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,macos,')
 build_arch=$($releng_path/detect-arch.sh)
 build_platform_arch=${build_platform}-${build_arch}
 
+python_loc=$(which python3)
+
 if [ -n "$FRIDA_HOST" ]; then
   host_platform=$(echo -n $FRIDA_HOST | cut -f1 -d"-")
 else
@@ -738,6 +740,7 @@ if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/.version" 2>/dev/null; th
   else
     echo "Downloading and deploying toolchain..."
     $download_command "https://build.frida.re/toolchain-${toolchain_version}-${build_platform}-${build_arch}.tar.bz2" | tar -C "$FRIDA_TOOLROOT" -xj $tar_stdin || exit 1
+    find . -type f -wholename "*toolchain-linux*/bin/*" -exec sed -i '' -e "s#/opt/python27-64/bin/python#$python_loc#g" {} + > /dev/null 2>&1
   fi
 
   for template in $(find $FRIDA_TOOLROOT -name "*.frida.in"); do
