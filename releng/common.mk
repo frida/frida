@@ -9,10 +9,10 @@ FOR_HOST ?= $(build_platform_arch)
 frida_gum_flags := --default-library static $(FRIDA_COMMON_FLAGS) $(FRIDA_DIET_FLAGS)
 frida_core_flags := --default-library static $(FRIDA_COMMON_FLAGS) $(FRIDA_DIET_FLAGS) $(FRIDA_MAPPER_FLAGS)
 
-frida_python_tools := frida frida-discover frida-kill frida-ls-devices frida-ps frida-trace
+frida_tools := frida frida-discover frida-kill frida-ls-devices frida-ps frida-trace
 
 
-modules = capstone frida-gum frida-core frida-python frida-node
+modules = capstone frida-gum frida-core frida-python frida-node frida-tools
 
 git-submodules:
 	@if [ ! -f frida-core/meson.build ]; then \

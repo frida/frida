@@ -66,6 +66,7 @@ clean-submodules:
 	cd frida-core && git clean -xfd
 	cd frida-python && git clean -xfd
 	cd frida-node && git clean -xfd
+	cd frida-tools && git clean -xfd
 
 
 define make-capstone-rule
@@ -382,7 +383,8 @@ gadget-ios: build/frida-ios-universal/lib/FridaGadget.dylib ##@gadget Build for 
 gadget-ios-thin: build/frida_thin-ios-arm64/lib/FridaGadget.dylib ##@gadget Build for iOS without cross-arch support
 gadget-android: build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@gadget Build for Android
 
-python-macos: build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/frida build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so build/frida-macos-universal/bin/frida ##@python Build Python bindings for macOS
+
+python-macos: build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/frida build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so ##@python Build Python bindings for macOS
 python-macos-thin: build/tmp_thin-macos-x86_64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for macOS without cross-arch support
 
 define make-python-rule
@@ -402,7 +404,6 @@ build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-sta
 endef
 $(eval $(call make-python-rule,frida,tmp))
 $(eval $(call make-python-rule,frida_thin,tmp_thin))
-
 build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/frida: build/tmp-macos-x86_64/frida-$(PYTHON_NAME)/.frida-stamp
 	rm -rf $@
 	mkdir -p $(@D)
@@ -417,12 +418,6 @@ build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so: build/tm
 		&& $$LIPO $(@D)/_frida-32.so $(@D)/_frida-64.so -create -output $@
 	rm $(@D)/_frida-32.so $(@D)/_frida-64.so
 
-build/frida-macos-universal/bin/frida: build/tmp-macos-x86_64/frida-$(PYTHON_NAME)/.frida-stamp
-	mkdir -p build/frida-macos-universal/bin
-	for tool in $(frida_python_tools); do \
-		cp build/frida-macos-x86_64/bin/$$tool build/frida-macos-universal/bin/; \
-	done
-
 check-python-macos: python-macos ##@python Test Python bindings for macOS
 	export PYTHONPATH="$(shell pwd)/build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
@@ -432,18 +427,9 @@ check-python-macos-thin: python-macos-thin ##@python Test Python bindings for ma
 		&& cd frida-python \
 		&& $(PYTHON) -m unittest discover
 
-install-python-macos: python-macos ##@python Install Python bindings for macOS
-	@awk '/install_requires=\[/,/\],/' frida-python/src/setup.py | sed -n 's/.*"\(.*\)".*/\1/p' | $(PYTHON) -mpip install -r /dev/stdin
-	sitepackages=`$(PYTHON) -c 'import site; print(site.getsitepackages()[0])'` \
-		&& cp -r "build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/" "$$sitepackages"
 
-uninstall-python-macos: ##@python Uninstall Python bindings for macos
-	cd `$(PYTHON) -c 'import site; print(site.getsitepackages()[0])'` \
-		&& rm -rf _frida.so frida
-
-
-node-macos: build/frida-macos-$(build_arch)/lib/node_modules/frida build/.frida-node-submodule-stamp ##@node Build Node.js bindings for macOS
-node-macos-thin: build/frida_thin-macos-x86_64/lib/node_modules/frida build/.frida-node-submodule-stamp ##@node Build Node.js bindings for macOS without cross-arch support
+node-macos: build/frida-macos-$(build_arch)/lib/node_modules/frida ##@node Build Node.js bindings for macOS
+node-macos-thin: build/frida_thin-macos-x86_64/lib/node_modules/frida ##@node Build Node.js bindings for macOS without cross-arch support
 
 define make-node-rule
 build/$1-%/lib/node_modules/frida: build/$1-%/lib/pkgconfig/frida-core-1.0.pc build/.frida-node-submodule-stamp
@@ -484,31 +470,45 @@ check-node-macos-thin: node-macos-thin ##@node Test Node.js bindings for macOS w
 	$(call run-node-tests,frida_thin-macos-$(build_arch),$(FRIDA),$(NODE_BIN_DIR),$(NODE),$(NPM))
 
 
-install-macos: install-python-macos ##@utilities Install frida utilities (frida{-discover,-kill,-ls-devices,-ps,-trace})
-	for tool in $(frida_python_tools); do \
-		b="build/frida-macos-universal/bin/$$tool"; \
-		p="$(PREFIX)/bin/$$tool"; \
-		t="$$(mktemp -t frida)"; \
-		grep -v 'sys.path.insert' "$$b" > "$$t"; \
-		chmod +x "$$t"; \
-		if [ -w "$(PREFIX)/bin" ]; then \
-			mv "$$t" "$$p"; \
-		else \
-			sudo mv "$$t" "$$p"; \
-		fi \
-	done
+tools-macos: build/frida-macos-universal/bin/frida build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/frida_tools ##@tools Build CLI tools for macOS
+tools-macos-thin: build/tmp_thin-macos-x86_64/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Build CLI tools for macOS without cross-arch support
 
-uninstall-macos: uninstall-python-macos ##@utilities Uninstall frida utilities
-	@for tool in $(frida_python_tools); do \
-		if which "$$tool" &> /dev/null; then \
-			p=`which "$$tool"`; \
-			if [ -w "$$(dirname "$$p")" ]; then \
-				rm -f "$$p"; \
-			else \
-				sudo rm -f "$$p"; \
-			fi \
-		fi \
+define make-tools-rule
+build/$2-%/frida-tools-$$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodule-stamp build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp
+	. build/$1-meson-env-macos-$$(build_arch).rc; \
+	builddir=$$(@D); \
+	if [ ! -f $$$$builddir/build.ninja ]; then \
+		mkdir -p $$$$builddir; \
+		$$(MESON) \
+			--prefix $$(FRIDA)/build/$1-$$* \
+			--cross-file build/$1-$$*.txt \
+			-Dwith-python=$$(PYTHON) \
+			frida-tools $$$$builddir || exit 1; \
+	fi; \
+	$$(NINJA) -C $$$$builddir install || exit 1
+	@touch $$@
+endef
+$(eval $(call make-tools-rule,frida,tmp))
+$(eval $(call make-tools-rule,frida_thin,tmp_thin))
+build/frida-macos-universal/bin/frida: build/tmp-macos-x86_64/frida-tools-$(PYTHON_NAME)/.frida-stamp
+	mkdir -p build/frida-macos-universal/bin
+	for tool in $(frida_tools); do \
+		cp build/frida-macos-x86_64/bin/$$tool build/frida-macos-universal/bin/; \
 	done
+build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/frida_tools: build/tmp-macos-x86_64/frida-tools-$(PYTHON_NAME)/.frida-stamp
+	rm -rf $@
+	mkdir -p $(@D)
+	cp -a build/frida-macos-x86_64/lib/$(PYTHON_NAME)/site-packages/frida_tools $@
+	@touch $@
+
+check-tools-macos: tools-macos ##@tools Test CLI tools for macOS
+	export PYTHONPATH="$(shell pwd)/build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages" \
+		&& cd frida-tools \
+		&& $(PYTHON) -m unittest discover
+check-tools-macos-thin: tools-macos-thin ##@tools Test CLI tools for macOS without cross-arch support
+	export PYTHONPATH="$(shell pwd)/build/frida_thin-macos-x86_64/lib/$(PYTHON_NAME)/site-packages" \
+		&& cd frida-tools \
+		&& $(PYTHON) -m unittest discover
 
 
 .PHONY: \
@@ -518,9 +518,9 @@ uninstall-macos: uninstall-python-macos ##@utilities Uninstall frida utilities
 	core-macos core-macos-thin core-ios core-ios-thin core-android check-core-macos check-core-macos-thin check-core-android-arm64 frida-core-update-submodule-stamp \
 	server-macos server-macos-thin server-ios server-ios-thin server-android \
 	gadget-macos gadget-macos-thin gadget-ios gadget-ios-thin gadget-android \
-	python-macos python-macos-thin check-python-macos check-python-macos-thin install-python-macos uninstall-python-macos frida-python-update-submodule-stamp \
+	python-macos python-macos-thin check-python-macos check-python-macos-thin frida-python-update-submodule-stamp \
 	node-macos node-macos-thin check-node-macos check-node-macos-thin frida-node-update-submodule-stamp \
-	install-macos uninstall-macos \
+	tools-macos tools-macos-thin check-tools-macos check-tools-macos-thin frida-tools-update-submodule-stamp \
 	glib glib-shell glib-symlinks \
 	v8 v8-symlinks
 .SECONDARY:

@@ -68,6 +68,7 @@ clean-submodules:
 	cd frida-core && git clean -xfd
 	cd frida-python && git clean -xfd
 	cd frida-node && git clean -xfd
+	cd frida-tools && git clean -xfd
 
 
 define make-capstone-rule
@@ -426,19 +427,19 @@ $(eval $(call make-python-rule,frida_thin,tmp_thin))
 check-python-32: build/tmp-linux-x86/frida-$(PYTHON_NAME)/.frida-stamp ##@python Test Python bindings for x86
 	export PYTHONPATH="$(shell pwd)/build/frida-linux-x86/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
-		&& ${PYTHON} -m unittest tests.test_core tests.test_tracer
+		&& ${PYTHON} -m unittest discover
 check-python-64: build/tmp-linux-x86_64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Test Python bindings for x86-64
 	export PYTHONPATH="$(shell pwd)/build/frida-linux-x86_64/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
-		&& ${PYTHON} -m unittest tests.test_core tests.test_tracer
+		&& ${PYTHON} -m unittest discover
 check-python-32-thin: build/tmp_thin-linux-x86/frida-$(PYTHON_NAME)/.frida-stamp ##@python Test Python bindings for x86 without cross-arch support
 	export PYTHONPATH="$(shell pwd)/build/frida_thin-linux-x86/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
-		&& ${PYTHON} -m unittest tests.test_core tests.test_tracer
+		&& ${PYTHON} -m unittest discover
 check-python-64-thin: build/tmp_thin-linux-x86_64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Test Python bindings for x86-64 without cross-arch support
 	export PYTHONPATH="$(shell pwd)/build/frida_thin-linux-x86_64/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
-		&& ${PYTHON} -m unittest tests.test_core tests.test_tracer
+		&& ${PYTHON} -m unittest discover
 
 
 node-32: build/frida-linux-x86/lib/node_modules/frida build/.frida-node-submodule-stamp ##@node Build Node.js bindings for x86
@@ -489,6 +490,48 @@ check-node-64-thin: node-64-thin ##@node Test Node.js bindings for x86-64 withou
 	$(call run-node-tests,frida_thin-linux-x86_64,$(FRIDA),$(NODE_BIN_DIR),$(NODE),$(NPM))
 
 
+tools-32: build/tmp-linux-x86/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Build CLI tools for x86
+tools-64: build/tmp-linux-x86_64/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Build CLI tools for x86-64
+tools-32-thin: build/tmp_thin-linux-x86/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Build CLI tools for x86 without cross-arch support
+tools-64-thin: build/tmp_thin-linux-x86_64/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Build CLI tools for x86-64 without cross-arch support
+
+define make-tools-rule
+build/$2-%/frida-tools-$$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodule-stamp build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp
+	. build/$1-meson-env-linux-$$(build_arch).rc; \
+	builddir=$$(@D); \
+	if [ ! -f $$$$builddir/build.ninja ]; then \
+		mkdir -p $$$$builddir; \
+		$$(MESON) \
+			--prefix $$(FRIDA)/build/$1-$$* \
+			--libdir $$(FRIDA)/build/$1-$$*/lib \
+			--cross-file build/$1-$$*.txt \
+			-Dwith-python=$$(PYTHON) \
+			frida-tools $$$$builddir || exit 1; \
+	fi; \
+	$$(NINJA) -C $$$$builddir install || exit 1
+	@touch $$@
+endef
+$(eval $(call make-tools-rule,frida,tmp))
+$(eval $(call make-tools-rule,frida_thin,tmp_thin))
+
+check-tools-32: build/tmp-linux-x86/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Test CLI tools for x86
+	export PYTHONPATH="$(shell pwd)/build/frida-linux-x86/lib/$(PYTHON_NAME)/site-packages" \
+		&& cd frida-tools \
+		&& ${PYTHON} -m unittest discover
+check-tools-64: build/tmp-linux-x86_64/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Test CLI tools for x86-64
+	export PYTHONPATH="$(shell pwd)/build/frida-linux-x86_64/lib/$(PYTHON_NAME)/site-packages" \
+		&& cd frida-tools \
+		&& ${PYTHON} -m unittest discover
+check-tools-32-thin: build/tmp_thin-linux-x86/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Test CLI tools for x86 without cross-arch support
+	export PYTHONPATH="$(shell pwd)/build/frida_thin-linux-x86/lib/$(PYTHON_NAME)/site-packages" \
+		&& cd frida-tools \
+		&& ${PYTHON} -m unittest discover
+check-tools-64-thin: build/tmp_thin-linux-x86_64/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Test CLI tools for x86-64 without cross-arch support
+	export PYTHONPATH="$(shell pwd)/build/frida_thin-linux-x86_64/lib/$(PYTHON_NAME)/site-packages" \
+		&& cd frida-tools \
+		&& ${PYTHON} -m unittest discover
+
+
 .PHONY: \
 	help \
 	distclean clean clean-submodules git-submodules git-submodule-stamps \
@@ -498,6 +541,7 @@ check-node-64-thin: node-64-thin ##@node Test Node.js bindings for x86-64 withou
 	server-32 server-64 server-32-thin server-64-thin server-android server-qnx-arm server-qnx-armeabi \
 	python-32 python-64 python-32-thin python-64-thin check-python-32 check-python-64 check-python-32-thin check-python-64-thin frida-python-update-submodule-stamp \
 	node-32 node-64 node-32-thin node-64-thin check-node-32 check-node-64 check-node-32-thin check-node-64-thin frida-node-update-submodule-stamp \
+	tools-32 tools-64 tools-32-thin tools-64-thin check-tools-32 check-tools-64 check-tools-32-thin check-tools-64-thin frida-tools-update-submodule-stamp \
 	glib glib-shell glib-symlinks \
 	v8 v8-symlinks
 .SECONDARY:
