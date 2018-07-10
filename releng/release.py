@@ -27,6 +27,7 @@ if __name__ == '__main__':
     frida_core_dir = os.path.join(build_dir, "frida-core")
     frida_python_dir = os.path.join(build_dir, "frida-python")
     frida_node_dir = os.path.join(build_dir, "frida-node")
+    frida_tools_dir = os.path.join(build_dir, "frida-tools")
 
     if system == 'Windows':
         szip = r"C:\Program Files\7-Zip\7z.exe"
@@ -56,11 +57,9 @@ if __name__ == '__main__':
             targets.append("sdist")
         targets.extend(["bdist_egg", "upload"])
 
-        subprocess.call([interpreter, "setup.py"] + targets, cwd=os.path.join(frida_python_dir, "src"), env=env)
+        subprocess.call([interpreter, "setup.py"] + targets, cwd=frida_python_dir, env=env)
 
-    def upload_python_bindings_deb(distro_name, package_name_prefix, interpreter, extension, upload):
-        src_dir = os.path.join(frida_python_dir, "src")
-
+    def upload_python_debs(distro_name, package_name_prefix, interpreter, extension, upload):
         env = {}
         env.update(os.environ)
         env.update({
@@ -68,22 +67,23 @@ if __name__ == '__main__':
             'FRIDA_EXTENSION': extension
         })
 
-        subprocess.check_call([
-            "fpm",
-            "--iteration=1." + distro_name,
-            "--maintainer=Ole André Vadla Ravnås <oleavr@frida.re>",
-            "--vendor=Frida",
-            "--category=Libraries",
-            "--python-bin=" + interpreter,
-            "--python-package-name-prefix=" + package_name_prefix,
-            "--python-install-bin=/usr/bin",
-            "--python-install-lib=/usr/lib/{}/dist-packages".format(os.path.basename(interpreter)),
-            "-s", "python",
-            "-t", "deb",
-            "setup.py"
-        ], cwd=src_dir, env=env)
+        for module_dir in [frida_python_dir, frida_tools_dir]:
+            subprocess.check_call([
+                "fpm",
+                "--iteration=1." + distro_name,
+                "--maintainer=Ole André Vadla Ravnås <oleavr@frida.re>",
+                "--vendor=Frida",
+                "--category=Libraries",
+                "--python-bin=" + interpreter,
+                "--python-package-name-prefix=" + package_name_prefix,
+                "--python-install-bin=/usr/bin",
+                "--python-install-lib=/usr/lib/{}/dist-packages".format(os.path.basename(interpreter)),
+                "-s", "python",
+                "-t", "deb",
+                "setup.py"
+            ], cwd=module_dir, env=env)
 
-        packages = glob.glob(os.path.join(src_dir, "*.deb"))
+        packages = glob.glob(os.path.join(frida_python_dir, "*.deb"))
         try:
             for package in packages:
                 with open(package, "rb") as f:
@@ -92,9 +92,7 @@ if __name__ == '__main__':
             for package in packages:
                 os.unlink(package)
 
-    def upload_python_bindings_rpm(distro_name, package_name_prefix, interpreter, extension, upload):
-        src_dir = os.path.join(frida_python_dir, "src")
-
+    def upload_python_rpms(distro_name, package_name_prefix, interpreter, extension, upload):
         env = {}
         env.update(os.environ)
         env.update({
@@ -102,21 +100,23 @@ if __name__ == '__main__':
             'FRIDA_EXTENSION': extension
         })
 
-        subprocess.check_call([
-            "fpm",
-            "--iteration=1." + distro_name,
-            "--maintainer=Ole André Vadla Ravnås <oleavr@frida.re>",
-            "--vendor=Frida",
-            "--python-bin=" + interpreter,
-            "--python-package-name-prefix=" + package_name_prefix,
-            "-s", "python",
-            "-t", "rpm",
-            "setup.py"
-        ], cwd=src_dir, env=env)
+        for module_dir in [frida_python_dir, frida_tools_dir]:
+            subprocess.check_call([
+                "fpm",
+                "--iteration=1." + distro_name,
+                "--maintainer=Ole André Vadla Ravnås <oleavr@frida.re>",
+                "--vendor=Frida",
+                "--python-bin=" + interpreter,
+                "--python-package-name-prefix=" + package_name_prefix,
+                "-s", "python",
+                "-t", "rpm",
+                "setup.py"
+            ], cwd=module_dir, env=env)
 
         subprocess.check_call([
             "fpm",
             "--name={}-prompt-toolkit".format(package_name_prefix),
+            "--version=1.0.15",
             "--iteration=1." + distro_name,
             "--maintainer=Ole André Vadla Ravnås <oleavr@frida.re>",
             "--vendor=Frida",
@@ -125,9 +125,9 @@ if __name__ == '__main__':
             "-s", "python",
             "-t", "rpm",
             "prompt-toolkit"
-        ], cwd=src_dir)
+        ], cwd=frida_python_dir)
 
-        packages = glob.glob(os.path.join(src_dir, "*.rpm"))
+        packages = glob.glob(os.path.join(frida_python_dir, "*.rpm"))
         try:
             for package in packages:
                 with open(package, "rb") as f:
@@ -411,28 +411,28 @@ if __name__ == '__main__':
         elif slave == 'ubuntu_16_04-x86_64':
             upload = get_github_uploader()
 
-            upload_python_bindings_deb("ubuntu-xenial", "python", "/usr/bin/python2.7",
+            upload_python_debs("ubuntu-xenial", "python", "/usr/bin/python2.7",
                 os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python2.7", "site-packages", "_frida.so"),
                 upload)
-            upload_python_bindings_deb("ubuntu-xenial", "python3", "/usr/bin/python3.5",
+            upload_python_debs("ubuntu-xenial", "python3", "/usr/bin/python3.5",
                 os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python3.5", "site-packages", "_frida.so"),
                 upload)
         elif slave == 'ubuntu_18_04-x86_64':
             upload = get_github_uploader()
 
-            upload_python_bindings_deb("ubuntu-bionic", "python", "/usr/bin/python2.7",
+            upload_python_debs("ubuntu-bionic", "python", "/usr/bin/python2.7",
                 os.path.join(build_dir, "build", "frida_thin-linux-x86_64", "lib", "python2.7", "site-packages", "_frida.so"),
                 upload)
-            upload_python_bindings_deb("ubuntu-bionic", "python3", "/usr/bin/python3.6",
+            upload_python_debs("ubuntu-bionic", "python3", "/usr/bin/python3.6",
                 os.path.join(build_dir, "build", "frida_thin-linux-x86_64", "lib", "python3.6", "site-packages", "_frida.so"),
                 upload)
         elif slave == 'fedora_28-x86_64':
             upload = get_github_uploader()
 
-            upload_python_bindings_rpm("fc28", "python2", "/usr/bin/python2.7",
+            upload_python_rpms("fc28", "python2", "/usr/bin/python2.7",
                 os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python2.7", "site-packages", "_frida.so"),
                 upload)
-            upload_python_bindings_rpm("fc28", "python3", "/usr/bin/python3.6",
+            upload_python_rpms("fc28", "python3", "/usr/bin/python3.6",
                 os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python3.6", "site-packages", "_frida.so"),
                 upload)
         elif slave == 'pi':
