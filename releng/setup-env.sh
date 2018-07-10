@@ -750,7 +750,7 @@ if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/.version" 2>/dev/null; th
         find "$FRIDA_TOOLROOT/bin" -type f -exec sed -i '' -e "s#/opt/python27-64/bin/python#$python3#g" {} + > /dev/null 2>&1
         ;;
       macos)
-        find "$FRIDA_TOOLROOT/bin" -type f -exec sed -i '' -e "s#/usr/bin/python#$python3#g" {} \;
+        LC_CTYPE=C find "$FRIDA_TOOLROOT/bin" -type f -exec sed -i '' -e "s#/usr/bin/python#$python3#g" {} +
         ;;
       *)
         echo "Not patching python path for downloaded toolchain."
