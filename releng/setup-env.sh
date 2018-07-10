@@ -6,6 +6,10 @@ build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,macos,')
 build_arch=$($releng_path/detect-arch.sh)
 build_platform_arch=${build_platform}-${build_arch}
 
+if [ -z "$PYTHON3" ]; then
+  PYTHON3 = `which python3`
+fi
+
 if [ -n "$FRIDA_HOST" ]; then
   host_platform=$(echo -n $FRIDA_HOST | cut -f1 -d"-")
 else
