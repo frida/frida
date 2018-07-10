@@ -6,9 +6,6 @@ build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,macos,')
 build_arch=$($releng_path/detect-arch.sh)
 build_platform_arch=${build_platform}-${build_arch}
 
-if [ -z "$PYTHON3" ]; then
-  PYTHON3 = `which python3`
-fi
 
 if [ -n "$FRIDA_HOST" ]; then
   host_platform=$(echo -n $FRIDA_HOST | cut -f1 -d"-")
@@ -93,6 +90,12 @@ esac
 
 if [ -z "$FRIDA_HOST" ]; then
   echo "Assuming host is $host_platform_arch Set FRIDA_HOST to override."
+fi
+
+if [ -n "$PYTHON3" ]; then
+  python3=$PYTHON3
+else
+  python=`which python3`
 fi
 
 if [ $host_platform = android ]; then
@@ -742,7 +745,17 @@ if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/.version" 2>/dev/null; th
   else
     echo "Downloading and deploying toolchain..."
     $download_command "https://build.frida.re/toolchain-${toolchain_version}-${build_platform}-${build_arch}.tar.bz2" | tar -C "$FRIDA_TOOLROOT" -xj $tar_stdin || exit 1
-    find "$FRIDA_TOOLROOT/bin" -type f -exec sed -i '' -e "s#/opt/python27-64/bin/python#$PYTHON3#g" {} + > /dev/null 2>&1
+    case $build_platform in
+      linux)
+        find "$FRIDA_TOOLROOT/bin" -type f -exec sed -i '' -e "s#/opt/python27-64/bin/python#$python3#g" {} + > /dev/null 2>&1
+        ;;
+      macos)
+        find "$FRIDA_TOOLROOT/bin" -type f -exec sed -i '' -e "s#/usr/bin/python#$python3#g" {} \;
+        ;;
+      *)
+        echo "Not patching python path for downloaded toolchain."
+        ;;
+    esac
   fi
 
   for template in $(find $FRIDA_TOOLROOT -name "*.frida.in"); do
