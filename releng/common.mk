@@ -57,6 +57,7 @@ build/frida_thin-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida
 		./releng/setup-env.sh
 	cd $(FRIDA)/build/; \
 	ln -sf frida_thin-env-$*.rc frida-env-$*.rc; \
+	ln -sf frida_thin-meson-env-$*.rc frida-env-$*.rc; \
 	ln -sf frida_thin-$* frida-$*; \
 	ln -sf frida_thin-sdk-$* sdk-$*; \
 	ln -sf frida_thin-toolchain-$* toolchain-$*
