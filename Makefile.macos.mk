@@ -87,6 +87,7 @@ build/$1-%/lib/pkgconfig/capstone.pc: build/$1-env-%.rc build/.capstone-submodul
 			CAPSTONE_ARCHS="$$$$capstone_archs" \
 			CAPSTONE_SHARED=$$$$enable_shared \
 			CAPSTONE_STATIC=$$$$enable_static \
+			LIBARCHS="" \
 			install
 endef
 $(eval $(call make-capstone-rule,frida,tmp))
