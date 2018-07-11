@@ -169,9 +169,9 @@ if __name__ == '__main__':
             do(["git", "clean", "-xffd"])
         reset()
         with package_version_temporarily_set_to(version, os.path.join(frida_node_dir, "package.json")):
+            do_build_command([npm, "install"])
             if publish:
                 do([npm, "publish"])
-            do_build_command([npm, "install"])
             do_build_command([npm, "run", "prebuild", "--", "-t", "8.0.0", "-t", "9.0.0", "-t", "10.0.0"])
             do_build_command([npm, "run", "prebuild", "--", "-t", "2.0.0", "-r", "electron"])
             packages = glob.glob(os.path.join(frida_node_dir, "prebuilds", "*.tar.gz"))
