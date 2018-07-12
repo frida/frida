@@ -15,7 +15,7 @@ This is the recommended way to get started. All you need to do is:
     npm install frida       # Node.js bindings
 
 You may also download pre-built binaries for various operating systems from
-[https://build.frida.re/frida/](https://build.frida.re/frida/).
+Frida's [releases](https://github.com/frida/frida/releases) page on GitHub.
 
 ## 2. Build your own binaries
 
@@ -25,7 +25,7 @@ For running the Frida CLI tools, i.e. `frida`, `frida-ls-devices`, `frida-ps`,
 `frida-kill`, `frida-trace`, and `frida-discover`, you need Python plus a
 few packages:
 
-    pip3 install colorama prompt-toolkit pygments
+    pip3 install colorama prompt-toolkit==1.0.15 pygments
 
 ### Linux
 
