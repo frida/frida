@@ -83,14 +83,14 @@ if __name__ == '__main__':
                 "setup.py"
             ], cwd=module_dir, env=env)
 
-        packages = glob.glob(os.path.join(frida_python_dir, "*.deb"))
-        try:
-            for package in packages:
-                with open(package, "rb") as f:
-                    upload(os.path.basename(package), "application/x-deb", f)
-        finally:
-            for package in packages:
-                os.unlink(package)
+            packages = glob.glob(os.path.join(module_dir, "*.deb"))
+            try:
+                for package in packages:
+                    with open(package, "rb") as f:
+                        upload(os.path.basename(package), "application/x-deb", f)
+            finally:
+                for package in packages:
+                    os.unlink(package)
 
     def upload_python_rpms(distro_name, package_name_prefix, interpreter, extension, upload):
         env = {}
@@ -99,19 +99,6 @@ if __name__ == '__main__':
             'FRIDA_VERSION': version,
             'FRIDA_EXTENSION': extension
         })
-
-        for module_dir in [frida_python_dir, frida_tools_dir]:
-            subprocess.check_call([
-                "fpm",
-                "--iteration=1." + distro_name,
-                "--maintainer=Ole André Vadla Ravnås <oleavr@frida.re>",
-                "--vendor=Frida",
-                "--python-bin=" + interpreter,
-                "--python-package-name-prefix=" + package_name_prefix,
-                "-s", "python",
-                "-t", "rpm",
-                "setup.py"
-            ], cwd=module_dir, env=env)
 
         subprocess.check_call([
             "fpm",
@@ -127,14 +114,27 @@ if __name__ == '__main__':
             "prompt-toolkit"
         ], cwd=frida_python_dir)
 
-        packages = glob.glob(os.path.join(frida_python_dir, "*.rpm"))
-        try:
-            for package in packages:
-                with open(package, "rb") as f:
-                    upload(os.path.basename(package), "application/x-rpm", f)
-        finally:
-            for package in packages:
-                os.unlink(package)
+        for module_dir in [frida_python_dir, frida_tools_dir]:
+            subprocess.check_call([
+                "fpm",
+                "--iteration=1." + distro_name,
+                "--maintainer=Ole André Vadla Ravnås <oleavr@frida.re>",
+                "--vendor=Frida",
+                "--python-bin=" + interpreter,
+                "--python-package-name-prefix=" + package_name_prefix,
+                "-s", "python",
+                "-t", "rpm",
+                "setup.py"
+            ], cwd=module_dir, env=env)
+
+            packages = glob.glob(os.path.join(module_dir, "*.rpm"))
+            try:
+                for package in packages:
+                    with open(package, "rb") as f:
+                        upload(os.path.basename(package), "application/x-rpm", f)
+            finally:
+                for package in packages:
+                    os.unlink(package)
 
     def upload_node_bindings_to_npm(node, upload_to_github, publish, python2_interpreter=None, extra_build_args=[], extra_build_env=None):
         node_bin_dir = os.path.dirname(node)
