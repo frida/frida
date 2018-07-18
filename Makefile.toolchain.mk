@@ -108,7 +108,7 @@ build/ft-tmp-%/.package-stamp: \
 			mv $$tool $$tool-$(automake_version); \
 			ln -s $$tool-$(automake_version) $$tool; \
 		done
-	@find . -type f -exec sed -i '' -e "s_/opt/python27-64/bin/python_$(PYTHON3)_g" {} + > /dev/null 2>&1
+	find $(abspath $(@D)package)/bin -type f -exec sed -i'' -e "s_/opt/python27-64/bin/python_$(PYTHON3)_g" {} +
 	. $< \
 		&& for f in $(@D)/package/bin/* $(@D)/package/lib/gettext/* $(@D)/package/lib/vala-*/*; do \
 			if ! [ -L $$f ] && file -b --mime-type $$f | egrep -q "^application"; then \
