@@ -66,6 +66,12 @@ endif
 ifeq ($(host_arch), arm)
 	openssl_arch_args := linux-armv4
 endif
+ifeq ($(host_arch), mipsel)
+	openssl_arch_args := linux-mips32
+endif
+ifeq ($(host_arch), mips)
+	openssl_arch_args := linux-mips32
+endif
 endif
 ifeq ($(host_platform), android)
 	unwind := build/fs-%/lib/pkgconfig/libunwind.pc
