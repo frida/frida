@@ -580,7 +580,6 @@ build/fs-env-%.rc:
 		FRIDA_ASAN=$(FRIDA_ASAN) \
 		FRIDA_ENV_NAME=fs \
 		FRIDA_ENV_SDK=none \
-		PYTHON3=$(PYTHON3) \
 		./releng/setup-env.sh
 
 releng/meson/meson.py:

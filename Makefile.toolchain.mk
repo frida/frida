@@ -108,6 +108,7 @@ build/ft-tmp-%/.package-stamp: \
 			mv $$tool $$tool-$(automake_version); \
 			ln -s $$tool-$(automake_version) $$tool; \
 		done
+	@find . -type f -exec sed -i '' -e "s_/opt/python27-64/bin/python_$(PYTHON3)_g" {} + > /dev/null 2>&1
 	. $< \
 		&& for f in $(@D)/package/bin/* $(@D)/package/lib/gettext/* $(@D)/package/lib/vala-*/*; do \
 			if ! [ -L $$f ] && file -b --mime-type $$f | egrep -q "^application"; then \
@@ -234,7 +235,6 @@ build/ft-env-%.rc:
 		FRIDA_ASAN=$(FRIDA_ASAN) \
 		FRIDA_ENV_NAME=ft \
 		FRIDA_ENV_SDK=none \
-		PYTHON3=$(PYTHON3) \
 		./releng/setup-env.sh
 
 

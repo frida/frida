@@ -47,7 +47,6 @@ build/frida-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida-vers
 		FRIDA_OPTIMIZATION_FLAGS="$(FRIDA_OPTIMIZATION_FLAGS)" \
 		FRIDA_DEBUG_FLAGS="$(FRIDA_DEBUG_FLAGS)" \
 		FRIDA_ASAN=$(FRIDA_ASAN) \
-		PYTHON3=$(PYTHON3) \
 		./releng/setup-env.sh
 build/frida_thin-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida-version.h
 	FRIDA_HOST=$* \
@@ -55,7 +54,6 @@ build/frida_thin-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida
 		FRIDA_DEBUG_FLAGS="$(FRIDA_DEBUG_FLAGS)" \
 		FRIDA_ASAN=$(FRIDA_ASAN) \
 		FRIDA_ENV_NAME=frida_thin \
-		PYTHON3=$(PYTHON3) \
 		./releng/setup-env.sh
 	cd $(FRIDA)/build/; \
 	ln -sf frida_thin-env-$*.rc frida-env-$*.rc; \
