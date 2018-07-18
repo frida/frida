@@ -109,10 +109,10 @@ build/ft-tmp-%/.package-stamp: \
 			ln -s $$tool-$(automake_version) $$tool; \
 		done
 ifeq ($(build_platform), linux)
-		find $(abspath $(@D)/package)/bin -type f -exec sed -i'' -e "s_/opt/python27-64/bin/python_$(PYTHON3)_g" {} +
+		find $(abspath $(@D)/package)/bin -type f -exec sed -i'' -e "s_^$#!.*python.*_/usr/bin/env $(PYTHON3)_gi" {} +
 endif
 ifeq ($(build_platform), macos)
-		LC_CTYPE=C find $(abspath $(@D)/package)/bin -type f -exec sed -i '' -e "s_/opt/python27-64/bin/python_$(PYTHON3)_g" {} +
+		LC_CTYPE=C find $(abspath $(@D)/package)/bin -type f -exec sed -i '' -e "s_^$#!.*python.*_/usr/bin/env $(PYTHON3)_gi" {} +
 endif
 	. $< \
 		&& for f in $(@D)/package/bin/* $(@D)/package/lib/gettext/* $(@D)/package/lib/vala-*/*; do \
