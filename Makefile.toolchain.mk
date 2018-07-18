@@ -108,6 +108,12 @@ build/ft-tmp-%/.package-stamp: \
 			mv $$tool $$tool-$(automake_version); \
 			ln -s $$tool-$(automake_version) $$tool; \
 		done
+ifeq ($(build_platform), linux)
+		find $(abspath $(@D)/package)/bin -type f -exec sed -i'' -e "s_^#!.*python.*_#!/usr/bin/env python3_gi" {} +
+endif
+ifeq ($(build_platform), macos)
+		LC_CTYPE=C find $(abspath $(@D)/package)/bin -type f -exec sed -i '' -e "s_^#\!.*python.*_#\!/usr/bin/env python3_g" {} +
+endif
 	. $< \
 		&& for f in $(@D)/package/bin/* $(@D)/package/lib/gettext/* $(@D)/package/lib/vala-*/*; do \
 			if ! [ -L $$f ] && file -b --mime-type $$f | egrep -q "^application"; then \
