@@ -215,7 +215,7 @@ build/ft-%/bin/libtool: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 		&& make $(MAKE_J) install
 	@touch $@
 
-$(eval $(call make-tarball-module-rules,gettext,http://gnuftp.uib.no/gettext/gettext-$(gettext_version).tar.gz,build/ft-%/bin/autopoint,build/ft-%/bin/libtool,gettext-vasnprintf-apple-fix.patch))
+$(eval $(call make-tarball-module-rules,gettext,https://gnuftp.uib.no/gettext/gettext-$(gettext_version).tar.gz,build/ft-%/bin/autopoint,build/ft-%/bin/libtool,gettext-vasnprintf-apple-fix.patch))
 
 $(eval $(call make-git-module-rules,libffi,build/ft-%/lib/pkgconfig/libffi.pc,build/ft-%/bin/autopoint))
 
