@@ -181,6 +181,8 @@ flags_to_args () {
   fi
 }
 
+mkdir -p "$FRIDA_BUILD"
+
 case $host_platform in
   linux)
     case $host_arch in
@@ -455,8 +457,6 @@ case $host_platform in
     toolflags="--gcc-toolchain=$android_gcc_toolchain \
 --target=$android_host_target \
 -no-canonical-prefixes"
-
-    mkdir -p "$FRIDA_BUILD"
 
     cc_wrapper="$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-cc-wrapper-${host_platform_arch}.sh"
     sed \
