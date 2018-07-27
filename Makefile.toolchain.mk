@@ -1,12 +1,13 @@
 include config.mk
 
 MAKE_J ?= -j 8
-repo_base_url = "git://github.com/frida"
+repo_base_url = "https://github.com/frida"
 repo_suffix = ".git"
 
 m4_version := 1.4.18
 autoconf_version := 2.69
-automake_version := 1.15.1
+automake_version := 1.16.1
+automake_api_version := 1.16
 libtool_version := 2.4.6
 gettext_version := 0.19.8.1
 pkg_config_version := 0.29.2
@@ -33,6 +34,22 @@ else
 	host_arch := $(build_arch)
 endif
 host_platform_arch := $(host_platform)-$(host_arch)
+
+ifeq ($(host_platform), macos)
+	iconv := yes
+endif
+ifeq ($(host_platform), ios)
+	iconv := yes
+endif
+ifeq ($(host_platform), android)
+	iconv := yes
+endif
+ifeq ($(host_platform), qnx)
+	iconv := yes
+endif
+ifeq ($(iconv),yes)
+	glib_iconv_option := -Diconv=native
+endif
 
 ifeq ($(host_platform), linux)
 strip_all := --strip-all
@@ -104,9 +121,9 @@ build/ft-tmp-%/.package-stamp: \
 			. | tar -C $(abspath $(@D)/package) -xf -
 	cd $(abspath $(@D)/package)/bin \
 		&& for tool in aclocal automake; do \
-			rm $$tool-$(automake_version); \
-			mv $$tool $$tool-$(automake_version); \
-			ln -s $$tool-$(automake_version) $$tool; \
+			rm $$tool-$(automake_api_version); \
+			mv $$tool $$tool-$(automake_api_version); \
+			ln -s $$tool-$(automake_api_version) $$tool; \
 		done
 ifeq ($(build_platform), linux)
 		find $(abspath $(@D)/package)/bin -type f -exec sed -i'' -e "s_^#!.*python.*_#!/usr/bin/env python3_gi" {} +
@@ -152,47 +169,44 @@ $3: build/ft-env-%.rc build/ft-tmp-%/$1/Makefile
 	@touch $$@
 endef
 
-define make-git-module-rules
+define make-git-meson-module-rules
 build/.$1-stamp:
 	$(RM) -r $1
-	git clone $(repo_base_url)/$1$(repo_suffix)
+	git clone --recurse-submodules $(repo_base_url)/$1$(repo_suffix)
 	@mkdir -p $$(@D)
 	@touch $$@
 
-$1/configure: build/ft-env-$(build_platform_arch).rc build/.$1-stamp
-	. $$< \
-		&& cd $$(@D) \
-		&& toolchain=$$(shell pwd)/build/ft-toolchain-$$(build_platform_arch) \
-		&& export ACLOCAL_FLAGS="-I $$$$toolchain/share/aclocal" \
-		&& export ACLOCAL="aclocal -I $$$$toolchain/share/aclocal" \
-		&& [ -f autogen.sh ] && NOCONFIGURE=1 ./autogen.sh || autoreconf -ifv
-
-build/ft-tmp-%/$1/Makefile: build/ft-env-%.rc $1/configure $3
+build/ft-tmp-%/$1/build.ninja: build/ft-env-$(build_platform_arch).rc build/ft-env-%.rc build/.$1-stamp $3 releng/meson/meson.py
 	$(RM) -r $$(@D)
-	mkdir -p $$(@D)
-	. $$< && cd $$(@D) && PATH=$$(shell pwd)/build/ft-$$*/bin:$$$$PATH ../../../$1/configure
+	(. build/ft-meson-env-$(build_platform_arch).rc \
+		&& . build/ft-config-$$*.site \
+		&& $(MESON) \
+			--prefix $$$$frida_prefix \
+			--libdir $$$$frida_prefix/lib \
+			--default-library static \
+			--buildtype minsize \
+			--cross-file build/ft-$$*.txt \
+			$4 \
+			$$(@D) \
+			$1)
 
-$2: build/ft-env-%.rc build/ft-tmp-%/$1/Makefile
-	. $$< \
-		&& cd build/ft-tmp-$$*/$1 \
-		&& export PATH=$$(shell pwd)/build/ft-$$*/bin:$$$$PATH \
-		&& make $(MAKE_J) GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums \
-		&& make $(MAKE_J) GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums LN="ln -sf" install
+$2: build/ft-env-%.rc build/ft-tmp-%/$1/build.ninja
+	(. $$< \
+		&& $(NINJA) -C build/ft-tmp-$$*/$1 install)
 	@touch $$@
 endef
 
+$(eval $(call make-tarball-module-rules,m4,https://gnuftp.uib.no/m4/m4-$(m4_version).tar.gz,build/ft-%/bin/m4,,m4-vasnprintf-apple-fix.patch))
 
-$(eval $(call make-tarball-module-rules,m4,http://gnuftp.uib.no/m4/m4-$(m4_version).tar.gz,build/ft-%/bin/m4,,m4-vasnprintf-apple-fix.patch))
+$(eval $(call make-tarball-module-rules,autoconf,https://gnuftp.uib.no/autoconf/autoconf-$(autoconf_version).tar.gz,build/ft-%/bin/autoconf,build/ft-%/bin/m4))
 
-$(eval $(call make-tarball-module-rules,autoconf,http://gnuftp.uib.no/autoconf/autoconf-$(autoconf_version).tar.gz,build/ft-%/bin/autoconf,build/ft-%/bin/m4))
-
-$(eval $(call make-tarball-module-rules,automake,http://gnuftp.uib.no/automake/automake-$(automake_version).tar.gz,build/ft-%/bin/automake,build/ft-%/bin/autoconf))
+$(eval $(call make-tarball-module-rules,automake,https://gnuftp.uib.no/automake/automake-$(automake_version).tar.gz,build/ft-%/bin/automake,build/ft-%/bin/autoconf))
 
 build/.libtool-stamp:
 	$(RM) -r libtool
 	mkdir -p libtool
 	cd libtool \
-		&& $(download) http://gnuftp.uib.no/libtool/libtool-$(libtool_version).tar.gz | tar -xz --strip-components 1 \
+		&& $(download) https://gnuftp.uib.no/libtool/libtool-$(libtool_version).tar.gz | tar -xz --strip-components 1 \
 		&& patch -p1 < ../releng/patches/libtool-fixes.patch \
 		&& for name in aclocal.m4 config-h.in configure Makefile.in; do \
 			find . -name $$name -exec touch '{}' \;; \
@@ -217,13 +231,11 @@ build/ft-%/bin/libtool: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 
 $(eval $(call make-tarball-module-rules,gettext,https://gnuftp.uib.no/gettext/gettext-$(gettext_version).tar.gz,build/ft-%/bin/autopoint,build/ft-%/bin/libtool,gettext-vasnprintf-apple-fix.patch))
 
-$(eval $(call make-git-module-rules,libffi,build/ft-%/lib/pkgconfig/libffi.pc,build/ft-%/bin/autopoint))
-
-$(eval $(call make-git-module-rules,glib,build/ft-%/bin/glib-genmarshal,build/ft-%/lib/pkgconfig/libffi.pc))
+$(eval $(call make-git-meson-module-rules,glib,build/ft-%/bin/glib-genmarshal,build/ft-%/bin/autopoint,$(glib_iconv_option) -Dinternal_pcre=true))
 
 $(eval $(call make-tarball-module-rules,pkg-config,https://pkgconfig.freedesktop.org/releases/pkg-config-$(pkg_config_version).tar.gz,build/ft-%/bin/pkg-config,build/ft-%/bin/glib-genmarshal,pkg-config-static-glib.patch))
 
-$(eval $(call make-git-module-rules,vala,build/ft-%/bin/valac,build/ft-%/bin/glib-genmarshal))
+$(eval $(call make-git-meson-module-rules,vala,build/ft-%/bin/valac,build/ft-%/bin/glib-genmarshal,))
 
 build/ft-%/bin/dpkg-deb:
 	@mkdir -p $(@D)
