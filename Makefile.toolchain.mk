@@ -180,12 +180,17 @@ build/ft-tmp-%/$1/build.ninja: build/ft-env-$(build_platform_arch).rc build/ft-e
 	$(RM) -r $$(@D)
 	(. build/ft-meson-env-$(build_platform_arch).rc \
 		&& . build/ft-config-$$*.site \
+		&& if [ $$* = $(build_platform_arch) ]; then \
+			cross_args=""; \
+		else \
+			cross_args="--cross-file build/ft-$$*.txt"; \
+		fi \
 		&& $(MESON) \
 			--prefix $$$$frida_prefix \
 			--libdir $$$$frida_prefix/lib \
 			--default-library static \
 			--buildtype minsize \
-			--cross-file build/ft-$$*.txt \
+			$$$$cross_args \
 			$4 \
 			$$(@D) \
 			$1)

@@ -117,10 +117,15 @@ build/$1-%/lib/pkgconfig/frida-gum-1.0.pc: build/.frida-gum-submodule-stamp buil
 	builddir=build/$2-$$*/frida-gum; \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
 		mkdir -p $$$$builddir; \
+		if [ $$* = $$(build_platform_arch) ]; then \
+			cross_args=""; \
+		else \
+			cross_args="--cross-file build/$1-$$*.txt"; \
+		fi; \
 		$$(MESON) \
 			--prefix $$(FRIDA)/build/$1-$$* \
 			--libdir $$(FRIDA)/build/$1-$$*/lib \
-			--cross-file build/$1-$$*.txt \
+			$$$$cross_args \
 			$$(frida_gum_flags) \
 			frida-gum $$$$builddir || exit 1; \
 	fi; \
@@ -155,10 +160,15 @@ build/tmp-linux-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-s
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
+		if [ $* = $(build_platform_arch) ]; then \
+			cross_args=""; \
+		else \
+			cross_args="--cross-file build/frida-linux-x86.txt"; \
+		fi; \
 		$(MESON) \
 			--prefix $(FRIDA)/build/frida-linux-x86 \
 			--libdir $(FRIDA)/build/frida-linux-x86/lib \
-			--cross-file build/frida-linux-x86.txt \
+			$$cross_args \
 			$(frida_core_flags) \
 			-Dwith-32bit-helper=$(FRIDA)/build/tmp-linux-x86/frida-core/src/frida-helper \
 			-Dwith-64bit-helper=$(FRIDA)/build/tmp-linux-x86_64/frida-core/src/frida-helper \
@@ -172,10 +182,15 @@ build/tmp-linux-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submodul
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
+		if [ $* = $(build_platform_arch) ]; then \
+			cross_args=""; \
+		else \
+			cross_args="--cross-file build/frida-linux-x86_64.txt"; \
+		fi; \
 		$(MESON) \
 			--prefix $(FRIDA)/build/frida-linux-x86_64 \
 			--libdir $(FRIDA)/build/frida-linux-x86_64/lib \
-			--cross-file build/frida-linux-x86_64.txt \
+			$$cross_args \
 			$(frida_core_flags) \
 			-Dwith-32bit-helper=$(FRIDA)/build/tmp-linux-x86/frida-core/src/frida-helper \
 			-Dwith-64bit-helper=$(FRIDA)/build/tmp-linux-x86_64/frida-core/src/frida-helper \
@@ -314,10 +329,15 @@ build/tmp_thin-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stam
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
+		if [ $* = $(build_platform_arch) ]; then \
+			cross_args=""; \
+		else \
+			cross_args="--cross-file build/frida_thin-$*.txt"; \
+		fi; \
 		$(MESON) \
 			--prefix $(FRIDA)/build/frida_thin-$* \
 			--libdir $(FRIDA)/build/frida_thin-$*/lib \
-			--cross-file build/frida_thin-$*.txt \
+			$$cross_args \
 			$(frida_core_flags) \
 			frida-core $$builddir || exit 1; \
 	fi
@@ -411,10 +431,15 @@ build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-sta
 	builddir=$$(@D); \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
 		mkdir -p $$$$builddir; \
+		if [ $$* = $$(build_platform_arch) ]; then \
+			cross_args=""; \
+		else \
+			cross_args="--cross-file build/$1-$$*.txt"; \
+		fi; \
 		$$(MESON) \
 			--prefix $$(FRIDA)/build/$1-$$* \
 			--libdir $$(FRIDA)/build/$1-$$*/lib \
-			--cross-file build/$1-$$*.txt \
+			$$$$cross_args \
 			-Dwith-python=$$(PYTHON) \
 			frida-python $$$$builddir || exit 1; \
 	fi; \
@@ -501,10 +526,15 @@ build/$2-%/frida-tools-$$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodul
 	builddir=$$(@D); \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
 		mkdir -p $$$$builddir; \
+		if [ $$* = $$(build_platform_arch) ]; then \
+			cross_args=""; \
+		else \
+			cross_args="--cross-file build/$1-$$*.txt"; \
+		fi; \
 		$$(MESON) \
 			--prefix $$(FRIDA)/build/$1-$$* \
 			--libdir $$(FRIDA)/build/$1-$$*/lib \
-			--cross-file build/$1-$$*.txt \
+			$$$$cross_args \
 			-Dwith-python=$$(PYTHON) \
 			frida-tools $$$$builddir || exit 1; \
 	fi; \

@@ -111,9 +111,14 @@ build/$1-%/lib/pkgconfig/frida-gum-1.0.pc: build/.frida-gum-submodule-stamp buil
 	builddir=build/$2-$$*/frida-gum; \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
 		mkdir -p $$$$builddir; \
+		if [ $$* = $$(build_platform_arch) ]; then \
+			cross_args=""; \
+		else \
+			cross_args="--cross-file build/$1-$$*.txt"; \
+		fi; \
 		$$(MESON) \
 			--prefix $$(FRIDA)/build/$1-$$* \
-			--cross-file build/$1-$$*.txt \
+			$$$$cross_args \
 			$$(frida_gum_flags) \
 			frida-gum $$$$builddir || exit 1; \
 	fi; \
@@ -141,9 +146,14 @@ build/tmp-macos-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-sta
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
+		if [ $* = $(build_platform_arch) ]; then \
+			cross_args=""; \
+		else \
+			cross_args="--cross-file build/frida-macos-$*.txt"; \
+		fi; \
 		$(MESON) \
 			--prefix $(FRIDA)/build/frida-macos-$* \
-			--cross-file build/frida-macos-$*.txt \
+			$$cross_args \
 			$(frida_core_flags) \
 			-Dwith-64bit-helper=$(FRIDA)/build/tmp-macos-x86_64/frida-core/src/frida-helper \
 			-Dwith-32bit-agent=$(FRIDA)/build/tmp-macos-x86/frida-core/lib/agent/frida-agent.dylib \
@@ -266,9 +276,14 @@ build/tmp_thin-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stam
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
+		if [ $* = $(build_platform_arch) ]; then \
+			cross_args=""; \
+		else \
+			cross_args="--cross-file build/frida_thin-$*.txt"; \
+		fi; \
 		$(MESON) \
 			--prefix $(FRIDA)/build/frida_thin-$* \
-			--cross-file build/frida_thin-$*.txt \
+			$$cross_args \
 			$(frida_core_flags) \
 			frida-core $$builddir || exit 1; \
 	fi
@@ -394,9 +409,14 @@ build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-sta
 	builddir=$$(@D); \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
 		mkdir -p $$$$builddir; \
+		if [ $$* = $$(build_platform_arch) ]; then \
+			cross_args=""; \
+		else \
+			cross_args="--cross-file build/$1-$$*.txt"; \
+		fi; \
 		$$(MESON) \
 			--prefix $$(FRIDA)/build/$1-$$* \
-			--cross-file build/$1-$$*.txt \
+			$$$$cross_args \
 			-Dwith-python=$$(PYTHON) \
 			frida-python $$$$builddir || exit 1; \
 	fi; \
@@ -480,9 +500,14 @@ build/$2-%/frida-tools-$$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodul
 	builddir=$$(@D); \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
 		mkdir -p $$$$builddir; \
+		if [ $$* = $$(build_platform_arch) ]; then \
+			cross_args=""; \
+		else \
+			cross_args="--cross-file build/$1-$$*.txt"; \
+		fi; \
 		$$(MESON) \
 			--prefix $$(FRIDA)/build/$1-$$* \
-			--cross-file build/$1-$$*.txt \
+			$$$$cross_args \
 			-Dwith-python=$$(PYTHON) \
 			frida-tools $$$$builddir || exit 1; \
 	fi; \
