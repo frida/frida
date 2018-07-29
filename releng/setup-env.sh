@@ -294,7 +294,6 @@ case $host_platform in
     LIPO="$(xcrun --sdk $macos_sdk -f lipo)"
 
     CPPFLAGS="-mmacosx-version-min=$macos_minver"
-    CFLAGS="-mmacosx-version-min=$macos_minver"
     CXXFLAGS="-stdlib=libc++"
     LDFLAGS="-isysroot $macos_sdk_path -Wl,-macosx_version_min,$macos_minver -arch $host_clang_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
 
@@ -379,7 +378,6 @@ case $host_platform in
     LIPO="$(xcrun --sdk $ios_sdk -f lipo)"
 
     CPPFLAGS="-miphoneos-version-min=$ios_minver"
-    CFLAGS="-miphoneos-version-min=$ios_minver"
     CXXFLAGS="-stdlib=libc++"
     LDFLAGS="-isysroot $ios_sdk_path -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -Wl,-dead_strip"
 
@@ -507,15 +505,14 @@ case $host_platform in
     OBJCOPY="$android_gcc_toolchain/bin/${android_host_toolprefix}objcopy"
     OBJDUMP="$android_gcc_toolchain/bin/${android_host_toolprefix}objdump"
 
+    CPPFLAGS="-DANDROID -D__ANDROID_API__=$android_target_platform"
     CFLAGS="$android_host_cflags \
--ffunction-sections -fdata-sections \
--DANDROID -D__ANDROID_API__=$android_target_platform"
+-ffunction-sections -fdata-sections"
     CXXFLAGS="\
 -funwind-tables \
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/include \
 -I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++abi/include \
 -I$ANDROID_NDK_ROOT/sources/android/support/include"
-    CPPFLAGS="-DANDROID -D__ANDROID_API__=$android_target_platform"
     LDFLAGS="$android_host_ldflags \
 -Wl,--gc-sections \
 -Wl,-z,noexecstack \
@@ -662,7 +659,6 @@ if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   legacy_includes="$legacy_includes -I$FRIDA_SDKROOT/include"
   legacy_libpaths="$legacy_libpaths -L$FRIDA_SDKROOT/lib"
 fi
-CFLAGS="$CFLAGS $legacy_includes"
 CPPFLAGS="$CPPFLAGS $legacy_includes"
 LDFLAGS="$LDFLAGS $legacy_libpaths"
 
@@ -703,7 +699,6 @@ CXXFLAGS="$CFLAGS $CXXFLAGS"
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   version_include="-include $FRIDA_BUILD/frida-version.h"
   CPPFLAGS="$version_include $CPPFLAGS"
-  CFLAGS="$version_include $CFLAGS"
 
   meson_version_include=", '-include', '$FRIDA_BUILD/frida-version.h'"
 else
