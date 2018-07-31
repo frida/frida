@@ -152,7 +152,6 @@ build/.libiconv-stamp:
 	mkdir libiconv
 	cd libiconv \
 		&& $(download) https://gnuftp.uib.no/libiconv/libiconv-$(libiconv_version).tar.gz | tar -xz --strip-components 1 \
-		&& patch -p1 < ../releng/patches/libiconv-arm64.patch \
 		&& patch -p1 < ../releng/patches/libiconv-android.patch
 	@mkdir -p $(@D)
 	@touch $@
@@ -162,7 +161,7 @@ build/fs-tmp-%/libiconv/Makefile: build/fs-env-%.rc build/.libiconv-stamp
 	mkdir -p $(@D)
 	. $< \
 		&& cd $(@D) \
-		&& FRIDA_LEGACY_AUTOTOOLS=1 ../../../libiconv/configure \
+		&& ../../../libiconv/configure \
 			--enable-static \
 			--disable-shared \
 			--enable-relocatable \

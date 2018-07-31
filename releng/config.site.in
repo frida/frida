@@ -60,37 +60,21 @@ case $frida_host_platform_arch in
     cross_compiling=yes
     ;;
   android-x86)
-    if [ -n "$FRIDA_LEGACY_AUTOTOOLS" ]; then
-      host_alias="i686-linux-gnu"
-    else
-      host_alias="i686-none-linux-android"
-    fi
+    host_alias="i686-none-linux-android"
     cross_compiling=yes
     ;;
   android-x86_64)
-    if [ -n "$FRIDA_LEGACY_AUTOTOOLS" ]; then
-      host_alias="x86_64-linux-gnu"
-    else
-      host_alias="x86_64-none-linux-android"
-    fi
+    host_alias="x86_64-none-linux-android"
     cross_compiling=yes
     ;;
   android-arm)
-    if [ -n "$FRIDA_LEGACY_AUTOTOOLS" ]; then
-      host_alias="armv7-linux-eabi"
-    else
-      host_alias="armv7-none-linux-androideabi"
-    fi
+    host_alias="armv7-none-linux-androideabi"
     cross_compiling=yes
 
     frida_flags="$frida_flags -mthumb"
     ;;
   android-arm64)
-    if [ -n "$FRIDA_LEGACY_AUTOTOOLS" ]; then
-      host_alias="aarch64-linux-gnu"
-    else
-      host_alias="aarch64-none-linux-android"
-    fi
+    host_alias="aarch64-none-linux-android"
     cross_compiling=yes
     ;;
   macos-x86|ios-x86)
@@ -148,69 +132,6 @@ case "$PACKAGE_TARNAME" in
 
     CFLAGS="$CFLAGS -I$frida_prefix/include"
     LDFLAGS="$LDFLAGS -L$frida_prefix/lib"
-    ;;
-  'libffi')
-    CFLAGS="$CFLAGS -DFFI_MMAP_EXEC_WRIT=1 -DFFI_MMAP_EXEC_SELINUX=0"
-
-    enable_docs=no
-    enable_multi_os_directory=no
-
-    enable_shared=no
-    enable_static=yes
-    ;;
-  'glib')
-    with_pcre=internal
-    enable_debug=minimum
-    enable_dtrace=no
-    enable_libmount=no
-    enable_tests=no
-
-    enable_shared=no
-    enable_static=yes
-
-    glib_cv_stack_grows=no
-    glib_cv_uscore=no
-
-    case $frida_host_platform in
-      android|qnx)
-        ac_cv_func_posix_getgrgid_r=no
-        ac_cv_func_posix_getpwuid_r=no
-        ;;
-      *)
-        ac_cv_func_posix_getgrgid_r=yes
-        ac_cv_func_posix_getpwuid_r=yes
-        ;;
-    esac
-
-    case $frida_host_platform in
-      linux)
-        glib_cv_have_qsort_r=yes
-        ;;
-      macos|ios|android|qnx)
-        glib_cv_have_qsort_r=no
-        ;;
-    esac
-
-    case $frida_host_platform in
-      linux|android|macos|ios|qnx)
-        enable_proxy_libintl=yes
-        ;;
-    esac
-
-    CFLAGS="$CFLAGS -I$frida_prefix/include"
-    LDFLAGS="$LDFLAGS -L$frida_prefix/lib"
-    ;;
-  'libgee')
-    enable_shared=no
-    enable_static=yes
-    enable_internal_asserts=no
-    enable_consistency_check=no
-
-    CFLAGS="$CFLAGS -Wno-error=implicit-function-declaration"
-    ;;
-  'vala'|'json-glib')
-    enable_shared=no
-    enable_static=yes
     ;;
   'capstone')
     enable_shared=no
