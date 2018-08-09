@@ -295,13 +295,13 @@ case $host_platform in
 
     CPPFLAGS="-mmacosx-version-min=$macos_minver"
     CXXFLAGS="-stdlib=libc++"
-    LDFLAGS="-isysroot $macos_sdk_path -Wl,-macosx_version_min,$macos_minver -arch $host_clang_arch -Wl,-dead_strip -Wl,-no_compact_unwind"
+    LDFLAGS="-isysroot $macos_sdk_path -Wl,-macosx_version_min,$macos_minver -arch $host_clang_arch -Wl,-dead_strip"
 
     meson_root="$macos_sdk_path"
 
     base_toolchain_args="'-mmacosx-version-min=$macos_minver'"
     base_compiler_args="$base_toolchain_args"
-    base_linker_args="$base_toolchain_args, '-Wl,-dead_strip', '-Wl,-no_compact_unwind'"
+    base_linker_args="$base_toolchain_args, '-Wl,-dead_strip'"
 
     meson_c="$CC"
     meson_cpp="$CXX"
