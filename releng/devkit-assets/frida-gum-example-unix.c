@@ -110,7 +110,7 @@ static void
 example_listener_iface_init (gpointer g_iface,
                              gpointer iface_data)
 {
-  GumInvocationListenerIface * iface = (GumInvocationListenerIface *) g_iface;
+  GumInvocationListenerInterface * iface = g_iface;
 
   iface->on_enter = example_listener_on_enter;
   iface->on_leave = example_listener_on_leave;
