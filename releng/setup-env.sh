@@ -41,6 +41,11 @@ case $host_arch in
     meson_host_cpu=armv7hf
     meson_host_endian=little
     ;;
+  arm64)
+    meson_host_cpu_family=aarch64
+    meson_host_cpu=aarch64
+    meson_host_endian=little
+    ;;
   mips)
     meson_host_cpu_family=mips
     meson_host_cpu=mips
