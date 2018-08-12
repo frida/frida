@@ -71,10 +71,10 @@ build/frida-version.h: releng/generate-version-header.py .git/refs/heads/master
 glib:
 	@make -f Makefile.sdk.mk FRIDA_HOST=$(FOR_HOST) build/fs-$(FOR_HOST)/lib/pkgconfig/glib-2.0.pc
 glib-shell:
-	@. build/fs-env-$(FOR_HOST).rc && cd build/fs-tmp-$(FOR_HOST)/glib && bash
+	@. build/fs-meson-env-$(build_platform_arch).rc && cd build/fs-tmp-$(FOR_HOST)/glib && bash
 glib-symlinks:
 	@cd build; \
-	for candidate in $$(find . -mindepth 1 -maxdepth 1 -type d -name "frida-*"); do \
+	for candidate in $$(find . -mindepth 1 -maxdepth 1 -name "sdk-*"); do \
 		host_arch=$$(echo $$candidate | cut -f2- -d"-"); \
 		if [ -d "fs-tmp-$$host_arch/glib" ]; then \
 			echo "✓ $$host_arch"; \
@@ -85,7 +85,7 @@ glib-symlinks:
 			for name in glib gthread gmodule gobject gio; do \
 				libname=lib$$name-2.0.a; \
 				rm -f sdk-$$host_arch/lib/$$libname; \
-				ln -s ../../fs-tmp-$$host_arch/glib/$$name/.libs/$$libname sdk-$$host_arch/lib/$$libname; \
+				ln -s ../../fs-tmp-$$host_arch/glib/$$name/$$libname sdk-$$host_arch/lib/$$libname; \
 				pcname=$$name-2.0.pc; \
 				rm -f sdk-$$host_arch/lib/pkgconfig/$$pcname; \
 				ln -s ../../../fs-$$host_arch/lib/pkgconfig/$$pcname sdk-$$host_arch/lib/pkgconfig/$$pcname; \
