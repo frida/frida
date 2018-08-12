@@ -547,6 +547,6 @@ check-tools-macos-thin: tools-macos-thin ##@tools Test CLI tools for macOS witho
 	python-macos python-macos-thin check-python-macos check-python-macos-thin frida-python-update-submodule-stamp \
 	node-macos node-macos-thin check-node-macos check-node-macos-thin frida-node-update-submodule-stamp \
 	tools-macos tools-macos-thin check-tools-macos check-tools-macos-thin frida-tools-update-submodule-stamp \
-	glib glib-shell glib-symlinks \
+	glib glib-symlinks \
 	v8 v8-symlinks
 .SECONDARY:

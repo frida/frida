@@ -69,9 +69,11 @@ build/frida-version.h: releng/generate-version-header.py .git/refs/heads/master
 	@mv $@.tmp $@
 
 glib:
-	@make -f Makefile.sdk.mk FRIDA_HOST=$(FOR_HOST) build/fs-$(FOR_HOST)/lib/pkgconfig/glib-2.0.pc
-glib-shell:
-	@. build/fs-meson-env-$(build_platform_arch).rc && cd build/fs-tmp-$(FOR_HOST)/glib && bash
+	@if [ ! -e build/fs-$(FOR_HOST)/lib/pkgconfig/glib-2.0.pc ]; then \
+		make -f Makefile.sdk.mk FRIDA_HOST=$(FOR_HOST) build/fs-$(FOR_HOST)/lib/pkgconfig/glib-2.0.pc; \
+	else \
+		. build/fs-meson-env-$(build_platform_arch).rc && $(NINJA) -C build/fs-tmp-$(FOR_HOST)/glib; \
+	fi
 glib-symlinks:
 	@cd build; \
 	for candidate in $$(find . -mindepth 1 -maxdepth 1 -name "sdk-*"); do \
@@ -105,9 +107,11 @@ glib-symlinks:
 	done
 
 v8:
-	@rm -f build/fs-$(FOR_HOST)/lib/pkgconfig/v8-$(v8_api_version).pc
-	@touch -c build/fs-tmp-$(FOR_HOST)/v8/build.ninja
-	@make -f Makefile.sdk.mk FRIDA_HOST=$(FOR_HOST) build/fs-$(FOR_HOST)/lib/pkgconfig/v8-$(v8_api_version).pc
+	@if [ ! -e build/fs-$(FOR_HOST)/lib/pkgconfig/v8-$(v8_api_version).pc ]; then \
+		make -f Makefile.sdk.mk FRIDA_HOST=$(FOR_HOST) build/fs-$(FOR_HOST)/lib/pkgconfig/v8-$(v8_api_version).pc; \
+	else \
+		$(NINJA) -C build/fs-tmp-$(FOR_HOST)/v8 v8_monolith; \
+	fi
 v8-symlinks:
 	@cd build; \
 	for candidate in $$(find . -mindepth 1 -maxdepth 1 -name "sdk-*"); do \

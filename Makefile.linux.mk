@@ -572,6 +572,6 @@ check-tools-64-thin: build/tmp_thin-linux-x86_64/frida-tools-$(PYTHON_NAME)/.fri
 	python-32 python-64 python-32-thin python-64-thin check-python-32 check-python-64 check-python-32-thin check-python-64-thin frida-python-update-submodule-stamp \
 	node-32 node-64 node-32-thin node-64-thin check-node-32 check-node-64 check-node-32-thin check-node-64-thin frida-node-update-submodule-stamp \
 	tools-32 tools-64 tools-32-thin tools-64-thin check-tools-32 check-tools-64 check-tools-32-thin check-tools-64-thin frida-tools-update-submodule-stamp \
-	glib glib-shell glib-symlinks \
+	glib glib-symlinks \
 	v8 v8-symlinks
 .SECONDARY:
