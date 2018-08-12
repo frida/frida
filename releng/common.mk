@@ -62,7 +62,8 @@ build/frida_thin-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida
 	[ ! -e frida-meson-env-$*.rc ] && ln -s frida_thin-meson-env-$*.rc frida-meson-env-$*.rc; \
 	[ ! -d frida-$* ] && ln -s frida_thin-$* frida-$*; \
 	[ ! -d sdk-$* ] && ln -s frida_thin-sdk-$* sdk-$*; \
-	[ ! -d toolchain-$* ] && ln -s frida_thin-toolchain-$* toolchain-$*
+	[ ! -d toolchain-$* ] && ln -s frida_thin-toolchain-$* toolchain-$*; \
+	true
 
 build/frida-version.h: releng/generate-version-header.py .git/refs/heads/master
 	@python releng/generate-version-header.py > $@.tmp
