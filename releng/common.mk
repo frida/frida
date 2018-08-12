@@ -58,11 +58,11 @@ build/frida_thin-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida
 		FRIDA_ENV_NAME=frida_thin \
 		./releng/setup-env.sh
 	cd $(FRIDA)/build/; \
-	ln -sf frida_thin-env-$*.rc frida-env-$*.rc; \
-	ln -sf frida_thin-meson-env-$*.rc frida-env-$*.rc; \
-	ln -sf frida_thin-$* frida-$*; \
-	ln -sf frida_thin-sdk-$* sdk-$*; \
-	ln -sf frida_thin-toolchain-$* toolchain-$*
+	[ ! -e frida-env-$*.rc ] && ln -s frida_thin-env-$*.rc frida-env-$*.rc; \
+	[ ! -e frida-meson-env-$*.rc ] && ln -s frida_thin-meson-env-$*.rc frida-meson-env-$*.rc; \
+	[ ! -d frida-$* ] && ln -s frida_thin-$* frida-$*; \
+	[ ! -d sdk-$* ] && ln -s frida_thin-sdk-$* sdk-$*; \
+	[ ! -d toolchain-$* ] && ln -s frida_thin-toolchain-$* toolchain-$*
 
 build/frida-version.h: releng/generate-version-header.py .git/refs/heads/master
 	@python releng/generate-version-header.py > $@.tmp
