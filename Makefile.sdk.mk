@@ -349,8 +349,10 @@ $(eval $(call make-git-meson-module-rules,libsoup,build/fs-%/lib/pkgconfig/libso
 
 
 v8_common_args := \
-	is_debug=true \
-	v8_optimized_debug=false \
+	is_official_build=true \
+	is_debug=false \
+	v8_enable_v8_checks=false \
+	symbol_level=0 \
 	v8_monolithic=true \
 	v8_use_external_startup_data=false \
 	is_component_build=false \
