@@ -117,7 +117,7 @@ v8-symlinks:
 			rm -rf sdk-$$host_arch/include/v8-$(v8_api_version); \
 			ln -s ../../fs-$$host_arch/include/v8-$(v8_api_version) sdk-$$host_arch/include/v8-$(v8_api_version); \
 			rm -f sdk-$$host_arch/lib/libv8-$(v8_api_version).a; \
-			ln -s ../../fs-$$host_arch/lib/libv8-$(v8_api_version).a sdk-$$host_arch/lib/libv8-$(v8_api_version).a; \
+			ln -s ../../fs-tmp-$$host_arch/v8/obj/libv8_monolith.a sdk-$$host_arch/lib/libv8-$(v8_api_version).a; \
 			pcname=v8-$(v8_api_version).pc; \
 			rm -f sdk-$$host_arch/lib/pkgconfig/$$pcname; \
 			ln -s ../../../fs-$$host_arch/lib/pkgconfig/$$pcname sdk-$$host_arch/lib/pkgconfig/$$pcname; \
