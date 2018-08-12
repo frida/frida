@@ -193,14 +193,7 @@ def generate_library_windows(package, frida_root, host, output_dir, library_file
     ]
 
     v8 = [
-        sdk_lib_path("v8_base_0.lib", frida_root, host),
-        sdk_lib_path("v8_base_1.lib", frida_root, host),
-        sdk_lib_path("v8_base_2.lib", frida_root, host),
-        sdk_lib_path("v8_base_3.lib", frida_root, host),
-        sdk_lib_path("v8_libbase.lib", frida_root, host),
-        sdk_lib_path("v8_libplatform.lib", frida_root, host),
-        sdk_lib_path("v8_libsampler.lib", frida_root, host),
-        sdk_lib_path("v8_snapshot.lib", frida_root, host),
+        sdk_lib_path("v8-7.0.lib", frida_root, host),
     ]
 
     gum_lib = internal_arch_lib_path("gum", frida_root, host)
