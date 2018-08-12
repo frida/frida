@@ -9,6 +9,7 @@ libiconv_version := 1.15
 elfutils_version := 0.173
 libdwarf_version := 20180724
 openssl_version := 1.1.0h
+v8_api_version := 7.0
 
 
 build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos,')
@@ -85,7 +86,7 @@ ifeq ($(host_platform), qnx)
 	dwarf := build/fs-%/lib/libdwarf.a
 endif
 ifeq ($(enable_diet), 0)
-	v8 := build/fs-%/lib/pkgconfig/v8.pc
+	v8 := build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc
 endif
 
 ifneq ($(iconv),)
@@ -430,27 +431,29 @@ build/fs-tmp-%/v8/obj/libv8_monolith.a: build/fs-tmp-%/v8/build.ninja
 	$(NINJA) -C build/fs-tmp-$*/v8 v8_monolith
 	@touch $@
 
-build/fs-%/lib/pkgconfig/v8.pc: build/fs-tmp-%/v8/obj/libv8_monolith.a
-	install -d build/fs-$*/include/v8/include
-	install -m 644 v8-checkout/v8/include/*.h build/fs-$*/include/v8/include/
-	install -d build/fs-$*/include/v8/include/libplatform
-	install -m 644 v8-checkout/v8/include/libplatform/*.h build/fs-$*/include/v8/include/libplatform/
+build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc: build/fs-tmp-%/v8/obj/libv8_monolith.a
+	install -d build/fs-$*/include/v8-$(v8_api_version)/v8
+	install -m 644 v8-checkout/v8/include/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/
+	install -d build/fs-$*/include/v8-$(v8_api_version)/v8/inspector
+	install -m 644 build/fs-tmp-$*/v8/gen/include/inspector/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/inspector/
+	install -d build/fs-$*/include/v8-$(v8_api_version)/v8/libplatform
+	install -m 644 v8-checkout/v8/include/libplatform/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/libplatform/
 	install -d build/fs-$*/lib
-	install -m 644 $< build/fs-$*/lib/
+	install -m 644 $< build/fs-$*/lib/libv8-$(v8_api_version).a
 	install -d $(@D)
 	echo "prefix=\$${frida_sdk_prefix}" > $@.tmp
 	echo "exec_prefix=\$${prefix}" >> $@.tmp
 	echo "libdir=\$${exec_prefix}/lib" >> $@.tmp
-	echo "includedir=\$${prefix}/include/v8" >> $@.tmp
+	echo "includedir=\$${prefix}/include/v8-$(v8_api_version)" >> $@.tmp
 	echo "" >> $@.tmp
 	echo "Name: V8" >> $@.tmp
 	echo "Description: V8 JavaScript Engine" >> $@.tmp
 	echo "Version: 7.0.110" >> $@.tmp
-	echo "Libs: -L\$${libdir} -lv8_monolith" >> $@.tmp
+	echo "Libs: -L\$${libdir} -lv8-$(v8_api_version)" >> $@.tmp
 ifdef v8_libs_private
 	echo Libs.private: $(v8_libs_private) >> $@.tmp
 endif
-	echo "Cflags: -I\$${includedir} -I\$${includedir}/include" >> $@.tmp
+	echo "Cflags: -I\$${includedir} -I\$${includedir}/v8" >> $@.tmp
 	mv $@.tmp $@
 
 
