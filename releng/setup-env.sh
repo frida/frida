@@ -753,7 +753,7 @@ if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/.version" 2>/dev/null; th
   mv "$vala_wrapper" "$vala_impl"
   (
     echo "#!/bin/sh"
-    echo "exec \"$vala_impl\" \"\$@\" --vapidir=\"$FRIDA_TOOLROOT/share/vala-0.42/vapi\""
+    echo "exec \"$vala_impl\" --target-glib=2.57 \"\$@\" --vapidir=\"$FRIDA_TOOLROOT/share/vala-0.42/vapi\""
   ) > "$vala_wrapper"
   chmod 755 "$vala_wrapper"
 

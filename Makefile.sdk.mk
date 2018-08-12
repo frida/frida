@@ -249,13 +249,13 @@ $1/configure: build/fs-env-$(build_platform_arch).rc build/.$1-stamp
 build/fs-tmp-%/$1/Makefile: build/fs-env-%.rc $1/configure $3
 	$(RM) -r $$(@D)
 	mkdir -p $$(@D)
-	. $$< && cd $$(@D) && VALAFLAGS="$$$$VALAFLAGS --target-glib=2.53" ../../../$1/configure
+	. $$< && cd $$(@D) && ../../../$1/configure
 
 $2: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
 	. $$< \
 		&& cd build/fs-tmp-$$*/$1 \
-		&& make $(MAKE_J) GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums \
-		&& make $(MAKE_J) GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums install
+		&& make $(MAKE_J) \
+		&& make $(MAKE_J) install
 	@touch $$@
 endef
 
