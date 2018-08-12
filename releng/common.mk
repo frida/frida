@@ -11,6 +11,8 @@ frida_core_flags := --default-library static $(FRIDA_COMMON_FLAGS) $(FRIDA_DIET_
 
 frida_tools := frida frida-discover frida-kill frida-ls-devices frida-ps frida-trace
 
+v8_api_version := 7.0
+
 
 modules = capstone frida-gum frida-core frida-python frida-node frida-tools
 
@@ -103,23 +105,20 @@ glib-symlinks:
 	done
 
 v8:
-	@rm -f build/fs-$(FOR_HOST)/lib/pkgconfig/v8.pc build/fs-tmp-$(FOR_HOST)/.v8-build-stamp
-	@make -f Makefile.sdk.mk FRIDA_HOST=$(FOR_HOST) build/fs-$(FOR_HOST)/lib/pkgconfig/v8.pc
+	@rm -f build/fs-$(FOR_HOST)/lib/pkgconfig/v8-$(v8_api_version).pc
+	@touch -c build/fs-tmp-$(FOR_HOST)/v8/build.ninja
+	@make -f Makefile.sdk.mk FRIDA_HOST=$(FOR_HOST) build/fs-$(FOR_HOST)/lib/pkgconfig/v8-$(v8_api_version).pc
 v8-symlinks:
 	@cd build; \
-	for candidate in $$(find . -mindepth 1 -maxdepth 1 -type d -name "frida-*"); do \
+	for candidate in $$(find . -mindepth 1 -maxdepth 1 -name "sdk-*"); do \
 		host_arch=$$(echo $$candidate | cut -f2- -d"-"); \
 		if [ -d "fs-tmp-$$host_arch/v8" ]; then \
 			echo "✓ $$host_arch"; \
-			rm -rf sdk-$$host_arch/include/v8/include; \
-			ln -s ../../../fs-tmp-$$host_arch/v8/include sdk-$$host_arch/include/v8/include; \
-			v8_target=$$(basename $$(cd fs-tmp-$$host_arch/v8/out/*.release/ && pwd)); \
-			for name in libbase base libplatform libsampler snapshot; do \
-				libname=libv8_$$name.a; \
-				rm -f sdk-$$host_arch/lib/$$libname; \
-				ln -s ../../fs-tmp-$$host_arch/v8/out/$$v8_target/$$libname sdk-$$host_arch/lib/$$libname; \
-			done; \
-			pcname=v8.pc; \
+			rm -rf sdk-$$host_arch/include/v8-$(v8_api_version); \
+			ln -s ../../fs-$$host_arch/include/v8-$(v8_api_version) sdk-$$host_arch/include/v8-$(v8_api_version); \
+			rm -f sdk-$$host_arch/lib/libv8-$(v8_api_version).a; \
+			ln -s ../../fs-$$host_arch/lib/libv8-$(v8_api_version).a sdk-$$host_arch/lib/libv8-$(v8_api_version).a; \
+			pcname=v8-$(v8_api_version).pc; \
 			rm -f sdk-$$host_arch/lib/pkgconfig/$$pcname; \
 			ln -s ../../../fs-$$host_arch/lib/pkgconfig/$$pcname sdk-$$host_arch/lib/pkgconfig/$$pcname; \
 		fi; \
