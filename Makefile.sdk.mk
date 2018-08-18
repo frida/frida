@@ -444,13 +444,12 @@ build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc: build/fs-tmp-%/v8/obj/libv8_mo
 	install -m 644 $< build/fs-$*/lib/libv8-$(v8_api_version).a
 	install -d $(@D)
 	echo "prefix=\$${frida_sdk_prefix}" > $@.tmp
-	echo "exec_prefix=\$${prefix}" >> $@.tmp
-	echo "libdir=\$${exec_prefix}/lib" >> $@.tmp
+	echo "libdir=\$${prefix}/lib" >> $@.tmp
 	echo "includedir=\$${prefix}/include/v8-$(v8_api_version)" >> $@.tmp
 	echo "" >> $@.tmp
 	echo "Name: V8" >> $@.tmp
 	echo "Description: V8 JavaScript Engine" >> $@.tmp
-	echo "Version: 7.0.110" >> $@.tmp
+	echo "Version: 7.0.242" >> $@.tmp
 	echo "Libs: -L\$${libdir} -lv8-$(v8_api_version)" >> $@.tmp
 ifdef v8_libs_private
 	echo Libs.private: $(v8_libs_private) >> $@.tmp
