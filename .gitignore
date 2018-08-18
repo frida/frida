@@ -6,6 +6,7 @@
 /gettext
 /glib
 /glib-openssl
+/glib-schannel
 /ipch
 /json-glib
 /libdwarf
