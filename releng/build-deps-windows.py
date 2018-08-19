@@ -598,7 +598,7 @@ def transform_sdk_dest(srcfile):
 
     platform, configuration, runtime = rootdir.split("-")
     rootdir = "-".join([
-        platform_to_msvc(platform),
+        platform_to_msvs(platform),
         configuration.title()
     ])
 
@@ -654,6 +654,9 @@ def get_tmp_path(platform, configuration, runtime):
 
 def make_frida_repo_url(name):
     return "{}/{}.git".format(FRIDA_BASE_URL, name)
+
+def platform_to_msvs(platform):
+    return 'x64' if platform == 'x86_64' else 'Win32'
 
 def platform_to_msvc(platform):
     return 'x64' if platform == 'x86_64' else 'x86'
