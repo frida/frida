@@ -128,9 +128,6 @@ def build_meson_modules(platform, configuration):
             artifact_path = os.path.join(get_prefix_path(platform, configuration, runtime), artifact_subpath)
             if not os.path.exists(artifact_path):
                 build_meson_module(name, platform, configuration, runtime, options)
-            else:
-                # Refresh environment
-                get_meson_params(platform, configuration, runtime)
 
 def build_meson_module(name, platform, configuration, runtime, options):
     print("*** Building name={} platform={} runtime={} configuration={}".format(name, platform, configuration, runtime))
