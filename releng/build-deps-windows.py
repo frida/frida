@@ -372,7 +372,8 @@ def build_v8(platform, configuration, runtime):
     prefix = get_prefix_path(platform, configuration, runtime)
 
     lib_dir = os.path.join(prefix, "lib")
-    if len(glob.glob(os.path.join(lib_dir, "pkgconfig", "v8-*.pc"))) > 0:
+    pkgconfig_dir = os.path.join(lib_dir, "pkgconfig")
+    if len(glob.glob(os.path.join(pkgconfig_dir, "v8-*.pc"))) > 0:
         return
 
     checkout_dir = os.path.join(ROOT_DIR, "v8-checkout")
@@ -453,13 +454,13 @@ def build_v8(platform, configuration, runtime):
         header_files = [os.path.relpath(path, header_dir) for path in glob.glob(os.path.join(header_dir, "**", "*.h"), recursive=True)]
         copy_files(header_dir, header_files, include_dir)
 
-    if not os.path.exists(lib_dir):
-        os.makedirs(lib_dir)
+    if not os.path.exists(pkgconfig_dir):
+        os.makedirs(pkgconfig_dir)
+
     libv8_path = os.path.join(lib_dir, "libv8-{}.a".format(api_version))
     shutil.copyfile(monolith_path, libv8_path)
 
-    pc_path = os.path.join
-    with codecs.open(os.path.join(lib_dir, "pkgconfig", "v8-{}.pc".format(api_version)), "w", 'utf-8') as f:
+    with codecs.open(os.path.join(pkgconfig_dir, "v8-{}.pc".format(api_version)), "w", 'utf-8') as f:
         f.write("""\
 prefix={prefix}
 libdir=${{prefix}}/lib
