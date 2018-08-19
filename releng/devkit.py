@@ -170,7 +170,6 @@ def generate_library(package, frida_root, host, output_dir, library_filename):
 def generate_library_windows(package, frida_root, host, output_dir, library_filename):
     glib = [
         sdk_lib_path("glib-2.0.lib", frida_root, host),
-        sdk_lib_path("intl.lib", frida_root, host),
     ]
     gobject = glib + [
         sdk_lib_path("gobject-2.0.lib", frida_root, host),
