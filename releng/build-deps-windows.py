@@ -208,9 +208,11 @@ def generate_meson_env(platform, configuration, runtime):
       "UNICODE",
     ])
 
-    cflags = " ".join([
-      "/arch:SSE2",
-    ])
+    platform_cflags = []
+    if platform == 'x86':
+        platform_cflags += ["/arch:SSE2"]
+
+    cflags = " ".join(platform_cflags)
 
     cppflags = " ".join([
     ])
