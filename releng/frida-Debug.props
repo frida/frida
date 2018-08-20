@@ -20,7 +20,6 @@
     <Link>
       <LinkIncremental>true</LinkIncremental>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>$(IntDir)$(ProjectName).lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
 </Project>
