@@ -557,7 +557,7 @@ def file_is_sdk_related(directory, filename):
     if subdir == "bin":
         return False
 
-    if subdir == "lib" and ("vala" in subpath or "vala" in filename):
+    if subdir == "lib" and ("vala" in subpath or "vala" in filename or "vapigen" in filename):
         return False
 
     base, ext = os.path.splitext(filename)
