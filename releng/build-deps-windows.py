@@ -562,8 +562,6 @@ def file_is_sdk_related(directory, filename):
 
     base, ext = os.path.splitext(filename)
     ext = ext[1:]
-    if ext == "pc":
-        return False
 
     if ext == "h" and base.startswith("vala"):
         return False
