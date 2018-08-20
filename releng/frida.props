@@ -6,12 +6,6 @@
     <IntDir>$(SolutionDir)build\tmp-windows\$(PlatformName)-$(Configuration)\$(ProjectName)\</IntDir>
     <ValaCompiler>$(SolutionDir)build\toolchain-windows\bin\valac-0.42.exe</ValaCompiler>
     <ValaFlags>--target-glib=2.57 --vapidir="$(SolutionDir)frida-core\vapi" --vapidir="$(SolutionDir)frida-gum\vapi" --vapidir="$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\share\vala\vapi"</ValaFlags>
-    <V8Arch Condition=" '$(Platform)' == 'Win32' ">ia32</V8Arch>
-    <V8Arch Condition=" '$(Platform)' == 'x64' ">x64</V8Arch>
-    <Python27InstallPath32>$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Python\PythonCore\2.7\InstallPath)</Python27InstallPath32>
-    <Python36InstallPath32>$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Python\PythonCore\3.6\InstallPath)</Python36InstallPath32>
-    <Python27InstallPath64>$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Python\PythonCore\2.7\InstallPath)</Python27InstallPath64>
-    <Python36InstallPath64>$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Python\PythonCore\3.6\InstallPath)</Python36InstallPath64>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
