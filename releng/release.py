@@ -340,10 +340,10 @@ if __name__ == '__main__':
                 os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "lib", "python2.7", "site-packages", "_frida.pyd"))
             upload_python_bindings_to_pypi(r"C:\Program Files\Python 2.7\python.exe",
                 os.path.join(build_dir, "build", "frida-windows", "x64-Release", "lib", "python2.7", "site-packages", "_frida.pyd"))
-            upload_python_bindings_to_pypi(r"C:\Program Files (x86)\Python 3.6\python.exe",
-                os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "lib", "python3.6", "site-packages", "_frida.pyd"))
-            upload_python_bindings_to_pypi(r"C:\Program Files\Python 3.6\python.exe",
-                os.path.join(build_dir, "build", "frida-windows", "x64-Release", "lib", "python3.6", "site-packages", "_frida.pyd"), sdist=True)
+            upload_python_bindings_to_pypi(r"C:\Program Files (x86)\Python 3.7\python.exe",
+                os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "lib", "python3.7", "site-packages", "_frida.pyd"))
+            upload_python_bindings_to_pypi(r"C:\Program Files\Python 3.7\python.exe",
+                os.path.join(build_dir, "build", "frida-windows", "x64-Release", "lib", "python3.7", "site-packages", "_frida.pyd"), sdist=True)
 
             python2_interpreter=r"C:\Program Files\Python 2.7\python.exe"
             upload_node_bindings_to_npm(r"C:\Program Files (x86)\nodejs\node.exe", upload, publish=False, python2_interpreter=python2_interpreter)
