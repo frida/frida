@@ -1,5 +1,4 @@
 import codecs
-import datetime
 import glob
 import json
 import os
@@ -482,16 +481,11 @@ Cflags: -I${{includedir}} -I${{includedir}}/v8""".format(
 
 
 def package():
-    now = datetime.datetime.now()
+    toolchain_filename = "toolchain-windows-x86.exe"
+    toolchain_path = os.path.join(ROOT_DIR, "build", toolchain_filename)
 
-    toolchain_filename = now.strftime("toolchain-%Y%m%d-windows-x86.exe")
-    toolchain_path = os.path.join(ROOT_DIR, toolchain_filename)
-
-    sdk_filename = now.strftime("sdk-%Y%m%d-windows-any.exe")
-    sdk_path = os.path.join(ROOT_DIR, sdk_filename)
-
-    if os.path.exists(toolchain_path) and os.path.exists(sdk_path):
-        return
+    sdk_filename = "sdk-windows-any.exe"
+    sdk_path = os.path.join(ROOT_DIR, "build", sdk_filename)
 
     print("About to assemble:")
     print("\t* " + toolchain_filename)
