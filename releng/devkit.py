@@ -169,30 +169,30 @@ def generate_library(package, frida_root, host, output_dir, library_filename):
 
 def generate_library_windows(package, frida_root, host, output_dir, library_filename):
     glib = [
-        sdk_lib_path("glib-2.0.lib", frida_root, host),
+        sdk_lib_path("libglib-2.0.a", frida_root, host),
     ]
     gobject = glib + [
-        sdk_lib_path("gobject-2.0.lib", frida_root, host),
-        sdk_lib_path("ffi.lib", frida_root, host),
+        sdk_lib_path("libgobject-2.0.a", frida_root, host),
+        sdk_lib_path("libffi.a", frida_root, host),
     ]
     gmodule = glib + [
-        sdk_lib_path("gmodule-2.0.lib", frida_root, host),
+        sdk_lib_path("libgmodule-2.0.a", frida_root, host),
     ]
     gio = glib + gobject + gmodule + [
-        sdk_lib_path("gio-2.0.lib", frida_root, host),
-        sdk_lib_path("z.lib", frida_root, host),
+        sdk_lib_path("libgio-2.0.a", frida_root, host),
+        sdk_lib_path("libz.a", frida_root, host),
     ]
 
     json_glib = glib + gobject + [
-        sdk_lib_path("json-glib-1.0.lib", frida_root, host),
+        sdk_lib_path("libjson-glib-1.0.a", frida_root, host),
     ]
 
     gee = glib + gobject + [
-        sdk_lib_path("gee-0.8.lib", frida_root, host),
+        sdk_lib_path("libgee-0.8.a", frida_root, host),
     ]
 
     v8 = [
-        sdk_lib_path("v8-7.0.lib", frida_root, host),
+        sdk_lib_path("libv8-7.0.a", frida_root, host),
     ]
 
     gum_lib = internal_arch_lib_path("gum", frida_root, host)

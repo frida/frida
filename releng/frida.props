@@ -20,7 +20,7 @@
     <Link>
       <ImportLibrary>$(IntDir)$(ProjectName).lib</ImportLibrary>
       <AdditionalLibraryDirectories>$(IntDir)..\gum-32;$(IntDir)..\gum-64;$(IntDir)..\gumjs-32;$(IntDir)..\gumjs-64;$(SolutionDir)build\sdk-windows\$(PlatformName)-$(ConfigurationName)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ffi.lib;gee-0.8.lib;gio-2.0.lib;glib-2.0.lib;gmodule-2.0.lib;gobject-2.0.lib;gthread-2.0.lib;json-glib-1.0.lib;soup-2.4.lib;sqlite3.lib;v8-7.0.lib;z.lib;dnsapi.lib;iphlpapi.lib;ole32.lib;psapi.lib;shlwapi.lib;winmm.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libffi.a;libgee-0.8.a;libgio-2.0.a;libglib-2.0.a;libgmodule-2.0.a;libgobject-2.0.a;libgthread-2.0.a;libjson-glib-1.0.a;libsoup-2.4.a;libsqlite3.a;libv8-7.0.a;libz.a;dnsapi.lib;iphlpapi.lib;ole32.lib;psapi.lib;shlwapi.lib;winmm.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <PropertyGroup Label="Configuration">

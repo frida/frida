@@ -599,12 +599,6 @@ def transform_sdk_dest(srcfile):
     if runtime == 'dynamic' and subpath.split("\\")[0] == "lib":
         subpath = "lib-dynamic" + subpath[3:]
 
-    if filename.endswith(".a"):
-        if filename.startswith("lib"):
-            filename = filename[3:]
-        stem, ext = os.path.splitext(filename)
-        filename = stem + ".lib"
-
     return os.path.join(rootdir, subpath, filename)
 
 def transform_toolchain_dest(srcfile):
