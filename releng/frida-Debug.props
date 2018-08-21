@@ -6,6 +6,7 @@
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <_PropertySheetDisplayName>frida-Debug</_PropertySheetDisplayName>
+    <FridaComponentDefines></FridaComponentDefines>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>

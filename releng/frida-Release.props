@@ -5,6 +5,7 @@
   </ImportGroup>
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <FridaComponentDefines>G_DISABLE_ASSERT;G_DISABLE_CHECKS</FridaComponentDefines>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
