@@ -13,8 +13,8 @@ import v8
 import winreg
 
 
-PLATFORMS = ["x86_64", "x86"]
-CONFIGURATIONS = ["Debug", "Release"]
+PLATFORMS = ['x86_64', 'x86']
+CONFIGURATIONS = ['Debug', 'Release']
 TOOL_TARGET_RUNTIMES = ['static']
 LIBRARY_TARGET_RUNTIMES = ['static', 'dynamic']
 COMPRESSION_LEVEL = 9
