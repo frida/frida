@@ -141,7 +141,7 @@ def generate_header(package, frida_root, host, kit, umbrella_header_path, thirdp
         config += "\n".join(["#define {0} {1}".format(original, renamed) for original, renamed in public_mappings]) + "\n\n"
         config += "#endif\n\n"
 
-    return config + devkit_header
+    return (config + devkit_header).replace("\r\n", "\n")
 
 def ingest_header(header, all_header_files, processed_header_files, result):
     with codecs.open(header, "r", 'utf-8') as f:
