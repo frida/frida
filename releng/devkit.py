@@ -99,6 +99,9 @@ def generate_header(package, frida_root, host, kit, umbrella_header_path, thirdp
     umbrella_header = header_files[0]
     processed_header_files = set([umbrella_header])
     ingest_header(umbrella_header, header_files, processed_header_files, devkit_header_lines)
+    if kit == "frida-gumjs":
+        inspector_server_header = os.path.join(os.path.dirname(umbrella_header_path), "guminspectorserver.h")
+        ingest_header(inspector_server_header, header_files, processed_header_files, devkit_header_lines)
     if kit == "frida-core" and host.startswith("android-"):
         selinux_header = os.path.join(os.path.dirname(umbrella_header_path), "frida-selinux.h")
         ingest_header(selinux_header, header_files, processed_header_files, devkit_header_lines)
@@ -184,6 +187,10 @@ def generate_library_windows(package, frida_root, host, output_dir, library_file
         sdk_lib_path("libz.a", frida_root, host),
     ]
 
+    tls_provider = [
+        sdk_lib_path(os.path.join("gio", "modules", "libgioschannel-static.a"), frida_root, host),
+    ]
+
     json_glib = glib + gobject + [
         sdk_lib_path("libjson-glib-1.0.a", frida_root, host),
     ]
@@ -192,14 +199,24 @@ def generate_library_windows(package, frida_root, host, output_dir, library_file
         sdk_lib_path("libgee-0.8.a", frida_root, host),
     ]
 
+    sqlite = [
+        sdk_lib_path("libsqlite3.a", frida_root, host),
+    ]
+
+    libsoup = [
+        sdk_lib_path("libsoup-2.4.a", frida_root, host),
+        sdk_lib_path("libpsl.a", frida_root, host),
+        sdk_lib_path("libxml2.a", frida_root, host),
+    ]
+
     v8 = [
         sdk_lib_path("libv8-7.0.a", frida_root, host),
     ]
 
     gum_lib = internal_arch_lib_path("gum", frida_root, host)
     gum_deps = deduplicate(glib + gobject + gio)
-    gumjs_deps = deduplicate([gum_lib] + gum_deps + json_glib + v8)
-    frida_core_deps = deduplicate(glib + gobject + gio + json_glib + gmodule + gee)
+    gumjs_deps = deduplicate([gum_lib] + gum_deps + tls_provider + json_glib + sqlite + libsoup + v8)
+    frida_core_deps = deduplicate(glib + gobject + gio + tls_provider + json_glib + gmodule + gee + libsoup)
 
     if package == "frida-gum-1.0":
         package_lib_path = gum_lib
