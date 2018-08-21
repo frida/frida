@@ -12,6 +12,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import winenv
+
 
 INCLUDE_PATTERN = re.compile("#include\s+[<\"](.*?)[>\"]")
 
@@ -21,9 +23,6 @@ DEVKITS = {
     "frida-core": ("frida-core-1.0", ("frida-1.0", "frida-core.h")),
 }
 
-# TODO: auto-detect these:
-MSVS_DIR = r"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community"
-WINDOWS_SDK_DIR = r"C:\Program Files (x86)\Windows Kits\10"
 
 def generate_devkit(kit, host, output_dir):
     package, umbrella_header = DEVKITS[kit]
@@ -55,9 +54,11 @@ def generate_devkit(kit, host, output_dir):
 
 def generate_header(package, frida_root, host, kit, umbrella_header_path, thirdparty_symbol_mappings):
     if platform.system() == 'Windows':
+        (win10_sdk_dir, win10_sdk_version) = winenv.get_win10_sdk()
+
         include_dirs = [
-            MSVS_DIR + r"\VC\Tools\MSVC\14.14.26428\include",
-            WINDOWS_SDK_DIR + r"\Include\10.0.14393.0\ucrt",
+            os.path.join(winenv.get_msvc_tool_dir(), "include"),
+            os.path.join(win10_sdk_dir, "Include", win10_sdk_version, "ucrt"),
             os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "lib", "glib-2.0", "include"),
             os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "include", "glib-2.0"),
             os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "include", "glib-2.0"),
@@ -216,10 +217,10 @@ def generate_library_windows(package, frida_root, host, output_dir, library_file
     input_pdbs = [os.path.splitext(input_lib)[0] + ".pdb" for input_lib in input_libs]
     input_pdbs = [input_pdb for input_pdb in input_pdbs if os.path.exists(input_pdb)]
 
-    subprocess.check_output(
+    subprocess.run(
         [msvs_lib_exe(host), "/nologo", "/out:" + os.path.join(output_dir, library_filename)] + input_libs,
         cwd=msvs_runtime_path(host),
-        shell=False)
+        check=True)
 
     for pdb in input_pdbs:
         shutil.copy(pdb, output_dir)
@@ -405,12 +406,12 @@ def msvs_lib_exe(host):
 
 def msvs_tool_path(host, tool):
     if host == "windows-x86_64":
-        return MSVS_DIR + r"\VC\Tools\MSVC\14.14.26428\bin\HostX86\x64\{0}".format(tool)
+        return os.path.join(winenv.get_msvc_tool_dir(), "bin", "HostX86", "x64", tool)
     else:
-        return MSVS_DIR + r"\VC\Tools\MSVC\14.14.26428\bin\HostX86\x86\{0}".format(tool)
+        return os.path.join(winenv.get_msvc_tool_dir(), "bin", "HostX86", "x86", tool)
 
 def msvs_runtime_path(host):
-    return MSVS_DIR + r"\VC\Tools\MSVC\14.14.26428\bin\HostX86\x86"
+    return os.path.join(winenv.get_msvc_tool_dir(), "bin", "HostX86", "x86")
 
 def msvs_arch_config(host):
     if host == "windows-x86_64":

@@ -1,6 +1,7 @@
+#!/usr/bin/env python3
+
 import codecs
 import glob
-import json
 import os
 import platform
 import shutil
@@ -10,7 +11,7 @@ import tempfile
 import time
 import urllib.request
 import v8
-import winreg
+import winenv
 
 
 PLATFORMS = ['x86_64', 'x86']
@@ -25,7 +26,7 @@ VALA_VERSION = "0.42"
 VALA_TARGET_GLIB = "2.57"
 
 
-RELENG_DIR = os.path.abspath(os.path.dirname(sys.argv[0]))
+RELENG_DIR = os.path.abspath(os.path.dirname(__file__))
 ROOT_DIR = os.path.dirname(RELENG_DIR)
 BOOTSTRAP_TOOLCHAIN_DIR = os.path.join(ROOT_DIR, "build", "fts-toolchain-windows")
 
@@ -35,10 +36,6 @@ VALAC_FILENAME = "valac-{}.exe".format(VALA_VERSION)
 VALA_VAPI_SUBPATH = "share\\vala-{}\\vapi".format(VALA_VERSION)
 
 cached_meson_params = {}
-cached_msvs_dir = None
-cached_msvc_dir = None
-cached_winxpsdk = None
-cached_win10sdk = None
 
 build_platform = 'x86_64' if platform.machine().endswith("64") else 'x86'
 
@@ -86,9 +83,9 @@ def check_environment():
     ensure_bootstrap_toolchain()
 
     try:
-        get_msvs_installation_dir()
-        get_winxp_sdk()
-        get_win10_sdk()
+        winenv.get_msvs_installation_dir()
+        winenv.get_winxp_sdk()
+        winenv.get_win10_sdk()
     except MissingDependencyError as e:
         print("ERROR: {}".format(e), file=sys.stderr)
         sys.exit(1)
@@ -181,11 +178,11 @@ def generate_meson_env(platform, configuration, runtime):
     if not os.path.exists(env_dir):
         os.makedirs(env_dir)
 
-    vc_dir = os.path.join(get_msvs_installation_dir(), "VC")
+    vc_dir = os.path.join(winenv.get_msvs_installation_dir(), "VC")
     vc_install_dir = vc_dir + "\\"
 
     msvc_platform = platform_to_msvc(platform)
-    msvc_dir = get_msvc_tool_dir()
+    msvc_dir = winenv.get_msvc_tool_dir()
     msvc_bin_dir = os.path.join(msvc_dir, "bin", "Host" + platform_to_msvc(build_platform), msvc_platform)
 
     msvc_dll_dirs = []
@@ -193,7 +190,7 @@ def generate_meson_env(platform, configuration, runtime):
         build_msvc_platform = platform_to_msvc(build_platform)
         msvc_dll_dirs.append(os.path.join(msvc_dir, "bin", "Host" + build_msvc_platform, build_msvc_platform))
 
-    (winxp_sdk_dir, winxp_sdk_version) = get_winxp_sdk()
+    (winxp_sdk_dir, winxp_sdk_version) = winenv.get_winxp_sdk()
     if platform == 'x86':
         winxp_bin_dir = os.path.join(winxp_sdk_dir, "Bin")
         winxp_lib_dir = os.path.join(winxp_sdk_dir, "Lib")
@@ -216,7 +213,7 @@ def generate_meson_env(platform, configuration, runtime):
     cppflags = " ".join([
     ])
 
-    (win10_sdk_dir, win10_sdk_version) = get_win10_sdk()
+    (win10_sdk_dir, win10_sdk_version) = winenv.get_win10_sdk()
 
     m4_path = os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "bin", "m4.exe")
     bison_pkgdatadir = os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "share", "bison")
@@ -419,15 +416,15 @@ def build_v8(platform, configuration, runtime):
                 "v8_enable_v8_checks=true",
             ]
 
-        (win10_sdk_dir, win10_sdk_version) = get_win10_sdk()
+        (win10_sdk_dir, win10_sdk_version) = winenv.get_win10_sdk()
 
         args = " ".join([
             "target_cpu=\"{}\"".format(platform_to_msvc(platform)),
         ] + configuration_args + [
             "use_crt=\"{}\"".format(runtime),
             "is_clang=false",
-            "visual_studio_path=\"{}\"".format(get_msvs_installation_dir()),
-            "visual_studio_version=\"{}\"".format(get_msvs_version()),
+            "visual_studio_path=\"{}\"".format(winenv.get_msvs_installation_dir()),
+            "visual_studio_version=\"{}\"".format(winenv.get_msvs_version()),
             "wdk_path=\"{}\"".format(win10_sdk_dir),
             "windows_sdk_path=\"{}\"".format(win10_sdk_dir),
             "symbol_level=0",
@@ -653,60 +650,6 @@ def vscrt_from_configuration_and_runtime(configuration, runtime):
         result += "d"
     return result
 
-def get_msvs_installation_dir():
-    global cached_msvs_dir
-    if cached_msvs_dir is None:
-        installations = json.loads(subprocess.check_output([
-            os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "bin", "vswhere.exe"),
-            "-version", "15.0",
-            "-format", "json",
-            "-property", "installationPath"
-        ]))
-        if len(installations) == 0:
-            raise MissingDependencyError("Visual Studio 2017 is not installed")
-        cached_msvs_dir = installations[0]['installationPath'].rstrip("\\")
-    return cached_msvs_dir
-
-def get_msvs_version():
-    return "2017"
-
-def get_msvc_tool_dir():
-    global cached_msvc_dir
-    if cached_msvc_dir is None:
-        msvs_dir = get_msvs_installation_dir()
-        version = sorted(glob.glob(os.path.join(msvs_dir, "VC", "Tools", "MSVC", "*.*.*")))[-1]
-        cached_msvc_dir = os.path.join(msvs_dir, "VC", "Tools", "MSVC", version)
-    return cached_msvc_dir
-
-def get_winxp_sdk():
-    global cached_winxpsdk
-    if cached_winxpsdk is None:
-        try:
-            key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Microsoft SDKs\Windows\v7.1A")
-            try:
-                (install_dir, _) = winreg.QueryValueEx(key, "InstallationFolder")
-                (version, _) = winreg.QueryValueEx(key, "ProductVersion")
-                cached_winxpsdk = (install_dir.rstrip("\\"), version)
-            finally:
-                winreg.CloseKey(key)
-        except Exception as e:
-            raise MissingDependencyError("Windows XP SDK is not installed")
-    return cached_winxpsdk
-
-def get_win10_sdk():
-    global cached_win10sdk
-    if cached_win10sdk is None:
-        try:
-            key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows Kits\Installed Roots")
-            try:
-                (install_dir, _) = winreg.QueryValueEx(key, "KitsRoot10")
-                version = os.path.basename(sorted(glob.glob(os.path.join(install_dir, "Include", "*.*.*")))[-1])
-                cached_win10sdk = (install_dir.rstrip("\\"), version)
-            finally:
-                winreg.CloseKey(key)
-        except Exception as e:
-            raise MissingDependencyError("Windows 10 SDK is not installed")
-    return cached_win10sdk
 
 
 def perform(*args, **kwargs):
