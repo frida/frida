@@ -214,16 +214,11 @@ def generate_library_windows(package, frida_root, host, output_dir, library_file
         raise Exception("Unhandled package")
 
     input_libs = [package_lib_path] + package_lib_deps
-    input_pdbs = [os.path.splitext(input_lib)[0] + ".pdb" for input_lib in input_libs]
-    input_pdbs = [input_pdb for input_pdb in input_pdbs if os.path.exists(input_pdb)]
 
     subprocess.run(
         [msvs_lib_exe(host), "/nologo", "/out:" + os.path.join(output_dir, library_filename)] + input_libs,
         cwd=msvs_runtime_path(host),
         check=True)
-
-    for pdb in input_pdbs:
-        shutil.copy(pdb, output_dir)
 
     extra_flags = [os.path.basename(lib_path) for lib_path in input_libs]
     thirdparty_symbol_mappings = []
