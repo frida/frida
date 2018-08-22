@@ -225,8 +225,8 @@ case $host_platform in
         ;;
     esac
     CPP="${host_toolprefix}cpp"
-    CC="${host_toolprefix}gcc"
-    CXX="${host_toolprefix}g++"
+    CC="${host_toolprefix}gcc -static-libgcc"
+    CXX="$FRIDA_ROOT/releng/cxx-wrapper-linux.sh ${host_toolprefix}g++ -static-libgcc -static-libstdc++"
     LD="${host_toolprefix}ld"
 
     AR="${host_toolprefix}ar"
@@ -237,18 +237,23 @@ case $host_platform in
     OBJCOPY="${host_toolprefix}objcopy"
     OBJDUMP="${host_toolprefix}objdump"
 
-    CFLAGS="$host_arch_flags -static-libgcc -ffunction-sections -fdata-sections"
-    CXXFLAGS="-static-libstdc++"
-    LDFLAGS="-Wl,--gc-sections -Wl,-z,noexecstack"
+    CFLAGS="$host_arch_flags -ffunction-sections -fdata-sections"
+    LDFLAGS="$host_arch_flags -Wl,--gc-sections -Wl,-z,noexecstack"
+
+    arch_args=$(flags_to_args "$host_arch_flags")
+
+    base_toolchain_args="$arch_args, '-static-libgcc'"
+    base_compiler_args="$base_toolchain_args, '-ffunction-sections', '-fdata-sections'"
+    base_linker_args="$base_toolchain_args, '-Wl,--gc-sections', '-Wl,-z,noexecstack'"
 
     meson_c="${host_toolprefix}gcc"
     meson_cpp="${host_toolprefix}g++"
 
-    meson_c_args="$(flags_to_args "$host_arch_flags"), '-static-libgcc', '-ffunction-sections', '-fdata-sections'"
-    meson_cpp_args="'-static-libstdc++', '-fno-rtti'"
+    meson_c_args="$base_compiler_args"
+    meson_cpp_args="$base_compiler_args, '-static-libstdc++', '-fno-rtti'"
 
-    meson_c_link_args="'-Wl,--gc-sections', '-Wl,-z,noexecstack'"
-    meson_cpp_link_args=""
+    meson_c_link_args="$base_linker_args"
+    meson_cpp_link_args="$base_linker_args, '-static-libstdc++'"
     ;;
   macos)
     macos_minver="10.9"
@@ -694,6 +699,7 @@ if [ $enable_asan = yes ]; then
 fi
 
 CFLAGS="-fPIC $CFLAGS"
+CXXFLAGS="$CFLAGS $CXXFLAGS"
 
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   version_include="-include $FRIDA_BUILD/frida-version.h"
