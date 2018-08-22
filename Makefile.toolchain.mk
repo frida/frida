@@ -172,7 +172,8 @@ endef
 define make-git-meson-module-rules
 build/.$1-stamp:
 	$(RM) -r $1
-	git clone --recurse-submodules $(repo_base_url)/$1$(repo_suffix)
+	git clone $(repo_base_url)/$1$(repo_suffix)
+	cd $1 && git submodule init && git submodule update
 	@mkdir -p $$(@D)
 	@touch $$@
 
