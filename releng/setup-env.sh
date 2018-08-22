@@ -226,7 +226,7 @@ case $host_platform in
     esac
     CPP="${host_toolprefix}cpp"
     CC="${host_toolprefix}gcc -static-libgcc"
-    CXX="$FRIDA_ROOT/releng/cxx-wrapper-linux.sh ${host_toolprefix}g++ -static-libgcc -static-libstdc++"
+    CXX="${host_toolprefix}g++ -static-libgcc -static-libstdc++"
     LD="${host_toolprefix}ld"
 
     AR="${host_toolprefix}ar"
@@ -610,8 +610,8 @@ $arch_linker_args"
 
     toolchain_flags="--sysroot=$qnx_sysroot $host_arch_flags $qnx_preprocessor_flags"
     CPP="$qnx_toolchain_prefix-cpp $toolchain_flags"
-    CC="$FRIDA_ROOT/releng/cxx-wrapper-qnx.sh $qnx_toolchain_prefix-gcc $toolchain_flags -static-libgcc"
-    CXX="$FRIDA_ROOT/releng/cxx-wrapper-qnx.sh $qnx_toolchain_prefix-g++ $toolchain_flags -static-libgcc -static-libstdc++"
+    CC="$qnx_toolchain_prefix-gcc $toolchain_flags -static-libgcc"
+    CXX="$qnx_toolchain_prefix-g++ $toolchain_flags -static-libgcc -static-libstdc++"
     LD="$qnx_toolchain_prefix-ld --sysroot=$qnx_sysroot"
 
     AR="$qnx_toolchain_prefix-ar"
