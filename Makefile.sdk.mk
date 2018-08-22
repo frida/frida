@@ -303,7 +303,7 @@ $(eval $(call make-git-autotools-module-rules,libunwind,build/fs-%/lib/pkgconfig
 
 $(eval $(call make-git-meson-module-rules,libffi,build/fs-%/lib/pkgconfig/libffi.pc,,))
 
-$(eval $(call make-git-meson-module-rules,glib,build/fs-%/lib/pkgconfig/glib-2.0.pc,$(iconv) build/fs-%/lib/pkgconfig/zlib.pc build/fs-%/lib/pkgconfig/libffi.pc,$(glib_iconv_option) -Dinternal_pcre=true -Dtests=false))
+$(eval $(call make-git-meson-module-rules,glib,build/fs-%/lib/pkgconfig/glib-2.0.pc,$(iconv) build/fs-%/lib/pkgconfig/zlib.pc build/fs-%/lib/pkgconfig/libffi.pc,$(glib_iconv_option) -Dselinux=false -Dlibmount=false -Dinternal_pcre=true -Dtests=false))
 
 build/.openssl-stamp:
 	$(RM) -r openssl

@@ -10,7 +10,6 @@ automake_version := 1.16.1
 automake_api_version := 1.16
 libtool_version := 2.4.6
 gettext_version := 0.19.8.1
-pkg_config_version := 0.29.2
 
 
 build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos,')
@@ -237,9 +236,13 @@ build/ft-%/bin/libtool: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 
 $(eval $(call make-tarball-module-rules,gettext,https://gnuftp.uib.no/gettext/gettext-$(gettext_version).tar.gz,build/ft-%/bin/autopoint,build/ft-%/bin/libtool,gettext-vasnprintf-apple-fix.patch))
 
-$(eval $(call make-git-meson-module-rules,glib,build/ft-%/bin/glib-genmarshal,build/ft-%/bin/autopoint,$(glib_iconv_option) -Dinternal_pcre=true -Dtests=false))
+$(eval $(call make-git-meson-module-rules,zlib,build/ft-%/lib/pkgconfig/zlib.pc,))
 
-$(eval $(call make-tarball-module-rules,pkg-config,https://pkgconfig.freedesktop.org/releases/pkg-config-$(pkg_config_version).tar.gz,build/ft-%/bin/pkg-config,build/ft-%/bin/glib-genmarshal,pkg-config-static-glib.patch))
+$(eval $(call make-git-meson-module-rules,libffi,build/ft-%/lib/pkgconfig/libffi.pc,,))
+
+$(eval $(call make-git-meson-module-rules,glib,build/ft-%/bin/glib-genmarshal,build/ft-%/bin/autopoint build/ft-%/lib/pkgconfig/zlib.pc build/ft-%/lib/pkgconfig/libffi.pc,$(glib_iconv_option) -Dselinux=false -Dlibmount=false -Dinternal_pcre=true -Dtests=false))
+
+$(eval $(call make-git-meson-module-rules,pkg-config,build/ft-%/bin/pkg-config,build/ft-%/bin/glib-genmarshal,))
 
 $(eval $(call make-git-meson-module-rules,vala,build/ft-%/bin/valac,build/ft-%/bin/glib-genmarshal,))
 
