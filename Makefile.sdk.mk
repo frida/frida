@@ -220,17 +220,16 @@ build/.libdwarf-stamp:
 build/fs-tmp-%/libdwarf/Makefile: build/fs-env-%.rc build/.libdwarf-stamp build/fs-%/lib/libelf.a
 	$(RM) -r $(@D)
 	mkdir -p $(@D)
-	. $< && cd $(@D) && ../../../libdwarf/libdwarf/configure
+	. $< && cd $(@D) && ../../../libdwarf/configure
 
 build/fs-%/lib/libdwarf.a: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
 	. $< \
-		&& cd build/fs-tmp-$*/libdwarf \
-		&& make $(MAKE_J) HOSTCC="gcc" HOSTCFLAGS="" HOSTLDFLAGS="" libdwarf.a
+		&& make $(MAKE_J) -C build/fs-tmp-$*/libdwarf/libdwarf libdwarf.la
 	install -d build/fs-$*/include
 	install -m 644 libdwarf/libdwarf/dwarf.h build/fs-$*/include
-	install -m 644 build/fs-tmp-$*/libdwarf/libdwarf.h build/fs-$*/include
+	install -m 644 libdwarf/libdwarf/libdwarf.h build/fs-$*/include
 	install -d build/fs-$*/lib
-	install -m 644 build/fs-tmp-$*/libdwarf/libdwarf.a build/fs-$*/lib
+	install -m 644 build/fs-tmp-$*/libdwarf/libdwarf/.libs/libdwarf.a build/fs-$*/lib
 	@touch $@
 
 
