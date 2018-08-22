@@ -405,6 +405,17 @@ ifeq ($(host_platform), android)
 	v8_libs_private := "-llog -lm"
 endif
 
+gn:
+	# Google's prebuilt GN requires a newer glibc than our Debian Squeeze buildroot has.
+	git clone https://gn.googlesource.com/gn
+
+build/fs-tmp-%/gn/build.ninja: gn
+	CC=gcc CXX=g++ python gn/build/gen.py --no-sysroot --out-path $(abspath $(@D))
+
+build/fs-tmp-%/gn/gn: build/fs-tmp-%/gn/build.ninja
+	$(NINJA) -C build/fs-tmp-$*/gn
+	#@touch $@
+
 v8-checkout/depot_tools/gclient:
 	$(RM) -r v8-checkout/depot_tools
 	git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git v8-checkout/depot_tools
