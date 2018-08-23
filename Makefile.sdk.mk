@@ -390,11 +390,17 @@ endif
 v8_build_platform := $(shell echo $(build_platform) | sed 's,^macos$$,mac,')
 ifeq ($(host_platform), macos)
 	v8_os := mac
-	v8_platform_args := use_xcode_clang=true mac_deployment_target="10.9.0"
+	v8_platform_args := \
+		use_xcode_clang=true \
+		mac_deployment_target="10.9.0"
 endif
 ifeq ($(host_platform), ios)
 	v8_os := ios
-	v8_platform_args := use_xcode_clang=true mac_deployment_target="10.9.0" ios_deployment_target="7.0"
+	v8_platform_args := \
+		use_xcode_clang=true \
+		mac_deployment_target="10.9.0" \
+		ios_deployment_target="7.0" \
+		v8_enable_embedded_builtins=false
 endif
 ifeq ($(host_platform), linux)
 	v8_os := linux
