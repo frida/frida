@@ -435,6 +435,7 @@ def build_v8(platform, configuration, runtime):
             "v8_enable_disassembler=false",
             "v8_enable_gdbjit=false",
             "v8_enable_i18n_support=false",
+            "v8_untrusted_code_mitigations=false",
             "strip_absolute_paths_from_debug_symbols=true",
             "use_goma=false",
             "v8_embedder_string=\"-frida\"",
