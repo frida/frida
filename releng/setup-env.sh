@@ -718,11 +718,17 @@ ACLOCAL_FLAGS="$ACLOCAL_FLAGS -I $FRIDA_TOOLROOT/share/aclocal"
 ACLOCAL="aclocal $ACLOCAL_FLAGS"
 CONFIG_SITE="$FRIDA_BUILD/${frida_env_name_prefix}config-${host_platform_arch}.site"
 
-VALAC="$FRIDA_TOOLROOT/bin/valac-0.42"
-VALAFLAGS="--vapidir=\"$FRIDA_PREFIX/share/vala/vapi\""
+VALAC="$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-valac"
+vala_impl="$FRIDA_TOOLROOT/bin/valac-0.42"
+vala_flags="--vapidir=\"$FRIDA_PREFIX/share/vala/vapi\""
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
-  VALAFLAGS="$VALAFLAGS --vapidir=\"$FRIDA_SDKROOT/share/vala/vapi\""
+  vala_flags="$vala_flags --vapidir=\"$FRIDA_SDKROOT/share/vala/vapi\""
 fi
+(
+  echo "#!/bin/sh"
+  echo "exec \"$vala_impl\" $vala_flags \"\$@\""
+) > "$VALAC"
+chmod 755 "$VALAC"
 
 [ ! -d "$FRIDA_PREFIX/share/aclocal}" ] && mkdir -p "$FRIDA_PREFIX/share/aclocal"
 [ ! -d "$FRIDA_PREFIX/lib}" ] && mkdir -p "$FRIDA_PREFIX/lib"
@@ -841,7 +847,6 @@ fi
   echo "export PKG_CONFIG=\"$PKG_CONFIG\""
   echo "export PKG_CONFIG_PATH=\"\""
   echo "export VALAC=\"$VALAC\""
-  echo "export VALAFLAGS=\"$VALAFLAGS\""
   echo "export CPP=\"$CPP\""
   echo "export CPPFLAGS=\"$CPPFLAGS\""
   echo "export CC=\"$CC\""
@@ -947,7 +952,6 @@ meson_cross_file=build/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}.txt
   if [ -n "$meson_objcpp" ]; then
     echo "objcpp_args = [${meson_objcpp_args}${meson_version_include}]"
   fi
-  echo "vala_args = [$(flags_to_args "$VALAFLAGS")]"
   echo "c_link_args = [$meson_c_link_args]"
   echo "cpp_link_args = [$meson_cpp_link_args]"
   if [ -n "$meson_objc" ]; then
