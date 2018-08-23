@@ -459,7 +459,7 @@ build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc: build/fs-tmp-%/v8/obj/libv8_mo
 	echo "" >> $@.tmp
 	echo "Name: V8" >> $@.tmp
 	echo "Description: V8 JavaScript Engine" >> $@.tmp
-	echo "Version: 7.0.242" >> $@.tmp
+	echo "Version: $$(python releng/v8.py v8-checkout/v8 version)" >> $@.tmp
 	echo "Libs: -L\$${libdir} -lv8-$(v8_api_version)" >> $@.tmp
 ifdef v8_libs_private
 	echo Libs.private: $(v8_libs_private) >> $@.tmp
