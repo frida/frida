@@ -80,7 +80,7 @@ build/$1-%/lib/pkgconfig/capstone.pc: build/$1-env-%.rc build/.capstone-submodul
 			*-arm)    capstone_archs="arm"         ;; \
 			*-arm64)  capstone_archs="aarch64 arm" ;; \
 		esac \
-		&& make -C capstone \
+		&& CFLAGS="$$$$CPPFLAGS $$$$CFLAGS" make -C capstone \
 			PREFIX=$$$$frida_prefix \
 			BUILDDIR=../build/$2-$$*/capstone \
 			CAPSTONE_BUILD_CORE_ONLY=yes \
