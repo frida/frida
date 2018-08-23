@@ -387,14 +387,11 @@ ifeq ($(host_arch), arm64)
 endif
 
 v8_build_platform := $(shell echo $(build_platform) | sed 's,^macos$$,mac,')
-ifeq ($(build_platform), macos)
-	v8_platform_args := use_xcode_clang=true
-endif
 ifeq ($(host_platform), macos)
-	v8_platform_args := mac_deployment_target="10.9.0"
+	v8_platform_args := use_xcode_clang=true mac_deployment_target="10.9.0"
 endif
 ifeq ($(host_platform), ios)
-	v8_platform_args := mac_deployment_target="10.9.0" ios_deployment_target="7.0"
+	v8_platform_args := use_xcode_clang=true mac_deployment_target="10.9.0" ios_deployment_target="7.0"
 endif
 ifeq ($(host_platform), linux)
 	v8_platform_args := \
