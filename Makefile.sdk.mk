@@ -397,6 +397,14 @@ ifeq ($(host_platform), ios)
 	v8_platform_args := mac_deployment_target="10.9.0" ios_deployment_target="7.0"
 endif
 ifeq ($(host_platform), linux)
+	v8_platform_args := \
+		is_clang=false \
+		is_cfi=false \
+		treat_warnings_as_errors=false \
+		use_sysroot=false \
+		use_custom_libcxx=false \
+		linux_use_bundled_binutils=false \
+		use_gold=false
 	v8_libs_private := "-lrt"
 endif
 ifeq ($(host_platform), android)
@@ -405,14 +413,17 @@ endif
 
 gn:
 	# Google's prebuilt GN requires a newer glibc than our Debian Squeeze buildroot has.
-	git clone https://gn.googlesource.com/gn
+	git clone $(repo_base_url)/gn$(repo_suffix)
 
-build/fs-tmp-%/gn/build.ninja: gn
-	CC=gcc CXX=g++ python gn/build/gen.py --no-sysroot --out-path $(abspath $(@D))
+build/fs-tmp-%/gn/build.ninja: build/fs-env-%.rc gn
+	. $< \
+		&& CC=$$CC CXX=$$CXX python gn/build/gen.py \
+			--no-sysroot \
+			--out-path $(abspath $(@D))
 
 build/fs-tmp-%/gn/gn: build/fs-tmp-%/gn/build.ninja
 	$(NINJA) -C build/fs-tmp-$*/gn
-	#@touch $@
+	@touch $@
 
 v8-checkout/depot_tools/gclient:
 	$(RM) -r v8-checkout/depot_tools
@@ -436,8 +447,8 @@ v8-checkout/v8: v8-checkout/.gclient
 		&& gclient sync
 	@touch $@
 
-build/fs-tmp-%/v8/build.ninja: v8-checkout/v8
-	cd v8-checkout/v8 && ../depot_tools/gn gen $(abspath $(@D)) --args='target_cpu="$(v8_cpu)" $(v8_abi_args) $(v8_common_args) $(v8_platform_args)'
+build/fs-tmp-%/v8/build.ninja: v8-checkout/v8 build/fs-tmp-%/gn/gn
+	cd v8-checkout/v8 && ../../build/fs-tmp-$*/gn/gn gen $(abspath $(@D)) --args='target_cpu="$(v8_cpu)" $(v8_abi_args) $(v8_common_args) $(v8_platform_args)'
 
 build/fs-tmp-%/v8/obj/libv8_monolith.a: build/fs-tmp-%/v8/build.ninja
 	$(NINJA) -C build/fs-tmp-$*/v8 v8_monolith
