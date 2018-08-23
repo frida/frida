@@ -444,8 +444,8 @@ v8-checkout/v8: v8-checkout/.gclient
 		&& gclient sync
 	@touch $@
 
-build/fs-tmp-%/v8/build.ninja: v8-checkout/v8 build/fs-tmp-%/gn/gn
-	cd v8-checkout/v8 && ../../build/fs-tmp-$*/gn/gn gen $(abspath $(@D)) --args='target_cpu="$(v8_cpu)" $(v8_abi_args) $(v8_common_args) $(v8_platform_args)'
+build/fs-tmp-%/v8/build.ninja: v8-checkout/v8 build/fs-tmp-$(build_platform_arch)/gn/gn
+	cd v8-checkout/v8 && ../../build/fs-tmp-$(build_platform_arch)/gn/gn gen $(abspath $(@D)) --args='target_cpu="$(v8_cpu)" $(v8_abi_args) $(v8_common_args) $(v8_platform_args)'
 
 build/fs-tmp-%/v8/obj/libv8_monolith.a: build/fs-tmp-%/v8/build.ninja
 	$(NINJA) -C build/fs-tmp-$*/v8 v8_monolith
