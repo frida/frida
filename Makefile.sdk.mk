@@ -365,7 +365,7 @@ v8_common_args := \
 	$(NULL)
 
 ifeq ($(host_arch), x86)
-	v8_cpu := ia32
+	v8_cpu := x86
 endif
 ifeq ($(host_arch), x86_64)
 	v8_cpu := x64
