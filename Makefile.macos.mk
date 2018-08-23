@@ -111,7 +111,7 @@ build/$1-%/lib/pkgconfig/frida-gum-1.0.pc: build/.frida-gum-submodule-stamp buil
 	builddir=build/$2-$$*/frida-gum; \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
 		mkdir -p $$$$builddir; \
-		if [ "$$*" == "$$(build_platform_arch)" ]; then \
+		if [ "$$(build_platform_arch)" == "$$*" ]; then \
 			cross_args=""; \
 		else \
 			cross_args="--cross-file build/$1-$$*.txt"; \
@@ -146,7 +146,7 @@ build/tmp-macos-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-sta
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
-		if [ "$*" == "$(build_platform_arch)" ]; then \
+		if [ "$(build_platform_arch)" == "macos-$*" ]; then \
 			cross_args=""; \
 		else \
 			cross_args="--cross-file build/frida-macos-$*.txt"; \
@@ -276,7 +276,7 @@ build/tmp_thin-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stam
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
-		if [ "$*" == "$(build_platform_arch)" ]; then \
+		if [ "$(build_platform_arch)" == "$*" ]; then \
 			cross_args=""; \
 		else \
 			cross_args="--cross-file build/frida_thin-$*.txt"; \
@@ -409,7 +409,7 @@ build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-sta
 	builddir=$$(@D); \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
 		mkdir -p $$$$builddir; \
-		if [ "$$*" == "$$(build_platform_arch)" ]; then \
+		if [ "$$(build_platform_arch)" == "$$*" ]; then \
 			cross_args=""; \
 		else \
 			cross_args="--cross-file build/$1-$$*.txt"; \
@@ -500,7 +500,7 @@ build/$2-%/frida-tools-$$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodul
 	builddir=$$(@D); \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
 		mkdir -p $$$$builddir; \
-		if [ "$$*" == "$$(build_platform_arch)" ]; then \
+		if [ "$$(build_platform_arch)" == "$$*" ]; then \
 			cross_args=""; \
 		else \
 			cross_args="--cross-file build/$1-$$*.txt"; \
