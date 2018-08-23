@@ -388,12 +388,15 @@ endif
 
 v8_build_platform := $(shell echo $(build_platform) | sed 's,^macos$$,mac,')
 ifeq ($(host_platform), macos)
+	v8_os := mac
 	v8_platform_args := use_xcode_clang=true mac_deployment_target="10.9.0"
 endif
 ifeq ($(host_platform), ios)
+	v8_os := ios
 	v8_platform_args := use_xcode_clang=true mac_deployment_target="10.9.0" ios_deployment_target="7.0"
 endif
 ifeq ($(host_platform), linux)
+	v8_os := linux
 	v8_platform_args := \
 		is_clang=false \
 		is_cfi=false \
@@ -405,6 +408,7 @@ ifeq ($(host_platform), linux)
 	v8_libs_private := "-lrt"
 endif
 ifeq ($(host_platform), android)
+	v8_os := android
 	v8_libs_private := "-llog -lm"
 endif
 
@@ -445,7 +449,7 @@ v8-checkout/v8: v8-checkout/.gclient
 	@touch $@
 
 build/fs-tmp-%/v8/build.ninja: v8-checkout/v8 build/fs-tmp-$(build_platform_arch)/gn/gn
-	cd v8-checkout/v8 && ../../build/fs-tmp-$(build_platform_arch)/gn/gn gen $(abspath $(@D)) --args='target_cpu="$(v8_cpu)" $(v8_abi_args) $(v8_common_args) $(v8_platform_args)'
+	cd v8-checkout/v8 && ../../build/fs-tmp-$(build_platform_arch)/gn/gn gen $(abspath $(@D)) --args='target_os="$(v8_os)" target_cpu="$(v8_cpu)" $(v8_abi_args) $(v8_common_args) $(v8_platform_args)'
 
 build/fs-tmp-%/v8/obj/libv8_monolith.a: build/fs-tmp-%/v8/build.ninja
 	$(NINJA) -C build/fs-tmp-$*/v8 v8_monolith
