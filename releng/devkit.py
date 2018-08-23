@@ -12,7 +12,9 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import winenv
+
+if platform.system() == 'Windows':
+    import winenv
 
 
 INCLUDE_PATTERN = re.compile("#include\s+[<\"](.*?)[>\"]")
