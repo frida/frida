@@ -117,7 +117,7 @@ build/$1-%/lib/pkgconfig/frida-gum-1.0.pc: build/.frida-gum-submodule-stamp buil
 	builddir=build/$2-$$*/frida-gum; \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
 		mkdir -p $$$$builddir; \
-		if [ "$$(build_platform_arch)" == "$$*" ]; then \
+		if [ $$(build_platform_arch) = $$* ]; then \
 			cross_args=""; \
 		else \
 			cross_args="--cross-file build/$1-$$*.txt"; \
@@ -160,7 +160,7 @@ build/tmp-linux-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-s
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
-		if [ "$(build_arch)" == "x86" ]; then \
+		if [ $(build_arch) = x86 ]; then \
 			cross_args=""; \
 		else \
 			cross_args="--cross-file build/frida-linux-x86.txt"; \
@@ -182,7 +182,7 @@ build/tmp-linux-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submodul
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
-		if [ "$(build_arch)" == "x86_64" ]; then \
+		if [ $(build_arch) = x86_64 ]; then \
 			cross_args=""; \
 		else \
 			cross_args="--cross-file build/frida-linux-x86_64.txt"; \
@@ -329,7 +329,7 @@ build/tmp_thin-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stam
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
-		if [ "$(build_platform_arch)" == "$*" ]; then \
+		if [ $(build_platform_arch) = $* ]; then \
 			cross_args=""; \
 		else \
 			cross_args="--cross-file build/frida_thin-$*.txt"; \
@@ -431,7 +431,7 @@ build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-sta
 	builddir=$$(@D); \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
 		mkdir -p $$$$builddir; \
-		if [ "$$(build_platform_arch)" == "$$*" ]; then \
+		if [ $$(build_platform_arch) = $$* ]; then \
 			cross_args=""; \
 		else \
 			cross_args="--cross-file build/$1-$$*.txt"; \
@@ -526,7 +526,7 @@ build/$2-%/frida-tools-$$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodul
 	builddir=$$(@D); \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
 		mkdir -p $$$$builddir; \
-		if [ "$$(build_platform_arch)" == "$$*" ]; then \
+		if [ $$(build_platform_arch) = $$* ]; then \
 			cross_args=""; \
 		else \
 			cross_args="--cross-file build/$1-$$*.txt"; \
