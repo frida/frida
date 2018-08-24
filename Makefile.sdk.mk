@@ -425,7 +425,7 @@ gn:
 
 build/fs-tmp-%/gn/build.ninja: build/fs-env-%.rc gn
 	. $< \
-		&& CC=$$CC CXX=$$CXX python gn/build/gen.py \
+		&& CC="$$CC" CXX="$$CXX" python gn/build/gen.py \
 			--no-sysroot \
 			--out-path $(abspath $(@D))
 
