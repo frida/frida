@@ -97,8 +97,8 @@ if [ -z "$FRIDA_HOST" ]; then
 fi
 
 if [ $host_platform = android ]; then
-  ndk_required_name=r15c
-  ndk_required_version=15.2.4203891
+  ndk_required_name=r17b
+  ndk_required_version=17.1.4828580
   if [ -n "$ANDROID_NDK_ROOT" ]; then
     if [ -f "$ANDROID_NDK_ROOT/source.properties" ]; then
       ndk_installed_version=$(grep Pkg.Revision "$ANDROID_NDK_ROOT/source.properties" | awk '{ print $NF; }')
@@ -408,169 +408,92 @@ case $host_platform in
     meson_objcpp_link_args="$base_linker_args, '-stdlib=libc++'"
     ;;
   android)
-    android_build_platform=$(echo ${build_platform} | sed 's,^macos$,darwin,')
-    android_have_unwind=no
+    android_toolroot="$FRIDA_BUILD/${frida_env_name_prefix}ndk-${host_platform_arch}"
 
     case $host_arch in
       x86)
-        android_target_platform=14
-        android_host_abi=x86
-        android_host_target=i686-none-linux-android
-        android_host_toolchain=x86-4.9
-        android_host_triple=i686-linux-android
-        android_host_cflags="-march=i686"
-        android_host_ldflags="-fuse-ld=gold"
+        android_api=14
+        host_triplet="i686-linux-android"
+        host_arch_flags="-march=i686"
+        host_ldflags="-fuse-ld=gold"
         ;;
       x86_64)
-        android_target_platform=21
-        android_host_abi=x86_64
-        android_host_target=x86_64-none-linux-android
-        android_host_toolchain=x86_64-4.9
-        android_host_triple=x86_64-linux-android
-        android_host_cflags=""
-        android_host_ldflags="-fuse-ld=gold"
+        android_api=21
+        host_triplet="x86_64-linux-android"
+        host_arch_flags=""
+        host_ldflags="-fuse-ld=gold"
         ;;
       arm)
-        android_target_platform=14
-        android_host_abi=armeabi-v7a
-        android_host_target=armv7-none-linux-androideabi
-        android_host_toolchain=arm-linux-androideabi-4.9
-        android_host_triple=arm-linux-androideabi
-        android_host_cflags="-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16"
-        android_host_ldflags="-fuse-ld=gold -Wl,--fix-cortex-a8 -Wl,--icf=safe"
-        android_have_unwind=yes
+        android_api=14
+        host_triplet="arm-linux-androideabi"
+        host_arch_flags="-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16"
+        host_ldflags="-fuse-ld=gold -Wl,--fix-cortex-a8 -Wl,--icf=safe"
         ;;
       arm64)
-        android_target_platform=21
-        android_host_abi=arm64-v8a
-        android_host_target=aarch64-none-linux-android
-        android_host_toolchain=aarch64-linux-android-4.9
-        android_host_triple=aarch64-linux-android
-        android_host_cflags=""
-        android_host_ldflags="-fuse-ld=gold"
+        android_api=21
+        host_triplet="aarch64-linux-android"
+        host_arch_flags=""
+        host_ldflags="-fuse-ld=gold"
         ;;
     esac
-    android_host_toolprefix="$android_host_triple-"
+    host_toolprefix="$host_triplet-"
 
-    android_clang_prefix="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/${android_build_platform}-x86_64"
-    android_gcc_toolchain="$ANDROID_NDK_ROOT/toolchains/${android_host_toolchain}/prebuilt/${android_build_platform}-x86_64"
-    android_sysroot_compile="$ANDROID_NDK_ROOT/sysroot"
-    android_sysroot_link="$ANDROID_NDK_ROOT/platforms/android-${android_target_platform}/arch-${host_arch}"
-    android_sysinc="$android_sysroot_compile/usr/include/$android_host_triple"
-    toolflags="--gcc-toolchain=$android_gcc_toolchain \
---target=$android_host_target \
--no-canonical-prefixes"
+    rm -rf "$android_toolroot"
+    $ANDROID_NDK_ROOT/build/tools/make_standalone_toolchain.py \
+      --arch $host_arch \
+      --api $android_api \
+      --stl=libc++ \
+      --install-dir="$android_toolroot" || exit 1
 
-    cc_wrapper="$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-cc-wrapper-${host_platform_arch}.sh"
-    sed \
-      -e "s,@sysinc@,$android_sysinc,g" \
-      -e "s,@sysroot_compile@,$android_sysroot_compile,g" \
-      -e "s,@sysroot_link@,$android_sysroot_link,g" \
-      "$releng_path/cc-wrapper-android.sh.in" > "$cc_wrapper"
-    chmod +x "$cc_wrapper"
+    CPP="${android_toolroot}/bin/${host_toolprefix}cpp"
+    CC="${android_toolroot}/bin/${host_toolprefix}clang"
+    CXX="${android_toolroot}/bin/${host_toolprefix}clang++ -static-libstdc++"
+    GCC="${android_toolroot}/bin/${host_toolprefix}gcc"
+    LD="${android_toolroot}/bin/${host_toolprefix}ld"
 
-    cxx_wrapper="$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-cxx-wrapper-${host_platform_arch}.sh"
-    cxx_libdir="$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/libs/$android_host_abi"
-    sed \
-      -e "s,@sysinc@,$android_sysinc,g" \
-      -e "s,@sysroot_compile@,$android_sysroot_compile,g" \
-      -e "s,@sysroot_link@,$android_sysroot_link,g" \
-      -e "s,@libdir@,$cxx_libdir,g" \
-      -e "s,@have_unwind_library@,$android_have_unwind,g" \
-      "$releng_path/cxx-wrapper-android.sh.in" > "$cxx_wrapper"
-    chmod +x "$cxx_wrapper"
+    AR="${android_toolroot}/bin/${host_toolprefix}ar"
+    NM="${android_toolroot}/bin/${host_toolprefix}nm"
+    RANLIB="${android_toolroot}/bin/${host_toolprefix}ranlib"
+    STRIP="${android_toolroot}/bin/${host_toolprefix}strip"
+    STRIP_FLAGS="--strip-all"
+    OBJCOPY="${android_toolroot}/bin/${host_toolprefix}objcopy"
+    OBJDUMP="${android_toolroot}/bin/${host_toolprefix}objdump"
+
+    CFLAGS="$host_arch_flags -DANDROID -fPIE -ffunction-sections -fdata-sections"
+    CXXFLAGS="-funwind-tables"
+    LDFLAGS="$host_arch_flags $host_ldflags -pie -Wl,--gc-sections -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now"
 
     elf_cleaner=${FRIDA_ROOT}/releng/frida-elf-cleaner-${build_platform_arch}
 
     meson_cc_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang
     sed \
-      -e "s,@linker@,$android_clang_prefix/bin/clang,g" \
+      -e "s,@linker@,${android_toolroot}/bin/${host_toolprefix}clang,g" \
       -e "s,@elf_cleaner@,$elf_cleaner,g" \
       "$releng_path/meson-driver-wrapper-android.sh.in" > "$meson_cc_wrapper"
     chmod +x "$meson_cc_wrapper"
 
-    meson_cxx_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang++
+    meson_cpp_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang++
     sed \
-      -e "s,@linker@,$android_clang_prefix/bin/clang++,g" \
+      -e "s,@linker@,${android_toolroot}/bin/${host_toolprefix}clang++,g" \
       -e "s,@elf_cleaner@,$elf_cleaner,g" \
-      "$releng_path/meson-driver-wrapper-android.sh.in" > "$meson_cxx_wrapper"
-    chmod +x "$meson_cxx_wrapper"
+      "$releng_path/meson-driver-wrapper-android.sh.in" > "$meson_cpp_wrapper"
+    chmod +x "$meson_cpp_wrapper"
 
-    CPP="$android_gcc_toolchain/bin/${android_host_toolprefix}cpp --sysroot=$android_sysroot_compile -isystem $android_sysinc"
-    CC="$cc_wrapper $android_clang_prefix/bin/clang $toolflags"
-    GCC="$cc_wrapper $android_gcc_toolchain/bin/${android_host_toolprefix}gcc"
-    CXX="$cxx_wrapper $android_clang_prefix/bin/clang++ $toolflags"
-    LD="$android_gcc_toolchain/bin/${android_host_toolprefix}ld --sysroot=$android_sysroot_link"
-
-    AR="$android_gcc_toolchain/bin/${android_host_toolprefix}ar"
-    NM="$android_gcc_toolchain/bin/${android_host_toolprefix}nm"
-    RANLIB="$android_gcc_toolchain/bin/${android_host_toolprefix}ranlib"
-    STRIP="$android_gcc_toolchain/bin/${android_host_toolprefix}strip"
-    STRIP_FLAGS="--strip-all"
-    OBJCOPY="$android_gcc_toolchain/bin/${android_host_toolprefix}objcopy"
-    OBJDUMP="$android_gcc_toolchain/bin/${android_host_toolprefix}objdump"
-
-    CPPFLAGS="-DANDROID -D__ANDROID_API__=$android_target_platform"
-    CFLAGS="$android_host_cflags \
--ffunction-sections -fdata-sections"
-    CXXFLAGS="\
--funwind-tables \
--I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/include \
--I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++abi/include \
--I$ANDROID_NDK_ROOT/sources/android/support/include"
-    LDFLAGS="$android_host_ldflags \
--Wl,--gc-sections \
--Wl,-z,noexecstack \
--Wl,-z,relro \
--Wl,-z,now \
--lgcc"
-
-    meson_root="$android_sysroot_compile"
-
-    arch_args=$(flags_to_args "$android_host_cflags")
-    arch_linker_args=$(flags_to_args "$android_host_ldflags")
-
-    base_toolchain_args="\
-'--gcc-toolchain=$android_gcc_toolchain', \
-'--target=$android_host_target', \
-'-no-canonical-prefixes'"
-    [ -n "$arch_args" ] && base_toolchain_args="$base_toolchain_args, $arch_args"
-    base_compiler_args="\
-$base_toolchain_args, \
-'--sysroot=$android_sysroot_compile', \
-'-isystem', '$android_sysinc', \
-'-ffunction-sections', '-fdata-sections', \
-'-DANDROID', \
-'-D__ANDROID_API__=$android_target_platform'"
-    base_linker_args="\
-$base_toolchain_args, \
-'--sysroot=$android_sysroot_link', \
-'-Wl,--gc-sections', \
-'-Wl,-z,noexecstack', \
-'-Wl,-z,relro', \
-'-Wl,-z,now', \
-'-lgcc', \
-$arch_linker_args"
+    base_toolchain_args=$(flags_to_args "$host_arch_flags")
+    if [ -n "$base_toolchain_args" ]; then
+      base_toolchain_args="$base_toolchain_args, "
+    fi
+    base_compiler_args="$base_toolchain_args'-DANDROID', '-fPIE', '-ffunction-sections', '-fdata-sections'"
+    base_linker_args="$base_toolchain_args'-pie', '-Wl,--gc-sections', '-Wl,-z,noexecstack', '-Wl,-z,relro', '-Wl,-z,now'"
 
     meson_c="$meson_cc_wrapper"
-    meson_cpp="$meson_cxx_wrapper"
+    meson_cpp="$meson_cpp_wrapper"
 
     meson_c_args="$base_compiler_args"
-    meson_cpp_args="$base_compiler_args, \
-'-funwind-tables', '-fno-rtti', \
-'-I$ANDROID_NDK_ROOT/sources/cxx-stl/llvm-libc++/include', \
-'-I$ANDROID_NDK_ROOT/sources/cxx-stl/gabi++/include', \
-'-I$ANDROID_NDK_ROOT/sources/android/support/include'"
+    meson_cpp_args="$base_compiler_args, '-static-libstdc++', '-fno-rtti'"
 
     meson_c_link_args="$base_linker_args"
-    meson_cpp_link_args="$base_linker_args, '$cxx_libdir/libc++_static.a', '$cxx_libdir/libc++abi.a'"
-    if [ $android_have_unwind == yes ]; then
-      meson_cpp_link_args="$meson_cpp_link_args, '$cxx_libdir/libunwind.a'"
-    fi
-    meson_cpp_link_args="$meson_cpp_link_args, '$cxx_libdir/libandroid_support.a'"
-    if [ $android_have_unwind == yes ]; then
-      meson_cpp_link_args="$meson_cpp_link_args, '-Wl,--exclude-libs,$cxx_libdir/libunwind.a'"
-    fi
+    meson_cpp_link_args="$base_linker_args, '-static-libstdc++'"
     ;;
   qnx)
     case $host_arch in

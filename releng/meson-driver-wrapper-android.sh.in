@@ -7,53 +7,53 @@
 # - Add -Wl,-pie when linking programs.
 # - Clean up the ELF files to avoid dynamic linker warnings at runtime.
 
-output_type=executable
-output_path=
-
-argv=()
-while [[ $# > 0 ]]; do
-  arg="$1"
-
-  case "$arg" in
-    *-D_FILE_OFFSET_BITS=64*)
-      shift
-      ;;
-    *)
-      case "$arg" in
-        -E)
-          output_type=code
-          ;;
-        -c)
-          output_type=object
-          ;;
-        -shared)
-          output_type=shlib
-          ;;
-        -o)
-          argv+=("-o")
-          shift
-
-          arg="$1"
-
-          output_path="$arg"
-          ;;
-      esac
-
-      argv+=("$arg")
-      shift
-
-      ;;
-  esac
-done
-
-if [[ $output_type = executable ]]; then
-  argv+=("-Wl,-pie")
-fi
+#output_type=executable
+#output_path=
+#
+#argv=()
+#while [[ $# > 0 ]]; do
+#  arg="$1"
+#
+#  case "$arg" in
+#    *-D_FILE_OFFSET_BITS=64*)
+#      shift
+#      ;;
+#    *)
+#      case "$arg" in
+#        -E)
+#          output_type=code
+#          ;;
+#        -c)
+#          output_type=object
+#          ;;
+#        -shared)
+#          output_type=shlib
+#          ;;
+#        -o)
+#          argv+=("-o")
+#          shift
+#
+#          arg="$1"
+#
+#          output_path="$arg"
+#          ;;
+#      esac
+#
+#      argv+=("$arg")
+#      shift
+#
+#      ;;
+#  esac
+#done
+#
+#if [[ $output_type = executable ]]; then
+#  argv+=("-Wl,-pie")
+#fi
 
 "@linker@" "${argv[@]}" || exit $?
 
-case $output_type in
-  executable|shlib)
-    "@elf_cleaner@" "$output_path"
-    ;;
-esac
+#case $output_type in
+#  executable|shlib)
+#    "@elf_cleaner@" "$output_path"
+#    ;;
+#esac
