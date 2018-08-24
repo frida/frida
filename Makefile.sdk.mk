@@ -90,7 +90,7 @@ ifeq ($(enable_diet), 0)
 endif
 
 ifneq ($(iconv),)
-	glib_iconv_option := -Diconv=native
+	glib_iconv_option := -Diconv=gnu
 endif
 
 all: build/sdk-$(host_platform)-$(host_arch).tar.bz2
