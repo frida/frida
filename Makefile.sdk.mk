@@ -365,6 +365,10 @@ v8_common_args := \
 	v8_embedder_string="-frida" \
 	$(NULL)
 
+ifneq ($(host_arch), x86_64)
+v8_arch_args := v8_enable_embedded_builtins=false
+endif
+
 ifeq ($(host_arch), x86)
 	v8_cpu := x86
 endif
@@ -399,8 +403,7 @@ ifeq ($(host_platform), ios)
 	v8_platform_args := \
 		use_xcode_clang=true \
 		mac_deployment_target="10.9.0" \
-		ios_deployment_target="7.0" \
-		v8_enable_embedded_builtins=false
+		ios_deployment_target="7.0"
 endif
 ifeq ($(host_platform), linux)
 	v8_os := linux
@@ -465,7 +468,7 @@ build/fs-tmp-%/v8/build.ninja: v8-checkout/v8 build/fs-tmp-$(build_platform_arch
 	cd v8-checkout/v8 \
 		&& ../../build/fs-tmp-$(build_platform_arch)/gn/gn \
 			gen $(abspath $(@D)) \
-			--args='target_os="$(v8_os)" target_cpu="$(v8_cpu)" $(v8_abi_args) $(v8_common_args) $(v8_platform_args)'
+			--args='target_os="$(v8_os)" target_cpu="$(v8_cpu)" $(v8_abi_args) $(v8_common_args) $(v8_arch_args) $(v8_platform_args)'
 
 build/fs-tmp-%/v8/obj/libv8_monolith.a: build/fs-tmp-%/v8/build.ninja
 	$(NINJA) -C build/fs-tmp-$*/v8 v8_monolith
