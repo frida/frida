@@ -178,6 +178,8 @@ meson_root=""
 meson_objc=""
 meson_objcpp=""
 
+meson_platform_properties=()
+
 flags_to_args () {
   if [ -n "$1" ]; then
     echo "'$(echo "$1" | sed "s/ /', '/g")'"
@@ -437,6 +439,11 @@ case $host_platform in
         ;;
     esac
     host_toolprefix="$host_triplet-"
+
+    if [ $android_api -lt 21 ]; then
+      # XXX: Meson's auto-detection fails as this is a Clang built-in.
+      meson_platform_properties+=("has_function_stpcpy = false")
+    fi
 
     rm -rf "$android_toolroot"
     $ANDROID_NDK_ROOT/build/tools/make_standalone_toolchain.py \
@@ -882,6 +889,12 @@ meson_cross_file=build/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}.txt
   fi
   if [ -n "$meson_objcpp" ]; then
     echo "objcpp_link_args = [$meson_objcpp_link_args]"
+  fi
+  if [ ${#meson_platform_properties[@]} -gt 0 ]; then
+    echo ""
+    for prop in "${meson_platform_properties[@]}"; do
+      echo "$prop"
+    done
   fi
   echo ""
   echo "[host_machine]"
