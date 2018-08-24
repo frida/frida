@@ -416,6 +416,12 @@ ifeq ($(host_platform), linux)
 endif
 ifeq ($(host_platform), android)
 	v8_os := android
+	v8_platform_args := \
+		android_ndk_root="$(ANDROID_NDK_ROOT)" \
+		android_ndk_version="r17b" \
+		android_ndk_major_version=17 \
+		android32_ndk_api_level=14 \
+		android64_ndk_api_level=21
 	v8_libs_private := "-llog -lm"
 endif
 
@@ -456,7 +462,10 @@ v8-checkout/v8: v8-checkout/.gclient
 	@touch $@
 
 build/fs-tmp-%/v8/build.ninja: v8-checkout/v8 build/fs-tmp-$(build_platform_arch)/gn/gn
-	cd v8-checkout/v8 && ../../build/fs-tmp-$(build_platform_arch)/gn/gn gen $(abspath $(@D)) --args='target_os="$(v8_os)" target_cpu="$(v8_cpu)" $(v8_abi_args) $(v8_common_args) $(v8_platform_args)'
+	cd v8-checkout/v8 \
+		&& ../../build/fs-tmp-$(build_platform_arch)/gn/gn \
+			gen $(abspath $(@D)) \
+			--args='target_os="$(v8_os)" target_cpu="$(v8_cpu)" $(v8_abi_args) $(v8_common_args) $(v8_platform_args)'
 
 build/fs-tmp-%/v8/obj/libv8_monolith.a: build/fs-tmp-%/v8/build.ninja
 	$(NINJA) -C build/fs-tmp-$*/v8 v8_monolith
