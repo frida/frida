@@ -490,7 +490,7 @@ case $host_platform in
       base_toolchain_args="$base_toolchain_args, "
     fi
     base_compiler_args="$base_toolchain_args'-DANDROID', '-fPIE', '-ffunction-sections', '-fdata-sections'"
-    base_linker_args="$base_toolchain_args'-Wl,--gc-sections', '-Wl,-z,noexecstack', '-Wl,-z,relro', '-Wl,-z,now'"
+    base_linker_args="$base_toolchain_args$(flags_to_args "$host_ldflags"), '-Wl,--gc-sections', '-Wl,-z,noexecstack', '-Wl,-z,relro', '-Wl,-z,now'"
 
     meson_c="$meson_cc_wrapper"
     meson_cpp="$meson_cpp_wrapper"
