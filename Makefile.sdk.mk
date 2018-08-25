@@ -352,6 +352,7 @@ v8_common_args := \
 	is_debug=false \
 	v8_enable_v8_checks=false \
 	symbol_level=0 \
+	use_thin_lto=false \
 	v8_monolithic=true \
 	v8_use_external_startup_data=false \
 	is_component_build=false \

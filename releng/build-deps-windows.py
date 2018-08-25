@@ -428,6 +428,7 @@ def build_v8(platform, configuration, runtime):
             "wdk_path=\"{}\"".format(win10_sdk_dir),
             "windows_sdk_path=\"{}\"".format(win10_sdk_dir),
             "symbol_level=0",
+            "use_thin_lto=false",
             "v8_monolithic=true",
             "v8_use_external_startup_data=false",
             "is_component_build=false",
