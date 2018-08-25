@@ -377,15 +377,15 @@ ifeq ($(host_arch), x86_64)
 endif
 ifeq ($(host_arch), arm)
 	v8_cpu := arm
-	v8_cpu_args := arm_version=7 arm_fpu="vfpv3" arm_float_abi="softfp"
+	v8_cpu_args := arm_version=7 arm_fpu="vfpv3-d16" arm_float_abi="softfp"
 endif
 ifeq ($(host_arch), armeabi)
 	v8_cpu := arm
-	v8_cpu_args := arm_version=7 arm_fpu="vfpv3" arm_float_abi="softfp"
+	v8_cpu_args := arm_version=7 arm_fpu="vfpv3-d16" arm_float_abi="softfp"
 endif
 ifeq ($(host_arch), armhf)
 	v8_cpu := arm
-	v8_cpu_args := arm_version=7 arm_fpu="vfpv3" arm_float_abi="hard"
+	v8_cpu_args := arm_version=7 arm_fpu="vfpv3-d16" arm_float_abi="hard"
 endif
 ifeq ($(host_arch), arm64)
 	v8_cpu := arm64
