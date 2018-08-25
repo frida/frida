@@ -133,6 +133,13 @@ case "$PACKAGE_TARNAME" in
     CFLAGS="$CFLAGS -I$frida_prefix/include"
     LDFLAGS="$LDFLAGS -L$frida_prefix/lib"
     ;;
+  elfutils)
+    case $frida_host_platform_arch in
+      android-x86|android-arm)
+        ac_cv_have_decl_mempcpy=no
+        ;;
+    esac
+    ;;
   capstone)
     enable_shared=no
     enable_static=yes

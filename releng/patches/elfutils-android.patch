@@ -103,3 +103,14 @@ diff -Nur elfutils-orig/libelf/libintl.h elfutils/libelf/libintl.h
 +++ elfutils/libelf/libintl.h	2017-09-27 13:08:42.000000000 +0200
 @@ -0,0 +1 @@
 +/* Empty stub for Android. */
+diff -Nur elfutils-orig/lib/system.h elfutils/lib/system.h
+--- elfutils-orig/lib/system.h	2018-08-25 02:48:49.000000000 +0200
++++ elfutils/lib/system.h	2018-08-25 02:49:19.000000000 +0200
+@@ -32,6 +32,7 @@
+ #include <errno.h>
+ #include <stddef.h>
+ #include <stdint.h>
++#include <string.h>
+ #include <sys/param.h>
+ #include <endian.h>
+ #include <byteswap.h>
