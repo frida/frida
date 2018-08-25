@@ -34,15 +34,14 @@ while [[ $# > 0 ]]; do
   shift
 done
 
-#if [[ $output_type = executable ]]; then
-#  argv+=("-Wl,-pie")
-#fi
+if [[ $output_type = executable ]]; then
+  argv+=("-Wl,-pie")
+fi
 
 "@linker@" "${argv[@]}"
-exit $?
 
-#case $output_type in
-#  executable|shlib)
-#    "@elf_cleaner@" "$output_path"
-#    ;;
-#esac
+case $output_type in
+  executable|shlib)
+    "@elf_cleaner@" "$output_path"
+    ;;
+esac
