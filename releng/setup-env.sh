@@ -454,7 +454,7 @@ case $host_platform in
 
     CPP="${android_toolroot}/bin/${host_toolprefix}cpp"
     CC="${android_toolroot}/bin/${host_toolprefix}clang"
-    CXX="${android_toolroot}/bin/${host_toolprefix}clang++ -static-libstdc++"
+    CXX="${android_toolroot}/bin/${host_toolprefix}clang++"
     GCC="${android_toolroot}/bin/${host_toolprefix}gcc"
     LD="${android_toolroot}/bin/${host_toolprefix}ld"
 
@@ -467,8 +467,7 @@ case $host_platform in
     OBJDUMP="${android_toolroot}/bin/${host_toolprefix}objdump"
 
     CFLAGS="$host_arch_flags -DANDROID -fPIE -ffunction-sections -fdata-sections"
-    CXXFLAGS="-funwind-tables"
-    LDFLAGS="$host_arch_flags $host_ldflags -pie -Wl,--gc-sections -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now"
+    LDFLAGS="$host_arch_flags $host_ldflags -Wl,--gc-sections -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now"
 
     elf_cleaner=${FRIDA_ROOT}/releng/frida-elf-cleaner-${build_platform_arch}
 
@@ -491,13 +490,13 @@ case $host_platform in
       base_toolchain_args="$base_toolchain_args, "
     fi
     base_compiler_args="$base_toolchain_args'-DANDROID', '-fPIE', '-ffunction-sections', '-fdata-sections'"
-    base_linker_args="$base_toolchain_args'-pie', '-Wl,--gc-sections', '-Wl,-z,noexecstack', '-Wl,-z,relro', '-Wl,-z,now'"
+    base_linker_args="$base_toolchain_args'-Wl,--gc-sections', '-Wl,-z,noexecstack', '-Wl,-z,relro', '-Wl,-z,now'"
 
     meson_c="$meson_cc_wrapper"
     meson_cpp="$meson_cpp_wrapper"
 
     meson_c_args="$base_compiler_args"
-    meson_cpp_args="$base_compiler_args, '-static-libstdc++', '-fno-rtti'"
+    meson_cpp_args="$base_compiler_args"
 
     meson_c_link_args="$base_linker_args"
     meson_cpp_link_args="$base_linker_args, '-static-libstdc++'"
