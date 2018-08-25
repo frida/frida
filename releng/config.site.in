@@ -116,11 +116,11 @@ case "$PACKAGE_TARNAME" in
     enable_shared=no
     enable_static=yes
     ;;
-  'xz')
+  xz)
     enable_shared=no
     enable_static=yes
     ;;
-  'libunwind')
+  libunwind)
     enable_shared=no
     enable_static=yes
     enable_coredump=no
@@ -133,7 +133,7 @@ case "$PACKAGE_TARNAME" in
     CFLAGS="$CFLAGS -I$frida_prefix/include"
     LDFLAGS="$LDFLAGS -L$frida_prefix/lib"
     ;;
-  'capstone')
+  capstone)
     enable_shared=no
     enable_static=yes
     frida_flags="$frida_warning_flags $frida_flags"
