@@ -252,7 +252,7 @@ case $host_platform in
     meson_cpp="${host_toolprefix}g++"
 
     meson_c_args="$base_compiler_args"
-    meson_cpp_args="$base_compiler_args, '-static-libstdc++', '-fno-rtti'"
+    meson_cpp_args="$base_compiler_args, '-static-libstdc++'"
 
     meson_c_link_args="$base_linker_args"
     meson_cpp_link_args="$base_linker_args, '-static-libstdc++'"
@@ -316,9 +316,9 @@ case $host_platform in
     meson_objcpp="$CXX"
 
     meson_c_args="$base_compiler_args"
-    meson_cpp_args="$base_compiler_args, '-stdlib=libc++', '-fno-rtti'"
+    meson_cpp_args="$base_compiler_args, '-stdlib=libc++'"
     meson_objc_args="$base_compiler_args"
-    meson_objcpp_args="$base_compiler_args, '-stdlib=libc++', '-fno-rtti'"
+    meson_objcpp_args="$base_compiler_args, '-stdlib=libc++'"
 
     meson_c_link_args="$base_linker_args"
     meson_cpp_link_args="$base_linker_args, '-stdlib=libc++'"
@@ -400,9 +400,9 @@ case $host_platform in
     meson_objcpp="$CXX"
 
     meson_c_args="$base_compiler_args"
-    meson_cpp_args="$base_compiler_args, '-stdlib=libc++', '-fno-rtti'"
+    meson_cpp_args="$base_compiler_args, '-stdlib=libc++'"
     meson_objc_args="$base_compiler_args"
-    meson_objcpp_args="$base_compiler_args, '-stdlib=libc++', '-fno-rtti'"
+    meson_objcpp_args="$base_compiler_args, '-stdlib=libc++'"
 
     meson_c_link_args="$base_linker_args"
     meson_cpp_link_args="$base_linker_args, '-stdlib=libc++'"
@@ -566,7 +566,7 @@ case $host_platform in
     meson_cpp="$qnx_toolchain_prefix-g++"
 
     meson_c_args="$base_compiler_args"
-    meson_cpp_args="$base_compiler_args, '-static-libstdc++', '-fno-rtti'"
+    meson_cpp_args="$base_compiler_args, '-static-libstdc++'"
 
     meson_c_link_args="$base_linker_args"
     meson_cpp_link_args="$base_linker_args, '-static-libstdc++', '-L$(dirname $qnx_sysroot/lib/gcc/4.8.3/libstdc++.a)'"
