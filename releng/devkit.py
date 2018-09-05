@@ -95,7 +95,9 @@ def generate_header(package, frida_root, host, kit, umbrella_header_path, thirdp
             shell=True).decode('utf-8')
         header_lines = header_dependencies.strip().split("\n")[1:]
         header_files = [line.rstrip("\\").strip() for line in header_lines]
-        header_files = [header_file for header_file in header_files if header_file.startswith(frida_root)]
+        header_files = [header_file for header_file in header_files
+            if header_file.startswith(frida_root) and "/ndk-" not in header_file[len(frida_root):]
+        ]
 
     devkit_header_lines = []
     umbrella_header = header_files[0]
