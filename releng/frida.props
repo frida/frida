@@ -16,6 +16,7 @@
       <PreprocessorDefinitions>PSAPI_VERSION=1;WIN32;_WINDOWS;WINVER=0x0501;_WIN32_WINNT=0x0501;GUM_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ProgramDataBaseFileName>$(OutDir)\$(ProjectName).pdb</ProgramDataBaseFileName>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalOptions>/Zc:threadSafeInit- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <ImportLibrary>$(IntDir)$(ProjectName).lib</ImportLibrary>

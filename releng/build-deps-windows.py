@@ -210,7 +210,9 @@ def generate_meson_env(platform, configuration, runtime):
 
     cflags = " ".join(platform_cflags)
 
-    cppflags = " ".join([
+    cxxflags = " ".join(platform_cflags + [
+        # Relax C++11 compliance for XP compatibility.
+        "/Zc:threadSafeInit-",
     ])
 
     (win10_sdk_dir, win10_sdk_version) = winenv.get_win10_sdk()
@@ -252,7 +254,7 @@ set INCLUDE={include_path}
 set LIB={library_path}
 set CL={clflags}
 set CFLAGS={cflags}
-set CPPFLAGS={cppflags}
+set CXXFLAGS={cxxflags}
 set VCINSTALLDIR={vc_install_dir}
 set Platform={platform}
 set VALA={valac}
@@ -264,7 +266,7 @@ set DEPOT_TOOLS_WIN_TOOLCHAIN=0
             library_path=library_path,
             clflags=clflags,
             cflags=cflags,
-            cppflags=cppflags,
+            cxxflags=cxxflags,
             vc_install_dir=vc_install_dir,
             platform=msvc_platform,
             valac=VALAC_FILENAME,
@@ -351,7 +353,7 @@ sys.exit(subprocess.call([r"{bison_path}"] + args))
     shell_env["LIB"] = library_path
     shell_env["CL"] = clflags
     shell_env["CFLAGS"] = cflags
-    shell_env["CPPFLAGS"] = cppflags
+    shell_env["CXXFLAGS"] = cxxflags
     shell_env["VCINSTALLDIR"] = vc_install_dir
     shell_env["Platform"] = msvc_platform
     shell_env["VALAC"] = VALAC_FILENAME
