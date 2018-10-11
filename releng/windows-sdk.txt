@@ -1,1 +1,1 @@
-https://build.frida.re/sdk-20180825-windows-any.exe
+https://build.frida.re/sdk-20181011-windows-any.exe
