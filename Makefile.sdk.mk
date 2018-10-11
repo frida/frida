@@ -8,7 +8,7 @@ repo_suffix := .git
 libiconv_version := 1.15
 elfutils_version := 0.173
 libdwarf_version := 20180724
-openssl_version := 1.1.0h
+openssl_version := 1.1.1
 v8_api_version := 7.0
 
 
@@ -324,7 +324,6 @@ build/fs-%/lib/pkgconfig/openssl.pc: build/fs-env-%.rc build/fs-tmp-%/openssl/Co
 			--prefix=$$frida_prefix \
 			--openssldir=/etc/ssl \
 			no-comp \
-			no-ssl2 \
 			no-ssl3 \
 			no-zlib \
 			no-shared \
