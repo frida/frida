@@ -403,7 +403,6 @@ build/fs-%/lib/pkgconfig/openssl.pc: build/fs-env-%.rc build/fs-tmp-%/openssl/Co
 			--prefix=$$frida_prefix \
 			--openssldir=/etc/ssl \
 			no-engine \
-			no-deprecated \
 			no-comp \
 			no-ssl3 \
 			no-zlib \
