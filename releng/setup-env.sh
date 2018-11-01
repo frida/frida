@@ -67,6 +67,11 @@ case $host_arch in
     meson_host_cpu=mips
     meson_host_endian=little
     ;;
+  mips64)
+    meson_host_cpu_family=mips
+    meson_host_cpu=mips
+    meson_host_endian=big
+    ;;
   *)
     meson_host_cpu_family=$host_arch
     meson_host_cpu=$host_arch
@@ -235,6 +240,12 @@ case $host_platform in
         host_toolprefix="mipsel-unknown-linux-$libc-"
 
         meson_host_cpu="mips1"
+        ;;
+      mips64)
+        host_arch_flags="-march=mips64r2 -mabi=64"
+        host_toolprefix="mips-unknown-linux-$libc-"
+
+        meson_host_cpu="mips64r2"
         ;;
     esac
     CPP="${host_toolprefix}cpp"
