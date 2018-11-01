@@ -243,7 +243,7 @@ case $host_platform in
         ;;
       mips64)
         host_arch_flags="-march=mips64r2 -mabi=64"
-        host_toolprefix="mips-unknown-linux-$libc-"
+        host_toolprefix="mips64-unknown-linux-$libc-"
 
         meson_host_cpu="mips64r2"
         ;;
