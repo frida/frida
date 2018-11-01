@@ -34,7 +34,7 @@ else
 endif
 host_platform_arch := $(host_platform)-$(host_arch)
 
-enable_diet := $(shell echo $(host_platform_arch) | egrep -q "^(linux-arm|linux-mips|linux-mipsel|qnx-.+)$$" && echo 1 || echo 0)
+enable_diet := $(shell echo $(host_platform_arch) | egrep -q "^(linux-arm|linux-mips|linux-mipsel|linux-mips64|qnx-.+)$$" && echo 1 || echo 0)
 
 
 ifeq ($(host_platform), macos)
@@ -71,6 +71,9 @@ ifeq ($(host_arch), mipsel)
 endif
 ifeq ($(host_arch), mips)
 	openssl_arch_args := linux-mips32
+endif
+ifeq ($(host_arch), mips64)
+	openssl_arch_args := linux64-mips64
 endif
 endif
 ifeq ($(host_platform), android)

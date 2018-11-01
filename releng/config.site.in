@@ -40,6 +40,10 @@ case $frida_host_platform_arch in
     host_alias="mipsel-linux-$frida_libc"
     cross_compiling=yes
     ;;
+  linux-mips64)
+    host_alias="mips64-linux-$frida_libc"
+    cross_compiling=yes
+    ;;
   linux-x86)
     host_alias="i686-linux-gnu"
     cross_compiling=yes
