@@ -16,6 +16,11 @@ if [ -n "$FRIDA_HOST" ]; then
 else
   host_arch=$build_arch
 fi
+if [ -n "$FRIDA_LIBC" ]; then
+  libc=$FRIDA_LIBC
+else
+  libc=uclibc
+fi
 host_clang_arch=$(echo -n $host_arch | sed 's,^x86$,i386,')
 host_platform_arch=${host_platform}-${host_arch}
 
@@ -215,13 +220,13 @@ case $host_platform in
         ;;
       mips)
         host_arch_flags="-march=mips1"
-        host_toolprefix="mips-unknown-linux-uclibc-"
+        host_toolprefix="mips-unknown-linux-$libc-"
 
         meson_host_cpu="mips1"
         ;;
       mipsel)
         host_arch_flags="-march=mips1"
-        host_toolprefix="mipsel-unknown-linux-uclibc-"
+        host_toolprefix="mipsel-unknown-linux-$libc-"
 
         meson_host_cpu="mips1"
         ;;
@@ -842,6 +847,7 @@ sed \
   -e "s,@frida_prefix@,$FRIDA_PREFIX,g" \
   -e "s,@frida_optimization_flags@,$FRIDA_OPTIMIZATION_FLAGS,g" \
   -e "s,@frida_debug_flags@,$FRIDA_DEBUG_FLAGS,g" \
+  -e "s,@frida_libc@,$libc,g" \
   $releng_path/config.site.in > "$CONFIG_SITE"
 
 meson_cross_file=build/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}.txt
