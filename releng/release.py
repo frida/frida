@@ -369,10 +369,9 @@ if __name__ == '__main__':
 
             upload_directory("frida-qml-{version}-macos-x86_64", os.path.join(build_dir, "build", "frida-macos-x86_64", "lib", "qt5", "qml"), upload)
 
-            for osx_minor in range(9, 13):
-                upload_python_bindings_to_pypi("/usr/bin/python2.7",
-                    os.path.join(build_dir, "build", "frida-macos-universal", "lib", "python2.7", "site-packages", "_frida.so"),
-                    { '_PYTHON_HOST_PLATFORM': "macosx-10.%d-intel" % osx_minor })
+            upload_python_bindings_to_pypi("/usr/bin/python2.7",
+                os.path.join(build_dir, "build", "frida-macos-universal", "lib", "python2.7", "site-packages", "_frida.so"),
+                { '_PYTHON_HOST_PLATFORM': "macosx-10.9-intel" })
             upload_python_bindings_to_pypi("/usr/local/bin/python3.6",
                 os.path.join(build_dir, "build", "frida-macos-universal", "lib", "python3.6", "site-packages", "_frida.so"))
 
