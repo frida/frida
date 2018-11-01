@@ -25,3 +25,7 @@
 [submodule "frida-tools"]
 	path = frida-tools
 	url = git://github.com/frida/frida-tools.git
+[submodule "frida-gum-features-mips64"]
+	path = frida-gum
+	url = https://github.com/jonwilson030981/frida-gum.git
+	branch = features/mips64
