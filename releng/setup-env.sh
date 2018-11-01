@@ -21,10 +21,10 @@ if [ -n "$FRIDA_LIBC" ]; then
 else
   libc=uclibc
 fi
-if [-n "$FRIDA_CFLAGS" ]; then
+if [ -n "$FRIDA_CFLAGS" ]; then
   cflags=$FRIDA_CFLAGS
 fi
-if [-n "$FRIDA_LDFLAGS" ]; then
+if [ -n "$FRIDA_LDFLAGS" ]; then
   ldflags=$FRIDA_LDFLAGS
 fi
 host_clang_arch=$(echo -n $host_arch | sed 's,^x86$,i386,')
