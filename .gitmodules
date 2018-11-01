@@ -1,9 +1,6 @@
 [submodule "capstone"]
 	path = capstone
 	url = git://github.com/frida/capstone.git
-[submodule "frida-gum"]
-	path = frida-gum
-	url = git://github.com/frida/frida-gum.git
 [submodule "frida-core"]
 	path = frida-core
 	url = git://github.com/frida/frida-core.git
