@@ -179,7 +179,7 @@ build/fs-%/lib/libiconv.a: build/fs-env-%.rc build/fs-tmp-%/libiconv/Makefile
 	@touch $@
 
 
-build/.elfutils-stamp:
+build/.elfutils-stamp: build/.zlib-stamp
 	$(RM) -r elfutils
 	mkdir elfutils
 	cd elfutils \
