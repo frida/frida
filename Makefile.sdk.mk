@@ -8,7 +8,7 @@ repo_suffix := .git
 libiconv_version := 1.15
 elfutils_version := 0.173
 libdwarf_version := 20180724
-openssl_version := 1.1.0h
+openssl_version := 1.1.1
 v8_api_version := 7.0
 
 
@@ -39,14 +39,6 @@ enable_diet := $(shell echo $(host_platform_arch) | egrep -q "^(linux-arm|linux-
 
 ifeq ($(host_platform), macos)
 	iconv := build/fs-%/lib/libiconv.a
-	glib_tls_provider := build/fs-%/lib/pkgconfig/glib-openssl-static.pc
-	glib_tls_args := -Dca_certificates=no
-ifeq ($(host_arch), x86)
-	openssl_arch_args := darwin-i386-cc
-endif
-ifeq ($(host_arch), x86_64)
-	openssl_arch_args := darwin64-x86_64-cc enable-ec_nistp_64_gcc_128
-endif
 endif
 ifeq ($(host_platform), ios)
 	iconv := build/fs-%/lib/libiconv.a
@@ -55,26 +47,6 @@ ifeq ($(host_platform), linux)
 	unwind := build/fs-%/lib/pkgconfig/libunwind.pc
 	elf := build/fs-%/lib/libelf.a
 	dwarf := build/fs-%/lib/libdwarf.a
-	glib_tls_provider := build/fs-%/lib/pkgconfig/glib-openssl-static.pc
-	glib_tls_args := -Dca_certificates=no
-ifeq ($(host_arch), x86)
-	openssl_arch_args := linux-x86
-endif
-ifeq ($(host_arch), x86_64)
-	openssl_arch_args := linux-x86_64
-endif
-ifeq ($(host_arch), arm)
-	openssl_arch_args := linux-armv4
-endif
-ifeq ($(host_arch), mipsel)
-	openssl_arch_args := linux-mips32
-endif
-ifeq ($(host_arch), mips)
-	openssl_arch_args := linux-mips32
-endif
-ifeq ($(host_arch), mips64)
-	openssl_arch_args := linux64-mips64
-endif
 endif
 ifeq ($(host_platform), android)
 	unwind := build/fs-%/lib/pkgconfig/libunwind.pc
@@ -88,6 +60,9 @@ ifeq ($(host_platform), qnx)
 	elf := build/fs-%/lib/libelf.a
 	dwarf := build/fs-%/lib/libdwarf.a
 endif
+ifeq ($(host_platform),$(filter $(host_platform),macos ios linux android))
+	glib_tls_provider := build/fs-%/lib/pkgconfig/glib-openssl-static.pc
+endif
 ifeq ($(enable_diet), 0)
 	v8 := build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc
 endif
@@ -95,6 +70,7 @@ endif
 ifneq ($(iconv),)
 	glib_iconv_option := -Diconv=gnu
 endif
+
 
 all: build/sdk-$(host_platform)-$(host_arch).tar.bz2
 	@echo ""
@@ -305,6 +281,105 @@ $(eval $(call make-git-meson-module-rules,libffi,build/fs-%/lib/pkgconfig/libffi
 
 $(eval $(call make-git-meson-module-rules,glib,build/fs-%/lib/pkgconfig/glib-2.0.pc,$(iconv) build/fs-%/lib/pkgconfig/zlib.pc build/fs-%/lib/pkgconfig/libffi.pc,$(glib_iconv_option) -Dselinux=false -Dxattr=false -Dlibmount=false -Dinternal_pcre=true -Dtests=false))
 
+$(eval $(call make-git-meson-module-rules,glib-openssl,build/fs-%/lib/pkgconfig/glib-openssl-static.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/openssl.pc,-Dca_certificates=no))
+
+$(eval $(call make-git-meson-module-rules,libgee,build/fs-%/lib/pkgconfig/gee-0.8.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc))
+
+$(eval $(call make-git-meson-module-rules,json-glib,build/fs-%/lib/pkgconfig/json-glib-1.0.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc,-Dintrospection=false -Dtests=false))
+
+$(eval $(call make-git-meson-module-rules,libpsl,build/fs-%/lib/pkgconfig/libpsl.pc,,))
+
+$(eval $(call make-git-meson-module-rules,libxml2,build/fs-%/lib/pkgconfig/libxml-2.0.pc,build/fs-%/lib/pkgconfig/zlib.pc build/fs-%/lib/pkgconfig/liblzma.pc,))
+
+$(eval $(call make-git-meson-module-rules,libsoup,build/fs-%/lib/pkgconfig/libsoup-2.4.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/sqlite3.pc build/fs-%/lib/pkgconfig/libpsl.pc build/fs-%/lib/pkgconfig/libxml-2.0.pc,-Dgssapi=false -Dtls_check=false -Dgnome=false -Dintrospection=false -Dtests=false))
+
+
+ifeq ($(host_platform),$(filter $(host_platform),macos ios))
+	xcode_developer_dir := $(shell xcode-select -print-path)
+ifeq ($(host_platform_arch), macos-x86)
+	openssl_arch_args := macos-i386
+	xcode_platform := MacOSX
+endif
+ifeq ($(host_platform_arch), macos-x86_64)
+	openssl_arch_args := macos64-x86_64 enable-ec_nistp_64_gcc_128
+	xcode_platform := MacOSX
+endif
+ifeq ($(host_platform_arch), ios-x86)
+	openssl_arch_args := ios-sim-cross-i386
+	xcode_platform := iPhoneSimulator
+endif
+ifeq ($(host_platform_arch), ios-x86_64)
+	openssl_arch_args := ios-sim-cross-x86_64 enable-ec_nistp_64_gcc_128
+	xcode_platform := iPhoneSimulator
+endif
+ifeq ($(host_platform_arch), ios-arm)
+	openssl_arch_args := ios-cross-armv7 -D__ARM_MAX_ARCH__=7
+	xcode_platform := iPhoneOS
+endif
+ifeq ($(host_platform_arch), ios-arm64)
+	openssl_arch_args := ios64-cross-arm64 enable-ec_nistp_64_gcc_128
+	xcode_platform := iPhoneOS
+endif
+	openssl_host_env := \
+		CPP=clang CC=clang CXX=clang++ LD= LDFLAGS= AR= RANLIB= \
+		CROSS_COMPILE="$(xcode_developer_dir)/Toolchains/XcodeDefault.xctoolchain/usr/bin/" \
+		CROSS_TOP="${xcode_developer_dir}/Platforms/$(xcode_platform).platform/Developer" \
+		CROSS_SDK=$(xcode_platform)$(shell xcrun --sdk $(shell echo $(xcode_platform) | tr A-Z a-z) --show-sdk-version).sdk \
+		MACOS_MIN_SDK_VERSION=10.9 \
+		IOS_MIN_SDK_VERSION=7.0 \
+		CONFIG_DISABLE_BITCODE=true \
+		$(NULL)
+endif
+ifeq ($(host_platform), linux)
+ifeq ($(host_arch), x86)
+	openssl_arch_args := linux-x86
+endif
+ifeq ($(host_arch), x86_64)
+	openssl_arch_args := linux-x86_64 enable-ec_nistp_64_gcc_128
+endif
+ifeq ($(host_arch), arm)
+	openssl_arch_args := linux-armv4
+endif
+ifeq ($(host_arch), mipsel)
+	openssl_arch_args := linux-mips32
+endif
+ifeq ($(host_arch), mips)
+	openssl_arch_args := linux-mips32
+endif
+	openssl_host_env := \
+		$(NULL)
+endif
+ifeq ($(host_platform), android)
+ifeq ($(host_arch), x86)
+	openssl_arch_args := android-x86 -D__ANDROID_API__=14
+	ndk_abi := x86
+	ndk_triplet := i686-linux-android
+endif
+ifeq ($(host_arch), x86_64)
+	openssl_arch_args := android-x86_64 -D__ANDROID_API__=21
+	ndk_abi := x86_64
+	ndk_triplet := x86_64-linux-android
+endif
+ifeq ($(host_arch), arm)
+	openssl_arch_args := android-arm -D__ANDROID_API__=14 -D__ARM_MAX_ARCH__=7
+	ndk_abi := arm-linux-androideabi
+	ndk_triplet := arm-linux-androideabi
+endif
+ifeq ($(host_arch), arm64)
+	openssl_arch_args := android-arm64 -D__ANDROID_API__=21
+	ndk_abi := aarch64-linux-android
+	ndk_triplet := aarch64-linux-android
+endif
+	ndk_build_platform_arch := $(shell uname -s | tr '[A-Z]' '[a-z]')-$(build_arch)
+	ndk_llvm_prefix := $(ANDROID_NDK_ROOT)/toolchains/llvm/prebuilt/$(ndk_build_platform_arch)
+	ndk_gcc_prefix := $(ANDROID_NDK_ROOT)/toolchains/$(ndk_abi)-4.9/prebuilt/$(ndk_build_platform_arch)
+	openssl_host_env := \
+		CPP=clang CC=clang CXX=clang++ LD= LDFLAGS= AR=$(ndk_triplet)-ar RANLIB=$(ndk_triplet)-ranlib \
+		ANDROID_NDK=$(ANDROID_NDK_ROOT) \
+		PATH=$(ndk_llvm_prefix)/bin:$(ndk_gcc_prefix)/bin:$$PATH \
+		$(NULL)
+endif
+
 build/.openssl-stamp:
 	$(RM) -r openssl
 	mkdir openssl
@@ -322,32 +397,22 @@ build/fs-%/lib/pkgconfig/openssl.pc: build/fs-env-%.rc build/fs-tmp-%/openssl/Co
 	. $< \
 		&& . $$CONFIG_SITE \
 		&& export CC CFLAGS \
+		&& export $(openssl_host_env) OPENSSL_LOCAL_CONFIG_DIR="$(abspath releng/openssl-config)" \
 		&& cd build/fs-tmp-$*/openssl \
 		&& perl Configure \
 			--prefix=$$frida_prefix \
 			--openssldir=/etc/ssl \
+			no-engine \
 			no-comp \
-			no-ssl2 \
 			no-ssl3 \
 			no-zlib \
+			no-async \
 			no-shared \
 			enable-cms \
 			$(openssl_arch_args) \
 		&& make depend \
 		&& make \
 		&& make install_sw
-
-$(eval $(call make-git-meson-module-rules,glib-openssl,build/fs-%/lib/pkgconfig/glib-openssl-static.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/openssl.pc,$(glib_tls_args)))
-
-$(eval $(call make-git-meson-module-rules,libgee,build/fs-%/lib/pkgconfig/gee-0.8.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc))
-
-$(eval $(call make-git-meson-module-rules,json-glib,build/fs-%/lib/pkgconfig/json-glib-1.0.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc,-Dintrospection=false -Dtests=false))
-
-$(eval $(call make-git-meson-module-rules,libpsl,build/fs-%/lib/pkgconfig/libpsl.pc,,))
-
-$(eval $(call make-git-meson-module-rules,libxml2,build/fs-%/lib/pkgconfig/libxml-2.0.pc,build/fs-%/lib/pkgconfig/zlib.pc build/fs-%/lib/pkgconfig/liblzma.pc,))
-
-$(eval $(call make-git-meson-module-rules,libsoup,build/fs-%/lib/pkgconfig/libsoup-2.4.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/sqlite3.pc build/fs-%/lib/pkgconfig/libpsl.pc build/fs-%/lib/pkgconfig/libxml-2.0.pc,-Dgssapi=false -Dtls_check=false -Dgnome=false -Dintrospection=false -Dtests=false))
 
 
 v8_common_args := \
