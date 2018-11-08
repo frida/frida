@@ -21,12 +21,6 @@ if [ -n "$FRIDA_LIBC" ]; then
 else
   libc=uclibc
 fi
-if [ -n "$FRIDA_CFLAGS" ]; then
-  cflags=$FRIDA_CFLAGS
-fi
-if [ -n "$FRIDA_LDFLAGS" ]; then
-  ldflags=$FRIDA_LDFLAGS
-fi
 host_clang_arch=$(echo -n $host_arch | sed 's,^x86$,i386,')
 host_platform_arch=${host_platform}-${host_arch}
 
@@ -261,8 +255,8 @@ case $host_platform in
     OBJCOPY="${host_toolprefix}objcopy"
     OBJDUMP="${host_toolprefix}objdump"
 
-    CFLAGS="$cflags $host_arch_flags -ffunction-sections -fdata-sections"
-    LDFLAGS="$ldflags $host_arch_flags -Wl,--gc-sections -Wl,-z,noexecstack"
+    CFLAGS="$host_arch_flags -ffunction-sections -fdata-sections"
+    LDFLAGS="$host_arch_flags -Wl,--gc-sections -Wl,-z,noexecstack"
 
     arch_args=$(flags_to_args "$host_arch_flags")
 
