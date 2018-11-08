@@ -346,6 +346,9 @@ endif
 ifeq ($(host_arch), mips)
 	openssl_arch_args := linux-mips32
 endif
+ifeq ($(host_arch), mips64)
+	openssl_arch_args := linux64-mips64
+endif
 	openssl_host_env := \
 		$(NULL)
 endif
