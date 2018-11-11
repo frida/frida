@@ -218,6 +218,28 @@ if __name__ == '__main__':
             " && cp dists/stable/main/binary-iphoneos-arm/Packages.gz ."])
         os.unlink(deb)
 
+    def upload_ios_debug_symbols():
+        unstripped_ios_binaries = [
+            "build/tmp-ios-arm64/frida-core/server/frida-server-unsigned",
+            "build/tmp-ios-arm64/frida-core/lib/agent/frida-agent.dylib",
+        ]
+
+        output_dir = tempfile.mkdtemp(prefix="frida-symbols")
+        try:
+            for binary_path in unstripped_ios_binaries:
+                dwarf_name = os.path.basename(binary_path) + ".dwarf"
+                dwarf_path = os.path.join(output_dir, dwarf_name)
+
+                subprocess.check_call(["dsymutil", "-f", "--minimize", "-o", dwarf_path, binary_path], cwd=build_dir)
+
+                load_commands = subprocess.check_output(["otool", "-l", dwarf_path]).decode('utf-8')
+                uuid = [line.split(" ")[-1] for line in load_commands.split("\n") if "uuid " in line][0]
+
+                remote_dwarf_path = "/home/frida/public_html/symbols/ios/" + uuid + ".dwarf"
+                subprocess.check_call([scp, dwarf_path, "frida@build.frida.re:" + remote_dwarf_path])
+        finally:
+            shutil.rmtree(output_dir)
+
     def get_github_uploader():
         from agithub.GitHub import GitHub
         import requests
@@ -380,6 +402,8 @@ if __name__ == '__main__':
 
             upload_ios_deb("frida", os.path.join(build_dir, "build", "frida-ios-arm64", "bin", "frida-server"))
             upload_ios_deb("frida32", os.path.join(build_dir, "build", "frida-ios-arm", "bin", "frida-server"))
+
+            upload_ios_debug_symbols()
         elif slave == 'linux':
             upload = get_github_uploader()
 
