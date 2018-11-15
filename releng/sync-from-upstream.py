@@ -9,7 +9,7 @@ def make_gnome_url(repo_name):
 
 upstreams = {
     "zlib": "https://github.com/madler/zlib.git",
-    "libffi": "https://github.com/jonwilson030981/libffi.git",
+    "libffi": "https://github.com/libffi/libffi.git",
     "glib": make_gnome_url("glib"),
     "glib-openssl": make_gnome_url("glib-openssl"),
     "glib-schannel": "https://github.com/centricular/glib-schannel.git",
