@@ -391,7 +391,8 @@ server-macos: build/frida-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@server
 server-macos-thin: build/frida_thin-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for macOS without cross-arch support
 server-ios: build/frida-ios-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-ios-arm64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for iOS
 server-ios-thin: build/frida_thin-ios-arm64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for iOS without cross-arch support
-server-android: build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for Android
+server-android: build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for Android all supported architectures
+server-android-arm: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for Android arm and arm64 only
 
 gadget-macos: build/frida-macos-universal/lib/FridaGadget.dylib ##@gadget Build for macOS
 gadget-macos-thin: build/frida_thin-macos-x86_64/lib/FridaGadget.dylib ##@gadget Build for macOS without cross-arch support
@@ -542,7 +543,7 @@ check-tools-macos-thin: tools-macos-thin ##@tools Test CLI tools for macOS witho
 	capstone-update-submodule-stamp \
 	gum-macos gum-macos-thin gum-ios gum-ios-thin gum-android check-gum-macos check-gum-macos-thin frida-gum-update-submodule-stamp \
 	core-macos core-macos-thin core-ios core-ios-thin core-android check-core-macos check-core-macos-thin check-core-android-arm64 frida-core-update-submodule-stamp \
-	server-macos server-macos-thin server-ios server-ios-thin server-android \
+	server-macos server-macos-thin server-ios server-ios-thin server-android server-android-arm \
 	gadget-macos gadget-macos-thin gadget-ios gadget-ios-thin gadget-android \
 	python-macos python-macos-thin check-python-macos check-python-macos-thin frida-python-update-submodule-stamp \
 	node-macos node-macos-thin check-node-macos check-node-macos-thin frida-node-update-submodule-stamp \
