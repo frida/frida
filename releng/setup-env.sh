@@ -795,7 +795,7 @@ fi
   echo "export ACLOCAL=\"$ACLOCAL\""
   echo "export CONFIG_SITE=\"$CONFIG_SITE\""
   echo "unset LANG LC_ALL LC_COLLATE LC_CTYPE LC_MESSAGES LC_NUMERIC LC_TIME"
-  echo "export LC_ALL=en_US.UTF-8"
+  echo "export LC_ALL=en_US"
 ) > $env_rc
 
 case $host_platform in
