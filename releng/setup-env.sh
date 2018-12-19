@@ -466,7 +466,7 @@ case $host_platform in
     OBJCOPY="${android_toolroot}/bin/${host_toolprefix}objcopy"
     OBJDUMP="${android_toolroot}/bin/${host_toolprefix}objdump"
 
-    CFLAGS="$host_arch_flags -DANDROID -fPIE -ffunction-sections -fdata-sections"
+    CFLAGS="$host_arch_flags -DANDROID -ffunction-sections -fdata-sections"
     LDFLAGS="$host_arch_flags $host_ldflags -Wl,--gc-sections -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now"
 
     elf_cleaner=${FRIDA_ROOT}/releng/frida-elf-cleaner-${build_platform_arch}
@@ -489,7 +489,7 @@ case $host_platform in
     if [ -n "$base_toolchain_args" ]; then
       base_toolchain_args="$base_toolchain_args, "
     fi
-    base_compiler_args="$base_toolchain_args'-DANDROID', '-fPIE', '-ffunction-sections', '-fdata-sections'"
+    base_compiler_args="$base_toolchain_args'-DANDROID', '-fPIC', '-ffunction-sections', '-fdata-sections'"
     base_linker_args="$base_toolchain_args$(flags_to_args "$host_ldflags"), '-Wl,--gc-sections', '-Wl,-z,noexecstack', '-Wl,-z,relro', '-Wl,-z,now'"
 
     meson_c="$meson_cc_wrapper"
