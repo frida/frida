@@ -466,7 +466,7 @@ case $host_platform in
     OBJCOPY="${android_toolroot}/bin/${host_toolprefix}objcopy"
     OBJDUMP="${android_toolroot}/bin/${host_toolprefix}objdump"
 
-    CFLAGS="$host_arch_flags -DANDROID -fPIC -ffunction-sections -fdata-sections"
+    CFLAGS="$host_arch_flags -DANDROID -ffunction-sections -fdata-sections"
     LDFLAGS="$host_arch_flags $host_ldflags -Wl,--gc-sections -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now"
 
     elf_cleaner=${FRIDA_ROOT}/releng/frida-elf-cleaner-${build_platform_arch}
