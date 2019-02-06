@@ -164,7 +164,7 @@ build/.elfutils-stamp:
 	@mkdir -p $(@D)
 	@touch $@
 
-build/fs-tmp-%/elfutils/Makefile: build/fs-env-%.rc build/.elfutils-stamp build/fs-%/lib/pkgconfig/liblzma.pc
+build/fs-tmp-%/elfutils/Makefile: build/fs-env-%.rc build/.elfutils-stamp build/fs-%/lib/pkgconfig/liblzma.pc build/fs-%/lib/pkgconfig/zlib.pc
 	$(RM) -r $(@D)
 	mkdir -p $(@D)
 	. $< \
