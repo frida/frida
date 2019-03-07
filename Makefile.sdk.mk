@@ -16,10 +16,10 @@ build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos
 build_arch := $(shell releng/detect-arch.sh)
 build_platform_arch := $(build_platform)-$(build_arch)
 
-ifeq ($(build_platform), linux)
-	download := wget -O - -q
-else
+ifneq ($(shell which curl),)
 	download := curl -sS
+else
+	download := wget -O - -q
 endif
 
 ifdef FRIDA_HOST
