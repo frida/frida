@@ -341,7 +341,7 @@ ifeq ($(host_arch), arm)
 	openssl_arch_args := linux-armv4
 endif
 ifeq ($(host_arch), arm64)
-	openssl_arch_args := linux-arm64
+	openssl_arch_args := linux-aarch64
 endif
 ifeq ($(host_arch), mipsel)
 	openssl_arch_args := linux-mips32
