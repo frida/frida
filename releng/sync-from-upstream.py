@@ -1,4 +1,6 @@
 import os
+from pathlib import Path
+import re
 import subprocess
 import sys
 
@@ -8,6 +10,7 @@ def make_gnome_url(repo_name):
 
 
 upstreams = {
+    "meson": "https://github.com/mesonbuild/meson.git",
     "zlib": "https://github.com/madler/zlib.git",
     "libffi": "https://github.com/libffi/libffi.git",
     "glib": make_gnome_url("glib"),
@@ -27,7 +30,7 @@ upstreams = {
 def sync(repo_path):
     repo_name = os.path.basename(repo_path)
 
-    patches_path = os.path.join(repo_path, ".git", "frida-patches")
+    patches_path = os.path.join(str(Path.home()), ".frida-sync-" + re.sub(r"[^\w\d]", "-", repo_path.lower()).lstrip("-"))
     if os.path.exists(patches_path):
         patches = PendingPatches.load(patches_path)
 
