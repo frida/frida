@@ -241,7 +241,7 @@ $(eval $(call make-git-meson-module-rules,zlib,build/ft-%/lib/pkgconfig/zlib.pc,
 
 $(eval $(call make-git-meson-module-rules,libffi,build/ft-%/lib/pkgconfig/libffi.pc,,))
 
-$(eval $(call make-git-meson-module-rules,glib,build/ft-%/bin/glib-genmarshal,build/ft-%/bin/autopoint build/ft-%/lib/pkgconfig/zlib.pc build/ft-%/lib/pkgconfig/libffi.pc,$(glib_iconv_option) -Dselinux=false -Dxattr=false -Dlibmount=false -Dinternal_pcre=true -Dtests=false))
+$(eval $(call make-git-meson-module-rules,glib,build/ft-%/bin/glib-genmarshal,build/ft-%/bin/autopoint build/ft-%/lib/pkgconfig/zlib.pc build/ft-%/lib/pkgconfig/libffi.pc,$(glib_iconv_option) -Dselinux=disabled -Dxattr=false -Dlibmount=false -Dinternal_pcre=true -Dtests=false))
 
 $(eval $(call make-git-meson-module-rules,pkg-config,build/ft-%/bin/pkg-config,build/ft-%/bin/glib-genmarshal,))
 

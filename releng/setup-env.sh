@@ -143,8 +143,8 @@ fi
 
 prompt_color=33
 
-toolchain_version=20180825
-sdk_version=20190329
+toolchain_version=20190404
+sdk_version=20190404
 if [ $enable_asan = yes ]; then
   sdk_version="$sdk_version-asan"
 fi
@@ -286,6 +286,7 @@ case $host_platform in
     CC="$cc_wrapper"
     CXX="$cxx_wrapper"
     OBJC="$cc_wrapper"
+    OBJCXX="$cxx_wrapper"
     LD="$(xcrun --sdk $macos_sdk -f ld)"
 
     AR="$(xcrun --sdk $macos_sdk -f ar)"
@@ -370,6 +371,7 @@ case $host_platform in
     CC="$cc_wrapper"
     CXX="$cxx_wrapper"
     OBJC="$cc_wrapper"
+    OBJCXX="$cxx_wrapper"
     LD="$(xcrun --sdk $ios_sdk -f ld)"
 
     AR="$(xcrun --sdk $ios_sdk -f ar)"
@@ -414,7 +416,7 @@ case $host_platform in
 
     case $host_arch in
       x86)
-        android_api=14
+        android_api=18
         host_triplet="i686-linux-android"
         host_arch_flags="-march=i686"
         host_ldflags="-fuse-ld=gold"
@@ -426,7 +428,7 @@ case $host_platform in
         host_ldflags="-fuse-ld=gold"
         ;;
       arm)
-        android_api=14
+        android_api=18
         host_triplet="arm-linux-androideabi"
         host_arch_flags="-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16"
         host_ldflags="-fuse-ld=gold -Wl,--fix-cortex-a8 -Wl,--icf=safe"
@@ -611,6 +613,9 @@ if [ $enable_asan = yes ]; then
   if [ -n "$OBJC" ]; then
     OBJC="$OBJC $sanitizer_flag"
   fi
+  if [ -n "$OBJCXX" ]; then
+    OBJCXX="$OBJCXX $sanitizer_flag"
+  fi
   LD="$LD $sanitizer_flag"
 
   meson_c_args="'$sanitizer_flag', $meson_c_args"
@@ -648,7 +653,7 @@ ACLOCAL="aclocal $ACLOCAL_FLAGS"
 CONFIG_SITE="$FRIDA_BUILD/${frida_env_name_prefix}config-${host_platform_arch}.site"
 
 VALAC="$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-valac"
-vala_impl="$FRIDA_TOOLROOT/bin/valac-0.42"
+vala_impl="$FRIDA_TOOLROOT/bin/valac-0.46"
 vala_flags="--vapidir=\"$FRIDA_PREFIX/share/vala/vapi\""
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   vala_flags="$vala_flags --vapidir=\"$FRIDA_SDKROOT/share/vala/vapi\""
@@ -683,12 +688,12 @@ if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/.version" 2>/dev/null; th
       "$template" > "$target"
   done
 
-  vala_wrapper=$FRIDA_TOOLROOT/bin/valac-0.42
-  vala_impl=$FRIDA_TOOLROOT/bin/valac-0.42-impl
+  vala_wrapper=$FRIDA_TOOLROOT/bin/valac-0.46
+  vala_impl=$FRIDA_TOOLROOT/bin/valac-0.46-impl
   mv "$vala_wrapper" "$vala_impl"
   (
     echo "#!/bin/sh"
-    echo "exec \"$vala_impl\" --target-glib=2.57 \"\$@\" --vapidir=\"$FRIDA_TOOLROOT/share/vala-0.42/vapi\""
+    echo "exec \"$vala_impl\" --target-glib=2.62 \"\$@\" --vapidir=\"$FRIDA_TOOLROOT/share/vala-0.46/vapi\""
   ) > "$vala_wrapper"
   chmod 755 "$vala_wrapper"
 
@@ -819,6 +824,7 @@ case $host_platform in
       echo "export CODESIGN=\"$CODESIGN\""
       echo "export LIPO=\"$LIPO\""
       echo "export OBJC=\"$OBJC\""
+      echo "export OBJCXX=\"$OBJCXX\""
       echo "export OBJCFLAGS=\"$CFLAGS\""
       echo "export OBJCXXFLAGS=\"$CXXFLAGS\""
     ) >> $env_rc

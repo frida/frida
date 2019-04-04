@@ -21,14 +21,15 @@ LIBRARY_TARGET_RUNTIMES = ['static', 'dynamic']
 COMPRESSION_LEVEL = 9
 
 FRIDA_BASE_URL = "https://github.com/frida"
-BOOTSTRAP_TOOLCHAIN_URL = "https://build.frida.re/toolchain-20180825-windows-x86.exe"
-VALA_VERSION = "0.42"
-VALA_TARGET_GLIB = "2.57"
+BOOTSTRAP_TOOLCHAIN_URL = "https://build.frida.re/toolchain-20190404-windows-x86.exe"
+VALA_VERSION = "0.46"
+VALA_TARGET_GLIB = "2.62"
 
 
 RELENG_DIR = os.path.abspath(os.path.dirname(__file__))
 ROOT_DIR = os.path.dirname(RELENG_DIR)
 BOOTSTRAP_TOOLCHAIN_DIR = os.path.join(ROOT_DIR, "build", "fts-toolchain-windows")
+BOOTSTRAP_VALAC = "valac-0.46.exe"
 
 MESON = os.path.join(RELENG_DIR, "meson", "meson.py")
 NINJA = os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "bin", "ninja.exe")
@@ -107,7 +108,7 @@ def build_meson_modules(platform, configuration):
         ("json-glib", "json-glib-1.0.pc", ["introspection=false", "tests=false"]),
         ("libpsl", "libpsl.pc", []),
         ("libxml2", "libxml-2.0.pc", []),
-        ("libsoup", "libsoup-2.4.pc", ["gssapi=false", "tls_check=false", "gnome=false", "introspection=false", "tests=false"]),
+        ("libsoup", "libsoup-2.4.pc", ["gssapi=false", "tls_check=false", "gnome=false", "introspection=false", "vapi=false", "tests=false"]),
         ("vala", VALAC_FILENAME, []),
         ("pkg-config", "pkg-config.exe", []),
     ]
@@ -269,7 +270,7 @@ set DEPOT_TOOLS_WIN_TOOLCHAIN=0
             cxxflags=cxxflags,
             vc_install_dir=vc_install_dir,
             platform=msvc_platform,
-            valac=VALAC_FILENAME,
+            valac=BOOTSTRAP_VALAC,
             vala_flags=vala_flags
         ))
 
@@ -356,7 +357,7 @@ sys.exit(subprocess.call([r"{bison_path}"] + args))
     shell_env["CXXFLAGS"] = cxxflags
     shell_env["VCINSTALLDIR"] = vc_install_dir
     shell_env["Platform"] = msvc_platform
-    shell_env["VALAC"] = VALAC_FILENAME
+    shell_env["VALAC"] = BOOTSTRAP_VALAC
     shell_env["VALAFLAGS"] = vala_flags
 
     return MesonEnv(env_dir, shell_env)

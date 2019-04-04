@@ -6,9 +6,9 @@ repo_base_url = https://github.com/frida
 repo_suffix := .git
 
 libiconv_version := 1.15
-elfutils_version := 0.173
-libdwarf_version := 20180724
-openssl_version := 1.1.1
+elfutils_version := 34ff3ca2e86f8a4915500b92a8e00d6f52aa546c
+libdwarf_version := 20190110
+openssl_version := 1.1.1b
 v8_api_version := 7.0
 
 
@@ -155,12 +155,14 @@ build/fs-%/lib/libiconv.a: build/fs-env-%.rc build/fs-tmp-%/libiconv/Makefile
 	@touch $@
 
 
-build/.elfutils-stamp:
+build/.elfutils-stamp: build/fs-env-$(build_platform_arch).rc
 	$(RM) -r elfutils
-	mkdir elfutils
-	cd elfutils \
-		&& $(download) https://sourceware.org/pub/elfutils/$(elfutils_version)/elfutils-$(elfutils_version).tar.bz2 | tar -xj --strip-components 1 \
-		&& patch -p1 < ../releng/patches/elfutils-android.patch
+	git clone git://sourceware.org/git/elfutils.git
+	. $< \
+		&& cd elfutils \
+		&& git checkout $(elfutils_version) \
+		&& patch -p1 < ../releng/patches/elfutils-android.patch \
+		&& autoreconf -ifv
 	@mkdir -p $(@D)
 	@touch $@
 
@@ -172,7 +174,7 @@ build/fs-tmp-%/elfutils/Makefile: build/fs-env-%.rc build/.elfutils-stamp build/
 		&& if [ -n "$$FRIDA_GCC" ]; then \
 			export CC="$$FRIDA_GCC"; \
 		fi \
-		&& ../../../elfutils/configure
+		&& ../../../elfutils/configure --enable-maintainer-mode
 
 build/fs-%/lib/libelf.a: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
 	. $< \
@@ -291,7 +293,7 @@ $(eval $(call make-git-meson-module-rules,libpsl,build/fs-%/lib/pkgconfig/libpsl
 
 $(eval $(call make-git-meson-module-rules,libxml2,build/fs-%/lib/pkgconfig/libxml-2.0.pc,build/fs-%/lib/pkgconfig/zlib.pc build/fs-%/lib/pkgconfig/liblzma.pc,))
 
-$(eval $(call make-git-meson-module-rules,libsoup,build/fs-%/lib/pkgconfig/libsoup-2.4.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/sqlite3.pc build/fs-%/lib/pkgconfig/libpsl.pc build/fs-%/lib/pkgconfig/libxml-2.0.pc,-Dgssapi=false -Dtls_check=false -Dgnome=false -Dintrospection=false -Dtests=false))
+$(eval $(call make-git-meson-module-rules,libsoup,build/fs-%/lib/pkgconfig/libsoup-2.4.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/sqlite3.pc build/fs-%/lib/pkgconfig/libpsl.pc build/fs-%/lib/pkgconfig/libxml-2.0.pc,-Dgssapi=false -Dtls_check=false -Dgnome=false -Dintrospection=false -Dvapi=false -Dtests=false))
 
 
 ifeq ($(host_platform),$(filter $(host_platform),macos ios))
@@ -354,7 +356,7 @@ endif
 endif
 ifeq ($(host_platform), android)
 ifeq ($(host_arch), x86)
-	openssl_arch_args := android-x86 -D__ANDROID_API__=14
+	openssl_arch_args := android-x86 -D__ANDROID_API__=18
 	ndk_abi := x86
 	ndk_triplet := i686-linux-android
 endif
@@ -364,7 +366,7 @@ ifeq ($(host_arch), x86_64)
 	ndk_triplet := x86_64-linux-android
 endif
 ifeq ($(host_arch), arm)
-	openssl_arch_args := android-arm -D__ANDROID_API__=14 -D__ARM_MAX_ARCH__=7
+	openssl_arch_args := android-arm -D__ANDROID_API__=18 -D__ARM_MAX_ARCH__=7
 	ndk_abi := arm-linux-androideabi
 	ndk_triplet := arm-linux-androideabi
 endif
@@ -414,8 +416,8 @@ build/fs-%/lib/pkgconfig/openssl.pc: build/fs-env-%.rc build/fs-tmp-%/openssl/Co
 			enable-cms \
 			$(openssl_arch_args) \
 		&& make depend \
-		&& make \
-		&& make install_sw
+		&& make build_libs \
+		&& make install_dev
 
 
 v8_common_args := \
@@ -437,6 +439,9 @@ v8_common_args := \
 	v8_embedder_string="-frida" \
 	$(NULL)
 
+ifeq ($(host_platform_arch), android-x86_64)
+v8_arch_args := v8_enable_embedded_builtins=false
+endif
 ifneq ($(host_arch), x86_64)
 v8_arch_args := v8_enable_embedded_builtins=false
 endif
@@ -492,11 +497,13 @@ endif
 ifeq ($(host_platform), android)
 	v8_os := android
 	v8_platform_args := \
+		use_xcode_clang=true \
 		android_ndk_root="$(ANDROID_NDK_ROOT)" \
 		android_ndk_version="r17b" \
 		android_ndk_major_version=17 \
-		android32_ndk_api_level=14 \
-		android64_ndk_api_level=21
+		android32_ndk_api_level=18 \
+		android64_ndk_api_level=21 \
+		clang_base_path="$(abspath ./build/fs-ndk-android-$(host_arch))"
 	v8_libs_private := "-llog -lm"
 endif
 
