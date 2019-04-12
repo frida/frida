@@ -135,11 +135,12 @@ check-gum-macos-thin: build/frida_thin-macos-x86_64/lib/pkgconfig/frida-gum-1.0.
 	build/tmp_thin-macos-x86_64/frida-gum/tests/gum-tests $(test_args)
 
 
-core-macos: build/frida-macos-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for macOS
-core-macos-thin: build/frida_thin-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for macOS without cross-arch support
-core-ios: build/frida-ios-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-ios-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for iOS
-core-ios-thin: build/frida_thin-ios-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for iOS without cross-arch support
-core-android: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android
+core-macos: build/.core-macos-stamp-frida-macos-x86 build/.core-macos-stamp-frida-macos-x86_64 ##@core Build for macOS
+core-macos-thin: build/.core-macos-stamp-frida_thin-macos-x86_64 ##@core Build for macOS without cross-arch support
+core-ios: build/.core-ios-stamp-frida-ios-arm build/.core-ios-stamp-frida-ios-arm64 ##@core Build for iOS
+core-ios-thin: build/.core-ios-stamp-frida_thin-ios-arm64 ##@core Build for iOS without cross-arch support
+core-android: build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android
+core-android-arm: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android arm and arm64 only
 
 build/tmp-macos-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-macos-%/lib/pkgconfig/frida-gum-1.0.pc
 	. build/frida-meson-env-macos-$(build_arch).rc; \
@@ -316,6 +317,9 @@ build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/f
 build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/frida-core/.frida-helper-and-agent-stamp build/tmp-android-arm64/frida-core/.frida-helper-and-agent-stamp
 	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-android-arm64/frida-core install
 	@touch $@
+build/frida_thin-ios-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-ios-arm64/frida-core/.frida-ninja-stamp
+	. build/frida_thin-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp_thin-ios-arm64/frida-core install
+	@touch $@
 build/frida_thin-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-%/frida-core/.frida-ninja-stamp
 	. build/frida_thin-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp_thin-$*/frida-core install
 	@touch $@
@@ -336,49 +340,40 @@ build/tmp-android-%/frida-core/.frida-helper-and-agent-stamp: build/tmp-android-
 	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-android-$*/frida-core src/frida-helper lib/agent/frida-agent.so
 	@touch $@
 
-build/frida-macos-universal/lib/FridaGadget.dylib: build/frida-macos-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc
-	@if [ -z "$$MAC_CERTID" ]; then echo "MAC_CERTID not set, see https://github.com/frida/frida#macos-and-macos"; exit 1; fi
-	mkdir -p $(@D)
-	cp build/frida-macos-x86/lib/FridaGadget.dylib $(@D)/FridaGadget-x86.dylib
-	cp build/frida-macos-x86_64/lib/FridaGadget.dylib $(@D)/FridaGadget-x86_64.dylib
-	. build/frida-env-macos-x86_64.rc \
-		&& $$STRIP $$STRIP_FLAGS $(@D)/FridaGadget-x86.dylib $(@D)/FridaGadget-x86_64.dylib \
-		&& $$LIPO $(@D)/FridaGadget-x86.dylib $(@D)/FridaGadget-x86_64.dylib -create -output $@.tmp \
-		&& $$INSTALL_NAME_TOOL -id @executable_path/../Frameworks/FridaGadget.dylib $@.tmp \
-		&& $$CODESIGN -f -s "$$MAC_CERTID" $@.tmp
-	rm $(@D)/FridaGadget-*.dylib
-	mv $@.tmp $@
-build/frida_thin-macos-%/lib/FridaGadget.dylib: build/frida_thin-macos-%/lib/pkgconfig/frida-core-1.0.pc
-	@if [ -z "$$MAC_CERTID" ]; then echo "MAC_CERTID not set, see https://github.com/frida/frida#macos-and-macos"; exit 1; fi
-	mkdir -p $(@D)
-	cp build/frida_thin-macos-$*/lib/FridaGadget.dylib $@.tmp
-	. build/frida_thin-env-macos-$*.rc \
-		&& $$STRIP $$STRIP_FLAGS $@.tmp \
-		&& $$INSTALL_NAME_TOOL -id @executable_path/../Frameworks/FridaGadget.dylib $@.tmp \
-		&& $$CODESIGN -f -s "$$MAC_CERTID" $@.tmp
-	mv $@.tmp $@
-build/frida-ios-universal/lib/FridaGadget.dylib: build/frida-ios-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-ios-x86_64/lib/pkgconfig/frida-core-1.0.pc build/frida-ios-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-ios-arm64/lib/pkgconfig/frida-core-1.0.pc
+build/.core-macos-stamp-%: build/%/lib/pkgconfig/frida-core-1.0.pc
+	@if [ -z "$$MAC_CERTID" ]; then echo "MAC_CERTID not set, see https://github.com/frida/frida#macos-and-ios"; exit 1; fi
+	. build/frida-meson-env-macos-$(build_arch).rc \
+		&& $$CODESIGN -f -s "$$MAC_CERTID" -i "re.frida.Server" build/$*/bin/frida-server \
+		&& $$INSTALL_NAME_TOOL -id @executable_path/../Frameworks/FridaGadget.dylib build/$*/lib/frida-gadget.dylib \
+		&& $$CODESIGN -f -s "$$MAC_CERTID" build/$*/lib/frida-gadget.dylib
+	@touch $@
+build/.core-ios-stamp-%: build/%/lib/pkgconfig/frida-core-1.0.pc
 	@if [ -z "$$IOS_CERTID" ]; then echo "IOS_CERTID not set, see https://github.com/frida/frida#macos-and-ios"; exit 1; fi
-	mkdir -p $(@D)
-	cp build/frida-ios-x86/lib/FridaGadget.dylib $(@D)/FridaGadget-x86.dylib
-	cp build/frida-ios-x86_64/lib/FridaGadget.dylib $(@D)/FridaGadget-x86_64.dylib
-	cp build/frida-ios-arm/lib/FridaGadget.dylib $(@D)/FridaGadget-arm.dylib
-	cp build/frida-ios-arm64/lib/FridaGadget.dylib $(@D)/FridaGadget-arm64.dylib
-	. build/frida-env-ios-arm64.rc \
-		&& $$STRIP $$STRIP_FLAGS $(@D)/FridaGadget-x86.dylib $(@D)/FridaGadget-x86_64.dylib $(@D)/FridaGadget-arm.dylib $(@D)/FridaGadget-arm64.dylib \
-		&& $$LIPO $(@D)/FridaGadget-x86.dylib $(@D)/FridaGadget-x86_64.dylib $(@D)/FridaGadget-arm.dylib $(@D)/FridaGadget-arm64.dylib -create -output $@.tmp \
-		&& $$INSTALL_NAME_TOOL -id @executable_path/Frameworks/FridaGadget.dylib $@.tmp \
-		&& $$CODESIGN -f -s "$$IOS_CERTID" $@.tmp
-	rm $(@D)/FridaGadget-*.dylib
+	. build/frida-meson-env-macos-$(build_arch).rc \
+		&& $$CODESIGN -f -s "$$IOS_CERTID" --entitlements frida-core/server/frida-server.xcent build/$*/bin/frida-server \
+		&& $$INSTALL_NAME_TOOL -id @executable_path/Frameworks/FridaGadget.dylib build/$*/lib/frida-gadget.dylib \
+		&& $$CODESIGN -f -s "$$IOS_CERTID" build/$*/lib/frida-gadget.dylib
+	@touch $@
+
+build/frida-macos-universal/lib/frida-gadget.dylib: build/.core-macos-stamp-frida-macos-x86 build/.core-macos-stamp-frida-macos-x86_64
+	@mkdir -p $(@D)
+	cp build/frida-macos-x86/lib/frida-gadget.dylib $(@D)/frida-gadget-x86.dylib
+	cp build/frida-macos-x86_64/lib/frida-gadget.dylib $(@D)/frida-gadget-x86_64.dylib
+	. build/frida-meson-env-macos-$(build_arch).rc \
+		&& $$LIPO $(@D)/frida-gadget-x86.dylib $(@D)/frida-gadget-x86_64.dylib -create -output $@.tmp \
+		&& $$CODESIGN -f -s "$$MAC_CERTID" $@.tmp
+	rm $(@D)/frida-gadget-*.dylib
 	mv $@.tmp $@
-build/frida_thin-ios-%/lib/FridaGadget.dylib: build/frida_thin-ios-%/lib/pkgconfig/frida-core-1.0.pc
-	@if [ -z "$$IOS_CERTID" ]; then echo "IOS_CERTID not set, see https://github.com/frida/frida#ios-and-ios"; exit 1; fi
-	mkdir -p $(@D)
-	cp build/frida_thin-ios-$*/lib/FridaGadget.dylib $@.tmp
-	. build/frida_thin-env-ios-$*.rc \
-		&& $$STRIP $$STRIP_FLAGS $@.tmp \
-		&& $$INSTALL_NAME_TOOL -id @executable_path/../Frameworks/FridaGadget.dylib $@.tmp \
+build/frida-ios-universal/lib/frida-gadget.dylib: build/.core-ios-stamp-frida-ios-x86 build/.core-ios-stamp-frida-ios-x86_64 build/.core-ios-stamp-frida-ios-arm build/.core-ios-stamp-frida-ios-arm64
+	@mkdir -p $(@D)
+	cp build/frida-ios-x86/lib/frida-gadget.dylib $(@D)/frida-gadget-x86.dylib
+	cp build/frida-ios-x86_64/lib/frida-gadget.dylib $(@D)/frida-gadget-x86_64.dylib
+	cp build/frida-ios-arm/lib/frida-gadget.dylib $(@D)/frida-gadget-arm.dylib
+	cp build/frida-ios-arm64/lib/frida-gadget.dylib $(@D)/frida-gadget-arm64.dylib
+	. build/frida-env-ios-arm64.rc \
+		&& $$LIPO $(@D)/frida-gadget-x86.dylib $(@D)/frida-gadget-x86_64.dylib $(@D)/frida-gadget-arm.dylib $(@D)/frida-gadget-arm64.dylib -create -output $@.tmp \
 		&& $$CODESIGN -f -s "$$IOS_CERTID" $@.tmp
+	rm $(@D)/frida-gadget-*.dylib
 	mv $@.tmp $@
 
 check-core-macos: build/frida-macos-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Run tests for macOS
@@ -387,17 +382,17 @@ check-core-macos: build/frida-macos-x86/lib/pkgconfig/frida-core-1.0.pc build/fr
 check-core-macos-thin: build/frida_thin-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Run tests for macOS without cross-arch support
 	build/tmp_thin-macos-x86_64/frida-core/tests/frida-tests $(test_args)
 
-server-macos: build/frida-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for macOS
-server-macos-thin: build/frida_thin-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for macOS without cross-arch support
-server-ios: build/frida-ios-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-ios-arm64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for iOS
-server-ios-thin: build/frida_thin-ios-arm64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for iOS without cross-arch support
-server-android: build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for Android all supported architectures
-server-android-arm: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for Android arm and arm64 only
+server-macos: core-macos ##@server Build for macOS
+server-macos-thin: core-macos-thin ##@server Build for macOS without cross-arch support
+server-ios: core-ios ##@server Build for iOS
+server-ios-thin: core-ios-thin ##@server Build for iOS without cross-arch support
+server-android: core-android ##@server Build for Android all supported architectures
+server-android-arm: core-android-arm ##@server Build for Android arm and arm64 only
 
-gadget-macos: build/frida-macos-universal/lib/FridaGadget.dylib ##@gadget Build for macOS
-gadget-macos-thin: build/frida_thin-macos-x86_64/lib/FridaGadget.dylib ##@gadget Build for macOS without cross-arch support
-gadget-ios: build/frida-ios-universal/lib/FridaGadget.dylib ##@gadget Build for iOS
-gadget-ios-thin: build/frida_thin-ios-arm64/lib/FridaGadget.dylib ##@gadget Build for iOS without cross-arch support
+gadget-macos: build/frida-macos-universal/lib/frida-gadget.dylib ##@gadget Build for macOS
+gadget-macos-thin: core-macos-thin ##@gadget Build for macOS without cross-arch support
+gadget-ios: build/frida-ios-universal/lib/frida-gadget.dylib ##@gadget Build for iOS
+gadget-ios-thin: core-ios-thin ##@gadget Build for iOS without cross-arch support
 gadget-android: build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@gadget Build for Android
 
 
@@ -436,7 +431,6 @@ build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so: build/tm
 	cp build/frida-macos-x86/lib/$(PYTHON_NAME)/site-packages/_frida.so $(@D)/_frida-32.so
 	cp build/frida-macos-x86_64/lib/$(PYTHON_NAME)/site-packages/_frida.so $(@D)/_frida-64.so
 	. build/frida-env-macos-$(build_arch).rc \
-		&& $$STRIP $$STRIP_FLAGS $(@D)/_frida-32.so $(@D)/_frida-64.so \
 		&& $$LIPO $(@D)/_frida-32.so $(@D)/_frida-64.so -create -output $@
 	rm $(@D)/_frida-32.so $(@D)/_frida-64.so
 
@@ -542,7 +536,7 @@ check-tools-macos-thin: tools-macos-thin ##@tools Test CLI tools for macOS witho
 	distclean clean clean-submodules git-submodules git-submodule-stamps \
 	capstone-update-submodule-stamp \
 	gum-macos gum-macos-thin gum-ios gum-ios-thin gum-android check-gum-macos check-gum-macos-thin frida-gum-update-submodule-stamp \
-	core-macos core-macos-thin core-ios core-ios-thin core-android check-core-macos check-core-macos-thin check-core-android-arm64 frida-core-update-submodule-stamp \
+	core-macos core-macos-thin core-ios core-ios-thin core-android core-android-arm check-core-macos check-core-macos-thin check-core-android-arm64 frida-core-update-submodule-stamp \
 	server-macos server-macos-thin server-ios server-ios-thin server-android server-android-arm \
 	gadget-macos gadget-macos-thin gadget-ios gadget-ios-thin gadget-android \
 	python-macos python-macos-thin check-python-macos check-python-macos-thin frida-python-update-submodule-stamp \
