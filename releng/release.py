@@ -220,7 +220,7 @@ if __name__ == '__main__':
 
     def upload_ios_debug_symbols():
         unstripped_ios_binaries = [
-            "build/tmp-ios-arm64/frida-core/server/frida-server-unsigned",
+            "build/tmp-ios-arm64/frida-core/server/frida-server",
             "build/tmp-ios-arm64/frida-core/lib/agent/frida-agent.dylib",
         ]
 
