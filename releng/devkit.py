@@ -65,7 +65,7 @@ def generate_header(package, frida_root, host, kit, umbrella_header_path, thirdp
             os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "include", "glib-2.0"),
             os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "include", "glib-2.0"),
             os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "include", "json-glib-1.0"),
-            os.path.join(frida_root, "capstone", "include"),
+            os.path.join(frida_root, "capstone", "include", "capstone"),
             os.path.join(frida_root, "frida-gum"),
             os.path.join(frida_root, "frida-gum", "bindings")
         ]
