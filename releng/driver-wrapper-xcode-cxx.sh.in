@@ -1,0 +1,28 @@
+#!/bin/sh
+
+mode=link
+
+argv=()
+while [[ $# > 0 ]]; do
+  arg="$1"
+
+  case "$arg" in
+    -c|-E)
+      mode=compile
+      ;;
+  esac
+
+  argv+=("$arg")
+  shift
+done
+
+case $mode in
+  compile)
+    argv+=("-nostdinc++" "-I@frida_sdkroot@/include/c++/v1" "-I@frida_sdkroot@/include/c++abi")
+    ;;
+  link)
+    argv+=("-L@frida_sdkroot@/lib" "-lc++" "-lc++abi")
+    ;;
+esac
+
+exec "@driver@" -isysroot "@sysroot@" -arch "@arch@" "${argv[@]}"

@@ -271,16 +271,21 @@ case $host_platform in
       -e "s,@driver@,$clang_cc,g" \
       -e "s,@sysroot@,$macos_sdk_path,g" \
       -e "s,@arch@,$host_clang_arch,g" \
-      "$releng_path/driver-wrapper-xcode.sh.in" > "$cc_wrapper"
+      "$releng_path/driver-wrapper-xcode-cc.sh.in" > "$cc_wrapper"
     chmod +x "$cc_wrapper"
 
     cxx_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang++
-    sed \
-      -e "s,@driver@,$clang_cxx,g" \
-      -e "s,@sysroot@,$macos_sdk_path,g" \
-      -e "s,@arch@,$host_clang_arch,g" \
-      "$releng_path/driver-wrapper-xcode.sh.in" > "$cxx_wrapper"
-    chmod +x "$cxx_wrapper"
+    if [ "$FRIDA_ENV_SDK" != 'none' ]; then
+      sed \
+        -e "s,@driver@,$clang_cxx,g" \
+        -e "s,@sysroot@,$macos_sdk_path,g" \
+        -e "s,@arch@,$host_clang_arch,g" \
+        -e "s,@frida_sdkroot@,$FRIDA_SDKROOT,g" \
+        "$releng_path/driver-wrapper-xcode-cxx.sh.in" > "$cxx_wrapper"
+      chmod +x "$cxx_wrapper"
+    else
+      cp "$cc_wrapper" "$cxx_wrapper"
+    fi
 
     CPP="$cc_wrapper -E"
     CC="$cc_wrapper"
@@ -356,16 +361,21 @@ case $host_platform in
       -e "s,@driver@,$clang_cc,g" \
       -e "s,@sysroot@,$ios_sdk_path,g" \
       -e "s,@arch@,$ios_arch,g" \
-      "$releng_path/driver-wrapper-xcode.sh.in" > "$cc_wrapper"
+      "$releng_path/driver-wrapper-xcode-cc.sh.in" > "$cc_wrapper"
     chmod +x "$cc_wrapper"
 
     cxx_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang++
-    sed \
-      -e "s,@driver@,$clang_cxx,g" \
-      -e "s,@sysroot@,$ios_sdk_path,g" \
-      -e "s,@arch@,$ios_arch,g" \
-      "$releng_path/driver-wrapper-xcode.sh.in" > "$cxx_wrapper"
-    chmod +x "$cxx_wrapper"
+    if [ "$FRIDA_ENV_SDK" != 'none' ]; then
+      sed \
+        -e "s,@driver@,$clang_cxx,g" \
+        -e "s,@sysroot@,$ios_sdk_path,g" \
+        -e "s,@arch@,$ios_arch,g" \
+        -e "s,@frida_sdkroot@,$FRIDA_SDKROOT,g" \
+        "$releng_path/driver-wrapper-xcode-cxx.sh.in" > "$cxx_wrapper"
+      chmod +x "$cxx_wrapper"
+    else
+      cp "$cc_wrapper" "$cxx_wrapper"
+    fi
 
     CPP="$cc_wrapper -E"
     CC="$cc_wrapper"
@@ -475,16 +485,16 @@ case $host_platform in
 
     meson_cc_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang
     sed \
-      -e "s,@linker@,${android_toolroot}/bin/${host_toolprefix}clang,g" \
+      -e "s,@driver@,${android_toolroot}/bin/${host_toolprefix}clang,g" \
       -e "s,@elf_cleaner@,$elf_cleaner,g" \
-      "$releng_path/meson-driver-wrapper-android.sh.in" > "$meson_cc_wrapper"
+      "$releng_path/driver-wrapper-android.sh.in" > "$meson_cc_wrapper"
     chmod +x "$meson_cc_wrapper"
 
     meson_cpp_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang++
     sed \
-      -e "s,@linker@,${android_toolroot}/bin/${host_toolprefix}clang++,g" \
+      -e "s,@driver@,${android_toolroot}/bin/${host_toolprefix}clang++,g" \
       -e "s,@elf_cleaner@,$elf_cleaner,g" \
-      "$releng_path/meson-driver-wrapper-android.sh.in" > "$meson_cpp_wrapper"
+      "$releng_path/driver-wrapper-android.sh.in" > "$meson_cpp_wrapper"
     chmod +x "$meson_cpp_wrapper"
 
     base_toolchain_args=$(flags_to_args "$host_arch_flags")

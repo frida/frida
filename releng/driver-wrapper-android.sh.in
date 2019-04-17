@@ -38,7 +38,7 @@ if [[ $output_type = executable ]]; then
   argv+=("-Wl,-pie")
 fi
 
-"@linker@" "${argv[@]}" || exit $?
+"@driver@" "${argv[@]}" || exit $?
 
 case $output_type in
   executable|shlib)
