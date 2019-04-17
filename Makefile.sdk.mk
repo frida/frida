@@ -39,9 +39,11 @@ enable_diet := $(shell echo $(host_platform_arch) | egrep -q "^(linux-arm|linux-
 
 ifeq ($(host_platform), macos)
 	iconv := build/fs-%/lib/libiconv.a
+	libcxx := build/fs-%/lib/libc++.a
 endif
 ifeq ($(host_platform), ios)
 	iconv := build/fs-%/lib/libiconv.a
+	libcxx := build/fs-%/lib/libc++.a
 endif
 ifeq ($(host_platform), linux)
 	unwind := build/fs-%/lib/pkgconfig/libunwind.pc
@@ -99,7 +101,8 @@ build/fs-tmp-%/.package-stamp: \
 		build/fs-%/lib/pkgconfig/gee-0.8.pc \
 		build/fs-%/lib/pkgconfig/json-glib-1.0.pc \
 		build/fs-%/lib/pkgconfig/libsoup-2.4.pc \
-		$(v8)
+		$(v8) \
+		$(libcxx)
 	$(RM) -r $(@D)/package
 	mkdir -p $(@D)/package
 	cd build/fs-$* \
@@ -472,13 +475,11 @@ v8_build_platform := $(shell echo $(build_platform) | sed 's,^macos$$,mac,')
 ifeq ($(host_platform), macos)
 	v8_os := mac
 	v8_platform_args := \
-		use_xcode_clang=true \
 		mac_deployment_target="10.9.0"
 endif
 ifeq ($(host_platform), ios)
 	v8_os := ios
 	v8_platform_args := \
-		use_xcode_clang=true \
 		mac_deployment_target="10.9.0" \
 		ios_deployment_target="7.0"
 endif
@@ -576,6 +577,20 @@ ifdef v8_libs_private
 endif
 	echo "Cflags: -I\$${includedir} -I\$${includedir}/v8" >> $@.tmp
 	mv $@.tmp $@
+
+
+build/fs-%/lib/libc++.a: build/fs-tmp-%/v8/obj/libv8_monolith.a
+	install -d build/fs-$*/include/c++/v1
+	cp -a v8-checkout/v8/buildtools/third_party/libc++/trunk/include/* build/fs-$*/include/c++/v1/
+	rm build/fs-$*/include/c++/v1/CMakeLists.txt
+	install -d build/fs-$*/include/c++abi
+	cp -a v8-checkout/v8/buildtools/third_party/libc++abi/trunk/include/* build/fs-$*/include/c++abi/
+	$(shell xcrun -f libtool) -static -no_warning_for_no_symbols \
+		-o build/fs-$*/lib/libc++abi.a \
+		build/fs-tmp-$*/v8/obj/buildtools/third_party/libc++abi/libc++abi/*.o
+	$(shell xcrun -f libtool) -static -no_warning_for_no_symbols \
+		-o build/fs-$*/lib/libc++.a \
+		build/fs-tmp-$*/v8/obj/buildtools/third_party/libc++/libc++/*.o
 
 
 build/fs-env-%.rc:
