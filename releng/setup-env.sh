@@ -378,7 +378,7 @@ case $host_platform in
         "$releng_path/driver-wrapper-xcode-static-libc++.sh.in" > "$cxx_wrapper"
     else
       sed \
-        -e "s,@driver@,$clang_cc,g" \
+        -e "s,@driver@,$clang_cxx,g" \
         -e "s,@sysroot@,$ios_sdk_path,g" \
         -e "s,@arch@,$ios_arch,g" \
         "$releng_path/driver-wrapper-xcode-default.sh.in" > "$cxx_wrapper"
