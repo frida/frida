@@ -475,11 +475,13 @@ v8_build_platform := $(shell echo $(build_platform) | sed 's,^macos$$,mac,')
 ifeq ($(host_platform), macos)
 	v8_os := mac
 	v8_platform_args := \
+		use_xcode_clang=false \
 		mac_deployment_target="10.9.0"
 endif
 ifeq ($(host_platform), ios)
 	v8_os := ios
 	v8_platform_args := \
+		use_xcode_clang=false \
 		mac_deployment_target="10.9.0" \
 		ios_deployment_target="7.0"
 endif
