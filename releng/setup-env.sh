@@ -271,7 +271,7 @@ case $host_platform in
       -e "s,@driver@,$clang_cc,g" \
       -e "s,@sysroot@,$macos_sdk_path,g" \
       -e "s,@arch@,$host_clang_arch,g" \
-      "$releng_path/driver-wrapper-xcode-cc.sh.in" > "$cc_wrapper"
+      "$releng_path/driver-wrapper-xcode-default.sh.in" > "$cc_wrapper"
     chmod +x "$cc_wrapper"
 
     cxx_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang++
@@ -281,11 +281,15 @@ case $host_platform in
         -e "s,@sysroot@,$macos_sdk_path,g" \
         -e "s,@arch@,$host_clang_arch,g" \
         -e "s,@frida_sdkroot@,$FRIDA_SDKROOT,g" \
-        "$releng_path/driver-wrapper-xcode-cxx.sh.in" > "$cxx_wrapper"
-      chmod +x "$cxx_wrapper"
+        "$releng_path/driver-wrapper-xcode-static-libc++.sh.in" > "$cxx_wrapper"
     else
-      cp "$cc_wrapper" "$cxx_wrapper"
+      sed \
+        -e "s,@driver@,$clang_cxx,g" \
+        -e "s,@sysroot@,$macos_sdk_path,g" \
+        -e "s,@arch@,$host_clang_arch,g" \
+        "$releng_path/driver-wrapper-xcode-default.sh.in" > "$cxx_wrapper"
     fi
+    chmod +x "$cxx_wrapper"
 
     CPP="$cc_wrapper -E"
     CC="$cc_wrapper"
@@ -361,7 +365,7 @@ case $host_platform in
       -e "s,@driver@,$clang_cc,g" \
       -e "s,@sysroot@,$ios_sdk_path,g" \
       -e "s,@arch@,$ios_arch,g" \
-      "$releng_path/driver-wrapper-xcode-cc.sh.in" > "$cc_wrapper"
+      "$releng_path/driver-wrapper-xcode-default.sh.in" > "$cc_wrapper"
     chmod +x "$cc_wrapper"
 
     cxx_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang++
@@ -371,11 +375,15 @@ case $host_platform in
         -e "s,@sysroot@,$ios_sdk_path,g" \
         -e "s,@arch@,$ios_arch,g" \
         -e "s,@frida_sdkroot@,$FRIDA_SDKROOT,g" \
-        "$releng_path/driver-wrapper-xcode-cxx.sh.in" > "$cxx_wrapper"
-      chmod +x "$cxx_wrapper"
+        "$releng_path/driver-wrapper-xcode-static-libc++.sh.in" > "$cxx_wrapper"
     else
-      cp "$cc_wrapper" "$cxx_wrapper"
+      sed \
+        -e "s,@driver@,$clang_cc,g" \
+        -e "s,@sysroot@,$ios_sdk_path,g" \
+        -e "s,@arch@,$ios_arch,g" \
+        "$releng_path/driver-wrapper-xcode-default.sh.in" > "$cxx_wrapper"
     fi
+    chmod +x "$cxx_wrapper"
 
     CPP="$cc_wrapper -E"
     CC="$cc_wrapper"
