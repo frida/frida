@@ -582,6 +582,7 @@ endif
 
 
 build/fs-%/lib/libc++.a: build/fs-tmp-%/v8/obj/libv8_monolith.a
+	$(NINJA) -C build/fs-tmp-$*/v8 libc++
 	install -d build/fs-$*/include/c++/v1
 	cp -a v8-checkout/v8/buildtools/third_party/libc++/trunk/include/* build/fs-$*/include/c++/v1/
 	rm build/fs-$*/include/c++/v1/CMakeLists.txt
