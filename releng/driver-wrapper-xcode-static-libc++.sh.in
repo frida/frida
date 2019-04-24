@@ -18,10 +18,10 @@ done
 
 case $mode in
   compile)
-    argv+=("-nostdinc++" "-I@frida_sdkroot@/include/c++/v1" "-I@frida_sdkroot@/include/c++abi")
+    argv+=("-nostdinc++" "-I@frida_sdkroot@/include/c++")
     ;;
   link)
-    argv+=("-L@frida_sdkroot@/lib" "-lc++" "-lc++abi")
+    argv+=("-L@frida_sdkroot@/lib/c++" "-lc++" "-lc++abi")
     ;;
 esac
 

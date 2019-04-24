@@ -39,11 +39,11 @@ enable_diet := $(shell echo $(host_platform_arch) | egrep -q "^(linux-arm|linux-
 
 ifeq ($(host_platform), macos)
 	iconv := build/fs-%/lib/libiconv.a
-	libcxx := build/fs-%/lib/libc++.a
+	libcxx := build/fs-%/lib/c++/libc++.a
 endif
 ifeq ($(host_platform), ios)
 	iconv := build/fs-%/lib/libiconv.a
-	libcxx := build/fs-%/lib/libc++.a
+	libcxx := build/fs-%/lib/c++/libc++.a
 endif
 ifeq ($(host_platform), linux)
 	unwind := build/fs-%/lib/pkgconfig/libunwind.pc
@@ -106,6 +106,7 @@ build/fs-tmp-%/.package-stamp: \
 	$(RM) -r $(@D)/package
 	mkdir -p $(@D)/package
 	cd build/fs-$* \
+		&& [ -d lib/c++ ] && libcpp=lib/c++/*.a || libcpp= \
 		&& [ -d lib/gio/modules ] && gio_modules=lib/gio/modules/*.a || gio_modules= \
 		&& [ -d lib32 ] && lib32=lib32 || lib32= \
 		&& [ -d lib64 ] && lib64=lib64 || lib64= \
@@ -116,6 +117,7 @@ build/fs-tmp-%/.package-stamp: \
 			lib/glib-2.0 \
 			lib/libffi* \
 			lib/pkgconfig \
+			$$libcpp \
 			$$gio_modules \
 			$$lib32 \
 			$$lib64 \
@@ -582,18 +584,18 @@ endif
 	mv $@.tmp $@
 
 
-build/fs-%/lib/libc++.a: build/fs-tmp-%/v8/obj/libv8_monolith.a
+build/fs-%/lib/c++/libc++.a: build/fs-tmp-%/v8/obj/libv8_monolith.a
 	$(NINJA) -C build/fs-tmp-$*/v8 libc++
-	install -d build/fs-$*/include/c++/v1
-	cp -a v8-checkout/v8/buildtools/third_party/libc++/trunk/include/* build/fs-$*/include/c++/v1/
-	rm build/fs-$*/include/c++/v1/CMakeLists.txt
-	install -d build/fs-$*/include/c++abi
-	cp -a v8-checkout/v8/buildtools/third_party/libc++abi/trunk/include/* build/fs-$*/include/c++abi/
+	install -d build/fs-$*/include/c++
+	cp -a v8-checkout/v8/buildtools/third_party/libc++abi/trunk/include/* build/fs-$*/include/c++/
+	cp -a v8-checkout/v8/buildtools/third_party/libc++/trunk/include/* build/fs-$*/include/c++/
+	rm build/fs-$*/include/c++/CMakeLists.txt
+	install -d build/fs-$*/lib/c++
 	$(shell xcrun -f libtool) -static -no_warning_for_no_symbols \
-		-o build/fs-$*/lib/libc++abi.a \
+		-o build/fs-$*/lib/c++/libc++abi.a \
 		build/fs-tmp-$*/v8/obj/buildtools/third_party/libc++abi/libc++abi/*.o
 	$(shell xcrun -f libtool) -static -no_warning_for_no_symbols \
-		-o build/fs-$*/lib/libc++.a \
+		-o build/fs-$*/lib/c++/libc++.a \
 		build/fs-tmp-$*/v8/obj/buildtools/third_party/libc++/libc++/*.o
 
 
