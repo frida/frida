@@ -217,8 +217,12 @@ def generate_library_windows(package, frida_root, host, output_dir, library_file
         sdk_lib_path("libv8-7.0.a", frida_root, host),
     ]
 
+    capstone = [
+        internal_arch_lib_path("capstone", frida_root, host)
+    ]
+
     gum_lib = internal_arch_lib_path("gum", frida_root, host)
-    gum_deps = deduplicate(glib + gobject + gio)
+    gum_deps = deduplicate(glib + gobject + gio + capstone)
     gumjs_deps = deduplicate([gum_lib] + gum_deps + tls_provider + json_glib + sqlite + libsoup + v8)
     frida_core_deps = deduplicate(glib + gobject + gio + tls_provider + json_glib + gmodule + gee + libsoup)
 
