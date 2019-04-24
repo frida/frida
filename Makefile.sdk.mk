@@ -501,6 +501,7 @@ ifeq ($(host_platform), android)
 	v8_os := android
 	v8_platform_args := \
 		use_xcode_clang=true \
+		use_custom_libcxx=false \
 		android_ndk_root="$(ANDROID_NDK_ROOT)" \
 		android_ndk_version="r17b" \
 		android_ndk_major_version=17 \
