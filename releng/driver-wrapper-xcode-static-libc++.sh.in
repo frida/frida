@@ -21,7 +21,7 @@ case $mode in
     argv+=("-nostdinc++" "-isystem@frida_sdkroot@/include/c++")
     ;;
   link)
-    argv+=("-nostdlib++", "-L@frida_sdkroot@/lib/c++" "-lc++" "-lc++abi")
+    argv+=("-nostdlib++" "-L@frida_sdkroot@/lib/c++" "-lc++" "-lc++abi")
     ;;
 esac
 
