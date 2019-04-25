@@ -478,12 +478,14 @@ ifeq ($(host_platform), macos)
 	v8_os := mac
 	v8_platform_args := \
 		use_xcode_clang=false \
+		libcxx_abi_unstable=false \
 		mac_deployment_target="10.9.0"
 endif
 ifeq ($(host_platform), ios)
 	v8_os := ios
 	v8_platform_args := \
 		use_xcode_clang=false \
+		libcxx_abi_unstable=false \
 		mac_deployment_target="10.9.0" \
 		ios_deployment_target="7.0"
 endif
@@ -586,10 +588,24 @@ endif
 
 build/fs-%/lib/c++/libc++.a: build/fs-tmp-%/v8/obj/libv8_monolith.a
 	$(NINJA) -C build/fs-tmp-$*/v8 libc++
-	install -d build/fs-$*/include/c++
-	cp -a v8-checkout/v8/buildtools/third_party/libc++abi/trunk/include/* build/fs-$*/include/c++/
+	install -d build/fs-$*/include/c++/
 	cp -a v8-checkout/v8/buildtools/third_party/libc++/trunk/include/* build/fs-$*/include/c++/
-	rm build/fs-$*/include/c++/CMakeLists.txt
+	rm build/fs-$*/include/c++/CMakeLists.txt build/fs-$*/include/c++/__config_site.in
+	( \
+		echo "#ifndef _LIBCPP_CONFIG_SITE"; \
+		echo "#define _LIBCPP_CONFIG_SITE"; \
+		echo ""; \
+		echo "#define _LIBCPP_ENABLE_CXX17_REMOVED_UNEXPECTED_FUNCTIONS"; \
+		echo "#define _LIBCPP_HAS_NO_ALIGNED_ALLOCATION"; \
+		echo "#define _LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS"; \
+		echo "#define _LIBCPP_ENABLE_NODISCARD"; \
+		echo ""; \
+		echo "#endif"; \
+		echo ""; \
+	) | cat \
+		- \
+		v8-checkout/v8/buildtools/third_party/libc++/trunk/include/__config \
+		> build/fs-$*/include/c++/__config
 	install -d build/fs-$*/lib/c++
 	$(shell xcrun -f libtool) -static -no_warning_for_no_symbols \
 		-o build/fs-$*/lib/c++/libc++abi.a \
