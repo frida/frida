@@ -13,10 +13,6 @@ enable_silent_rules=yes
 frida_warning_flags="-Wall"
 
 case "$PACKAGE_TARNAME" in
-  openssl)
-    # Debug symbols are massive
-    frida_flags="@frida_optimization_flags@ -pipe -g1"
-    ;;
   capstone)
     # Takes ages to compile with debug information
     frida_flags="@frida_optimization_flags@ -pipe"
