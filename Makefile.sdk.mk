@@ -440,6 +440,7 @@ v8_common_args := \
 	v8_enable_gdbjit=false \
 	v8_enable_i18n_support=false \
 	v8_untrusted_code_mitigations=false \
+	treat_warnings_as_errors=false \
 	strip_absolute_paths_from_debug_symbols=true \
 	use_goma=false \
 	v8_embedder_string="-frida" \
@@ -495,7 +496,6 @@ ifeq ($(host_platform), linux)
 	v8_platform_args := \
 		is_clang=false \
 		is_cfi=false \
-		treat_warnings_as_errors=false \
 		use_sysroot=false \
 		use_custom_libcxx=false \
 		linux_use_bundled_binutils=false \
