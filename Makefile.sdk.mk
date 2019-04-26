@@ -405,6 +405,7 @@ build/fs-tmp-%/openssl/Configure: build/.openssl-stamp
 
 build/fs-%/lib/pkgconfig/openssl.pc: build/fs-env-%.rc build/fs-tmp-%/openssl/Configure
 	. $< \
+		&& export PACKAGE_TARNAME=openssl \
 		&& . $$CONFIG_SITE \
 		&& export CC CFLAGS \
 		&& export $(openssl_host_env) OPENSSL_LOCAL_CONFIG_DIR="$(abspath releng/openssl-config)" \
