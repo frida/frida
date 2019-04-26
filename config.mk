@@ -10,6 +10,9 @@ FRIDA_MAPPER_FLAGS := -Denable_mapper=auto
 FRIDA_OPTIMIZATION_FLAGS ?= -Os
 FRIDA_DEBUG_FLAGS ?= -g3
 
+FRIDA_SDK_OPTIMIZATION_FLAGS ?= -Os
+FRIDA_SDK_DEBUG_FLAGS ?= -g1
+
 FRIDA_ASAN ?= no
 
 PYTHON ?= $(shell which python)
