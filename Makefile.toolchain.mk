@@ -66,6 +66,11 @@ ifeq ($(host_platform), ios)
 	strip_all := -Sx
 endif
 
+ifeq ($(host_platform),$(filter $(host_platform),macos ios))
+	export_ldflags := -Wl,-exported_symbols_list,$(abspath build/ft-executable.symbols)
+else
+	export_ldflags := -Wl,--version-script,$(abspath build/ft-executable.version)
+endif
 
 ifeq ($(host_platform), macos)
 	dpkg_deb := build/ft-%/bin/dpkg-deb
@@ -255,14 +260,28 @@ build/ft-%/bin/dpkg-deb:
 	@mv $@.tmp $@
 
 
-build/ft-env-%.rc:
+build/ft-env-%.rc: build/ft-executable.symbols build/ft-executable.version
 	FRIDA_HOST=$* \
 		FRIDA_OPTIMIZATION_FLAGS="$(FRIDA_OPTIMIZATION_FLAGS)" \
 		FRIDA_DEBUG_FLAGS="$(FRIDA_DEBUG_FLAGS)" \
+		FRIDA_EXTRA_LDFLAGS="$(export_ldflags)" \
 		FRIDA_ASAN=$(FRIDA_ASAN) \
 		FRIDA_ENV_NAME=ft \
 		FRIDA_ENV_SDK=none \
 		./releng/setup-env.sh
+
+build/ft-executable.symbols:
+	@mkdir -p $(@D)
+	@echo "# No exported symbols." > $@
+
+build/ft-executable.version:
+	@mkdir -p $(@D)
+	@( \
+		echo "FRIDA_TOOLCHAIN_EXECUTABLE {"; \
+		echo "  local:"; \
+		echo "    *;"; \
+		echo "};" \
+	) > $@
 
 
 .PHONY: all

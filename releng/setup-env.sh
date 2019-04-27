@@ -606,6 +606,13 @@ case $host_platform_arch in
     ;;
 esac
 
+if [ -n "$FRIDA_EXTRA_LDFLAGS" ]; then
+  LDFLAGS="$LDFLAGS $FRIDA_EXTRA_LDFLAGS"
+  extra_link_args=$(flags_to_args "$FRIDA_EXTRA_LDFLAGS")
+  meson_c_link_args="$meson_c_link_args, $extra_link_args"
+  meson_cpp_link_args="$meson_cpp_link_args, $extra_link_args"
+fi
+
 # We need these legacy paths for dependencies that don't use pkg-config
 legacy_includes="-I$FRIDA_PREFIX/include"
 legacy_libpaths="-L$FRIDA_PREFIX/lib"
@@ -817,8 +824,6 @@ fi
   echo "export ACLOCAL_FLAGS=\"$ACLOCAL_FLAGS\""
   echo "export ACLOCAL=\"$ACLOCAL\""
   echo "export CONFIG_SITE=\"$CONFIG_SITE\""
-  echo "unset LANG LC_ALL LC_COLLATE LC_CTYPE LC_MESSAGES LC_NUMERIC LC_TIME"
-  echo "export LC_ALL=en_US"
 ) > $env_rc
 
 case $host_platform in
