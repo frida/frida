@@ -70,7 +70,7 @@ ifeq ($(enable_diet), 0)
 endif
 
 ifneq ($(iconv),)
-	glib_iconv_option := -Diconv=gnu
+	glib_iconv_option := -Diconv=external
 endif
 
 

@@ -47,7 +47,7 @@ ifeq ($(host_platform), qnx)
 	iconv := yes
 endif
 ifeq ($(iconv),yes)
-	glib_iconv_option := -Diconv=native
+	glib_iconv_option := -Diconv=external
 endif
 
 ifeq ($(host_platform), linux)
