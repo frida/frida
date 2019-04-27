@@ -111,7 +111,6 @@ build/ft-tmp-%/.package-stamp: \
 			--exclude bin/gdbus \
 			--exclude bin/gio \
 			--exclude bin/gio-launch-desktop \
-			--exclude bin/gio-querymodules \
 			--exclude bin/gobject-query \
 			--exclude bin/gsettings \
 			--exclude etc \
