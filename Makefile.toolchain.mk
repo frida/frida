@@ -107,6 +107,13 @@ build/ft-tmp-%/.package-stamp: \
 	mkdir -p $(@D)/package
 	cd build/ft-$* \
 		&& tar -c \
+			--exclude bin/gapplication \
+			--exclude bin/gdbus \
+			--exclude bin/gio \
+			--exclude bin/gio-launch-desktop \
+			--exclude bin/gio-querymodules \
+			--exclude bin/gobject-query \
+			--exclude bin/gsettings \
 			--exclude etc \
 			--exclude include \
 			--exclude lib/charset.alias \
@@ -114,12 +121,16 @@ build/ft-tmp-%/.package-stamp: \
 			--exclude lib/glib-2.0 \
 			--exclude lib/gio \
 			--exclude lib/pkgconfig \
+			--exclude "lib/vala-0.46/*.a" \
+			--exclude share/bash-completion \
 			--exclude share/devhelp \
 			--exclude share/doc \
 			--exclude share/emacs \
 			--exclude share/gdb \
 			--exclude share/info \
+			--exclude share/locale \
 			--exclude share/man \
+			--exclude share/vala/Makefile.vapigen \
 			--exclude "*.pyc" \
 			--exclude "*.pyo" \
 			. | tar -C $(abspath $(@D)/package) -xf -
