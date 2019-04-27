@@ -51,19 +51,19 @@ ifeq ($(iconv),yes)
 endif
 
 ifeq ($(host_platform), linux)
-strip_all := --strip-all
+	strip_all := --strip-all
 endif
 ifeq ($(host_platform), qnx)
-strip_all := --strip-all
+	strip_all := --strip-all
 endif
 ifeq ($(host_platform), android)
-strip_all := --strip-all
+	strip_all := --strip-all
 endif
 ifeq ($(host_platform), macos)
-strip_all := -Sx
+	strip_all := -Sx
 endif
 ifeq ($(host_platform), ios)
-strip_all := -Sx
+	strip_all := -Sx
 endif
 
 
