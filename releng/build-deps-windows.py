@@ -4,6 +4,7 @@ import codecs
 import glob
 import os
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -34,7 +35,8 @@ BOOTSTRAP_VALAC = "valac-0.46.exe"
 MESON = os.path.join(RELENG_DIR, "meson", "meson.py")
 NINJA = os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "bin", "ninja.exe")
 VALAC_FILENAME = "valac-{}.exe".format(VALA_VERSION)
-VALA_VAPI_SUBPATH = "share\\vala-{}\\vapi".format(VALA_VERSION)
+VALAC_PATTERN = re.compile(r"valac-\d+\.\d+.exe$")
+VALA_TOOLCHAIN_VAPI_SUBPATH_PATTERN = re.compile(r"share\\vala-\d+\.\d+\\vapi$")
 
 cached_meson_params = {}
 
@@ -570,7 +572,7 @@ def file_is_sdk_related(directory, filename):
         return False
 
     if ext in ("vapi", "deps"):
-        return not directory.endswith(VALA_VAPI_SUBPATH)
+        return not is_vala_toolchain_vapi_directory(directory)
 
     return "\\share\\" not in directory
 
@@ -578,8 +580,11 @@ def file_is_vala_toolchain_related(directory, filename):
     base, ext = os.path.splitext(filename)
     ext = ext[1:]
     if ext in ('vapi', 'deps'):
-        return directory.endswith(VALA_VAPI_SUBPATH)
-    return filename == VALAC_FILENAME
+        return is_vala_toolchain_vapi_directory(directory)
+    return VALAC_PATTERN.match(filename) is not None
+
+def is_vala_toolchain_vapi_directory(directory):
+    return VALA_TOOLCHAIN_VAPI_SUBPATH_PATTERN.search(directory) is not None
 
 def transform_identity(srcfile):
     return srcfile
