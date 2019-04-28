@@ -31,6 +31,10 @@ case $frida_host_platform_arch in
     host_alias="arm-linux-gnueabihf"
     cross_compiling=yes
     ;;
+  linux-arm64)
+    host_alias="aarch64-linux-gnu"
+    cross_compiling=yes
+    ;;
   linux-mips)
     host_alias="mips-linux-uclibc"
     cross_compiling=yes

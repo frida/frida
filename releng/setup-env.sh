@@ -213,6 +213,10 @@ case $host_platform in
 
         meson_host_cpu="armv6hf"
         ;;
+      arm64)
+        host_arch_flags="-march=armv8-a"
+        host_toolprefix="aarch64-linux-gnu-"
+        ;;
       mips)
         host_arch_flags="-march=mips1"
         host_toolprefix="mips-unknown-linux-uclibc-"
