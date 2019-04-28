@@ -23,6 +23,7 @@ upstreams = {
     "libsoup": make_gnome_url("libsoup"),
     "vala": make_gnome_url("vala"),
     "pkg-config": "https://anongit.freedesktop.org/git/pkg-config.git",
+    "duktape": "https://github.com/svaarala/duktape.git",
     "v8": "https://chromium.googlesource.com/v8/v8",
     "capstone": "https://github.com/aquynh/capstone.git",
 }
