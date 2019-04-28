@@ -442,6 +442,7 @@ v8_common_args := \
 	v8_untrusted_code_mitigations=false \
 	treat_warnings_as_errors=false \
 	strip_absolute_paths_from_debug_symbols=true \
+	use_glib=false \
 	use_goma=false \
 	v8_embedder_string="-frida" \
 	$(NULL)
