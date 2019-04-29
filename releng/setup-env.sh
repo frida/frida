@@ -295,6 +295,13 @@ case $host_platform in
     fi
     chmod +x "$cxx_wrapper"
 
+    ar_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-ar
+    sed \
+      -e "s,@ar@,$(xcrun --sdk $macos_sdk -f ar),g" \
+      -e "s,@libtool@,$(xcrun --sdk $macos_sdk -f libtool),g" \
+      "$releng_path/ar-wrapper-xcode.sh.in" > "$ar_wrapper"
+    chmod +x "$ar_wrapper"
+
     CPP="$cc_wrapper -E"
     CC="$cc_wrapper"
     CXX="$cxx_wrapper"
@@ -302,7 +309,7 @@ case $host_platform in
     OBJCXX="$cxx_wrapper"
     LD="$(xcrun --sdk $macos_sdk -f ld)"
 
-    AR="$(xcrun --sdk $macos_sdk -f ar)"
+    AR="$ar_wrapper"
     NM="$FRIDA_ROOT/releng/llvm-nm-macos-x86_64"
     RANLIB="$(xcrun --sdk $macos_sdk -f ranlib)"
     LIBTOOL="$(xcrun --sdk $macos_sdk -f libtool)"
@@ -389,6 +396,13 @@ case $host_platform in
     fi
     chmod +x "$cxx_wrapper"
 
+    ar_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-ar
+    sed \
+      -e "s,@ar@,$(xcrun --sdk $ios_sdk -f ar),g" \
+      -e "s,@libtool@,$(xcrun --sdk $ios_sdk -f libtool),g" \
+      "$releng_path/ar-wrapper-xcode.sh.in" > "$ar_wrapper"
+    chmod +x "$ar_wrapper"
+
     CPP="$cc_wrapper -E"
     CC="$cc_wrapper"
     CXX="$cxx_wrapper"
@@ -396,7 +410,7 @@ case $host_platform in
     OBJCXX="$cxx_wrapper"
     LD="$(xcrun --sdk $ios_sdk -f ld)"
 
-    AR="$(xcrun --sdk $ios_sdk -f ar)"
+    AR="$ar_wrapper"
     NM="$FRIDA_ROOT/releng/llvm-nm-macos-x86_64"
     RANLIB="$(xcrun --sdk $ios_sdk -f ranlib)"
     LIBTOOL="$(xcrun --sdk $ios_sdk -f libtool)"
