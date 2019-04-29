@@ -26,7 +26,7 @@ build/frida_thin-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida
 		FRIDA_ASAN=$(FRIDA_ASAN) \
 		FRIDA_ENV_NAME=frida_thin \
 		./releng/setup-env.sh
-	cd $(FRIDA)/build/; \
+	@cd $(FRIDA)/build/; \
 	[ ! -e frida-env-$*.rc ] && ln -s frida_thin-env-$*.rc frida-env-$*.rc; \
 	[ ! -e frida-meson-env-$*.rc ] && ln -s frida_thin-meson-env-$*.rc frida-meson-env-$*.rc; \
 	[ ! -d frida-$* ] && ln -s frida_thin-$* frida-$*; \
