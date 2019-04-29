@@ -54,9 +54,11 @@ clean: clean-submodules
 	rm -f build/*.txt
 	rm -f build/frida-version.h
 	rm -rf build/frida-*-*
+	rm -rf build/frida_thin-*-*
 	rm -rf build/fs-*-*
 	rm -rf build/ft-*-*
 	rm -rf build/tmp-*-*
+	rm -rf build/tmp_thin-*-*
 	rm -rf build/fs-tmp-*-*
 	rm -rf build/ft-tmp-*-*
 
