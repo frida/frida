@@ -537,13 +537,32 @@ check-tools-macos-thin: tools-macos-thin ##@tools Test CLI tools for macOS witho
 .PHONY: \
 	distclean clean clean-submodules git-submodules git-submodule-stamps \
 	capstone-update-submodule-stamp \
-	gum-macos gum-macos-thin gum-ios gum-ios-thin gum-android check-gum-macos check-gum-macos-thin frida-gum-update-submodule-stamp \
-	core-macos core-macos-thin core-ios core-ios-thin core-android core-android-arm check-core-macos check-core-macos-thin check-core-android-arm64 frida-core-update-submodule-stamp \
-	server-macos server-macos-thin server-ios server-ios-thin server-android server-android-arm \
-	gadget-macos gadget-macos-thin gadget-ios gadget-ios-thin gadget-android \
-	python-macos python-macos-thin check-python-macos check-python-macos-thin frida-python-update-submodule-stamp \
-	node-macos node-macos-thin check-node-macos check-node-macos-thin frida-node-update-submodule-stamp \
-	tools-macos tools-macos-thin check-tools-macos check-tools-macos-thin frida-tools-update-submodule-stamp \
+	gum-macos gum-macos-thin \
+		gum-ios gum-ios-thin \
+		gum-android \
+		check-gum-macos check-gum-macos-thin \
+		frida-gum-update-submodule-stamp \
+	core-macos core-macos-thin \
+		core-ios core-ios-thin \
+		core-android core-android-arm \
+		check-core-macos check-core-macos-thin \
+		check-core-android-arm64 \
+		frida-core-update-submodule-stamp \
+	server-macos server-macos-thin \
+		server-ios server-ios-thin \
+		server-android server-android-arm \
+	gadget-macos gadget-macos-thin \
+		gadget-ios gadget-ios-thin \
+		gadget-android \
+	python-macos python-macos-thin \
+		check-python-macos check-python-macos-thin \
+		frida-python-update-submodule-stamp \
+	node-macos node-macos-thin \
+		check-node-macos check-node-macos-thin \
+		frida-node-update-submodule-stamp \
+	tools-macos tools-macos-thin \
+		check-tools-macos check-tools-macos-thin \
+		frida-tools-update-submodule-stamp \
 	glib glib-symlinks \
 	v8 v8-symlinks
 .SECONDARY:
