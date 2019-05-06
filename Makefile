@@ -1,5 +1,9 @@
 modules = capstone frida-gum frida-core frida-python frida-node frida-tools
 
+all $(MAKECMDGOALS):
+	@build_os=$$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos,'); \
+	$(MAKE) -f Makefile.$$build_os.mk $(MAKECMDGOALS)
+
 git-submodules:
 	@if [ ! -f frida-core/meson.build ]; then \
 		git submodule init; \
@@ -27,9 +31,5 @@ endef
 $(foreach m,$(modules),$(eval $(call make-update-submodule-stamp,$m)))
 git-submodule-stamps: $(foreach m,$(modules),$m-update-submodule-stamp)
 -include git-submodule-stamps
-
-all $(MAKECMDGOALS):
-	@build_os=$$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos,'); \
-	$(MAKE) -f Makefile.$$build_os.mk $(MAKECMDGOALS)
 
 .PHONY: all $(MAKECMDGOALS)
