@@ -100,7 +100,10 @@ gum-macos: build/frida-macos-x86/lib/pkgconfig/frida-gum-1.0.pc build/frida-maco
 gum-macos-thin: build/frida_thin-macos-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for macOS without cross-arch support
 gum-ios: build/frida-ios-arm/lib/pkgconfig/frida-gum-1.0.pc build/frida-ios-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for iOS
 gum-ios-thin: build/frida_thin-ios-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for iOS without cross-arch support
-gum-android: build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android
+gum-android-x86: build/frida-android-x86/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/x86
+gum-android-x86_64: build/frida-android-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/x86_64
+gum-android-arm: build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/arm
+gum-android-arm64: build/frida-android-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/arm64
 
 define make-gum-rules
 build/.$1-gum-npm-stamp: build/$1-env-macos-$$(build_arch).rc
@@ -141,8 +144,10 @@ core-macos: build/.core-macos-stamp-frida-macos-x86 build/.core-macos-stamp-frid
 core-macos-thin: build/.core-macos-stamp-frida_thin-macos-x86_64 ##@core Build for macOS without cross-arch support
 core-ios: build/.core-ios-stamp-frida-ios-arm build/.core-ios-stamp-frida-ios-arm64 ##@core Build for iOS
 core-ios-thin: build/.core-ios-stamp-frida_thin-ios-arm64 ##@core Build for iOS without cross-arch support
-core-android: build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android
-core-android-arm: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android arm and arm64 only
+core-android-x86: build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/x86
+core-android-x86_64: build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/x86_64
+core-android-arm: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/arm
+core-android-arm64: build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/arm64
 
 build/tmp-macos-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-macos-%/lib/pkgconfig/frida-gum-1.0.pc
 	. build/frida-meson-env-macos-$(build_arch).rc; \
@@ -384,18 +389,10 @@ check-core-macos: build/frida-macos-x86/lib/pkgconfig/frida-core-1.0.pc build/fr
 check-core-macos-thin: build/frida_thin-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Run tests for macOS without cross-arch support
 	build/tmp_thin-macos-x86_64/frida-core/tests/frida-tests $(test_args)
 
-server-macos: core-macos ##@server Build for macOS
-server-macos-thin: core-macos-thin ##@server Build for macOS without cross-arch support
-server-ios: core-ios ##@server Build for iOS
-server-ios-thin: core-ios-thin ##@server Build for iOS without cross-arch support
-server-android: core-android ##@server Build for Android all supported architectures
-server-android-arm: core-android-arm ##@server Build for Android arm and arm64 only
-
 gadget-macos: build/frida-macos-universal/lib/frida-gadget.dylib ##@gadget Build for macOS
 gadget-macos-thin: core-macos-thin ##@gadget Build for macOS without cross-arch support
 gadget-ios: build/frida-ios-universal/lib/frida-gadget.dylib ##@gadget Build for iOS
 gadget-ios-thin: core-ios-thin ##@gadget Build for iOS without cross-arch support
-gadget-android: build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@gadget Build for Android
 
 
 python-macos: build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/frida build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so ##@python Build Python bindings for macOS
@@ -539,21 +536,21 @@ check-tools-macos-thin: tools-macos-thin ##@tools Test CLI tools for macOS witho
 	capstone-update-submodule-stamp \
 	gum-macos gum-macos-thin \
 		gum-ios gum-ios-thin \
-		gum-android \
+		gum-android-x86 gum-android-x86_64 \
+		gum-android-arm gum-android-arm64 \
 		check-gum-macos check-gum-macos-thin \
 		frida-gum-update-submodule-stamp \
 	core-macos core-macos-thin \
 		core-ios core-ios-thin \
-		core-android core-android-arm \
+		core-android-x86 core-android-x86_64 \
+		core-android-arm core-android-arm64 \
 		check-core-macos check-core-macos-thin \
-		check-core-android-arm64 \
 		frida-core-update-submodule-stamp \
 	server-macos server-macos-thin \
 		server-ios server-ios-thin \
 		server-android server-android-arm \
 	gadget-macos gadget-macos-thin \
 		gadget-ios gadget-ios-thin \
-		gadget-android \
 	python-macos python-macos-thin \
 		check-python-macos check-python-macos-thin \
 		frida-python-update-submodule-stamp \
