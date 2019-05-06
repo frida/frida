@@ -20,13 +20,13 @@ HELP_FUN = \
 	print "Where $${target_color}TARGET$${reset_color} specifies one or more of:\n"; \
 	print "\n"; \
 	for (@sections) { \
-		print "  /* $$_ */\n"; $$sep = " " x (20 - length $$_->[0]); \
-		printf("  $${target_color}%-20s$${reset_color}    %s\n", $$_->[0], $$_->[1]) for @{$$help{$$_}}; \
+		print "  /* $$_ */\n"; $$sep = " " x (23 - length $$_->[0]); \
+		printf("  $${target_color}%-23s$${reset_color}    %s\n", $$_->[0], $$_->[1]) for @{$$help{$$_}}; \
 		print "\n"; \
 	} \
 	print "And optionally also $${variable_color}VARIABLE$${reset_color} values:\n"; \
-	print "  $${variable_color}PYTHON$${reset_color}                  Absolute path of Python interpreter including version suffix\n"; \
-	print "  $${variable_color}NODE$${reset_color}                    Absolute path of Node.js binary\n"; \
+	print "  $${variable_color}PYTHON$${reset_color}                     Absolute path of Python interpreter including version suffix\n"; \
+	print "  $${variable_color}NODE$${reset_color}                       Absolute path of Node.js binary\n"; \
 	print "\n"; \
 	print "For example:\n"; \
 	print "  \$$ make $${target_color}python-macos $${variable_color}PYTHON$${reset_color}=/usr/local/bin/python3.6\n"; \
@@ -101,9 +101,9 @@ gum-macos-thin: build/frida_thin-macos-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@
 gum-ios: build/frida-ios-arm/lib/pkgconfig/frida-gum-1.0.pc build/frida-ios-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for iOS
 gum-ios-thin: build/frida_thin-ios-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for iOS without cross-arch support
 gum-android-x86: build/frida-android-x86/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/x86
-gum-android-x86_64: build/frida-android-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/x86_64
-gum-android-arm: build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/arm
-gum-android-arm64: build/frida-android-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/arm64
+gum-android-x86_64: build/frida-android-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/x86-64
+gum-android-arm: build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/ARM
+gum-android-arm64: build/frida-android-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/ARM64
 
 define make-gum-rules
 build/.$1-gum-npm-stamp: build/$1-env-macos-$$(build_arch).rc
@@ -145,9 +145,9 @@ core-macos-thin: build/.core-macos-stamp-frida_thin-macos-x86_64 ##@core Build f
 core-ios: build/.core-ios-stamp-frida-ios-arm build/.core-ios-stamp-frida-ios-arm64 ##@core Build for iOS
 core-ios-thin: build/.core-ios-stamp-frida_thin-ios-arm64 ##@core Build for iOS without cross-arch support
 core-android-x86: build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/x86
-core-android-x86_64: build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/x86_64
-core-android-arm: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/arm
-core-android-arm64: build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/arm64
+core-android-x86_64: build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/x86-64
+core-android-arm: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/ARM
+core-android-arm64: build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/ARM64
 
 build/tmp-macos-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-macos-%/lib/pkgconfig/frida-gum-1.0.pc
 	. build/frida-meson-env-macos-$(build_arch).rc; \
