@@ -431,31 +431,6 @@ if __name__ == '__main__':
 
             upload_node_bindings_to_npm("/opt/node-32/bin/node", upload, publish=False)
             upload_node_bindings_to_npm("/opt/node-64/bin/node", upload, publish=False)
-        elif worker == 'linux-arm':
-            upload = get_github_uploader()
-
-            upload_devkits("linux-arm", upload)
-            upload_devkits("linux-armhf", upload)
-
-            upload_file("frida-server-{version}-linux-arm", os.path.join(build_dir, "build", "frida_thin-linux-arm", "bin", "frida-server"), upload)
-            upload_file("frida-server-{version}-linux-armhf", os.path.join(build_dir, "build", "frida_thin-linux-armhf", "bin", "frida-server"), upload)
-
-            upload_file("frida-gadget-{version}-linux-arm.so", os.path.join(build_dir, "build", "frida_thin-linux-arm", "lib", "frida-gadget.so"), upload)
-            upload_file("frida-gadget-{version}-linux-armhf.so", os.path.join(build_dir, "build", "frida_thin-linux-armhf", "lib", "frida-gadget.so"), upload)
-        elif worker == 'linux-armhf':
-            upload = get_github_uploader()
-
-            upload_node_bindings_to_npm(find_executable("node"), upload, publish=False,
-                    extra_build_args=["--arch=arm"],
-                    extra_build_env=os.path.join(build_dir, "build", "frida-env-linux-armhf.rc"))
-        elif worker == 'linux-mips':
-            upload = get_github_uploader()
-
-            upload_devkits("linux-mipsel", upload)
-
-            upload_file("frida-server-{version}-linux-mipsel", os.path.join(build_dir, "build", "frida_thin-linux-mipsel", "bin", "frida-server"), upload)
-
-            upload_file("frida-gadget-{version}-linux-mipsel.so", os.path.join(build_dir, "build", "frida_thin-linux-mipsel", "lib", "frida-gadget.so"), upload)
         elif worker == 'android':
             upload = get_github_uploader()
 
@@ -478,17 +453,6 @@ if __name__ == '__main__':
             upload_file("frida-gadget-{version}-android-x86_64.so", os.path.join(build_dir, "build", "frida-android-x86_64", "lib", "frida-gadget.so"), upload)
             upload_file("frida-gadget-{version}-android-arm.so", os.path.join(build_dir, "build", "frida-android-arm", "lib", "frida-gadget.so"), upload)
             upload_file("frida-gadget-{version}-android-arm64.so", os.path.join(build_dir, "build", "frida-android-arm64", "lib", "frida-gadget.so"), upload)
-        elif worker == 'qnx-arm':
-            upload = get_github_uploader()
-
-            upload_devkits("qnx-arm", upload)
-            upload_devkits("qnx-armeabi", upload)
-
-            upload_file("frida-server-{version}-qnx-arm", os.path.join(build_dir, "build", "frida_thin-qnx-arm", "bin", "frida-server"), upload)
-            upload_file("frida-server-{version}-qnx-armeabi", os.path.join(build_dir, "build", "frida_thin-qnx-armeabi", "bin", "frida-server"), upload)
-
-            upload_file("frida-gadget-{version}-qnx-arm.so", os.path.join(build_dir, "build", "frida_thin-qnx-arm", "lib", "frida-gadget.so"), upload)
-            upload_file("frida-gadget-{version}-qnx-armeabi.so", os.path.join(build_dir, "build", "frida_thin-qnx-armeabi", "lib", "frida-gadget.so"), upload)
         elif worker == 'ubuntu_16_04-x86_64':
             upload = get_github_uploader()
 
