@@ -77,14 +77,14 @@ build/$1-%/lib/pkgconfig/capstone.pc: build/$1-env-%.rc build/.capstone-submodul
 		&& export PACKAGE_TARNAME=capstone \
 		&& . $$$$CONFIG_SITE \
 		&& case $$* in \
-			*-x86)    capstone_archs="x86"     ;; \
-			*-x86_64) capstone_archs="x86"     ;; \
-			*-arm)    capstone_archs="arm"     ;; \
-			*-armhf)  capstone_archs="arm"     ;; \
-			*-armeabi)capstone_archs="arm"     ;; \
-			*-arm64)  capstone_archs="aarch64" ;; \
-			*-mips)   capstone_archs="mips"    ;; \
-			*-mipsel) capstone_archs="mips"    ;; \
+			*-x86)     capstone_archs="x86"     ;; \
+			*-x86_64)  capstone_archs="x86"     ;; \
+			*-arm)     capstone_archs="arm"     ;; \
+			*-armhf)   capstone_archs="arm"     ;; \
+			*-armeabi) capstone_archs="arm"     ;; \
+			*-arm64)   capstone_archs="aarch64" ;; \
+			*-mips)    capstone_archs="mips"    ;; \
+			*-mipsel)  capstone_archs="mips"    ;; \
 		esac \
 		&& CFLAGS="$$$$CPPFLAGS $$$$CFLAGS" make -C capstone \
 			PREFIX=$$$$frida_prefix \
