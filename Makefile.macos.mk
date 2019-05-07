@@ -546,9 +546,6 @@ check-tools-macos-thin: tools-macos-thin ##@tools Test CLI tools for macOS witho
 		core-android-arm core-android-arm64 \
 		check-core-macos check-core-macos-thin \
 		frida-core-update-submodule-stamp \
-	server-macos server-macos-thin \
-		server-ios server-ios-thin \
-		server-android server-android-arm \
 	gadget-macos gadget-macos-thin \
 		gadget-ios gadget-ios-thin \
 	python-macos python-macos-thin \
