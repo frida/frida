@@ -76,11 +76,12 @@ build/$1-%/lib/pkgconfig/capstone.pc: build/$1-env-%.rc build/.capstone-submodul
 	. build/$1-env-$$*.rc \
 		&& export PACKAGE_TARNAME=capstone \
 		&& . $$$$CONFIG_SITE \
-		&& case $$* in \
-			*-x86)    capstone_archs="x86"         ;; \
-			*-x86_64) capstone_archs="x86"         ;; \
-			*-arm)    capstone_archs="arm"         ;; \
-			*-arm64)  capstone_archs="aarch64 arm" ;; \
+		&& case $1-$$* in \
+			*-x86)           capstone_archs="x86"         ;; \
+			*-x86_64)        capstone_archs="x86"         ;; \
+			*-arm)           capstone_archs="arm"         ;; \
+			frida-ios-arm64) capstone_archs="aarch64 arm" ;; \
+			*-arm64)         capstone_archs="aarch64"     ;; \
 		esac \
 		&& CFLAGS="$$$$CPPFLAGS $$$$CFLAGS" make -C capstone \
 			PREFIX=$$$$frida_prefix \
