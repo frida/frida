@@ -461,19 +461,19 @@ case $host_platform in
         android_api=21
         host_triplet="x86_64-linux-android"
         host_arch_flags=""
-        host_ldflags="-fuse-ld=gold"
+        host_ldflags="-fuse-ld=gold -Wl,--icf=all"
         ;;
       arm)
         android_api=18
         host_triplet="arm-linux-androideabi"
         host_arch_flags="-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16"
-        host_ldflags="-fuse-ld=gold -Wl,--fix-cortex-a8 -Wl,--icf=safe"
+        host_ldflags="-fuse-ld=gold -Wl,--icf=all -Wl,--fix-cortex-a8"
         ;;
       arm64)
         android_api=21
         host_triplet="aarch64-linux-android"
         host_arch_flags=""
-        host_ldflags="-fuse-ld=gold"
+        host_ldflags="-fuse-ld=gold -Wl,--icf=all"
         ;;
     esac
     host_toolprefix="$host_triplet-"
