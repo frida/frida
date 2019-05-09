@@ -34,7 +34,7 @@ else
 endif
 host_platform_arch := $(host_platform)-$(host_arch)
 
-enable_diet := $(shell echo $(host_platform_arch) | egrep -q "^(linux-arm|linux-mips|linux-mipsel|qnx-.+)$$" && echo 1 || echo 0)
+enable_v8 := $(shell echo $(host_platform_arch) | egrep -q "^(linux-arm|linux-mips|linux-mipsel|qnx-.+)$$" && echo 0 || echo 1)
 
 
 ifeq ($(host_platform), macos)
@@ -65,7 +65,7 @@ endif
 ifeq ($(host_platform),$(filter $(host_platform),macos ios linux android))
 	glib_tls_provider := build/fs-%/lib/pkgconfig/glib-openssl-static.pc
 endif
-ifeq ($(enable_diet), 0)
+ifeq ($(enable_v8), 1)
 	v8 := build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc
 endif
 

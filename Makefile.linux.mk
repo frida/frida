@@ -188,10 +188,10 @@ build/tmp-linux-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-s
 			--libdir $(FRIDA)/build/frida-linux-x86/lib \
 			$$cross_args \
 			$(frida_core_flags) \
-			-Dwith-32bit-helper=$(FRIDA)/build/tmp-linux-x86/frida-core/src/frida-helper \
-			-Dwith-64bit-helper=$(FRIDA)/build/tmp-linux-x86_64/frida-core/src/frida-helper \
-			-Dwith-32bit-agent=$(FRIDA)/build/tmp-linux-x86/frida-core/lib/agent/frida-agent.so \
-			-Dwith-64bit-agent=$(FRIDA)/build/tmp-linux-x86_64/frida-core/lib/agent/frida-agent.so \
+			-Dhelper32=$(FRIDA)/build/tmp-linux-x86/frida-core/src/frida-helper \
+			-Dhelper64=$(FRIDA)/build/tmp-linux-x86_64/frida-core/src/frida-helper \
+			-Dagent32=$(FRIDA)/build/tmp-linux-x86/frida-core/lib/agent/frida-agent.so \
+			-Dagent64=$(FRIDA)/build/tmp-linux-x86_64/frida-core/lib/agent/frida-agent.so \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -210,10 +210,10 @@ build/tmp-linux-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submodul
 			--libdir $(FRIDA)/build/frida-linux-x86_64/lib \
 			$$cross_args \
 			$(frida_core_flags) \
-			-Dwith-32bit-helper=$(FRIDA)/build/tmp-linux-x86/frida-core/src/frida-helper \
-			-Dwith-64bit-helper=$(FRIDA)/build/tmp-linux-x86_64/frida-core/src/frida-helper \
-			-Dwith-32bit-agent=$(FRIDA)/build/tmp-linux-x86/frida-core/lib/agent/frida-agent.so \
-			-Dwith-64bit-agent=$(FRIDA)/build/tmp-linux-x86_64/frida-core/lib/agent/frida-agent.so \
+			-Dhelper32=$(FRIDA)/build/tmp-linux-x86/frida-core/src/frida-helper \
+			-Dhelper64=$(FRIDA)/build/tmp-linux-x86_64/frida-core/src/frida-helper \
+			-Dagent32=$(FRIDA)/build/tmp-linux-x86/frida-core/lib/agent/frida-agent.so \
+			-Dagent64=$(FRIDA)/build/tmp-linux-x86_64/frida-core/lib/agent/frida-agent.so \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -240,10 +240,10 @@ build/tmp-android-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submod
 			--libdir $(FRIDA)/build/frida-android-x86_64/lib \
 			--cross-file build/frida-android-x86_64.txt \
 			$(frida_core_flags) \
-			-Dwith-32bit-helper=$(FRIDA)/build/tmp-android-x86/frida-core/src/frida-helper \
-			-Dwith-64bit-helper=$(FRIDA)/build/tmp-android-x86_64/frida-core/src/frida-helper \
-			-Dwith-32bit-agent=$(FRIDA)/build/tmp-android-x86/frida-core/lib/agent/frida-agent.so \
-			-Dwith-64bit-agent=$(FRIDA)/build/tmp-android-x86_64/frida-core/lib/agent/frida-agent.so \
+			-Dhelper32=$(FRIDA)/build/tmp-android-x86/frida-core/src/frida-helper \
+			-Dhelper64=$(FRIDA)/build/tmp-android-x86_64/frida-core/src/frida-helper \
+			-Dagent32=$(FRIDA)/build/tmp-android-x86/frida-core/lib/agent/frida-agent.so \
+			-Dagent64=$(FRIDA)/build/tmp-android-x86_64/frida-core/lib/agent/frida-agent.so \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -270,10 +270,10 @@ build/tmp-android-arm64/frida-core/.frida-ninja-stamp: build/.frida-core-submodu
 			--libdir $(FRIDA)/build/frida-android-arm64/lib \
 			--cross-file build/frida-android-arm64.txt \
 			$(frida_core_flags) \
-			-Dwith-32bit-helper=$(FRIDA)/build/tmp-android-arm/frida-core/src/frida-helper \
-			-Dwith-64bit-helper=$(FRIDA)/build/tmp-android-arm64/frida-core/src/frida-helper \
-			-Dwith-32bit-agent=$(FRIDA)/build/tmp-android-arm/frida-core/lib/agent/frida-agent.so \
-			-Dwith-64bit-agent=$(FRIDA)/build/tmp-android-arm64/frida-core/lib/agent/frida-agent.so \
+			-Dhelper32=$(FRIDA)/build/tmp-android-arm/frida-core/src/frida-helper \
+			-Dhelper64=$(FRIDA)/build/tmp-android-arm64/frida-core/src/frida-helper \
+			-Dagent32=$(FRIDA)/build/tmp-android-arm/frida-core/lib/agent/frida-agent.so \
+			-Dagent64=$(FRIDA)/build/tmp-android-arm64/frida-core/lib/agent/frida-agent.so \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -355,7 +355,7 @@ build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-sta
 			--prefix $$(FRIDA)/build/$1-$$* \
 			--libdir $$(FRIDA)/build/$1-$$*/lib \
 			$$$$cross_args \
-			-Dwith-python=$$(PYTHON) \
+			-Dpython=$$(PYTHON) \
 			frida-python $$$$builddir || exit 1; \
 	fi; \
 	$$(NINJA) -C $$$$builddir install || exit 1
@@ -458,7 +458,7 @@ build/$2-%/frida-tools-$$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodul
 			--prefix $$(FRIDA)/build/$1-$$* \
 			--libdir $$(FRIDA)/build/$1-$$*/lib \
 			$$$$cross_args \
-			-Dwith-python=$$(PYTHON) \
+			-Dpython=$$(PYTHON) \
 			frida-tools $$$$builddir || exit 1; \
 	fi; \
 	$$(NINJA) -C $$$$builddir install || exit 1

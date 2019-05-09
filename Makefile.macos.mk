@@ -164,9 +164,9 @@ build/tmp-macos-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-sta
 			--prefix $(FRIDA)/build/frida-macos-$* \
 			$$cross_args \
 			$(frida_core_flags) \
-			-Dwith-64bit-helper=$(FRIDA)/build/tmp-macos-x86_64/frida-core/src/frida-helper \
-			-Dwith-32bit-agent=$(FRIDA)/build/tmp-macos-x86/frida-core/lib/agent/frida-agent.dylib \
-			-Dwith-64bit-agent=$(FRIDA)/build/tmp-macos-x86_64/frida-core/lib/agent/frida-agent.dylib \
+			-Dhelper64=$(FRIDA)/build/tmp-macos-x86_64/frida-core/src/frida-helper \
+			-Dagent32=$(FRIDA)/build/tmp-macos-x86/frida-core/lib/agent/frida-agent.dylib \
+			-Dagent64=$(FRIDA)/build/tmp-macos-x86_64/frida-core/lib/agent/frida-agent.dylib \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -191,9 +191,9 @@ build/tmp-ios-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-
 			--prefix $(FRIDA)/build/frida-ios-x86_64 \
 			--cross-file build/frida-ios-x86_64.txt \
 			$(frida_core_flags) \
-			-Dwith-64bit-helper=$(FRIDA)/build/tmp-ios-x86_64/frida-core/src/frida-helper \
-			-Dwith-32bit-agent=$(FRIDA)/build/tmp-ios-x86/frida-core/lib/agent/frida-agent.dylib \
-			-Dwith-64bit-agent=$(FRIDA)/build/tmp-ios-x86_64/frida-core/lib/agent/frida-agent.dylib \
+			-Dhelper64=$(FRIDA)/build/tmp-ios-x86_64/frida-core/src/frida-helper \
+			-Dagent32=$(FRIDA)/build/tmp-ios-x86/frida-core/lib/agent/frida-agent.dylib \
+			-Dagent64=$(FRIDA)/build/tmp-ios-x86_64/frida-core/lib/agent/frida-agent.dylib \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -218,9 +218,9 @@ build/tmp-ios-arm64/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-s
 			--prefix $(FRIDA)/build/frida-ios-arm64 \
 			--cross-file build/frida-ios-arm64.txt \
 			$(frida_core_flags) \
-			-Dwith-64bit-helper=$(FRIDA)/build/tmp-ios-arm64/frida-core/src/frida-helper \
-			-Dwith-32bit-agent=$(FRIDA)/build/tmp-ios-arm/frida-core/lib/agent/frida-agent.dylib \
-			-Dwith-64bit-agent=$(FRIDA)/build/tmp-ios-arm64/frida-core/lib/agent/frida-agent.dylib \
+			-Dhelper64=$(FRIDA)/build/tmp-ios-arm64/frida-core/src/frida-helper \
+			-Dagent32=$(FRIDA)/build/tmp-ios-arm/frida-core/lib/agent/frida-agent.dylib \
+			-Dagent64=$(FRIDA)/build/tmp-ios-arm64/frida-core/lib/agent/frida-agent.dylib \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -245,10 +245,10 @@ build/tmp-android-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submod
 			--prefix $(FRIDA)/build/frida-android-x86_64 \
 			--cross-file build/frida-android-x86_64.txt \
 			$(frida_core_flags) \
-			-Dwith-32bit-helper=$(FRIDA)/build/tmp-android-x86/frida-core/src/frida-helper \
-			-Dwith-64bit-helper=$(FRIDA)/build/tmp-android-x86_64/frida-core/src/frida-helper \
-			-Dwith-32bit-agent=$(FRIDA)/build/tmp-android-x86/frida-core/lib/agent/frida-agent.so \
-			-Dwith-64bit-agent=$(FRIDA)/build/tmp-android-x86_64/frida-core/lib/agent/frida-agent.so \
+			-Dhelper32=$(FRIDA)/build/tmp-android-x86/frida-core/src/frida-helper \
+			-Dhelper64=$(FRIDA)/build/tmp-android-x86_64/frida-core/src/frida-helper \
+			-Dagent32=$(FRIDA)/build/tmp-android-x86/frida-core/lib/agent/frida-agent.so \
+			-Dagent64=$(FRIDA)/build/tmp-android-x86_64/frida-core/lib/agent/frida-agent.so \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -273,10 +273,10 @@ build/tmp-android-arm64/frida-core/.frida-ninja-stamp: build/.frida-core-submodu
 			--prefix $(FRIDA)/build/frida-android-arm64 \
 			--cross-file build/frida-android-arm64.txt \
 			$(frida_core_flags) \
-			-Dwith-32bit-helper=$(FRIDA)/build/tmp-android-arm/frida-core/src/frida-helper \
-			-Dwith-64bit-helper=$(FRIDA)/build/tmp-android-arm64/frida-core/src/frida-helper \
-			-Dwith-32bit-agent=$(FRIDA)/build/tmp-android-arm/frida-core/lib/agent/frida-agent.so \
-			-Dwith-64bit-agent=$(FRIDA)/build/tmp-android-arm64/frida-core/lib/agent/frida-agent.so \
+			-Dhelper32=$(FRIDA)/build/tmp-android-arm/frida-core/src/frida-helper \
+			-Dhelper64=$(FRIDA)/build/tmp-android-arm64/frida-core/src/frida-helper \
+			-Dagent32=$(FRIDA)/build/tmp-android-arm/frida-core/lib/agent/frida-agent.so \
+			-Dagent64=$(FRIDA)/build/tmp-android-arm64/frida-core/lib/agent/frida-agent.so \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -413,7 +413,7 @@ build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-sta
 		$$(MESON) \
 			--prefix $$(FRIDA)/build/$1-$$* \
 			$$$$cross_args \
-			-Dwith-python=$$(PYTHON) \
+			-Dpython=$$(PYTHON) \
 			frida-python $$$$builddir || exit 1; \
 	fi; \
 	$$(NINJA) -C $$$$builddir install || exit 1
@@ -503,7 +503,7 @@ build/$2-%/frida-tools-$$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodul
 		$$(MESON) \
 			--prefix $$(FRIDA)/build/$1-$$* \
 			$$$$cross_args \
-			-Dwith-python=$$(PYTHON) \
+			-Dpython=$$(PYTHON) \
 			frida-tools $$$$builddir || exit 1; \
 	fi; \
 	$$(NINJA) -C $$$$builddir install || exit 1
