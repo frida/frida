@@ -61,22 +61,29 @@ main (int argc,
   if (error == NULL)
   {
     FridaScript * script;
+    FridaScriptOptions * options;
 
     g_print ("[*] Attached\n");
 
-    script = frida_session_create_script_sync (session, "example",
-        "Interceptor.attach(Module.findExportByName(null, 'open'), {\n"
-        "  onEnter: function (args) {\n"
-        "    console.log('[*] open(\"' + Memory.readUtf8String(args[0]) + '\")');\n"
+    options = frida_script_options_new ();
+    frida_script_options_set_name (options, "example");
+    frida_script_options_set_runtime (options, FRIDA_SCRIPT_RUNTIME_V8);
+
+    script = frida_session_create_script_sync (session,
+        "Interceptor.attach(Module.getExportByName(null, 'open'), {\n"
+        "  onEnter(args) {\n"
+        "    console.log('[*] open(\"' + args[0].readUtf8String() + '\")');\n"
         "  }\n"
         "});\n"
-        "Interceptor.attach(Module.findExportByName(null, 'close'), {\n"
-        "  onEnter: function (args) {\n"
+        "Interceptor.attach(Module.getExportByName(null, 'close'), {\n"
+        "  onEnter(args) {\n"
         "    console.log('[*] close(' + args[0].toInt32() + ')');\n"
         "  }\n"
         "});",
-        &error);
+        options, &error);
     g_assert (error == NULL);
+
+    g_clear_object (&options);
 
     g_signal_connect (script, "message", G_CALLBACK (on_message), NULL);
 

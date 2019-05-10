@@ -18,16 +18,16 @@ main (int argc,
 
   gum_init_embedded ();
 
-  backend = gum_script_backend_obtain_duk ();
+  backend = gum_script_backend_obtain_v8 ();
 
   script = gum_script_backend_create_sync (backend, "example",
-      "Interceptor.attach(Module.findExportByName(null, 'open'), {\n"
-      "  onEnter: function (args) {\n"
-      "    console.log('[*] open(\"' + Memory.readUtf8String(args[0]) + '\")');\n"
+      "Interceptor.attach(Module.getExportByName(null, 'open'), {\n"
+      "  onEnter(args) {\n"
+      "    console.log('[*] open(\"' + args[0].readUtf8String() + '\")');\n"
       "  }\n"
       "});\n"
-      "Interceptor.attach(Module.findExportByName(null, \"close\"), {\n"
-      "  onEnter: function (args) {\n"
+      "Interceptor.attach(Module.getExportByName(null, \"close\"), {\n"
+      "  onEnter(args) {\n"
       "    console.log('[*] close(' + args[0].toInt32() + ')');\n"
       "  }\n"
       "});",

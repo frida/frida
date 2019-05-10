@@ -70,22 +70,29 @@ main (int argc,
   if (error == NULL)
   {
     FridaScript * script;
+    FridaScriptOptions * options;
 
     g_print ("[*] Attached\n");
 
-    script = frida_session_create_script_sync (session, "example",
-        "Interceptor.attach(Module.findExportByName('kernel32.dll', 'CreateFileW'), {\n"
-        "  onEnter: function (args) {\n"
-        "    console.log('[*] CreateFileW(\"' + Memory.readUtf16String(args[0]) + '\")');\n"
+    options = frida_script_options_new ();
+    frida_script_options_set_name (options, "example");
+    frida_script_options_set_runtime (options, FRIDA_SCRIPT_RUNTIME_V8);
+
+    script = frida_session_create_script_sync (session,
+        "Interceptor.attach(Module.getExportByName('kernel32.dll', 'CreateFileW'), {\n"
+        "  onEnter(args) {\n"
+        "    console.log('[*] CreateFileW(\"' + args[0].readUtf16String() + '\")');\n"
         "  }\n"
         "});\n"
-        "Interceptor.attach(Module.findExportByName('kernel32.dll', 'CloseHandle'), {\n"
-        "  onEnter: function (args) {\n"
+        "Interceptor.attach(Module.getExportByName('kernel32.dll', 'CloseHandle'), {\n"
+        "  onEnter(args) {\n"
         "    console.log('[*] CloseHandle(' + args[0] + ')');\n"
         "  }\n"
         "});",
-        &error);
+        options, &error);
     g_assert (error == NULL);
+
+    g_clear_object (&options);
 
     g_signal_connect (script, "message", G_CALLBACK (on_message), NULL);
 
