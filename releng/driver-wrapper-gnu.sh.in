@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# This wrapper script is necessary in order to avoid polluting the build
-# systems with Android-specific quirks.
-
-output_type=executable
-output_path=
-
 #
 # FIXME
 #
@@ -20,31 +14,19 @@ output_path=
 initializer_index=
 initializer_object=
 
+output_type=unknown
+
 argv=()
 while [[ $# > 0 ]]; do
   arg="$1"
 
   case "$arg" in
-    -E)
-      output_type=code
-      ;;
-    -c)
-      output_type=object
-      ;;
-    -shared)
-      output_type=shlib
-      ;;
-    -o)
-      argv+=("-o")
-      shift
-
-      arg="$1"
-
-      output_path="$arg"
-      ;;
     lib/gadget/*/gadget-entrypoint-unix.c.o)
       initializer_index=${#argv[@]}
       initializer_object="$1"
+      ;;
+    -shared)
+      output_type=shlib
       ;;
   esac
 
@@ -57,14 +39,4 @@ if [[ -n "$initializer_object" && $output_type = shlib ]]; then
   argv+=("$initializer_object")
 fi
 
-if [[ $output_type = executable ]]; then
-  argv+=("-Wl,-pie")
-fi
-
-"@driver@" "${argv[@]}" || exit $?
-
-case $output_type in
-  executable|shlib)
-    "@elf_cleaner@" "$output_path"
-    ;;
-esac
+exec "@driver@" "${argv[@]}"

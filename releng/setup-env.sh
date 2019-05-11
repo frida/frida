@@ -230,9 +230,22 @@ case $host_platform in
         meson_host_cpu="mips1"
         ;;
     esac
+
+    cc_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-gcc
+    sed \
+      -e "s,@driver@,${host_toolprefix}gcc,g" \
+      "$releng_path/driver-wrapper-gnu.sh.in" > "$cc_wrapper"
+    chmod +x "$cc_wrapper"
+
+    cpp_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-g++
+    sed \
+      -e "s,@driver@,${host_toolprefix}g++,g" \
+      "$releng_path/driver-wrapper-gnu.sh.in" > "$cpp_wrapper"
+    chmod +x "$cpp_wrapper"
+
     CPP="${host_toolprefix}cpp"
-    CC="${host_toolprefix}gcc -static-libgcc"
-    CXX="${host_toolprefix}g++ -static-libgcc -static-libstdc++"
+    CC="$cc_wrapper -static-libgcc"
+    CXX="$cpp_wrapper -static-libgcc -static-libstdc++"
     LD="${host_toolprefix}ld"
 
     AR="${host_toolprefix}ar"
@@ -252,8 +265,8 @@ case $host_platform in
     base_compiler_args="$base_toolchain_args, '-ffunction-sections', '-fdata-sections'"
     base_linker_args="$base_toolchain_args, '-Wl,--gc-sections', '-Wl,-z,noexecstack'"
 
-    meson_c="${host_toolprefix}gcc"
-    meson_cpp="${host_toolprefix}g++"
+    meson_c="$cc_wrapper"
+    meson_cpp="$cpp_wrapper"
 
     meson_c_args="$base_compiler_args"
     meson_cpp_args="$base_compiler_args, '-static-libstdc++'"
