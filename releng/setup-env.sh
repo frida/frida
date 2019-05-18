@@ -292,7 +292,7 @@ case $host_platform in
     chmod +x "$cc_wrapper"
 
     cxx_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang++
-    if [ "$FRIDA_ENV_SDK" != 'none' ]; then
+    if [ "$FRIDA_ENV_SDK" != 'none' ] && [ $enable_asan = no ]; then
       sed \
         -e "s,@driver@,$clang_cxx,g" \
         -e "s,@sysroot@,$macos_sdk_path,g" \
@@ -393,7 +393,7 @@ case $host_platform in
     chmod +x "$cc_wrapper"
 
     cxx_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang++
-    if [ "$FRIDA_ENV_SDK" != 'none' ]; then
+    if [ "$FRIDA_ENV_SDK" != 'none' ] && [ $enable_asan = no ]; then
       sed \
         -e "s,@driver@,$clang_cxx,g" \
         -e "s,@sysroot@,$ios_sdk_path,g" \
@@ -673,19 +673,6 @@ if [ $enable_asan = yes ]; then
     OBJCXX="$OBJCXX $sanitizer_flag"
   fi
   LD="$LD $sanitizer_flag"
-
-  meson_c_args="'$sanitizer_flag', $meson_c_args"
-  meson_cpp_args="'$sanitizer_flag', $meson_cpp_args"
-  meson_c_link_args="'$sanitizer_flag', $meson_c_link_args"
-  meson_cpp_link_args="'$sanitizer_flag', $meson_cpp_link_args"
-  if [ -n "$meson_objc" ]; then
-    meson_objc_args="'$sanitizer_flag', $meson_objc_args"
-    meson_objc_link_args="'$sanitizer_flag', $meson_objc_link_args"
-  fi
-  if [ -n "$meson_objcpp" ]; then
-    meson_objcpp_args="'$sanitizer_flag', $meson_objcpp_args"
-    meson_objcpp_link_args="'$sanitizer_flag', $meson_objcpp_link_args"
-  fi
 fi
 
 CFLAGS="-fPIC $CFLAGS"

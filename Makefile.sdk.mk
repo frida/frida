@@ -264,7 +264,7 @@ build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_platform_arch).rc build/fs-e
 			--prefix $$$$frida_prefix \
 			--libdir $$$$frida_prefix/lib \
 			--default-library static \
-			--buildtype minsize \
+			$$(FRIDA_SDK_FLAGS) \
 			$$$$cross_args \
 			$4 \
 			$$(@D) \
@@ -300,6 +300,15 @@ $(eval $(call make-git-meson-module-rules,libxml2,build/fs-%/lib/pkgconfig/libxm
 
 $(eval $(call make-git-meson-module-rules,libsoup,build/fs-%/lib/pkgconfig/libsoup-2.4.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/sqlite3.pc build/fs-%/lib/pkgconfig/libpsl.pc build/fs-%/lib/pkgconfig/libxml-2.0.pc,-Dgssapi=false -Dtls_check=false -Dgnome=false -Dintrospection=false -Dvapi=false -Dtests=false))
 
+
+ifeq ($(FRIDA_ASAN), yes)
+	openssl_buildtype_args := \
+		enable-asan \
+		$(NULL)
+else
+	openssl_buildtype_args := \
+		$(NULL)
+endif
 
 ifeq ($(host_platform),$(filter $(host_platform),macos ios))
 	xcode_developer_dir := $(shell xcode-select -print-path)
@@ -420,6 +429,7 @@ build/fs-%/lib/pkgconfig/openssl.pc: build/fs-env-%.rc build/fs-tmp-%/openssl/Co
 			no-async \
 			no-shared \
 			enable-cms \
+			$(openssl_buildtype_args) \
 			$(openssl_arch_args) \
 		&& make depend \
 		&& make build_libs \
@@ -427,10 +437,6 @@ build/fs-%/lib/pkgconfig/openssl.pc: build/fs-env-%.rc build/fs-tmp-%/openssl/Co
 
 
 v8_common_args := \
-	is_official_build=true \
-	is_debug=false \
-	v8_enable_v8_checks=false \
-	symbol_level=0 \
 	use_thin_lto=false \
 	v8_monolithic=true \
 	v8_use_external_startup_data=false \
@@ -446,6 +452,20 @@ v8_common_args := \
 	use_goma=false \
 	v8_embedder_string="-frida" \
 	$(NULL)
+
+ifeq ($(FRIDA_ASAN), yes)
+v8_buildtype_args := \
+	is_asan=true \
+	symbol_level=1 \
+	$(NULL)
+else
+v8_buildtype_args := \
+	is_official_build=true \
+	is_debug=false \
+	v8_enable_v8_checks=false \
+	symbol_level=0 \
+	$(NULL)
+endif
 
 ifeq ($(host_platform_arch), android-x86_64)
 v8_arch_args := v8_enable_embedded_builtins=false
@@ -480,17 +500,35 @@ v8_build_platform := $(shell echo $(build_platform) | sed 's,^macos$$,mac,')
 ifeq ($(host_platform), macos)
 	v8_os := mac
 	v8_platform_args := \
-		use_xcode_clang=false \
 		libcxx_abi_unstable=false \
-		mac_deployment_target="10.9.0"
+		mac_deployment_target="10.9.0" \
+		$(NULL)
+ifeq ($(FRIDA_ASAN), yes)
+	v8_platform_args += \
+		use_xcode_clang=true \
+		$(NULL)
+else
+	v8_platform_args += \
+		use_xcode_clang=false \
+		$(NULL)
+endif
 endif
 ifeq ($(host_platform), ios)
 	v8_os := ios
 	v8_platform_args := \
-		use_xcode_clang=false \
 		libcxx_abi_unstable=false \
 		mac_deployment_target="10.9.0" \
-		ios_deployment_target="7.0"
+		ios_deployment_target="7.0" \
+		$(NULL)
+ifeq ($(FRIDA_ASAN), yes)
+	v8_platform_args += \
+		use_xcode_clang=true \
+		$(NULL)
+else
+	v8_platform_args += \
+		use_xcode_clang=false \
+		$(NULL)
+endif
 endif
 ifeq ($(host_platform), linux)
 	v8_os := linux
@@ -557,7 +595,7 @@ build/fs-tmp-%/v8/build.ninja: v8-checkout/v8 build/fs-tmp-$(build_platform_arch
 	cd v8-checkout/v8 \
 		&& ../../build/fs-tmp-$(build_platform_arch)/gn/gn \
 			gen $(abspath $(@D)) \
-			--args='target_os="$(v8_os)" target_cpu="$(v8_cpu)" $(v8_cpu_args) $(v8_common_args) $(v8_arch_args) $(v8_platform_args)'
+			--args='target_os="$(v8_os)" target_cpu="$(v8_cpu)" $(v8_cpu_args) $(v8_common_args) $(v8_buildtype_args) $(v8_arch_args) $(v8_platform_args)'
 
 build/fs-tmp-%/v8/obj/libv8_monolith.a: build/fs-tmp-%/v8/build.ninja
 	$(NINJA) -C build/fs-tmp-$*/v8 v8_monolith
