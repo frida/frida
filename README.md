@@ -34,9 +34,10 @@ few packages:
 ### macOS and iOS
 
 First make a trusted code-signing certificate. You can use the guide at
-https://sourceware.org/gdb/wiki/BuildingOnDarwin in the section
-“Creating a certificate”. You can use the name `frida-cert` instead of
-`gdb-cert` if you'd like.
+https://sourceware.org/gdb/wiki/PermissionsDarwin in the sections
+"Create a certificate in the System Keychain" and "Trust the certificate
+for code signing. You can use the name `frida-cert` instead of `gdb-cert`
+if you'd like.
 
 Next export the name of the created certificate to the environment
 variables `MAC_CERTID` and `IOS_CERTID` and run `make`:
