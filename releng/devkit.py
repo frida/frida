@@ -530,11 +530,12 @@ def deduplicate(items):
 
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("kit")
     parser.add_argument("host")
     parser.add_argument("outdir")
-    parser.add_argument("-t", "--thin", help='build without cross-arch support', action="store_true")
+    parser.add_argument("-t", "--thin", help="build without cross-arch support", action='store_true')
 
     arguments = parser.parse_args()
 
