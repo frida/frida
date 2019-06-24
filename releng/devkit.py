@@ -26,25 +26,25 @@ DEVKITS = {
 }
 
 
-def generate_devkit(kit, host, output_dir):
+def generate_devkit(kit, host, flavor, output_dir):
     package, umbrella_header = DEVKITS[kit]
 
     frida_root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
     library_filename = compute_library_filename(kit)
-    (extra_ldflags, thirdparty_symbol_mappings) = generate_library(package, frida_root, host, output_dir, library_filename)
+    (extra_ldflags, thirdparty_symbol_mappings) = generate_library(package, frida_root, host, flavor, output_dir, library_filename)
 
-    umbrella_header_path = compute_umbrella_header_path(frida_root, host, package, umbrella_header)
+    umbrella_header_path = compute_umbrella_header_path(frida_root, host, flavor, package, umbrella_header)
 
     header_filename = kit + ".h"
     if not os.path.exists(umbrella_header_path):
         raise Exception("Header not found: {}".format(umbrella_header_path))
-    header = generate_header(package, frida_root, host, kit, umbrella_header_path, thirdparty_symbol_mappings)
+    header = generate_header(package, frida_root, host, kit, flavor, umbrella_header_path, thirdparty_symbol_mappings)
     with codecs.open(os.path.join(output_dir, header_filename), "w", 'utf-8') as f:
         f.write(header)
 
     example_filename = kit + "-example.c"
-    example = generate_example(example_filename, package, frida_root, host, kit, extra_ldflags)
+    example = generate_example(example_filename, package, frida_root, host, kit, flavor, extra_ldflags)
     with codecs.open(os.path.join(output_dir, example_filename), "w", 'utf-8') as f:
         f.write(example)
 
@@ -54,7 +54,7 @@ def generate_devkit(kit, host, output_dir):
 
     return [header_filename, library_filename, example_filename]
 
-def generate_header(package, frida_root, host, kit, umbrella_header_path, thirdparty_symbol_mappings):
+def generate_header(package, frida_root, host, kit, flavor, umbrella_header_path, thirdparty_symbol_mappings):
     if platform.system() == 'Windows':
         (win10_sdk_dir, win10_sdk_version) = winenv.get_win10_sdk()
 
@@ -89,7 +89,7 @@ def generate_header(package, frida_root, host, kit, umbrella_header_path, thirdp
         frida_root_slashed = frida_root.replace("\\", "/")
         header_files = [header_file for header_file in header_files if bool(re.match('^' + frida_root_slashed, header_file, re.I))]
     else:
-        rc = env_rc(frida_root, host)
+        rc = env_rc(frida_root, host, flavor)
         header_dependencies = subprocess.check_output(
             ["(. \"{rc}\" && $CPP $CFLAGS -M $($PKG_CONFIG --cflags {package}) \"{header}\")".format(rc=rc, package=package, header=umbrella_header_path)],
             shell=True).decode('utf-8')
@@ -169,13 +169,13 @@ def ingest_header(header, all_header_files, processed_header_files, result):
             else:
                 result.append(line)
 
-def generate_library(package, frida_root, host, output_dir, library_filename):
+def generate_library(package, frida_root, host, flavor, output_dir, library_filename):
     if platform.system() == 'Windows':
-        return generate_library_windows(package, frida_root, host, output_dir, library_filename)
+        return generate_library_windows(package, frida_root, host, flavor, output_dir, library_filename)
     else:
-        return generate_library_unix(package, frida_root, host, output_dir, library_filename)
+        return generate_library_unix(package, frida_root, host, flavor, output_dir, library_filename)
 
-def generate_library_windows(package, frida_root, host, output_dir, library_filename):
+def generate_library_windows(package, frida_root, host, flavor, output_dir, library_filename):
     glib = [
         sdk_lib_path("libglib-2.0.a", frida_root, host),
     ]
@@ -250,7 +250,7 @@ def generate_library_windows(package, frida_root, host, output_dir, library_file
 
     return (extra_flags, thirdparty_symbol_mappings)
 
-def generate_library_unix(package, frida_root, host, output_dir, library_filename):
+def generate_library_unix(package, frida_root, host, flavor, output_dir, library_filename):
     output_path = os.path.join(output_dir, library_filename)
 
     try:
@@ -258,7 +258,7 @@ def generate_library_unix(package, frida_root, host, output_dir, library_filenam
     except:
         pass
 
-    rc = env_rc(frida_root, host)
+    rc = env_rc(frida_root, host, flavor)
     ar = probe_env(rc, "echo $AR")
 
     library_flags = subprocess.check_output(
@@ -371,7 +371,7 @@ def resolve_library_paths(names, dirs):
             flags.append("-l{}".format(name))
     return (deduplicate(paths), flags)
 
-def generate_example(filename, package, frida_root, host, kit, extra_ldflags):
+def generate_example(filename, package, frida_root, host, kit, flavor, extra_ldflags):
     if platform.system() == 'Windows':
         os_flavor = "windows"
     else:
@@ -384,7 +384,7 @@ def generate_example(filename, package, frida_root, host, kit, extra_ldflags):
     if platform.system() == 'Windows':
         return example_code
     else:
-        rc = env_rc(frida_root, host)
+        rc = env_rc(frida_root, host, flavor)
 
         cc = probe_env(rc, "echo $CC")
         cflags = probe_env(rc, "echo $CFLAGS")
@@ -415,8 +415,8 @@ def generate_example(filename, package, frida_root, host, kit, extra_ldflags):
 def asset_path(name):
     return os.path.join(os.path.dirname(__file__), "devkit-assets", name)
 
-def env_rc(frida_root, host):
-    return os.path.join(frida_root, "build", "frida-env-{}.rc".format(host))
+def env_rc(frida_root, host, flavor):
+    return os.path.join(frida_root, "build", "frida{}-env-{}.rc".format(flavor, host))
 
 def msvs_cl_exe(host):
     return msvs_tool_path(host, "cl.exe")
@@ -451,7 +451,7 @@ def compute_library_filename(kit):
     else:
         return "lib{}.a".format(kit)
 
-def compute_umbrella_header_path(frida_root, host, package, umbrella_header):
+def compute_umbrella_header_path(frida_root, host, flavor, package, umbrella_header):
     if platform.system() == 'Windows':
         if package == "frida-gum-1.0":
             return os.path.join(frida_root, "frida-gum", "gum", "gum.h")
@@ -462,7 +462,7 @@ def compute_umbrella_header_path(frida_root, host, package, umbrella_header):
         else:
             raise Exception("Unhandled package")
     else:
-        return os.path.join(frida_root, "build", "frida-" + host, "include", *umbrella_header)
+        return os.path.join(frida_root, "build", "frida" + flavor + "-" + host, "include", *umbrella_header)
 
 def sdk_lib_path(name, frida_root, host):
     return os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "lib", name)
@@ -528,17 +528,27 @@ def deduplicate(items):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print("Usage: {0} kit host outdir".format(sys.argv[0]), file=sys.stderr)
-        sys.exit(1)
+    import argparse
 
-    kit = sys.argv[1]
-    host = sys.argv[2]
-    outdir = os.path.abspath(sys.argv[3])
+    parser = argparse.ArgumentParser()
+    parser.add_argument("kit")
+    parser.add_argument("host")
+    parser.add_argument("outdir")
+    parser.add_argument("-t", "--thin", help="build without cross-arch support", action='store_true')
+
+    arguments = parser.parse_args()
+
+    kit = arguments.kit
+    host = arguments.host
+    outdir = os.path.abspath(arguments.outdir)
+    if arguments.thin:
+        flavor = "_thin"
+    else:
+        flavor = ""
 
     try:
         os.makedirs(outdir)
     except:
         pass
 
-    generate_devkit(kit, host, outdir)
+    generate_devkit(kit, host, flavor, outdir)
