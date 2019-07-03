@@ -310,7 +310,7 @@ if __name__ == '__main__':
 
         upload(asset_filename, "application/x-xz", tarball)
 
-    def upload_devkits(host, upload):
+    def upload_devkits(host, upload, flavor=""):
         kits = [
             "frida-gum",
             "frida-gumjs",
@@ -329,7 +329,7 @@ if __name__ == '__main__':
             output_dir = tempfile.mkdtemp(prefix="frida-release")
             try:
                 try:
-                    filenames = generate_devkit(kit, host, output_dir)
+                    filenames = generate_devkit(kit, host, flavor, output_dir)
                 except Exception as e:
                     print("Skipping {}: {}".format(asset_filename, e))
                     continue
