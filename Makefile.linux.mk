@@ -297,21 +297,27 @@ build/tmp_thin-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stam
 	@touch $@
 
 build/frida-linux-x86/lib/pkgconfig/frida-core-1.0.pc: build/tmp-linux-x86/frida-core/.frida-helper-and-agent-stamp build/tmp-linux-x86_64/frida-core/.frida-helper-and-agent-stamp
+	@rm -f build/tmp-linux-x86/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-linux-x86/frida-core install
 	@touch $@
 build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-linux-x86/frida-core/.frida-helper-and-agent-stamp build/tmp-linux-x86_64/frida-core/.frida-helper-and-agent-stamp
+	@rm -f build/tmp-linux-x86_64/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-linux-x86_64/frida-core install
 	@touch $@
 build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x86/frida-core/.frida-helper-and-agent-stamp
+	@rm -f build/tmp-android-x86/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-android-x86/frida-core install
 	@touch $@
 build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x86/frida-core/.frida-helper-and-agent-stamp build/tmp-android-x86_64/frida-core/.frida-helper-and-agent-stamp
+	@rm -f build/tmp-android-x86_64/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-android-x86_64/frida-core install
 	@touch $@
 build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/frida-core/.frida-helper-and-agent-stamp
+	@rm -f build/tmp-android-arm/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-android-arm/frida-core install
 	@touch $@
 build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/frida-core/.frida-helper-and-agent-stamp build/tmp-android-arm64/frida-core/.frida-helper-and-agent-stamp
+	@rm -f build/tmp-android-arm64/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-android-arm64/frida-core install
 	@touch $@
 build/frida_thin-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-%/frida-core/.frida-ninja-stamp
