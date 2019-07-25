@@ -362,6 +362,7 @@ build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-sta
 			--libdir $$(FRIDA)/build/$1-$$*/lib \
 			$$$$cross_args \
 			-Dpython=$$(PYTHON) \
+			-Dpython_incdir=$$(PYTHON_INCDIR) \
 			frida-python $$$$builddir || exit 1; \
 	fi; \
 	$$(NINJA) -C $$$$builddir install || exit 1
