@@ -345,6 +345,10 @@ python-linux-x86_64: build/tmp-linux-x86_64/frida-$(PYTHON_NAME)/.frida-stamp ##
 python-linux-x86-thin: build/tmp_thin-linux-x86/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for Linux/x86 without cross-arch support
 python-linux-x86_64-thin: build/tmp_thin-linux-x86_64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for Linux/x86-64 without cross-arch support
 python-linux-arm64: build/tmp_thin-linux-arm64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for Linux/ARM64
+python-android-x86: build/tmp_thin-android-x86/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for Android/x86
+python-android-x86_64: build/tmp_thin-android-x86_64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for Android/x86_64
+python-android-arm: build/tmp_thin-android-arm/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for Android/ARM
+python-android-arm64: build/tmp_thin-android-arm64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for Android/ARM64
 
 define make-python-rule
 build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-stamp build/$1-%/lib/pkgconfig/frida-core-1.0.pc
