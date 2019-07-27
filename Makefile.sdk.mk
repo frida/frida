@@ -6,7 +6,7 @@ repo_base_url = https://github.com/frida
 repo_suffix := .git
 
 libiconv_version := 1.15
-elfutils_version := 34ff3ca2e86f8a4915500b92a8e00d6f52aa546c
+elfutils_version := 1b1433d5670b75c4bd5c9b598e0b00fba6e82d90
 libdwarf_version := 20190110
 openssl_version := 1.1.1b
 v8_api_version := 7.0
@@ -166,6 +166,7 @@ build/.elfutils-stamp: build/fs-env-$(build_platform_arch).rc
 	. $< \
 		&& cd elfutils \
 		&& git checkout $(elfutils_version) \
+		&& patch -p1 < ../releng/patches/elfutils-clang.patch \
 		&& patch -p1 < ../releng/patches/elfutils-android.patch \
 		&& autoreconf -ifv
 	@mkdir -p $(@D)
@@ -548,8 +549,8 @@ ifeq ($(host_platform), android)
 		use_xcode_clang=true \
 		use_custom_libcxx=false \
 		android_ndk_root="$(ANDROID_NDK_ROOT)" \
-		android_ndk_version="r17b" \
-		android_ndk_major_version=17 \
+		android_ndk_version="r20" \
+		android_ndk_major_version=20 \
 		android32_ndk_api_level=18 \
 		android64_ndk_api_level=21 \
 		clang_base_path="$(abspath ./build/fs-ndk-android-$(host_arch))"
