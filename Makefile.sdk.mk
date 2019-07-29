@@ -553,7 +553,7 @@ ifeq ($(host_platform), android)
 		android_ndk_major_version=20 \
 		android32_ndk_api_level=18 \
 		android64_ndk_api_level=21 \
-		clang_base_path="$(abspath ./build/fs-ndk-android-$(host_arch))"
+		clang_base_path="$(abspath $(ANDROID_NDK_ROOT)/toolchains/llvm/prebuilt/$(build_platform_arch))"
 	v8_libs_private := "-llog -lm"
 endif
 
