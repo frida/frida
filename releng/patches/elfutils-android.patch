@@ -12,13 +12,13 @@ index 8274ec79..f00877a3 100644
  		argp_LDADD="-largp"
  	fi
 diff --git a/lib/system.h b/lib/system.h
-index 172456d2..cafad69c 100644
+index 292082bd..172456d2 100644
 --- a/lib/system.h
 +++ b/lib/system.h
-@@ -34,6 +34,7 @@
+@@ -33,6 +33,7 @@
+ #include <error.h>
  #include <stddef.h>
  #include <stdint.h>
- #include <string.h>
 +#include <string.h>
  #include <sys/param.h>
  #include <endian.h>

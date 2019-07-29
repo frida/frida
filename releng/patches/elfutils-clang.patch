@@ -360,18 +360,6 @@ index 84b22d7c..befdfcfa 100644
 -#endif
 -
  #endif	/* eu-config.h */
-diff --git a/lib/system.h b/lib/system.h
-index 292082bd..172456d2 100644
---- a/lib/system.h
-+++ b/lib/system.h
-@@ -33,6 +33,7 @@
- #include <error.h>
- #include <stddef.h>
- #include <stdint.h>
-+#include <string.h>
- #include <sys/param.h>
- #include <endian.h>
- #include <byteswap.h>
 diff --git a/libasm/asm_newscn.c b/libasm/asm_newscn.c
 index 7cdf484f..062834ee 100644
 --- a/libasm/asm_newscn.c
