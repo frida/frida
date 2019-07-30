@@ -456,7 +456,8 @@ case $host_platform in
     meson_objcpp_link_args="$base_linker_args, '-stdlib=libc++'"
     ;;
   android)
-    android_toolroot="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/${build_platform}-${build_arch}"
+    android_build_platform=$(echo ${build_platform} | sed 's,^macos$,darwin,')
+    android_toolroot="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/${android_build_platform}-${build_arch}"
 
     case $host_arch in
       x86)
