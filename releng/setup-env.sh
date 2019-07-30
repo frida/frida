@@ -475,7 +475,7 @@ case $host_platform in
       arm)
         android_api=18
         host_compiler_triplet="armv7a-linux-androideabi"
-        host_tooltriplet='arm-linux-androideabi'
+        host_tooltriplet="arm-linux-androideabi"
         host_arch_flags="-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16"
         host_ldflags="-fuse-ld=gold -Wl,--icf=all -Wl,--fix-cortex-a8"
         ;;
@@ -488,9 +488,8 @@ case $host_platform in
     esac
     host_compiler_prefix="${host_compiler_triplet}${android_api}-"
 
-    if [ ! -n "$host_tooltriplet" ]
-    then
-        host_tooltriplet="$host_compiler_triplet"
+    if [ -z "$host_tooltriplet" ]; then
+      host_tooltriplet="$host_compiler_triplet"
     fi
     host_toolprefix="$host_tooltriplet-"
 
