@@ -1,0 +1,2745 @@
+diff --git a/backends/aarch64_retval.c b/backends/aarch64_retval.c
+index 1308340b..f083c154 100644
+--- a/backends/aarch64_retval.c
++++ b/backends/aarch64_retval.c
+@@ -292,7 +292,7 @@ aarch64_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	  assert (count > 0);
+ 	  if (count <= 4)
+ 	    return pass_hfa (locp, base_size, count);
+-	  FALLTHROUGH;
++	  /* fall through */
+ 
+ 	case 1:
+ 	  /* Not a HFA.  */
+diff --git a/backends/alpha_retval.c b/backends/alpha_retval.c
+index d9bae3bc..05dddd35 100644
+--- a/backends/alpha_retval.c
++++ b/backends/alpha_retval.c
+@@ -85,7 +85,7 @@ alpha_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	  typedie = dwarf_formref_die (attr, &die_mem);
+ 	  tag = DWARF_TAG_OR_RETURN (typedie);
+ 	}
+-      FALLTHROUGH;
++      /* fall through */
+ 
+     case DW_TAG_base_type:
+     case DW_TAG_enumeration_type:
+@@ -131,7 +131,7 @@ alpha_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	  }
+       }
+ 
+-      FALLTHROUGH;
++      /* fall through */
+ 
+     case DW_TAG_structure_type:
+     case DW_TAG_class_type:
+diff --git a/backends/arm_regs.c b/backends/arm_regs.c
+index a46a4c99..cd0e7ec2 100644
+--- a/backends/arm_regs.c
++++ b/backends/arm_regs.c
+@@ -77,7 +77,7 @@ arm_register_info (Ebl *ebl __attribute__ ((unused)),
+ 
+     case 16 + 0 ... 16 + 7:
+       regno += 96 - 16;
+-      FALLTHROUGH;
++      /* fall through */
+     case 96 + 0 ... 96 + 7:
+       *setname = "FPA";
+       *type = DW_ATE_float;
+diff --git a/backends/arm_retval.c b/backends/arm_retval.c
+index 1c28f016..8f461826 100644
+--- a/backends/arm_retval.c
++++ b/backends/arm_retval.c
+@@ -82,7 +82,7 @@ arm_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	  typedie = dwarf_formref_die (attr, &die_mem);
+ 	  tag = DWARF_TAG_OR_RETURN (typedie);
+ 	}
+-      FALLTHROUGH;
++      /* fall through */
+ 
+     case DW_TAG_base_type:
+     case DW_TAG_enumeration_type:
+diff --git a/backends/i386_regs.c b/backends/i386_regs.c
+index 7ec93bb9..bf1fae92 100644
+--- a/backends/i386_regs.c
++++ b/backends/i386_regs.c
+@@ -92,7 +92,7 @@ i386_register_info (Ebl *ebl __attribute__ ((unused)),
+     case 5:
+     case 8:
+       *type = DW_ATE_address;
+-      FALLTHROUGH;
++      /* fall through */
+     case 0 ... 3:
+     case 6 ... 7:
+       name[0] = 'e';
+diff --git a/backends/i386_retval.c b/backends/i386_retval.c
+index 32fec728..9169aa69 100644
+--- a/backends/i386_retval.c
++++ b/backends/i386_retval.c
+@@ -85,7 +85,7 @@ i386_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	  typedie = dwarf_formref_die (attr, &die_mem);
+ 	  tag = DWARF_TAG_OR_RETURN (typedie);
+ 	}
+-      FALLTHROUGH;
++      /* fall through */
+ 
+     case DW_TAG_base_type:
+     case DW_TAG_enumeration_type:
+@@ -123,7 +123,7 @@ i386_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	if (size <= 8)
+ 	  return nloc_intregpair;
+       }
+-    FALLTHROUGH;
++    /* fall through */
+ 
+     case DW_TAG_structure_type:
+     case DW_TAG_class_type:
+diff --git a/backends/ia64_retval.c b/backends/ia64_retval.c
+index 03ea4d89..41e1b95c 100644
+--- a/backends/ia64_retval.c
++++ b/backends/ia64_retval.c
+@@ -260,7 +260,7 @@ ia64_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	  typedie = dwarf_formref_die (attr, &die_mem);
+ 	  tag = DWARF_TAG_OR_RETURN (typedie);
+ 	}
+-      FALLTHROUGH;
++      /* fall through */
+ 
+     case DW_TAG_base_type:
+     case DW_TAG_enumeration_type:
+diff --git a/backends/linux-core-note.c b/backends/linux-core-note.c
+index 9faae4c3..bb2de976 100644
+--- a/backends/linux-core-note.c
++++ b/backends/linux-core-note.c
+@@ -226,7 +226,7 @@ EBLHOOK(core_note) (const GElf_Nhdr *nhdr, const char *name,
+       if (memcmp (name, "CORE", nhdr->n_namesz) == 0)
+ 	break;
+       /* Buggy old Linux kernels didn't terminate "LINUX".  */
+-      FALLTHROUGH;
++      /* fall through */
+ 
+     case sizeof "LINUX":
+       if (memcmp (name, "LINUX", nhdr->n_namesz) == 0)
+diff --git a/backends/m68k_retval.c b/backends/m68k_retval.c
+index a653ba3a..0f85bcf6 100644
+--- a/backends/m68k_retval.c
++++ b/backends/m68k_retval.c
+@@ -92,7 +92,7 @@ m68k_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	  typedie = dwarf_formref_die (attr, &die_mem);
+ 	  tag = DWARF_TAG_OR_RETURN (typedie);
+ 	}
+-      FALLTHROUGH;
++      /* fall through */
+ 
+     case DW_TAG_base_type:
+     case DW_TAG_enumeration_type:
+@@ -135,7 +135,7 @@ m68k_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	if (size <= 8)
+ 	  return nloc_intregpair;
+       }
+-      FALLTHROUGH;
++      /* fall through */
+     case DW_TAG_structure_type:
+     case DW_TAG_class_type:
+     case DW_TAG_union_type:
+diff --git a/backends/ppc64_retval.c b/backends/ppc64_retval.c
+index eb1c11ec..d4d406f2 100644
+--- a/backends/ppc64_retval.c
++++ b/backends/ppc64_retval.c
+@@ -96,7 +96,7 @@ ppc64_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	  typedie = dwarf_formref_die (attr, &die_mem);
+ 	  tag = DWARF_TAG_OR_RETURN (typedie);
+ 	}
+-      FALLTHROUGH;
++      /* fall through */
+ 
+     case DW_TAG_base_type:
+     case DW_TAG_enumeration_type:
+@@ -141,7 +141,7 @@ ppc64_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	  return nloc_intreg;
+ 	}
+ 
+-      FALLTHROUGH;
++      /* fall through */
+     case DW_TAG_structure_type:
+     case DW_TAG_class_type:
+     case DW_TAG_union_type:
+@@ -161,7 +161,7 @@ ppc64_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	    return nloc_vmxreg;
+ 	  }
+       }
+-      FALLTHROUGH;
++      /* fall through */
+ 
+     case DW_TAG_string_type:
+       if (dwarf_aggregate_size (typedie, &size) == 0 && size <= 8)
+diff --git a/backends/ppc_regs.c b/backends/ppc_regs.c
+index 43d2534f..09db9e68 100644
+--- a/backends/ppc_regs.c
++++ b/backends/ppc_regs.c
+@@ -140,7 +140,7 @@ ppc_register_info (Ebl *ebl __attribute__ ((unused)),
+     case 100:
+       if (*bits == 32)
+ 	return stpcpy (name, "mq") + 1 - name;
+-      FALLTHROUGH;
++      /* fall through */
+     case 102 ... 107:
+       name[0] = 's';
+       name[1] = 'p';
+diff --git a/backends/ppc_retval.c b/backends/ppc_retval.c
+index 39b42da1..38aa3316 100644
+--- a/backends/ppc_retval.c
++++ b/backends/ppc_retval.c
+@@ -108,7 +108,7 @@ ppc_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	  typedie = dwarf_formref_die (attr, &die_mem);
+ 	  tag = DWARF_TAG_OR_RETURN (typedie);
+ 	}
+-      FALLTHROUGH;
++      /* fall through */
+ 
+     case DW_TAG_base_type:
+     case DW_TAG_enumeration_type:
+@@ -172,7 +172,7 @@ ppc_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	      return nloc_intregquad;
+ 	    }
+       }
+-      FALLTHROUGH;
++      /* fall through */
+ 
+     case DW_TAG_structure_type:
+     case DW_TAG_class_type:
+diff --git a/backends/s390_retval.c b/backends/s390_retval.c
+index 2043f985..4641ef14 100644
+--- a/backends/s390_retval.c
++++ b/backends/s390_retval.c
+@@ -87,7 +87,7 @@ s390_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	  typedie = dwarf_formref_die (attr, &die_mem);
+ 	  tag = DWARF_TAG_OR_RETURN (typedie);
+ 	}
+-      FALLTHROUGH;
++      /* fall through */
+ 
+     case DW_TAG_base_type:
+     case DW_TAG_enumeration_type:
+@@ -127,7 +127,7 @@ s390_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	    return size <= asize ? nloc_intreg : nloc_intregpair;
+ 	  }
+       }
+-      FALLTHROUGH;
++      /* fall through */
+ 
+     case DW_TAG_structure_type:
+     case DW_TAG_class_type:
+diff --git a/backends/sh_retval.c b/backends/sh_retval.c
+index 33d7d964..321bbfc1 100644
+--- a/backends/sh_retval.c
++++ b/backends/sh_retval.c
+@@ -84,7 +84,7 @@ sh_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	  typedie = dwarf_formref_die (attr, &die_mem);
+ 	  tag = DWARF_TAG_OR_RETURN (typedie);
+ 	}
+-      FALLTHROUGH;
++      /* fall through */
+ 
+     case DW_TAG_base_type:
+     case DW_TAG_enumeration_type:
+diff --git a/backends/sparc_retval.c b/backends/sparc_retval.c
+index fb81cdce..24077ef1 100644
+--- a/backends/sparc_retval.c
++++ b/backends/sparc_retval.c
+@@ -91,7 +91,7 @@ sparc_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	  typedie = dwarf_formref_die (attr, &die_mem);
+ 	  tag = DWARF_TAG_OR_RETURN (typedie);
+ 	}
+-      FALLTHROUGH;
++      /* fall through */
+ 
+     case DW_TAG_base_type:
+     case DW_TAG_enumeration_type:
+diff --git a/backends/tilegx_retval.c b/backends/tilegx_retval.c
+index 7f7d24b0..3798e24f 100644
+--- a/backends/tilegx_retval.c
++++ b/backends/tilegx_retval.c
+@@ -79,7 +79,7 @@ tilegx_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	  typedie = dwarf_formref_die (attr, &die_mem);
+ 	  tag = DWARF_TAG_OR_RETURN (typedie);
+ 	}
+-      FALLTHROUGH;
++      /* fall through */
+ 
+     case DW_TAG_base_type:
+     case DW_TAG_enumeration_type:
+@@ -113,7 +113,7 @@ tilegx_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	  return nloc_intreg;
+ 	}
+ 
+-      FALLTHROUGH;
++      /* fall through */
+     case DW_TAG_structure_type:
+     case DW_TAG_class_type:
+     case DW_TAG_union_type:
+diff --git a/backends/x86_64_regs.c b/backends/x86_64_regs.c
+index ef987daf..c1dfe6fd 100644
+--- a/backends/x86_64_regs.c
++++ b/backends/x86_64_regs.c
+@@ -87,7 +87,7 @@ x86_64_register_info (Ebl *ebl __attribute__ ((unused)),
+ 
+     case 6 ... 7:
+       *type = DW_ATE_address;
+-      FALLTHROUGH;
++      /* fall through */
+     case 0 ... 5:
+       name[0] = 'r';
+       name[1] = baseregs[regno][0];
+diff --git a/backends/x86_64_retval.c b/backends/x86_64_retval.c
+index f9114cb1..c1f87b6a 100644
+--- a/backends/x86_64_retval.c
++++ b/backends/x86_64_retval.c
+@@ -100,7 +100,7 @@ x86_64_return_value_location (Dwarf_Die *functypedie, const Dwarf_Op **locp)
+ 	  typedie = dwarf_formref_die (attr, &die_mem);
+ 	  tag = DWARF_TAG_OR_RETURN (typedie);
+ 	}
+-      FALLTHROUGH;
++      /* fall through */
+ 
+     case DW_TAG_base_type:
+     case DW_TAG_enumeration_type:
+diff --git a/config/eu.am b/config/eu.am
+index 82acda3a..6a49f183 100644
+--- a/config/eu.am
++++ b/config/eu.am
+@@ -64,19 +64,18 @@ endif
+ if HAVE_IMPLICIT_FALLTHROUGH_WARNING
+ # Use strict fallthrough. Only __attribute__((fallthrough)) will prevent the
+ # warning
+-IMPLICIT_FALLTHROUGH_WARNING=-Wimplicit-fallthrough=5
++IMPLICIT_FALLTHROUGH_WARNING=-Wimplicit-fallthrough
+ else
+ IMPLICIT_FALLTHROUGH_WARNING=
+ endif
+ 
+ AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
+-	    -Wold-style-definition -Wstrict-prototypes -Wtrampolines \
++	    -Wold-style-definition -Wstrict-prototypes \
+ 	    $(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
+ 	    $(NULL_DEREFERENCE_WARNING) $(IMPLICIT_FALLTHROUGH_WARNING) \
+ 	    $(if $($(*F)_no_Werror),,-Werror) \
+ 	    $(if $($(*F)_no_Wunused),,-Wunused -Wextra) \
+ 	    $(if $($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) \
+-	    $(if $($(*F)_no_Wpacked_not_aligned),-Wno-packed-not-aligned,) \
+ 	    $($(*F)_CFLAGS)
+ 
+ COMPILE.os = $(filter-out -fprofile-arcs -ftest-coverage, $(COMPILE))
+diff --git a/configure.ac b/configure.ac
+index b4e012de..8274ec79 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -125,7 +125,7 @@ void baz (int n)
+ 		  ac_cv_c99=yes, ac_cv_c99=no)
+ CFLAGS="$old_CFLAGS"])
+ AS_IF([test "x$ac_cv_c99" != xyes],
+-      AC_MSG_ERROR([gcc with GNU99 support required]))
++      AC_MSG_WARN([gcc with GNU99 support required]))
+ 
+ AC_CACHE_CHECK([whether gcc supports __attribute__((visibility()))],
+ 	ac_cv_visibility, [dnl
+diff --git a/lib/eu-config.h b/lib/eu-config.h
+index 84b22d7c..befdfcfa 100644
+--- a/lib/eu-config.h
++++ b/lib/eu-config.h
+@@ -198,12 +198,4 @@ asm (".section predict_data, \"aw\"; .previous\n"
+ # define COMPAT_VERSION(name, version, prefix) error "should use #ifdef SYMBOL_VERSIONING"
+ #endif
+ 
+-#ifndef FALLTHROUGH
+-# ifdef HAVE_FALLTHROUGH
+-#  define FALLTHROUGH __attribute__ ((fallthrough))
+-# else
+-#  define FALLTHROUGH ((void) 0)
+-# endif
+-#endif
+-
+ #endif	/* eu-config.h */
+diff --git a/libasm/asm_newscn.c b/libasm/asm_newscn.c
+index 7cdf484f..062834ee 100644
+--- a/libasm/asm_newscn.c
++++ b/libasm/asm_newscn.c
+@@ -46,8 +46,8 @@
+    dirty tricks here.  */
+ static const struct
+ {
+-  struct FillPattern pattern;
+   char zero;
++  struct FillPattern pattern;
+ } xdefault_pattern =
+   {
+     .pattern =
+diff --git a/libcpu/i386_disasm.c b/libcpu/i386_disasm.c
+index a7e03f95..96d638eb 100644
+--- a/libcpu/i386_disasm.c
++++ b/libcpu/i386_disasm.c
+@@ -819,7 +819,7 @@ i386_disasm (Ebl *ebl __attribute__((unused)),
+ 			      ++param_start;
+ 			      break;
+ 			    }
+-			  FALLTHROUGH;
++			  /* fall through */
+ 			default:
+ 			  assert (! "INVALID not handled");
+ 			}
+diff --git a/libdw/cfi.c b/libdw/cfi.c
+index 341e055b..a6060638 100644
+--- a/libdw/cfi.c
++++ b/libdw/cfi.c
+@@ -138,7 +138,7 @@ execute_cfi (Dwarf_CFI *cache,
+ 
+ 	case DW_CFA_advance_loc1:
+ 	  operand = *program++;
+-	  FALLTHROUGH;
++	  /* fall through */
+ 	case DW_CFA_advance_loc + 0 ... DW_CFA_advance_loc + CFI_PRIMARY_MAX:
+ 	advance_loc:
+ 	  loc += operand * cie->code_alignment_factor;
+@@ -301,7 +301,7 @@ execute_cfi (Dwarf_CFI *cache,
+ 
+ 	case DW_CFA_restore_extended:
+ 	  get_uleb128 (operand, program, end);
+-	  FALLTHROUGH;
++	  /* fall through */
+ 	case DW_CFA_restore + 0 ... DW_CFA_restore + CFI_PRIMARY_MAX:
+ 
+ 	  if (unlikely (abi_cfi) && likely (opcode == DW_CFA_restore))
+diff --git a/libdw/dwarf_frame_register.c b/libdw/dwarf_frame_register.c
+index d0159fb8..bd5972cd 100644
+--- a/libdw/dwarf_frame_register.c
++++ b/libdw/dwarf_frame_register.c
+@@ -62,7 +62,7 @@ dwarf_frame_register (Dwarf_Frame *fs, int regno, Dwarf_Op *ops_mem,
+       /* Use the default rule for registers not yet mentioned in CFI.  */
+       if (fs->cache->default_same_value)
+ 	goto same_value;
+-      FALLTHROUGH;
++      /* fall through */
+     case reg_undefined:
+       /* The value is known to be unavailable.  */
+       break;
+diff --git a/libdwfl/dwfl_report_elf.c b/libdwfl/dwfl_report_elf.c
+index 3fc9384a..cdaa2111 100644
+--- a/libdwfl/dwfl_report_elf.c
++++ b/libdwfl/dwfl_report_elf.c
+@@ -174,7 +174,7 @@ __libdwfl_elf_address_range (Elf *elf, GElf_Addr base, bool add_p_vaddr,
+       /* An assigned base address is meaningless for these.  */
+       base = 0;
+       add_p_vaddr = true;
+-      FALLTHROUGH;
++      /* fall through */
+     case ET_DYN:
+     default:;
+       size_t phnum;
+diff --git a/libdwfl/dwfl_segment_report_module.c b/libdwfl/dwfl_segment_report_module.c
+index 76ba1506..8d6058d9 100644
+--- a/libdwfl/dwfl_segment_report_module.c
++++ b/libdwfl/dwfl_segment_report_module.c
+@@ -199,6 +199,356 @@ handle_file_note (GElf_Addr module_start, GElf_Addr module_end,
+   return retval;
+ }
+ 
++#define declare_segment_read_closure \
++  Dwfl_Memory_Callback* const memory_callback, \
++  Dwfl *dwfl, \
++  void *const memory_callback_arg
++
++#define pass_segment_read_closure \
++  memory_callback, dwfl, memory_callback_arg
++
++bool segment_read (declare_segment_read_closure, int segndx,
++			    void **buffer, size_t *buffer_available,
++			    GElf_Addr addr, size_t minread)
++{
++  return ! (*memory_callback) (dwfl, segndx, buffer, buffer_available,
++        addr, minread, memory_callback_arg);
++}
++
++#define declare_release_buffer_closure declare_segment_read_closure
++
++#define pass_release_buffer_closure pass_segment_read_closure
++
++void release_buffer (declare_release_buffer_closure, void **buffer, size_t *buffer_available)
++{
++  if (*buffer != NULL)
++    (void) segment_read (pass_segment_read_closure, -1, buffer, buffer_available, 0, 0);
++}
++
++#define declare_finish_closure \
++  declare_release_buffer_closure, \
++  void *phdrsp, \
++  Elf *elf, \
++  void *buffer, \
++  int fd, \
++  size_t buffer_available, \
++  int ndx
++
++#define pass_finish_closure \
++  pass_release_buffer_closure, phdrsp, elf, buffer, fd, buffer_available, ndx
++
++int finish (declare_finish_closure)
++{
++  free (phdrsp);
++  release_buffer (pass_release_buffer_closure, &buffer, &buffer_available);
++  if (elf != NULL)
++    elf_end (elf);
++  if (fd != -1)
++    close (fd);
++  return ndx;
++}
++
++#define declare_read_portion_closure \
++  declare_segment_read_closure, \
++  size_t buffer_available, \
++  void *buffer, \
++  size_t segment, \
++  GElf_Addr start
++
++#define pass_read_portion_closure \
++  pass_segment_read_closure, buffer_available, buffer, segment, start
++
++bool read_portion (declare_read_portion_closure, void **data, size_t *data_size,
++			    GElf_Addr vaddr, size_t filesz)
++{
++  /* Check whether we will have to read the segment data, or if it
++      can be returned from the existing buffer.  */
++  if (filesz > buffer_available
++      || vaddr - start > buffer_available - filesz
++      /* If we're in string mode, then don't consider the buffer we have
++          sufficient unless it contains the terminator of the string.  */
++      || (filesz == 0 && memchr (vaddr - start + buffer, '\0',
++                buffer_available - (vaddr - start)) == NULL))
++    {
++      *data = NULL;
++      *data_size = filesz;
++      return segment_read (pass_segment_read_closure, addr_segndx (dwfl, segment, vaddr, false),
++                data, data_size, vaddr, filesz);
++    }
++
++  /* We already have this whole note segment from our initial read.  */
++  *data = vaddr - start + buffer;
++  *data_size = 0;
++  return false;
++}
++
++#define declare_finish_portion_closure declare_release_buffer_closure
++#define pass_finish_portion_closure pass_release_buffer_closure
++
++void finish_portion (declare_finish_portion_closure, void **data, size_t *data_size)
++{
++  if (*data_size != 0)
++    release_buffer (pass_release_buffer_closure, data, data_size);
++}
++
++union ELF_EHDR
++{
++  Elf32_Ehdr e32;
++  Elf64_Ehdr e64;
++};
++
++#define declare_consider_notes_closure \
++  declare_read_portion_closure, \
++  void **build_id, \
++  unsigned char ei_data, \
++  Elf_Data *xlatefrom, \
++  Elf_Data *xlateto, \
++  union ELF_EHDR ehdr, \
++  size_t *build_id_len, \
++  GElf_Addr *build_id_vaddr
++
++#define pass_consider_notes_closure \
++  pass_read_portion_closure, build_id, ei_data, xlatefrom, xlateto, ehdr, build_id_len, build_id_vaddr
++
++/* Consider a PT_NOTE we've found in the image.  */
++void consider_notes (declare_consider_notes_closure, GElf_Addr vaddr, GElf_Xword filesz,
++          GElf_Xword align)
++{
++  /* If we have already seen a build ID, we don't care any more.  */
++  if (*build_id != NULL || filesz == 0)
++    return;
++
++  void *data;
++  size_t data_size;
++  if (read_portion (pass_read_portion_closure, &data, &data_size, vaddr, filesz))
++    return;
++
++  /* data_size will be zero if we got everything from the initial
++      buffer, otherwise it will be the size of the new buffer that
++      could be read.  */
++  if (data_size != 0)
++    filesz = data_size;
++
++  assert (sizeof (Elf32_Nhdr) == sizeof (Elf64_Nhdr));
++
++  void *notes;
++  if (ei_data == MY_ELFDATA)
++    notes = data;
++  else {
++    notes = malloc (filesz);
++    if (unlikely (notes == NULL))
++      return;
++    xlatefrom->d_type = xlateto->d_type = (align == 8
++                  ? ELF_T_NHDR8 : ELF_T_NHDR);
++    xlatefrom->d_buf = (void *) data;
++    xlatefrom->d_size = filesz;
++    xlateto->d_buf = notes;
++    xlateto->d_size = filesz;
++    if (elf32_xlatetom (xlateto, xlatefrom,
++            ehdr.e32.e_ident[EI_DATA]) == NULL)
++      goto done;
++  }
++
++  const GElf_Nhdr *nh = notes;
++  size_t len = 0;
++  while (filesz > len + sizeof (*nh))
++    {
++      const void *note_name;
++      const void *note_desc;
++
++      len += sizeof (*nh);
++      note_name = notes + len;
++
++      len += nh->n_namesz;
++      len = align == 8 ? NOTE_ALIGN8 (len) : NOTE_ALIGN4 (len);
++      note_desc = notes + len;
++
++      if (unlikely (filesz < len + nh->n_descsz))
++        break;
++
++            if (nh->n_type == NT_GNU_BUILD_ID
++          && nh->n_descsz > 0
++          && nh->n_namesz == sizeof "GNU"
++          && !memcmp (note_name, "GNU", sizeof "GNU"))
++        {
++          *build_id_vaddr = note_desc - (const void *) notes + vaddr;
++          *build_id_len = nh->n_descsz;
++          *build_id = malloc (nh->n_descsz);
++          if (likely (build_id != NULL))
++            memcpy (build_id, note_desc, *build_id_len);
++          break;
++        }
++
++      len += nh->n_descsz;
++      len = align == 8 ? NOTE_ALIGN8 (len) : NOTE_ALIGN4 (len);
++      nh = (void *) notes + len;
++    }
++
++  done:
++    if (notes != data)
++      free (notes);
++    finish_portion (pass_finish_portion_closure, &data, &data_size);
++}
++
++#define declare_consider_phdr_closure \
++  declare_consider_notes_closure, \
++  GElf_Addr *dyn_vaddr, \
++  GElf_Xword *dyn_filesz, \
++  GElf_Off *file_trimmed_end, \
++  GElf_Off shdrs_end, \
++  GElf_Off *total_filesz, \
++  GElf_Off *file_end, \
++  bool *found_bias, \
++  GElf_Addr *module_start, \
++  GElf_Addr *module_end, \
++  GElf_Addr *module_address_sync, \
++  GElf_Off *contiguous, \
++  GElf_Addr *bias, \
++  GElf_Off phoff, \
++  uint_fast16_t phnum, \
++  uint_fast16_t phentsize
++
++#define pass_consider_phdr_closure \
++  pass_read_portion_closure, &build_id, ei_data, &xlatefrom, &xlateto, ehdr, &build_id_len, \
++  &build_id_vaddr, &dyn_vaddr, &dyn_filesz, &file_trimmed_end, shdrs_end, \
++  &total_filesz, &file_end, &found_bias, &module_start, &module_end, &module_address_sync, \
++  &contiguous, &bias, phoff, phnum, phentsize
++
++/* Consider each of the program headers we've read from the image.  */
++void consider_phdr (declare_consider_phdr_closure, GElf_Word type,
++          GElf_Addr vaddr, GElf_Xword memsz,
++          GElf_Off offset, GElf_Xword filesz,
++          GElf_Xword align)
++{
++  switch (type)
++    {
++    case PT_DYNAMIC:
++      *dyn_vaddr = vaddr;
++      *dyn_filesz = filesz;
++      break;
++
++    case PT_NOTE:
++      /* We calculate from the p_offset of the note segment,
++          because we don't yet know the bias for its p_vaddr.  */
++      consider_notes (pass_consider_notes_closure, start + offset, filesz, align);
++      break;
++
++    case PT_LOAD:
++      align = dwfl->segment_align > 1 ? dwfl->segment_align : align ?: 1;
++
++      GElf_Addr vaddr_end = (vaddr + memsz + align - 1) & -align;
++      GElf_Addr filesz_vaddr = filesz < memsz ? vaddr + filesz : vaddr_end;
++      GElf_Off filesz_offset = filesz_vaddr - vaddr + offset;
++
++      if (*file_trimmed_end < offset + filesz)
++        {
++          *file_trimmed_end = offset + filesz;
++
++          /* Trim the last segment so we don't bother with zeros
++              in the last page that are off the end of the file.
++              However, if the extra bit in that page includes the
++              section headers, keep them.  */
++          if (shdrs_end <= filesz_offset && shdrs_end > *file_trimmed_end)
++            {
++        filesz += shdrs_end - *file_trimmed_end;
++        *file_trimmed_end = shdrs_end;
++            }
++        }
++
++      *total_filesz += filesz;
++
++      if (*file_end < filesz_offset)
++        {
++          *file_end = filesz_offset;
++          if (filesz_vaddr - start == filesz_offset)
++            *contiguous = *file_end;
++        }
++
++      if (!(*found_bias) && (offset & -align) == 0
++          && likely (filesz_offset >= phoff + phnum * phentsize))
++        {
++          *bias = start - vaddr;
++          *found_bias = true;
++        }
++
++      if ((vaddr & -align) < *module_start)
++        {
++          *module_start = vaddr & -align;
++          *module_address_sync = vaddr + memsz;
++        }
++
++      if (*module_end < vaddr_end)
++        *module_end = vaddr_end;
++      break;
++  }
++}
++
++#define declare_consider_dyn_closure \
++  bool *execlike, \
++  GElf_Addr *soname_stroff, \
++  GElf_Addr *dynstr_vaddr, \
++  GElf_Xword *dynstrsz
++
++#define pass_consider_dyn_closure \
++  &execlike, &soname_stroff, &dynstr_vaddr, &dynstrsz
++
++bool consider_dyn (declare_consider_dyn_closure, GElf_Sxword tag, GElf_Xword val)
++{
++  switch (tag)
++    {
++    default:
++      return false;
++
++          case DT_DEBUG:
++      *execlike = true;
++      break;
++
++          case DT_SONAME:
++      *soname_stroff = val;
++      break;
++
++          case DT_STRTAB:
++      *dynstr_vaddr = val;
++      break;
++
++          case DT_STRSZ:
++      *dynstrsz = val;
++      break;
++    }
++
++  return soname_stroff != 0 && dynstr_vaddr != 0 && dynstrsz != 0;
++}
++
++#define declare_final_read_closure \
++  declare_segment_read_closure, \
++  void *contents, \
++  size_t segment
++
++#define pass_final_read_closure \
++  pass_segment_read_closure, contents, segment
++
++void final_read (declare_final_read_closure, size_t offset, GElf_Addr vaddr, size_t size)
++{
++  void *into = contents + offset;
++  size_t read_size = size;
++  (void) segment_read (pass_segment_read_closure, addr_segndx (dwfl, segment, vaddr, false),
++        &into, &read_size, vaddr, size);
++}
++
++#define declare_read_phdr_closure \
++  declare_final_read_closure, \
++  GElf_Addr bias
++
++#define pass_read_phdr_closure \
++  pass_final_read_closure, bias
++
++void read_phdr (declare_read_phdr_closure, GElf_Word type, GElf_Addr vaddr,
++				 GElf_Off offset, GElf_Xword filesz)
++{
++  if (type == PT_LOAD)
++    final_read (pass_final_read_closure, offset, vaddr + bias, filesz);
++}
++
+ /* Return true iff we are certain ELF cannot match BUILD_ID of
+    BUILD_ID_LEN bytes.  Pass DISK_FILE_HAS_BUILD_ID as false if it is
+    certain ELF does not contain build-id (it is only a performance hit
+@@ -257,20 +607,6 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
+ 
+   GElf_Addr start = dwfl->lookup_addr[segment];
+ 
+-  inline bool segment_read (int segndx,
+-			    void **buffer, size_t *buffer_available,
+-			    GElf_Addr addr, size_t minread)
+-  {
+-    return ! (*memory_callback) (dwfl, segndx, buffer, buffer_available,
+-				 addr, minread, memory_callback_arg);
+-  }
+-
+-  inline void release_buffer (void **buffer, size_t *buffer_available)
+-  {
+-    if (*buffer != NULL)
+-      (void) segment_read (-1, buffer, buffer_available, 0, 0);
+-  }
+-
+   /* First read in the file header and check its sanity.  */
+ 
+   void *buffer = NULL;
+@@ -282,62 +618,17 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
+      here so we can always safely free it.  */
+   void *phdrsp = NULL;
+ 
+-  inline int finish (void)
+-  {
+-    free (phdrsp);
+-    release_buffer (&buffer, &buffer_available);
+-    if (elf != NULL)
+-      elf_end (elf);
+-    if (fd != -1)
+-      close (fd);
+-    return ndx;
+-  }
+-
+-  if (segment_read (ndx, &buffer, &buffer_available,
++  if (segment_read (pass_segment_read_closure, ndx, &buffer, &buffer_available,
+ 		    start, sizeof (Elf64_Ehdr))
+       || memcmp (buffer, ELFMAG, SELFMAG) != 0)
+-    return finish ();
+-
+-  inline bool read_portion (void **data, size_t *data_size,
+-			    GElf_Addr vaddr, size_t filesz)
+-  {
+-    /* Check whether we will have to read the segment data, or if it
+-       can be returned from the existing buffer.  */
+-    if (filesz > buffer_available
+-	|| vaddr - start > buffer_available - filesz
+-	/* If we're in string mode, then don't consider the buffer we have
+-	   sufficient unless it contains the terminator of the string.  */
+-	|| (filesz == 0 && memchr (vaddr - start + buffer, '\0',
+-				   buffer_available - (vaddr - start)) == NULL))
+-      {
+-	*data = NULL;
+-	*data_size = filesz;
+-	return segment_read (addr_segndx (dwfl, segment, vaddr, false),
+-			     data, data_size, vaddr, filesz);
+-      }
+-
+-    /* We already have this whole note segment from our initial read.  */
+-    *data = vaddr - start + buffer;
+-    *data_size = 0;
+-    return false;
+-  }
+-
+-  inline void finish_portion (void **data, size_t *data_size)
+-  {
+-    if (*data_size != 0)
+-      release_buffer (data, data_size);
+-  }
++    return finish (pass_finish_closure);
+ 
+   /* Extract the information we need from the file header.  */
+   const unsigned char *e_ident;
+   unsigned char ei_class;
+   unsigned char ei_data;
+   uint16_t e_type;
+-  union
+-  {
+-    Elf32_Ehdr e32;
+-    Elf64_Ehdr e64;
+-  } ehdr;
++  union ELF_EHDR ehdr;
+   GElf_Off phoff;
+   uint_fast16_t phnum;
+   uint_fast16_t phentsize;
+@@ -363,13 +654,13 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
+     case ELFCLASS32:
+       xlatefrom.d_size = sizeof (Elf32_Ehdr);
+       if (elf32_xlatetom (&xlateto, &xlatefrom, ei_data) == NULL)
+-	return finish ();
++	return finish (pass_finish_closure);
+       e_type = ehdr.e32.e_type;
+       phoff = ehdr.e32.e_phoff;
+       phnum = ehdr.e32.e_phnum;
+       phentsize = ehdr.e32.e_phentsize;
+       if (phentsize != sizeof (Elf32_Phdr))
+-	return finish ();
++	return finish (pass_finish_closure);
+       /* NOTE if the number of sections is > 0xff00 then e_shnum
+ 	 is zero and the actual number would come from the section
+ 	 zero sh_size field. We ignore this here because getting shdrs
+@@ -381,19 +672,19 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
+     case ELFCLASS64:
+       xlatefrom.d_size = sizeof (Elf64_Ehdr);
+       if (elf64_xlatetom (&xlateto, &xlatefrom, ei_data) == NULL)
+-	return finish ();
++	return finish (pass_finish_closure);
+       e_type = ehdr.e64.e_type;
+       phoff = ehdr.e64.e_phoff;
+       phnum = ehdr.e64.e_phnum;
+       phentsize = ehdr.e64.e_phentsize;
+       if (phentsize != sizeof (Elf64_Phdr))
+-	return finish ();
++	return finish (pass_finish_closure);
+       /* See the NOTE above for shdrs_end and ehdr.e32.e_shnum.  */
+       shdrs_end = ehdr.e64.e_shoff + ehdr.e64.e_shnum * ehdr.e64.e_shentsize;
+       break;
+ 
+     default:
+-      return finish ();
++      return finish (pass_finish_closure);
+     }
+ 
+   /* The file header tells where to find the program headers.
+@@ -401,16 +692,16 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
+      Without them, we don't have a module to report.  */
+ 
+   if (phnum == 0)
+-    return finish ();
++    return finish (pass_finish_closure);
+ 
+   xlatefrom.d_type = xlateto.d_type = ELF_T_PHDR;
+   xlatefrom.d_size = phnum * phentsize;
+ 
+   void *ph_buffer = NULL;
+   size_t ph_buffer_size = 0;
+-  if (read_portion (&ph_buffer, &ph_buffer_size,
++  if (read_portion (pass_read_portion_closure, &ph_buffer, &ph_buffer_size,
+ 		    start + phoff, xlatefrom.d_size))
+-    return finish ();
++    return finish (pass_finish_closure);
+ 
+   /* ph_buffer_size will be zero if we got everything from the initial
+      buffer, otherwise it will be the size of the new buffer that
+@@ -423,11 +714,11 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
+   bool class32 = ei_class == ELFCLASS32;
+   size_t phdr_size = class32 ? sizeof (Elf32_Phdr) : sizeof (Elf64_Phdr);
+   if (unlikely (phnum > SIZE_MAX / phdr_size))
+-    return finish ();
++    return finish (pass_finish_closure);
+   const size_t phdrsp_bytes = phnum * phdr_size;
+   phdrsp = malloc (phdrsp_bytes);
+   if (unlikely (phdrsp == NULL))
+-    return finish ();
++    return finish (pass_finish_closure);
+ 
+   xlateto.d_buf = phdrsp;
+   xlateto.d_size = phdrsp_bytes;
+@@ -456,156 +747,6 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
+   size_t build_id_len = 0;
+   GElf_Addr build_id_vaddr = 0;
+ 
+-  /* Consider a PT_NOTE we've found in the image.  */
+-  inline void consider_notes (GElf_Addr vaddr, GElf_Xword filesz,
+-			      GElf_Xword align)
+-  {
+-    /* If we have already seen a build ID, we don't care any more.  */
+-    if (build_id != NULL || filesz == 0)
+-      return;
+-
+-    void *data;
+-    size_t data_size;
+-    if (read_portion (&data, &data_size, vaddr, filesz))
+-      return;
+-
+-    /* data_size will be zero if we got everything from the initial
+-       buffer, otherwise it will be the size of the new buffer that
+-       could be read.  */
+-    if (data_size != 0)
+-      filesz = data_size;
+-
+-    assert (sizeof (Elf32_Nhdr) == sizeof (Elf64_Nhdr));
+-
+-    void *notes;
+-    if (ei_data == MY_ELFDATA)
+-      notes = data;
+-    else
+-      {
+-	notes = malloc (filesz);
+-	if (unlikely (notes == NULL))
+-	  return;
+-	xlatefrom.d_type = xlateto.d_type = (align == 8
+-					     ? ELF_T_NHDR8 : ELF_T_NHDR);
+-	xlatefrom.d_buf = (void *) data;
+-	xlatefrom.d_size = filesz;
+-	xlateto.d_buf = notes;
+-	xlateto.d_size = filesz;
+-	if (elf32_xlatetom (&xlateto, &xlatefrom,
+-			    ehdr.e32.e_ident[EI_DATA]) == NULL)
+-	  goto done;
+-      }
+-
+-    const GElf_Nhdr *nh = notes;
+-    size_t len = 0;
+-    while (filesz > len + sizeof (*nh))
+-      {
+-	const void *note_name;
+-	const void *note_desc;
+-
+-	len += sizeof (*nh);
+-	note_name = notes + len;
+-
+-	len += nh->n_namesz;
+-	len = align == 8 ? NOTE_ALIGN8 (len) : NOTE_ALIGN4 (len);
+-	note_desc = notes + len;
+-
+-	if (unlikely (filesz < len + nh->n_descsz))
+-	  break;
+-
+-        if (nh->n_type == NT_GNU_BUILD_ID
+-	    && nh->n_descsz > 0
+-	    && nh->n_namesz == sizeof "GNU"
+-	    && !memcmp (note_name, "GNU", sizeof "GNU"))
+-	  {
+-	    build_id_vaddr = note_desc - (const void *) notes + vaddr;
+-	    build_id_len = nh->n_descsz;
+-	    build_id = malloc (nh->n_descsz);
+-	    if (likely (build_id != NULL))
+-	      memcpy (build_id, note_desc, build_id_len);
+-	    break;
+-	  }
+-
+-	len += nh->n_descsz;
+-	len = align == 8 ? NOTE_ALIGN8 (len) : NOTE_ALIGN4 (len);
+-	nh = (void *) notes + len;
+-      }
+-
+-  done:
+-    if (notes != data)
+-      free (notes);
+-    finish_portion (&data, &data_size);
+-  }
+-
+-  /* Consider each of the program headers we've read from the image.  */
+-  inline void consider_phdr (GElf_Word type,
+-			     GElf_Addr vaddr, GElf_Xword memsz,
+-			     GElf_Off offset, GElf_Xword filesz,
+-			     GElf_Xword align)
+-  {
+-    switch (type)
+-      {
+-      case PT_DYNAMIC:
+-	dyn_vaddr = vaddr;
+-	dyn_filesz = filesz;
+-	break;
+-
+-      case PT_NOTE:
+-	/* We calculate from the p_offset of the note segment,
+-	   because we don't yet know the bias for its p_vaddr.  */
+-	consider_notes (start + offset, filesz, align);
+-	break;
+-
+-      case PT_LOAD:
+-	align = dwfl->segment_align > 1 ? dwfl->segment_align : align ?: 1;
+-
+-	GElf_Addr vaddr_end = (vaddr + memsz + align - 1) & -align;
+-	GElf_Addr filesz_vaddr = filesz < memsz ? vaddr + filesz : vaddr_end;
+-	GElf_Off filesz_offset = filesz_vaddr - vaddr + offset;
+-
+-	if (file_trimmed_end < offset + filesz)
+-	  {
+-	    file_trimmed_end = offset + filesz;
+-
+-	    /* Trim the last segment so we don't bother with zeros
+-	       in the last page that are off the end of the file.
+-	       However, if the extra bit in that page includes the
+-	       section headers, keep them.  */
+-	    if (shdrs_end <= filesz_offset && shdrs_end > file_trimmed_end)
+-	      {
+-		filesz += shdrs_end - file_trimmed_end;
+-		file_trimmed_end = shdrs_end;
+-	      }
+-	  }
+-
+-	total_filesz += filesz;
+-
+-	if (file_end < filesz_offset)
+-	  {
+-	    file_end = filesz_offset;
+-	    if (filesz_vaddr - start == filesz_offset)
+-	      contiguous = file_end;
+-	  }
+-
+-	if (!found_bias && (offset & -align) == 0
+-	    && likely (filesz_offset >= phoff + phnum * phentsize))
+-	  {
+-	    bias = start - vaddr;
+-	    found_bias = true;
+-	  }
+-
+-	if ((vaddr & -align) < module_start)
+-	  {
+-	    module_start = vaddr & -align;
+-	    module_address_sync = vaddr + memsz;
+-	  }
+-
+-	if (module_end < vaddr_end)
+-	  module_end = vaddr_end;
+-	break;
+-      }
+-  }
+-
+   Elf32_Phdr (*p32)[phnum] = phdrsp;
+   Elf64_Phdr (*p64)[phnum] = phdrsp;
+   if (ei_class == ELFCLASS32)
+@@ -614,7 +755,7 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
+ 	found_bias = false;	/* Trigger error check.  */
+       else
+ 	for (uint_fast16_t i = 0; i < phnum; ++i)
+-	  consider_phdr ((*p32)[i].p_type,
++	  consider_phdr (pass_consider_phdr_closure, (*p32)[i].p_type,
+ 			 (*p32)[i].p_vaddr, (*p32)[i].p_memsz,
+ 			 (*p32)[i].p_offset, (*p32)[i].p_filesz,
+ 			 (*p32)[i].p_align);
+@@ -625,20 +766,20 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
+ 	found_bias = false;	/* Trigger error check.  */
+       else
+ 	for (uint_fast16_t i = 0; i < phnum; ++i)
+-	  consider_phdr ((*p64)[i].p_type,
++	  consider_phdr (pass_consider_phdr_closure, (*p64)[i].p_type,
+ 			 (*p64)[i].p_vaddr, (*p64)[i].p_memsz,
+ 			 (*p64)[i].p_offset, (*p64)[i].p_filesz,
+ 			 (*p64)[i].p_align);
+     }
+ 
+-  finish_portion (&ph_buffer, &ph_buffer_size);
++  finish_portion (pass_finish_portion_closure, &ph_buffer, &ph_buffer_size);
+ 
+   /* We must have seen the segment covering offset 0, or else the ELF
+      header we read at START was not produced by these program headers.  */
+   if (unlikely (!found_bias))
+     {
+       free (build_id);
+-      return finish ();
++      return finish (pass_finish_closure);
+     }
+ 
+   /* Now we know enough to report a module for sure: its bounds.  */
+@@ -709,7 +850,7 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
+       if (skip_this_module)
+ 	{
+ 	  free (build_id);
+-	  return finish ();
++	  return finish (pass_finish_closure);
+ 	}
+     }
+ 
+@@ -755,39 +896,13 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
+   GElf_Addr dynstr_vaddr = 0;
+   GElf_Xword dynstrsz = 0;
+   bool execlike = false;
+-  inline bool consider_dyn (GElf_Sxword tag, GElf_Xword val)
+-  {
+-    switch (tag)
+-      {
+-      default:
+-	return false;
+-
+-      case DT_DEBUG:
+-	execlike = true;
+-	break;
+-
+-      case DT_SONAME:
+-	soname_stroff = val;
+-	break;
+-
+-      case DT_STRTAB:
+-	dynstr_vaddr = val;
+-	break;
+-
+-      case DT_STRSZ:
+-	dynstrsz = val;
+-	break;
+-      }
+-
+-    return soname_stroff != 0 && dynstr_vaddr != 0 && dynstrsz != 0;
+-  }
+ 
+   const size_t dyn_entsize = (ei_class == ELFCLASS32
+ 			      ? sizeof (Elf32_Dyn) : sizeof (Elf64_Dyn));
+   void *dyn_data = NULL;
+   size_t dyn_data_size = 0;
+   if (dyn_filesz != 0 && dyn_filesz % dyn_entsize == 0
+-      && ! read_portion (&dyn_data, &dyn_data_size, dyn_vaddr, dyn_filesz))
++      && ! read_portion (pass_read_portion_closure, &dyn_data, &dyn_data_size, dyn_vaddr, dyn_filesz))
+     {
+       /* dyn_data_size will be zero if we got everything from the initial
+          buffer, otherwise it will be the size of the new buffer that
+@@ -799,7 +914,7 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
+       Elf32_Dyn (*d32)[dyn_filesz / sizeof (Elf32_Dyn)] = dyns;
+       Elf64_Dyn (*d64)[dyn_filesz / sizeof (Elf64_Dyn)] = dyns;
+       if (unlikely (dyns == NULL))
+-	return finish ();
++	return finish (pass_finish_closure);
+ 
+       xlatefrom.d_type = xlateto.d_type = ELF_T_DYN;
+       xlatefrom.d_buf = (void *) dyn_data;
+@@ -811,19 +926,19 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
+ 	{
+ 	  if (elf32_xlatetom (&xlateto, &xlatefrom, ei_data) != NULL)
+ 	    for (size_t i = 0; i < dyn_filesz / sizeof (Elf32_Dyn); ++i)
+-	      if (consider_dyn ((*d32)[i].d_tag, (*d32)[i].d_un.d_val))
++	      if (consider_dyn (pass_consider_dyn_closure, (*d32)[i].d_tag, (*d32)[i].d_un.d_val))
+ 		break;
+ 	}
+       else
+ 	{
+ 	  if (elf64_xlatetom (&xlateto, &xlatefrom, ei_data) != NULL)
+ 	    for (size_t i = 0; i < dyn_filesz / sizeof (Elf64_Dyn); ++i)
+-	      if (consider_dyn ((*d64)[i].d_tag, (*d64)[i].d_un.d_val))
++	      if (consider_dyn (pass_consider_dyn_closure, (*d64)[i].d_tag, (*d64)[i].d_un.d_val))
+ 		break;
+ 	}
+       free (dyns);
+     }
+-  finish_portion (&dyn_data, &dyn_data_size);
++  finish_portion (pass_finish_portion_closure, &dyn_data, &dyn_data_size);
+ 
+   /* We'll use the name passed in or a stupid default if not DT_SONAME.  */
+   if (name == NULL)
+@@ -855,7 +970,7 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
+ 
+       /* Try to get the DT_SONAME string.  */
+       if (soname_stroff != 0 && soname_stroff + 1 < dynstrsz
+-	  && ! read_portion (&soname, &soname_size,
++	  && ! read_portion (pass_read_portion_closure, &soname, &soname_size,
+ 			     dynstr_vaddr + soname_stroff, 0))
+ 	name = soname;
+     }
+@@ -884,12 +999,12 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
+   /* At this point we do not need BUILD_ID or NAME any more.
+      They have been copied.  */
+   free (build_id);
+-  finish_portion (&soname, &soname_size);
++  finish_portion (pass_finish_portion_closure, &soname, &soname_size);
+ 
+   if (unlikely (mod == NULL))
+     {
+       ndx = -1;
+-      return finish ();
++      return finish (pass_finish_closure);
+     }
+ 
+   /* We have reported the module.  Now let the caller decide whether we
+@@ -913,35 +1028,20 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
+ 
+       void *contents = calloc (1, file_trimmed_end);
+       if (unlikely (contents == NULL))
+-	return finish ();
+-
+-      inline void final_read (size_t offset, GElf_Addr vaddr, size_t size)
+-      {
+-	void *into = contents + offset;
+-	size_t read_size = size;
+-	(void) segment_read (addr_segndx (dwfl, segment, vaddr, false),
+-			     &into, &read_size, vaddr, size);
+-      }
++	return finish (pass_finish_closure);
+ 
+       if (contiguous < file_trimmed_end)
+ 	{
+ 	  /* We can't use the memory image verbatim as the file image.
+ 	     So we'll be reading into a local image of the virtual file.  */
+ 
+-	  inline void read_phdr (GElf_Word type, GElf_Addr vaddr,
+-				 GElf_Off offset, GElf_Xword filesz)
+-	  {
+-	    if (type == PT_LOAD)
+-	      final_read (offset, vaddr + bias, filesz);
+-	  }
+-
+ 	  if (ei_class == ELFCLASS32)
+ 	    for (uint_fast16_t i = 0; i < phnum; ++i)
+-	      read_phdr ((*p32)[i].p_type, (*p32)[i].p_vaddr,
++	      read_phdr (pass_read_phdr_closure, (*p32)[i].p_type, (*p32)[i].p_vaddr,
+ 			 (*p32)[i].p_offset, (*p32)[i].p_filesz);
+ 	  else
+ 	    for (uint_fast16_t i = 0; i < phnum; ++i)
+-	      read_phdr ((*p64)[i].p_type, (*p64)[i].p_vaddr,
++	      read_phdr (pass_read_phdr_closure, (*p64)[i].p_type, (*p64)[i].p_vaddr,
+ 			 (*p64)[i].p_offset, (*p64)[i].p_filesz);
+ 	}
+       else
+@@ -953,7 +1053,7 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
+ 	  memcpy (contents, buffer, have);
+ 
+ 	  if (have < file_trimmed_end)
+-	    final_read (have, start + have, file_trimmed_end - have);
++	    final_read (pass_final_read_closure, have, start + have, file_trimmed_end - have);
+ 	}
+ 
+       elf = elf_memory (contents, file_trimmed_end);
+@@ -974,5 +1074,5 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
+       mod->main_bias = bias;
+     }
+ 
+-  return finish ();
++  return finish (pass_finish_closure);
+ }
+diff --git a/libdwfl/elf-from-memory.c b/libdwfl/elf-from-memory.c
+index c54c1b99..73d78aa7 100644
+--- a/libdwfl/elf-from-memory.c
++++ b/libdwfl/elf-from-memory.c
+@@ -225,33 +225,37 @@ elf_from_remote_memory (GElf_Addr ehdr_vma,
+   Elf64_Phdr (*p64)[phnum] = phdrsp;
+   switch (ehdr.e32.e_ident[EI_CLASS])
+     {
+-      /* Sanity checks segments and calculates segment_end,
+-	 segments_end, segments_end_mem and loadbase (if not
+-	 found_base yet).  Returns true if sanity checking failed,
+-	 false otherwise.  */
+-      inline bool handle_segment (GElf_Addr vaddr, GElf_Off offset,
+-				  GElf_Xword filesz, GElf_Xword memsz)
+-	{
+-	  /* Sanity check the segment load aligns with the pagesize.  */
+-	  if (((vaddr - offset) & (pagesize - 1)) != 0)
+-	    return true;
+-
+-	  GElf_Off segment_end = ((offset + filesz + pagesize - 1)
+-				  & -pagesize);
+-
+-	  if (segment_end > (GElf_Off) contents_size)
+-	    contents_size = segment_end;
+-
+-	  if (!found_base && (offset & -pagesize) == 0)
+-	    {
+-	      loadbase = ehdr_vma - (vaddr & -pagesize);
+-	      found_base = true;
+-	    }
+-
+-	  segments_end = offset + filesz;
+-	  segments_end_mem = offset + memsz;
+-	  return false;
+-	}
++/* Sanity checks segments and calculates segment_end,
++   segments_end, segments_end_mem and loadbase (if not
++   found_base yet).  Returns true if sanity checking failed,
++   false otherwise.  */
++#define handle_segment(_vaddr, _offset, _filesz, _memsz) \
++( { \
++    bool result; \
++    GElf_Addr vaddr = _vaddr; \
++    GElf_Off offset = _offset; \
++    GElf_Xword filesz = _filesz; \
++    GElf_Xword memsz = _memsz; \
++    /* Sanity check the segment load aligns with the pagesize.  */ \
++    if (((vaddr - offset) & (pagesize - 1)) != 0) \
++        result = true; \
++    else \
++    { \
++        result = false; \
++        GElf_Off segment_end = ((offset + filesz + pagesize - 1) \
++                                & -pagesize); \
++        if (segment_end > (GElf_Off) contents_size) \
++        contents_size = segment_end; \
++        if (!found_base && (offset & -pagesize) == 0) \
++        { \
++            loadbase = ehdr_vma - (vaddr & -pagesize); \
++            found_base = true; \
++        } \
++        segments_end = offset + filesz; \
++        segments_end_mem = offset + memsz; \
++    } \
++    result; \
++} )
+ 
+     case ELFCLASS32:
+       if (elf32_xlatetom (&xlateto, &xlatefrom,
+@@ -309,18 +313,21 @@ elf_from_remote_memory (GElf_Addr ehdr_vma,
+     {
+       /* Reads the given segment.  Returns true if reading fails,
+ 	 false otherwise.  */
+-      inline bool handle_segment (GElf_Addr vaddr, GElf_Off offset,
+-				  GElf_Xword filesz)
+-	{
+-	  GElf_Off start = offset & -pagesize;
+-	  GElf_Off end = (offset + filesz + pagesize - 1) & -pagesize;
+-	  if (end > (GElf_Off) contents_size)
+-	    end = contents_size;
+-	  nread = (*read_memory) (arg, buffer + start,
+-				  (loadbase + vaddr) & -pagesize,
+-				  end - start, end - start);
+-	  return nread <= 0;
+-	}
++#undef handle_segment
++#define handle_segment(_vaddr, _offset, _filesz) \
++( { \
++    GElf_Addr vaddr = _vaddr; \
++    GElf_Off offset = _offset; \
++    GElf_Xword filesz = _filesz; \
++    GElf_Off start = offset & -pagesize; \
++    GElf_Off end = (offset + filesz + pagesize - 1) & -pagesize; \
++    if (end > (GElf_Off) contents_size) \
++    end = contents_size; \
++    nread = (*read_memory) (arg, buffer + start, \
++                            (loadbase + vaddr) & -pagesize, \
++                            end - start, end - start); \
++    (nread <= 0); \
++} )
+ 
+     case ELFCLASS32:
+       for (uint_fast16_t i = 0; i < phnum; ++i)
+diff --git a/libdwfl/frame_unwind.c b/libdwfl/frame_unwind.c
+index d7dfa5a9..f8f4bf94 100644
+--- a/libdwfl/frame_unwind.c
++++ b/libdwfl/frame_unwind.c
+@@ -442,7 +442,7 @@ expr_eval (Dwfl_Frame *state, Dwarf_Frame *frame, const Dwarf_Op *ops,
+ 	    }
+ 	  if (val1 == 0)
+ 	    break;
+-	  FALLTHROUGH;
++	  /* fall through */
+ 	case DW_OP_skip:;
+ 	  Dwarf_Word offset = op->offset + 1 + 2 + (int16_t) op->number;
+ 	  const Dwarf_Op *found = bsearch ((void *) (uintptr_t) offset, ops, nops,
+diff --git a/libdwfl/link_map.c b/libdwfl/link_map.c
+index 29307c74..19727e0c 100644
+--- a/libdwfl/link_map.c
++++ b/libdwfl/link_map.c
+@@ -225,6 +225,77 @@ addrsize (uint_fast8_t elfclass)
+   return elfclass * 4;
+ }
+ 
++#define declare_release_buffer2_closure \
++	void *buffer, \
++  size_t buffer_available, \
++	Dwfl *dwfl, \
++	Dwfl_Memory_Callback *memory_callback, \
++	void *memory_callback_arg
++
++#define pass_release_buffer2_closure \
++	buffer, buffer_available, dwfl, memory_callback, memory_callback_arg
++
++int release_buffer2 (declare_release_buffer2_closure, int result)
++{
++	if (buffer != NULL)
++		(void) (*memory_callback) (dwfl, -1, &buffer, &buffer_available, 0, 0,
++				memory_callback_arg);
++	return result;
++}
++
++#define declare_read_addrs_closure \
++	declare_release_buffer2_closure, \
++	uint_fast8_t elfclass, \
++	GElf_Addr read_vaddr, \
++	uint_fast8_t elfdata, \
++	GElf_Addr* addrs
++
++#define pass_read_addrs_closure \
++	pass_release_buffer2_closure, elfclass, read_vaddr, elfdata, addrs
++
++bool read_addrs (declare_read_addrs_closure, GElf_Addr vaddr, size_t n)
++{
++	size_t nb = n * addrsize (elfclass); /* Address words -> bytes to read.  */
++
++	/* Read a new buffer if the old one doesn't cover these words.  */
++	if (buffer == NULL
++			|| vaddr < read_vaddr
++			|| vaddr - read_vaddr + nb > buffer_available)
++	{
++		release_buffer2 (pass_release_buffer2_closure, 0);
++
++		read_vaddr = vaddr;
++		int segndx = INTUSE(dwfl_addrsegment) (dwfl, vaddr, NULL);
++		if (unlikely (segndx < 0)
++				|| unlikely (! (*memory_callback) (dwfl, segndx,
++										&buffer, &buffer_available,
++										vaddr, nb, memory_callback_arg)))
++			return true;
++	}
++
++	Elf32_Addr (*a32)[n] = vaddr - read_vaddr + buffer;
++	Elf64_Addr (*a64)[n] = (void *) a32;
++
++	if (elfclass == ELFCLASS32)
++	{
++		if (elfdata == ELFDATA2MSB)
++			for (size_t i = 0; i < n; ++i)
++				addrs[i] = BE32 (read_4ubyte_unaligned_noncvt (&(*a32)[i]));
++		else
++			for (size_t i = 0; i < n; ++i)
++				addrs[i] = LE32 (read_4ubyte_unaligned_noncvt (&(*a32)[i]));
++	} else {
++		if (elfdata == ELFDATA2MSB)
++			for (size_t i = 0; i < n; ++i)
++				addrs[i] = BE64 (read_8ubyte_unaligned_noncvt (&(*a64)[i]));
++		else
++			for (size_t i = 0; i < n; ++i)
++				addrs[i] = LE64 (read_8ubyte_unaligned_noncvt (&(*a64)[i]));
++	}
++
++	return false;
++}
++
+ /* Report a module for each struct link_map in the linked list at r_map
+    in the struct r_debug at R_DEBUG_VADDR.  For r_debug_info description
+    see dwfl_link_map_report in libdwflP.h.  If R_DEBUG_INFO is not NULL then no
+@@ -249,62 +320,11 @@ report_r_debug (uint_fast8_t elfclass, uint_fast8_t elfdata,
+ 
+   void *buffer = NULL;
+   size_t buffer_available = 0;
+-  inline int release_buffer (int result)
+-  {
+-    if (buffer != NULL)
+-      (void) (*memory_callback) (dwfl, -1, &buffer, &buffer_available, 0, 0,
+-				 memory_callback_arg);
+-    return result;
+-  }
+ 
+   GElf_Addr addrs[4];
+-  inline bool read_addrs (GElf_Addr vaddr, size_t n)
+-  {
+-    size_t nb = n * addrsize (elfclass); /* Address words -> bytes to read.  */
+-
+-    /* Read a new buffer if the old one doesn't cover these words.  */
+-    if (buffer == NULL
+-	|| vaddr < read_vaddr
+-	|| vaddr - read_vaddr + nb > buffer_available)
+-      {
+-	release_buffer (0);
+-
+-	read_vaddr = vaddr;
+-	int segndx = INTUSE(dwfl_addrsegment) (dwfl, vaddr, NULL);
+-	if (unlikely (segndx < 0)
+-	    || unlikely (! (*memory_callback) (dwfl, segndx,
+-					       &buffer, &buffer_available,
+-					       vaddr, nb, memory_callback_arg)))
+-	  return true;
+-      }
+-
+-    Elf32_Addr (*a32)[n] = vaddr - read_vaddr + buffer;
+-    Elf64_Addr (*a64)[n] = (void *) a32;
+-
+-    if (elfclass == ELFCLASS32)
+-      {
+-	if (elfdata == ELFDATA2MSB)
+-	  for (size_t i = 0; i < n; ++i)
+-	    addrs[i] = BE32 (read_4ubyte_unaligned_noncvt (&(*a32)[i]));
+-	else
+-	  for (size_t i = 0; i < n; ++i)
+-	    addrs[i] = LE32 (read_4ubyte_unaligned_noncvt (&(*a32)[i]));
+-      }
+-    else
+-      {
+-	if (elfdata == ELFDATA2MSB)
+-	  for (size_t i = 0; i < n; ++i)
+-	    addrs[i] = BE64 (read_8ubyte_unaligned_noncvt (&(*a64)[i]));
+-	else
+-	  for (size_t i = 0; i < n; ++i)
+-	    addrs[i] = LE64 (read_8ubyte_unaligned_noncvt (&(*a64)[i]));
+-      }
+ 
+-    return false;
+-  }
+-
+-  if (unlikely (read_addrs (read_vaddr, 1)))
+-    return release_buffer (-1);
++  if (unlikely (read_addrs (pass_read_addrs_closure, read_vaddr, 1)))
++    return release_buffer2 (pass_release_buffer2_closure, -1);
+ 
+   GElf_Addr next = addrs[0];
+ 
+@@ -318,8 +338,8 @@ report_r_debug (uint_fast8_t elfclass, uint_fast8_t elfdata,
+   size_t iterations = 0;
+   while (next != 0 && ++iterations < dwfl->lookup_elts)
+     {
+-      if (read_addrs (next, 4))
+-	return release_buffer (-1);
++      if (read_addrs (pass_read_addrs_closure, next, 4))
++	return release_buffer2 (pass_release_buffer2_closure, -1);
+ 
+       /* Unused: l_addr is the difference between the address in memory
+          and the ELF file when the core was created. We need to
+@@ -345,7 +365,7 @@ report_r_debug (uint_fast8_t elfclass, uint_fast8_t elfdata,
+ 	name = l_name - read_vaddr + buffer;
+       else
+ 	{
+-	  release_buffer (0);
++	  release_buffer2 (pass_release_buffer2_closure, 0);
+ 	  read_vaddr = l_name;
+ 	  int segndx = INTUSE(dwfl_addrsegment) (dwfl, l_name, NULL);
+ 	  if (likely (segndx >= 0)
+@@ -372,7 +392,7 @@ report_r_debug (uint_fast8_t elfclass, uint_fast8_t elfdata,
+ 	  r_debug_info_module = malloc (sizeof (*r_debug_info_module)
+ 					+ strlen (name1) + 1);
+ 	  if (unlikely (r_debug_info_module == NULL))
+-	    return release_buffer (result);
++	    return release_buffer2 (pass_release_buffer2_closure, result);
+ 	  r_debug_info_module->fd = -1;
+ 	  r_debug_info_module->elf = NULL;
+ 	  r_debug_info_module->l_ld = l_ld;
+@@ -413,7 +433,7 @@ report_r_debug (uint_fast8_t elfclass, uint_fast8_t elfdata,
+ 		      GElf_Addr build_id_vaddr = (build_id_elfaddr
+ 						  - elf_dynamic_vaddr + l_ld);
+ 
+-		      release_buffer (0);
++		      release_buffer2 (pass_release_buffer2_closure, 0);
+ 		      int segndx = INTUSE(dwfl_addrsegment) (dwfl,
+ 							     build_id_vaddr,
+ 							     NULL);
+@@ -432,7 +452,7 @@ report_r_debug (uint_fast8_t elfclass, uint_fast8_t elfdata,
+ 			    /* File has valid build-id which does not match
+ 			       the one in memory.  */
+ 			    valid = false;
+-			  release_buffer (0);
++			  release_buffer2 (pass_release_buffer2_closure, 0);
+ 			}
+ 		    }
+ 
+@@ -498,7 +518,7 @@ report_r_debug (uint_fast8_t elfclass, uint_fast8_t elfdata,
+ 	}
+     }
+ 
+-  return release_buffer (result);
++  return release_buffer2 (pass_release_buffer2_closure, result);
+ }
+ 
+ static GElf_Addr
+@@ -687,6 +707,40 @@ find_executable (Dwfl *dwfl, GElf_Addr at_phdr, GElf_Addr at_entry,
+   return 0;
+ }
+ 
++#define declare_consider_phdr2_closure \
++	GElf_Addr dyn_vaddr, \
++  GElf_Xword dyn_filesz, \
++  GElf_Addr dyn_bias, \
++	Dwfl *dwfl, \
++	GElf_Addr phdr
++
++#define pass_consider_phdr2_closure \
++	dyn_vaddr, dyn_filesz, dyn_bias, dwfl, phdr
++
++bool consider_phdr2 (declare_consider_phdr2_closure, GElf_Word type,
++				 GElf_Addr vaddr, GElf_Xword filesz)
++{
++	switch (type)
++	{
++		case PT_PHDR:
++			if (dyn_bias == (GElf_Addr) -1
++			/* Do a sanity check on the putative address.  */
++				&& ((vaddr & (dwfl->segment_align - 1))
++					== (phdr & (dwfl->segment_align - 1))))
++			{
++				dyn_bias = phdr - vaddr;
++				return dyn_vaddr != 0;
++			}
++			break;
++
++		case PT_DYNAMIC:
++			dyn_vaddr = vaddr;
++			dyn_filesz = filesz;
++			return dyn_bias != (GElf_Addr) -1;
++	}
++
++return false;
++}
+ 
+ int
+ dwfl_link_map_report (Dwfl *dwfl, const void *auxv, size_t auxv_size,
+@@ -758,31 +812,6 @@ dwfl_link_map_report (Dwfl *dwfl, const void *auxv, size_t auxv_size,
+       GElf_Xword dyn_filesz = 0;
+       GElf_Addr dyn_bias = (GElf_Addr) -1;
+ 
+-      inline bool consider_phdr (GElf_Word type,
+-				 GElf_Addr vaddr, GElf_Xword filesz)
+-      {
+-	switch (type)
+-	  {
+-	  case PT_PHDR:
+-	    if (dyn_bias == (GElf_Addr) -1
+-		/* Do a sanity check on the putative address.  */
+-		&& ((vaddr & (dwfl->segment_align - 1))
+-		    == (phdr & (dwfl->segment_align - 1))))
+-	      {
+-		dyn_bias = phdr - vaddr;
+-		return dyn_vaddr != 0;
+-	      }
+-	    break;
+-
+-	  case PT_DYNAMIC:
+-	    dyn_vaddr = vaddr;
+-	    dyn_filesz = filesz;
+-	    return dyn_bias != (GElf_Addr) -1;
+-	  }
+-
+-	return false;
+-      }
+-
+       if (phdr != 0 && phnum != 0)
+ 	{
+ 	  Dwfl_Module *phdr_mod;
+@@ -899,7 +928,7 @@ dwfl_link_map_report (Dwfl *dwfl, const void *auxv, size_t auxv_size,
+ 		  if (elfclass == ELFCLASS32)
+ 		    {
+ 		      for (size_t i = 0; i < phnum; ++i)
+-			if (consider_phdr ((*p32)[i].p_type,
++			if (consider_phdr2 (pass_consider_phdr2_closure, (*p32)[i].p_type,
+ 					   (*p32)[i].p_vaddr,
+ 					   (*p32)[i].p_filesz))
+ 			  break;
+@@ -907,7 +936,7 @@ dwfl_link_map_report (Dwfl *dwfl, const void *auxv, size_t auxv_size,
+ 		  else
+ 		    {
+ 		      for (size_t i = 0; i < phnum; ++i)
+-			if (consider_phdr ((*p64)[i].p_type,
++			if (consider_phdr2 (pass_consider_phdr2_closure, (*p64)[i].p_type,
+ 					   (*p64)[i].p_vaddr,
+ 					   (*p64)[i].p_filesz))
+ 			  break;
+diff --git a/libebl/eblobjnote.c b/libebl/eblobjnote.c
+index f7ac915c..360e28b8 100644
+--- a/libebl/eblobjnote.c
++++ b/libebl/eblobjnote.c
+@@ -581,7 +581,7 @@ ebl_object_note (Ebl *ebl, uint32_t namesz, const char *name, uint32_t type,
+ 		free (buf);
+ 	      break;
+ 	    }
+-	  FALLTHROUGH;
++	  /* fall through */
+ 
+ 	default:
+ 	  /* Unknown type.  */
+diff --git a/libelf/elf32_updatenull.c b/libelf/elf32_updatenull.c
+index 5f3cdbf6..ee99eaa9 100644
+--- a/libelf/elf32_updatenull.c
++++ b/libelf/elf32_updatenull.c
+@@ -236,7 +236,7 @@ __elfw2(LIBELFBITS,updatenull_wrlock) (Elf *elf, int *change_bop, size_t shnum)
+ 		      __libelf_seterrno (ELF_E_GROUP_NOT_REL);
+ 		      return -1;
+ 		    }
+-		  FALLTHROUGH;
++		  /* fall through */
+ 		case SHT_SYMTAB_SHNDX:
+ 		  sh_entsize = elf_typesize (32, ELF_T_WORD, 1);
+ 		  break;
+diff --git a/libelf/elf_begin.c b/libelf/elf_begin.c
+index 8107a103..c0584098 100644
+--- a/libelf/elf_begin.c
++++ b/libelf/elf_begin.c
+@@ -614,7 +614,7 @@ read_unmmaped_file (int fildes, int64_t offset, size_t maxsize, Elf_Cmd cmd,
+ 			     ? sizeof (Elf32_Ehdr) : sizeof (Elf64_Ehdr)))
+ 	return file_read_elf (fildes, NULL, mem.header, offset, maxsize, cmd,
+ 			      parent);
+-      FALLTHROUGH;
++      /* fall through */
+ 
+     default:
+       break;
+@@ -1143,7 +1143,7 @@ elf_begin (int fildes, Elf_Cmd cmd, Elf *ref)
+ 	  retval = NULL;
+ 	  break;
+ 	}
+-      FALLTHROUGH;
++      /* fall through */
+ 
+     case ELF_C_READ:
+     case ELF_C_READ_MMAP:
+diff --git a/libelf/elf_cntl.c b/libelf/elf_cntl.c
+index fd681789..94d82027 100644
+--- a/libelf/elf_cntl.c
++++ b/libelf/elf_cntl.c
+@@ -62,7 +62,7 @@ elf_cntl (Elf *elf, Elf_Cmd cmd)
+ 	  result = -1;
+ 	  break;
+ 	}
+-      FALLTHROUGH;
++      /* fall through */
+ 
+     case ELF_C_FDDONE:
+       /* Mark the file descriptor as not usable.  */
+diff --git a/src/addr2line.c b/src/addr2line.c
+index 69d8d995..ce5290aa 100644
+--- a/src/addr2line.c
++++ b/src/addr2line.c
+@@ -618,7 +618,7 @@ handle_address (const char *string, Dwfl *dwfl)
+ 	case 1:
+ 	  addr = 0;
+ 	  j = i;
+-	  FALLTHROUGH;
++	  /* fall through */
+ 	case 2:
+ 	  if (string[j] != '\0')
+ 	    break;
+@@ -692,19 +692,22 @@ handle_address (const char *string, Dwfl *dwfl)
+ 	  Dwarf_Line *info = dwfl_dwarf_line (line, &bias);
+ 	  assert (info != NULL);
+ 
+-	  inline void show (int (*get) (Dwarf_Line *, bool *),
+-			    const char *note)
+-	  {
+-	    bool flag;
+-	    if ((*get) (info, &flag) == 0 && flag)
+-	      fputs (note, stdout);
++		#define show(get_arg, note_arg) \
++	  { \
++	    int (*get) (Dwarf_Line *, bool *) = get_arg; \
++	    const char *note = note_arg; \
++	    bool flag; \
++	    if ((*get) (info, &flag) == 0 && flag) \
++	      fputs (note, stdout); \
+ 	  }
+-	  inline void show_int (int (*get) (Dwarf_Line *, unsigned int *),
+-				const char *name)
+-	  {
+-	    unsigned int val;
+-	    if ((*get) (info, &val) == 0 && val != 0)
+-	      printf (" (%s %u)", name, val);
++
++	  #define show_int(get_arg, name_arg) \
++	  { \
++	    int (*get) (Dwarf_Line *, unsigned int *) = get_arg; \
++	    const char *name = name_arg; \
++	    unsigned int val; \
++	    if ((*get) (info, &val) == 0 && val != 0) \
++	      printf (" (%s %u)", name, val); \
+ 	  }
+ 
+ 	  show (&dwarf_linebeginstatement, " (is_stmt)");
+diff --git a/src/ar.c b/src/ar.c
+index d70f1f46..410cea93 100644
+--- a/src/ar.c
++++ b/src/ar.c
+@@ -445,20 +445,21 @@ do_oper_extract (int oper, const char *arfname, char **argv, int argc,
+   memset (found, '\0', sizeof (found));
+ 
+   size_t name_max = 0;
+-  inline bool should_truncate_fname (void)
+-  {
+-    if (errno == ENAMETOOLONG && allow_truncate_fname)
+-      {
+-	if (name_max == 0)
+-	  {
+-	    long int len = pathconf (".", _PC_NAME_MAX);
+-	    if (len > 0)
+-	      name_max = len;
+-	  }
+-	return name_max != 0;
+-      }
+-    return false;
+-  }
++  #define should_truncate_fname() \
++  ( { \
++    bool result = false; \
++    if (errno == ENAMETOOLONG && allow_truncate_fname) \
++      { \
++	if (name_max == 0) \
++	  { \
++	    long int len = pathconf (".", _PC_NAME_MAX); \
++	    if (len > 0) \
++	      name_max = len; \
++	  } \
++	result = (name_max != 0); \
++      } \
++    result; \
++  } )
+ 
+   off_t index_off = -1;
+   size_t index_size = 0;
+diff --git a/src/arlib-argp.c b/src/arlib-argp.c
+index 1bdd8d0b..3b524799 100644
+--- a/src/arlib-argp.c
++++ b/src/arlib-argp.c
+@@ -59,13 +59,13 @@ parse_opt (int key, char *arg __attribute__ ((unused)),
+ static char *
+ help_filter (int key, const char *text, void *input __attribute__ ((unused)))
+ {
+-  inline char *text_for_default (void)
+-  {
+-    char *new_text;
+-    if (unlikely (asprintf (&new_text, gettext ("%s (default)"), text) < 0))
+-      return (char *) text;
+-    return new_text;
+-  }
++  #define text_for_default() \
++  ( { \
++    char *new_text; \
++    if (unlikely (asprintf (&new_text, gettext ("%s (default)"), text) < 0)) \
++      new_text = (char *) text; \
++    new_text; \
++  } )
+ 
+   switch (key)
+     {
+diff --git a/src/elfcompress.c b/src/elfcompress.c
+index 6ba6af41..60d9b406 100644
+--- a/src/elfcompress.c
++++ b/src/elfcompress.c
+@@ -149,7 +149,7 @@ parse_opt (int key, char *arg __attribute__ ((unused)),
+ 		    N_("Only one input file allowed together with '-o'"));
+       /* We only use this for checking the number of arguments, we don't
+ 	 actually want to consume them.  */
+-      FALLTHROUGH;
++      /* fall through */
+     default:
+       return ARGP_ERR_UNKNOWN;
+     }
+@@ -276,59 +276,51 @@ process_file (const char *fname)
+   size_t shnum = 0;
+ 
+ #define WORD_BITS (8U * sizeof (unsigned int))
+-  void set_section (size_t ndx)
+-  {
+-    sections[ndx / WORD_BITS] |= (1U << (ndx % WORD_BITS));
+-  }
++	#define set_section(ndx) \
++	  sections[ndx / WORD_BITS] |= (1U << (ndx % WORD_BITS))
+ 
+-  bool get_section (size_t ndx)
+-  {
+-    return (sections[ndx / WORD_BITS] & (1U << (ndx % WORD_BITS))) != 0;
+-  }
++	#define get_section(ndx) \
++	  ((sections[ndx / WORD_BITS] & (1U << (ndx % WORD_BITS))) != 0)
+ 
+   /* How many sections are we going to change?  */
+-  size_t get_sections (void)
+-  {
+-    size_t s = 0;
+-    for (size_t i = 0; i < shnum / WORD_BITS + 1; i++)
+-      s += __builtin_popcount (sections[i]);
+-    return s;
+-  }
+-
+-  int cleanup (int res)
+-  {
+-    elf_end (elf);
+-    close (fd);
+-
+-    elf_end (elfnew);
+-    close (fdnew);
+-
+-    if (fnew != NULL)
+-      {
+-	unlink (fnew);
+-	free (fnew);
+-	fnew = NULL;
+-      }
+-
+-    free (snamebuf);
+-    if (names != NULL)
+-      {
+-	dwelf_strtab_free (names);
+-	free (scnstrents);
+-	free (symstrents);
+-	free (namesbuf);
+-	if (scnnames != NULL)
+-	  {
+-	    for (size_t n = 0; n < shnum; n++)
+-	      free (scnnames[n]);
+-	    free (scnnames);
+-	  }
+-      }
+-
+-    free (sections);
+-
+-    return res;
+-  }
++  #define get_sections() \
++  ( { \
++    size_t s = 0; \
++    for (size_t i = 0; i < shnum / WORD_BITS + 1; i++) \
++      s += __builtin_popcount (sections[i]); \
++    s; \
++  } )
++
++  #define cleanup(res) \
++	( { \
++			int result = res; \
++			elf_end (elf); \
++			close (fd); \
++			elf_end (elfnew); \
++			close (fdnew); \
++			if (fnew != NULL) \
++				{ \
++		unlink (fnew); \
++		free (fnew); \
++		fnew = NULL; \
++				} \
++			free (snamebuf); \
++			if (names != NULL) \
++				{ \
++		dwelf_strtab_free (names); \
++		free (scnstrents); \
++		free (symstrents); \
++		free (namesbuf); \
++		if (scnnames != NULL) \
++			{ \
++				for (size_t n = 0; n < shnum; n++) \
++					free (scnnames[n]); \
++				free (scnnames); \
++			} \
++				} \
++			free (sections); \
++		result; \
++	} )
+ 
+   fd = open (fname, O_RDONLY);
+   if (fd < 0)
+diff --git a/src/elflint.c b/src/elflint.c
+index edb466dd..24f6de9e 100644
+--- a/src/elflint.c
++++ b/src/elflint.c
+@@ -1763,7 +1763,7 @@ section [%2d] '%s': entry %zu: pointer does not match address of section [%2d] '
+ 	  if (dyn->d_tag < DT_ADDRRNGLO || dyn->d_tag > DT_ADDRRNGHI)
+ 	    /* Value is no pointer.  */
+ 	    break;
+-	  FALLTHROUGH;
++	  /* fall through */
+ 
+ 	case DT_AUXILIARY:
+ 	case DT_FILTER:
+@@ -3435,10 +3435,8 @@ check_attributes (Ebl *ebl, GElf_Ehdr *ehdr, GElf_Shdr *shdr, int idx)
+       return;
+     }
+ 
+-  inline size_t pos (const unsigned char *p)
+-  {
+-    return p - (const unsigned char *) data->d_buf;
+-  }
++  #define pos(p) \
++    ((const unsigned char *) (p) - (const unsigned char *) data->d_buf)
+ 
+   const unsigned char *p = data->d_buf;
+   if (*p++ != 'A')
+@@ -3448,10 +3446,7 @@ check_attributes (Ebl *ebl, GElf_Ehdr *ehdr, GElf_Shdr *shdr, int idx)
+       return;
+     }
+ 
+-  inline size_t left (void)
+-  {
+-    return (const unsigned char *) data->d_buf + data->d_size - p;
+-  }
++  #define left() ((const unsigned char *) data->d_buf + data->d_size - p)
+ 
+   while (left () >= 4)
+     {
+@@ -3995,7 +3990,7 @@ section [%2zu] '%s': merge flag set but entry size is zero\n"),
+ 	    case SHT_NOBITS:
+ 	      if (is_debuginfo)
+ 		break;
+-	      FALLTHROUGH;
++	      /* fall through */
+ 	    default:
+ 	      ERROR (gettext ("\
+ section [%2zu] '%s' has unexpected type %d for an executable section\n"),
+@@ -4139,7 +4134,7 @@ section [%2zu] '%s': ELF header says this is the section header string table but
+ 	    ERROR (gettext ("\
+ section [%2zu] '%s': relocatable files cannot have dynamic symbol tables\n"),
+ 		   cnt, section_name (ebl, cnt));
+-	  FALLTHROUGH;
++	  /* fall through */
+ 	case SHT_SYMTAB:
+ 	  check_symtab (ebl, ehdr, shdr, cnt);
+ 	  break;
+@@ -4362,7 +4357,7 @@ section [%2d] '%s': unknown core file note type %" PRIu32
+ 	    if (nhdr.n_namesz == sizeof "Linux"
+ 		&& !memcmp (data->d_buf + name_offset, "Linux", sizeof "Linux"))
+ 	      break;
+-	    FALLTHROUGH;
++	    /* fall through */
+ 	  default:
+ 	    {
+ 	    unknown_note:
+diff --git a/src/objdump.c b/src/objdump.c
+index 6b365d5c..075c5f52 100644
+--- a/src/objdump.c
++++ b/src/objdump.c
+@@ -222,7 +222,7 @@ parse_opt (int key, char *arg,
+ 	}
+       /* We only use this for checking the number of arguments, we don't
+ 	 actually want to consume them.  */
+-      FALLTHROUGH;
++      /* fall through */
+     default:
+       return ARGP_ERR_UNKNOWN;
+     }
+diff --git a/src/readelf.c b/src/readelf.c
+index 2084fb1f..9b0af70c 100644
+--- a/src/readelf.c
++++ b/src/readelf.c
+@@ -376,17 +376,19 @@ static error_t
+ parse_opt (int key, char *arg,
+ 	   struct argp_state *state __attribute__ ((unused)))
+ {
+-  void add_dump_section (const char *name, bool implicit)
+-  {
+-    struct section_argument *a = xmalloc (sizeof *a);
+-    a->arg = name;
+-    a->next = NULL;
+-    a->implicit = implicit;
+-    struct section_argument ***tailp
+-      = key == 'x' ? &dump_data_sections_tail : &string_sections_tail;
+-    **tailp = a;
+-    *tailp = &a->next;
+-  }
++#define add_dump_section(_name, _implicit) \
++  ( { \
++		const char *name = _name; \
++		bool implicit = _implicit; \
++    struct section_argument *a = xmalloc (sizeof *a); \
++    a->arg = name; \
++    a->next = NULL; \
++    a->implicit = implicit; \
++    struct section_argument ***tailp \
++      = key == 'x' ? &dump_data_sections_tail : &string_sections_tail; \
++    **tailp = a; \
++    *tailp = &a->next; \
++  } )
+ 
+   switch (key)
+     {
+@@ -544,7 +546,7 @@ parse_opt (int key, char *arg,
+ 	  print_string_sections = true;
+ 	  break;
+ 	}
+-      FALLTHROUGH;
++      /* fall through */
+     case 'x':
+       add_dump_section (arg, false);
+       any_control_option = true;
+@@ -3595,10 +3597,7 @@ print_attributes (Ebl *ebl, const GElf_Ehdr *ehdr)
+ 
+       fputs_unlocked (gettext ("  Owner          Size\n"), stdout);
+ 
+-      inline size_t left (void)
+-      {
+-	return (const unsigned char *) data->d_buf + data->d_size - p;
+-      }
++      #define left() ((const unsigned char *) data->d_buf + data->d_size - p)
+ 
+       /* Loop over the sections.  */
+       while (left () >= 4)
+@@ -6163,11 +6162,12 @@ print_cfa_program (const unsigned char *readp, const unsigned char *const endp,
+ 		   Dwfl_Module *dwflmod, Ebl *ebl, Dwarf *dbg)
+ {
+   char regnamebuf[REGNAMESZ];
+-  const char *regname (unsigned int regno)
+-  {
+-    register_info (ebl, regno, NULL, regnamebuf, NULL, NULL);
+-    return regnamebuf;
+-  }
++  #define regname(regno_arg) \
++  ( { \
++    unsigned int regno = regno_arg; \
++    register_info (ebl, regno, NULL, regnamebuf, NULL, NULL); \
++    regnamebuf; \
++  } )
+ 
+   puts ("\n   Program:");
+   Dwarf_Word pc = vma_base;
+@@ -7118,7 +7118,7 @@ attr_callback (Dwarf_Attribute *attrp, void *arg)
+ 			dwarf_form_name (form), (uintmax_t) num);
+ 	      return DWARF_CB_OK;
+ 	    }
+-	  FALLTHROUGH;
++	  /* fall through */
+ 
+ 	/* These cases always take a loclist[ptr] and no constant. */
+ 	case DW_AT_location:
+@@ -7506,7 +7506,7 @@ attr_callback (Dwarf_Attribute *attrp, void *arg)
+ 	      print_block (block.length, block.data);
+ 	      break;
+ 	    }
+-	  FALLTHROUGH;
++	  /* fall through */
+ 
+ 	case DW_AT_location:
+ 	case DW_AT_data_location:
+@@ -8679,15 +8679,16 @@ print_debug_line_section (Dwfl_Module *dwflmod, Ebl *ebl, GElf_Ehdr *ehdr,
+ 	 or DW_LNS_advance_pc (as per DWARF4 6.2.5.1).  */
+       unsigned int op_addr_advance;
+       bool show_op_index;
+-      inline void advance_pc (unsigned int op_advance)
+-      {
+-	op_addr_advance = minimum_instr_len * ((op_index + op_advance)
+-					       / max_ops_per_instr);
+-	address += op_addr_advance;
+-	show_op_index = (op_index > 0 ||
+-			 (op_index + op_advance) % max_ops_per_instr > 0);
+-	op_index = (op_index + op_advance) % max_ops_per_instr;
+-      }
++      #define advance_pc(op_advance_arg) \
++      ( { \
++        unsigned int op_advance = op_advance_arg; \
++				op_addr_advance = minimum_instr_len * ((op_index + (op_advance)) \
++											/ max_ops_per_instr); \
++				address += (op_advance); \
++				show_op_index = (op_index > 0 || \
++						(op_index + (op_advance)) % max_ops_per_instr > 0); \
++				op_index = (op_index + (op_advance)) % max_ops_per_instr; \
++      } )
+ 
+       if (max_ops_per_instr == 0)
+ 	{
+@@ -12002,14 +12003,16 @@ handle_core_registers (Ebl *ebl, Elf *core, const void *desc,
+   qsort (regs, maxreg + 1, sizeof regs[0], &compare_registers);
+ 
+   /* Collect the unique sets and sort them.  */
+-  inline bool same_set (const struct register_info *a,
+-			const struct register_info *b)
+-  {
+-    return (a < &regs[maxnreg] && a->regloc != NULL
+-	    && b < &regs[maxnreg] && b->regloc != NULL
+-	    && a->bits == b->bits
+-	    && (a->set == b->set || !strcmp (a->set, b->set)));
+-  }
++  #define same_set(a_arg, b_arg) \
++  ( { \
++    const struct register_info *a = a_arg; \
++    const struct register_info *b = b_arg; \
++    (a < &regs[maxnreg] && a->regloc != NULL \
++	    && b < &regs[maxnreg] && b->regloc != NULL \
++	    && a->bits == b->bits \
++	    && (a->set == b->set || !strcmp (a->set, b->set))); \
++  } )
++
+   struct register_info *sets[maxreg + 1];
+   sets[0] = &regs[0];
+   size_t nsets = 1;
+@@ -12082,7 +12085,7 @@ handle_auxv_note (Ebl *ebl, Elf *core, GElf_Word descsz, GElf_Off desc_pos)
+ 		printf ("    %s\n", name);
+ 		break;
+ 	      }
+-	    FALLTHROUGH;
++	    /* fall through */
+ 	  case 'x':		/* hex */
+ 	  case 'p':		/* address */
+ 	  case 's':		/* address of string */
+diff --git a/src/strings.c b/src/strings.c
+index ef40d5ec..123425f7 100644
+--- a/src/strings.c
++++ b/src/strings.c
+@@ -245,7 +245,7 @@ parse_opt (int key, char *arg,
+ 	case 'b':
+ 	case 'B':
+ 	  big_endian = true;
+-	  FALLTHROUGH;
++	  /* fall through */
+ 
+ 	case 'l':
+ 	case 'L':
+diff --git a/src/strip.c b/src/strip.c
+index 48792a70..2a882eab 100644
+--- a/src/strip.c
++++ b/src/strip.c
+@@ -442,84 +442,40 @@ update_shdrstrndx (Elf *elf, size_t shdrstrndx)
+   return 0;
+ }
+ 
+-/* Remove any relocations between debug sections in ET_REL
+-   for the debug file when requested.  These relocations are always
+-   zero based between the unallocated sections.  */
+-static void
+-remove_debug_relocations (Ebl *ebl, Elf *elf, GElf_Ehdr *ehdr,
+-			  const char *fname, size_t shstrndx)
++struct shdr_info
+ {
+-  Elf_Scn *scn = NULL;
+-  while ((scn = elf_nextscn (elf, scn)) != NULL)
+-    {
+-      /* We need the actual section and header from the elf
+-	 not just the cached original in shdr_info because we
+-	 might want to change the size.  */
+-      GElf_Shdr shdr_mem;
+-      GElf_Shdr *shdr = gelf_getshdr (scn, &shdr_mem);
+-      if (shdr->sh_type == SHT_REL || shdr->sh_type == SHT_RELA)
+-	{
+-	  /* Make sure that this relocation section points to a
+-	     section to relocate with contents, that isn't
+-	     allocated and that is a debug section.  */
+-	  Elf_Scn *tscn = elf_getscn (elf, shdr->sh_info);
+-	  GElf_Shdr tshdr_mem;
+-	  GElf_Shdr *tshdr = gelf_getshdr (tscn, &tshdr_mem);
+-	  if (tshdr->sh_type == SHT_NOBITS
+-	      || tshdr->sh_size == 0
+-	      || (tshdr->sh_flags & SHF_ALLOC) != 0)
+-	    continue;
+-
+-	  const char *tname =  elf_strptr (elf, shstrndx,
+-					   tshdr->sh_name);
+-	  if (! tname || ! ebl_debugscn_p (ebl, tname))
+-	    continue;
+-
+-	  /* OK, lets relocate all trivial cross debug section
+-	     relocations. */
+-	  Elf_Data *reldata = elf_getdata (scn, NULL);
+-	  if (reldata == NULL || reldata->d_buf == NULL)
+-	    INTERNAL_ERROR (fname);
+-
+-	  /* Make sure we adjust the uncompressed debug data
+-	     (and recompress if necessary at the end).  */
+-	  GElf_Chdr tchdr;
+-	  int tcompress_type = 0;
+-	  bool is_gnu_compressed = false;
+-	  if (strncmp (tname, ".zdebug", strlen ("zdebug")) == 0)
+-	    {
+-	      is_gnu_compressed = true;
+-	      if (elf_compress_gnu (tscn, 0, 0) != 1)
+-		INTERNAL_ERROR (fname);
+-	    }
+-	  else
+-	    {
+-	      if (gelf_getchdr (tscn, &tchdr) != NULL)
+-		{
+-		  tcompress_type = tchdr.ch_type;
+-		  if (elf_compress (tscn, 0, 0) != 1)
+-		    INTERNAL_ERROR (fname);
+-		}
+-	    }
++  Elf_Scn *scn;
++  GElf_Shdr shdr;
++  Elf_Data *data;
++  Elf_Data *debug_data;
++  const char *name;
++  Elf32_Word idx;		/* Index in new file.  */
++  Elf32_Word old_sh_link;	/* Original value of shdr.sh_link.  */
++  Elf32_Word symtab_idx;
++  Elf32_Word version_idx;
++  Elf32_Word group_idx;
++  Elf32_Word group_cnt;
++  Elf_Scn *newscn;
++  Dwelf_Strent *se;
++  Elf32_Word *newsymidx;
++};
+ 
+-	  Elf_Data *tdata = elf_getdata (tscn, NULL);
+-	  if (tdata == NULL || tdata->d_buf == NULL
+-	      || tdata->d_type != ELF_T_BYTE)
+-	    INTERNAL_ERROR (fname);
++#define declare_relocate_closure \
++  Ebl * const ebl, \
++	Elf * const elf, \
++  Elf_Data * const symdata, \
++  Elf_Data * const xndxdata, \
++  const char * const fname, \
++  Elf_Data * const tdata, \
++  GElf_Ehdr * const ehdr
+ 
+-	  /* Pick up the symbol table and shndx table to
+-	     resolve relocation symbol indexes.  */
+-	  Elf64_Word symt = shdr->sh_link;
+-	  Elf_Data *symdata, *xndxdata;
+-	  Elf_Scn * symscn = elf_getscn (elf, symt);
+-	  symdata = elf_getdata (symscn, NULL);
+-	  xndxdata = get_xndxdata (elf, symscn);
+-	  if (symdata == NULL)
+-	    INTERNAL_ERROR (fname);
++#define pass_relocate_closure \
++  ebl, elf, symdata, xndxdata, fname, tdata, ehdr
+ 
+-	  /* Apply one relocation.  Returns true when trivial
+-	     relocation actually done.  */
+-	  bool relocate (GElf_Addr offset, const GElf_Sxword addend,
++/* Apply one relocation.  Returns true when trivial
++  relocation actually done.  */
++static bool
++relocate (declare_relocate_closure, GElf_Addr offset, const GElf_Sxword addend,
+ 			 bool is_rela, int rtype, int symndx)
+ 	  {
+ 	    /* R_*_NONE relocs can always just be removed.  */
+@@ -656,7 +612,82 @@ remove_debug_relocations (Ebl *ebl, Elf *elf, GElf_Ehdr *ehdr,
+ 		return true;
+ 	      }
+ 	    return false;
+-	  }
++}
++
++/* Remove any relocations between debug sections in ET_REL
++   for the debug file when requested.  These relocations are always
++   zero based between the unallocated sections.  */
++static void
++remove_debug_relocations (Ebl *ebl, Elf *elf, GElf_Ehdr *ehdr,
++			  const char *fname, size_t shstrndx)
++{
++  Elf_Scn *scn = NULL;
++  while ((scn = elf_nextscn (elf, scn)) != NULL)
++    {
++      /* We need the actual section and header from the elf
++	 not just the cached original in shdr_info because we
++	 might want to change the size.  */
++      GElf_Shdr shdr_mem;
++      GElf_Shdr *shdr = gelf_getshdr (scn, &shdr_mem);
++      if (shdr->sh_type == SHT_REL || shdr->sh_type == SHT_RELA)
++	{
++	  /* Make sure that this relocation section points to a
++	     section to relocate with contents, that isn't
++	     allocated and that is a debug section.  */
++	  Elf_Scn *tscn = elf_getscn (elf, shdr->sh_info);
++	  GElf_Shdr tshdr_mem;
++	  GElf_Shdr *tshdr = gelf_getshdr (tscn, &tshdr_mem);
++	  if (tshdr->sh_type == SHT_NOBITS
++	      || tshdr->sh_size == 0
++	      || (tshdr->sh_flags & SHF_ALLOC) != 0)
++	    continue;
++
++	  const char *tname =  elf_strptr (elf, shstrndx,
++					   tshdr->sh_name);
++	  if (! tname || ! ebl_debugscn_p (ebl, tname))
++	    continue;
++
++	  /* OK, lets relocate all trivial cross debug section
++	     relocations. */
++	  Elf_Data *reldata = elf_getdata (scn, NULL);
++	  if (reldata == NULL || reldata->d_buf == NULL)
++	    INTERNAL_ERROR (fname);
++
++	  /* Make sure we adjust the uncompressed debug data
++	     (and recompress if necessary at the end).  */
++	  GElf_Chdr tchdr;
++	  int tcompress_type = 0;
++	  bool is_gnu_compressed = false;
++	  if (strncmp (tname, ".zdebug", strlen ("zdebug")) == 0)
++	    {
++	      is_gnu_compressed = true;
++	      if (elf_compress_gnu (tscn, 0, 0) != 1)
++		INTERNAL_ERROR (fname);
++	    }
++	  else
++	    {
++	      if (gelf_getchdr (tscn, &tchdr) != NULL)
++		{
++		  tcompress_type = tchdr.ch_type;
++		  if (elf_compress (tscn, 0, 0) != 1)
++		    INTERNAL_ERROR (fname);
++		}
++	    }
++
++	  Elf_Data *tdata = elf_getdata (tscn, NULL);
++	  if (tdata == NULL || tdata->d_buf == NULL
++	      || tdata->d_type != ELF_T_BYTE)
++	    INTERNAL_ERROR (fname);
++
++	  /* Pick up the symbol table and shndx table to
++	     resolve relocation symbol indexes.  */
++	  Elf64_Word symt = shdr->sh_link;
++	  Elf_Data *symdata, *xndxdata;
++	  Elf_Scn * symscn = elf_getscn (elf, symt);
++	  symdata = elf_getdata (symscn, NULL);
++	  xndxdata = get_xndxdata (elf, symscn);
++	  if (symdata == NULL)
++	    INTERNAL_ERROR (fname);
+ 
+ 	  if (shdr->sh_entsize == 0)
+ 	    INTERNAL_ERROR (fname);
+@@ -668,7 +699,8 @@ remove_debug_relocations (Ebl *ebl, Elf *elf, GElf_Ehdr *ehdr,
+ 	      {
+ 		GElf_Rel rel_mem;
+ 		GElf_Rel *r = gelf_getrel (reldata, relidx, &rel_mem);
+-		if (! relocate (r->r_offset, 0, false,
++		if (! relocate (pass_relocate_closure,
++				r->r_offset, 0, false,
+ 				GELF_R_TYPE (r->r_info),
+ 				GELF_R_SYM (r->r_info)))
+ 		  {
+@@ -682,7 +714,8 @@ remove_debug_relocations (Ebl *ebl, Elf *elf, GElf_Ehdr *ehdr,
+ 	      {
+ 		GElf_Rela rela_mem;
+ 		GElf_Rela *r = gelf_getrela (reldata, relidx, &rela_mem);
+-		if (! relocate (r->r_offset, r->r_addend, true,
++		if (! relocate (pass_relocate_closure,
++				r->r_offset, r->r_addend, true,
+ 				GELF_R_TYPE (r->r_info),
+ 				GELF_R_SYM (r->r_info)))
+ 		  {
+@@ -936,23 +969,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
+   GElf_Off lastsec_offset = 0;
+   Elf64_Xword lastsec_size = 0;
+   size_t shstrndx;
+-  struct shdr_info
+-  {
+-    Elf_Scn *scn;
+-    GElf_Shdr shdr;
+-    Elf_Data *data;
+-    Elf_Data *debug_data;
+-    const char *name;
+-    Elf32_Word idx;		/* Index in new file.  */
+-    Elf32_Word old_sh_link;	/* Original value of shdr.sh_link.  */
+-    Elf32_Word symtab_idx;
+-    Elf32_Word version_idx;
+-    Elf32_Word group_idx;
+-    Elf32_Word group_cnt;
+-    Elf_Scn *newscn;
+-    Dwelf_Strent *se;
+-    Elf32_Word *newsymidx;
+-  } *shdr_info = NULL;
++  struct shdr_info *shdr_info = NULL;
+   Elf_Scn *scn;
+   size_t cnt;
+   size_t idx;
+@@ -1536,20 +1553,20 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
+ 		 file's .data pointer.  Below, we'll copy the section
+ 		 contents.  */
+ 
+-	      inline void check_preserved (size_t i)
+-	      {
+-		if (i != 0 && i < shnum + 2 && shdr_info[i].idx != 0
+-		    && shdr_info[i].debug_data == NULL)
+-		  {
+-		    if (shdr_info[i].data == NULL)
+-		      shdr_info[i].data = elf_getdata (shdr_info[i].scn, NULL);
+-		    if (shdr_info[i].data == NULL)
+-		      INTERNAL_ERROR (fname);
+-
+-		    shdr_info[i].debug_data = shdr_info[i].data;
+-		    changes |= i < cnt;
+-		  }
+-	      }
++	    #define check_preserved(i_arg) \
++	    { \
++				size_t i = i_arg; \
++				if (i != 0 && i < shnum + 2 && shdr_info[i].idx != 0 \
++						&& shdr_info[i].debug_data == NULL) \
++					{ \
++						if (shdr_info[i].data == NULL) \
++							shdr_info[i].data = elf_getdata (shdr_info[i].scn, NULL); \
++						if (shdr_info[i].data == NULL) \
++							INTERNAL_ERROR (fname); \
++						shdr_info[i].debug_data = shdr_info[i].data; \
++						changes |= i < cnt; \
++					} \
++ 	    }
+ 
+ 	      check_preserved (shdr_info[cnt].shdr.sh_link);
+ 	      if (SH_INFO_LINK_P (&shdr_info[cnt].shdr))
+@@ -2127,22 +2144,23 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
+ 	/* Update section headers when the data size has changed.
+ 	   We also update the SHT_NOBITS section in the debug
+ 	   file so that the section headers match in sh_size.  */
+-	inline void update_section_size (const Elf_Data *newdata)
+-	{
+-	  GElf_Shdr shdr_mem;
+-	  GElf_Shdr *shdr = gelf_getshdr (scn, &shdr_mem);
+-	  shdr->sh_size = newdata->d_size;
+-	  (void) gelf_update_shdr (scn, shdr);
+-	  if (debugelf != NULL)
+-	    {
+-	      /* libelf will use d_size to set sh_size.  */
+-	      Elf_Data *debugdata = elf_getdata (elf_getscn (debugelf,
+-							     cnt), NULL);
+-	      if (debugdata == NULL)
+-		INTERNAL_ERROR (fname);
+-	      debugdata->d_size = newdata->d_size;
+-	    }
+-	}
++	#define update_section_size(newdata_arg) \
++	( { \
++	  const Elf_Data *newdata = newdata_arg; \
++	  GElf_Shdr shdr_mem; \
++	  GElf_Shdr *shdr = gelf_getshdr (scn, &shdr_mem); \
++	  shdr->sh_size = newdata->d_size; \
++	  (void) gelf_update_shdr (scn, shdr); \
++	  if (debugelf != NULL) \
++	    { \
++	      /* libelf will use d_size to set sh_size.  */ \
++	      Elf_Data *debugdata = elf_getdata (elf_getscn (debugelf, \
++							     cnt), NULL); \
++	      if (debugdata == NULL) \
++		INTERNAL_ERROR (fname); \
++	      debugdata->d_size = newdata->d_size; \
++	    } \
++ 	} )
+ 
+ 	if (shdr_info[cnt].idx == 0 && debug_fname == NULL)
+ 	  /* Ignore sections which are discarded.  When we are saving a
+@@ -2155,18 +2173,21 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
+ 	const Elf32_Word *const newsymidx = shdr_info[symtabidx].newsymidx;
+ 	switch (shdr_info[cnt].shdr.sh_type)
+ 	  {
+-	    inline bool no_symtab_updates (void)
+-	    {
+-	      /* If the symbol table hasn't changed, do not do anything.  */
+-	      if (shdr_info[symtabidx].newsymidx == NULL)
+-		return true;
+-
+-	      /* If the symbol table is not discarded, but additionally
+-		 duplicated in the separate debug file and this section
+-		 is discarded, don't adjust anything.  */
+-	      return (shdr_info[cnt].idx == 0
+-		      && shdr_info[symtabidx].debug_data != NULL);
+-	    }
++	    #define no_symtab_updates() \
++	    ( { \
++	        bool no_updates; \
++	        /* If the symbol table hasn't changed, do not do anything.  */ \
++	        if (shdr_info[symtabidx].newsymidx == NULL) { \
++	          no_updates = true; \
++	        } else { \
++	          /* If the symbol table is not discarded, but additionally */ \
++	          /* duplicated in the separate debug file and this section */ \
++	          /* is discarded, don't adjust anything. */ \
++	          no_updates = (shdr_info[cnt].idx == 0 \
++	                        && shdr_info[symtabidx].debug_data != NULL); \
++	        } \
++	        no_updates; \
++	    } )
+ 
+ 	  case SHT_REL:
+ 	  case SHT_RELA:
+diff --git a/src/unstrip.c b/src/unstrip.c
+index fc878325..797a7249 100644
+--- a/src/unstrip.c
++++ b/src/unstrip.c
+@@ -437,11 +437,12 @@ adjust_relocs (Elf_Scn *outscn, Elf_Scn *inscn, const GElf_Shdr *shdr,
+ {
+   Elf_Data *data = elf_getdata (outscn, NULL);
+ 
+-  inline void adjust_reloc (GElf_Xword *info)
+-    {
+-      size_t ndx = GELF_R_SYM (*info);
+-      if (ndx != STN_UNDEF)
+-	*info = GELF_R_INFO (map[ndx - 1], GELF_R_TYPE (*info));
++  #define adjust_reloc(info_arg) \
++    { \
++      GElf_Xword *info = info_arg; \
++      size_t ndx = GELF_R_SYM (*info); \
++      if (ndx != STN_UNDEF) \
++        *info = GELF_R_INFO (map[ndx - 1], GELF_R_TYPE (*info)); \
+     }
+ 
+   switch (shdr->sh_type)
+@@ -1186,14 +1187,17 @@ find_alloc_sections_prelink (Elf *debug, Elf_Data *debug_shstrtab,
+     }
+ 
+   bool fail = false;
+-  inline void check_match (bool match, Elf_Scn *scn, const char *name)
+-    {
+-      if (!match)
+-	{
+-	  fail = true;
+-	  error (0, 0, _("cannot find matching section for [%zu] '%s'"),
+-		 elf_ndxscn (scn), name);
+-	}
++  #define check_match(match_arg, scn_arg, name_arg) \
++    { \
++      bool match = match_arg; \
++      Elf_Scn *scnp = scn_arg; \
++      const char *sect_name = name_arg; \
++      if (!match) \
++      { \
++        fail = true; \
++        error (0, 0, _("cannot find matching section for [%zu] '%s'"), \
++               elf_ndxscn (scnp), sect_name); \
++      } \
+     }
+ 
+   Elf_Scn *scn = NULL;
+@@ -1422,27 +1426,31 @@ more sections in stripped file than debug file -- arguments reversed?"));
+     }
+ 
+   /* Locate a matching unallocated section in SECTIONS.  */
+-  inline struct section *find_unalloc_section (const GElf_Shdr *shdr,
+-					       const char *name,
+-					       const char *sig)
+-    {
+-      size_t l = nalloc, u = stripped_shnum - 1;
+-      while (l < u)
+-	{
+-	  size_t i = (l + u) / 2;
+-	  struct section *sec = &sections[i];
+-	  int cmp = compare_unalloc_sections (shdr, &sec->shdr,
+-					      name, sec->name,
+-					      sig, sec->sig);
+-	  if (cmp < 0)
+-	    u = i;
+-	  else if (cmp > 0)
+-	    l = i + 1;
+-	  else
+-	    return sec;
+-	}
+-      return NULL;
+-    }
++  #define find_unalloc_section(shdr_arg, name_arg, sig_arg) \
++  ( { \
++      const GElf_Shdr *shdr_p = shdr_arg; \
++      const char *sect_name = name_arg; \
++      const char *sig = sig_arg; \
++      struct section * result = NULL; \
++      size_t l = nalloc, u = stripped_shnum - 1; \
++      while (l < u) \
++      { \
++        size_t i = (l + u) / 2; \
++        struct section *secp = &sections[i]; \
++        int cmp = compare_unalloc_sections (shdr_p, &secp->shdr, \
++                                            sect_name, secp->name, \
++                                            sig, sec->sig); \
++        if (cmp < 0) \
++          u = i; \
++        else if (cmp > 0) \
++          l = i + 1; \
++        else { \
++          result = secp; \
++          break; \
++        } \
++      } \
++    result; \
++  } )
+ 
+   Elf_Data *shstrtab = elf_getdata (elf_getscn (unstripped,
+ 						unstripped_shstrndx), NULL);
+@@ -2184,12 +2192,13 @@ handle_explicit_files (const char *output_file, bool create_dirs, bool force,
+ 
+   /* Warn, and exit if not forced to continue, if some ELF header
+      sanity check for the stripped and unstripped files failed.  */
+-  void warn (const char *msg)
+-  {
+-    error (force ? 0 : EXIT_FAILURE, 0, "%s'%s' and '%s' %s%s.",
+-	   force ? _("WARNING: ") : "",
+-	   stripped_file, unstripped_file, msg,
+-	   force ? "" : _(", use --force"));
++  #define warn(msg_arg) \
++  { \
++    const char *msg = msg_arg; \
++    error (force ? 0 : EXIT_FAILURE, 0, "%s'%s' and '%s' %s%s.", \
++	   force ? _("WARNING: ") : "", \
++	   stripped_file, unstripped_file, msg, \
++	   force ? "" : _(", use --force")); \
+   }
+ 
+   int stripped_fd = open_file (stripped_file, false);
+@@ -2445,10 +2454,11 @@ static void
+ handle_implicit_modules (const struct arg_info *info)
+ {
+   struct match_module_info mmi = { info->args, NULL, info->match_files };
+-  inline ptrdiff_t next (ptrdiff_t offset)
+-    {
+-      return dwfl_getmodules (info->dwfl, &match_module, &mmi, offset);
+-    }
++  #define next(offset_arg) \
++  ( { \
++    ptrdiff_t old_offset = offset_arg; \
++    dwfl_getmodules (info->dwfl, &match_module, &mmi, old_offset); \
++  } )
+   ptrdiff_t offset = next (0);
+   if (offset == 0)
+     error (EXIT_FAILURE, 0, _("no matching modules found"));

@@ -97,37 +97,33 @@ if [ -z "$FRIDA_HOST" ]; then
 fi
 
 if [ $host_platform = android ]; then
-  ndk_required_name=r17b
-  ndk_required_version=17.1.4828580
+  ndk_required_name=">= r20"
   if [ -n "$ANDROID_NDK_ROOT" ]; then
     if [ -f "$ANDROID_NDK_ROOT/source.properties" ]; then
-      ndk_installed_version=$(grep Pkg.Revision "$ANDROID_NDK_ROOT/source.properties" | awk '{ print $NF; }')
+      ndk_installed_version=$(grep Pkg.Revision "$ANDROID_NDK_ROOT/source.properties" | awk '{ split($NF, v, "."); print v[1]; }')
     else
       ndk_installed_version=$(cut -f1 -d" " "$ANDROID_NDK_ROOT/RELEASE.TXT")
     fi
-    case $ndk_installed_version in
-      $ndk_required_version)
-        ;;
-      *)
-        (
-          echo ""
-          echo "Unsupported NDK version $ndk_installed_version. Please install NDK $ndk_required_name ($ndk_required_version)."
-          echo ""
-          echo "Frida's SDK - the prebuilt dependencies snapshot - was compiled against $ndk_required_name,"
-          echo "and as we have observed the NDK ABI breaking over time, we ask that you install"
-          echo "the exact same version."
-          echo ""
-          echo "However, if you'd like to take the risk and use a different NDK, you may edit"
-          echo "releng/setup-env.sh and adjust the ndk_required variable. Make sure you use"
-          echo "a newer NDK, and not an older one. Note that the proper solution is to rebuild"
-          echo "the SDK against your NDK by running:"
-          echo "  make -f Makefile.sdk.mk FRIDA_HOST=android-arm"
-          echo "If you do this and it works well for you, please let us know so we can upgrade"
-          echo "the upstream SDK version."
-          echo ""
-        ) > /dev/stderr
-        exit 1
-    esac
+    if [ $ndk_installed_version -lt 20 ]; then
+      (
+        echo ""
+        echo "Unsupported NDK version $ndk_installed_version. Please install NDK $ndk_required_name."
+        echo ""
+        echo "Frida's SDK - the prebuilt dependencies snapshot - was compiled against $ndk_required_name,"
+        echo "and as we have observed the NDK ABI breaking over time, we ask that you install"
+        echo "the exact same version."
+        echo ""
+        echo "However, if you'd like to take the risk and use a different NDK, you may edit"
+        echo "releng/setup-env.sh and adjust the ndk_required variable. Make sure you use"
+        echo "a newer NDK, and not an older one. Note that the proper solution is to rebuild"
+        echo "the SDK against your NDK by running:"
+        echo "  make -f Makefile.sdk.mk FRIDA_HOST=android-arm"
+        echo "If you do this and it works well for you, please let us know so we can upgrade"
+        echo "the upstream SDK version."
+        echo ""
+      ) > /dev/stderr
+      exit 1
+    fi
   else
     echo "ANDROID_NDK_ROOT must be set to the location of your $ndk_required_name NDK." > /dev/stderr
     exit 1
@@ -461,52 +457,50 @@ case $host_platform in
     meson_objcpp_link_args="$base_linker_args, '-stdlib=libc++'"
     ;;
   android)
-    android_toolroot="$FRIDA_BUILD/${frida_env_name_prefix}ndk-${host_platform_arch}"
+    android_toolroot="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/${build_platform}-${build_arch}"
 
     case $host_arch in
       x86)
         android_api=18
-        host_triplet="i686-linux-android"
+        host_compiler_triplet="i686-linux-android"
         host_arch_flags="-march=i686"
         host_ldflags="-fuse-ld=gold"
         ;;
       x86_64)
         android_api=21
-        host_triplet="x86_64-linux-android"
+        host_compiler_triplet="x86_64-linux-android"
         host_arch_flags=""
         host_ldflags="-fuse-ld=gold -Wl,--icf=all"
         ;;
       arm)
         android_api=18
-        host_triplet="arm-linux-androideabi"
+        host_compiler_triplet="armv7a-linux-androideabi"
+        host_tooltriplet="arm-linux-androideabi"
         host_arch_flags="-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16"
         host_ldflags="-fuse-ld=gold -Wl,--icf=all -Wl,--fix-cortex-a8"
         ;;
       arm64)
         android_api=21
-        host_triplet="aarch64-linux-android"
+        host_compiler_triplet="aarch64-linux-android"
         host_arch_flags=""
         host_ldflags="-fuse-ld=gold -Wl,--icf=all"
         ;;
     esac
-    host_toolprefix="$host_triplet-"
+    host_compiler_prefix="${host_compiler_triplet}${android_api}-"
+
+    if [ -z "$host_tooltriplet" ]; then
+      host_tooltriplet="$host_compiler_triplet"
+    fi
+    host_toolprefix="$host_tooltriplet-"
 
     if [ $android_api -lt 21 ]; then
       # XXX: Meson's auto-detection fails as this is a Clang built-in.
       meson_platform_properties+=("has_function_stpcpy = false")
     fi
 
-    rm -rf "$android_toolroot"
-    $ANDROID_NDK_ROOT/build/tools/make_standalone_toolchain.py \
-      --arch $host_arch \
-      --api $android_api \
-      --stl=libc++ \
-      --install-dir="$android_toolroot" || exit 1
-
-    CPP="${android_toolroot}/bin/${host_toolprefix}cpp"
-    CC="${android_toolroot}/bin/${host_toolprefix}clang"
-    CXX="${android_toolroot}/bin/${host_toolprefix}clang++"
-    GCC="${android_toolroot}/bin/${host_toolprefix}gcc"
+    CPP="${android_toolroot}/bin/${host_compiler_prefix}clang -E"
+    CC="${android_toolroot}/bin/${host_compiler_prefix}clang"
+    CXX="${android_toolroot}/bin/${host_compiler_prefix}clang++"
     LD="${android_toolroot}/bin/${host_toolprefix}ld"
 
     AR="${android_toolroot}/bin/${host_toolprefix}ar"
@@ -524,14 +518,14 @@ case $host_platform in
 
     meson_cc_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang
     sed \
-      -e "s,@driver@,${android_toolroot}/bin/${host_toolprefix}clang,g" \
+      -e "s,@driver@,${android_toolroot}/bin/${host_compiler_prefix}clang,g" \
       -e "s,@elf_cleaner@,$elf_cleaner,g" \
       "$releng_path/driver-wrapper-android.sh.in" > "$meson_cc_wrapper"
     chmod +x "$meson_cc_wrapper"
 
     meson_cpp_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang++
     sed \
-      -e "s,@driver@,${android_toolroot}/bin/${host_toolprefix}clang++,g" \
+      -e "s,@driver@,${android_toolroot}/bin/${host_compiler_prefix}clang++,g" \
       -e "s,@elf_cleaner@,$elf_cleaner,g" \
       "$releng_path/driver-wrapper-android.sh.in" > "$meson_cpp_wrapper"
     chmod +x "$meson_cpp_wrapper"
