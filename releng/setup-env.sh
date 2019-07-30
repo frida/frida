@@ -160,7 +160,6 @@ FRIDA_PREFIX_LIB="$FRIDA_PREFIX/lib"
 FRIDA_TOOLROOT="$FRIDA_BUILD/${frida_env_name_prefix}toolchain-${build_platform_arch}"
 FRIDA_SDKROOT="$FRIDA_BUILD/${frida_env_name_prefix}sdk-${host_platform_arch}"
 
-GCC=""
 LIBTOOL=""
 STRIP_FLAGS=""
 
@@ -821,9 +820,6 @@ fi
   echo "export CPP=\"$CPP\""
   echo "export CPPFLAGS=\"$CPPFLAGS\""
   echo "export CC=\"$CC\""
-  if [ -n "$GCC" ]; then
-    echo "export FRIDA_GCC=\"$GCC\""
-  fi
   echo "export CFLAGS=\"$CFLAGS\""
   echo "export CXX=\"$CXX\""
   echo "export CXXFLAGS=\"$CXXFLAGS\""

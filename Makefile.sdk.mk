@@ -177,9 +177,6 @@ build/fs-tmp-%/elfutils/Makefile: build/fs-env-%.rc build/.elfutils-stamp build/
 	mkdir -p $(@D)
 	. $< \
 		&& cd $(@D) \
-		&& if [ -n "$$FRIDA_GCC" ]; then \
-			export CC="$$FRIDA_GCC"; \
-		fi \
 		&& ../../../elfutils/configure --enable-maintainer-mode
 
 build/fs-%/lib/libelf.a: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
