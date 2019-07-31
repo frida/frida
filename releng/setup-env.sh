@@ -97,14 +97,14 @@ if [ -z "$FRIDA_HOST" ]; then
 fi
 
 if [ $host_platform = android ]; then
-  ndk_required_name=">= r20"
+  ndk_required_name="r20"
   if [ -n "$ANDROID_NDK_ROOT" ]; then
     if [ -f "$ANDROID_NDK_ROOT/source.properties" ]; then
       ndk_installed_version=$(grep Pkg.Revision "$ANDROID_NDK_ROOT/source.properties" | awk '{ split($NF, v, "."); print v[1]; }')
     else
       ndk_installed_version=$(cut -f1 -d" " "$ANDROID_NDK_ROOT/RELEASE.TXT")
     fi
-    if [ $ndk_installed_version -lt 20 ]; then
+    if [ $ndk_installed_version -ne 20 ]; then
       (
         echo ""
         echo "Unsupported NDK version $ndk_installed_version. Please install NDK $ndk_required_name."
