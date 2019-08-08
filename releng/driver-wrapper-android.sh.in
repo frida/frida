@@ -6,20 +6,6 @@
 output_type=executable
 output_path=
 
-#
-# FIXME
-#
-# The ordering of object files on the command-line influences the order
-# in which library initializers run. We exploit this to ensure gadget's
-# entrypoint runs *after* V8's static initializer has run.
-#
-# This is obviously a terrible hack, but will have to do until we find
-# a better solution.
-#
-
-initializer_index=
-initializer_object=
-
 argv=()
 while [[ $# > 0 ]]; do
   arg="$1"
@@ -42,20 +28,11 @@ while [[ $# > 0 ]]; do
 
       output_path="$arg"
       ;;
-    lib/gadget/*/gadget-entrypoint-unix.c.o)
-      initializer_index=${#argv[@]}
-      initializer_object="$1"
-      ;;
   esac
 
   argv+=("$arg")
   shift
 done
-
-if [[ -n "$initializer_object" && $output_type = shlib ]]; then
-  unset argv[$initializer_index]
-  argv+=("$initializer_object")
-fi
 
 if [[ $output_type = executable ]]; then
   argv+=("-Wl,-pie")
