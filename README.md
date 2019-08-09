@@ -4,7 +4,7 @@ Dynamic instrumentation toolkit for developers, reverse-engineers, and security
 researchers. Learn more at [www.frida.re](https://www.frida.re/).
 
 Two ways to install
-===
+===================
 
 ## 1. Install from prebuilt binaries
 
