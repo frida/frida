@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if [ "$1" == "csr" ]; then
+  shift
+
+  output_path="$1"
+  shift
+
+  exec "@libtool@" -o "$output_path" -no_warning_for_no_symbols "$@"
+fi
+
+exec "@ar@" "$@"

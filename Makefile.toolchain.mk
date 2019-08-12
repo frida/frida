@@ -16,10 +16,10 @@ build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos
 build_arch := $(shell releng/detect-arch.sh)
 build_platform_arch := $(build_platform)-$(build_arch)
 
-ifeq ($(build_platform), linux)
-	download := wget -O - -q
-else
+ifneq ($(shell which curl),)
 	download := curl -sS
+else
+	download := wget -O - -q
 endif
 
 ifdef FRIDA_HOST
@@ -47,25 +47,30 @@ ifeq ($(host_platform), qnx)
 	iconv := yes
 endif
 ifeq ($(iconv),yes)
-	glib_iconv_option := -Diconv=native
+	glib_iconv_option := -Diconv=external
 endif
 
 ifeq ($(host_platform), linux)
-strip_all := --strip-all
+	strip_all := --strip-all
 endif
 ifeq ($(host_platform), qnx)
-strip_all := --strip-all
+	strip_all := --strip-all
 endif
 ifeq ($(host_platform), android)
-strip_all := --strip-all
+	strip_all := --strip-all
 endif
 ifeq ($(host_platform), macos)
-strip_all := -Sx
+	strip_all := -Sx
 endif
 ifeq ($(host_platform), ios)
-strip_all := -Sx
+	strip_all := -Sx
 endif
 
+ifeq ($(host_platform),$(filter $(host_platform),macos ios))
+	export_ldflags := -Wl,-exported_symbols_list,$(abspath build/ft-executable.symbols)
+else
+	export_ldflags := -Wl,--version-script,$(abspath build/ft-executable.version)
+endif
 
 ifeq ($(host_platform), macos)
 	dpkg_deb := build/ft-%/bin/dpkg-deb
@@ -102,6 +107,12 @@ build/ft-tmp-%/.package-stamp: \
 	mkdir -p $(@D)/package
 	cd build/ft-$* \
 		&& tar -c \
+			--exclude bin/gapplication \
+			--exclude bin/gdbus \
+			--exclude bin/gio \
+			--exclude bin/gio-launch-desktop \
+			--exclude bin/gobject-query \
+			--exclude bin/gsettings \
 			--exclude etc \
 			--exclude include \
 			--exclude lib/charset.alias \
@@ -109,12 +120,16 @@ build/ft-tmp-%/.package-stamp: \
 			--exclude lib/glib-2.0 \
 			--exclude lib/gio \
 			--exclude lib/pkgconfig \
+			--exclude "lib/vala-0.46/*.a" \
+			--exclude share/bash-completion \
 			--exclude share/devhelp \
 			--exclude share/doc \
 			--exclude share/emacs \
 			--exclude share/gdb \
 			--exclude share/info \
+			--exclude share/locale \
 			--exclude share/man \
+			--exclude share/vala/Makefile.vapigen \
 			--exclude "*.pyc" \
 			--exclude "*.pyo" \
 			. | tar -C $(abspath $(@D)/package) -xf -
@@ -241,7 +256,7 @@ $(eval $(call make-git-meson-module-rules,zlib,build/ft-%/lib/pkgconfig/zlib.pc,
 
 $(eval $(call make-git-meson-module-rules,libffi,build/ft-%/lib/pkgconfig/libffi.pc,,))
 
-$(eval $(call make-git-meson-module-rules,glib,build/ft-%/bin/glib-genmarshal,build/ft-%/bin/autopoint build/ft-%/lib/pkgconfig/zlib.pc build/ft-%/lib/pkgconfig/libffi.pc,$(glib_iconv_option) -Dselinux=false -Dxattr=false -Dlibmount=false -Dinternal_pcre=true -Dtests=false))
+$(eval $(call make-git-meson-module-rules,glib,build/ft-%/bin/glib-genmarshal,build/ft-%/bin/autopoint build/ft-%/lib/pkgconfig/zlib.pc build/ft-%/lib/pkgconfig/libffi.pc,$(glib_iconv_option) -Dselinux=disabled -Dxattr=false -Dlibmount=false -Dinternal_pcre=true -Dtests=false))
 
 $(eval $(call make-git-meson-module-rules,pkg-config,build/ft-%/bin/pkg-config,build/ft-%/bin/glib-genmarshal,))
 
@@ -255,14 +270,28 @@ build/ft-%/bin/dpkg-deb:
 	@mv $@.tmp $@
 
 
-build/ft-env-%.rc:
+build/ft-env-%.rc: build/ft-executable.symbols build/ft-executable.version
 	FRIDA_HOST=$* \
 		FRIDA_OPTIMIZATION_FLAGS="$(FRIDA_OPTIMIZATION_FLAGS)" \
 		FRIDA_DEBUG_FLAGS="$(FRIDA_DEBUG_FLAGS)" \
+		FRIDA_EXTRA_LDFLAGS="$(export_ldflags)" \
 		FRIDA_ASAN=$(FRIDA_ASAN) \
 		FRIDA_ENV_NAME=ft \
 		FRIDA_ENV_SDK=none \
 		./releng/setup-env.sh
+
+build/ft-executable.symbols:
+	@mkdir -p $(@D)
+	@echo "# No exported symbols." > $@
+
+build/ft-executable.version:
+	@mkdir -p $(@D)
+	@( \
+		echo "FRIDA_TOOLCHAIN_EXECUTABLE {"; \
+		echo "  local:"; \
+		echo "    *;"; \
+		echo "};" \
+	) > $@
 
 
 .PHONY: all

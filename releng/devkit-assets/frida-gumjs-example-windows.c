@@ -28,12 +28,12 @@ main (int argc,
   backend = gum_script_backend_obtain_duk ();
 
   script = gum_script_backend_create_sync (backend, "example",
-      "Interceptor.attach(Module.findExportByName('user32.dll', 'MessageBeep'), {\n"
+      "Interceptor.attach(Module.getExportByName('user32.dll', 'MessageBeep'), {\n"
       "  onEnter: function (args) {\n"
       "    console.log('[*] MessageBeep(' + args[0].toInt32() + ')');\n"
       "  }\n"
       "});\n"
-      "Interceptor.attach(Module.findExportByName('kernel32.dll', 'Sleep'), {\n"
+      "Interceptor.attach(Module.getExportByName('kernel32.dll', 'Sleep'), {\n"
       "  onEnter: function (args) {\n"
       "    console.log('[*] Sleep(' + args[0].toInt32() + ')');\n"
       "  }\n"

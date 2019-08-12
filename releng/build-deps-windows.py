@@ -4,6 +4,7 @@ import codecs
 import glob
 import os
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -21,19 +22,21 @@ LIBRARY_TARGET_RUNTIMES = ['static', 'dynamic']
 COMPRESSION_LEVEL = 9
 
 FRIDA_BASE_URL = "https://github.com/frida"
-BOOTSTRAP_TOOLCHAIN_URL = "https://build.frida.re/toolchain-20180825-windows-x86.exe"
-VALA_VERSION = "0.42"
-VALA_TARGET_GLIB = "2.57"
+BOOTSTRAP_TOOLCHAIN_URL = "https://build.frida.re/toolchain-20190404-windows-x86.exe"
+VALA_VERSION = "0.46"
+VALA_TARGET_GLIB = "2.62"
 
 
 RELENG_DIR = os.path.abspath(os.path.dirname(__file__))
 ROOT_DIR = os.path.dirname(RELENG_DIR)
 BOOTSTRAP_TOOLCHAIN_DIR = os.path.join(ROOT_DIR, "build", "fts-toolchain-windows")
+BOOTSTRAP_VALAC = "valac-0.46.exe"
 
 MESON = os.path.join(RELENG_DIR, "meson", "meson.py")
 NINJA = os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "bin", "ninja.exe")
 VALAC_FILENAME = "valac-{}.exe".format(VALA_VERSION)
-VALA_VAPI_SUBPATH = "share\\vala-{}\\vapi".format(VALA_VERSION)
+VALAC_PATTERN = re.compile(r"valac-\d+\.\d+.exe$")
+VALA_TOOLCHAIN_VAPI_SUBPATH_PATTERN = re.compile(r"share\\vala-\d+\.\d+\\vapi$")
 
 cached_meson_params = {}
 
@@ -107,7 +110,7 @@ def build_meson_modules(platform, configuration):
         ("json-glib", "json-glib-1.0.pc", ["introspection=false", "tests=false"]),
         ("libpsl", "libpsl.pc", []),
         ("libxml2", "libxml-2.0.pc", []),
-        ("libsoup", "libsoup-2.4.pc", ["gssapi=false", "tls_check=false", "gnome=false", "introspection=false", "tests=false"]),
+        ("libsoup", "libsoup-2.4.pc", ["gssapi=false", "tls_check=false", "gnome=false", "introspection=false", "vapi=false", "tests=false"]),
         ("vala", VALAC_FILENAME, []),
         ("pkg-config", "pkg-config.exe", []),
     ]
@@ -269,7 +272,7 @@ set DEPOT_TOOLS_WIN_TOOLCHAIN=0
             cxxflags=cxxflags,
             vc_install_dir=vc_install_dir,
             platform=msvc_platform,
-            valac=VALAC_FILENAME,
+            valac=BOOTSTRAP_VALAC,
             vala_flags=vala_flags
         ))
 
@@ -356,7 +359,7 @@ sys.exit(subprocess.call([r"{bison_path}"] + args))
     shell_env["CXXFLAGS"] = cxxflags
     shell_env["VCINSTALLDIR"] = vc_install_dir
     shell_env["Platform"] = msvc_platform
-    shell_env["VALAC"] = VALAC_FILENAME
+    shell_env["VALAC"] = BOOTSTRAP_VALAC
     shell_env["VALAFLAGS"] = vala_flags
 
     return MesonEnv(env_dir, shell_env)
@@ -439,6 +442,7 @@ def build_v8(platform, configuration, runtime):
             "v8_enable_gdbjit=false",
             "v8_enable_i18n_support=false",
             "v8_untrusted_code_mitigations=false",
+            "treat_warnings_as_errors=false",
             "strip_absolute_paths_from_debug_symbols=true",
             "use_goma=false",
             "v8_embedder_string=\"-frida\"",
@@ -568,7 +572,7 @@ def file_is_sdk_related(directory, filename):
         return False
 
     if ext in ("vapi", "deps"):
-        return not directory.endswith(VALA_VAPI_SUBPATH)
+        return not is_vala_toolchain_vapi_directory(directory)
 
     return "\\share\\" not in directory
 
@@ -576,8 +580,11 @@ def file_is_vala_toolchain_related(directory, filename):
     base, ext = os.path.splitext(filename)
     ext = ext[1:]
     if ext in ('vapi', 'deps'):
-        return directory.endswith(VALA_VAPI_SUBPATH)
-    return filename == VALAC_FILENAME
+        return is_vala_toolchain_vapi_directory(directory)
+    return VALAC_PATTERN.match(filename) is not None
+
+def is_vala_toolchain_vapi_directory(directory):
+    return VALA_TOOLCHAIN_VAPI_SUBPATH_PATTERN.search(directory) is not None
 
 def transform_identity(srcfile):
     return srcfile

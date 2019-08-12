@@ -1,0 +1,28 @@
+#!/bin/bash
+
+mode=link
+
+argv=()
+while [[ $# > 0 ]]; do
+  arg="$1"
+
+  case "$arg" in
+    -c|-E)
+      mode=compile
+      ;;
+  esac
+
+  argv+=("$arg")
+  shift
+done
+
+case $mode in
+  compile)
+    argv+=("-nostdinc++" "-isystem@frida_sdkroot@/include/c++")
+    exec "@driver@" -isysroot "@sysroot@" -arch "@arch@" "${argv[@]}"
+    ;;
+  link)
+    argv+=("-nostdlib++" "-L@frida_sdkroot@/lib/c++" "-lc++" "-lc++abi")
+    exec "@driver@" -isysroot "@sysroot@" -arch "@arch@" "${argv[@]}" 2> >(grep -v "ld: warning: embedded dylibs/frameworks only run on iOS 8 or later")
+    ;;
+esac

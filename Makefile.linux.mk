@@ -20,17 +20,17 @@ HELP_FUN = \
 	print "Where $${target_color}TARGET$${reset_color} specifies one or more of:\n"; \
 	print "\n"; \
 	for (@sections) { \
-		print "  /* $$_ */\n"; $$sep = " " x (20 - length $$_->[0]); \
-		printf("  $${target_color}%-20s$${reset_color}    %s\n", $$_->[0], $$_->[1]) for @{$$help{$$_}}; \
+		print "  /* $$_ */\n"; $$sep = " " x (30 - length $$_->[0]); \
+		printf("  $${target_color}%-30s$${reset_color}    %s\n", $$_->[0], $$_->[1]) for @{$$help{$$_}}; \
 		print "\n"; \
 	} \
 	print "And optionally also $${variable_color}VARIABLE$${reset_color} values:\n"; \
-	print "  $${variable_color}PYTHON$${reset_color}                  Absolute path of Python interpreter including version suffix\n"; \
-	print "  $${variable_color}NODE$${reset_color}                    Absolute path of Node.js binary\n"; \
+	print "  $${variable_color}PYTHON$${reset_color}                            Absolute path of Python interpreter including version suffix\n"; \
+	print "  $${variable_color}NODE$${reset_color}                              Absolute path of Node.js binary\n"; \
 	print "\n"; \
 	print "For example:\n"; \
-	print "  \$$ make $${target_color}python-64 $${variable_color}PYTHON$${reset_color}=/opt/python36-64/bin/python3.6\n"; \
-	print "  \$$ make $${target_color}node-32 $${variable_color}NODE$${reset_color}=/opt/node-32/bin/node\n"; \
+	print "  \$$ make $${target_color}python-linux-x86_64 $${variable_color}PYTHON$${reset_color}=/opt/python36-64/bin/python3.6\n"; \
+	print "  \$$ make $${target_color}node-linux-x86 $${variable_color}NODE$${reset_color}=/opt/node-linux-x86/bin/node\n"; \
 	print "\n";
 
 help:
@@ -77,15 +77,16 @@ build/$1-%/lib/pkgconfig/capstone.pc: build/$1-env-%.rc build/.capstone-submodul
 		&& export PACKAGE_TARNAME=capstone \
 		&& . $$$$CONFIG_SITE \
 		&& case $$* in \
-			*-x86)    capstone_archs="x86"      ;; \
-			*-x86_64) capstone_archs="x86"      ;; \
-			*-arm)    capstone_archs="arm"      ;; \
-			*-armhf)  capstone_archs="arm"      ;; \
-			*-armeabi)capstone_archs="arm"      ;; \
-			*-arm64)  capstone_archs="aarch64"  ;; \
-			*-mips)   capstone_archs="mips"     ;; \
-			*-mipsel) capstone_archs="mips"     ;; \
-			*-mips64)   capstone_archs="mips64" ;; \
+			*-x86)       capstone_archs="x86"     ;; \
+			*-x86_64)    capstone_archs="x86"     ;; \
+			*-arm)       capstone_archs="arm"     ;; \
+			*-armhf)     capstone_archs="arm"     ;; \
+			*-armeabi)   capstone_archs="arm"     ;; \
+			*-arm64)     capstone_archs="aarch64" ;; \
+			*-mips)      capstone_archs="mips"    ;; \
+			*-mipsel)    capstone_archs="mips"    ;; \
+			*-mips64)    capstone_archs="mips64"    ;; \
+			*-mips64el)  capstone_archs="mips64"    ;; \
 		esac \
 		&& CFLAGS="$$$$CPPFLAGS $$$$CFLAGS" make -C capstone \
 			PREFIX=$$$$frida_prefix \
@@ -100,11 +101,23 @@ $(eval $(call make-capstone-rule,frida,tmp))
 $(eval $(call make-capstone-rule,frida_thin,tmp_thin))
 
 
-gum-32: build/frida-linux-x86/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for x86
-gum-64: build/frida-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for x86-64
-gum-32-thin: build/frida_thin-linux-x86/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for x86 without cross-arch support
-gum-64-thin: build/frida_thin-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for x86-64 without cross-arch support
-gum-android: build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android
+gum-linux-x86: build/frida-linux-x86/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/x86
+gum-linux-x86_64: build/frida-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/x86-64
+gum-linux-x86-thin: build/frida_thin-linux-x86/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/x86 without cross-arch support
+gum-linux-x86_64-thin: build/frida_thin-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/x86-64 without cross-arch support
+gum-linux-arm: build/frida_thin-linux-arm/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/ARM
+gum-linux-armhf: build/frida_thin-linux-armhf/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/ARMhf
+gum-linux-arm64: build/frida_thin-linux-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/ARM64
+gum-linux-mips: build/frida_thin-linux-mips/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/MIPS
+gum-linux-mipsel: build/frida_thin-linux-mipsel/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/MIPSel
+gum-linux-mips64: build/frida_thin-linux-mips64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/MIPS64
+gum-linux-mips64el: build/frida_thin-linux-mips64el/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/MIP64Sel
+gum-android-x86: build/frida-android-x86/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/x86
+gum-android-x86_64: build/frida-android-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/x86-64
+gum-android-arm: build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/ARM
+gum-android-arm64: build/frida-android-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/ARM64
+gum-qnx-arm: build/frida_thin-qnx-arm/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for QNX/ARM
+gum-qnx-armeabi: build/frida_thin-qnx-armeabi/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for QNX/ARMEABI
 
 
 define make-gum-rules
@@ -136,26 +149,35 @@ endef
 $(eval $(call make-gum-rules,frida,tmp))
 $(eval $(call make-gum-rules,frida_thin,tmp_thin))
 
-check-gum-32: build/frida-linux-x86/lib/pkgconfig/frida-gum-1.0.pc ##@gum Run tests for x86
+check-gum-linux-x86: gum-linux-x86 ##@gum Run tests for Linux/x86
 	build/tmp-linux-x86/frida-gum/tests/gum-tests $(test_args)
-check-gum-64: build/frida-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Run tests for x86-64
+check-gum-linux-x86_64: gum-linux-x86_64 ##@gum Run tests for Linux/x86-64
 	build/tmp-linux-x86_64/frida-gum/tests/gum-tests $(test_args)
-check-gum-32-thin: build/frida_thin-linux-x86/lib/pkgconfig/frida-gum-1.0.pc ##@gum Run tests for x86 without cross-arch support
+check-gum-linux-x86-thin: gum-linux-x86-thin ##@gum Run tests for Linux/x86 without cross-arch support
 	build/tmp_thin-linux-x86/frida-gum/tests/gum-tests $(test_args)
-check-gum-64-thin: build/frida_thin-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Run tests for x86-64 without cross-arch support
+check-gum-linux-x86_64-thin: gum-linux-x86_64-thin ##@gum Run tests for Linux/x86-64 without cross-arch support
 	build/tmp_thin-linux-x86_64/frida-gum/tests/gum-tests $(test_args)
+check-gum-linux-arm64: gum-linux-arm64 ##@gum Run tests for Linux/ARM64
+	build/tmp_thin-linux-arm64/frida-gum/tests/gum-tests $(test_args)
 
 
-core-32: build/frida-linux-x86/lib/pkgconfig/frida-core-1.0.pc ##@core Build for x86
-core-64: build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for x86-64
-core-32-thin: build/frida_thin-linux-x86/lib/pkgconfig/frida-core-1.0.pc ##@core Build for x86 without cross-arch support
-core-64-thin: build/frida_thin-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for x86-64 without cross-arch support
-core-android: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android
-core-qnx-arm: build/frida-qnx-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for QNX-arm
-core-qnx-armeabi: build/frida-qnx-armeabi/lib/pkgconfig/frida-core-1.0.pc ##@core Build for QNX-armeabi
-core-linux-mips: build/frida-linux-mips/lib/pkgconfig/frida-core-1.0.pc ##@core Build for mips
-core-linux-mipsel: build/frida-linux-mipsel/lib/pkgconfig/frida-core-1.0.pc ##@core Build for mipsel
-core-linux-mips64: build/frida-linux-mips64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for mips64
+core-linux-x86: build/frida-linux-x86/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Linux/x86
+core-linux-x86_64: build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Linux/x86-64
+core-linux-x86-thin: build/frida_thin-linux-x86/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Linux/x86 without cross-arch support
+core-linux-x86_64-thin: build/frida_thin-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Linux/x86-64 without cross-arch support
+core-linux-arm: build/frida_thin-linux-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Linux/ARM
+core-linux-armhf: build/frida_thin-linux-armhf/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Linux/ARMhf
+core-linux-arm64: build/frida_thin-linux-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Linux/ARM64
+core-linux-mips: build/frida_thin-linux-mips/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Linux/MIPS
+core-linux-mipsel: build/frida_thin-linux-mipsel/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Linux/MIPSel
+core-linux-mips64: build/frida_thin-linux-mips64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Linux/MIPS64
+core-linux-mips64el: build/frida_thin-linux-mips64el/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Linux/MIPS64el
+core-android-x86: build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/x86
+core-android-x86_64: build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/x86-64
+core-android-arm: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/ARM
+core-android-arm64: build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/ARM64
+core-qnx-arm: build/frida_thin-qnx-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for QNX/ARM
+core-qnx-armeabi: build/frida_thin-qnx-armeabi/lib/pkgconfig/frida-core-1.0.pc ##@core Build for QNX/ARMEABI
 
 build/tmp-linux-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-linux-x86/lib/pkgconfig/frida-gum-1.0.pc
 	. build/frida-meson-env-linux-$(build_arch).rc; \
@@ -172,10 +194,10 @@ build/tmp-linux-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-s
 			--libdir $(FRIDA)/build/frida-linux-x86/lib \
 			$$cross_args \
 			$(frida_core_flags) \
-			-Dwith-32bit-helper=$(FRIDA)/build/tmp-linux-x86/frida-core/src/frida-helper \
-			-Dwith-64bit-helper=$(FRIDA)/build/tmp-linux-x86_64/frida-core/src/frida-helper \
-			-Dwith-32bit-agent=$(FRIDA)/build/tmp-linux-x86/frida-core/lib/agent/frida-agent.so \
-			-Dwith-64bit-agent=$(FRIDA)/build/tmp-linux-x86_64/frida-core/lib/agent/frida-agent.so \
+			-Dhelper32=$(FRIDA)/build/tmp-linux-x86/frida-core/src/frida-helper \
+			-Dhelper64=$(FRIDA)/build/tmp-linux-x86_64/frida-core/src/frida-helper \
+			-Dagent32=$(FRIDA)/build/tmp-linux-x86/frida-core/lib/agent/frida-agent.so \
+			-Dagent64=$(FRIDA)/build/tmp-linux-x86_64/frida-core/lib/agent/frida-agent.so \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -194,76 +216,13 @@ build/tmp-linux-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submodul
 			--libdir $(FRIDA)/build/frida-linux-x86_64/lib \
 			$$cross_args \
 			$(frida_core_flags) \
-			-Dwith-32bit-helper=$(FRIDA)/build/tmp-linux-x86/frida-core/src/frida-helper \
-			-Dwith-64bit-helper=$(FRIDA)/build/tmp-linux-x86_64/frida-core/src/frida-helper \
-			-Dwith-32bit-agent=$(FRIDA)/build/tmp-linux-x86/frida-core/lib/agent/frida-agent.so \
-			-Dwith-64bit-agent=$(FRIDA)/build/tmp-linux-x86_64/frida-core/lib/agent/frida-agent.so \
+			-Dhelper32=$(FRIDA)/build/tmp-linux-x86/frida-core/src/frida-helper \
+			-Dhelper64=$(FRIDA)/build/tmp-linux-x86_64/frida-core/src/frida-helper \
+			-Dagent32=$(FRIDA)/build/tmp-linux-x86/frida-core/lib/agent/frida-agent.so \
+			-Dagent64=$(FRIDA)/build/tmp-linux-x86_64/frida-core/lib/agent/frida-agent.so \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
-build/tmp-linux-arm/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-linux-arm/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-linux-$(build_arch).rc; \
-	builddir=$(@D); \
-	if [ ! -f $$builddir/build.ninja ]; then \
-		mkdir -p $$builddir; \
-		$(MESON) \
-			--prefix $(FRIDA)/build/frida-linux-arm \
-			--libdir $(FRIDA)/build/frida-linux-arm/lib \
-			--cross-file build/frida-linux-arm.txt \
-			$(frida_core_flags) \
-			frida-core $$builddir || exit 1; \
-	fi
-	@touch $@
-build/tmp-linux-armhf/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-linux-armhf/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-linux-$(build_arch).rc; \
-	builddir=$(@D); \
-	if [ ! -f $$builddir/build.ninja ]; then \
-		mkdir -p $$builddir; \
-		$(MESON) \
-			--prefix $(FRIDA)/build/frida-linux-armhf \
-			--libdir $(FRIDA)/build/frida-linux-armhf/lib \
-			--cross-file build/frida-linux-armhf.txt \
-			$(frida_core_flags) \
-			frida-core $$builddir || exit 1; \
-	fi
-	@touch $@
-build/tmp-linux-mips/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-linux-mips/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-linux-$(build_arch).rc; \
-	builddir=$(@D); \
-	if [ ! -f $$builddir/build.ninja ]; then \
-		mkdir -p $$builddir; \
-		$(MESON) \
-			--prefix $(FRIDA)/build/frida-linux-mips \
-			--libdir $(FRIDA)/build/frida-linux-mips/lib \
-			--cross-file build/frida-linux-mips.txt \
-			$(frida_core_flags) \
-			frida-core $$builddir || exit 1; \
-	fi
-	@touch $@
-build/tmp-linux-mipsel/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-linux-mipsel/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-linux-$(build_arch).rc; \
-	builddir=$(@D); \
-	if [ ! -f $$builddir/build.ninja ]; then \
-		mkdir -p $$builddir; \
-		$(MESON) \
-			--prefix $(FRIDA)/build/frida-linux-mipsel \
-			--libdir $(FRIDA)/build/frida-linux-mipsel/lib \
-			--cross-file build/frida-linux-mipsel.txt \
-			$(frida_core_flags) \
-			frida-core $$builddir || exit 1; \
-	fi
-	@touch $@
-build/tmp-linux-mips64/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-linux-mips64/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-linux-$(build_arch).rc; \
-	builddir=$(@D); \
-	if [ ! -f $$builddir/build.ninja ]; then \
-		mkdir -p $$builddir; \
-		$(MESON) \
-			--prefix $(FRIDA)/build/frida-linux-mips64 \
-			--libdir $(FRIDA)/build/frida-linux-mips64/lib \
-			--cross-file build/frida-linux-mips64.txt \
-			$(frida_core_flags) \
-			frida-core $$builddir || exit 1; \
 build/tmp-android-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-android-x86/lib/pkgconfig/frida-gum-1.0.pc
 	. build/frida-meson-env-linux-$(build_arch).rc; \
 	builddir=$(@D); \
@@ -287,10 +246,10 @@ build/tmp-android-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submod
 			--libdir $(FRIDA)/build/frida-android-x86_64/lib \
 			--cross-file build/frida-android-x86_64.txt \
 			$(frida_core_flags) \
-			-Dwith-32bit-helper=$(FRIDA)/build/tmp-android-x86/frida-core/src/frida-helper \
-			-Dwith-64bit-helper=$(FRIDA)/build/tmp-android-x86_64/frida-core/src/frida-helper \
-			-Dwith-32bit-agent=$(FRIDA)/build/tmp-android-x86/frida-core/lib/agent/frida-agent.so \
-			-Dwith-64bit-agent=$(FRIDA)/build/tmp-android-x86_64/frida-core/lib/agent/frida-agent.so \
+			-Dhelper32=$(FRIDA)/build/tmp-android-x86/frida-core/src/frida-helper \
+			-Dhelper64=$(FRIDA)/build/tmp-android-x86_64/frida-core/src/frida-helper \
+			-Dagent32=$(FRIDA)/build/tmp-android-x86/frida-core/lib/agent/frida-agent.so \
+			-Dagent64=$(FRIDA)/build/tmp-android-x86_64/frida-core/lib/agent/frida-agent.so \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -317,23 +276,10 @@ build/tmp-android-arm64/frida-core/.frida-ninja-stamp: build/.frida-core-submodu
 			--libdir $(FRIDA)/build/frida-android-arm64/lib \
 			--cross-file build/frida-android-arm64.txt \
 			$(frida_core_flags) \
-			-Dwith-32bit-helper=$(FRIDA)/build/tmp-android-arm/frida-core/src/frida-helper \
-			-Dwith-64bit-helper=$(FRIDA)/build/tmp-android-arm64/frida-core/src/frida-helper \
-			-Dwith-32bit-agent=$(FRIDA)/build/tmp-android-arm/frida-core/lib/agent/frida-agent.so \
-			-Dwith-64bit-agent=$(FRIDA)/build/tmp-android-arm64/frida-core/lib/agent/frida-agent.so \
-			frida-core $$builddir || exit 1; \
-	fi
-	@touch $@
-build/tmp-qnx-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-qnx-%/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-linux-$(build_arch).rc; \
-	builddir=$(@D); \
-	if [ ! -f $$builddir/build.ninja ]; then \
-		mkdir -p $$builddir; \
-		$(MESON) \
-			--prefix $(FRIDA)/build/frida-qnx-$* \
-			--libdir $(FRIDA)/build/frida-qnx-$*/lib \
-			--cross-file build/frida-qnx-$*.txt \
-			$(frida_core_flags) \
+			-Dhelper32=$(FRIDA)/build/tmp-android-arm/frida-core/src/frida-helper \
+			-Dhelper64=$(FRIDA)/build/tmp-android-arm64/frida-core/src/frida-helper \
+			-Dagent32=$(FRIDA)/build/tmp-android-arm/frida-core/lib/agent/frida-agent.so \
+			-Dagent64=$(FRIDA)/build/tmp-android-arm64/frida-core/lib/agent/frida-agent.so \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -357,40 +303,28 @@ build/tmp_thin-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stam
 	@touch $@
 
 build/frida-linux-x86/lib/pkgconfig/frida-core-1.0.pc: build/tmp-linux-x86/frida-core/.frida-helper-and-agent-stamp build/tmp-linux-x86_64/frida-core/.frida-helper-and-agent-stamp
+	@rm -f build/tmp-linux-x86/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-linux-x86/frida-core install
 	@touch $@
 build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-linux-x86/frida-core/.frida-helper-and-agent-stamp build/tmp-linux-x86_64/frida-core/.frida-helper-and-agent-stamp
+	@rm -f build/tmp-linux-x86_64/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-linux-x86_64/frida-core install
 	@touch $@
-build/frida-linux-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-linux-arm/frida-core/.frida-helper-and-agent-stamp
-	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-linux-arm/frida-core install
-	@touch $@
-build/frida-linux-armhf/lib/pkgconfig/frida-core-1.0.pc: build/tmp-linux-armhf/frida-core/.frida-helper-and-agent-stamp
-	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-linux-armhf/frida-core install
-	@touch $@
-build/frida-linux-mips/lib/pkgconfig/frida-core-1.0.pc: build/tmp-linux-mips/frida-core/.frida-helper-and-agent-stamp
-	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-linux-mips/frida-core install
-	@touch $@
-build/frida-linux-mipsel/lib/pkgconfig/frida-core-1.0.pc: build/tmp-linux-mipsel/frida-core/.frida-helper-and-agent-stamp
-	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-linux-mipsel/frida-core install
-	@touch $@
-build/frida-linux-mips64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-linux-mips64/frida-core/.frida-helper-and-agent-stamp
-	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-linux-mips64/frida-core install
-	@touch $@
 build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x86/frida-core/.frida-helper-and-agent-stamp
+	@rm -f build/tmp-android-x86/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-android-x86/frida-core install
 	@touch $@
 build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x86/frida-core/.frida-helper-and-agent-stamp build/tmp-android-x86_64/frida-core/.frida-helper-and-agent-stamp
+	@rm -f build/tmp-android-x86_64/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-android-x86_64/frida-core install
 	@touch $@
 build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/frida-core/.frida-helper-and-agent-stamp
+	@rm -f build/tmp-android-arm/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-android-arm/frida-core install
 	@touch $@
 build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/frida-core/.frida-helper-and-agent-stamp build/tmp-android-arm64/frida-core/.frida-helper-and-agent-stamp
+	@rm -f build/tmp-android-arm64/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-android-arm64/frida-core install
-	@touch $@
-build/frida-qnx-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-qnx-%/frida-core/.frida-ninja-stamp
-	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-qnx-$*/frida-core install
 	@touch $@
 build/frida_thin-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-%/frida-core/.frida-ninja-stamp
 	. build/frida_thin-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp_thin-$*/frida-core install
@@ -400,48 +334,23 @@ build/tmp-%/frida-core/.frida-helper-and-agent-stamp: build/tmp-%/frida-core/.fr
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-$*/frida-core src/frida-helper lib/agent/frida-agent.so
 	@touch $@
 
-check-core-32: build/frida-linux-x86/lib/pkgconfig/frida-core-1.0.pc ##@core Run tests for x86
+check-core-linux-x86: core-linux-x86 ##@core Run tests for Linux/x86
 	build/tmp-linux-x86/frida-core/tests/frida-tests $(test_args)
-check-core-64: build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Run tests for x86-64
+check-core-linux-x86_64: core-linux-x86_64 ##@core Run tests for Linux/x86-64
 	build/tmp-linux-x86_64/frida-core/tests/frida-tests $(test_args)
-check-core-32-thin: build/frida_thin-linux-x86/lib/pkgconfig/frida-core-1.0.pc ##@core Run tests for x86 without cross-arch support
+check-core-linux-x86-thin: core-linux-x86-thin ##@core Run tests for Linux/x86 without cross-arch support
 	build/tmp_thin-linux-x86/frida-core/tests/frida-tests $(test_args)
-check-core-64-thin: build/frida_thin-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Run tests for x86-64 without cross-arch support
+check-core-linux-x86_64-thin: core-linux-x86_64-thin ##@core Run tests for Linux/x86-64 without cross-arch support
 	build/tmp_thin-linux-x86_64/frida-core/tests/frida-tests $(test_args)
-
-server-32: build/frida-linux-x86/lib/pkgconfig/frida-core-1.0.pc ##@server Build for x86
-server-64: build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for x86-64
-server-32-thin: build/frida_thin-linux-x86/lib/pkgconfig/frida-core-1.0.pc ##@server Build for x86 without cross-arch support
-server-64-thin: build/frida_thin-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for x86-64 without cross-arch support
-server-arm: build/frida-linux-arm/lib/pkgconfig/frida-core-1.0.pc ##@server Build for arm
-server-armhf: build/frida-linux-armhf/lib/pkgconfig/frida-core-1.0.pc ##@server Build for arm
-server-mips: build/frida-linux-mips/lib/pkgconfig/frida-core-1.0.pc ##@server Build for mips
-server-mipsel: build/frida-linux-mipsel/lib/pkgconfig/frida-core-1.0.pc ##@server Build for mipsel
-server-mips64: build/frida-linux-mips64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for mips64
-server-android: build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@server Build for Android
-server-qnx-arm: build/frida-qnx-arm/lib/pkgconfig/frida-core-1.0.pc ##@server Build for QNX-arm
-server-qnx-armeabi: build/frida-qnx-armeabi/lib/pkgconfig/frida-core-1.0.pc ##@server Build for QNX-armeabi
-
-inject-32: build/frida-linux-x86/lib/pkgconfig/frida-core-1.0.pc ##@inject Build for x86
-inject-64: build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@inject Build for x86-64
-inject-arm: build/frida-linux-arm/lib/pkgconfig/frida-core-1.0.pc ##@inject Build for arm
-inject-armhf: build/frida-linux-armhf/lib/pkgconfig/frida-core-1.0.pc ##@inject Build for armhf
-
-gadget-32: build/frida-linux-x86/lib/pkgconfig/frida-core-1.0.pc ##@gadget Build for x86
-gadget-64: build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@gadget Build for x86-64
-gadget-android: build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@gadget Build for Android
-gadget-arm: build/frida-linux-arm/lib/pkgconfig/frida-core-1.0.pc ##@gadget Build for linux-arm
-gadget-armhf: build/frida-linux-armhf/lib/pkgconfig/frida-core-1.0.pc ##@gadget Build for linux-armhf
-gadget-mipsel: build/frida-linux-mipsel/lib/pkgconfig/frida-core-1.0.pc ##@gadget Build for mipsel
-gadget-mips64: build/frida-linux-mips64/lib/pkgconfig/frida-core-1.0.pc ##@gadget Build for mips64
-gadget-qnx-arm: build/frida-qnx-arm/lib/pkgconfig/frida-core-1.0.pc ##@gadget Build for qnx-arm
-gadget-qnx-armeabi: build/frida-qnx-armeabi/lib/pkgconfig/frida-core-1.0.pc ##@gadget Build for qnx-armeabi
+check-core-linux-arm64: core-linux-arm64 ##@core Run tests for Linux/ARM64
+	build/tmp_thin-linux-arm64/frida-core/tests/frida-tests $(test_args)
 
 
-python-32: build/tmp-linux-x86/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for x86
-python-64: build/tmp-linux-x86_64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for x86-64
-python-32-thin: build/tmp_thin-linux-x86/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for x86 without cross-arch support
-python-64-thin: build/tmp_thin-linux-x86_64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for x86-64 without cross-arch support
+python-linux-x86: build/tmp-linux-x86/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for Linux/x86
+python-linux-x86_64: build/tmp-linux-x86_64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for Linux/x86-64
+python-linux-x86-thin: build/tmp_thin-linux-x86/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for Linux/x86 without cross-arch support
+python-linux-x86_64-thin: build/tmp_thin-linux-x86_64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for Linux/x86-64 without cross-arch support
+python-linux-arm64: build/tmp_thin-linux-arm64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for Linux/ARM64
 
 define make-python-rule
 build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-stamp build/$1-%/lib/pkgconfig/frida-core-1.0.pc
@@ -458,7 +367,8 @@ build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-sta
 			--prefix $$(FRIDA)/build/$1-$$* \
 			--libdir $$(FRIDA)/build/$1-$$*/lib \
 			$$$$cross_args \
-			-Dwith-python=$$(PYTHON) \
+			-Dpython=$$(PYTHON) \
+			-Dpython_incdir=$$(PYTHON_INCDIR) \
 			frida-python $$$$builddir || exit 1; \
 	fi; \
 	$$(NINJA) -C $$$$builddir install || exit 1
@@ -467,28 +377,33 @@ endef
 $(eval $(call make-python-rule,frida,tmp))
 $(eval $(call make-python-rule,frida_thin,tmp_thin))
 
-check-python-32: build/tmp-linux-x86/frida-$(PYTHON_NAME)/.frida-stamp ##@python Test Python bindings for x86
+check-python-linux-x86: build/tmp-linux-x86/frida-$(PYTHON_NAME)/.frida-stamp ##@python Test Python bindings for Linux/x86
 	export PYTHONPATH="$(shell pwd)/build/frida-linux-x86/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
 		&& ${PYTHON} -m unittest discover
-check-python-64: build/tmp-linux-x86_64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Test Python bindings for x86-64
+check-python-linux-x86_64: build/tmp-linux-x86_64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Test Python bindings for Linux/x86-64
 	export PYTHONPATH="$(shell pwd)/build/frida-linux-x86_64/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
 		&& ${PYTHON} -m unittest discover
-check-python-32-thin: build/tmp_thin-linux-x86/frida-$(PYTHON_NAME)/.frida-stamp ##@python Test Python bindings for x86 without cross-arch support
+check-python-linux-x86-thin: build/tmp_thin-linux-x86/frida-$(PYTHON_NAME)/.frida-stamp ##@python Test Python bindings for Linux/x86 without cross-arch support
 	export PYTHONPATH="$(shell pwd)/build/frida_thin-linux-x86/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
 		&& ${PYTHON} -m unittest discover
-check-python-64-thin: build/tmp_thin-linux-x86_64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Test Python bindings for x86-64 without cross-arch support
+check-python-linux-x86_64-thin: build/tmp_thin-linux-x86_64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Test Python bindings for Linux/x86-64 without cross-arch support
 	export PYTHONPATH="$(shell pwd)/build/frida_thin-linux-x86_64/lib/$(PYTHON_NAME)/site-packages" \
+		&& cd frida-python \
+		&& ${PYTHON} -m unittest discover
+check-python-linux-arm64: build/tmp_thin-linux-arm64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Test Python bindings for Linux/ARM64
+	export PYTHONPATH="$(shell pwd)/build/frida_thin-linux-arm64/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
 		&& ${PYTHON} -m unittest discover
 
 
-node-32: build/frida-linux-x86/lib/node_modules/frida build/.frida-node-submodule-stamp ##@node Build Node.js bindings for x86
-node-64: build/frida-linux-x86_64/lib/node_modules/frida build/.frida-node-submodule-stamp ##@node Build Node.js bindings for x86-64
-node-32-thin: build/frida_thin-linux-x86/lib/node_modules/frida build/.frida-node-submodule-stamp ##@node Build Node.js bindings for x86 without cross-arch support
-node-64-thin: build/frida_thin-linux-x86_64/lib/node_modules/frida build/.frida-node-submodule-stamp ##@node Build Node.js bindings for x86-64 without cross-arch support
+node-linux-x86: build/frida-linux-x86/lib/node_modules/frida build/.frida-node-submodule-stamp ##@node Build Node.js bindings for Linux/x86
+node-linux-x86_64: build/frida-linux-x86_64/lib/node_modules/frida build/.frida-node-submodule-stamp ##@node Build Node.js bindings for Linux/x86-64
+node-linux-x86-thin: build/frida_thin-linux-x86/lib/node_modules/frida build/.frida-node-submodule-stamp ##@node Build Node.js bindings for Linux/x86 without cross-arch support
+node-linux-x86_64-thin: build/frida_thin-linux-x86_64/lib/node_modules/frida build/.frida-node-submodule-stamp ##@node Build Node.js bindings for Linux/x86-64 without cross-arch support
+node-linux-arm64: build/frida_thin-linux-arm64/lib/node_modules/frida build/.frida-node-submodule-stamp ##@node Build Node.js bindings for Linux/ARM64
 
 define make-node-rule
 build/$1-%/lib/node_modules/frida: build/$1-%/lib/pkgconfig/frida-core-1.0.pc build/.frida-node-submodule-stamp
@@ -523,20 +438,23 @@ define run-node-tests
 			--timeout 60000 \
 			test/*.ts
 endef
-check-node-32: node-32 ##@node Test Node.js bindings for x86
+check-node-linux-x86: node-linux-x86 ##@node Test Node.js bindings for Linux/x86
 	$(call run-node-tests,frida-linux-x86,$(FRIDA),$(NODE_BIN_DIR),$(NODE),$(NPM))
-check-node-64: node-64 ##@node Test Node.js bindings for x86-64
+check-node-linux-x86_64: node-linux-x86_64 ##@node Test Node.js bindings for Linux/x86-64
 	$(call run-node-tests,frida-linux-x86_64,$(FRIDA),$(NODE_BIN_DIR),$(NODE),$(NPM))
-check-node-32-thin: node-32-thin ##@node Test Node.js bindings for x86 without cross-arch support
+check-node-linux-x86-thin: node-linux-x86-thin ##@node Test Node.js bindings for Linux/x86 without cross-arch support
 	$(call run-node-tests,frida_thin-linux-x86,$(FRIDA),$(NODE_BIN_DIR),$(NODE),$(NPM))
-check-node-64-thin: node-64-thin ##@node Test Node.js bindings for x86-64 without cross-arch support
+check-node-linux-x86_64-thin: node-linux-x86_64-thin ##@node Test Node.js bindings for Linux/x86-64 without cross-arch support
 	$(call run-node-tests,frida_thin-linux-x86_64,$(FRIDA),$(NODE_BIN_DIR),$(NODE),$(NPM))
+check-node-linux-arm64: node-linux-arm64 ##@node Test Node.js bindings for Linux/ARM64
+	$(call run-node-tests,frida_thin-linux-arm64,$(FRIDA),$(NODE_BIN_DIR),$(NODE),$(NPM))
 
 
-tools-32: build/tmp-linux-x86/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Build CLI tools for x86
-tools-64: build/tmp-linux-x86_64/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Build CLI tools for x86-64
-tools-32-thin: build/tmp_thin-linux-x86/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Build CLI tools for x86 without cross-arch support
-tools-64-thin: build/tmp_thin-linux-x86_64/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Build CLI tools for x86-64 without cross-arch support
+tools-linux-x86: build/tmp-linux-x86/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Build CLI tools for Linux/x86
+tools-linux-x86_64: build/tmp-linux-x86_64/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Build CLI tools for Linux/x86-64
+tools-linux-x86-thin: build/tmp_thin-linux-x86/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Build CLI tools for Linux/x86 without cross-arch support
+tools-linux-x86_64-thin: build/tmp_thin-linux-x86_64/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Build CLI tools for Linux/x86-64 without cross-arch support
+tools-linux-arm64: build/tmp_thin-linux-arm64/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Build CLI tools for Linux/ARM64
 
 define make-tools-rule
 build/$2-%/frida-tools-$$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodule-stamp build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp
@@ -553,7 +471,7 @@ build/$2-%/frida-tools-$$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodul
 			--prefix $$(FRIDA)/build/$1-$$* \
 			--libdir $$(FRIDA)/build/$1-$$*/lib \
 			$$$$cross_args \
-			-Dwith-python=$$(PYTHON) \
+			-Dpython=$$(PYTHON) \
 			frida-tools $$$$builddir || exit 1; \
 	fi; \
 	$$(NINJA) -C $$$$builddir install || exit 1
@@ -562,20 +480,24 @@ endef
 $(eval $(call make-tools-rule,frida,tmp))
 $(eval $(call make-tools-rule,frida_thin,tmp_thin))
 
-check-tools-32: build/tmp-linux-x86/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Test CLI tools for x86
+check-tools-linux-x86: build/tmp-linux-x86/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Test CLI tools for Linux/x86
 	export PYTHONPATH="$(shell pwd)/build/frida-linux-x86/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-tools \
 		&& ${PYTHON} -m unittest discover
-check-tools-64: build/tmp-linux-x86_64/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Test CLI tools for x86-64
+check-tools-linux-x86_64: build/tmp-linux-x86_64/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Test CLI tools for Linux/x86-64
 	export PYTHONPATH="$(shell pwd)/build/frida-linux-x86_64/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-tools \
 		&& ${PYTHON} -m unittest discover
-check-tools-32-thin: build/tmp_thin-linux-x86/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Test CLI tools for x86 without cross-arch support
+check-tools-linux-x86-thin: build/tmp_thin-linux-x86/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Test CLI tools for Linux/x86 without cross-arch support
 	export PYTHONPATH="$(shell pwd)/build/frida_thin-linux-x86/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-tools \
 		&& ${PYTHON} -m unittest discover
-check-tools-64-thin: build/tmp_thin-linux-x86_64/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Test CLI tools for x86-64 without cross-arch support
+check-tools-linux-x86_64-thin: build/tmp_thin-linux-x86_64/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Test CLI tools for Linux/x86-64 without cross-arch support
 	export PYTHONPATH="$(shell pwd)/build/frida_thin-linux-x86_64/lib/$(PYTHON_NAME)/site-packages" \
+		&& cd frida-tools \
+		&& ${PYTHON} -m unittest discover
+check-tools-linux-arm64: build/tmp_thin-linux-arm64/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Test CLI tools for Linux/ARM64
+	export PYTHONPATH="$(shell pwd)/build/frida_thin-linux-arm64/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-tools \
 		&& ${PYTHON} -m unittest discover
 
@@ -584,12 +506,51 @@ check-tools-64-thin: build/tmp_thin-linux-x86_64/frida-tools-$(PYTHON_NAME)/.fri
 	help \
 	distclean clean clean-submodules git-submodules git-submodule-stamps \
 	capstone-update-submodule-stamp \
-	gum-32 gum-64 gum-32-thin gum-64-thin gum-android check-gum-32 check-gum-64 check-gum-32-thin check-gum-64-thin frida-gum-update-submodule-stamp \
-	core-32 core-64 core-32-thin core-64-thin core-android check-core-32 check-core-64 check-core-32-thin check-core-64-thin frida-core-update-submodule-stamp \
-	server-32 server-64 server-32-thin server-64-thin server-android server-qnx-arm server-qnx-armeabi \
-	python-32 python-64 python-32-thin python-64-thin check-python-32 check-python-64 check-python-32-thin check-python-64-thin frida-python-update-submodule-stamp \
-	node-32 node-64 node-32-thin node-64-thin check-node-32 check-node-64 check-node-32-thin check-node-64-thin frida-node-update-submodule-stamp \
-	tools-32 tools-64 tools-32-thin tools-64-thin check-tools-32 check-tools-64 check-tools-32-thin check-tools-64-thin frida-tools-update-submodule-stamp \
+	gum-linux-x86 gum-linux-x86_64 \
+		gum-linux-x86-thin gum-linux-x86_64-thin \
+		gum-linux-arm gum-linux-armhf gum-linux-arm64 \
+		gum-linux-mips gum-linux-mipsel \
+		gum-linux-mips64 gum-linux-mips64el \
+		gum-android-x86 gum-android-x86_64 \
+		gum-android-arm gum-android-arm64 \
+		gum-qnx-arm gum-qnx-armeabi \
+		check-gum-linux-x86 check-gum-linux-x86_64 \
+		check-gum-linux-x86-thin check-gum-linux-x86_64-thin \
+		check-gum-linux-arm64 \
+		frida-gum-update-submodule-stamp \
+	core-linux-x86 core-linux-x86_64 \
+		core-linux-x86-thin core-linux-x86_64-thin \
+		core-linux-arm core-linux-armhf core-linux-arm64 \
+		core-linux-mips core-linux-mipsel \
+		core-linux-mips64 core-linux-mips64el \
+		core-android-x86 core-android-x86_64 \
+		core-android-arm core-android-arm64 \
+		core-qnx-arm core-qnx-armeabi \
+		check-core-linux-x86 check-core-linux-x86_64 \
+		check-core-linux-x86-thin check-core-linux-x86_64-thin \
+		check-core-linux-arm64 \
+		frida-core-update-submodule-stamp \
+	python-linux-x86 python-linux-x86_64 \
+		python-linux-x86-thin python-linux-x86_64-thin \
+		python-linux-arm64 \
+		check-python-linux-x86 check-python-linux-x86_64 \
+		check-python-linux-x86-thin check-python-linux-x86_64-thin \
+		check-python-linux-arm64 \
+		frida-python-update-submodule-stamp \
+	node-linux-x86 node-linux-x86_64 \
+		node-linux-x86-thin node-linux-x86_64-thin \
+		node-linux-arm64 \
+		check-node-linux-x86 check-node-linux-x86_64 \
+		check-node-linux-x86-thin check-node-linux-x86_64-thin \
+		check-node-linux-arm64 \
+		frida-node-update-submodule-stamp \
+	tools-linux-x86 tools-linux-x86_64 \
+		tools-linux-x86-thin tools-linux-x86_64-thin \
+		tools-linux-arm64 \
+		check-tools-linux-x86 check-tools-linux-x86_64 \
+		check-tools-linux-x86-thin check-tools-linux-x86_64-thin \
+		check-tools-linux-arm64 \
+		frida-tools-update-submodule-stamp \
 	glib glib-symlinks \
 	v8 v8-symlinks
 .SECONDARY:

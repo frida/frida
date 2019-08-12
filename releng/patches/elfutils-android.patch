@@ -1,94 +1,52 @@
-diff -Nur elfutils-orig/configure elfutils/configure
---- elfutils-orig/configure	2017-08-02 21:20:00.000000000 +0200
-+++ elfutils/configure	2017-09-27 02:44:01.000000000 +0200
-@@ -6113,7 +6113,7 @@
- 
- 
- 	if test "$have_argp" = "false"; then
--		as_fn_error $? "\"no libargp found\"" "$LINENO" 5
-+		argp_LDADD=""
- 	else
- 		argp_LDADD="-largp"
- 	fi
-diff -Nur elfutils-orig/configure.ac elfutils/configure.ac
---- elfutils-orig/configure.ac	2017-08-02 18:28:57.000000000 +0200
-+++ elfutils/configure.ac	2017-09-27 02:43:48.000000000 +0200
-@@ -376,7 +376,7 @@
+diff --git a/configure.ac b/configure.ac
+index 8274ec79..f00877a3 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -485,7 +485,7 @@ if test "$libc_has_argp" = "false" ; then
  	AC_CHECK_LIB([argp], [argp_parse], [have_argp="true"], [have_argp="false"])
  
  	if test "$have_argp" = "false"; then
 -		AC_MSG_ERROR("no libargp found")
-+		argp_LDADD=""
++		AC_MSG_WARN("no libargp found")
  	else
  		argp_LDADD="-largp"
  	fi
-diff -Nur elfutils-orig/libelf/elf_getaroff.c elfutils/libelf/elf_getaroff.c
---- elfutils-orig/libelf/elf_getaroff.c	2017-06-19 16:45:16.000000000 +0200
-+++ elfutils/libelf/elf_getaroff.c	2017-09-27 02:53:14.000000000 +0200
-@@ -38,7 +38,7 @@
- #include "libelfP.h"
- 
- 
--off_t
-+int64_t
- elf_getaroff (Elf *elf)
- {
-   /* Be gratious, the specs demand it.  */
-diff -Nur elfutils-orig/libelf/elf_getbase.c elfutils/libelf/elf_getbase.c
---- elfutils-orig/libelf/elf_getbase.c	2017-06-19 16:45:16.000000000 +0200
-+++ elfutils/libelf/elf_getbase.c	2017-09-27 02:50:21.000000000 +0200
-@@ -37,7 +37,7 @@
- #include "libelfP.h"
- 
- 
--off_t
-+int64_t
- elf_getbase (Elf *elf)
- {
-   return elf == NULL ? (off_t) -1 : elf->start_offset;
-diff -Nur elfutils-orig/libelf/elf_getdata_rawchunk.c elfutils/libelf/elf_getdata_rawchunk.c
---- elfutils-orig/libelf/elf_getdata_rawchunk.c	2017-06-19 16:45:16.000000000 +0200
-+++ elfutils/libelf/elf_getdata_rawchunk.c	2017-09-27 02:51:12.000000000 +0200
-@@ -41,7 +41,7 @@
- #include "common.h"
- 
- Elf_Data *
--elf_getdata_rawchunk (Elf *elf, off_t offset, size_t size, Elf_Type type)
-+elf_getdata_rawchunk (Elf *elf, int64_t offset, size_t size, Elf_Type type)
- {
-   if (unlikely (elf == NULL))
-     return NULL;
-diff -Nur elfutils-orig/libelf/elf_update.c elfutils/libelf/elf_update.c
---- elfutils-orig/libelf/elf_update.c	2017-06-19 16:45:16.000000000 +0200
-+++ elfutils/libelf/elf_update.c	2017-09-27 02:53:01.000000000 +0200
-@@ -91,6 +91,7 @@
+diff --git a/lib/system.h b/lib/system.h
+index 292082bd..172456d2 100644
+--- a/lib/system.h
++++ b/lib/system.h
+@@ -33,6 +33,7 @@
+ #include <error.h>
+ #include <stddef.h>
+ #include <stdint.h>
++#include <string.h>
+ #include <sys/param.h>
+ #include <endian.h>
+ #include <byteswap.h>
+diff --git a/libelf/elf_update.c b/libelf/elf_update.c
+index 9b8867ce..afb3aa82 100644
+--- a/libelf/elf_update.c
++++ b/libelf/elf_update.c
+@@ -91,6 +91,7 @@ write_file (Elf *elf, int64_t size, int change_bo, size_t shnum)
  	 fallback case might fail (with unexpected errnos) in some cases.
  	 So we only report an error when the call fails and errno is
  	 ENOSPC. Otherwise we ignore the error and treat it as just hint.  */
 +#if 0
        if (elf->parent == NULL
  	  && (elf->maximum_size == ~((size_t) 0)
- 	      || (size_t) size > elf->maximum_size)
-@@ -100,6 +101,7 @@
- 	    __libelf_seterrno (ELF_E_WRITE_ERROR);
- 	    return -1;
- 	  }
+ 	      || (size_t) size > elf->maximum_size))
+@@ -116,6 +117,7 @@ write_file (Elf *elf, int64_t size, int change_bo, size_t shnum)
+ 	    }
+ 
+ 	}
 +#endif
  
        /* The file is mmaped.  */
        if ((class == ELFCLASS32
-@@ -148,7 +150,7 @@
- }
- 
- 
--off_t
-+int64_t
- elf_update (Elf *elf, Elf_Cmd cmd)
- {
-   size_t shnum;
-diff -Nur elfutils-orig/libelf/libelfP.h elfutils/libelf/libelfP.h
---- elfutils-orig/libelf/libelfP.h	2017-06-19 16:45:16.000000000 +0200
-+++ elfutils/libelf/libelfP.h	2017-09-27 02:49:35.000000000 +0200
+diff --git a/libelf/libelfP.h b/libelf/libelfP.h
+index b55d5c48..5f13d947 100644
+--- a/libelf/libelfP.h
++++ b/libelf/libelfP.h
 @@ -40,7 +40,7 @@
  #include <string.h>
  
@@ -98,19 +56,9 @@ diff -Nur elfutils-orig/libelf/libelfP.h elfutils/libelf/libelfP.h
  
  
  /* Helper Macros to write 32 bit and 64 bit functions.  */
-diff -Nur elfutils-orig/libelf/libintl.h elfutils/libelf/libintl.h
---- elfutils-orig/libelf/libintl.h	1970-01-01 01:00:00.000000000 +0100
-+++ elfutils/libelf/libintl.h	2017-09-27 13:08:42.000000000 +0200
+diff --git a/libelf/libintl.h b/libelf/libintl.h
+index e69de29b..0a2b2b66 100644
+--- a/libelf/libintl.h
++++ b/libelf/libintl.h
 @@ -0,0 +1 @@
-+/* Empty stub for Android. */
-diff -Nur elfutils-orig/lib/system.h elfutils/lib/system.h
---- elfutils-orig/lib/system.h	2018-08-25 02:48:49.000000000 +0200
-+++ elfutils/lib/system.h	2018-08-25 02:49:19.000000000 +0200
-@@ -32,6 +32,7 @@
- #include <errno.h>
- #include <stddef.h>
- #include <stdint.h>
-+#include <string.h>
- #include <sys/param.h>
- #include <endian.h>
- #include <byteswap.h>
++/* Empty stub for Android. */ 

@@ -1,10 +1,10 @@
 # Frida
 
 Dynamic instrumentation toolkit for developers, reverse-engineers, and security
-researchers.
+researchers. Learn more at [www.frida.re](https://www.frida.re/).
 
-Two ways to install—
-===
+Two ways to install
+===================
 
 ## 1. Install from prebuilt binaries
 
@@ -25,7 +25,7 @@ For running the Frida CLI tools, i.e. `frida`, `frida-ls-devices`, `frida-ps`,
 `frida-kill`, `frida-trace`, and `frida-discover`, you need Python plus a
 few packages:
 
-    pip3 install colorama prompt-toolkit==1.0.15 pygments
+    pip3 install colorama prompt-toolkit pygments
 
 ### Linux
 
@@ -34,9 +34,10 @@ few packages:
 ### macOS and iOS
 
 First make a trusted code-signing certificate. You can use the guide at
-https://sourceware.org/gdb/wiki/BuildingOnDarwin in the section
-“Creating a certificate”. You can use the name `frida-cert` instead of
-`gdb-cert` if you'd like.
+https://sourceware.org/gdb/wiki/PermissionsDarwin in the sections
+"Create a certificate in the System Keychain" and "Trust the certificate
+for code signing". You can use the name `frida-cert` instead of `gdb-cert`
+if you'd like.
 
 Next export the name of the created certificate to the environment
 variables `MAC_CERTID` and `IOS_CERTID` and run `make`:
