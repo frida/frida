@@ -302,12 +302,6 @@ if __name__ == '__main__':
             data = subprocess.check_output(["gzip", "-c", path])
             upload(asset_filename, "application/gzip", data)
 
-    def upload_file_gzipped(name_template, path, upload):
-        assert system != 'Windows'
-        asset_filename = (name_template + ".gz").format(version=version)
-        data = subprocess.check_output(["gzip", "-c", "-T", "0", path])
-        upload(asset_filename, "application/x-xz", data)
-
     def upload_directory(name_template, path, upload):
         tarball_filename = (name_template + ".tar").format(version=version)
         asset_filename = tarball_filename + ".xz"
