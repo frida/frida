@@ -168,7 +168,7 @@ if __name__ == '__main__':
         def reset():
             do(["git", "clean", "-xffd"])
         reset()
-        with package_version_temporarily_set_to(version, os.path.join(frida_node_dir, "package.json")):
+        with package_version_temporarily_set_to(version, frida_node_dir):
             do_build_command([npm, "install"])
             if publish:
                 do([npm, "publish"])
@@ -186,11 +186,13 @@ if __name__ == '__main__':
 
     def upload_meta_module_to_npm(node, module_name):
         module_dir = os.path.join(build_dir, "releng", "modules", module_name)
-        with package_version_temporarily_set_to(version, os.path.join(module_dir, "package.json")):
+        with package_version_temporarily_set_to(version, module_dir):
             subprocess.check_call(["npm", "publish"], cwd=module_dir)
 
     @contextmanager
-    def package_version_temporarily_set_to(version, package_json_path):
+    def package_version_temporarily_set_to(version, module_dir):
+        package_json_path = os.path.join(module_dir, "package.json")
+
         with codecs.open(package_json_path, "rb", 'utf-8') as f:
             package_json_original = f.read()
 
@@ -284,13 +286,26 @@ if __name__ == '__main__':
 
         return upload
 
-    def upload_file(name_template, path, upload):
-        if system == 'Windows':
-            asset_filename = (name_template + ".xz").format(version=version)
-            data = subprocess.check_output([szip, "a", "-txz", "-so", asset_filename, path])
+    def upload_file(name_template, path, upload, compression='xz'):
+        if compression == 'xz':
+            if system == 'Windows':
+                asset_filename = (name_template + ".xz").format(version=version)
+                data = subprocess.check_output([szip, "a", "-txz", "-so", asset_filename, path])
+            else:
+                asset_filename = (name_template + ".xz").format(version=version)
+                data = subprocess.check_output(["xz", "-z", "-c", "-T", "0", path])
+            upload(asset_filename, "application/x-xz", data)
         else:
-            asset_filename = (name_template + ".xz").format(version=version)
-            data = subprocess.check_output(["xz", "-z", "-c", "-T", "0", path])
+            assert compression == 'gz'
+            assert system != 'Windows'
+            asset_filename = (name_template + ".gz").format(version=version)
+            data = subprocess.check_output(["gzip", "-c", path])
+            upload(asset_filename, "application/gzip", data)
+
+    def upload_file_gzipped(name_template, path, upload):
+        assert system != 'Windows'
+        asset_filename = (name_template + ".gz").format(version=version)
+        data = subprocess.check_output(["gzip", "-c", "-T", "0", path])
         upload(asset_filename, "application/x-xz", data)
 
     def upload_directory(name_template, path, upload):
@@ -386,6 +401,7 @@ if __name__ == '__main__':
 
             upload_file("frida-gadget-{version}-macos-universal.dylib", os.path.join(build_dir, "build", "frida-macos-universal", "lib", "frida-gadget.dylib"), upload)
             upload_file("frida-gadget-{version}-ios-universal.dylib", os.path.join(build_dir, "build", "frida-ios-universal", "lib", "frida-gadget.dylib"), upload)
+            upload_file("frida-gadget-{version}-ios-universal.dylib", os.path.join(build_dir, "build", "frida-ios-universal", "lib", "frida-gadget.dylib"), upload, compression='gz')
 
             upload_directory("frida-swift-{version}-macos-x86_64", os.path.join(build_dir, "frida-swift", "build", "Release"), upload)
 

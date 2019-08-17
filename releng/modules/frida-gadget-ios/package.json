@@ -20,11 +20,5 @@
   "bugs": {
     "url": "https://github.com/frida/frida/issues"
   },
-  "homepage": "https://github.com/frida/frida#readme",
-  "dependencies": {
-    "glob": "^7.1.2",
-    "lzma-native": "^3.0.5",
-    "pump": "^3.0.0",
-    "simple-get": "^2.7.0"
-  }
+  "homepage": "https://github.com/frida/frida#readme"
 }

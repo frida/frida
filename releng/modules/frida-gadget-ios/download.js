@@ -1,19 +1,13 @@
-'use strict';
-
 const fs = require('fs');
 const gadget = require('.');
-const _glob = require('glob');
-const lzma = require('lzma-native');
-const _simpleGet = require('simple-get');
+const https = require('https');
 const path = require('path');
-const _pump = require('pump');
 const util = require('util');
+const zlib = require('zlib');
 
 const access = util.promisify(fs.access);
-const glob = util.promisify(_glob);
-const pump = util.promisify(_pump);
+const readdir = util.promisify(fs.readdir);
 const rename = util.promisify(fs.rename);
-const simpleGet = util.promisify(_simpleGet);
 const unlink = util.promisify(fs.unlink);
 
 async function run() {
@@ -35,27 +29,114 @@ async function alreadyDownloaded() {
 }
 
 async function download() {
-  const response = await simpleGet({
-    url: `https://github.com/frida/frida/releases/download/${gadget.version}/frida-gadget-${gadget.version}-ios-universal.dylib.xz`
-  });
-  if (response.statusCode !== 200) {
-    throw new Error(`Unable to download: ${response.statusMessage} (status code: ${response.statusCode})`);
-  }
+  const response = await httpsGet(`https://github.com/frida/frida/releases/download/${gadget.version}/frida-gadget-${gadget.version}-ios-universal.dylib.gz`);
 
   const tempGadgetPath = gadget.path + '.download';
   const tempGadgetStream = fs.createWriteStream(tempGadgetPath);
-  await pump(response, lzma.createDecompressor(), tempGadgetStream);
+  await pump(response, zlib.createGunzip(), tempGadgetStream);
 
   await rename(tempGadgetPath, gadget.path);
 }
 
 async function pruneOldVersions() {
-  const currentLib = gadget.path;
-  const libs = await glob(path.join(path.dirname(currentLib), '*.dylib'), {});
-  const obsoleteLibs = libs.filter(lib => lib !== currentLib);
-  for (const lib of obsoleteLibs) {
-    await unlink(lib);
+  const gadgetDir = path.dirname(gadget.path);
+  const currentName = path.basename(gadget.path);
+  for (const name of await readdir(gadgetDir)) {
+    if (name.startsWith('frida-gadget-') && name.endsWith('-ios-universal.dylib') && name !== currentName) {
+      await unlink(path.join(gadgetDir, name));
+    }
   }
+}
+
+function httpsGet(url) {
+  return new Promise((resolve, reject) => {
+    let redirects = 0;
+
+    tryGet(url);
+
+    function tryGet(url) {
+      const request = https.get(url, response => {
+        tearDown();
+
+        const {statusCode, headers} = response;
+
+        if (statusCode === 200) {
+          resolve(response);
+        } else {
+          response.resume();
+
+          if (statusCode >= 300 && statusCode < 400 && headers.location !== undefined) {
+            if (redirects === 10) {
+              reject(new Error('Too many redirects'));
+              return;
+            }
+
+            redirects++;
+            tryGet(headers.location);
+          } else {
+            reject(new Error(`Download failed (code=${statusCode})`));
+          }
+        }
+      });
+
+      request.addListener('error', onError);
+
+      function onError(error) {
+        tearDown();
+        reject(error);
+      }
+
+      function tearDown() {
+        request.removeListener('error', onError);
+      }
+    }
+  });
+}
+
+function pump(...streams) {
+  return new Promise((resolve, reject) => {
+    let done = false;
+
+    streams.forEach(stream => {
+      stream.addListener('error', onError);
+    });
+
+    for (let i = 0; i !== streams.length - 1; i++) {
+      const cur = streams[i];
+      const next = streams[i + 1];
+      cur.pipe(next);
+    }
+
+    const last = streams[streams.length - 1];
+    last.addListener('finish', onFinish);
+
+    function onFinish() {
+      if (done)
+        return;
+      done = true;
+
+      tearDown();
+      resolve();
+    }
+
+    function onError(error) {
+      if (done)
+        return;
+      done = true;
+
+      tearDown();
+      reject(error);
+    }
+
+    function tearDown() {
+      last.removeListener('finish', onFinish);
+
+      streams.forEach(stream => {
+        stream.removeListener('error', onError);
+        stream.destroy();
+      });
+    }
+  });
 }
 
 run().catch(onError);
