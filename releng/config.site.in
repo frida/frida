@@ -3,6 +3,7 @@
 frida_host_platform=@frida_host_platform@
 frida_host_arch=@frida_host_arch@
 frida_host_platform_arch=@frida_host_platform_arch@
+frida_libc=@frida_libc@
 frida_prefix=@frida_prefix@
 
 test "$prefix" = NONE && prefix="$frida_prefix"
@@ -36,11 +37,15 @@ case $frida_host_platform_arch in
     cross_compiling=yes
     ;;
   linux-mips)
-    host_alias="mips-linux-uclibc"
+    host_alias="mips-linux-$frida_libc"
     cross_compiling=yes
     ;;
   linux-mipsel)
-    host_alias="mipsel-linux-uclibc"
+    host_alias="mipsel-linux-$frida_libc"
+    cross_compiling=yes
+    ;;
+  linux-mips64)
+    host_alias="mips64-linux-$frida_libc"
     cross_compiling=yes
     ;;
   linux-x86)
