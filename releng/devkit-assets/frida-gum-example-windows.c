@@ -51,11 +51,11 @@ main (int argc,
   listener = g_object_new (EXAMPLE_TYPE_LISTENER, NULL);
 
   gum_interceptor_begin_transaction (interceptor);
-  gum_interceptor_attach_listener (interceptor,
+  gum_interceptor_attach (interceptor,
       GSIZE_TO_POINTER (gum_module_find_export_by_name ("user32.dll", "MessageBeep")),
       listener,
       GSIZE_TO_POINTER (EXAMPLE_HOOK_MESSAGE_BEEP));
-  gum_interceptor_attach_listener (interceptor,
+  gum_interceptor_attach (interceptor,
       GSIZE_TO_POINTER (gum_module_find_export_by_name ("kernel32.dll", "Sleep")),
       listener,
       GSIZE_TO_POINTER (EXAMPLE_HOOK_SLEEP));
@@ -66,7 +66,7 @@ main (int argc,
 
   g_print ("[*] listener got %u calls\n", EXAMPLE_LISTENER (listener)->num_calls);
 
-  gum_interceptor_detach_listener (interceptor, listener);
+  gum_interceptor_detach (interceptor, listener);
 
   MessageBeep (MB_ICONINFORMATION);
   Sleep (1);
@@ -86,7 +86,7 @@ example_listener_on_enter (GumInvocationListener * listener,
                            GumInvocationContext * ic)
 {
   ExampleListener * self = EXAMPLE_LISTENER (listener);
-  ExampleHookId hook_id = GUM_LINCTX_GET_FUNC_DATA (ic, ExampleHookId);
+  ExampleHookId hook_id = GUM_IC_GET_FUNC_DATA (ic, ExampleHookId);
 
   switch (hook_id)
   {
