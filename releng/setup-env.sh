@@ -909,6 +909,9 @@ meson_cross_file=build/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}.txt
   if [ -n "$OBJDUMP" ]; then
     echo "objdump = '$OBJDUMP'"
   fi
+  if [ -n "$INSTALL_NAME_TOOL" ]; then
+    echo "install_name_tool = '$INSTALL_NAME_TOOL'"
+  fi
   if [ -n "$OTOOL" ]; then
     echo "otool = '$OTOOL'"
   fi
