@@ -45,7 +45,7 @@ main (int argc,
 
   manager = frida_device_manager_new ();
 
-  devices = frida_device_manager_enumerate_devices_sync (manager, &error);
+  devices = frida_device_manager_enumerate_devices_sync (manager, NULL, &error);
   g_assert (error == NULL);
 
   local_device = NULL;
@@ -66,7 +66,7 @@ main (int argc,
   frida_unref (devices);
   devices = NULL;
 
-  session = frida_device_attach_sync (local_device, target_pid, &error);
+  session = frida_device_attach_sync (local_device, target_pid, NULL, &error);
   if (error == NULL)
   {
     FridaScript * script;
@@ -89,14 +89,14 @@ main (int argc,
         "    console.log('[*] CloseHandle(' + args[0] + ')');\n"
         "  }\n"
         "});",
-        options, &error);
+        options, NULL, &error);
     g_assert (error == NULL);
 
     g_clear_object (&options);
 
     g_signal_connect (script, "message", G_CALLBACK (on_message), NULL);
 
-    frida_script_load_sync (script, &error);
+    frida_script_load_sync (script, NULL, &error);
     g_assert (error == NULL);
 
     g_print ("[*] Script loaded\n");
@@ -106,11 +106,11 @@ main (int argc,
 
     g_print ("[*] Stopped\n");
 
-    frida_script_unload_sync (script, NULL);
+    frida_script_unload_sync (script, NULL, NULL);
     frida_unref (script);
     g_print ("[*] Unloaded\n");
 
-    frida_session_detach_sync (session);
+    frida_session_detach_sync (session, NULL, NULL);
     frida_unref (session);
     g_print ("[*] Detached\n");
   }
@@ -122,7 +122,7 @@ main (int argc,
 
   frida_unref (local_device);
 
-  frida_device_manager_close_sync (manager);
+  frida_device_manager_close_sync (manager, NULL, NULL);
   frida_unref (manager);
   g_print ("[*] Closed\n");
 
