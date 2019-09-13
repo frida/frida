@@ -93,6 +93,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-payload-64", "frida-c
 		{A31522D9-715B-4E04-AA57-DF7AFEBE082C} = {A31522D9-715B-4E04-AA57-DF7AFEBE082C}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tinycc-32", "frida-gum\ext\tinycc\tinycc-32.vcxproj", "{E1212DF2-FBA5-4E95-821F-A6C89446767A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tinycc-64", "frida-gum\ext\tinycc\tinycc-64.vcxproj", "{9CDF2D78-15B7-4BAE-B533-5F830FBD73E7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -325,6 +329,18 @@ Global
 		{26CCF317-ACE8-4CD6-BDDE-FFED1AA2FADD}.Release|Win32.Build.0 = Release|x64
 		{26CCF317-ACE8-4CD6-BDDE-FFED1AA2FADD}.Release|x64.ActiveCfg = Release|x64
 		{26CCF317-ACE8-4CD6-BDDE-FFED1AA2FADD}.Release|x64.Build.0 = Release|x64
+		{E1212DF2-FBA5-4E95-821F-A6C89446767A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E1212DF2-FBA5-4E95-821F-A6C89446767A}.Debug|Win32.Build.0 = Debug|Win32
+		{E1212DF2-FBA5-4E95-821F-A6C89446767A}.Debug|x64.ActiveCfg = Debug|Win32
+		{E1212DF2-FBA5-4E95-821F-A6C89446767A}.Release|Win32.ActiveCfg = Release|Win32
+		{E1212DF2-FBA5-4E95-821F-A6C89446767A}.Release|Win32.Build.0 = Release|Win32
+		{E1212DF2-FBA5-4E95-821F-A6C89446767A}.Release|x64.ActiveCfg = Release|Win32
+		{9CDF2D78-15B7-4BAE-B533-5F830FBD73E7}.Debug|Win32.ActiveCfg = Debug|x64
+		{9CDF2D78-15B7-4BAE-B533-5F830FBD73E7}.Debug|x64.ActiveCfg = Debug|x64
+		{9CDF2D78-15B7-4BAE-B533-5F830FBD73E7}.Debug|x64.Build.0 = Debug|x64
+		{9CDF2D78-15B7-4BAE-B533-5F830FBD73E7}.Release|Win32.ActiveCfg = Release|x64
+		{9CDF2D78-15B7-4BAE-B533-5F830FBD73E7}.Release|x64.ActiveCfg = Release|x64
+		{9CDF2D78-15B7-4BAE-B533-5F830FBD73E7}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
