@@ -344,7 +344,7 @@ case $host_platform in
 
     CPPFLAGS="-mmacosx-version-min=$macos_minver"
     CXXFLAGS="-stdlib=libc++"
-    LDFLAGS="-isysroot $macos_sdk_path -Wl,-macosx_version_min,$macos_minver -arch $host_clang_arch -Wl,-dead_strip"
+    LDFLAGS="-isysroot $macos_sdk_path -arch $host_clang_arch -Wl,-dead_strip"
 
     meson_root="$macos_sdk_path"
 
@@ -445,7 +445,7 @@ case $host_platform in
 
     CPPFLAGS="-miphoneos-version-min=$ios_minver"
     CXXFLAGS="-stdlib=libc++"
-    LDFLAGS="-isysroot $ios_sdk_path -Wl,-iphoneos_version_min,$ios_minver -arch $ios_arch -Wl,-dead_strip"
+    LDFLAGS="-isysroot $ios_sdk_path -arch $ios_arch -Wl,-dead_strip"
 
     meson_root="$ios_sdk_path"
 
