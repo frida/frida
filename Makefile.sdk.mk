@@ -334,6 +334,10 @@ ifeq ($(host_platform_arch), ios-arm64)
 	openssl_arch_args := ios64-cross-arm64 enable-ec_nistp_64_gcc_128
 	xcode_platform := iPhoneOS
 endif
+ifeq ($(host_platform_arch), ios-arm64e)
+	openssl_arch_args := ios64-cross-arm64e enable-ec_nistp_64_gcc_128
+	xcode_platform := iPhoneOS
+endif
 	openssl_host_env := \
 		CPP=clang CC=clang CXX=clang++ LD= LDFLAGS= AR= RANLIB= \
 		CROSS_COMPILE="$(xcode_developer_dir)/Toolchains/XcodeDefault.xctoolchain/usr/bin/" \
@@ -499,6 +503,9 @@ ifeq ($(host_arch), armhf)
 endif
 ifeq ($(host_arch), arm64)
 	v8_cpu := arm64
+endif
+ifeq ($(host_arch), arm64e)
+	v8_cpu := arm64e
 endif
 
 v8_build_platform := $(shell echo $(build_platform) | sed 's,^macos$$,mac,')
