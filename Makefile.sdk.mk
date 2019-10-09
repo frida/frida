@@ -529,19 +529,11 @@ endif
 ifeq ($(host_platform), ios)
 	v8_os := ios
 	v8_platform_args := \
+		use_xcode_clang=true \
 		libcxx_abi_unstable=false \
 		mac_deployment_target="10.9.0" \
 		ios_deployment_target="7.0" \
 		$(NULL)
-ifeq ($(FRIDA_ASAN), yes)
-	v8_platform_args += \
-		use_xcode_clang=true \
-		$(NULL)
-else
-	v8_platform_args += \
-		use_xcode_clang=false \
-		$(NULL)
-endif
 endif
 ifeq ($(host_platform), linux)
 	v8_os := linux
