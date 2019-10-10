@@ -382,20 +382,18 @@ build/frida-macos-universal/lib/frida-gadget.dylib: build/.core-macos-stamp-frid
 		&& $$CODESIGN -f -s "$$MAC_CERTID" $@.tmp
 	rm $(@D)/frida-gadget-*.dylib
 	mv $@.tmp $@
-build/frida-ios-universal/lib/frida-gadget.dylib: build/.core-ios-stamp-frida-ios-x86 build/.core-ios-stamp-frida-ios-x86_64 build/.core-ios-stamp-frida-ios-arm build/.core-ios-stamp-frida-ios-arm64 build/.core-ios-stamp-frida_thin-ios-arm64e
+build/frida-ios-universal/lib/frida-gadget.dylib: build/.core-ios-stamp-frida-ios-x86 build/.core-ios-stamp-frida-ios-x86_64 build/.core-ios-stamp-frida-ios-arm build/.core-ios-stamp-frida-ios-arm64
 	@mkdir -p $(@D)
 	cp build/frida-ios-x86/lib/frida-gadget.dylib $(@D)/frida-gadget-x86.dylib
 	cp build/frida-ios-x86_64/lib/frida-gadget.dylib $(@D)/frida-gadget-x86_64.dylib
 	cp build/frida-ios-arm/lib/frida-gadget.dylib $(@D)/frida-gadget-arm.dylib
 	cp build/frida-ios-arm64/lib/frida-gadget.dylib $(@D)/frida-gadget-arm64.dylib
-	cp build/frida-ios-arm64e/lib/frida-gadget.dylib $(@D)/frida-gadget-arm64e.dylib
 	. build/frida-env-ios-arm64.rc \
 		&& $$LIPO \
 			$(@D)/frida-gadget-x86.dylib \
 			$(@D)/frida-gadget-x86_64.dylib \
 			$(@D)/frida-gadget-arm.dylib \
 			$(@D)/frida-gadget-arm64.dylib \
-			$(@D)/frida-gadget-arm64e.dylib \
 			-create \
 			-output $@.tmp \
 		&& $$CODESIGN -f -s "$$IOS_CERTID" $@.tmp
