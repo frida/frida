@@ -2,6 +2,7 @@
 from __future__ import print_function
 
 if __name__ == '__main__':
+    from agithub.GitHub import GitHub
     from contextlib import contextmanager
     from devkit import generate_devkit
     from distutils.spawn import find_executable
@@ -10,6 +11,7 @@ if __name__ == '__main__':
     import os
     import platform
     import re
+    import requests
     import shutil
     import subprocess
     import sys
@@ -243,9 +245,6 @@ if __name__ == '__main__':
             shutil.rmtree(output_dir)
 
     def get_github_uploader():
-        from agithub.GitHub import GitHub
-        import requests
-
         with open(os.path.expanduser("~/.frida-release-github-token"), "r") as f:
             token = f.read().strip()
 
@@ -354,6 +353,22 @@ if __name__ == '__main__':
 
             upload(asset_filename, asset_mimetype, asset_data)
 
+    def trigger_magisk_frida_ci():
+        with open(os.path.expanduser("~/.frida-release-magisk-token"), "r") as f:
+            token = f.read().strip()
+
+        try:
+            r = requests.post(
+                url="https://gitlab.com/api/v4/projects/14857712/ref/master/trigger/pipeline",
+                params={
+                    "token": token,
+                },
+                data={})
+            r.raise_for_status()
+            print("Triggered magisk-frida CI")
+        except Exception as e:
+            print("Failed to trigger magisk-frida CI: {}".format(e))
+
     if int(nano) == 0:
         if worker == 'windows':
             upload = get_github_uploader()
@@ -453,6 +468,8 @@ if __name__ == '__main__':
             upload_file("frida-server-{version}-android-x86_64", os.path.join(build_dir, "build", "frida-android-x86_64", "bin", "frida-server"), upload)
             upload_file("frida-server-{version}-android-arm", os.path.join(build_dir, "build", "frida-android-arm", "bin", "frida-server"), upload)
             upload_file("frida-server-{version}-android-arm64", os.path.join(build_dir, "build", "frida-android-arm64", "bin", "frida-server"), upload)
+
+            trigger_magisk_frida_ci()
 
             upload_file("frida-inject-{version}-android-x86", os.path.join(build_dir, "build", "frida-android-x86", "bin", "frida-inject"), upload)
             upload_file("frida-inject-{version}-android-x86_64", os.path.join(build_dir, "build", "frida-android-x86_64", "bin", "frida-inject"), upload)
