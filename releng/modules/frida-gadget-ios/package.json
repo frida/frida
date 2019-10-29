@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "Gadget for iOS",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "install": "node download.js"
   },
