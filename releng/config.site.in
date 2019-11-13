@@ -28,6 +28,10 @@ case $frida_host_platform_arch in
     host_alias="arm-linux-gnueabi"
     cross_compiling=yes
     ;;
+  linux-armbe8)
+    host_alias="arm-linux-gnueabi"
+    cross_compiling=yes
+    ;;
   linux-armhf)
     host_alias="arm-linux-gnueabihf"
     cross_compiling=yes

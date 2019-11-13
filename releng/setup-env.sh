@@ -36,6 +36,11 @@ case $host_arch in
     meson_host_cpu=armv7
     meson_host_endian=little
     ;;
+  armbe8)
+    meson_host_cpu_family=arm
+    meson_host_cpu=armv6
+    meson_host_endian=big
+    ;;
   armeabi)
     meson_host_cpu_family=arm
     meson_host_cpu=armv7eabi
@@ -215,6 +220,11 @@ case $host_platform in
         host_toolprefix="arm-linux-gnueabi-"
 
         meson_host_cpu="armv5t"
+        ;;
+      armbe8)
+        host_arch_flags="-march=armv6 -mbe8"
+        host_toolprefix="armeb-linux-gnueabi-"
+        meson_host_cpu="armv6t"
         ;;
       armhf)
         host_arch_flags="-march=armv6"

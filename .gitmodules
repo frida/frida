@@ -3,10 +3,10 @@
 	url = git://github.com/frida/capstone.git
 [submodule "frida-gum"]
 	path = frida-gum
-	url = git://github.com/frida/frida-gum.git
+	url = git@github.com:jonwilson030981/frida-gum.git
 [submodule "frida-core"]
 	path = frida-core
-	url = git://github.com/frida/frida-core.git
+	url = git@github.com:jonwilson030981/frida-core.git
 [submodule "frida-python"]
 	path = frida-python
 	url = git://github.com/frida/frida-python.git
