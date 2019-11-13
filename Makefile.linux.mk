@@ -80,6 +80,7 @@ build/$1-%/lib/pkgconfig/capstone.pc: build/$1-env-%.rc build/.capstone-submodul
 			*-x86)       capstone_archs="x86"     ;; \
 			*-x86_64)    capstone_archs="x86"     ;; \
 			*-arm)       capstone_archs="arm"     ;; \
+			*-armbe8)    capstone_archs="arm"     ;; \
 			*-armhf)     capstone_archs="arm"     ;; \
 			*-armeabi)   capstone_archs="arm"     ;; \
 			*-arm64)     capstone_archs="aarch64" ;; \
@@ -106,6 +107,7 @@ gum-linux-x86_64: build/frida-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum
 gum-linux-x86-thin: build/frida_thin-linux-x86/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/x86 without cross-arch support
 gum-linux-x86_64-thin: build/frida_thin-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/x86-64 without cross-arch support
 gum-linux-arm: build/frida_thin-linux-arm/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/ARM
+gum-linux-armbe8: build/frida_thin-linux-armbe8/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/ARMBE8
 gum-linux-armhf: build/frida_thin-linux-armhf/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/ARMhf
 gum-linux-arm64: build/frida_thin-linux-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/ARM64
 gum-linux-mips: build/frida_thin-linux-mips/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/MIPS
@@ -166,6 +168,7 @@ core-linux-x86_64: build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@c
 core-linux-x86-thin: build/frida_thin-linux-x86/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Linux/x86 without cross-arch support
 core-linux-x86_64-thin: build/frida_thin-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Linux/x86-64 without cross-arch support
 core-linux-arm: build/frida_thin-linux-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Linux/ARM
+core-linux-armbe8: build/frida_thin-linux-armbe8/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Linux/ARMBE8
 core-linux-armhf: build/frida_thin-linux-armhf/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Linux/ARMhf
 core-linux-arm64: build/frida_thin-linux-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Linux/ARM64
 core-linux-mips: build/frida_thin-linux-mips/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Linux/MIPS
@@ -321,6 +324,10 @@ build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x8
 build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-android-arm/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-android-arm/frida-core install
+	@touch $@
+build/frida-android-armbe8/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-armbe8/frida-core/.frida-helper-and-agent-stamp
+	@rm -f build/tmp-android-armbe8/frida-core/src/frida-data-{helper,agent}*
+	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-android-armbe8/frida-core install
 	@touch $@
 build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/frida-core/.frida-helper-and-agent-stamp build/tmp-android-arm64/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-android-arm64/frida-core/src/frida-data-{helper,agent}*
@@ -508,7 +515,7 @@ check-tools-linux-arm64: build/tmp_thin-linux-arm64/frida-tools-$(PYTHON_NAME)/.
 	capstone-update-submodule-stamp \
 	gum-linux-x86 gum-linux-x86_64 \
 		gum-linux-x86-thin gum-linux-x86_64-thin \
-		gum-linux-arm gum-linux-armhf gum-linux-arm64 \
+		gum-linux-arm gum-linux-armbe8 gum-linux-armhf gum-linux-arm64 \
 		gum-linux-mips gum-linux-mipsel \
 		gum-linux-mips64 gum-linux-mips64el \
 		gum-android-x86 gum-android-x86_64 \
@@ -520,7 +527,7 @@ check-tools-linux-arm64: build/tmp_thin-linux-arm64/frida-tools-$(PYTHON_NAME)/.
 		frida-gum-update-submodule-stamp \
 	core-linux-x86 core-linux-x86_64 \
 		core-linux-x86-thin core-linux-x86_64-thin \
-		core-linux-arm core-linux-armhf core-linux-arm64 \
+		core-linux-arm core-linux-armbe8 core-linux-armhf core-linux-arm64 \
 		core-linux-mips core-linux-mipsel \
 		core-linux-mips64 core-linux-mips64el \
 		core-android-x86 core-android-x86_64 \
