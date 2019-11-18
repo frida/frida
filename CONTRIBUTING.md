@@ -1,8 +1,8 @@
 # Intro
 
 Frida is composed of many sub-projects and its code spans across many
-different languages, such as C, C++, Vala, Javascript, Typescript,
-Python and assembly and the coding conventions may vary across any
+different languages, such as C, C++, Vala, JavaScript, TypeScript,
+Python, assembly, etc., and the coding conventions may vary across any
 combination of project/language.
 
 The rules presented here are not there because of Ole's OCD: they're
@@ -10,20 +10,22 @@ about keeping the codebase readable and maintainable, and give the code
 a consistent structure as it grows. That helps every contributor to
 easily orientate in it.
 
-Moreover, reading this doc helps saving everyone's time when it comes to
+Moreover, reading this doc helps save everyone's time when it comes to
 get a PR reviewed.
 
 # General rules
 
-Rules in this section apply always, regardless of the programming
+Rules in this section apply in all cases, regardless of the programming
 language or the project owning the code. Examples are in
-pseudo-javascript for brevity (with some exception).
+pseudo-javascript for brevity (with some exceptions).
 
 ## Comments vs. naming
 
 ### Rule
 
-Avoid comments unless they're **really useful**, use meaningful names.
+Only use comments for communicating what cannot be conveyed by the code
+itself through meaningful variable and function names, and splitting out
+logic into separate functions.
 
 **NOTE**: names should be long enough to be meaningful, but not 
 ridiculously long.
@@ -98,7 +100,7 @@ private void schedule_idle (owned ScheduledFunc func) { ... }
 
 ### Rule 
 
-Higher level functions come before lower level functions.
+Higher level functions must be placed before lower level functions, and
 Should be sorted chronologically.
 In case of C code the corresponding forward declarations must follow
 the same order.
@@ -192,10 +194,10 @@ call it multiple times.
 
 #### Example
 
-There's no fixed recipe to define what a "repeaded chunk of code is", it
+There's no fixed recipe to define what a "repeated chunk of code is", it
 really depends on the context. For example, even a couple of lines may
-be worth to be refactored into a function, especially if they involve a
-fairly complex error handling logic.
+be worth refactoring into a function, especially if they require some
+fairly complex error-handling logic.
 
 ```vala
 private async LLDB.Client start_lldb_service (Fruity.LockdownClient lockdown, Cancellable? cancellable)
@@ -217,7 +219,7 @@ private async LLDB.Client start_lldb_service (Fruity.LockdownClient lockdown, Ca
 
 ### Rule
 
-Minimise nesting when possible.
+Minimize nesting when possible.
 
 #### Wrong
 
@@ -242,7 +244,7 @@ function doSomethingMaybe() {
 
 ### Rule
 
-Hanging indent (when breaking a long line of code) should be *twice*
+Hanging indent – when breaking a long line of code – should be *twice*
 the regular indent, regardless of the indentation rules.
 
 #### Wrong
@@ -291,8 +293,9 @@ for (let i = 0; i !== len; i++) {
 
 ### Rule
 
-Use explicit comparisons, even with `0`, `NULL`, `undefined` and booleans
-instead of relying on language-specific coercion.
+Use explicit comparisons, even with `0`, `NULL`, and `undefined`,
+instead of relying on language-specific coercion. Only use implicit
+for booleans.
 
 #### Wrong
 
@@ -314,8 +317,8 @@ if (value !== 0) {
 
 ### Rule
 
-Internal APIs should assume the API contract is not violated (which
-means the function is passed everything it needs) and omit any check
+Internal APIs should assume the API contract is not violated – i.e.
+that the function is passed everything it needs – and omit any check
 on the arguments.
 
 #### Wrong
@@ -340,7 +343,7 @@ function doSomethingInternallyWithDevice(device) {
 
 # Rules for C
 
-This set of rules apply to C code, regardless of the project owning it.
+This set of rules applies to C code, regardless of the project owning it.
 
 ## File structure
 
@@ -348,14 +351,17 @@ This set of rules apply to C code, regardless of the project owning it.
 
 Every C file must follow the following structure, in this order:
 
-* Own heder includes
+* Own header includes
 * Internal header includes
-* System includes
+* System/dependency includes
 * typedefs
 * enum and struct definitions
 * Forward declarations / prototypes
 * Global state / static variables
 * Implementation code
+
+Each such group should be separated by a blank line, and includes should
+be listed in alphabetical order.
 
 ## Spaces
 
@@ -455,21 +461,24 @@ gint i;
 
 ### Rule
 
-It's ok to leave **one** blank line here and there if needed to
-separate semantically distinct blocks of code or improve readability
-(some example later). Just, don't abuse that and never leave more 
-than one blank line.
+It's encouraged to leave **one** blank line when needing to separate
+semantically distinct blocks of code or improve readability
+(some examples later). Just don't abuse that and never leave more 
+than one blank line. (Except for Python code, which should follow the
+recommendations in PEP-8.)
 
 #### Wrong
 
 ```
-static void function_one(void)
+static void
+function_one (void)
 {
   ...
 }
 
 
-static void function_two(void)
+static void
+function_two (void)
 {
   ...
 }
@@ -478,12 +487,14 @@ static void function_two(void)
 #### Correct
 
 ```
-static void function_one(void)
+static void
+function_one (void)
 {
   ...
 }
 
-static void function_two(void)
+static void
+function_two (void)
 {
   ...
 }
@@ -519,8 +530,9 @@ frida_find_libsystem (const GumModuleDetails * details, gpointer user_data)
 
 ### Rule
 
-Function which takes no arguments should be explicitly marked as
-`(void)`.
+Functions which take no arguments should be declared `(void)`, as `()`
+means that no information about the number or types of the arguments
+is supplied. (Unlike C++, where `()` means "no arguments".)
 
 #### Wrong
 
@@ -687,7 +699,7 @@ insn = cs_malloc (capstone);
 
 ### Rule
 
-In function definitions, the return type belongs to its own line (not
+In function definitions, the return type goes on its own line (not
 for the prototype).
 
 #### Wrong
@@ -732,7 +744,7 @@ if (cached_address_for_breakpoint[instance->cpu_type] == 0)
 
 ### Rule
 
-Code in a block is indended by 2 spaces.
+Code in a block is indented by 2 spaces.
 
 #### Wrong
 
@@ -750,8 +762,8 @@ if (magic == NULL)
 
 ### Rule
 
-Simple `if` statements in which the code is only one line don't need
-curly braces.
+Simple `if` statements in which the code is only one line should not
+have curly braces.
 
 #### Wrong
 
@@ -772,7 +784,7 @@ if (magic == NULL)
 ### Rule
 
 If the `if` statement has curly braces, then also the `else` should
-have it (or vice-versa).
+have it (and vice-versa).
 
 #### Wrong
 
@@ -812,8 +824,8 @@ have it (or vice-versa).
 
 ### Rule
 
-If the `if` statement has one-line blocks but those lines are broken
-for length, it needs curly braces.
+When an `if` statement has single-statement bodies but any of them
+exceed the maximum line length, curly braces must be used.
 
 #### Wrong
 
@@ -843,8 +855,8 @@ for length, it needs curly braces.
 
 ### Rule
 
-If the condition of the `if` statement has been broken in multiple
-lines, then use the braces regardless.
+If the condition of an `if` statement has been broken up into multiple
+lines, then use braces regardless.
 
 #### Wrong
 
@@ -904,9 +916,9 @@ switch (cpu_type)
 }
 ```
 
-# Rules for Javascript
+# Rules for JavaScript
 
-This set of rules apply to Javascript code, regardless of the project owning it.
+This set of rules apply to JavaScript code, regardless of the project owning it.
 
 ## String constants
 
@@ -1001,7 +1013,8 @@ if (methodName === '- init') {
 
 ### Rule
 
-Put parenthesis around the ternary comparison condition.
+Put parenthesis around the ternary comparison condition unless it's
+simply referencing a boolean variable.
 
 #### Wrong
 
@@ -1019,8 +1032,8 @@ m = (res[0] === '') ? '*' : res[0];
 
 ### Rule
 
-Unless the specific project already follows the semistandard
-convention, put no spaces between function name and argument list.
+Unless the specific project follows the semistandard conventions, put no
+spaces between function name and argument list.
 
 #### Wrong
 
@@ -1062,25 +1075,24 @@ enumerateMatches('exports:' + obj.module + '!' + obj.function);
 
 ### Rule
 
-Stick to the `ES5` syntax, so it can be consumed by the Duktape
-runtime.
+Stick to `ES5` syntax, so it can be consumed by the Duktape runtime
+without having to first `frida-compile` the code.
 
 ### Rule
 
-In `rpc.exports`, `dispose()` comes first, or right after `init()`
+In `rpc.exports`, `dispose()` comes first, or right after `init()`.
 
+# Rules for TypeScript
 
-# Rules for Typescript
-
-This set of rules apply to Typescript code, regardless of the project
-owning it. Rules for Javascript also apply to Typescript, if not
+This set of rules apply to TypeScript code, regardless of the project
+owning it. Rules for JavaScript also apply to TypeScript, if not
 explicitly overridden.
 
 ## Indentation
 
 ### Rule
 
-Indent with tabs only.
+Indent with 4 spaces.
 
 ## Spaces
 
@@ -1170,7 +1182,7 @@ const LOCKDOWN_PORT = 62078;
 
 ### Rule
 
-Better use `interface` when possible.
+Use `interface` when possible.
 
 #### Wrong
 
@@ -1256,7 +1268,7 @@ Json.Node parameters = new Json.Node (Json.NodeType.OBJECT);
 var parameters = new Json.Node (Json.NodeType.OBJECT);
 ```
 
-# Generic rules for python
+# Generic rules for Python
 
 This set of rules apply to all python code, regardless of the project
 it belongs to.
@@ -1352,8 +1364,7 @@ language.
 
 ### Rule
 
-There's no mandatory maximum length, but it's ok to break very long
-lines if that improves readability.
+Lines should not exceed 140 characters.
 
 # Rules for C code in frida-core
 
