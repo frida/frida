@@ -5,7 +5,7 @@ different languages, such as C, C++, Vala, JavaScript, TypeScript,
 Python, assembly, etc., and the coding conventions may vary across any
 combination of project/language.
 
-The rules presented here are not there because of Ole's OCD: they're
+The rules presented here are not there because of @oleavr's OCD: they're
 about keeping the codebase readable and maintainable, and give the code
 a consistent structure as it grows. That helps every contributor to
 easily orientate in it.
