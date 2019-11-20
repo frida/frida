@@ -208,18 +208,31 @@ if __name__ == '__main__':
             with codecs.open(package_json_path, "wb", 'utf-8') as f:
                 f.write(package_json_original)
 
-    def upload_ios_deb(name, server):
+    def upload_ios_deb(name, server, upload_to_github):
         env = {
             'FRIDA_VERSION': version,
             'FRIDA_TOOLCHAIN': toolchain_dir
         }
         env.update(os.environ)
+
         deb = os.path.join(build_dir, "{}_{}_iphoneos-arm.deb".format(name, version))
+        filename = os.path.basename(deb)
+
         subprocess.call([os.path.join(frida_core_dir, "tools", "package-server.sh"), server, deb], env=env)
-        subprocess.call([scp, deb, "frida@build.frida.re:/home/frida/public_html/debs/"])
-        subprocess.call([ssh, "frida@build.frida.re", "cd /home/frida/public_html" +
-            " && reprepro -Vb . --confdir /home/frida/.reprepo --ignore=forbiddenchar includedeb stable debs/" + os.path.basename(deb) +
-            " && cp dists/stable/main/binary-iphoneos-arm/Packages.gz ."])
+
+        subprocess.call([scp, deb, "frida@192.168.1.2:/home/frida/public_html/debs/"])
+        subprocess.call([ssh, "frida@192.168.1.2", " && ".join([
+                "cd /home/frida/public_html",
+                "reprepro -Vb . --confdir /home/frida/.reprepo --ignore=forbiddenchar includedeb stable debs/" + filename,
+                "cp dists/stable/main/binary-iphoneos-arm/Packages.gz .",
+                "s3cmd sync --delete-removed --acl-public pool/ s3://build.frida.re/pool/",
+                "s3cmd put --acl-public Release Packages.gz s3://build.frida.re/",
+            ])
+        ])
+
+        with open(deb, 'rb') as f:
+            upload_to_github(filename, "vnd.debian.binary-package", f.read())
+
         os.unlink(deb)
 
     def upload_ios_debug_symbols():
@@ -240,7 +253,7 @@ if __name__ == '__main__':
                 uuid = [line.split(" ")[-1] for line in load_commands.split("\n") if "uuid " in line][0]
 
                 remote_dwarf_path = "/home/frida/public_html/symbols/ios/" + uuid + ".dwarf"
-                subprocess.check_call([scp, dwarf_path, "frida@build.frida.re:" + remote_dwarf_path])
+                subprocess.check_call([scp, dwarf_path, "frida@192.168.1.2:" + remote_dwarf_path])
         finally:
             shutil.rmtree(output_dir)
 
@@ -425,8 +438,8 @@ if __name__ == '__main__':
             upload_node_bindings_to_npm("/opt/node-64/bin/node", upload, publish=True)
             upload_meta_modules_to_npm("/opt/node-64/bin/node")
 
-            upload_ios_deb("frida", os.path.join(build_dir, "build", "frida-ios-arm64", "bin", "frida-server"))
-            upload_ios_deb("frida32", os.path.join(build_dir, "build", "frida-ios-arm", "bin", "frida-server"))
+            upload_ios_deb("frida", os.path.join(build_dir, "build", "frida-ios-arm64", "bin", "frida-server"), upload)
+            upload_ios_deb("frida32", os.path.join(build_dir, "build", "frida-ios-arm", "bin", "frida-server"), upload)
 
             upload_ios_debug_symbols()
         elif worker == 'linux-x86':
