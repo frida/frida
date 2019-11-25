@@ -407,6 +407,9 @@ if __name__ == '__main__':
             python2_interpreter=r"C:\Program Files\Python 2.7\python.exe"
             upload_node_bindings_to_npm(r"C:\Program Files (x86)\nodejs\node.exe", upload, publish=False, python2_interpreter=python2_interpreter)
             upload_node_bindings_to_npm(r"C:\Program Files\nodejs\node.exe", upload, publish=False, python2_interpreter=python2_interpreter)
+
+            upload_file("frida-clr-{version}-windows-x86.dll", os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "bin", "Frida.dll"), upload)
+            upload_file("frida-clr-{version}-windows-x86_64.dll", os.path.join(build_dir, "build", "frida-windows", "x64-Release", "bin", "Frida.dll"), upload)
         elif worker == 'mac':
             upload = get_github_uploader()
 
