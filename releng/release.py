@@ -225,10 +225,20 @@ if __name__ == '__main__':
                 "cd /home/frida/public_html",
                 "reprepro -Vb . --confdir /home/frida/.reprepo --ignore=forbiddenchar includedeb stable debs/" + filename,
                 "cp dists/stable/main/binary-iphoneos-arm/Packages.gz .",
+                "rm -f Packages",
+                "gunzip -k Packages.gz",
                 "s3cmd sync --delete-removed --acl-public pool/ s3://build.frida.re/pool/",
-                "s3cmd put --acl-public Release Packages.gz s3://build.frida.re/",
+                "s3cmd put --acl-public Release Packages Packages.gz s3://build.frida.re/",
+                "s3cmd put --acl-public Packages Packages.gz s3://build.frida.re/./",
             ])
         ])
+        subprocess.call(["cfcli", "purge"] + ["https://build.frida.re" + resource for resource in [
+            "/Release",
+            "/Packages",
+            "/Packages.gz",
+            "/./Packages",
+            "/./Packages.gz",
+        ]])
 
         with open(deb, 'rb') as f:
             upload_to_github(filename, "vnd.debian.binary-package", f.read())
