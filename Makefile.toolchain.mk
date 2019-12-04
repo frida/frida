@@ -217,7 +217,7 @@ $2: build/ft-env-%.rc build/ft-tmp-%/$1/build.ninja
 	@touch $$@
 endef
 
-$(eval $(call make-tarball-module-rules,m4,https://gnuftp.uib.no/m4/m4-$(m4_version).tar.gz,build/ft-%/bin/m4,,m4-vasnprintf-apple-fix.patch 01-fix-ftbfs-with-glibc-2.28.patch))
+$(eval $(call make-tarball-module-rules,m4,https://gnuftp.uib.no/m4/m4-$(m4_version).tar.gz,build/ft-%/bin/m4,,m4-vasnprintf-apple-fix.patch m4-ftbfs-fix.patch))
 
 $(eval $(call make-tarball-module-rules,autoconf,https://gnuftp.uib.no/autoconf/autoconf-$(autoconf_version).tar.gz,build/ft-%/bin/autoconf,build/ft-%/bin/m4))
 
