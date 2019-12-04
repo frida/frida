@@ -384,7 +384,7 @@ ret = thread_create (task, &instance->thread);
 
 ### Rule
 
-When declaring pointers, put a space before and afer `*`.
+When declaring pointers, put a space before and after `*`.
 
 #### Wrong
 
@@ -1329,7 +1329,7 @@ Lines should not exceed 80 characters.
 
 ### Rule
 
-When definining a function implementation each argument must go on
+When defining a function implementation each argument must go on
 its own line, vertically aligned (not for the prototype).
 
 #### Wrong
