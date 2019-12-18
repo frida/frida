@@ -269,6 +269,12 @@ def generate_library_unix(package, frida_root, host, flavor, output_dir, library
     library_paths, extra_flags = resolve_library_paths(library_names, library_dirs)
     extra_flags += infer_linker_flags(library_flags)
 
+    v8_libs = [path for path in library_paths if os.path.basename(path).startswith("libv8")]
+    if len(v8_libs) > 0:
+        v8_libdir = os.path.dirname(v8_libs[0])
+        libcxx_libs = glob(os.path.join(v8_libdir, "c++", "*.a"))
+        library_paths.extend(libcxx_libs)
+
     ar_version = subprocess.Popen([ar, "--version"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8')
     mri_supported = ar_version.startswith("GNU ar ")
 
@@ -281,6 +287,8 @@ def generate_library_unix(package, frida_root, host, flavor, output_dir, library
         ar.communicate(input=raw_mri.encode('utf-8'))
         if ar.returncode != 0:
             raise Exception("ar failed")
+    elif host.startswith("macos-") or host.startswith("ios-"):
+        subprocess.check_output(["xcrun", "libtool", "-static", "-o", output_path] + library_paths)
     else:
         combined_dir = tempfile.mkdtemp(prefix="devkit")
         object_names = set()
