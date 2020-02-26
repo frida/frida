@@ -11,6 +11,8 @@ libdwarf_version := 20190110
 openssl_version := 1.1.1b
 v8_api_version := 7.0
 
+gnu_mirror := saimei.ftp.acc.umu.se/mirror/gnu.org/gnu
+
 
 build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos,')
 build_arch := $(shell releng/detect-arch.sh)
@@ -136,7 +138,7 @@ build/.libiconv-stamp:
 	$(RM) -r libiconv
 	mkdir libiconv
 	cd libiconv \
-		&& $(download) https://gnuftp.uib.no/libiconv/libiconv-$(libiconv_version).tar.gz | tar -xz --strip-components 1 \
+		&& $(download) https://$(gnu_mirror)/libiconv/libiconv-$(libiconv_version).tar.gz | tar -xz --strip-components 1 \
 		&& patch -p1 < ../releng/patches/libiconv-android.patch
 	@mkdir -p $(@D)
 	@touch $@

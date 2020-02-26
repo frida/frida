@@ -11,6 +11,8 @@ automake_api_version := 1.16
 libtool_version := 2.4.6
 gettext_version := 0.19.8.1
 
+gnu_mirror := saimei.ftp.acc.umu.se/mirror/gnu.org/gnu
+
 
 build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos,')
 build_arch := $(shell releng/detect-arch.sh)
@@ -217,17 +219,17 @@ $2: build/ft-env-%.rc build/ft-tmp-%/$1/build.ninja
 	@touch $$@
 endef
 
-$(eval $(call make-tarball-module-rules,m4,https://gnuftp.uib.no/m4/m4-$(m4_version).tar.gz,build/ft-%/bin/m4,,m4-vasnprintf-apple-fix.patch m4-ftbfs-fix.patch))
+$(eval $(call make-tarball-module-rules,m4,https://$(gnu_mirror)/m4/m4-$(m4_version).tar.gz,build/ft-%/bin/m4,,m4-vasnprintf-apple-fix.patch m4-ftbfs-fix.patch))
 
-$(eval $(call make-tarball-module-rules,autoconf,https://gnuftp.uib.no/autoconf/autoconf-$(autoconf_version).tar.gz,build/ft-%/bin/autoconf,build/ft-%/bin/m4))
+$(eval $(call make-tarball-module-rules,autoconf,https://$(gnu_mirror)/autoconf/autoconf-$(autoconf_version).tar.gz,build/ft-%/bin/autoconf,build/ft-%/bin/m4))
 
-$(eval $(call make-tarball-module-rules,automake,https://gnuftp.uib.no/automake/automake-$(automake_version).tar.gz,build/ft-%/bin/automake,build/ft-%/bin/autoconf))
+$(eval $(call make-tarball-module-rules,automake,https://$(gnu_mirror)/automake/automake-$(automake_version).tar.gz,build/ft-%/bin/automake,build/ft-%/bin/autoconf))
 
 build/.libtool-stamp:
 	$(RM) -r libtool
 	mkdir -p libtool
 	cd libtool \
-		&& $(download) https://gnuftp.uib.no/libtool/libtool-$(libtool_version).tar.gz | tar -xz --strip-components 1 \
+		&& $(download) https://$(gnu_mirror)/libtool/libtool-$(libtool_version).tar.gz | tar -xz --strip-components 1 \
 		&& patch -p1 < ../releng/patches/libtool-fixes.patch \
 		&& for name in aclocal.m4 config-h.in configure Makefile.in; do \
 			find . -name $$name -exec touch '{}' \;; \
@@ -250,7 +252,7 @@ build/ft-%/bin/libtool: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 		&& make $(MAKE_J) install
 	@touch $@
 
-$(eval $(call make-tarball-module-rules,gettext,https://gnuftp.uib.no/gettext/gettext-$(gettext_version).tar.gz,build/ft-%/bin/autopoint,build/ft-%/bin/libtool,gettext-vasnprintf-apple-fix.patch))
+$(eval $(call make-tarball-module-rules,gettext,https://$(gnu_mirror)/gettext/gettext-$(gettext_version).tar.gz,build/ft-%/bin/autopoint,build/ft-%/bin/libtool,gettext-vasnprintf-apple-fix.patch))
 
 $(eval $(call make-git-meson-module-rules,zlib,build/ft-%/lib/pkgconfig/zlib.pc,))
 
