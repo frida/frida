@@ -515,7 +515,7 @@ ifeq ($(host_arch), arm64)
 endif
 ifeq ($(host_arch), arm64e)
 	v8_cpu := arm64
-	v8_cpu_args := arm64_version=83
+	v8_cpu_args := arm_version=83
 endif
 
 v8_build_platform := $(shell echo $(build_platform) | sed 's,^macos$$,mac,')
