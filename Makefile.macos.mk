@@ -143,9 +143,8 @@ check-gum-macos-thin: build/frida_thin-macos-x86_64/lib/pkgconfig/frida-gum-1.0.
 
 core-macos: build/.core-macos-stamp-frida-macos-x86 build/.core-macos-stamp-frida-macos-x86_64 ##@core Build for macOS
 core-macos-thin: build/.core-macos-stamp-frida_thin-macos-x86_64 ##@core Build for macOS without cross-arch support
-core-ios: build/.core-ios-stamp-frida-ios-arm build/.core-ios-stamp-frida-ios-arm64 ##@core Build for iOS
+core-ios: build/.core-ios-stamp-frida-ios-arm build/.core-ios-stamp-frida-ios-arm64 build/.core-ios-stamp-frida-ios-arm64e ##@core Build for iOS
 core-ios-thin: build/.core-ios-stamp-frida_thin-ios-arm64 ##@core Build for iOS without cross-arch support
-core-ios-arm64e: build/.core-ios-stamp-frida_thin-ios-arm64e ##@core Build for iOS/arm64e
 core-android-x86: build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/x86
 core-android-x86_64: build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/x86-64
 core-android-arm: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/ARM
@@ -165,9 +164,9 @@ build/tmp-macos-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-sta
 			--prefix $(FRIDA)/build/frida-macos-$* \
 			$$cross_args \
 			$(frida_core_flags) \
-			-Dhelper64=$(FRIDA)/build/tmp-macos-x86_64/frida-core/src/frida-helper \
-			-Dagent32=$(FRIDA)/build/tmp-macos-x86/frida-core/lib/agent/frida-agent.dylib \
-			-Dagent64=$(FRIDA)/build/tmp-macos-x86_64/frida-core/lib/agent/frida-agent.dylib \
+			-Dhelper_modern=$(FRIDA)/build/tmp-macos-x86_64/frida-core/src/frida-helper \
+			-Dagent_modern=$(FRIDA)/build/tmp-macos-x86_64/frida-core/lib/agent/frida-agent.dylib \
+			-Dagent_legacy=$(FRIDA)/build/tmp-macos-x86/frida-core/lib/agent/frida-agent.dylib \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -192,9 +191,9 @@ build/tmp-ios-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-
 			--prefix $(FRIDA)/build/frida-ios-x86_64 \
 			--cross-file build/frida-ios-x86_64.txt \
 			$(frida_core_flags) \
-			-Dhelper64=$(FRIDA)/build/tmp-ios-x86_64/frida-core/src/frida-helper \
-			-Dagent32=$(FRIDA)/build/tmp-ios-x86/frida-core/lib/agent/frida-agent.dylib \
-			-Dagent64=$(FRIDA)/build/tmp-ios-x86_64/frida-core/lib/agent/frida-agent.dylib \
+			-Dhelper_modern=$(FRIDA)/build/tmp-ios-x86_64/frida-core/src/frida-helper \
+			-Dagent_modern=$(FRIDA)/build/tmp-ios-x86_64/frida-core/lib/agent/frida-agent.dylib \
+			-Dagent_legacy=$(FRIDA)/build/tmp-ios-x86/frida-core/lib/agent/frida-agent.dylib \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -219,9 +218,24 @@ build/tmp-ios-arm64/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-s
 			--prefix $(FRIDA)/build/frida-ios-arm64 \
 			--cross-file build/frida-ios-arm64.txt \
 			$(frida_core_flags) \
-			-Dhelper64=$(FRIDA)/build/tmp-ios-arm64/frida-core/src/frida-helper \
-			-Dagent32=$(FRIDA)/build/tmp-ios-arm/frida-core/lib/agent/frida-agent.dylib \
-			-Dagent64=$(FRIDA)/build/tmp-ios-arm64/frida-core/lib/agent/frida-agent.dylib \
+			-Dhelper_modern=$(FRIDA)/build/tmp-ios-arm64/frida-core/src/frida-helper \
+			-Dagent_modern=$(FRIDA)/build/tmp-ios-arm64/frida-core/lib/agent/frida-agent.dylib \
+			-Dagent_legacy=$(FRIDA)/build/tmp-ios-arm/frida-core/lib/agent/frida-agent.dylib \
+			frida-core $$builddir || exit 1; \
+	fi
+	@touch $@
+build/tmp-ios-arm64e/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-ios-arm64e/lib/pkgconfig/frida-gum-1.0.pc
+	. build/frida-meson-env-macos-$(build_arch).rc; \
+	builddir=$(@D); \
+	if [ ! -f $$builddir/build.ninja ]; then \
+		mkdir -p $$builddir; \
+		$(MESON) \
+			--prefix $(FRIDA)/build/frida-ios-arm64e \
+			--cross-file build/frida-ios-arm64e.txt \
+			$(frida_core_flags) \
+			-Dhelper_modern=$(FRIDA)/build/tmp-ios-arm64e/frida-core/src/frida-helper \
+			-Dagent_modern=$(FRIDA)/build/tmp-ios-arm64e/frida-core/lib/agent/frida-agent.dylib \
+			-Dagent_legacy=$(FRIDA)/build/tmp-ios-arm64/frida-core/lib/agent/frida-agent.dylib \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -246,10 +260,10 @@ build/tmp-android-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submod
 			--prefix $(FRIDA)/build/frida-android-x86_64 \
 			--cross-file build/frida-android-x86_64.txt \
 			$(frida_core_flags) \
-			-Dhelper32=$(FRIDA)/build/tmp-android-x86/frida-core/src/frida-helper \
-			-Dhelper64=$(FRIDA)/build/tmp-android-x86_64/frida-core/src/frida-helper \
-			-Dagent32=$(FRIDA)/build/tmp-android-x86/frida-core/lib/agent/frida-agent.so \
-			-Dagent64=$(FRIDA)/build/tmp-android-x86_64/frida-core/lib/agent/frida-agent.so \
+			-Dhelper_modern=$(FRIDA)/build/tmp-android-x86_64/frida-core/src/frida-helper \
+			-Dhelper_legacy=$(FRIDA)/build/tmp-android-x86/frida-core/src/frida-helper \
+			-Dagent_modern=$(FRIDA)/build/tmp-android-x86_64/frida-core/lib/agent/frida-agent.so \
+			-Dagent_legacy=$(FRIDA)/build/tmp-android-x86/frida-core/lib/agent/frida-agent.so \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -274,10 +288,10 @@ build/tmp-android-arm64/frida-core/.frida-ninja-stamp: build/.frida-core-submodu
 			--prefix $(FRIDA)/build/frida-android-arm64 \
 			--cross-file build/frida-android-arm64.txt \
 			$(frida_core_flags) \
-			-Dhelper32=$(FRIDA)/build/tmp-android-arm/frida-core/src/frida-helper \
-			-Dhelper64=$(FRIDA)/build/tmp-android-arm64/frida-core/src/frida-helper \
-			-Dagent32=$(FRIDA)/build/tmp-android-arm/frida-core/lib/agent/frida-agent.so \
-			-Dagent64=$(FRIDA)/build/tmp-android-arm64/frida-core/lib/agent/frida-agent.so \
+			-Dhelper_modern=$(FRIDA)/build/tmp-android-arm64/frida-core/src/frida-helper \
+			-Dhelper_legacy=$(FRIDA)/build/tmp-android-arm/frida-core/src/frida-helper \
+			-Dagent_modern=$(FRIDA)/build/tmp-android-arm64/frida-core/lib/agent/frida-agent.so \
+			-Dagent_legacy=$(FRIDA)/build/tmp-android-arm/frida-core/lib/agent/frida-agent.so \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -319,6 +333,10 @@ build/frida-ios-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-arm/frida-c
 	@rm -f build/tmp-ios-arm64/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-ios-arm64/frida-core install
 	@touch $@
+build/frida-ios-arm64e/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-arm64/frida-core/.frida-agent-stamp build/tmp-ios-arm64e/frida-core/.frida-helper-and-agent-stamp
+	@rm -f build/tmp-ios-arm64e/frida-core/src/frida-data-{helper,agent}*
+	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-ios-arm64e/frida-core install
+	@touch $@
 build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x86/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-android-x86/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-android-x86/frida-core install
@@ -337,6 +355,9 @@ build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm
 	@touch $@
 build/frida_thin-ios-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-ios-arm64/frida-core/.frida-ninja-stamp
 	. build/frida_thin-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp_thin-ios-arm64/frida-core install
+	@touch $@
+build/frida_thin-ios-arm64e/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-ios-arm64e/frida-core/.frida-ninja-stamp
+	. build/frida_thin-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp_thin-ios-arm64e/frida-core install
 	@touch $@
 build/frida_thin-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-%/frida-core/.frida-ninja-stamp
 	. build/frida_thin-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp_thin-$*/frida-core install
@@ -382,18 +403,20 @@ build/frida-macos-universal/lib/frida-gadget.dylib: build/.core-macos-stamp-frid
 		&& $$CODESIGN -f -s "$$MAC_CERTID" $@.tmp
 	rm $(@D)/frida-gadget-*.dylib
 	mv $@.tmp $@
-build/frida-ios-universal/lib/frida-gadget.dylib: build/.core-ios-stamp-frida-ios-x86 build/.core-ios-stamp-frida-ios-x86_64 build/.core-ios-stamp-frida-ios-arm build/.core-ios-stamp-frida-ios-arm64
+build/frida-ios-universal/lib/frida-gadget.dylib: build/.core-ios-stamp-frida-ios-x86 build/.core-ios-stamp-frida-ios-x86_64 build/.core-ios-stamp-frida-ios-arm build/.core-ios-stamp-frida-ios-arm64 build/.core-ios-stamp-frida-ios-arm64e
 	@mkdir -p $(@D)
 	cp build/frida-ios-x86/lib/frida-gadget.dylib $(@D)/frida-gadget-x86.dylib
 	cp build/frida-ios-x86_64/lib/frida-gadget.dylib $(@D)/frida-gadget-x86_64.dylib
 	cp build/frida-ios-arm/lib/frida-gadget.dylib $(@D)/frida-gadget-arm.dylib
 	cp build/frida-ios-arm64/lib/frida-gadget.dylib $(@D)/frida-gadget-arm64.dylib
-	. build/frida-env-ios-arm64.rc \
+	cp build/frida-ios-arm64e/lib/frida-gadget.dylib $(@D)/frida-gadget-arm64e.dylib
+	. build/frida-env-ios-arm64e.rc \
 		&& $$LIPO \
 			$(@D)/frida-gadget-x86.dylib \
 			$(@D)/frida-gadget-x86_64.dylib \
 			$(@D)/frida-gadget-arm.dylib \
 			$(@D)/frida-gadget-arm64.dylib \
+			$(@D)/frida-gadget-arm64e.dylib \
 			-create \
 			-output $@.tmp \
 		&& $$CODESIGN -f -s "$$IOS_CERTID" $@.tmp
@@ -410,7 +433,6 @@ gadget-macos: build/frida-macos-universal/lib/frida-gadget.dylib ##@gadget Build
 gadget-macos-thin: core-macos-thin ##@gadget Build for macOS without cross-arch support
 gadget-ios: build/frida-ios-universal/lib/frida-gadget.dylib ##@gadget Build for iOS
 gadget-ios-thin: core-ios-thin ##@gadget Build for iOS without cross-arch support
-gadget-ios-arm64e: core-ios-arm64e ##@gadget Build for iOS/arm64e
 
 
 python-macos: build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/frida build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so ##@python Build Python bindings for macOS
@@ -560,13 +582,13 @@ check-tools-macos-thin: tools-macos-thin ##@tools Test CLI tools for macOS witho
 		check-gum-macos check-gum-macos-thin \
 		frida-gum-update-submodule-stamp \
 	core-macos core-macos-thin \
-		core-ios core-ios-thin core-ios-arm64e \
+		core-ios core-ios-thin \
 		core-android-x86 core-android-x86_64 \
 		core-android-arm core-android-arm64 \
 		check-core-macos check-core-macos-thin \
 		frida-core-update-submodule-stamp \
 	gadget-macos gadget-macos-thin \
-		gadget-ios gadget-ios-thin gadget-ios-arm64e \
+		gadget-ios gadget-ios-thin \
 	python-macos python-macos-thin \
 		check-python-macos check-python-macos-thin \
 		frida-python-update-submodule-stamp \

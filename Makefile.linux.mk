@@ -197,10 +197,10 @@ build/tmp-linux-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-s
 			--libdir $(FRIDA)/build/frida-linux-x86/lib \
 			$$cross_args \
 			$(frida_core_flags) \
-			-Dhelper32=$(FRIDA)/build/tmp-linux-x86/frida-core/src/frida-helper \
-			-Dhelper64=$(FRIDA)/build/tmp-linux-x86_64/frida-core/src/frida-helper \
-			-Dagent32=$(FRIDA)/build/tmp-linux-x86/frida-core/lib/agent/frida-agent.so \
-			-Dagent64=$(FRIDA)/build/tmp-linux-x86_64/frida-core/lib/agent/frida-agent.so \
+			-Dhelper_modern=$(FRIDA)/build/tmp-linux-x86_64/frida-core/src/frida-helper \
+			-Dhelper_legacy=$(FRIDA)/build/tmp-linux-x86/frida-core/src/frida-helper \
+			-Dagent_modern=$(FRIDA)/build/tmp-linux-x86_64/frida-core/lib/agent/frida-agent.so \
+			-Dagent_legacy=$(FRIDA)/build/tmp-linux-x86/frida-core/lib/agent/frida-agent.so \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -219,10 +219,10 @@ build/tmp-linux-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submodul
 			--libdir $(FRIDA)/build/frida-linux-x86_64/lib \
 			$$cross_args \
 			$(frida_core_flags) \
-			-Dhelper32=$(FRIDA)/build/tmp-linux-x86/frida-core/src/frida-helper \
-			-Dhelper64=$(FRIDA)/build/tmp-linux-x86_64/frida-core/src/frida-helper \
-			-Dagent32=$(FRIDA)/build/tmp-linux-x86/frida-core/lib/agent/frida-agent.so \
-			-Dagent64=$(FRIDA)/build/tmp-linux-x86_64/frida-core/lib/agent/frida-agent.so \
+			-Dhelper_modern=$(FRIDA)/build/tmp-linux-x86_64/frida-core/src/frida-helper \
+			-Dhelper_legacy=$(FRIDA)/build/tmp-linux-x86/frida-core/src/frida-helper \
+			-Dagent_modern=$(FRIDA)/build/tmp-linux-x86_64/frida-core/lib/agent/frida-agent.so \
+			-Dagent_legacy=$(FRIDA)/build/tmp-linux-x86/frida-core/lib/agent/frida-agent.so \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -249,10 +249,10 @@ build/tmp-android-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submod
 			--libdir $(FRIDA)/build/frida-android-x86_64/lib \
 			--cross-file build/frida-android-x86_64.txt \
 			$(frida_core_flags) \
-			-Dhelper32=$(FRIDA)/build/tmp-android-x86/frida-core/src/frida-helper \
-			-Dhelper64=$(FRIDA)/build/tmp-android-x86_64/frida-core/src/frida-helper \
-			-Dagent32=$(FRIDA)/build/tmp-android-x86/frida-core/lib/agent/frida-agent.so \
-			-Dagent64=$(FRIDA)/build/tmp-android-x86_64/frida-core/lib/agent/frida-agent.so \
+			-Dhelper_modern=$(FRIDA)/build/tmp-android-x86_64/frida-core/src/frida-helper \
+			-Dhelper_legacy=$(FRIDA)/build/tmp-android-x86/frida-core/src/frida-helper \
+			-Dagent_modern=$(FRIDA)/build/tmp-android-x86_64/frida-core/lib/agent/frida-agent.so \
+			-Dagent_legacy=$(FRIDA)/build/tmp-android-x86/frida-core/lib/agent/frida-agent.so \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -279,10 +279,10 @@ build/tmp-android-arm64/frida-core/.frida-ninja-stamp: build/.frida-core-submodu
 			--libdir $(FRIDA)/build/frida-android-arm64/lib \
 			--cross-file build/frida-android-arm64.txt \
 			$(frida_core_flags) \
-			-Dhelper32=$(FRIDA)/build/tmp-android-arm/frida-core/src/frida-helper \
-			-Dhelper64=$(FRIDA)/build/tmp-android-arm64/frida-core/src/frida-helper \
-			-Dagent32=$(FRIDA)/build/tmp-android-arm/frida-core/lib/agent/frida-agent.so \
-			-Dagent64=$(FRIDA)/build/tmp-android-arm64/frida-core/lib/agent/frida-agent.so \
+			-Dhelper_modern=$(FRIDA)/build/tmp-android-arm64/frida-core/src/frida-helper \
+			-Dhelper_legacy=$(FRIDA)/build/tmp-android-arm/frida-core/src/frida-helper \
+			-Dagent_modern=$(FRIDA)/build/tmp-android-arm64/frida-core/lib/agent/frida-agent.so \
+			-Dagent_legacy=$(FRIDA)/build/tmp-android-arm/frida-core/lib/agent/frida-agent.so \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
