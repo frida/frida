@@ -18,7 +18,7 @@ if __name__ == '__main__':
     import tempfile
 
     system = platform.system()
-    worker = sys.argv[1]
+    builder = sys.argv[1]
 
     build_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     if system == 'Darwin':
@@ -393,7 +393,7 @@ if __name__ == '__main__':
             print("Failed to trigger magisk-frida CI: {}".format(e))
 
     if int(nano) == 0:
-        if worker == 'windows':
+        if builder == 'windows':
             upload = get_github_uploader()
 
             upload_devkits("windows-x86", upload)
@@ -420,23 +420,15 @@ if __name__ == '__main__':
 
             upload_file("frida-clr-{version}-windows-x86.dll", os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "bin", "Frida.dll"), upload)
             upload_file("frida-clr-{version}-windows-x86_64.dll", os.path.join(build_dir, "build", "frida-windows", "x64-Release", "bin", "Frida.dll"), upload)
-        elif worker == 'mac':
+        elif builder == 'macos':
             upload = get_github_uploader()
 
             upload_devkits("macos-x86", upload)
             upload_devkits("macos-x86_64", upload)
-            upload_devkits("ios-x86", upload)
-            upload_devkits("ios-x86_64", upload)
-            upload_devkits("ios-arm", upload)
-            upload_devkits("ios-arm64", upload)
 
             upload_file("frida-server-{version}-macos-x86_64", os.path.join(build_dir, "build", "frida-macos-x86_64", "bin", "frida-server"), upload)
-            upload_file("frida-server-{version}-ios-arm", os.path.join(build_dir, "build", "frida-ios-arm", "bin", "frida-server"), upload)
-            upload_file("frida-server-{version}-ios-arm64", os.path.join(build_dir, "build", "frida-ios-arm64", "bin", "frida-server"), upload)
 
             upload_file("frida-gadget-{version}-macos-universal.dylib", os.path.join(build_dir, "build", "frida-macos-universal", "lib", "frida-gadget.dylib"), upload)
-            upload_file("frida-gadget-{version}-ios-universal.dylib", os.path.join(build_dir, "build", "frida-ios-universal", "lib", "frida-gadget.dylib"), upload)
-            upload_file("frida-gadget-{version}-ios-universal.dylib", os.path.join(build_dir, "build", "frida-ios-universal", "lib", "frida-gadget.dylib"), upload, compression='gz')
 
             upload_directory("frida-swift-{version}-macos-x86_64", os.path.join(build_dir, "frida-swift", "build", "Release"), upload)
 
@@ -450,12 +442,7 @@ if __name__ == '__main__':
 
             upload_node_bindings_to_npm("/opt/node-64/bin/node", upload, publish=True)
             upload_meta_modules_to_npm("/opt/node-64/bin/node")
-
-            upload_ios_deb("frida", os.path.join(build_dir, "build", "frida-ios-arm64", "bin", "frida-server"), upload)
-            upload_ios_deb("frida32", os.path.join(build_dir, "build", "frida-ios-arm", "bin", "frida-server"), upload)
-
-            upload_ios_debug_symbols()
-        elif worker == 'linux-x86':
+        elif builder == 'linux-x86':
             upload = get_github_uploader()
 
             upload_devkits("linux-x86", upload)
@@ -482,7 +469,25 @@ if __name__ == '__main__':
 
             upload_node_bindings_to_npm("/opt/node-32/bin/node", upload, publish=False)
             upload_node_bindings_to_npm("/opt/node-64/bin/node", upload, publish=False)
-        elif worker == 'android':
+        elif builder == 'ios':
+            upload = get_github_uploader()
+
+            upload_devkits("ios-x86", upload)
+            upload_devkits("ios-x86_64", upload)
+            upload_devkits("ios-arm", upload)
+            upload_devkits("ios-arm64", upload)
+
+            upload_file("frida-server-{version}-ios-arm", os.path.join(build_dir, "build", "frida-ios-arm", "bin", "frida-server"), upload)
+            upload_file("frida-server-{version}-ios-arm64", os.path.join(build_dir, "build", "frida-ios-arm64", "bin", "frida-server"), upload)
+
+            upload_file("frida-gadget-{version}-ios-universal.dylib", os.path.join(build_dir, "build", "frida-ios-universal", "lib", "frida-gadget.dylib"), upload)
+            upload_file("frida-gadget-{version}-ios-universal.dylib", os.path.join(build_dir, "build", "frida-ios-universal", "lib", "frida-gadget.dylib"), upload, compression='gz')
+
+            upload_ios_deb("frida", os.path.join(build_dir, "build", "frida-ios-arm64", "bin", "frida-server"), upload)
+            upload_ios_deb("frida32", os.path.join(build_dir, "build", "frida-ios-arm", "bin", "frida-server"), upload)
+
+            upload_ios_debug_symbols()
+        elif builder == 'android':
             upload = get_github_uploader()
 
             upload_devkits("android-x86", upload)
@@ -506,7 +511,7 @@ if __name__ == '__main__':
             upload_file("frida-gadget-{version}-android-x86_64.so", os.path.join(build_dir, "build", "frida-android-x86_64", "lib", "frida-gadget.so"), upload)
             upload_file("frida-gadget-{version}-android-arm.so", os.path.join(build_dir, "build", "frida-android-arm", "lib", "frida-gadget.so"), upload)
             upload_file("frida-gadget-{version}-android-arm64.so", os.path.join(build_dir, "build", "frida-android-arm64", "lib", "frida-gadget.so"), upload)
-        elif worker == 'ubuntu_16_04-x86_64':
+        elif builder == 'ubuntu_16_04-x86_64':
             upload = get_github_uploader()
 
             upload_python_debs("ubuntu-xenial", "python", "/usr/bin/python2.7",
@@ -515,7 +520,7 @@ if __name__ == '__main__':
             upload_python_debs("ubuntu-xenial", "python3", "/usr/bin/python3.5",
                 os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python3.5", "site-packages", "_frida.so"),
                 upload)
-        elif worker == 'ubuntu_16_04-arm64':
+        elif builder == 'ubuntu_16_04-arm64':
             upload = get_github_uploader()
 
             upload_devkits("linux-arm64", upload)
@@ -530,7 +535,7 @@ if __name__ == '__main__':
                 os.path.join(build_dir, "build", "frida_thin-linux-arm64", "lib", "python3.5", "site-packages", "_frida.so"))
 
             upload_node_bindings_to_npm("/usr/bin/node", upload, publish=False)
-        elif worker == 'ubuntu_18_04-x86_64':
+        elif builder == 'ubuntu_18_04-x86_64':
             upload = get_github_uploader()
 
             upload_python_debs("ubuntu-bionic", "python", "/usr/bin/python2.7",
@@ -539,7 +544,7 @@ if __name__ == '__main__':
             upload_python_debs("ubuntu-bionic", "python3", "/usr/bin/python3.6",
                 os.path.join(build_dir, "build", "frida_thin-linux-x86_64", "lib", "python3.6", "site-packages", "_frida.so"),
                 upload)
-        elif worker == 'fedora_28-x86_64':
+        elif builder == 'fedora_28-x86_64':
             upload = get_github_uploader()
 
             upload_python_rpms("fc28", "python2", "/usr/bin/python2.7",
