@@ -7,7 +7,7 @@ while [[ $# > 0 ]]; do
   arg="$1"
 
   case "$arg" in
-    -c|-E)
+    -c|-E|--version|-Wl,--version|-Wl,-v)
       mode=compile
       ;;
   esac
