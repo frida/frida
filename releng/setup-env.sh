@@ -745,6 +745,7 @@ if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/.version" 2>/dev/null; th
     cp -a "$template" "$target"
     sed \
       -e "s,@FRIDA_TOOLROOT@,$FRIDA_TOOLROOT,g" \
+      -e "s,@FRIDA_RELENG@,$releng_path,g" \
       "$template" > "$target"
   done
 
@@ -792,6 +793,7 @@ if [ "$FRIDA_ENV_SDK" != 'none' ] && ! grep -Eq "^$sdk_version\$" "$FRIDA_SDKROO
     cp -a "$template" "$target"
     sed \
       -e "s,@FRIDA_SDKROOT@,$FRIDA_SDKROOT,g" \
+      -e "s,@FRIDA_RELENG@,$releng_path,g" \
       "$template" > "$target"
   done
 

@@ -127,7 +127,7 @@ build/fs-tmp-%/.package-stamp: \
 			share/glib-2.0/schemas \
 			share/vala \
 			| tar -C $(abspath $(@D)/package) -xf -
-	releng/relocatify.sh $(@D)/package $(abspath build/fs-$*)
+	releng/relocatify.sh $(@D)/package $(abspath build/fs-$*) $(abspath releng)
 ifeq ($(host_platform), ios)
 	cp $(shell xcrun --sdk macosx --show-sdk-path)/usr/include/mach/mach_vm.h $(@D)/package/include/frida_mach_vm.h
 endif

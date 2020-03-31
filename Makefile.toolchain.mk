@@ -155,7 +155,7 @@ build/ft-tmp-%/.package-stamp: \
 				fi; \
 			fi; \
 		done
-	releng/relocatify.sh $(@D)/package $(abspath build/ft-$*)
+	releng/relocatify.sh $(@D)/package $(abspath build/ft-$*) $(abspath releng)
 	@touch $@
 
 

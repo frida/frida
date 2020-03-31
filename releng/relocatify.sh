@@ -2,7 +2,8 @@
 
 package=$1
 prefix=$2
-[ -z "$package" -o -z "$prefix" ] && exit 1
+releng=$3
+[ -z "$package" -o -z "$prefix" -o -z "$releng" ] && exit 1
 
 build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,macos,')
 
@@ -15,17 +16,21 @@ fi
 
 for file in $(find "$package" -type f); do
   if grep -q "$prefix" $file; then
-    if echo "$file" | grep -Eq "\\.pm$|aclocal.*|autoconf|autoheader|autom4te.*|automake.*|autopoint|autoreconf|autoscan|autoupdate|gdbus-codegen|gettextize|lib/gettext/user-email|/glib-2.0/codegen/|/gdb/auto-load/|ifnames|libtoolize|bin/vala-gen-introspect"; then
+    if echo "$file" | grep -Eq "\\.pm$|aclocal.*|autoconf|autoheader|autom4te.*|automake.*|autopoint|autoreconf|autoscan|autoupdate|gdbus-codegen|gettextize|lib/gettext/user-email|/glib-2.0/codegen/|/gdb/auto-load/|ifnames|libtool|bin/vala-gen-introspect"; then
       newname="$file.frida.in"
       mv "$file" "$newname"
       sed_inplace \
+        -e "s,$prefix-,,g" \
         -e "s,$prefix,@FRIDA_TOOLROOT@,g" \
+        -e "s,$releng,@FRIDA_RELENG@,g" \
         $newname || exit 1
     elif echo "$file" | grep -Eq "\\.la$"; then
       newname="$file.frida.in"
       mv "$file" "$newname"
       sed_inplace \
+        -e "s,$prefix-,,g" \
         -e "s,$prefix,@FRIDA_SDKROOT@,g" \
+        -e "s,$releng,@FRIDA_RELENG@,g" \
         $newname || exit 1
     elif echo "$file" | grep -Eq "\\.pc$"; then
       sed_inplace \
