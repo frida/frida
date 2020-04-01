@@ -24,13 +24,18 @@ upstreams = {
     "vala": make_gnome_url("vala"),
     "pkg-config": "https://anongit.freedesktop.org/git/pkg-config.git",
     "duktape": "https://github.com/svaarala/duktape.git",
+    "gn": "https://gn.googlesource.com/gn",
     "v8": "https://chromium.googlesource.com/v8/v8",
+    "v8/build": "https://chromium.googlesource.com/chromium/src/build",
+    "v8/buildtools": "https://chromium.googlesource.com/chromium/src/buildtools",
     "capstone": "https://github.com/aquynh/capstone.git",
 }
 
 
 def sync(repo_path):
     repo_name = os.path.basename(repo_path)
+    if repo_name in ("build", "buildtools") and os.path.basename(os.path.dirname(repo_path)) == "v8":
+        repo_name = "v8/" + repo_name
 
     patches_path = os.path.join(str(Path.home()), ".frida-sync-" + re.sub(r"[^\w\d]", "-", repo_path.lower()).lstrip("-"))
     if os.path.exists(patches_path):
