@@ -344,7 +344,7 @@ endif
 		CPP=clang CC=clang CXX=clang++ LD= LDFLAGS= AR= RANLIB= \
 		CROSS_COMPILE="$(xcode_developer_dir)/Toolchains/XcodeDefault.xctoolchain/usr/bin/" \
 		CROSS_TOP="${xcode_developer_dir}/Platforms/$(xcode_platform).platform/Developer" \
-		CROSS_SDK=$(xcode_platform)$(shell xcrun --sdk $(shell echo $(xcode_platform) | tr A-Z a-z) --show-sdk-version).sdk \
+		CROSS_SDK=$(xcode_platform)$(shell xcrun --sdk $(shell echo $(xcode_platform) | tr A-Z a-z) --show-sdk-version | cut -f1-2 -d'.').sdk \
 		MACOS_MIN_SDK_VERSION=10.9 \
 		IOS_MIN_SDK_VERSION=7.0 \
 		CONFIG_DISABLE_BITCODE=true \
