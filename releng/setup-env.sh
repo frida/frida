@@ -936,14 +936,8 @@ if [ -n "$meson_linker_flavor" ]; then
     echo "export CC_LD=$meson_linker_flavor"
     echo "export CXX_LD=$meson_linker_flavor"
   ) >> $meson_env_rc
-  case $host_platform in
-    macos|ios)
-      (
-        echo "export OBJC_LD=$meson_linker_flavor"
-        echo "export OBJCXX_LD=$meson_linker_flavor"
-      ) >> $meson_env_rc
-      ;;
-  esac
+  [ -n "$meson_objc" ] && echo "export OBJC_LD=$meson_linker_flavor" >> $meson_env_rc
+  [ -n "$meson_objcpp" ] && echo "export OBJCXX_LD=$meson_linker_flavor" >> $meson_env_rc
 fi
 if [ "$host_platform" != "$build_platform" ]; then
   build_env_rc=build/${FRIDA_ENV_NAME:-frida}-meson-env-${build_platform_arch}.rc
@@ -976,6 +970,12 @@ meson_cross_file=build/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}.txt
   fi
   if [ -n "$meson_objcpp" ]; then
     echo "objcpp = '$meson_objcpp'"
+  fi
+  if [ -n "$meson_linker_flavor" ]; then
+    echo "c_ld = '$meson_linker_flavor'"
+    echo "cpp_ld = '$meson_linker_flavor'"
+    [ -n "$meson_objc" ] && echo "objc_ld = '$meson_linker_flavor'"
+    [ -n "$meson_objcpp" ] && echo "objcpp_ld = '$meson_linker_flavor'"
   fi
   echo "vala = '$VALAC'"
   echo "ar = '$AR'"
