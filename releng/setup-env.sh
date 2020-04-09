@@ -939,7 +939,7 @@ if [ -n "$meson_linker_flavor" ]; then
   [ -n "$meson_objc" ] && echo "export OBJC_LD=$meson_linker_flavor" >> $meson_env_rc
   [ -n "$meson_objcpp" ] && echo "export OBJCXX_LD=$meson_linker_flavor" >> $meson_env_rc
 fi
-if [ "$host_platform" != "$build_platform" ]; then
+if [ "$host_platform_arch" != "$build_platform_arch" ]; then
   build_env_rc=build/${FRIDA_ENV_NAME:-frida}-meson-env-${build_platform_arch}.rc
   if [ ! -f $build_env_rc ]; then
     FRIDA_HOST=${build_platform_arch} releng/setup-env.sh
