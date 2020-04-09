@@ -165,6 +165,7 @@ build/.elfutils-stamp: build/fs-env-$(build_platform_arch).rc
 		&& git checkout -b release $(elfutils_version) \
 		&& patch -p1 < ../releng/patches/elfutils-clang.patch \
 		&& patch -p1 < ../releng/patches/elfutils-android.patch \
+		&& patch -p1 < ../releng/patches/elfutils-glibc-compatibility.patch \
 		&& autoreconf -ifv
 	@mkdir -p $(@D)
 	@touch $@

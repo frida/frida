@@ -1,0 +1,20 @@
+diff -Nur elfutils-orig/libelf/elf_compress_gnu.c elfutils/libelf/elf_compress_gnu.c
+--- elfutils-orig/libelf/elf_compress_gnu.c	2020-04-09 01:33:29.349055000 +0000
++++ elfutils/libelf/elf_compress_gnu.c	2020-04-09 03:54:21.810337642 +0000
+@@ -34,6 +34,16 @@
+ #include "libelfP.h"
+ #include "common.h"
+ 
++#ifndef htobe64
++# if __BYTE_ORDER == __LITTLE_ENDIAN
++#  define htobe64(x) __builtin_bswap64 (x)
++#  define be64toh(x) __builtin_bswap64 (x)
++# else
++#  define htobe64(x) x
++#  define be64toh(x) x
++# endif
++#endif
++
+ int
+ elf_compress_gnu (Elf_Scn *scn, int inflate, unsigned int flags)
+ {
