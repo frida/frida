@@ -622,7 +622,7 @@ build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc: build/fs-tmp-%/v8/obj/libv8_mo
 		patch build/fs-$*/include/v8-$(v8_api_version)/v8/v8config.h \
 		-s v8-checkout/v8 \
 		-b build/fs-tmp-$*/v8 \
-		-G v8-checkout/depot_tools/gn
+		-G build/fs-tmp-$(build_platform_arch)/gn/gn
 	echo "prefix=\$${frida_sdk_prefix}" > $@.tmp
 	echo "libdir=\$${prefix}/lib" >> $@.tmp
 	echo "includedir=\$${prefix}/include/v8-$(v8_api_version)" >> $@.tmp
