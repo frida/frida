@@ -5,11 +5,11 @@ MAKE_J ?= -j 8
 repo_base_url = https://github.com/frida
 repo_suffix := .git
 
-libiconv_version := 1.15
-elfutils_version := 1b1433d5670b75c4bd5c9b598e0b00fba6e82d90
-libdwarf_version := 20190110
-openssl_version := 1.1.1b
-v8_api_version := 7.0
+libiconv_version := 1.16
+elfutils_version := elfutils-0.179
+libdwarf_version := 20200114
+openssl_version := 1.1.1f
+v8_api_version := 8.0
 
 gnu_mirror := saimei.ftp.acc.umu.se/mirror/gnu.org/gnu
 
@@ -19,7 +19,7 @@ build_arch := $(shell releng/detect-arch.sh)
 build_platform_arch := $(build_platform)-$(build_arch)
 
 ifneq ($(shell which curl),)
-	download := curl -sS
+	download := curl -sSL
 else
 	download := wget -O - -q
 endif
@@ -65,7 +65,7 @@ ifeq ($(host_platform), qnx)
 	dwarf := build/fs-%/lib/libdwarf.a
 endif
 ifeq ($(host_platform),$(filter $(host_platform),macos ios linux android))
-	glib_tls_provider := build/fs-%/lib/pkgconfig/glib-openssl-static.pc
+	glib_tls_provider := build/fs-%/lib/pkgconfig/gioopenssl.pc
 endif
 ifeq ($(enable_v8), 1)
 	v8 := build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc
@@ -138,8 +138,7 @@ build/.libiconv-stamp:
 	$(RM) -r libiconv
 	mkdir libiconv
 	cd libiconv \
-		&& $(download) https://$(gnu_mirror)/libiconv/libiconv-$(libiconv_version).tar.gz | tar -xz --strip-components 1 \
-		&& patch -p1 < ../releng/patches/libiconv-android.patch
+		&& $(download) https://$(gnu_mirror)/libiconv/libiconv-$(libiconv_version).tar.gz | tar -xz --strip-components 1
 	@mkdir -p $(@D)
 	@touch $@
 
@@ -148,11 +147,7 @@ build/fs-tmp-%/libiconv/Makefile: build/fs-env-%.rc build/.libiconv-stamp
 	mkdir -p $(@D)
 	. $< \
 		&& cd $(@D) \
-		&& ../../../libiconv/configure \
-			--enable-static \
-			--disable-shared \
-			--enable-relocatable \
-			--disable-rpath
+		&& ../../../libiconv/configure
 
 build/fs-%/lib/libiconv.a: build/fs-env-%.rc build/fs-tmp-%/libiconv/Makefile
 	. $< \
@@ -167,7 +162,7 @@ build/.elfutils-stamp: build/fs-env-$(build_platform_arch).rc
 	git clone git://sourceware.org/git/elfutils.git
 	. $< \
 		&& cd elfutils \
-		&& git checkout $(elfutils_version) \
+		&& git checkout -b release $(elfutils_version) \
 		&& patch -p1 < ../releng/patches/elfutils-clang.patch \
 		&& patch -p1 < ../releng/patches/elfutils-android.patch \
 		&& autoreconf -ifv
@@ -253,7 +248,7 @@ build/.$1-stamp:
 
 build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_platform_arch).rc build/fs-env-%.rc build/.$1-stamp $3 releng/meson/meson.py
 	$(RM) -r $$(@D)
-	(. build/fs-meson-env-$(build_platform_arch).rc \
+	(. build/fs-meson-env-$$*.rc \
 		&& . build/fs-config-$$*.site \
 		&& if [ $$* = $(build_platform_arch) ]; then \
 			cross_args=""; \
@@ -264,7 +259,7 @@ build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_platform_arch).rc build/fs-e
 			--prefix $$$$frida_prefix \
 			--libdir $$$$frida_prefix/lib \
 			--default-library static \
-			$$(FRIDA_SDK_FLAGS) \
+			$$(FRIDA_MESONFLAGS_BOTTLE) \
 			$$$$cross_args \
 			$4 \
 			$$(@D) \
@@ -286,19 +281,19 @@ $(eval $(call make-git-autotools-module-rules,libunwind,build/fs-%/lib/pkgconfig
 
 $(eval $(call make-git-meson-module-rules,libffi,build/fs-%/lib/pkgconfig/libffi.pc,,))
 
-$(eval $(call make-git-meson-module-rules,glib,build/fs-%/lib/pkgconfig/glib-2.0.pc,$(iconv) build/fs-%/lib/pkgconfig/zlib.pc build/fs-%/lib/pkgconfig/libffi.pc,$(glib_iconv_option) -Dselinux=disabled -Dxattr=false -Dlibmount=false -Dinternal_pcre=true -Dtests=false))
+$(eval $(call make-git-meson-module-rules,glib,build/fs-%/lib/pkgconfig/glib-2.0.pc,$(iconv) build/fs-%/lib/pkgconfig/zlib.pc build/fs-%/lib/pkgconfig/libffi.pc,$(glib_iconv_option) -Dselinux=disabled -Dxattr=false -Dlibmount=disabled -Dinternal_pcre=true -Dtests=false))
 
-$(eval $(call make-git-meson-module-rules,glib-openssl,build/fs-%/lib/pkgconfig/glib-openssl-static.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/openssl.pc,-Dca_certificates=no))
+$(eval $(call make-git-meson-module-rules,glib-networking,build/fs-%/lib/pkgconfig/gioopenssl.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/openssl.pc,-Dgnutls=disabled -Dopenssl=enabled -Dlibproxy=disabled -Dgnome_proxy=disabled -Dstatic_modules=true))
 
 $(eval $(call make-git-meson-module-rules,libgee,build/fs-%/lib/pkgconfig/gee-0.8.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc))
 
-$(eval $(call make-git-meson-module-rules,json-glib,build/fs-%/lib/pkgconfig/json-glib-1.0.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc,-Dintrospection=false -Dtests=false))
+$(eval $(call make-git-meson-module-rules,json-glib,build/fs-%/lib/pkgconfig/json-glib-1.0.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc,-Dintrospection=disabled -Dtests=false))
 
-$(eval $(call make-git-meson-module-rules,libpsl,build/fs-%/lib/pkgconfig/libpsl.pc,,))
+$(eval $(call make-git-meson-module-rules,libpsl,build/fs-%/lib/pkgconfig/libpsl.pc,,-Dtests=false))
 
 $(eval $(call make-git-meson-module-rules,libxml2,build/fs-%/lib/pkgconfig/libxml-2.0.pc,build/fs-%/lib/pkgconfig/zlib.pc build/fs-%/lib/pkgconfig/liblzma.pc,))
 
-$(eval $(call make-git-meson-module-rules,libsoup,build/fs-%/lib/pkgconfig/libsoup-2.4.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/sqlite3.pc build/fs-%/lib/pkgconfig/libpsl.pc build/fs-%/lib/pkgconfig/libxml-2.0.pc,-Dgssapi=false -Dtls_check=false -Dgnome=false -Dintrospection=false -Dvapi=false -Dtests=false))
+$(eval $(call make-git-meson-module-rules,libsoup,build/fs-%/lib/pkgconfig/libsoup-2.4.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/sqlite3.pc build/fs-%/lib/pkgconfig/libpsl.pc build/fs-%/lib/pkgconfig/libxml-2.0.pc,-Dgssapi=disabled -Dtls_check=false -Dgnome=false -Dintrospection=disabled -Dvapi=disabled -Dtests=false))
 
 
 ifeq ($(FRIDA_ASAN), yes)
@@ -393,7 +388,7 @@ ifeq ($(host_arch), x86_64)
 	ndk_triplet := x86_64-linux-android
 endif
 ifeq ($(host_arch), arm)
-	openssl_arch_args := android-arm -D__ANDROID_API__=18 -D__ARM_MAX_ARCH__=7
+	openssl_arch_args := android-arm -D__ANDROID_API__=18 -D__ARM_MAX_ARCH__=7 -fno-integrated-as
 	ndk_abi := arm-linux-androideabi
 	ndk_triplet := arm-linux-androideabi
 endif
@@ -460,6 +455,7 @@ v8_common_args := \
 	v8_enable_i18n_support=false \
 	v8_untrusted_code_mitigations=false \
 	treat_warnings_as_errors=false \
+	fatal_linker_warnings=false \
 	use_glib=false \
 	use_goma=false \
 	v8_embedder_string="-frida" \
@@ -481,13 +477,6 @@ v8_buildtype_args := \
 	$(NULL)
 endif
 
-ifeq ($(host_platform_arch), android-x86_64)
-v8_arch_args := v8_enable_embedded_builtins=false
-endif
-ifneq ($(host_arch), x86_64)
-v8_arch_args := v8_enable_embedded_builtins=false
-endif
-
 ifeq ($(host_arch), x86)
 	v8_cpu := x86
 endif
@@ -496,19 +485,19 @@ ifeq ($(host_arch), x86_64)
 endif
 ifeq ($(host_arch), arm)
 	v8_cpu := arm
-	v8_cpu_args := arm_version=7 arm_fpu="vfpv3-d16" arm_float_abi="softfp"
+	v8_cpu_args := arm_version=7 arm_fpu="vfpv3-d16" arm_float_abi="softfp" arm_use_neon=false
 endif
 ifeq ($(host_arch), armbe8)
 	v8_cpu := arm
-	v8_cpu_args := arm_version=7 arm_fpu="vfpv3-d16" arm_float_abi="softfp"
+	v8_cpu_args := arm_version=7 arm_fpu="vfpv3-d16" arm_float_abi="softfp" arm_use_neon=false
 endif
 ifeq ($(host_arch), armeabi)
 	v8_cpu := arm
-	v8_cpu_args := arm_version=7 arm_fpu="vfpv3-d16" arm_float_abi="softfp"
+	v8_cpu_args := arm_version=7 arm_fpu="vfpv3-d16" arm_float_abi="softfp" arm_use_neon=false
 endif
 ifeq ($(host_arch), armhf)
 	v8_cpu := arm
-	v8_cpu_args := arm_version=7 arm_fpu="vfpv3-d16" arm_float_abi="hard"
+	v8_cpu_args := arm_version=7 arm_fpu="vfpv3-d16" arm_float_abi="hard" arm_use_neon=false
 endif
 ifeq ($(host_arch), arm64)
 	v8_cpu := arm64
@@ -561,12 +550,19 @@ ifeq ($(host_platform), android)
 		use_xcode_clang=true \
 		use_custom_libcxx=false \
 		android_ndk_root="$(ANDROID_NDK_ROOT)" \
-		android_ndk_version="r20" \
-		android_ndk_major_version=20 \
+		android_ndk_version="r21" \
+		android_ndk_major_version=21 \
 		android32_ndk_api_level=18 \
 		android64_ndk_api_level=21 \
 		clang_base_path="$(abspath $(ANDROID_NDK_ROOT)/toolchains/llvm/prebuilt/$(ndk_build_platform_arch))"
 	v8_libs_private := "-llog -lm"
+endif
+
+ifneq ($(MACOS_SDK_ROOT),)
+	v8_platform_args += mac_sdk_path="$(MACOS_SDK_ROOT)"
+endif
+ifneq ($(IOS_SDK_ROOT),)
+	v8_platform_args += ios_sdk_path="$(IOS_SDK_ROOT)"
 endif
 
 gn:
@@ -576,7 +572,6 @@ gn:
 build/fs-tmp-%/gn/build.ninja: build/fs-env-%.rc gn
 	. $< \
 		&& CC="$$CC" CXX="$$CXX" python gn/build/gen.py \
-			--no-sysroot \
 			--out-path $(abspath $(@D))
 
 build/fs-tmp-%/gn/gn: build/fs-tmp-%/gn/build.ninja
@@ -588,7 +583,7 @@ v8-checkout/depot_tools/gclient:
 	git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git v8-checkout/depot_tools
 
 v8-checkout/.gclient: v8-checkout/depot_tools/gclient
-	cd v8-checkout && depot_tools/gclient config --spec 'solutions = [ \
+	cd v8-checkout && PATH=$(abspath v8-checkout/depot_tools):$$PATH depot_tools/gclient config --spec 'solutions = [ \
   { \
     "url": "$(repo_base_url)/v8.git", \
     "managed": False, \
@@ -596,20 +591,17 @@ v8-checkout/.gclient: v8-checkout/depot_tools/gclient
     "deps_file": "DEPS", \
     "custom_deps": {}, \
   }, \
-] \
-'
+]'
 
 v8-checkout/v8: v8-checkout/.gclient
-	cd v8-checkout \
-		&& export PATH=$(abspath v8-checkout/depot_tools):$$PATH \
-		&& gclient sync
+	cd v8-checkout && PATH=$(abspath v8-checkout/depot_tools):$$PATH gclient sync
 	@touch $@
 
 build/fs-tmp-%/v8/build.ninja: v8-checkout/v8 build/fs-tmp-$(build_platform_arch)/gn/gn
 	cd v8-checkout/v8 \
 		&& ../../build/fs-tmp-$(build_platform_arch)/gn/gn \
 			gen $(abspath $(@D)) \
-			--args='target_os="$(v8_os)" target_cpu="$(v8_cpu)" $(v8_cpu_args) $(v8_common_args) $(v8_buildtype_args) $(v8_arch_args) $(v8_platform_args)'
+			--args='target_os="$(v8_os)" target_cpu="$(v8_cpu)" $(v8_cpu_args) $(v8_common_args) $(v8_buildtype_args) $(v8_platform_args)'
 
 build/fs-tmp-%/v8/obj/libv8_monolith.a: build/fs-tmp-%/v8/build.ninja
 	$(NINJA) -C build/fs-tmp-$*/v8 v8_monolith
@@ -625,13 +617,18 @@ build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc: build/fs-tmp-%/v8/obj/libv8_mo
 	install -d build/fs-$*/lib
 	install -m 644 $< build/fs-$*/lib/libv8-$(v8_api_version).a
 	install -d $(@D)
+	$(PYTHON3) releng/v8.py \
+		patch build/fs-$*/include/v8-$(v8_api_version)/v8/v8config.h \
+		-s v8-checkout/v8 \
+		-b build/fs-tmp-$*/v8 \
+		-G v8-checkout/depot_tools/gn
 	echo "prefix=\$${frida_sdk_prefix}" > $@.tmp
 	echo "libdir=\$${prefix}/lib" >> $@.tmp
 	echo "includedir=\$${prefix}/include/v8-$(v8_api_version)" >> $@.tmp
 	echo "" >> $@.tmp
 	echo "Name: V8" >> $@.tmp
 	echo "Description: V8 JavaScript Engine" >> $@.tmp
-	echo "Version: $$(python releng/v8.py v8-checkout/v8 version)" >> $@.tmp
+	echo "Version: $$($(PYTHON3) releng/v8.py get version -s v8-checkout/v8)" >> $@.tmp
 	echo "Libs: -L\$${libdir} -lv8-$(v8_api_version)" >> $@.tmp
 ifdef v8_libs_private
 	echo Libs.private: $(v8_libs_private) >> $@.tmp
@@ -649,7 +646,6 @@ build/fs-%/lib/c++/libc++.a: build/fs-tmp-%/v8/obj/libv8_monolith.a
 		echo "#ifndef _LIBCPP_CONFIG_SITE"; \
 		echo "#define _LIBCPP_CONFIG_SITE"; \
 		echo ""; \
-		echo "#define _LIBCPP_ENABLE_CXX17_REMOVED_UNEXPECTED_FUNCTIONS"; \
 		echo "#define _LIBCPP_HAS_NO_ALIGNED_ALLOCATION"; \
 		echo "#define _LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS"; \
 		echo "#define _LIBCPP_ENABLE_NODISCARD"; \
@@ -671,8 +667,8 @@ build/fs-%/lib/c++/libc++.a: build/fs-tmp-%/v8/obj/libv8_monolith.a
 
 build/fs-env-%.rc:
 	FRIDA_HOST=$* \
-		FRIDA_OPTIMIZATION_FLAGS="$(FRIDA_SDK_OPTIMIZATION_FLAGS)" \
-		FRIDA_DEBUG_FLAGS="$(FRIDA_SDK_DEBUG_FLAGS)" \
+		FRIDA_ACOPTFLAGS="$(FRIDA_ACOPTFLAGS_BOTTLE)" \
+		FRIDA_ACDBGFLAGS="$(FRIDA_ACDBGFLAGS_BOTTLE)" \
 		FRIDA_ASAN=$(FRIDA_ASAN) \
 		FRIDA_ENV_NAME=fs \
 		FRIDA_ENV_SDK=none \

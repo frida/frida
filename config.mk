@@ -6,21 +6,20 @@ FRIDA := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 FRIDA_ASAN ?= no
 
 ifeq ($(FRIDA_ASAN), yes)
-FRIDA_COMMON_FLAGS := --buildtype debugoptimized -Db_sanitize=address
-FRIDA_SDK_FLAGS := --buildtype debugoptimized -Db_sanitize=address
-FRIDA_OPTIMIZATION_FLAGS ?= -O1
-FRIDA_SDK_OPTIMIZATION_FLAGS ?= -O1
+FRIDA_MESONFLAGS_COMMON := -Doptimization=1 -Ddebug=true -Db_sanitize=address
+FRIDA_MESONFLAGS_BOTTLE := -Doptimization=1 -Ddebug=true -Db_sanitize=address
+FRIDA_ACOPTFLAGS_COMMON ?= -O1
+FRIDA_ACOPTFLAGS_BOTTLE ?= -O1
 else
-FRIDA_COMMON_FLAGS := --buildtype minsize --strip
-FRIDA_SDK_FLAGS := --buildtype minsize
-FRIDA_OPTIMIZATION_FLAGS ?= -Os
-FRIDA_SDK_OPTIMIZATION_FLAGS ?= -Os
+FRIDA_MESONFLAGS_COMMON := -Doptimization=s -Ddebug=false --strip
+FRIDA_MESONFLAGS_BOTTLE := -Doptimization=s -Ddebug=false
+FRIDA_ACOPTFLAGS_COMMON ?= -Os
+FRIDA_ACOPTFLAGS_BOTTLE ?= -Os
 endif
+FRIDA_ACDBGFLAGS_COMMON ?= -g3
+FRIDA_ACDBGFLAGS_BOTTLE ?= -g1
 
 FRIDA_MAPPER_FLAGS := -Dmapper=auto
-
-FRIDA_DEBUG_FLAGS ?= -g3
-FRIDA_SDK_DEBUG_FLAGS ?= -g1
 
 PYTHON ?= $(shell which python)
 PYTHON_VERSION := $(shell $(PYTHON) -c 'import sys; v = sys.version_info; print("{0}.{1}".format(v[0], v[1]))')

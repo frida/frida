@@ -6,10 +6,12 @@ repo_suffix = ".git"
 
 m4_version := 1.4.18
 autoconf_version := 2.69
-automake_version := 1.16.1
+automake_version := 1.16.2
 automake_api_version := 1.16
 libtool_version := 2.4.6
-gettext_version := 0.19.8.1
+gettext_version := 0.20.1
+flex_version := 2.6.4
+bison_version := 3.5.4
 
 gnu_mirror := saimei.ftp.acc.umu.se/mirror/gnu.org/gnu
 
@@ -19,7 +21,7 @@ build_arch := $(shell releng/detect-arch.sh)
 build_platform_arch := $(build_platform)-$(build_arch)
 
 ifneq ($(shell which curl),)
-	download := curl -sS
+	download := curl -sSL
 else
 	download := wget -O - -q
 endif
@@ -109,12 +111,16 @@ build/ft-tmp-%/.package-stamp: \
 	mkdir -p $(@D)/package
 	cd build/ft-$* \
 		&& tar -c \
+			--exclude bin/bison \
+			--exclude bin/flex \
+			--exclude bin/flex++ \
 			--exclude bin/gapplication \
 			--exclude bin/gdbus \
 			--exclude bin/gio \
 			--exclude bin/gio-launch-desktop \
 			--exclude bin/gobject-query \
 			--exclude bin/gsettings \
+			--exclude bin/yacc \
 			--exclude etc \
 			--exclude include \
 			--exclude lib/charset.alias \
@@ -122,7 +128,7 @@ build/ft-tmp-%/.package-stamp: \
 			--exclude lib/glib-2.0 \
 			--exclude lib/gio \
 			--exclude lib/pkgconfig \
-			--exclude "lib/vala-0.46/*.a" \
+			--exclude "lib/vala-0.50/*.a" \
 			--exclude share/bash-completion \
 			--exclude share/devhelp \
 			--exclude share/doc \
@@ -145,7 +151,7 @@ build/ft-tmp-%/.package-stamp: \
 		&& for f in $(@D)/package/bin/*; do \
 			if [ -L $$f ]; then \
 				true; \
-			elif file -b --mime-type $$f | egrep -q "^application"; then \
+			elif file -b --mime $$f | egrep -q "executable|binary"; then \
 				$$STRIP $(strip_all) $$f || exit 1; \
 			else \
 				if [ $(build_platform) = macos ]; then \
@@ -154,7 +160,8 @@ build/ft-tmp-%/.package-stamp: \
 					sed -i"" -e "s_^#!.*python.*_#!/usr/bin/env python3_gi" $$f || exit 1; \
 				fi; \
 			fi; \
-		done
+		done \
+		&& $$STRIP $(strip_all) $(@D)/package/lib/vala-*/gen-introspect-*
 	releng/relocatify.sh $(@D)/package $(abspath build/ft-$*) $(abspath releng)
 	@touch $@
 
@@ -176,7 +183,9 @@ build/.$1-stamp:
 build/ft-tmp-%/$1/Makefile: build/ft-env-%.rc build/.$1-stamp $4
 	$(RM) -r $$(@D)
 	mkdir -p $$(@D)
-	. $$< && cd $$(@D) && PATH=$$(shell pwd)/build/ft-$$*/bin:$$$$PATH ../../../$1/configure
+	. $$< \
+		&& cd $$(@D) \
+		&& PATH=$$(shell pwd)/build/ft-$$*/bin:$$$$PATH ../../../$1/configure
 
 $3: build/ft-env-%.rc build/ft-tmp-%/$1/Makefile
 	. $$< \
@@ -196,18 +205,18 @@ build/.$1-stamp:
 
 build/ft-tmp-%/$1/build.ninja: build/ft-env-$(build_platform_arch).rc build/ft-env-%.rc build/.$1-stamp $3 releng/meson/meson.py
 	$(RM) -r $$(@D)
-	(. build/ft-meson-env-$(build_platform_arch).rc \
+	(. build/ft-meson-env-$$*.rc \
 		&& . build/ft-config-$$*.site \
 		&& if [ $$* = $(build_platform_arch) ]; then \
 			cross_args=""; \
 		else \
 			cross_args="--cross-file build/ft-$$*.txt"; \
 		fi \
-		&& $(MESON) \
+		&& PATH=$$(shell pwd)/build/ft-$$*/bin:$$$$PATH $(MESON) \
 			--prefix $$$$frida_prefix \
 			--libdir $$$$frida_prefix/lib \
 			--default-library static \
-			--buildtype minsize \
+			$$(FRIDA_MESONFLAGS_BOTTLE) \
 			$$$$cross_args \
 			$4 \
 			$$(@D) \
@@ -252,17 +261,21 @@ build/ft-%/bin/libtool: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 		&& make $(MAKE_J) install
 	@touch $@
 
-$(eval $(call make-tarball-module-rules,gettext,https://$(gnu_mirror)/gettext/gettext-$(gettext_version).tar.gz,build/ft-%/bin/autopoint,build/ft-%/bin/libtool,gettext-vasnprintf-apple-fix.patch))
+$(eval $(call make-tarball-module-rules,gettext,https://$(gnu_mirror)/gettext/gettext-$(gettext_version).tar.gz,build/ft-%/bin/autopoint,build/ft-%/bin/libtool,gettext-static-only.patch))
 
 $(eval $(call make-git-meson-module-rules,zlib,build/ft-%/lib/pkgconfig/zlib.pc,))
 
 $(eval $(call make-git-meson-module-rules,libffi,build/ft-%/lib/pkgconfig/libffi.pc,,))
 
-$(eval $(call make-git-meson-module-rules,glib,build/ft-%/bin/glib-genmarshal,build/ft-%/lib/pkgconfig/zlib.pc build/ft-%/lib/pkgconfig/libffi.pc,$(glib_iconv_option) -Dselinux=disabled -Dxattr=false -Dlibmount=false -Dinternal_pcre=true -Dtests=false))
+$(eval $(call make-git-meson-module-rules,glib,build/ft-%/bin/glib-genmarshal,build/ft-%/lib/pkgconfig/zlib.pc build/ft-%/lib/pkgconfig/libffi.pc,$(glib_iconv_option) -Dselinux=disabled -Dxattr=false -Dlibmount=disabled -Dinternal_pcre=true -Dtests=false))
 
 $(eval $(call make-git-meson-module-rules,pkg-config,build/ft-%/bin/pkg-config,build/ft-%/bin/glib-genmarshal,))
 
-$(eval $(call make-git-meson-module-rules,vala,build/ft-%/bin/valac,build/ft-%/bin/glib-genmarshal,))
+$(eval $(call make-tarball-module-rules,flex,https://github.com/westes/flex/releases/download/v$(flex_version)/flex-$(flex_version).tar.gz,build/ft-%/bin/flex,))
+
+$(eval $(call make-tarball-module-rules,bison,https://$(gnu_mirror)/bison/bison-$(bison_version).tar.gz,build/ft-%/bin/bison,))
+
+$(eval $(call make-git-meson-module-rules,vala,build/ft-%/bin/valac,build/ft-%/bin/glib-genmarshal build/ft-%/bin/flex build/ft-%/bin/bison,))
 
 build/ft-%/bin/dpkg-deb:
 	@mkdir -p $(@D)
@@ -274,8 +287,8 @@ build/ft-%/bin/dpkg-deb:
 
 build/ft-env-%.rc: build/ft-executable.symbols build/ft-executable.version
 	FRIDA_HOST=$* \
-		FRIDA_OPTIMIZATION_FLAGS="$(FRIDA_OPTIMIZATION_FLAGS)" \
-		FRIDA_DEBUG_FLAGS="$(FRIDA_DEBUG_FLAGS)" \
+		FRIDA_ACOPTFLAGS="$(FRIDA_ACOPTFLAGS_BOTTLE)" \
+		FRIDA_ACDBGFLAGS="$(FRIDA_ACDBGFLAGS_BOTTLE)" \
 		FRIDA_EXTRA_LDFLAGS="$(export_ldflags)" \
 		FRIDA_ASAN=$(FRIDA_ASAN) \
 		FRIDA_ENV_NAME=ft \

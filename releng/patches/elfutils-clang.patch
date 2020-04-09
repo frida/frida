@@ -305,7 +305,7 @@ index f9114cb1..c1f87b6a 100644
      case DW_TAG_base_type:
      case DW_TAG_enumeration_type:
 diff --git a/config/eu.am b/config/eu.am
-index 82acda3a..6a49f183 100644
+index 6c3c444f..14efdf65 100644
 --- a/config/eu.am
 +++ b/config/eu.am
 @@ -64,19 +64,18 @@ endif
@@ -329,12 +329,12 @@ index 82acda3a..6a49f183 100644
 -	    $(if $($(*F)_no_Wpacked_not_aligned),-Wno-packed-not-aligned,) \
  	    $($(*F)_CFLAGS)
  
- COMPILE.os = $(filter-out -fprofile-arcs -ftest-coverage, $(COMPILE))
+ AM_CXXFLAGS = -std=c++11 -Wall -Wshadow \
 diff --git a/configure.ac b/configure.ac
-index b4e012de..8274ec79 100644
+index a39e800f..a2716772 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -125,7 +125,7 @@ void baz (int n)
+@@ -127,7 +127,7 @@ void baz (int n)
  		  ac_cv_c99=yes, ac_cv_c99=no)
  CFLAGS="$old_CFLAGS"])
  AS_IF([test "x$ac_cv_c99" != xyes],
@@ -375,18 +375,18 @@ index 7cdf484f..062834ee 100644
    {
      .pattern =
 diff --git a/libcpu/i386_disasm.c b/libcpu/i386_disasm.c
-index a7e03f95..96d638eb 100644
+index 4422ffa2..c50ecd66 100644
 --- a/libcpu/i386_disasm.c
 +++ b/libcpu/i386_disasm.c
-@@ -819,7 +819,7 @@ i386_disasm (Ebl *ebl __attribute__((unused)),
+@@ -821,7 +821,7 @@ i386_disasm (Ebl *ebl __attribute__((unused)),
  			      ++param_start;
  			      break;
  			    }
 -			  FALLTHROUGH;
 +			  /* fall through */
  			default:
- 			  assert (! "INVALID not handled");
- 			}
+ 			  str = "INVALID not handled";
+ 			  break;
 diff --git a/libdw/cfi.c b/libdw/cfi.c
 index 341e055b..a6060638 100644
 --- a/libdw/cfi.c
@@ -436,7 +436,7 @@ index 3fc9384a..cdaa2111 100644
      default:;
        size_t phnum;
 diff --git a/libdwfl/dwfl_segment_report_module.c b/libdwfl/dwfl_segment_report_module.c
-index 76ba1506..8d6058d9 100644
+index 430e13d5..a7d42492 100644
 --- a/libdwfl/dwfl_segment_report_module.c
 +++ b/libdwfl/dwfl_segment_report_module.c
 @@ -199,6 +199,356 @@ handle_file_note (GElf_Addr module_start, GElf_Addr module_end,
@@ -1300,7 +1300,7 @@ index 76ba1506..8d6058d9 100644
  	}
  
        elf = elf_memory (contents, file_trimmed_end);
-@@ -974,5 +1074,5 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
+@@ -975,5 +1075,5 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
        mod->main_bias = bias;
      }
  
@@ -2007,10 +2007,10 @@ index 6ba6af41..60d9b406 100644
    fd = open (fname, O_RDONLY);
    if (fd < 0)
 diff --git a/src/elflint.c b/src/elflint.c
-index edb466dd..24f6de9e 100644
+index 480d84ba..da698bf4 100644
 --- a/src/elflint.c
 +++ b/src/elflint.c
-@@ -1763,7 +1763,7 @@ section [%2d] '%s': entry %zu: pointer does not match address of section [%2d] '
+@@ -1767,7 +1767,7 @@ section [%2d] '%s': entry %zu: pointer does not match address of section [%2d] '
  	  if (dyn->d_tag < DT_ADDRRNGLO || dyn->d_tag > DT_ADDRRNGHI)
  	    /* Value is no pointer.  */
  	    break;
@@ -2019,7 +2019,7 @@ index edb466dd..24f6de9e 100644
  
  	case DT_AUXILIARY:
  	case DT_FILTER:
-@@ -3435,10 +3435,8 @@ check_attributes (Ebl *ebl, GElf_Ehdr *ehdr, GElf_Shdr *shdr, int idx)
+@@ -3439,10 +3439,8 @@ check_attributes (Ebl *ebl, GElf_Ehdr *ehdr, GElf_Shdr *shdr, int idx)
        return;
      }
  
@@ -2032,7 +2032,7 @@ index edb466dd..24f6de9e 100644
  
    const unsigned char *p = data->d_buf;
    if (*p++ != 'A')
-@@ -3448,10 +3446,7 @@ check_attributes (Ebl *ebl, GElf_Ehdr *ehdr, GElf_Shdr *shdr, int idx)
+@@ -3452,10 +3450,7 @@ check_attributes (Ebl *ebl, GElf_Ehdr *ehdr, GElf_Shdr *shdr, int idx)
        return;
      }
  
@@ -2044,7 +2044,7 @@ index edb466dd..24f6de9e 100644
  
    while (left () >= 4)
      {
-@@ -3995,7 +3990,7 @@ section [%2zu] '%s': merge flag set but entry size is zero\n"),
+@@ -3999,7 +3994,7 @@ section [%2zu] '%s': merge flag set but entry size is zero\n"),
  	    case SHT_NOBITS:
  	      if (is_debuginfo)
  		break;
@@ -2053,7 +2053,7 @@ index edb466dd..24f6de9e 100644
  	    default:
  	      ERROR (gettext ("\
  section [%2zu] '%s' has unexpected type %d for an executable section\n"),
-@@ -4139,7 +4134,7 @@ section [%2zu] '%s': ELF header says this is the section header string table but
+@@ -4143,7 +4138,7 @@ section [%2zu] '%s': ELF header says this is the section header string table but
  	    ERROR (gettext ("\
  section [%2zu] '%s': relocatable files cannot have dynamic symbol tables\n"),
  		   cnt, section_name (ebl, cnt));
@@ -2062,7 +2062,7 @@ index edb466dd..24f6de9e 100644
  	case SHT_SYMTAB:
  	  check_symtab (ebl, ehdr, shdr, cnt);
  	  break;
-@@ -4362,7 +4357,7 @@ section [%2d] '%s': unknown core file note type %" PRIu32
+@@ -4366,7 +4361,7 @@ section [%2d] '%s': unknown core file note type %" PRIu32
  	    if (nhdr.n_namesz == sizeof "Linux"
  		&& !memcmp (data->d_buf + name_offset, "Linux", sizeof "Linux"))
  	      break;
@@ -2072,7 +2072,7 @@ index edb466dd..24f6de9e 100644
  	    {
  	    unknown_note:
 diff --git a/src/objdump.c b/src/objdump.c
-index 6b365d5c..075c5f52 100644
+index a619674f..ab3ce5f7 100644
 --- a/src/objdump.c
 +++ b/src/objdump.c
 @@ -222,7 +222,7 @@ parse_opt (int key, char *arg,
@@ -2085,10 +2085,10 @@ index 6b365d5c..075c5f52 100644
        return ARGP_ERR_UNKNOWN;
      }
 diff --git a/src/readelf.c b/src/readelf.c
-index 2084fb1f..9b0af70c 100644
+index cbb519d1..918bd3fa 100644
 --- a/src/readelf.c
 +++ b/src/readelf.c
-@@ -376,17 +376,19 @@ static error_t
+@@ -387,17 +387,19 @@ static error_t
  parse_opt (int key, char *arg,
  	   struct argp_state *state __attribute__ ((unused)))
  {
@@ -2119,7 +2119,7 @@ index 2084fb1f..9b0af70c 100644
  
    switch (key)
      {
-@@ -544,7 +546,7 @@ parse_opt (int key, char *arg,
+@@ -560,7 +562,7 @@ parse_opt (int key, char *arg,
  	  print_string_sections = true;
  	  break;
  	}
@@ -2128,7 +2128,7 @@ index 2084fb1f..9b0af70c 100644
      case 'x':
        add_dump_section (arg, false);
        any_control_option = true;
-@@ -3595,10 +3597,7 @@ print_attributes (Ebl *ebl, const GElf_Ehdr *ehdr)
+@@ -3611,10 +3613,7 @@ print_attributes (Ebl *ebl, const GElf_Ehdr *ehdr)
  
        fputs_unlocked (gettext ("  Owner          Size\n"), stdout);
  
@@ -2140,7 +2140,7 @@ index 2084fb1f..9b0af70c 100644
  
        /* Loop over the sections.  */
        while (left () >= 4)
-@@ -6163,11 +6162,12 @@ print_cfa_program (const unsigned char *readp, const unsigned char *const endp,
+@@ -6179,11 +6178,12 @@ print_cfa_program (const unsigned char *readp, const unsigned char *const endp,
  		   Dwfl_Module *dwflmod, Ebl *ebl, Dwarf *dbg)
  {
    char regnamebuf[REGNAMESZ];
@@ -2158,7 +2158,7 @@ index 2084fb1f..9b0af70c 100644
  
    puts ("\n   Program:");
    Dwarf_Word pc = vma_base;
-@@ -7118,7 +7118,7 @@ attr_callback (Dwarf_Attribute *attrp, void *arg)
+@@ -7134,7 +7134,7 @@ attr_callback (Dwarf_Attribute *attrp, void *arg)
  			dwarf_form_name (form), (uintmax_t) num);
  	      return DWARF_CB_OK;
  	    }
@@ -2167,7 +2167,7 @@ index 2084fb1f..9b0af70c 100644
  
  	/* These cases always take a loclist[ptr] and no constant. */
  	case DW_AT_location:
-@@ -7506,7 +7506,7 @@ attr_callback (Dwarf_Attribute *attrp, void *arg)
+@@ -7522,7 +7522,7 @@ attr_callback (Dwarf_Attribute *attrp, void *arg)
  	      print_block (block.length, block.data);
  	      break;
  	    }
@@ -2176,7 +2176,7 @@ index 2084fb1f..9b0af70c 100644
  
  	case DW_AT_location:
  	case DW_AT_data_location:
-@@ -8679,15 +8679,16 @@ print_debug_line_section (Dwfl_Module *dwflmod, Ebl *ebl, GElf_Ehdr *ehdr,
+@@ -8695,15 +8695,16 @@ print_debug_line_section (Dwfl_Module *dwflmod, Ebl *ebl, GElf_Ehdr *ehdr,
  	 or DW_LNS_advance_pc (as per DWARF4 6.2.5.1).  */
        unsigned int op_addr_advance;
        bool show_op_index;
@@ -2202,7 +2202,7 @@ index 2084fb1f..9b0af70c 100644
  
        if (max_ops_per_instr == 0)
  	{
-@@ -12002,14 +12003,16 @@ handle_core_registers (Ebl *ebl, Elf *core, const void *desc,
+@@ -12018,14 +12019,16 @@ handle_core_registers (Ebl *ebl, Elf *core, const void *desc,
    qsort (regs, maxreg + 1, sizeof regs[0], &compare_registers);
  
    /* Collect the unique sets and sort them.  */
@@ -2227,7 +2227,7 @@ index 2084fb1f..9b0af70c 100644
    struct register_info *sets[maxreg + 1];
    sets[0] = &regs[0];
    size_t nsets = 1;
-@@ -12082,7 +12085,7 @@ handle_auxv_note (Ebl *ebl, Elf *core, GElf_Word descsz, GElf_Off desc_pos)
+@@ -12098,7 +12101,7 @@ handle_auxv_note (Ebl *ebl, Elf *core, GElf_Word descsz, GElf_Off desc_pos)
  		printf ("    %s\n", name);
  		break;
  	      }
@@ -2607,10 +2607,10 @@ index 48792a70..2a882eab 100644
  	  case SHT_REL:
  	  case SHT_RELA:
 diff --git a/src/unstrip.c b/src/unstrip.c
-index fc878325..797a7249 100644
+index 9b8c09a1..1d973582 100644
 --- a/src/unstrip.c
 +++ b/src/unstrip.c
-@@ -437,11 +437,12 @@ adjust_relocs (Elf_Scn *outscn, Elf_Scn *inscn, const GElf_Shdr *shdr,
+@@ -437,15 +437,16 @@ adjust_relocs (Elf_Scn *outscn, Elf_Scn *inscn, const GElf_Shdr *shdr,
  {
    Elf_Data *data = elf_getdata (outscn, NULL);
  
@@ -2618,17 +2618,25 @@ index fc878325..797a7249 100644
 -    {
 -      size_t ndx = GELF_R_SYM (*info);
 -      if (ndx != STN_UNDEF)
--	*info = GELF_R_INFO (map[ndx - 1], GELF_R_TYPE (*info));
+-	{
+-	  if (ndx > map_size)
+-	    error (EXIT_FAILURE, 0, "bad symbol ndx section");
+-	  *info = GELF_R_INFO (map[ndx - 1], GELF_R_TYPE (*info));
+-	}
 +  #define adjust_reloc(info_arg) \
 +    { \
 +      GElf_Xword *info = info_arg; \
 +      size_t ndx = GELF_R_SYM (*info); \
 +      if (ndx != STN_UNDEF) \
-+        *info = GELF_R_INFO (map[ndx - 1], GELF_R_TYPE (*info)); \
++	{ \
++	  if (ndx > map_size) \
++	    error (EXIT_FAILURE, 0, "bad symbol ndx section"); \
++	  *info = GELF_R_INFO (map[ndx - 1], GELF_R_TYPE (*info)); \
++	} \
      }
  
    switch (shdr->sh_type)
-@@ -1186,14 +1187,17 @@ find_alloc_sections_prelink (Elf *debug, Elf_Data *debug_shstrtab,
+@@ -1194,14 +1195,17 @@ find_alloc_sections_prelink (Elf *debug, Elf_Data *debug_shstrtab,
      }
  
    bool fail = false;
@@ -2654,7 +2662,7 @@ index fc878325..797a7249 100644
      }
  
    Elf_Scn *scn = NULL;
-@@ -1422,27 +1426,31 @@ more sections in stripped file than debug file -- arguments reversed?"));
+@@ -1443,27 +1447,31 @@ more sections in stripped file than debug file -- arguments reversed?"));
      }
  
    /* Locate a matching unallocated section in SECTIONS.  */
@@ -2707,7 +2715,7 @@ index fc878325..797a7249 100644
  
    Elf_Data *shstrtab = elf_getdata (elf_getscn (unstripped,
  						unstripped_shstrndx), NULL);
-@@ -2184,12 +2192,13 @@ handle_explicit_files (const char *output_file, bool create_dirs, bool force,
+@@ -2227,12 +2235,13 @@ handle_explicit_files (const char *output_file, bool create_dirs, bool force,
  
    /* Warn, and exit if not forced to continue, if some ELF header
       sanity check for the stripped and unstripped files failed.  */
@@ -2727,7 +2735,7 @@ index fc878325..797a7249 100644
    }
  
    int stripped_fd = open_file (stripped_file, false);
-@@ -2445,10 +2454,11 @@ static void
+@@ -2488,10 +2497,11 @@ static void
  handle_implicit_modules (const struct arg_info *info)
  {
    struct match_module_info mmi = { info->args, NULL, info->match_files };

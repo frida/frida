@@ -112,19 +112,19 @@ if [ -z "$FRIDA_HOST" ]; then
 fi
 
 if [ $host_platform = android ]; then
-  ndk_required_name="r20"
+  ndk_required=21
   if [ -n "$ANDROID_NDK_ROOT" ]; then
     if [ -f "$ANDROID_NDK_ROOT/source.properties" ]; then
       ndk_installed_version=$(grep Pkg.Revision "$ANDROID_NDK_ROOT/source.properties" | awk '{ split($NF, v, "."); print v[1]; }')
     else
       ndk_installed_version=$(cut -f1 -d" " "$ANDROID_NDK_ROOT/RELEASE.TXT")
     fi
-    if [ $ndk_installed_version -ne 20 ]; then
+    if [ $ndk_installed_version -ne $ndk_required ]; then
       (
         echo ""
-        echo "Unsupported NDK version $ndk_installed_version. Please install NDK $ndk_required_name."
+        echo "Unsupported NDK version $ndk_installed_version. Please install NDK r$ndk_required."
         echo ""
-        echo "Frida's SDK - the prebuilt dependencies snapshot - was compiled against $ndk_required_name,"
+        echo "Frida's SDK - the prebuilt dependencies snapshot - was compiled against r$ndk_required,"
         echo "and as we have observed the NDK ABI breaking over time, we ask that you install"
         echo "the exact same version."
         echo ""
@@ -154,8 +154,8 @@ fi
 
 prompt_color=33
 
-toolchain_version=20190428
-sdk_version=20200312
+toolchain_version=20200407
+sdk_version=20200407
 if [ $enable_asan = yes ]; then
   sdk_version="$sdk_version-asan"
 fi
@@ -175,8 +175,6 @@ FRIDA_PREFIX_LIB="$FRIDA_PREFIX/lib"
 FRIDA_TOOLROOT="$FRIDA_BUILD/${frida_env_name_prefix}toolchain-${build_platform_arch}"
 FRIDA_SDKROOT="$FRIDA_BUILD/${frida_env_name_prefix}sdk-${host_platform_arch}"
 
-OBJCOPY=""
-OBJDUMP=""
 LIBTOOL=""
 STRIP_FLAGS=""
 
@@ -191,6 +189,7 @@ meson_root=""
 
 meson_objc=""
 meson_objcpp=""
+meson_linker_flavor=""
 
 meson_platform_properties=()
 
@@ -261,42 +260,73 @@ case $host_platform in
         meson_host_cpu="mips64r2"
         ;;
     esac
-    CPP="${host_toolprefix}cpp"
-    CC="${host_toolprefix}gcc -static-libgcc"
-    CXX="${host_toolprefix}g++ -static-libgcc -static-libstdc++"
-    LD="${host_toolprefix}ld"
 
-    AR="${host_toolprefix}ar"
-    NM="${host_toolprefix}nm"
-    RANLIB="${host_toolprefix}ranlib"
-    STRIP="${host_toolprefix}strip"
+    CPP="${CPP:-${host_toolprefix}cpp}"
+
+    glibc_compat_flag="-fgnu89-inline"
+    libgcc_flags="-static-libgcc"
+    libstdcxx_flags="-static-libstdc++"
+    base_compiler_flags="-ffunction-sections -fdata-sections"
+    base_linker_flags="-Wl,--gc-sections -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now $libgcc_flags"
+
+    cc_config_flags="$libgcc_flags $glibc_compat_flag"
+    cxx_config_flags="$libgcc_flags $libstdcxx_flags"
+
+    LD="${LD:-${host_toolprefix}ld}"
+    if "$LD" --version | grep -q "GNU gold"; then
+      cc_config_flags="$cc_config_flags -fuse-ld=gold"
+      cxx_config_flags="$cxx_config_flags -fuse-ld=gold"
+      meson_linker_flavor=gold
+      base_linker_flags="-Wl,--icf=all $base_linker_flags"
+    fi
+
+    if [ -n "$CC" ]; then
+      eval cc=($CC)
+      CC="${cc[0]} $cc_config_flags"
+      meson_c="${cc[0]}"
+    else
+      CC="${host_toolprefix}gcc $cc_config_flags"
+      meson_c="${host_toolprefix}gcc"
+    fi
+    if [ -n "$CXX" ]; then
+      eval cxx=($CXX)
+      CXX="${cxx[0]} $cxx_config_flags"
+      meson_cpp="${cxx[0]}"
+    else
+      CXX="${host_toolprefix}g++ $cxx_config_flags"
+      meson_cpp="${host_toolprefix}g++"
+    fi
+
+    AR="${AR:-${host_toolprefix}ar}"
+    NM="${NM:-${host_toolprefix}nm}"
+    RANLIB="${RANLIB:-${host_toolprefix}ranlib}"
+    STRIP="${STRIP:-${host_toolprefix}strip}"
     STRIP_FLAGS="--strip-all"
-    OBJCOPY="${host_toolprefix}objcopy"
-    OBJDUMP="${host_toolprefix}objdump"
+    OBJCOPY="${OBJCOPY:-${host_toolprefix}objcopy}"
+    OBJDUMP="${OBJDUMP:-${host_toolprefix}objdump}"
 
-    CFLAGS="$host_arch_flags -ffunction-sections -fdata-sections"
-    LDFLAGS="$host_arch_flags -Wl,--gc-sections -Wl,-z,noexecstack"
+    CFLAGS="$host_arch_flags $base_compiler_flags"
+    LDFLAGS="$host_arch_flags $base_linker_flags"
 
-    arch_args=$(flags_to_args "$host_arch_flags")
+    base_toolchain_args="$(flags_to_args "$host_arch_flags")"
+    base_compiler_args="$base_toolchain_args, $(flags_to_args "$base_compiler_flags")"
+    base_linker_args="$base_toolchain_args, $(flags_to_args "$base_linker_flags")"
 
-    base_toolchain_args="$arch_args, '-static-libgcc'"
-    base_compiler_args="$base_toolchain_args, '-ffunction-sections', '-fdata-sections'"
-    base_linker_args="$base_toolchain_args, '-Wl,--gc-sections', '-Wl,-z,noexecstack'"
-
-    meson_c="${host_toolprefix}gcc"
-    meson_cpp="${host_toolprefix}g++"
-
-    meson_c_args="$base_compiler_args"
-    meson_cpp_args="$base_compiler_args, '-static-libstdc++'"
+    meson_c_args="$base_compiler_args, '$glibc_compat_flag'"
+    meson_cpp_args="$base_compiler_args"
 
     meson_c_link_args="$base_linker_args"
-    meson_cpp_link_args="$base_linker_args, '-static-libstdc++'"
+    meson_cpp_link_args="$base_linker_args, $(flags_to_args "$libstdcxx_flags")"
     ;;
   macos)
     macos_minver="10.9"
 
     macos_sdk="macosx"
-    macos_sdk_path="$(xcrun --sdk $macos_sdk --show-sdk-path)"
+    if [ -z "$MACOS_SDK_ROOT" ]; then
+      macos_sdk_path="$(xcrun --sdk $macos_sdk --show-sdk-path)"
+    else
+      macos_sdk_path="$MACOS_SDK_ROOT"
+    fi
 
     clang_cc="$(xcrun --sdk $macos_sdk -f clang)"
     clang_cxx="$(xcrun --sdk $macos_sdk -f clang++)"
@@ -388,7 +418,11 @@ case $host_platform in
         ios_sdk="iphoneos"
         ;;
     esac
-    ios_sdk_path="$(xcrun --sdk $ios_sdk --show-sdk-path)"
+    if [ -z "$IOS_SDK_ROOT" ]; then
+      ios_sdk_path="$(xcrun --sdk $ios_sdk --show-sdk-path)"
+    else
+      ios_sdk_path="$IOS_SDK_ROOT"
+    fi
 
     clang_cc="$(xcrun --sdk $ios_sdk -f clang)"
     clang_cxx="$(xcrun --sdk $ios_sdk -f clang++)"
@@ -536,6 +570,7 @@ case $host_platform in
 
     CFLAGS="$host_arch_flags -DANDROID -ffunction-sections -fdata-sections"
     LDFLAGS="$host_arch_flags $host_ldflags -Wl,--gc-sections -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now"
+    meson_linker_flavor=gold
 
     elf_cleaner=${FRIDA_ROOT}/releng/frida-elf-cleaner-${build_platform_arch}
 
@@ -558,7 +593,11 @@ case $host_platform in
       base_toolchain_args="$base_toolchain_args, "
     fi
     base_compiler_args="$base_toolchain_args'-DANDROID', '-fPIC', '-ffunction-sections', '-fdata-sections'"
-    base_linker_args="$base_toolchain_args$(flags_to_args "$host_ldflags"), '-Wl,--gc-sections', '-Wl,-z,noexecstack', '-Wl,-z,relro', '-Wl,-z,now'"
+    base_linker_args="$base_toolchain_args"
+    if [ -n "$host_ldflags" ]; then
+      base_linker_args="$base_linker_args$(flags_to_args "$host_ldflags"), "
+    fi
+    base_linker_args="$base_linker_args'-Wl,--gc-sections', '-Wl,-z,noexecstack', '-Wl,-z,relro', '-Wl,-z,now'"
 
     meson_c="$meson_cc_wrapper"
     meson_cpp="$meson_cpp_wrapper"
@@ -693,7 +732,7 @@ if [ $enable_asan = yes ]; then
 fi
 
 CFLAGS="-fPIC $CFLAGS"
-CXXFLAGS="$CFLAGS $CXXFLAGS"
+CXXFLAGS="$CFLAGS${CXXFLAGS:+ $CXXFLAGS}"
 
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   version_include="-include $FRIDA_BUILD/frida-version.h"
@@ -713,7 +752,7 @@ ACLOCAL="aclocal $ACLOCAL_FLAGS"
 CONFIG_SITE="$FRIDA_BUILD/${frida_env_name_prefix}config-${host_platform_arch}.site"
 
 VALAC="$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-valac"
-vala_impl="$FRIDA_TOOLROOT/bin/valac-0.46"
+vala_impl="$FRIDA_TOOLROOT/bin/valac-0.50"
 vala_flags="--vapidir=\"$FRIDA_PREFIX/share/vala/vapi\""
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   vala_flags="$vala_flags --vapidir=\"$FRIDA_SDKROOT/share/vala/vapi\""
@@ -749,12 +788,12 @@ if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/.version" 2>/dev/null; th
       "$template" > "$target"
   done
 
-  vala_wrapper=$FRIDA_TOOLROOT/bin/valac-0.46
-  vala_impl=$FRIDA_TOOLROOT/bin/valac-0.46-impl
+  vala_wrapper=$FRIDA_TOOLROOT/bin/valac-0.50
+  vala_impl=$FRIDA_TOOLROOT/bin/valac-0.50-impl
   mv "$vala_wrapper" "$vala_impl"
   (
     echo "#!/bin/sh"
-    echo "exec \"$vala_impl\" --target-glib=2.62 \"\$@\" --vapidir=\"$FRIDA_TOOLROOT/share/vala-0.46/vapi\""
+    echo "exec \"$vala_impl\" --target-glib=2.66 \"\$@\" --vapidir=\"$FRIDA_TOOLROOT/share/vala-0.50/vapi\""
   ) > "$vala_wrapper"
   chmod 755 "$vala_wrapper"
 
@@ -892,14 +931,37 @@ case $host_platform in
 esac
 
 egrep -v "^export LD=" "$env_rc" > "$meson_env_rc"
+if [ -n "$meson_linker_flavor" ]; then
+  (
+    echo "export CC_LD=$meson_linker_flavor"
+    echo "export CXX_LD=$meson_linker_flavor"
+  ) >> $meson_env_rc
+  case $host_platform in
+    macos|ios)
+      (
+        echo "export OBJC_LD=$meson_linker_flavor"
+        echo "export OBJCXX_LD=$meson_linker_flavor"
+      ) >> $meson_env_rc
+      ;;
+  esac
+fi
+if [ "$host_platform" != "$build_platform" ]; then
+  build_env_rc=build/${FRIDA_ENV_NAME:-frida}-meson-env-${build_platform_arch}.rc
+  if [ ! -f $build_env_rc ]; then
+    FRIDA_HOST=${build_platform_arch} releng/setup-env.sh
+  fi
+  egrep "^export (PKG_CONFIG_PATH|CC|CXX|OBJC|OBJCXX|CPPFLAGS|CFLAGS|CXXFLAGS|CC_LD|CXX_LD|OBJC_LD|OBJCXX_LD|LDFLAGS|AR)=" $build_env_rc \
+    | sed -e "s,=,_FOR_BUILD=," \
+    >> $meson_env_rc
+fi
 
 sed \
   -e "s,@frida_host_platform@,$host_platform,g" \
   -e "s,@frida_host_arch@,$host_arch,g" \
   -e "s,@frida_host_platform_arch@,$host_platform_arch,g" \
   -e "s,@frida_prefix@,$FRIDA_PREFIX,g" \
-  -e "s,@frida_optimization_flags@,$FRIDA_OPTIMIZATION_FLAGS,g" \
-  -e "s,@frida_debug_flags@,$FRIDA_DEBUG_FLAGS,g" \
+  -e "s,@frida_optimization_flags@,$FRIDA_ACOPTFLAGS,g" \
+  -e "s,@frida_debug_flags@,$FRIDA_ACDBGFLAGS,g" \
   -e "s,@frida_libc@,$libc,g" \
   $releng_path/config.site.in > "$CONFIG_SITE"
 

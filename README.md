@@ -40,9 +40,9 @@ for code signing". You can use the name `frida-cert` instead of `gdb-cert`
 if you'd like.
 
 Next export the name of the created certificate to the environment variables
-`MAC_CERTID` and `IOS_CERTID`, and run `make`:
+`MACOS_CERTID` and `IOS_CERTID`, and run `make`:
 
-    export MAC_CERTID=frida-cert
+    export MACOS_CERTID=frida-cert
     export IOS_CERTID=frida-cert
     make
 
@@ -55,7 +55,7 @@ To ensure that macOS accepts the newly created certificate, restart the
 
     frida.sln
 
-(Requires Visual Studio 2017.)
+(Requires Visual Studio 2019.)
 
 See [https://www.frida.re/docs/building/](https://www.frida.re/docs/building/)
 for details.

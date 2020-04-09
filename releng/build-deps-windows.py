@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import codecs
 import glob
 import os
 import platform
@@ -22,15 +21,15 @@ LIBRARY_TARGET_RUNTIMES = ['static', 'dynamic']
 COMPRESSION_LEVEL = 9
 
 FRIDA_BASE_URL = "https://github.com/frida"
-BOOTSTRAP_TOOLCHAIN_URL = "https://build.frida.re/toolchain-20190428-windows-x86.exe"
-VALA_VERSION = "0.46"
-VALA_TARGET_GLIB = "2.62"
+BOOTSTRAP_TOOLCHAIN_URL = "https://build.frida.re/toolchain-20200407-windows-x86.exe"
+VALA_VERSION = "0.50"
+VALA_TARGET_GLIB = "2.66"
 
 
 RELENG_DIR = os.path.abspath(os.path.dirname(__file__))
 ROOT_DIR = os.path.dirname(RELENG_DIR)
 BOOTSTRAP_TOOLCHAIN_DIR = os.path.join(ROOT_DIR, "build", "fts-toolchain-windows")
-BOOTSTRAP_VALAC = "valac-0.46.exe"
+BOOTSTRAP_VALAC = "valac-0.50.exe"
 
 MESON = os.path.join(RELENG_DIR, "meson", "meson.py")
 NINJA = os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "bin", "ninja.exe")
@@ -105,12 +104,12 @@ def build_meson_modules(platform, configuration):
         ("libffi", "libffi.pc", []),
         ("sqlite", "sqlite3.pc", []),
         ("glib", "glib-2.0.pc", ["internal_pcre=true", "tests=false"]),
-        ("glib-schannel", "glib-schannel-static.pc", []),
+        ("glib-schannel", "gioschannel.pc", []),
         ("libgee", "gee-0.8.pc", []),
-        ("json-glib", "json-glib-1.0.pc", ["introspection=false", "tests=false"]),
-        ("libpsl", "libpsl.pc", []),
+        ("json-glib", "json-glib-1.0.pc", ["introspection=disabled", "tests=false"]),
+        ("libpsl", "libpsl.pc", ["tests=false"]),
         ("libxml2", "libxml-2.0.pc", []),
-        ("libsoup", "libsoup-2.4.pc", ["gssapi=false", "tls_check=false", "gnome=false", "introspection=false", "vapi=false", "tests=false"]),
+        ("libsoup", "libsoup-2.4.pc", ["gssapi=disabled", "tls_check=false", "gnome=false", "introspection=disabled", "vapi=disabled", "tests=false"]),
         ("vala", VALAC_FILENAME, []),
         ("pkg-config", "pkg-config.exe", []),
     ]
@@ -122,7 +121,7 @@ def build_meson_modules(platform, configuration):
             artifact_subpath = os.path.join("bin", artifact_name)
             runtime_flavors = TOOL_TARGET_RUNTIMES
         else:
-            raise NotImplementedError("Unsupported artifact type")
+            raise NotImplementedError("unsupported artifact type")
         for runtime in runtime_flavors:
             artifact_path = os.path.join(get_prefix_path(platform, configuration, runtime), artifact_subpath)
             if not os.path.exists(artifact_path):
@@ -134,8 +133,9 @@ def build_meson_module(name, platform, configuration, runtime, options):
 
     source_dir = os.path.join(ROOT_DIR, name)
     build_dir = os.path.join(env_dir, name)
-    build_type = 'minsize' if configuration == 'Release' else 'debug'
     prefix = get_prefix_path(platform, configuration, runtime)
+    optimization = 's' if configuration == 'Release' else '0'
+    debug = 'false' if configuration == 'Release' else 'true'
     option_flags = ["-D" + option for option in options]
 
     if not os.path.exists(source_dir):
@@ -147,10 +147,11 @@ def build_meson_module(name, platform, configuration, runtime, options):
     perform(
         "py", "-3", MESON,
         build_dir,
-        "--buildtype", build_type,
         "--prefix", prefix,
         "--default-library", "static",
         "--backend", "ninja",
+        "-Doptimization=" + optimization,
+        "-Ddebug=" + debug,
         "-Db_vscrt=" + vscrt_from_configuration_and_runtime(configuration, runtime),
         *option_flags,
         cwd=source_dir,
@@ -250,7 +251,7 @@ def generate_meson_env(platform, configuration, runtime):
     ])
 
     env_path = os.path.join(env_dir, "env.bat")
-    with codecs.open(env_path, "w", 'utf-8') as f:
+    with open(env_path, "w", encoding='utf-8') as f:
         f.write("""@ECHO OFF
 set PATH={exe_path};%PATH%
 set INCLUDE={include_path}
@@ -278,7 +279,7 @@ set DEPOT_TOOLS_WIN_TOOLCHAIN=0
 
     rc_path = os.path.join(winxp_bin_dir, "rc.exe")
     rc_wrapper_path = os.path.join(env_dir, "rc.bat")
-    with codecs.open(rc_wrapper_path, "w", 'utf-8') as f:
+    with open(rc_wrapper_path, "w", encoding='utf-8') as f:
         f.write("""@ECHO OFF
 SETLOCAL EnableExtensions
 SET _res=0
@@ -286,7 +287,7 @@ SET _res=0
 ENDLOCAL & SET _res=%_res%
 EXIT /B %_res%""".format(rc_path=rc_path, flags=clflags))
 
-    with codecs.open(os.path.join(env_dir, "meson.bat"), "w", 'utf-8') as f:
+    with open(os.path.join(env_dir, "meson.bat"), "w", encoding='utf-8') as f:
         f.write("""@ECHO OFF
 SETLOCAL EnableExtensions
 SET _res=0
@@ -297,7 +298,7 @@ EXIT /B %_res%""".format(meson_path=MESON))
     pkgconfig_path = os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "bin", "pkg-config.exe")
     pkgconfig_lib_dir = os.path.join(prefix, "lib", "pkgconfig")
     pkgconfig_wrapper_path = os.path.join(env_dir, "pkg-config.bat")
-    with codecs.open(pkgconfig_wrapper_path, "w", 'utf-8') as f:
+    with open(pkgconfig_wrapper_path, "w", encoding='utf-8') as f:
         f.write("""@ECHO OFF
 SETLOCAL EnableExtensions
 SET _res=0
@@ -308,14 +309,14 @@ EXIT /B %_res%""".format(pkgconfig_path=pkgconfig_path, pkgconfig_lib_dir=pkgcon
 
     flex_path = os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "bin", "flex.exe")
     flex_wrapper_path = os.path.join(env_dir, "flex.py")
-    with codecs.open(os.path.join(env_dir, "flex.bat"), "w", 'utf-8') as f:
+    with open(os.path.join(env_dir, "flex.bat"), "w", encoding='utf-8') as f:
         f.write("""@ECHO OFF
 SETLOCAL EnableExtensions
 SET _res=0
 py -3 "{wrapper_path}" %* || SET _res=1
 ENDLOCAL & SET _res=%_res%
 EXIT /B %_res%""".format(wrapper_path=flex_wrapper_path))
-    with codecs.open(flex_wrapper_path, "w", 'utf-8') as f:
+    with open(flex_wrapper_path, "w", encoding='utf-8') as f:
         f.write("""import subprocess
 import sys
 
@@ -325,14 +326,14 @@ sys.exit(subprocess.call([r"{flex_path}"] + args))
 
     bison_path = os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "bin", "bison.exe")
     bison_wrapper_path = os.path.join(env_dir, "bison.py")
-    with codecs.open(os.path.join(env_dir, "bison.bat"), "w", 'utf-8') as f:
+    with open(os.path.join(env_dir, "bison.bat"), "w", encoding='utf-8') as f:
         f.write("""@ECHO OFF
 SETLOCAL EnableExtensions
 SET _res=0
 py -3 "{wrapper_path}" %* || SET _res=1
 ENDLOCAL & SET _res=%_res%
 EXIT /B %_res%""".format(wrapper_path=bison_wrapper_path))
-    with codecs.open(bison_wrapper_path, "w", 'utf-8') as f:
+    with open(bison_wrapper_path, "w", encoding='utf-8') as f:
         f.write("""\
 import os
 import subprocess
@@ -460,13 +461,15 @@ def build_v8(platform, configuration, runtime):
         header_files = [os.path.relpath(path, header_dir) for path in glob.glob(os.path.join(header_dir, "**", "*.h"), recursive=True)]
         copy_files(header_dir, header_files, include_dir)
 
+    v8.patch_config_header(os.path.join(include_dir, "v8config.h"), source_dir, build_dir, gn, env)
+
     if not os.path.exists(pkgconfig_dir):
         os.makedirs(pkgconfig_dir)
 
     libv8_path = os.path.join(lib_dir, "libv8-{}.a".format(api_version))
     shutil.copyfile(monolith_path, libv8_path)
 
-    with codecs.open(os.path.join(pkgconfig_dir, "v8-{}.pc".format(api_version)), "w", 'utf-8') as f:
+    with open(os.path.join(pkgconfig_dir, "v8-{}.pc".format(api_version)), "w", encoding='utf-8') as f:
         f.write("""\
 prefix={prefix}
 libdir=${{prefix}}/lib

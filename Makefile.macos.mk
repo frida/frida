@@ -83,7 +83,7 @@ build/$1-%/lib/pkgconfig/capstone.pc: build/$1-env-%.rc build/.capstone-submodul
 			frida-ios-arm64) capstone_archs="aarch64 arm" ;; \
 			*-arm64*)        capstone_archs="aarch64"     ;; \
 		esac \
-		&& CFLAGS="$$$$CPPFLAGS $$$$CFLAGS" make -C capstone \
+		&& CFLAGS="$$$$CPPFLAGS $$$$CFLAGS -w" make -C capstone \
 			PREFIX=$$$$frida_prefix \
 			BUILDDIR=../build/$2-$$*/capstone \
 			CAPSTONE_BUILD_CORE_ONLY=yes \
@@ -113,7 +113,7 @@ build/.$1-gum-npm-stamp: build/$1-env-macos-$$(build_arch).rc
 	@touch $$@
 
 build/$1-%/lib/pkgconfig/frida-gum-1.0.pc: build/.frida-gum-submodule-stamp build/.$1-gum-npm-stamp build/$1-%/lib/pkgconfig/capstone.pc
-	. build/$1-meson-env-macos-$$(build_arch).rc; \
+	. build/$1-meson-env-$$*.rc; \
 	builddir=build/$2-$$*/frida-gum; \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
 		mkdir -p $$$$builddir; \
@@ -151,7 +151,7 @@ core-android-arm: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc ##@cor
 core-android-arm64: build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/ARM64
 
 build/tmp-macos-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-macos-%/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-macos-$(build_arch).rc; \
+	. build/frida-meson-env-macos-$*.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
@@ -171,7 +171,7 @@ build/tmp-macos-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-sta
 	fi
 	@touch $@
 build/tmp-ios-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-ios-x86/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-macos-$(build_arch).rc; \
+	. build/frida-meson-env-ios-x86.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
@@ -183,7 +183,7 @@ build/tmp-ios-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-sta
 	fi
 	@touch $@
 build/tmp-ios-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-ios-x86_64/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-macos-$(build_arch).rc; \
+	. build/frida-meson-env-ios-x86_64.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
@@ -198,7 +198,7 @@ build/tmp-ios-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-
 	fi
 	@touch $@
 build/tmp-ios-arm/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-ios-arm/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-macos-$(build_arch).rc; \
+	. build/frida-meson-env-ios-arm.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
@@ -210,7 +210,7 @@ build/tmp-ios-arm/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-sta
 	fi
 	@touch $@
 build/tmp-ios-arm64/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-ios-arm64/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-macos-$(build_arch).rc; \
+	. build/frida-meson-env-ios-arm64.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
@@ -225,7 +225,7 @@ build/tmp-ios-arm64/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-s
 	fi
 	@touch $@
 build/tmp-ios-arm64e/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-ios-arm64e/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-macos-$(build_arch).rc; \
+	. build/frida-meson-env-ios-arm64e.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
@@ -240,7 +240,7 @@ build/tmp-ios-arm64e/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-
 	fi
 	@touch $@
 build/tmp-android-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-android-x86/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-macos-$(build_arch).rc; \
+	. build/frida-meson-env-android-x86.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
@@ -252,7 +252,7 @@ build/tmp-android-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule
 	fi
 	@touch $@
 build/tmp-android-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-android-x86_64/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-macos-$(build_arch).rc; \
+	. build/frida-meson-env-android-x86_64.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
@@ -268,7 +268,7 @@ build/tmp-android-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submod
 	fi
 	@touch $@
 build/tmp-android-arm/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-macos-$(build_arch).rc; \
+	. build/frida-meson-env-android-arm.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
@@ -280,7 +280,7 @@ build/tmp-android-arm/frida-core/.frida-ninja-stamp: build/.frida-core-submodule
 	fi
 	@touch $@
 build/tmp-android-arm64/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-android-arm64/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-macos-$(build_arch).rc; \
+	. build/frida-meson-env-android-arm64.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
@@ -296,7 +296,7 @@ build/tmp-android-arm64/frida-core/.frida-ninja-stamp: build/.frida-core-submodu
 	fi
 	@touch $@
 build/tmp_thin-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida_thin-%/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida_thin-meson-env-macos-$(build_arch).rc; \
+	. build/frida_thin-meson-env-$*.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
@@ -380,11 +380,11 @@ build/tmp-android-%/frida-core/.frida-helper-and-agent-stamp: build/tmp-android-
 	@touch $@
 
 build/.core-macos-stamp-%: build/%/lib/pkgconfig/frida-core-1.0.pc
-	@if [ -z "$$MAC_CERTID" ]; then echo "MAC_CERTID not set, see https://github.com/frida/frida#macos-and-ios"; exit 1; fi
+	@if [ -z "$$MACOS_CERTID" ]; then echo "MACOS_CERTID not set, see https://github.com/frida/frida#macos-and-ios"; exit 1; fi
 	. build/frida-meson-env-macos-$(build_arch).rc \
-		&& $$CODESIGN -f -s "$$MAC_CERTID" -i "re.frida.Server" build/$*/bin/frida-server \
+		&& $$CODESIGN -f -s "$$MACOS_CERTID" -i "re.frida.Server" build/$*/bin/frida-server \
 		&& $$INSTALL_NAME_TOOL -id @executable_path/../Frameworks/FridaGadget.dylib build/$*/lib/frida-gadget.dylib \
-		&& $$CODESIGN -f -s "$$MAC_CERTID" build/$*/lib/frida-gadget.dylib
+		&& $$CODESIGN -f -s "$$MACOS_CERTID" build/$*/lib/frida-gadget.dylib
 	@touch $@
 build/.core-ios-stamp-%: build/%/lib/pkgconfig/frida-core-1.0.pc
 	@if [ -z "$$IOS_CERTID" ]; then echo "IOS_CERTID not set, see https://github.com/frida/frida#macos-and-ios"; exit 1; fi
@@ -400,7 +400,7 @@ build/frida-macos-universal/lib/frida-gadget.dylib: build/.core-macos-stamp-frid
 	cp build/frida-macos-x86_64/lib/frida-gadget.dylib $(@D)/frida-gadget-x86_64.dylib
 	. build/frida-meson-env-macos-$(build_arch).rc \
 		&& $$LIPO $(@D)/frida-gadget-x86.dylib $(@D)/frida-gadget-x86_64.dylib -create -output $@.tmp \
-		&& $$CODESIGN -f -s "$$MAC_CERTID" $@.tmp
+		&& $$CODESIGN -f -s "$$MACOS_CERTID" $@.tmp
 	rm $(@D)/frida-gadget-*.dylib
 	mv $@.tmp $@
 build/frida-ios-universal/lib/frida-gadget.dylib: build/.core-ios-stamp-frida-ios-x86 build/.core-ios-stamp-frida-ios-x86_64 build/.core-ios-stamp-frida-ios-arm build/.core-ios-stamp-frida-ios-arm64 build/.core-ios-stamp-frida-ios-arm64e
@@ -440,7 +440,7 @@ python-macos-thin: build/tmp_thin-macos-x86_64/frida-$(PYTHON_NAME)/.frida-stamp
 
 define make-python-rule
 build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-stamp build/$1-%/lib/pkgconfig/frida-core-1.0.pc
-	. build/$1-meson-env-macos-$$(build_arch).rc; \
+	. build/$1-meson-env-$$*.rc; \
 	builddir=$$(@D); \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
 		mkdir -p $$$$builddir; \
@@ -531,7 +531,7 @@ tools-macos-thin: build/tmp_thin-macos-x86_64/frida-tools-$(PYTHON_NAME)/.frida-
 
 define make-tools-rule
 build/$2-%/frida-tools-$$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodule-stamp build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp
-	. build/$1-meson-env-macos-$$(build_arch).rc; \
+	. build/$1-meson-env-$$*.rc; \
 	builddir=$$(@D); \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
 		mkdir -p $$$$builddir; \

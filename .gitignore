@@ -1,11 +1,13 @@
 /.vs
 /autoconf
 /automake
+/bison
 /build
 /elfutils
+/flex
 /gettext
 /glib
-/glib-openssl
+/glib-networking
 /glib-schannel
 /gn
 /ipch

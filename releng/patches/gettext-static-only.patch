@@ -1,0 +1,134 @@
+diff -Nur gettext-orig/gettext-runtime/intl/Makefile.am gettext/gettext-runtime/intl/Makefile.am
+--- gettext-orig/gettext-runtime/intl/Makefile.am	2019-05-12 13:56:31.000000000 +0000
++++ gettext/gettext-runtime/intl/Makefile.am	2020-04-04 23:39:08.975329221 +0000
+@@ -388,31 +388,6 @@
+ endif
+ 
+ 
+-# Installation of preloadable_libintl.so.
+-
+-if PRELOADABLE_LIBINTL
+-
+-install-exec-local: install-exec-preloadable
+-install-exec-preloadable: libgnuintl.la
+-	$(mkdir_p) $(DESTDIR)$(libdir)
+-	$(LIBTOOL) --mode=install \
+-	  $(INSTALL_DATA) libgnuintl.la $(DESTDIR)$(libdir)/libgnuintl.la
+-	rm -f $(DESTDIR)$(libdir)/preloadable_libintl.so
+-	$(INSTALL_DATA) $(DESTDIR)$(libdir)/libgnuintl.so $(DESTDIR)$(libdir)/preloadable_libintl.so
+-	$(LIBTOOL) --mode=uninstall \
+-	  rm -f $(DESTDIR)$(libdir)/libgnuintl.la
+-
+-installdirs-local: installdirs-preloadable
+-installdirs-preloadable:
+-	$(mkdir_p) $(DESTDIR)$(libdir)
+-
+-uninstall-local: uninstall-preloadable
+-uninstall-preloadable:
+-	rm -f $(DESTDIR)$(libdir)/preloadable_libintl.so
+-
+-endif
+-
+-
+ # Installation of locale.alias.
+ 
+ EXTRA_DIST += locale.alias ref-add.sin ref-del.sin
+diff -Nur gettext-orig/gettext-runtime/intl/Makefile.in gettext/gettext-runtime/intl/Makefile.in
+--- gettext-orig/gettext-runtime/intl/Makefile.in	2019-05-12 15:08:36.000000000 +0000
++++ gettext/gettext-runtime/intl/Makefile.in	2020-04-04 23:41:42.398107449 +0000
+@@ -1956,25 +1956,11 @@
+ @USE_INCLUDED_LIBINTL_TRUE@	$(LIBTOOL) --mode=uninstall \
+ @USE_INCLUDED_LIBINTL_TRUE@	  rm -f $(DESTDIR)$(libdir)/libintl.la
+ 
+-# Installation of preloadable_libintl.so.
++@PRELOADABLE_LIBINTL_TRUE@install-exec-local:
+ 
+-@PRELOADABLE_LIBINTL_TRUE@install-exec-local: install-exec-preloadable
+-@PRELOADABLE_LIBINTL_TRUE@install-exec-preloadable: libgnuintl.la
+-@PRELOADABLE_LIBINTL_TRUE@	$(mkdir_p) $(DESTDIR)$(libdir)
+-@PRELOADABLE_LIBINTL_TRUE@	$(LIBTOOL) --mode=install \
+-@PRELOADABLE_LIBINTL_TRUE@	  $(INSTALL_DATA) libgnuintl.la $(DESTDIR)$(libdir)/libgnuintl.la
+-@PRELOADABLE_LIBINTL_TRUE@	rm -f $(DESTDIR)$(libdir)/preloadable_libintl.so
+-@PRELOADABLE_LIBINTL_TRUE@	$(INSTALL_DATA) $(DESTDIR)$(libdir)/libgnuintl.so $(DESTDIR)$(libdir)/preloadable_libintl.so
+-@PRELOADABLE_LIBINTL_TRUE@	$(LIBTOOL) --mode=uninstall \
+-@PRELOADABLE_LIBINTL_TRUE@	  rm -f $(DESTDIR)$(libdir)/libgnuintl.la
++@PRELOADABLE_LIBINTL_TRUE@installdirs-local:
+ 
+-@PRELOADABLE_LIBINTL_TRUE@installdirs-local: installdirs-preloadable
+-@PRELOADABLE_LIBINTL_TRUE@installdirs-preloadable:
+-@PRELOADABLE_LIBINTL_TRUE@	$(mkdir_p) $(DESTDIR)$(libdir)
+-
+-@PRELOADABLE_LIBINTL_TRUE@uninstall-local: uninstall-preloadable
+-@PRELOADABLE_LIBINTL_TRUE@uninstall-preloadable:
+-@PRELOADABLE_LIBINTL_TRUE@	rm -f $(DESTDIR)$(libdir)/preloadable_libintl.so
++@PRELOADABLE_LIBINTL_TRUE@uninstall-local:
+ 
+ @USE_INCLUDED_LIBINTL_TRUE@all-local: ref-add.sed ref-del.sed
+ 
+diff -Nur gettext-orig/gettext-tools/intl/Makefile.am gettext/gettext-tools/intl/Makefile.am
+--- gettext-orig/gettext-tools/intl/Makefile.am	2019-05-12 13:56:31.000000000 +0000
++++ gettext/gettext-tools/intl/Makefile.am	2020-04-04 23:41:08.194380740 +0000
+@@ -388,31 +388,6 @@
+ endif
+ 
+ 
+-# Installation of preloadable_libintl.so.
+-
+-if PRELOADABLE_LIBINTL
+-
+-install-exec-local: install-exec-preloadable
+-install-exec-preloadable: libgnuintl.la
+-	$(mkdir_p) $(DESTDIR)$(libdir)
+-	$(LIBTOOL) --mode=install \
+-	  $(INSTALL_DATA) libgnuintl.la $(DESTDIR)$(libdir)/libgnuintl.la
+-	rm -f $(DESTDIR)$(libdir)/preloadable_libintl.so
+-	$(INSTALL_DATA) $(DESTDIR)$(libdir)/libgnuintl.so $(DESTDIR)$(libdir)/preloadable_libintl.so
+-	$(LIBTOOL) --mode=uninstall \
+-	  rm -f $(DESTDIR)$(libdir)/libgnuintl.la
+-
+-installdirs-local: installdirs-preloadable
+-installdirs-preloadable:
+-	$(mkdir_p) $(DESTDIR)$(libdir)
+-
+-uninstall-local: uninstall-preloadable
+-uninstall-preloadable:
+-	rm -f $(DESTDIR)$(libdir)/preloadable_libintl.so
+-
+-endif
+-
+-
+ # Installation of locale.alias.
+ 
+ EXTRA_DIST += locale.alias ref-add.sin ref-del.sin
+diff -Nur gettext-orig/gettext-tools/intl/Makefile.in gettext/gettext-tools/intl/Makefile.in
+--- gettext-orig/gettext-tools/intl/Makefile.in	2019-05-12 15:09:16.000000000 +0000
++++ gettext/gettext-tools/intl/Makefile.in	2020-04-04 23:41:32.314188071 +0000
+@@ -2660,25 +2660,11 @@
+ @USE_INCLUDED_LIBINTL_TRUE@	$(LIBTOOL) --mode=uninstall \
+ @USE_INCLUDED_LIBINTL_TRUE@	  rm -f $(DESTDIR)$(libdir)/libintl.la
+ 
+-# Installation of preloadable_libintl.so.
++@PRELOADABLE_LIBINTL_TRUE@install-exec-local:
+ 
+-@PRELOADABLE_LIBINTL_TRUE@install-exec-local: install-exec-preloadable
+-@PRELOADABLE_LIBINTL_TRUE@install-exec-preloadable: libgnuintl.la
+-@PRELOADABLE_LIBINTL_TRUE@	$(mkdir_p) $(DESTDIR)$(libdir)
+-@PRELOADABLE_LIBINTL_TRUE@	$(LIBTOOL) --mode=install \
+-@PRELOADABLE_LIBINTL_TRUE@	  $(INSTALL_DATA) libgnuintl.la $(DESTDIR)$(libdir)/libgnuintl.la
+-@PRELOADABLE_LIBINTL_TRUE@	rm -f $(DESTDIR)$(libdir)/preloadable_libintl.so
+-@PRELOADABLE_LIBINTL_TRUE@	$(INSTALL_DATA) $(DESTDIR)$(libdir)/libgnuintl.so $(DESTDIR)$(libdir)/preloadable_libintl.so
+-@PRELOADABLE_LIBINTL_TRUE@	$(LIBTOOL) --mode=uninstall \
+-@PRELOADABLE_LIBINTL_TRUE@	  rm -f $(DESTDIR)$(libdir)/libgnuintl.la
++@PRELOADABLE_LIBINTL_TRUE@installdirs-local:
+ 
+-@PRELOADABLE_LIBINTL_TRUE@installdirs-local: installdirs-preloadable
+-@PRELOADABLE_LIBINTL_TRUE@installdirs-preloadable:
+-@PRELOADABLE_LIBINTL_TRUE@	$(mkdir_p) $(DESTDIR)$(libdir)
+-
+-@PRELOADABLE_LIBINTL_TRUE@uninstall-local: uninstall-preloadable
+-@PRELOADABLE_LIBINTL_TRUE@uninstall-preloadable:
+-@PRELOADABLE_LIBINTL_TRUE@	rm -f $(DESTDIR)$(libdir)/preloadable_libintl.so
++@PRELOADABLE_LIBINTL_TRUE@uninstall-local:
+ 
+ @USE_INCLUDED_LIBINTL_TRUE@all-local: ref-add.sed ref-del.sed
+ 

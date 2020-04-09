@@ -89,7 +89,7 @@ build/$1-%/lib/pkgconfig/capstone.pc: build/$1-env-%.rc build/.capstone-submodul
 			*-mips64)    capstone_archs="mips64"    ;; \
 			*-mips64el)  capstone_archs="mips64"    ;; \
 		esac \
-		&& CFLAGS="$$$$CPPFLAGS $$$$CFLAGS" make -C capstone \
+		&& CFLAGS="$$$$CPPFLAGS $$$$CFLAGS -w" make -C capstone \
 			PREFIX=$$$$frida_prefix \
 			BUILDDIR=../build/$2-$$*/capstone \
 			CAPSTONE_BUILD_CORE_ONLY=yes \
@@ -129,7 +129,7 @@ build/.$1-gum-npm-stamp: build/$1-env-linux-$$(build_arch).rc
 	@touch $$@
 
 build/$1-%/lib/pkgconfig/frida-gum-1.0.pc: build/.frida-gum-submodule-stamp build/.$1-gum-npm-stamp build/$1-%/lib/pkgconfig/capstone.pc
-	. build/$1-meson-env-linux-$$(build_arch).rc; \
+	. build/$1-meson-env-$$*.rc; \
 	builddir=build/$2-$$*/frida-gum; \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
 		mkdir -p $$$$builddir; \
@@ -183,7 +183,7 @@ core-qnx-arm: build/frida_thin-qnx-arm/lib/pkgconfig/frida-core-1.0.pc ##@core B
 core-qnx-armeabi: build/frida_thin-qnx-armeabi/lib/pkgconfig/frida-core-1.0.pc ##@core Build for QNX/ARMEABI
 
 build/tmp-linux-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-linux-x86/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-linux-$(build_arch).rc; \
+	. build/frida-meson-env-linux-x86.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
@@ -205,7 +205,7 @@ build/tmp-linux-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-s
 	fi
 	@touch $@
 build/tmp-linux-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-linux-$(build_arch).rc; \
+	. build/frida-meson-env-linux-x86_64.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
@@ -227,7 +227,7 @@ build/tmp-linux-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submodul
 	fi
 	@touch $@
 build/tmp-android-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-android-x86/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-linux-$(build_arch).rc; \
+	. build/frida-meson-env-android-x86.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
@@ -240,7 +240,7 @@ build/tmp-android-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule
 	fi
 	@touch $@
 build/tmp-android-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-android-x86_64/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-linux-$(build_arch).rc; \
+	. build/frida-meson-env-android-x86_64.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
@@ -257,7 +257,7 @@ build/tmp-android-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submod
 	fi
 	@touch $@
 build/tmp-android-arm/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-linux-$(build_arch).rc; \
+	. build/frida-meson-env-android-arm.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
@@ -270,7 +270,7 @@ build/tmp-android-arm/frida-core/.frida-ninja-stamp: build/.frida-core-submodule
 	fi
 	@touch $@
 build/tmp-android-arm64/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-android-arm64/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-linux-$(build_arch).rc; \
+	. build/frida-meson-env-android-arm64.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
@@ -287,7 +287,7 @@ build/tmp-android-arm64/frida-core/.frida-ninja-stamp: build/.frida-core-submodu
 	fi
 	@touch $@
 build/tmp_thin-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida_thin-%/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida_thin-meson-env-linux-$(build_arch).rc; \
+	. build/frida_thin-meson-env-$*.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		mkdir -p $$builddir; \
@@ -361,7 +361,7 @@ python-linux-arm64: build/tmp_thin-linux-arm64/frida-$(PYTHON_NAME)/.frida-stamp
 
 define make-python-rule
 build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-stamp build/$1-%/lib/pkgconfig/frida-core-1.0.pc
-	. build/$1-meson-env-linux-$$(build_arch).rc; \
+	. build/$1-meson-env-$$*.rc; \
 	builddir=$$(@D); \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
 		mkdir -p $$$$builddir; \
@@ -465,7 +465,7 @@ tools-linux-arm64: build/tmp_thin-linux-arm64/frida-tools-$(PYTHON_NAME)/.frida-
 
 define make-tools-rule
 build/$2-%/frida-tools-$$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodule-stamp build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp
-	. build/$1-meson-env-linux-$$(build_arch).rc; \
+	. build/$1-meson-env-$$*.rc; \
 	builddir=$$(@D); \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
 		mkdir -p $$$$builddir; \

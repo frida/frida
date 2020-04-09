@@ -11,8 +11,6 @@ test "$prefix" = NONE && prefix="$frida_prefix"
 enable_nls=no
 enable_silent_rules=yes
 
-frida_warning_flags="-Wall"
-
 case "$PACKAGE_TARNAME" in
   capstone)
     # Takes ages to compile with debug information
@@ -124,18 +122,19 @@ if [ -x /usr/bin/install ]; then
   ac_cv_path_install="/usr/bin/install -p"
 fi
 
+enable_shared=no
+enable_static=yes
+
 case "$PACKAGE_TARNAME" in
-  gettext*)
-    enable_shared=no
-    enable_static=yes
-    ;;
-  xz)
-    enable_shared=no
-    enable_static=yes
+  elfutils)
+    enable_debuginfod=no
+    case $frida_host_platform_arch in
+      android-x86|android-arm)
+        ac_cv_have_decl_mempcpy=no
+        ;;
+    esac
     ;;
   libunwind)
-    enable_shared=no
-    enable_static=yes
     enable_coredump=no
     enable_ptrace=no
     enable_setjmp=no
@@ -145,21 +144,6 @@ case "$PACKAGE_TARNAME" in
 
     CFLAGS="$CFLAGS -I$frida_prefix/include"
     LDFLAGS="$LDFLAGS -L$frida_prefix/lib"
-    ;;
-  elfutils)
-    case $frida_host_platform_arch in
-      android-x86|android-arm)
-        ac_cv_have_decl_mempcpy=no
-        ;;
-    esac
-    ;;
-  capstone)
-    enable_shared=no
-    enable_static=yes
-    frida_flags="$frida_warning_flags $frida_flags"
-    ;;
-  *)
-    frida_flags="$frida_warning_flags $frida_flags"
     ;;
 esac
 

@@ -11,18 +11,18 @@ frida_core_flags := --default-library static $(FRIDA_COMMON_FLAGS) $(FRIDA_MAPPE
 
 frida_tools := frida frida-discover frida-kill frida-ls-devices frida-ps frida-trace
 
-v8_api_version := 7.0
+v8_api_version := 8.0
 
 build/frida-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida-version.h
 	FRIDA_HOST=$* \
-		FRIDA_OPTIMIZATION_FLAGS="$(FRIDA_OPTIMIZATION_FLAGS)" \
-		FRIDA_DEBUG_FLAGS="$(FRIDA_DEBUG_FLAGS)" \
+		FRIDA_ACOPTFLAGS="$(FRIDA_ACOPTFLAGS_COMMON)" \
+		FRIDA_ACDBGFLAGS="$(FRIDA_ACDBGFLAGS_COMMON)" \
 		FRIDA_ASAN=$(FRIDA_ASAN) \
 		./releng/setup-env.sh
 build/frida_thin-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida-version.h
 	FRIDA_HOST=$* \
-		FRIDA_OPTIMIZATION_FLAGS="$(FRIDA_OPTIMIZATION_FLAGS)" \
-		FRIDA_DEBUG_FLAGS="$(FRIDA_DEBUG_FLAGS)" \
+		FRIDA_ACOPTFLAGS="$(FRIDA_ACOPTFLAGS_COMMON)" \
+		FRIDA_ACDBGFLAGS="$(FRIDA_ACDBGFLAGS_COMMON)" \
 		FRIDA_ASAN=$(FRIDA_ASAN) \
 		FRIDA_ENV_NAME=frida_thin \
 		./releng/setup-env.sh

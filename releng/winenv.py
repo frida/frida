@@ -25,17 +25,17 @@ def get_msvs_installation_dir():
             toolchain_dir = BOOTSTRAP_TOOLCHAIN_DIR
         installations = json.loads(subprocess.check_output([
             os.path.join(toolchain_dir, "bin", "vswhere.exe"),
-            "-version", "15.0",
+            "-version", "16.0",
             "-format", "json",
             "-property", "installationPath"
         ]))
         if len(installations) == 0:
-            raise MissingDependencyError("Visual Studio 2017 is not installed")
+            raise MissingDependencyError("Visual Studio 2019 is not installed")
         cached_msvs_dir = installations[0]['installationPath'].rstrip("\\")
     return cached_msvs_dir
 
 def get_msvs_version():
-    return "2017"
+    return "2019"
 
 def get_msvc_tool_dir():
     global cached_msvc_dir
