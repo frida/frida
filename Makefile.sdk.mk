@@ -466,7 +466,6 @@ ifeq ($(FRIDA_ASAN), yes)
 v8_buildtype_args := \
 	is_asan=true \
 	symbol_level=1 \
-	strip_absolute_paths_from_debug_symbols=false \
 	$(NULL)
 else
 v8_buildtype_args := \
@@ -474,7 +473,6 @@ v8_buildtype_args := \
 	is_debug=false \
 	v8_enable_v8_checks=false \
 	symbol_level=0 \
-	strip_absolute_paths_from_debug_symbols=true \
 	$(NULL)
 endif
 
