@@ -203,28 +203,23 @@ build/.$1-stamp:
 	@mkdir -p $$(@D)
 	@touch $$@
 
-build/ft-tmp-%/$1/build.ninja: build/ft-env-$(build_platform_arch).rc build/ft-env-%.rc build/.$1-stamp $3 releng/meson/meson.py
+build/ft-tmp-%/$1/build.ninja: build/ft-env-%.rc build/.$1-stamp $3 releng/meson/meson.py
 	$(RM) -r $$(@D)
 	(. build/ft-meson-env-$$*.rc \
 		&& . build/ft-config-$$*.site \
-		&& if [ $$* = $(build_platform_arch) ]; then \
-			cross_args=""; \
-		else \
-			cross_args="--cross-file build/ft-$$*.txt"; \
-		fi \
-		&& PATH=$$(shell pwd)/build/ft-$$*/bin:$$$$PATH $(MESON) \
+		&& PATH=$$(shell pwd)/build/ft-$(build_platform_arch)/bin:$$$$PATH $(MESON) \
+			--cross-file build/ft-$$*.txt \
 			--prefix $$$$frida_prefix \
 			--libdir $$$$frida_prefix/lib \
 			--default-library static \
 			$$(FRIDA_MESONFLAGS_BOTTLE) \
-			$$$$cross_args \
 			$4 \
 			$$(@D) \
 			$1)
 
 $2: build/ft-env-%.rc build/ft-tmp-%/$1/build.ninja
 	(. $$< \
-		&& $(NINJA) -C build/ft-tmp-$$*/$1 install)
+		&& PATH=$$(shell pwd)/build/ft-$(build_platform_arch)/bin:$$$$PATH $(NINJA) -C build/ft-tmp-$$*/$1 install)
 	@touch $$@
 endef
 
@@ -271,11 +266,11 @@ $(eval $(call make-git-meson-module-rules,glib,build/ft-%/bin/glib-genmarshal,bu
 
 $(eval $(call make-git-meson-module-rules,pkg-config,build/ft-%/bin/pkg-config,build/ft-%/bin/glib-genmarshal,))
 
-$(eval $(call make-tarball-module-rules,flex,https://github.com/westes/flex/releases/download/v$(flex_version)/flex-$(flex_version).tar.gz,build/ft-%/bin/flex,))
+$(eval $(call make-tarball-module-rules,flex,https://github.com/westes/flex/releases/download/v$(flex_version)/flex-$(flex_version).tar.gz,build/ft-%/bin/flex,build/ft-$(build_platform_arch)/bin/m4))
 
-$(eval $(call make-tarball-module-rules,bison,https://$(gnu_mirror)/bison/bison-$(bison_version).tar.gz,build/ft-%/bin/bison,))
+$(eval $(call make-tarball-module-rules,bison,https://$(gnu_mirror)/bison/bison-$(bison_version).tar.gz,build/ft-%/bin/bison,build/ft-$(build_platform_arch)/bin/m4))
 
-$(eval $(call make-git-meson-module-rules,vala,build/ft-%/bin/valac,build/ft-%/bin/glib-genmarshal build/ft-%/bin/flex build/ft-%/bin/bison,))
+$(eval $(call make-git-meson-module-rules,vala,build/ft-%/bin/valac,build/ft-%/bin/glib-genmarshal build/ft-$(build_platform_arch)/bin/flex build/ft-$(build_platform_arch)/bin/bison,))
 
 build/ft-%/bin/dpkg-deb:
 	@mkdir -p $(@D)
