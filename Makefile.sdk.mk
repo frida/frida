@@ -251,17 +251,12 @@ build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_platform_arch).rc build/fs-e
 	$(RM) -r $$(@D)
 	(. build/fs-meson-env-$$*.rc \
 		&& . build/fs-config-$$*.site \
-		&& if [ $$* = $(build_platform_arch) ]; then \
-			cross_args=""; \
-		else \
-			cross_args="--cross-file build/fs-$$*.txt"; \
-		fi \
 		&& $(MESON) \
+			--cross-file build/fs-$$*.txt \
 			--prefix $$$$frida_prefix \
 			--libdir $$$$frida_prefix/lib \
 			--default-library static \
 			$$(FRIDA_MESONFLAGS_BOTTLE) \
-			$$$$cross_args \
 			$4 \
 			$$(@D) \
 			$1)
