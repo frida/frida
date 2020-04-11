@@ -263,13 +263,12 @@ case $host_platform in
 
     CPP="${CPP:-${host_toolprefix}cpp}"
 
-    glibc_compat_flag="-fgnu89-inline"
     libgcc_flags="-static-libgcc"
     libstdcxx_flags="-static-libstdc++"
     base_compiler_flags="-ffunction-sections -fdata-sections"
     base_linker_flags="-Wl,--gc-sections -Wl,-z,noexecstack $libgcc_flags"
 
-    cc_config_flags="$libgcc_flags $glibc_compat_flag"
+    cc_config_flags="$libgcc_flags"
     cxx_config_flags="$libgcc_flags $libstdcxx_flags"
 
     LD="${LD:-${host_toolprefix}ld}"
@@ -312,7 +311,7 @@ case $host_platform in
     base_compiler_args="$base_toolchain_args, $(flags_to_args "$base_compiler_flags")"
     base_linker_args="$base_toolchain_args, $(flags_to_args "$base_linker_flags")"
 
-    meson_c_args="$base_compiler_args, '$glibc_compat_flag'"
+    meson_c_args="$base_compiler_args"
     meson_cpp_args="$base_compiler_args"
 
     meson_c_link_args="$base_linker_args"
