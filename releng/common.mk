@@ -6,8 +6,8 @@ build_platform_arch := $(build_platform)-$(build_arch)
 
 FOR_HOST ?= $(build_platform_arch)
 
-frida_gum_flags := --default-library static $(FRIDA_COMMON_FLAGS)
-frida_core_flags := --default-library static $(FRIDA_COMMON_FLAGS) $(FRIDA_MAPPER_FLAGS)
+frida_gum_flags := --default-library static $(FRIDA_MESONFLAGS_COMMON)
+frida_core_flags := --default-library static $(FRIDA_MESONFLAGS_COMMON) $(FRIDA_MAPPER_FLAGS)
 
 frida_tools := frida frida-discover frida-kill frida-ls-devices frida-ps frida-trace
 
