@@ -73,6 +73,10 @@ ifeq ($(enable_v8), 1)
 	v8 := build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc
 endif
 
+ifeq ($(FRIDA_LIBC), uclibc)
+	iconv := build/fs-%/lib/libiconv.a
+endif
+
 ifneq ($(iconv),)
 	glib_iconv_option := -Diconv=external
 endif
@@ -158,6 +162,32 @@ build/fs-%/lib/libiconv.a: build/fs-env-%.rc build/fs-tmp-%/libiconv/Makefile
 		&& make $(MAKE_J) install
 	@touch $@
 
+build/.xz-stamp:
+	$(RM) -r xz
+	git clone --recurse-submodules $(repo_base_url)/xz$(repo_suffix)
+	@mkdir -p $(@D)
+	@touch $@
+
+xz/configure: build/fs-env-$(build_platform_arch).rc build/.xz-stamp
+	. $< \
+		&& cd $(@D) \
+		&& [ -f autogen.sh ] && NOCONFIGURE=1 ./autogen.sh || autoreconf -ifv \
+		&& patch -p1 < ../releng/patches/xz-uclibc.patch
+
+build/fs-tmp-%/xz/Makefile: build/fs-env-%.rc xz/configure
+	$(RM) -r $(@D)
+	mkdir -p $(@D)
+	. $< \
+		&& cd $(@D) \
+		&& ../../../xz/configure
+
+build/fs-%/lib/pkgconfig/liblzma.pc: build/fs-env-%.rc build/fs-tmp-%/xz/Makefile
+	. $< \
+		&& cd build/fs-tmp-$*/xz \
+		&& make $(MAKE_J) \
+		&& make $(MAKE_J) install
+	@touch $@
+
 
 build/.elfutils-stamp: build/fs-env-$(build_platform_arch).rc
 	$(RM) -r elfutils
@@ -168,6 +198,7 @@ build/.elfutils-stamp: build/fs-env-$(build_platform_arch).rc
 		&& patch -p1 < ../releng/patches/elfutils-clang.patch \
 		&& patch -p1 < ../releng/patches/elfutils-android.patch \
 		&& patch -p1 < ../releng/patches/elfutils-glibc-compatibility.patch \
+		&& patch -p1 < ../releng/patches/elfutils-musl.patch \
 		&& autoreconf -ifv
 	@mkdir -p $(@D)
 	@touch $@
@@ -270,8 +301,6 @@ $2: build/fs-env-%.rc build/fs-tmp-%/$1/build.ninja
 endef
 
 $(eval $(call make-git-meson-module-rules,zlib,build/fs-%/lib/pkgconfig/zlib.pc,))
-
-$(eval $(call make-git-autotools-module-rules,xz,build/fs-%/lib/pkgconfig/liblzma.pc,))
 
 $(eval $(call make-git-meson-module-rules,sqlite,build/fs-%/lib/pkgconfig/sqlite3.pc,,))
 

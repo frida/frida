@@ -21,6 +21,15 @@ case "$PACKAGE_TARNAME" in
     ;;
 esac
 
+case $frida_libc in
+  musl)
+    frida_flags="$frida_flags -DHAVE_MUSLLIBC"
+    ;;
+  uclibc)
+    frida_flags="$frida_flags -DHAVE_UCLIBC"
+    ;;
+esac
+
 case $frida_host_platform_arch in
   linux-arm)
     host_alias="arm-linux-gnueabi"
