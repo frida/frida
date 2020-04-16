@@ -162,33 +162,6 @@ build/fs-%/lib/libiconv.a: build/fs-env-%.rc build/fs-tmp-%/libiconv/Makefile
 		&& make $(MAKE_J) install
 	@touch $@
 
-build/.xz-stamp:
-	$(RM) -r xz
-	git clone --recurse-submodules $(repo_base_url)/xz$(repo_suffix)
-	@mkdir -p $(@D)
-	@touch $@
-
-xz/configure: build/fs-env-$(build_platform_arch).rc build/.xz-stamp
-	. $< \
-		&& cd $(@D) \
-		&& [ -f autogen.sh ] && NOCONFIGURE=1 ./autogen.sh || autoreconf -ifv \
-		&& patch -p1 < ../releng/patches/xz-uclibc.patch
-
-build/fs-tmp-%/xz/Makefile: build/fs-env-%.rc xz/configure
-	$(RM) -r $(@D)
-	mkdir -p $(@D)
-	. $< \
-		&& cd $(@D) \
-		&& ../../../xz/configure
-
-build/fs-%/lib/pkgconfig/liblzma.pc: build/fs-env-%.rc build/fs-tmp-%/xz/Makefile
-	. $< \
-		&& cd build/fs-tmp-$*/xz \
-		&& make $(MAKE_J) \
-		&& make $(MAKE_J) install
-	@touch $@
-
-
 build/.elfutils-stamp: build/fs-env-$(build_platform_arch).rc
 	$(RM) -r elfutils
 	git clone git://sourceware.org/git/elfutils.git
@@ -259,6 +232,12 @@ $1/configure: build/fs-env-$(build_platform_arch).rc build/.$1-stamp
 	. $$< \
 		&& cd $$(@D) \
 		&& [ -f autogen.sh ] && NOCONFIGURE=1 ./autogen.sh || autoreconf -ifv
+	if [ -n "$5" ]; then \
+		cd $$(@D); \
+		for patch in $5; do \
+			patch -p1 < ../releng/patches/$$$$patch; \
+		done; \
+	fi
 
 build/fs-tmp-%/$1/Makefile: build/fs-env-%.rc $1/configure $3
 	$(RM) -r $$(@D)
@@ -301,6 +280,8 @@ $2: build/fs-env-%.rc build/fs-tmp-%/$1/build.ninja
 endef
 
 $(eval $(call make-git-meson-module-rules,zlib,build/fs-%/lib/pkgconfig/zlib.pc,))
+
+$(eval $(call make-git-autotools-module-rules,xz,build/fs-%/lib/pkgconfig/liblzma.pc,,,xz-uclibc.patch))
 
 $(eval $(call make-git-meson-module-rules,sqlite,build/fs-%/lib/pkgconfig/sqlite3.pc,,))
 

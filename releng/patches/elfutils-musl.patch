@@ -30,7 +30,7 @@
 
  #include <errno.h>
 -#include <error.h>
-+#ifndef HAVE_MUSLLIBC
++#if defined (__GLIBC__) || defined (__UCLIBC__)
 +# include <error.h>
 +#endif
  #include <stddef.h>
@@ -43,7 +43,7 @@
  #include <stdlib.h>
  #include <string.h>
 -#include <sys/cdefs.h>
-+#ifndef HAVE_MUSLLIBC
++#if defined (__GLIBC__) || defined (__UCLIBC__)
 +# include <sys/cdefs.h>
 +#endif
 

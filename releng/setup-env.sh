@@ -267,16 +267,6 @@ case $host_platform in
     libstdcxx_flags="-static-libstdc++"
     base_compiler_flags="-ffunction-sections -fdata-sections"
     base_linker_flags="-Wl,--gc-sections -Wl,-z,noexecstack $libgcc_flags"
-
-    case "$frida_libc" in
-      musl)
-        base_compiler_flags="$base_compiler_flags -DHAVE_MUSLLIBC"
-        ;;
-      uclibc)
-        base_compiler_flags="$base_compiler_flags -DHAVE_UCLIBC"
-        ;;
-    esac
-
     cc_config_flags="$libgcc_flags"
     cxx_config_flags="$libgcc_flags $libstdcxx_flags"
 
