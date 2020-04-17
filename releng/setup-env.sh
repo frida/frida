@@ -266,7 +266,7 @@ case $host_platform in
     libgcc_flags="-static-libgcc"
     libstdcxx_flags="-static-libstdc++"
     base_compiler_flags="-ffunction-sections -fdata-sections"
-    base_linker_flags="-Wl,--gc-sections -Wl,-z,noexecstack $libgcc_flagsl
+    base_linker_flags="-Wl,--gc-sections -Wl,-z,noexecstack $libgcc_flags"
 
     cc_config_flags="$libgcc_flags"
     cxx_config_flags="$libgcc_flags $libstdcxx_flags"
