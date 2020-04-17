@@ -1,0 +1,51 @@
+--- elfutils-orig/libelf/elf.h	2020-04-14 15:13:14.506291332 +0100
++++ elfutils/libelf/elf.h	2020-04-14 15:42:17.002897186 +0100
+@@ -21,6 +21,22 @@
+
+ #include <features.h>
+
++#ifndef __BEGIN_DECLS
++# ifdef	__cplusplus
++#  define __BEGIN_DECLS extern "C" {
++# else
++#  define __BEGIN_DECLS
++# endif
++#endif
++
++#ifndef __END_DECLS
++# ifdef	__cplusplus
++#  define __END_DECLS }
++# else
++#  define __END_DECLS
++# endif
++#endif
++
+ __BEGIN_DECLS
+
+ /* Standard ELF types.  */
+--- elfutils-orig/lib/system.h	2020-04-14 15:44:09.703560677 +0100
++++ elfutils/lib/system.h	2020-04-14 15:48:36.582535246 +0100
+@@ -30,7 +30,9 @@
+ #define LIB_SYSTEM_H	1
+
+ #include <errno.h>
+-#include <error.h>
++#if defined (__GLIBC__) || defined (__UCLIBC__)
++# include <error.h>
++#endif
+ #include <stddef.h>
+ #include <stdint.h>
+ #include <string.h>
+--- elfutils-orig/lib/fixedsizehash.h	2020-04-14 15:58:26.370597399 +0100
++++ elfutils/lib/fixedsizehash.h	2020-04-14 15:58:58.667910886 +0100
+@@ -30,7 +30,9 @@
+ #include <errno.h>
+ #include <stdlib.h>
+ #include <string.h>
+-#include <sys/cdefs.h>
++#if defined (__GLIBC__) || defined (__UCLIBC__)
++# include <sys/cdefs.h>
++#endif
+
+ #include <system.h>
+

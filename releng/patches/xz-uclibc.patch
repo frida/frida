@@ -1,0 +1,12 @@
+--- xz-orig/configure	2020-04-14 19:11:25.239625275 +0100
++++ xz/configure	2020-04-14 19:11:59.413013962 +0100
+@@ -5949,6 +5949,9 @@
+ #include <stdlib.h>
+ #include <wchar.h>
+ #include <stdio.h>
++#ifdef __UCLIBC__
++# include <stddef.h>
++#endif
+
+ // Check varargs macros.  These examples are taken from C99 6.10.3.5.
+ #define debug(...) fprintf (stderr, __VA_ARGS__)

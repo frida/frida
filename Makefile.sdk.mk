@@ -73,6 +73,10 @@ ifeq ($(enable_v8), 1)
 	v8 := build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc
 endif
 
+ifeq ($(FRIDA_LIBC), uclibc)
+	iconv := build/fs-%/lib/libiconv.a
+endif
+
 ifneq ($(iconv),)
 	glib_iconv_option := -Diconv=external
 endif
@@ -168,6 +172,7 @@ build/.elfutils-stamp: build/fs-env-$(build_platform_arch).rc
 		&& patch -p1 < ../releng/patches/elfutils-clang.patch \
 		&& patch -p1 < ../releng/patches/elfutils-android.patch \
 		&& patch -p1 < ../releng/patches/elfutils-glibc-compatibility.patch \
+		&& patch -p1 < ../releng/patches/elfutils-musl.patch \
 		&& autoreconf -ifv
 	@mkdir -p $(@D)
 	@touch $@
@@ -228,6 +233,12 @@ $1/configure: build/fs-env-$(build_platform_arch).rc build/.$1-stamp
 	. $$< \
 		&& cd $$(@D) \
 		&& [ -f autogen.sh ] && NOCONFIGURE=1 ./autogen.sh || autoreconf -ifv
+	if [ -n "$5" ]; then \
+		cd $$(@D); \
+		for patch in $5; do \
+			patch -p1 < ../releng/patches/$$$$patch; \
+		done; \
+	fi
 
 build/fs-tmp-%/$1/Makefile: build/fs-env-%.rc $1/configure $3
 	$(RM) -r $$(@D)
@@ -271,7 +282,7 @@ endef
 
 $(eval $(call make-git-meson-module-rules,zlib,build/fs-%/lib/pkgconfig/zlib.pc,))
 
-$(eval $(call make-git-autotools-module-rules,xz,build/fs-%/lib/pkgconfig/liblzma.pc,))
+$(eval $(call make-git-autotools-module-rules,xz,build/fs-%/lib/pkgconfig/liblzma.pc,,,xz-uclibc.patch))
 
 $(eval $(call make-git-meson-module-rules,sqlite,build/fs-%/lib/pkgconfig/sqlite3.pc,,))
 
