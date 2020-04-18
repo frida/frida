@@ -185,10 +185,6 @@ build/tmp-linux-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-s
 			--prefix $(FRIDA)/build/frida-linux-x86 \
 			--libdir $(FRIDA)/build/frida-linux-x86/lib \
 			$(frida_core_flags) \
-			-Dhelper_modern=$(FRIDA)/build/tmp-linux-x86_64/frida-core/src/frida-helper \
-			-Dhelper_legacy=$(FRIDA)/build/tmp-linux-x86/frida-core/src/frida-helper \
-			-Dagent_modern=$(FRIDA)/build/tmp-linux-x86_64/frida-core/lib/agent/frida-agent.so \
-			-Dagent_legacy=$(FRIDA)/build/tmp-linux-x86/frida-core/lib/agent/frida-agent.so \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -277,7 +273,7 @@ build/tmp_thin-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stam
 	fi
 	@touch $@
 
-build/frida-linux-x86/lib/pkgconfig/frida-core-1.0.pc: build/tmp-linux-x86/frida-core/.frida-helper-and-agent-stamp build/tmp-linux-x86_64/frida-core/.frida-helper-and-agent-stamp
+build/frida-linux-x86/lib/pkgconfig/frida-core-1.0.pc: build/tmp-linux-x86/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-linux-x86/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-linux-x86/frida-core install
 	@touch $@
