@@ -539,6 +539,9 @@ ifeq ($(host_platform), ios)
 		mac_deployment_target="10.9.0" \
 		ios_deployment_target="7.0" \
 		$(NULL)
+ifeq ($(host_arch),$(filter $(host_arch),arm64 arm64e))
+	v8_platform_args += v8_enable_pointer_compression=false
+endif
 endif
 ifeq ($(host_platform), linux)
 	v8_os := linux
