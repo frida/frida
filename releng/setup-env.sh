@@ -205,9 +205,12 @@ mkdir -p "$FRIDA_BUILD"
 
 case $host_platform in
   linux)
+    host_arch_flags=""
+    host_cflags=""
     case $host_arch in
       x86)
-        host_arch_flags="-m32"
+        host_arch_flags="-m32 -march=pentium4"
+        host_cflags="-mfpmath=sse -mstackrealign"
         host_toolprefix="/usr/bin/"
         ;;
       x86_64)
@@ -268,6 +271,14 @@ case $host_platform in
     base_compiler_flags="-ffunction-sections -fdata-sections"
     base_linker_flags="-Wl,--gc-sections -Wl,-z,noexecstack $libgcc_flags"
 
+    if [ -n "$host_arch_flags" ]; then
+      base_compiler_flags="$base_compiler_flags $host_arch_flags"
+      base_linker_flags="$base_linker_flags $host_arch_flags"
+    fi
+    if [ -n "$host_cflags" ]; then
+      base_compiler_flags="$base_compiler_flags $host_cflags"
+    fi
+
     cc_config_flags="$libgcc_flags"
     cxx_config_flags="$libgcc_flags $libstdcxx_flags"
 
@@ -304,12 +315,11 @@ case $host_platform in
     OBJCOPY="${OBJCOPY:-${host_toolprefix}objcopy}"
     OBJDUMP="${OBJDUMP:-${host_toolprefix}objdump}"
 
-    CFLAGS="$host_arch_flags $base_compiler_flags"
-    LDFLAGS="$host_arch_flags $base_linker_flags"
+    CFLAGS="$base_compiler_flags"
+    LDFLAGS="$base_linker_flags"
 
-    base_toolchain_args="$(flags_to_args "$host_arch_flags")"
-    base_compiler_args="$base_toolchain_args, $(flags_to_args "$base_compiler_flags")"
-    base_linker_args="$base_toolchain_args, $(flags_to_args "$base_linker_flags")"
+    base_compiler_args=$(flags_to_args "$base_compiler_flags")
+    base_linker_args=$(flags_to_args "$base_linker_flags")
 
     meson_c_args="$base_compiler_args"
     meson_cpp_args="$base_compiler_args"
@@ -515,17 +525,19 @@ case $host_platform in
     android_build_platform=$(echo ${build_platform} | sed 's,^macos$,darwin,')
     android_toolroot="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/${android_build_platform}-${build_arch}"
 
+    host_arch_flags=""
+    host_cflags=""
     case $host_arch in
       x86)
         android_api=18
         host_compiler_triplet="i686-linux-android"
-        host_arch_flags="-march=i686"
+        host_arch_flags="-march=pentium4"
+        host_cflags="-mfpmath=sse -mstackrealign"
         host_ldflags="-fuse-ld=gold"
         ;;
       x86_64)
         android_api=21
         host_compiler_triplet="x86_64-linux-android"
-        host_arch_flags=""
         host_ldflags="-fuse-ld=gold -Wl,--icf=all"
         ;;
       arm)
@@ -538,21 +550,31 @@ case $host_platform in
       arm64)
         android_api=21
         host_compiler_triplet="aarch64-linux-android"
-        host_arch_flags=""
         host_ldflags="-fuse-ld=gold -Wl,--icf=all"
         ;;
     esac
+
+    libstdcxx_flags="-static-libstdc++"
+    base_compiler_flags="-DANDROID -fPIC -ffunction-sections -fdata-sections"
+    base_linker_flags="-Wl,--gc-sections -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now"
+
+    if [ -n "$host_arch_flags" ]; then
+      base_compiler_flags="$base_compiler_flags $host_arch_flags"
+      base_linker_flags="$base_linker_flags $host_arch_flags"
+    fi
+    if [ -n "$host_cflags" ]; then
+      base_compiler_flags="$base_compiler_flags $host_cflags"
+    fi
+    if [ -n "$host_ldflags" ]; then
+      base_linker_flags="$base_linker_flags $host_ldflags"
+    fi
+
     host_compiler_prefix="${host_compiler_triplet}${android_api}-"
 
     if [ -z "$host_tooltriplet" ]; then
       host_tooltriplet="$host_compiler_triplet"
     fi
     host_toolprefix="$host_tooltriplet-"
-
-    if [ $android_api -lt 21 ]; then
-      # XXX: Meson's auto-detection fails as this is a Clang built-in.
-      meson_platform_properties+=("has_function_stpcpy = false")
-    fi
 
     CPP="${android_toolroot}/bin/${host_compiler_prefix}clang -E"
     CC="${android_toolroot}/bin/${host_compiler_prefix}clang"
@@ -567,8 +589,9 @@ case $host_platform in
     OBJCOPY="${android_toolroot}/bin/${host_toolprefix}objcopy"
     OBJDUMP="${android_toolroot}/bin/${host_toolprefix}objdump"
 
-    CFLAGS="$host_arch_flags -DANDROID -ffunction-sections -fdata-sections"
-    LDFLAGS="$host_arch_flags $host_ldflags -Wl,--gc-sections -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now"
+    CFLAGS="$base_compiler_flags"
+    CXXFLAGS="$libstdcxx_flags"
+    LDFLAGS="$base_linker_flags"
     meson_linker_flavor=gold
 
     elf_cleaner=${FRIDA_ROOT}/releng/frida-elf-cleaner-${build_platform_arch}
@@ -587,16 +610,8 @@ case $host_platform in
       "$releng_path/driver-wrapper-android.sh.in" > "$meson_cpp_wrapper"
     chmod +x "$meson_cpp_wrapper"
 
-    base_toolchain_args=$(flags_to_args "$host_arch_flags")
-    if [ -n "$base_toolchain_args" ]; then
-      base_toolchain_args="$base_toolchain_args, "
-    fi
-    base_compiler_args="$base_toolchain_args'-DANDROID', '-fPIC', '-ffunction-sections', '-fdata-sections'"
-    base_linker_args="$base_toolchain_args"
-    if [ -n "$host_ldflags" ]; then
-      base_linker_args="$base_linker_args$(flags_to_args "$host_ldflags"), "
-    fi
-    base_linker_args="$base_linker_args'-Wl,--gc-sections', '-Wl,-z,noexecstack', '-Wl,-z,relro', '-Wl,-z,now'"
+    base_compiler_args=$(flags_to_args "$base_compiler_flags")
+    base_linker_args=$(flags_to_args "$base_linker_flags")
 
     meson_c="$meson_cc_wrapper"
     meson_cpp="$meson_cpp_wrapper"
@@ -605,7 +620,12 @@ case $host_platform in
     meson_cpp_args="$base_compiler_args"
 
     meson_c_link_args="$base_linker_args"
-    meson_cpp_link_args="$base_linker_args, '-static-libstdc++'"
+    meson_cpp_link_args="$base_linker_args, $(flags_to_args "$libstdcxx_flags")"
+
+    if [ $android_api -lt 21 ]; then
+      # XXX: Meson's auto-detection fails as this is a Clang built-in.
+      meson_platform_properties+=("has_function_stpcpy = false")
+    fi
     ;;
   qnx)
     case $host_arch in
@@ -699,7 +719,7 @@ if [ -n "$FRIDA_EXTRA_LDFLAGS" ]; then
   meson_cpp_link_args="$meson_cpp_link_args, $extra_link_args"
 fi
 
-# We need these legacy paths for dependencies that don't use pkg-config
+# We need these legacy paths for dependencies that don't use pkg-config.
 legacy_includes="-I$FRIDA_PREFIX/include"
 legacy_libpaths="-L$FRIDA_PREFIX/lib"
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
