@@ -155,12 +155,6 @@ build/ft-tmp-%/.package-stamp: \
 				true; \
 			elif file -b --mime $$f | egrep -q "executable|binary"; then \
 				$$STRIP $(strip_all) $$f || exit 1; \
-			else \
-				if [ $(build_platform) = macos ]; then \
-					sed -i "" -e "s_^#\!.*python.*_#\!/usr/bin/env python3_g" $$f || exit 1; \
-				else \
-					sed -i"" -e "s_^#!.*python.*_#!/usr/bin/env python3_gi" $$f || exit 1; \
-				fi; \
 			fi; \
 		done \
 		&& $$STRIP $(strip_all) $(@D)/package/lib/vala-*/gen-introspect-*
