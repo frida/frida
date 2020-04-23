@@ -135,7 +135,7 @@ def build_meson_module(name, platform, configuration, runtime, options):
     build_dir = os.path.join(env_dir, name)
     prefix = get_prefix_path(platform, configuration, runtime)
     optimization = 's' if configuration == 'Release' else '0'
-    debug = 'false' if configuration == 'Release' else 'true'
+    ndebug = 'true' if configuration == 'Release' else 'false'
     option_flags = ["-D" + option for option in options]
 
     if not os.path.exists(source_dir):
@@ -151,7 +151,7 @@ def build_meson_module(name, platform, configuration, runtime, options):
         "--default-library", "static",
         "--backend", "ninja",
         "-Doptimization=" + optimization,
-        "-Ddebug=" + debug,
+        "-Db_ndebug=" + ndebug,
         "-Db_vscrt=" + vscrt_from_configuration_and_runtime(configuration, runtime),
         *option_flags,
         cwd=source_dir,

@@ -6,13 +6,13 @@ FRIDA := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 FRIDA_ASAN ?= no
 
 ifeq ($(FRIDA_ASAN), yes)
-FRIDA_MESONFLAGS_COMMON := -Doptimization=1 -Ddebug=true -Db_sanitize=address
-FRIDA_MESONFLAGS_BOTTLE := -Doptimization=1 -Ddebug=true -Db_sanitize=address
+FRIDA_MESONFLAGS_COMMON := -Doptimization=1 -Db_sanitize=address
+FRIDA_MESONFLAGS_BOTTLE := -Doptimization=1 -Db_sanitize=address
 FRIDA_ACOPTFLAGS_COMMON ?= -O1
 FRIDA_ACOPTFLAGS_BOTTLE ?= -O1
 else
-FRIDA_MESONFLAGS_COMMON := -Doptimization=s -Ddebug=false --strip
-FRIDA_MESONFLAGS_BOTTLE := -Doptimization=s -Ddebug=false
+FRIDA_MESONFLAGS_COMMON := -Doptimization=s -Db_ndebug=true --strip
+FRIDA_MESONFLAGS_BOTTLE := -Doptimization=s -Db_ndebug=true
 FRIDA_ACOPTFLAGS_COMMON ?= -Os
 FRIDA_ACOPTFLAGS_BOTTLE ?= -Os
 endif
