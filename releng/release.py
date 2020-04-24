@@ -105,7 +105,6 @@ if __name__ == '__main__':
         subprocess.check_call([
             "fpm",
             "--name={}-prompt-toolkit".format(package_name_prefix),
-            "--version=1.0.15",
             "--iteration=1." + distro_name,
             "--maintainer=Ole André Vadla Ravnås <oleavr@frida.re>",
             "--vendor=Frida",
