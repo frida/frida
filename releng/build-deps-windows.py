@@ -21,7 +21,7 @@ LIBRARY_TARGET_RUNTIMES = ['static', 'dynamic']
 COMPRESSION_LEVEL = 9
 
 FRIDA_BASE_URL = "https://github.com/frida"
-BOOTSTRAP_TOOLCHAIN_URL = "https://build.frida.re/toolchain-20200422-windows-x86.exe"
+BOOTSTRAP_TOOLCHAIN_URL = "https://build.frida.re/toolchain-20200424-windows-x86.exe"
 VALA_VERSION = "0.50"
 VALA_TARGET_GLIB = "2.66"
 
