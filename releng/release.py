@@ -33,8 +33,8 @@ if __name__ == '__main__':
 
     if system == 'Windows':
         szip = r"C:\Program Files\7-Zip\7z.exe"
-        ssh = r"C:\Program Files (x86)\PuTTY\plink.exe"
-        scp = r"C:\Program Files (x86)\PuTTY\pscp.exe"
+        ssh = r"C:\Program Files\PuTTY\plink.exe"
+        scp = r"C:\Program Files\PuTTY\pscp.exe"
     else:
         szip = "7z"
         ssh = "ssh"
