@@ -4,6 +4,7 @@ import os
 import subprocess
 import sys
 
+
 def generate_version_header():
     build_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     description = subprocess.Popen(["git", "describe", "--tags", "--always", "--long"], cwd=build_dir, stdout=subprocess.PIPE).communicate()[0]
