@@ -102,19 +102,6 @@ if __name__ == '__main__':
             'FRIDA_EXTENSION': extension
         })
 
-        subprocess.check_call([
-            "fpm",
-            "--name={}-prompt-toolkit".format(package_name_prefix),
-            "--iteration=1." + distro_name,
-            "--maintainer=Ole André Vadla Ravnås <oleavr@frida.re>",
-            "--vendor=Frida",
-            "--python-bin=" + interpreter,
-            "--python-package-name-prefix=" + package_name_prefix,
-            "-s", "python",
-            "-t", "rpm",
-            "prompt-toolkit"
-        ], cwd=frida_python_dir)
-
         for module_dir in [frida_python_dir, frida_tools_dir]:
             subprocess.check_call([
                 "fpm",
