@@ -35,7 +35,7 @@ build/frida_thin-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida
 	true
 
 build/frida-version.h: releng/generate-version-header.py .git/refs/heads/master
-	@python releng/generate-version-header.py > $@.tmp
+	@$(PYTHON3) releng/generate-version-header.py > $@.tmp
 	@mv $@.tmp $@
 
 glib:
