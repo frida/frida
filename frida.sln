@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27428.2037
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29926.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-core", "frida-core\frida-core.vcxproj", "{B7DC9B02-A5FF-4AA1-B2A2-DC1653168D44}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -96,6 +96,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tinycc-32", "frida-gum\ext\tinycc\tinycc-32.vcxproj", "{E1212DF2-FBA5-4E95-821F-A6C89446767A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tinycc-64", "frida-gum\ext\tinycc\tinycc-64.vcxproj", "{9CDF2D78-15B7-4BAE-B533-5F830FBD73E7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gumjs-inspector", "frida-gum\bindings\gumjs\gumjs-inspector.vcxproj", "{0B28EC3C-CC22-4067-9F08-6A3FAC4FB454}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -345,6 +347,14 @@ Global
 		{9CDF2D78-15B7-4BAE-B533-5F830FBD73E7}.Release|Win32.Build.0 = Release|x64
 		{9CDF2D78-15B7-4BAE-B533-5F830FBD73E7}.Release|x64.ActiveCfg = Release|x64
 		{9CDF2D78-15B7-4BAE-B533-5F830FBD73E7}.Release|x64.Build.0 = Release|x64
+		{0B28EC3C-CC22-4067-9F08-6A3FAC4FB454}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0B28EC3C-CC22-4067-9F08-6A3FAC4FB454}.Debug|Win32.Build.0 = Debug|Win32
+		{0B28EC3C-CC22-4067-9F08-6A3FAC4FB454}.Debug|x64.ActiveCfg = Debug|x64
+		{0B28EC3C-CC22-4067-9F08-6A3FAC4FB454}.Debug|x64.Build.0 = Debug|x64
+		{0B28EC3C-CC22-4067-9F08-6A3FAC4FB454}.Release|Win32.ActiveCfg = Release|Win32
+		{0B28EC3C-CC22-4067-9F08-6A3FAC4FB454}.Release|Win32.Build.0 = Release|Win32
+		{0B28EC3C-CC22-4067-9F08-6A3FAC4FB454}.Release|x64.ActiveCfg = Release|x64
+		{0B28EC3C-CC22-4067-9F08-6A3FAC4FB454}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
