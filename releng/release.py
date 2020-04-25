@@ -124,7 +124,7 @@ if __name__ == '__main__':
                 for package in packages:
                     os.unlink(package)
 
-    def upload_node_bindings_to_npm(node, upload_to_github, publish, python2_interpreter=None, extra_build_args=[], extra_build_env=None):
+    def upload_node_bindings_to_npm(node, upload_to_github, publish, extra_build_args=[], extra_build_env=None):
         node_bin_dir = os.path.dirname(node)
         npm = os.path.join(node_bin_dir, "npm")
         if system == 'Windows':
@@ -135,8 +135,6 @@ if __name__ == '__main__':
             'PATH': node_bin_dir + os.pathsep + os.getenv('PATH'),
             'FRIDA': build_dir
         })
-        if python2_interpreter is not None:
-            env['PYTHON'] = python2_interpreter
 
         def do(args, **kwargs):
             quoted_args = []
@@ -400,9 +398,8 @@ if __name__ == '__main__':
             upload_python_bindings_to_pypi(r"C:\Program Files\Python 3.8\python.exe",
                 os.path.join(build_dir, "build", "frida-windows", "x64-Release", "lib", "python3.8", "site-packages", "_frida.pyd"), sdist=True)
 
-            python2_interpreter=r"C:\Program Files\Python 2.7\python.exe"
-            upload_node_bindings_to_npm(r"C:\Program Files (x86)\nodejs\node.exe", upload, publish=False, python2_interpreter=python2_interpreter)
-            upload_node_bindings_to_npm(r"C:\Program Files\nodejs\node.exe", upload, publish=False, python2_interpreter=python2_interpreter)
+            upload_node_bindings_to_npm(r"C:\Program Files (x86)\nodejs\node.exe", upload, publish=False)
+            upload_node_bindings_to_npm(r"C:\Program Files\nodejs\node.exe", upload, publish=False)
 
             upload_file("frida-clr-{version}-windows-x86.dll", os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "bin", "Frida.dll"), upload)
             upload_file("frida-clr-{version}-windows-x86_64.dll", os.path.join(build_dir, "build", "frida-windows", "x64-Release", "bin", "Frida.dll"), upload)
