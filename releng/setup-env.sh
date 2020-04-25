@@ -979,6 +979,10 @@ sed \
 case $host_platform in
   macos|ios)
     (
+      echo "export INSTALL_NAME_TOOL=\"$INSTALL_NAME_TOOL\""
+      echo "export OTOOL=\"$OTOOL\""
+      echo "export CODESIGN=\"$CODESIGN\""
+      echo "export LIPO=\"$LIPO\""
       echo "export OBJC=\"$OBJC\""
       echo "export OBJCXX=\"$OBJCXX\""
       echo "export OBJCFLAGS=\"$CFLAGS\""
