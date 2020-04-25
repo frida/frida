@@ -423,8 +423,8 @@ if __name__ == '__main__':
             upload_python_bindings_to_pypi("/usr/local/bin/python3.8",
                 os.path.join(build_dir, "build", "frida-macos-universal", "lib", "python3.8", "site-packages", "_frida.so"))
 
-            upload_node_bindings_to_npm("/opt/node-64/bin/node", upload, publish=True)
-            upload_meta_modules_to_npm("/opt/node-64/bin/node")
+            upload_node_bindings_to_npm("/usr/local/bin/node", upload, publish=True)
+            upload_meta_modules_to_npm("/usr/local/bin/node")
         elif builder == 'manylinux-x86_64':
             upload = get_github_uploader()
 
