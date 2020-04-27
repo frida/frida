@@ -400,6 +400,10 @@ case $host_platform in
     base_toolchain_args="'-mmacosx-version-min=$macos_minver'"
     base_compiler_args="$base_toolchain_args"
     base_linker_args="$base_toolchain_args, '-Wl,-dead_strip'"
+    if [ $host_arch = x86 ]; then
+      # Suppress linker warning about x86 being a deprecated architecture.
+      base_linker_args="$base_linker_args, '-Wl,-w'"
+    fi
 
     meson_c="$CC"
     meson_cpp="$CXX"
