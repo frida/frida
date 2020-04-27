@@ -350,7 +350,7 @@ endif
 		CROSS_TOP="${xcode_developer_dir}/Platforms/$(xcode_platform).platform/Developer" \
 		CROSS_SDK=$(xcode_platform)$(shell xcrun --sdk $(shell echo $(xcode_platform) | tr A-Z a-z) --show-sdk-version | cut -f1-2 -d'.').sdk \
 		MACOS_MIN_SDK_VERSION=10.9 \
-		IOS_MIN_SDK_VERSION=7.0 \
+		IOS_MIN_SDK_VERSION=8.0 \
 		CONFIG_DISABLE_BITCODE=true \
 		$(NULL)
 endif
@@ -537,7 +537,7 @@ ifeq ($(host_platform), ios)
 		use_xcode_clang=true \
 		libcxx_abi_unstable=false \
 		mac_deployment_target="10.9.0" \
-		ios_deployment_target="7.0" \
+		ios_deployment_target="8.0" \
 		$(NULL)
 ifeq ($(host_arch),$(filter $(host_arch),arm64 arm64e))
 	v8_platform_args += v8_enable_pointer_compression=false

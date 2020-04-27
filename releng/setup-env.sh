@@ -421,7 +421,7 @@ case $host_platform in
     meson_objcpp_link_args="$base_linker_args, '-stdlib=libc++'"
     ;;
   ios)
-    ios_minver="7.0"
+    ios_minver="8.0"
 
     case $host_arch in
       x86|x86_64)
