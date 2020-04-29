@@ -1,5 +1,9 @@
 # config.site for configure
 
+if [ -z "$PACKAGE_TARNAME" ]; then
+  PACKAGE_TARNAME=$(basename $(dirname "$0"))
+fi
+
 frida_host_platform=@frida_host_platform@
 frida_host_arch=@frida_host_arch@
 frida_host_platform_arch=@frida_host_platform_arch@
@@ -126,6 +130,9 @@ enable_shared=no
 enable_static=yes
 
 case "$PACKAGE_TARNAME" in
+  gettext|libtextstyle)
+    enable_curses=no
+    ;;
   elfutils)
     enable_debuginfod=no
     case $frida_host_platform_arch in
