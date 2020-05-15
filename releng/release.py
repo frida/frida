@@ -126,9 +126,9 @@ if __name__ == '__main__':
 
     def upload_node_bindings_to_npm(node, upload_to_github, publish, extra_build_args=[], extra_build_env=None):
         node_bin_dir = os.path.dirname(node)
-        npm = os.path.join(node_bin_dir, "npm")
+        npm = [os.path.join(node_bin_dir, "npm")]
         if system == 'Windows':
-            npm += '.cmd'
+            npm = ["call", npm[0] + '.cmd']
 
         env = dict(os.environ)
         env.update({
@@ -155,11 +155,11 @@ if __name__ == '__main__':
             do(["git", "clean", "-xffd"])
         reset()
         with package_version_temporarily_set_to(version, frida_node_dir):
-            do_build_command([npm, "install"])
+            do_build_command(npm + ["install"])
             if publish:
-                do([npm, "publish"])
-            do_build_command([npm, "run", "prebuild", "--", "-t", "10.0.0", "-t", "12.0.0", "-t", "14.0.0"])
-            do_build_command([npm, "run", "prebuild", "--", "-t", "8.0.0", "-t", "9.0.0-beta.1", "-r", "electron"])
+                do(npm + ["publish"])
+            do_build_command(npm + ["run", "prebuild", "--", "-t", "10.0.0", "-t", "12.0.0", "-t", "14.0.0"])
+            do_build_command(npm + ["run", "prebuild", "--", "-t", "8.0.0", "-t", "9.0.0-beta.1", "-r", "electron"])
             packages = glob.glob(os.path.join(frida_node_dir, "prebuilds", "*.tar.gz"))
             for package in packages:
                 with open(package, 'rb') as package_file:
