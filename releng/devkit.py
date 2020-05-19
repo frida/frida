@@ -135,7 +135,7 @@ def generate_header(package, frida_root, host, kit, flavor, umbrella_header_path
         public_mappings = []
         for original, renamed in extract_public_thirdparty_symbol_mappings(thirdparty_symbol_mappings):
             public_mappings.append((original, renamed))
-            if not "define {0}".format(original) in devkit_header:
+            if "define {0}".format(original) not in devkit_header and "define  {0}".format(original) not in devkit_header:
                 continue
             def fixup_macro(match):
                 prefix = match.group(1)
