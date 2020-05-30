@@ -126,8 +126,12 @@ if [ -x /usr/bin/install ]; then
   ac_cv_path_install="/usr/bin/install -p"
 fi
 
-enable_shared=no
-enable_static=yes
+if [ -z "$enable_shared" ]; then
+  enable_shared=no
+fi
+if [ -z "$enable_static" ]; then
+  enable_static=yes
+fi
 
 case "$PACKAGE_TARNAME" in
   gettext|libtextstyle)
