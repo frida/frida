@@ -152,8 +152,6 @@ if [ $host_platform = qnx ]; then
   fi
 fi
 
-prompt_color=33
-
 toolchain_version=20200518
 sdk_version=20200518
 if [ $enable_asan = yes ]; then
@@ -901,7 +899,6 @@ fi
 
 (
   echo "export PATH=\"${env_path_sdk}${FRIDA_TOOLROOT}/bin:\$PATH\""
-  echo "export PS1=\"\e[0;${prompt_color}m[\u@\h \w \e[m\e[1;${prompt_color}mfrida-${host_platform_arch}\e[m\e[0;${prompt_color}m]\e[m\n\$ \""
   echo "export PKG_CONFIG=\"$PKG_CONFIG\""
   echo "export PKG_CONFIG_PATH=\"\""
   echo "export VALAC=\"$VALAC\""
@@ -965,7 +962,6 @@ sed \
 
 (
   echo "export PATH=\"${env_path_sdk}${FRIDA_TOOLROOT}/bin:\$PATH\""
-  echo "export PS1=\"\e[0;${prompt_color}m[\u@\h \w \e[m\e[1;${prompt_color}mfrida-${host_platform_arch}\e[m\e[0;${prompt_color}m]\e[m\n\$ \""
   echo "export PKG_CONFIG=\"$PKG_CONFIG\""
   echo "export PKG_CONFIG_PATH=\"\""
   echo "export VALAC=\"$VALAC\""
