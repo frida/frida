@@ -326,7 +326,14 @@ case $host_platform in
     meson_cpp_link_args="$base_linker_args, $(flags_to_args "$libstdcxx_flags")"
     ;;
   macos)
-    macos_minver="10.9"
+    case $host_arch in
+      arm64e)
+        macos_minver="10.16"
+        ;;
+      *)
+        macos_minver="10.9"
+        ;;
+    esac
 
     macos_sdk="macosx"
     if [ -z "$MACOS_SDK_ROOT" ]; then

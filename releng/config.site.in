@@ -106,7 +106,7 @@ case $frida_host_platform_arch in
 
     frida_flags="$frida_flags -mthumb"
     ;;
-  ios-arm64|ios-arm64e)
+  macos-arm64e|ios-arm64|ios-arm64e)
     host_alias="aarch64-apple-darwin"
     cross_compiling=yes
     ;;

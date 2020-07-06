@@ -324,6 +324,10 @@ ifeq ($(host_platform_arch), macos-x86_64)
 	openssl_arch_args := macos64-x86_64 enable-ec_nistp_64_gcc_128
 	xcode_platform := MacOSX
 endif
+ifeq ($(host_platform_arch), macos-arm64e)
+	openssl_arch_args := macos64-cross-arm64e enable-ec_nistp_64_gcc_128
+	xcode_platform := MacOSX
+endif
 ifeq ($(host_platform_arch), ios-x86)
 	openssl_arch_args := ios-sim-cross-i386
 	xcode_platform := iPhoneSimulator
@@ -349,10 +353,14 @@ endif
 		CROSS_COMPILE="$(xcode_developer_dir)/Toolchains/XcodeDefault.xctoolchain/usr/bin/" \
 		CROSS_TOP="${xcode_developer_dir}/Platforms/$(xcode_platform).platform/Developer" \
 		CROSS_SDK=$(xcode_platform)$(shell xcrun --sdk $(shell echo $(xcode_platform) | tr A-Z a-z) --show-sdk-version | cut -f1-2 -d'.').sdk \
-		MACOS_MIN_SDK_VERSION=10.9 \
 		IOS_MIN_SDK_VERSION=8.0 \
 		CONFIG_DISABLE_BITCODE=true \
 		$(NULL)
+ifeq ($(host_platform_arch), macos-arm64e)
+	openssl_host_env += MACOS_MIN_SDK_VERSION=10.16
+else
+	openssl_host_env += MACOS_MIN_SDK_VERSION=10.9
+endif
 endif
 ifeq ($(host_platform), linux)
 ifeq ($(host_arch), x86)
@@ -517,18 +525,23 @@ endif
 v8_build_platform := $(shell echo $(build_platform) | sed 's,^macos$$,mac,')
 ifeq ($(host_platform), macos)
 	v8_os := mac
-	v8_platform_args := \
-		libcxx_abi_unstable=false \
-		mac_deployment_target="10.9.0" \
-		$(NULL)
-ifeq ($(FRIDA_ASAN), yes)
+	v8_platform_args := libcxx_abi_unstable=false
+ifeq ($(host_arch), arm64e)
+	v8_platform_args += mac_deployment_target="10.16.0"
+else
+	v8_platform_args += mac_deployment_target="10.9.0"
+endif
+ifeq ($(host_arch), arm64e)
 	v8_platform_args += \
 		use_xcode_clang=true \
+		v8_enable_pointer_compression=false \
 		$(NULL)
 else
-	v8_platform_args += \
-		use_xcode_clang=false \
-		$(NULL)
+ifeq ($(FRIDA_ASAN), yes)
+	v8_platform_args += use_xcode_clang=true
+else
+	v8_platform_args += use_xcode_clang=false
+endif
 endif
 endif
 ifeq ($(host_platform), ios)
