@@ -324,6 +324,10 @@ ifeq ($(host_platform_arch), macos-x86_64)
 	openssl_arch_args := macos64-x86_64 enable-ec_nistp_64_gcc_128
 	xcode_platform := MacOSX
 endif
+ifeq ($(host_platform_arch), macos-arm64)
+	openssl_arch_args := macos64-cross-arm64 enable-ec_nistp_64_gcc_128
+	xcode_platform := MacOSX
+endif
 ifeq ($(host_platform_arch), macos-arm64e)
 	openssl_arch_args := macos64-cross-arm64e enable-ec_nistp_64_gcc_128
 	xcode_platform := MacOSX
@@ -356,7 +360,7 @@ endif
 		IOS_MIN_SDK_VERSION=8.0 \
 		CONFIG_DISABLE_BITCODE=true \
 		$(NULL)
-ifeq ($(host_platform_arch), macos-arm64e)
+ifeq ($(host_platform_arch),$(filter $(host_platform_arch),macos-arm64 macos-arm64e))
 	openssl_host_env += MACOS_MIN_SDK_VERSION=10.16
 else
 	openssl_host_env += MACOS_MIN_SDK_VERSION=10.9
@@ -526,12 +530,12 @@ v8_build_platform := $(shell echo $(build_platform) | sed 's,^macos$$,mac,')
 ifeq ($(host_platform), macos)
 	v8_os := mac
 	v8_platform_args := libcxx_abi_unstable=false
-ifeq ($(host_arch), arm64e)
+ifeq ($(host_arch),$(filter $(host_arch),arm64 arm64e))
 	v8_platform_args += mac_deployment_target="10.16.0"
 else
 	v8_platform_args += mac_deployment_target="10.9.0"
 endif
-ifeq ($(host_arch), arm64e)
+ifeq ($(host_arch),$(filter $(host_arch),arm64 arm64e))
 	v8_platform_args += \
 		use_xcode_clang=true \
 		v8_enable_pointer_compression=false \

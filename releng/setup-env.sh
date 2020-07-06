@@ -327,7 +327,7 @@ case $host_platform in
     ;;
   macos)
     case $host_arch in
-      arm64e)
+      arm64|arm64e)
         macos_minver="10.16"
         ;;
       *)
