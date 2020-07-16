@@ -125,7 +125,7 @@ gum-qnx-armeabi: build/frida_thin-qnx-armeabi/lib/pkgconfig/frida-gum-1.0.pc ##@
 define make-gum-rules
 build/.$1-gum-npm-stamp: build/$1-env-linux-$$(build_arch).rc
 	@$$(NPM) --version &>/dev/null || (echo -e "\033[31mOops. It appears Node.js is not installed.\nWe need it for processing JavaScript code at build-time.\nCheck PATH or set NODE to the absolute path of your Node.js binary.\033[0m"; exit 1;)
-	. build/$1-env-linux-$$(build_arch).rc && cd frida-gum/bindings/gumjs && $(NPM) install
+	. build/$1-meson-env-linux-$$(build_arch).rc && cd frida-gum/bindings/gumjs && $(NPM) install
 	@touch $$@
 
 build/$1-%/lib/pkgconfig/frida-gum-1.0.pc: build/.frida-gum-submodule-stamp build/.$1-gum-npm-stamp build/$1-%/lib/pkgconfig/capstone.pc
@@ -275,38 +275,38 @@ build/tmp_thin-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stam
 
 build/frida-linux-x86/lib/pkgconfig/frida-core-1.0.pc: build/tmp-linux-x86/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-linux-x86/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-linux-x86/frida-core install
+	. build/frida-meson-env-linux-x86.rc && $(NINJA) -C build/tmp-linux-x86/frida-core install
 	@touch $@
 build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-linux-x86/frida-core/.frida-helper-and-agent-stamp build/tmp-linux-x86_64/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-linux-x86_64/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-linux-x86_64/frida-core install
+	. build/frida-meson-env-linux-x86_64.rc && $(NINJA) -C build/tmp-linux-x86_64/frida-core install
 	@touch $@
 build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x86/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-android-x86/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-android-x86/frida-core install
+	. build/frida-meson-env-android-x86.rc && $(NINJA) -C build/tmp-android-x86/frida-core install
 	@touch $@
 build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x86/frida-core/.frida-helper-and-agent-stamp build/tmp-android-x86_64/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-android-x86_64/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-android-x86_64/frida-core install
+	. build/frida-meson-env-android-x86_64.rc && $(NINJA) -C build/tmp-android-x86_64/frida-core install
 	@touch $@
 build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-android-arm/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-android-arm/frida-core install
+	. build/frida-meson-env-android-arm.rc && $(NINJA) -C build/tmp-android-arm/frida-core install
 	@touch $@
 build/frida-android-armbe8/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-armbe8/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-android-armbe8/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-android-armbe8/frida-core install
+	. build/frida-meson-env-android-armbe8.rc && $(NINJA) -C build/tmp-android-armbe8/frida-core install
 	@touch $@
 build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/frida-core/.frida-helper-and-agent-stamp build/tmp-android-arm64/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-android-arm64/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-android-arm64/frida-core install
+	. build/frida-meson-env-android-arm64.rc && $(NINJA) -C build/tmp-android-arm64/frida-core install
 	@touch $@
 build/frida_thin-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-%/frida-core/.frida-ninja-stamp
-	. build/frida_thin-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp_thin-$*/frida-core install
+	. build/frida_thin-meson-env-$*.rc && $(NINJA) -C build/tmp_thin-$*/frida-core install
 	@touch $@
 
 build/tmp-%/frida-core/.frida-helper-and-agent-stamp: build/tmp-%/frida-core/.frida-ninja-stamp
-	. build/frida-meson-env-linux-$(build_arch).rc && $(NINJA) -C build/tmp-$*/frida-core src/frida-helper lib/agent/frida-agent.so
+	. build/frida-meson-env-$*.rc && $(NINJA) -C build/tmp-$*/frida-core src/frida-helper lib/agent/frida-agent.so
 	@touch $@
 
 check-core-linux-x86: core-linux-x86 ##@core Run tests for Linux/x86

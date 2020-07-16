@@ -109,7 +109,7 @@ gum-android-arm64: build/frida-android-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@g
 define make-gum-rules
 build/.$1-gum-npm-stamp: build/$1-env-macos-$$(build_arch).rc
 	@$$(NPM) --version &>/dev/null || (echo -e "\033[31mOops. It appears Node.js is not installed.\nWe need it for processing JavaScript code at build-time.\nCheck PATH or set NODE to the absolute path of your Node.js binary.\033[0m"; exit 1;)
-	. build/$1-env-macos-$$(build_arch).rc && cd frida-gum/bindings/gumjs && npm install
+	. build/$1-meson-env-macos-$$(build_arch).rc && cd frida-gum/bindings/gumjs && npm install
 	@touch $$@
 
 build/$1-%/lib/pkgconfig/frida-gum-1.0.pc: build/.frida-gum-submodule-stamp build/.$1-gum-npm-stamp build/$1-%/lib/pkgconfig/capstone.pc
@@ -292,64 +292,64 @@ build/frida-macos-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp-macos-x86/frida-c
 	@touch $@
 build/frida-ios-x86/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-x86/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-ios-x86/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-ios-x86/frida-core install
+	. build/frida-meson-env-ios-x86.rc && $(NINJA) -C build/tmp-ios-x86/frida-core install
 	@touch $@
 build/frida-ios-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-x86/frida-core/.frida-agent-stamp build/tmp-ios-x86_64/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-ios-x86_64/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-ios-x86_64/frida-core install
+	. build/frida-meson-env-ios-x86_64.rc && $(NINJA) -C build/tmp-ios-x86_64/frida-core install
 	@touch $@
 build/frida-ios-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-arm/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-ios-arm/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-ios-arm/frida-core install
+	. build/frida-meson-env-ios-arm.rc && $(NINJA) -C build/tmp-ios-arm/frida-core install
 	@touch $@
 build/frida-ios-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-arm/frida-core/.frida-agent-stamp build/tmp-ios-arm64/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-ios-arm64/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-ios-arm64/frida-core install
+	. build/frida-meson-env-ios-arm64.rc && $(NINJA) -C build/tmp-ios-arm64/frida-core install
 	@touch $@
 build/frida-ios-arm64e/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-arm64/frida-core/.frida-agent-stamp build/tmp-ios-arm64e/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-ios-arm64e/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-ios-arm64e/frida-core install
+	. build/frida-meson-env-ios-arm64e.rc && $(NINJA) -C build/tmp-ios-arm64e/frida-core install
 	@touch $@
 build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x86/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-android-x86/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-android-x86/frida-core install
+	. build/frida-meson-env-android-x86.rc && $(NINJA) -C build/tmp-android-x86/frida-core install
 	@touch $@
 build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x86/frida-core/.frida-helper-and-agent-stamp build/tmp-android-x86_64/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-android-x86_64/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-android-x86_64/frida-core install
+	. build/frida-meson-env-android-x86_64.rc && $(NINJA) -C build/tmp-android-x86_64/frida-core install
 	@touch $@
 build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-android-arm/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-android-arm/frida-core install
+	. build/frida-meson-env-android-arm.rc && $(NINJA) -C build/tmp-android-arm/frida-core install
 	@touch $@
 build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/frida-core/.frida-helper-and-agent-stamp build/tmp-android-arm64/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-android-arm64/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-android-arm64/frida-core install
+	. build/frida-meson-env-android-arm64.rc && $(NINJA) -C build/tmp-android-arm64/frida-core install
 	@touch $@
 build/frida_thin-ios-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-ios-arm64/frida-core/.frida-ninja-stamp
-	. build/frida_thin-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp_thin-ios-arm64/frida-core install
+	. build/frida_thin-meson-env-ios-arm64.rc && $(NINJA) -C build/tmp_thin-ios-arm64/frida-core install
 	@touch $@
 build/frida_thin-ios-arm64e/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-ios-arm64e/frida-core/.frida-ninja-stamp
-	. build/frida_thin-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp_thin-ios-arm64e/frida-core install
+	. build/frida_thin-meson-env-ios-arm64e.rc && $(NINJA) -C build/tmp_thin-ios-arm64e/frida-core install
 	@touch $@
 build/frida_thin-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-%/frida-core/.frida-ninja-stamp
-	. build/frida_thin-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp_thin-$*/frida-core install
+	. build/frida_thin-meson-env-$*.rc && $(NINJA) -C build/tmp_thin-$*/frida-core install
 	@touch $@
 
 build/tmp-macos-%/frida-core/.frida-helper-and-agent-stamp: build/tmp-macos-%/frida-core/.frida-ninja-stamp
-	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-macos-$*/frida-core src/frida-helper lib/agent/frida-agent.dylib
+	. build/frida-meson-env-macos-$*.rc && $(NINJA) -C build/tmp-macos-$*/frida-core src/frida-helper lib/agent/frida-agent.dylib
 	@touch $@
 build/tmp-macos-%/frida-core/.frida-agent-stamp: build/tmp-macos-%/frida-core/.frida-ninja-stamp
-	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-macos-$*/frida-core lib/agent/frida-agent.dylib
+	. build/frida-meson-env-macos-$*.rc && $(NINJA) -C build/tmp-macos-$*/frida-core lib/agent/frida-agent.dylib
 	@touch $@
 build/tmp-ios-%/frida-core/.frida-helper-and-agent-stamp: build/tmp-ios-%/frida-core/.frida-ninja-stamp
-	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-ios-$*/frida-core src/frida-helper lib/agent/frida-agent.dylib
+	. build/frida-meson-env-ios-$*.rc && $(NINJA) -C build/tmp-ios-$*/frida-core src/frida-helper lib/agent/frida-agent.dylib
 	@touch $@
 build/tmp-ios-%/frida-core/.frida-agent-stamp: build/tmp-ios-%/frida-core/.frida-ninja-stamp
-	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-ios-$*/frida-core lib/agent/frida-agent.dylib
+	. build/frida-meson-env-ios-$*.rc && $(NINJA) -C build/tmp-ios-$*/frida-core lib/agent/frida-agent.dylib
 	@touch $@
 build/tmp-android-%/frida-core/.frida-helper-and-agent-stamp: build/tmp-android-%/frida-core/.frida-ninja-stamp
-	. build/frida-meson-env-macos-$(build_arch).rc && $(NINJA) -C build/tmp-android-$*/frida-core src/frida-helper lib/agent/frida-agent.so
+	. build/frida-meson-env-android-$*.rc && $(NINJA) -C build/tmp-android-$*/frida-core src/frida-helper lib/agent/frida-agent.so
 	@touch $@
 
 build/.core-macos-stamp-%: build/%/lib/pkgconfig/frida-core-1.0.pc
@@ -383,7 +383,7 @@ build/frida-ios-universal/lib/frida-gadget.dylib: build/.core-ios-stamp-frida-io
 	cp build/frida-ios-arm/lib/frida-gadget.dylib $(@D)/frida-gadget-arm.dylib
 	cp build/frida-ios-arm64/lib/frida-gadget.dylib $(@D)/frida-gadget-arm64.dylib
 	cp build/frida-ios-arm64e/lib/frida-gadget.dylib $(@D)/frida-gadget-arm64e.dylib
-	. build/frida-env-ios-arm64e.rc \
+	. build/frida-meson-env-ios-arm64e.rc \
 		&& $$LIPO \
 			$(@D)/frida-gadget-x86.dylib \
 			$(@D)/frida-gadget-x86_64.dylib \
