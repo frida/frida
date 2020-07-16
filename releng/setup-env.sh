@@ -111,7 +111,7 @@ if [ -z "$FRIDA_HOST" ]; then
   echo "Assuming host is $host_platform_arch Set FRIDA_HOST to override."
 fi
 
-if [ $host_platform = android ]; then
+if [ "$host_platform" == "android" ]; then
   ndk_required=21
   if [ -n "$ANDROID_NDK_ROOT" ]; then
     if [ -f "$ANDROID_NDK_ROOT/source.properties" ]; then
@@ -119,7 +119,7 @@ if [ $host_platform = android ]; then
     else
       ndk_installed_version=$(cut -f1 -d" " "$ANDROID_NDK_ROOT/RELEASE.TXT")
     fi
-    if [ $ndk_installed_version -ne $ndk_required ]; then
+    if [ "$ndk_installed_version" -ne "$ndk_required" ]; then
       (
         echo ""
         echo "Unsupported NDK version $ndk_installed_version. Please install NDK r$ndk_required."
@@ -145,7 +145,7 @@ if [ $host_platform = android ]; then
   fi
 fi
 
-if [ $host_platform = qnx ]; then
+if [ "$host_platform" == "qnx" ]; then
   if [ ! -n "$QNX_HOST" ]; then
     echo "You need to specify QNX_HOST and QNX_TARGET"
     exit 1
@@ -154,7 +154,7 @@ fi
 
 toolchain_version=20200518
 sdk_version=20200518
-if [ $enable_asan = yes ]; then
+if [ "$enable_asan" == "yes" ]; then
   sdk_version="$sdk_version-asan"
 fi
 
