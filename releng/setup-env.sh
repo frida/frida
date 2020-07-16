@@ -336,10 +336,10 @@ case $host_platform in
     esac
 
     macos_sdk="macosx"
-    if [ -z "$MACOS_SDK_ROOT" ]; then
-      macos_sdk_path="$(xcrun --sdk $macos_sdk --show-sdk-path)"
+    if [ $host_arch = x86 ] && [ -n "$MACOS_X86_SDK_ROOT" ]; then
+      macos_sdk_path="$MACOS_X86_SDK_ROOT"
     else
-      macos_sdk_path="$MACOS_SDK_ROOT"
+      macos_sdk_path="$(xcrun --sdk $macos_sdk --show-sdk-path)"
     fi
 
     clang_cc="$(xcrun --sdk $macos_sdk -f clang)"
