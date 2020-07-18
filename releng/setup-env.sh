@@ -95,17 +95,6 @@ else
   echo "Please install curl or wget: required for downloading SDK and toolchain." > /dev/stderr
   exit 1
 fi
-case $build_platform in
-  linux)
-    tar_stdin=""
-    ;;
-  macos)
-    tar_stdin="-"
-    ;;
-  *)
-    echo "Could not determine build platform" > /dev/stderr
-    exit 1
-esac
 
 if [ -z "$FRIDA_HOST" ]; then
   echo "Assuming host is $host_platform_arch Set FRIDA_HOST to override."
@@ -804,7 +793,7 @@ if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/.version" 2>/dev/null; th
     tar -C "$FRIDA_TOOLROOT" -xjf $local_toolchain || exit 1
   else
     echo "Downloading and deploying toolchain..."
-    $download_command "https://build.frida.re/toolchain-${toolchain_version}-${build_platform}-${build_arch}.tar.bz2" | tar -C "$FRIDA_TOOLROOT" -xj $tar_stdin || exit 1
+    $download_command "https://build.frida.re/toolchain-${toolchain_version}-${build_platform}-${build_arch}.tar.bz2" | tar -C "$FRIDA_TOOLROOT" -xjf - || exit 1
   fi
 
   for template in $(find $FRIDA_TOOLROOT -name "*.frida.in"); do
@@ -841,7 +830,7 @@ if [ "$FRIDA_ENV_SDK" != 'none' ] && ! grep -Eq "^$sdk_version\$" "$FRIDA_SDKROO
     tar -C "$FRIDA_SDKROOT" -xjf $local_sdk || exit 1
   else
     echo "Downloading and deploying SDK for ${host_platform_arch}..."
-    $download_command "https://build.frida.re/sdk-${sdk_version}-${host_platform}-${host_arch}.tar.bz2" | tar -C "$FRIDA_SDKROOT" -xj $tar_stdin 2> /dev/null
+    $download_command "https://build.frida.re/sdk-${sdk_version}-${host_platform}-${host_arch}.tar.bz2" | tar -C "$FRIDA_SDKROOT" -xjf - 2> /dev/null
     if [ $? -ne 0 ]; then
       echo ""
       echo "Bummer. It seems we don't have a prebuilt SDK for your system."
