@@ -403,19 +403,20 @@ if __name__ == '__main__':
 
             upload_file("frida-clr-{version}-windows-x86.dll", os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "bin", "Frida.dll"), upload)
             upload_file("frida-clr-{version}-windows-x86_64.dll", os.path.join(build_dir, "build", "frida-windows", "x64-Release", "bin", "Frida.dll"), upload)
-        elif builder == 'macos':
+        elif builder == 'macos-modern':
             upload = get_github_uploader()
 
+            upload_devkits("macos-arm64", upload)
+            upload_devkits("macos-arm64e", upload)
             upload_devkits("macos-x86", upload)
             upload_devkits("macos-x86_64", upload)
 
+            upload_file("frida-server-{version}-macos-arm64", os.path.join(build_dir, "build", "frida-macos-arm64", "bin", "frida-server"), upload)
             upload_file("frida-server-{version}-macos-x86_64", os.path.join(build_dir, "build", "frida-macos-x86_64", "bin", "frida-server"), upload)
 
             upload_file("frida-gadget-{version}-macos-universal.dylib", os.path.join(build_dir, "build", "frida-macos-universal", "lib", "frida-gadget.dylib"), upload)
 
-            upload_directory("frida-swift-{version}-macos-x86_64", os.path.join(build_dir, "frida-swift", "build", "Release"), upload)
-
-            upload_directory("frida-qml-{version}-macos-x86_64", os.path.join(build_dir, "build", "frida-macos-x86_64", "lib", "qt5", "qml"), upload)
+            upload_directory("frida-swift-{version}-macos-universal", os.path.join(build_dir, "frida-swift", "build", "Release"), upload)
 
             upload_python_bindings_to_pypi("/usr/bin/python2.7",
                 os.path.join(build_dir, "build", "frida-macos-universal", "lib", "python2.7", "site-packages", "_frida.so"),
@@ -425,6 +426,10 @@ if __name__ == '__main__':
 
             upload_node_bindings_to_npm("/usr/local/bin/node", upload, publish=True)
             upload_meta_modules_to_npm("/usr/local/bin/node")
+        elif builder == 'macos-legacy':
+            upload = get_github_uploader()
+
+            upload_directory("frida-qml-{version}-macos-x86_64", os.path.join(build_dir, "build", "frida-macos-x86_64", "lib", "qt5", "qml"), upload)
         elif builder == 'manylinux-x86_64':
             upload = get_github_uploader()
 
