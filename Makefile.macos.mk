@@ -138,10 +138,16 @@ $(eval $(call make-gum-rules,frida_thin,tmp_thin))
 ifeq ($(build_arch), arm64)
 check-gum-macos: build/frida-macos-arm64/lib/pkgconfig/frida-gum-1.0.pc build/frida-macos-arm64e/lib/pkgconfig/frida-gum-1.0.pc ##@gum Run tests for macOS
 	build/tmp-macos-arm64/frida-gum/tests/gum-tests $(test_args)
-	build/tmp-macos-arm64e/frida-gum/tests/gum-tests $(test_args)
+	runner=build/tmp-macos-arm64e/frida-gum/tests/gum-tests; \
+	if $$runner --help &>/dev/null; then \
+		$$runner $(test_args); \
+	fi
 else
 check-gum-macos: build/frida-macos-x86/lib/pkgconfig/frida-gum-1.0.pc build/frida-macos-x86_64/lib/pkgconfig/frida-gum-1.0.pc
-	build/tmp-macos-x86/frida-gum/tests/gum-tests $(test_args)
+	runner=build/tmp-macos-x86/frida-gum/tests/gum-tests; \
+	if $$runner --help &>/dev/null; then \
+		$$runner $(test_args); \
+	fi
 	build/tmp-macos-x86_64/frida-gum/tests/gum-tests $(test_args)
 endif
 check-gum-macos-thin: build/frida_thin-macos-$(build_arch)/lib/pkgconfig/frida-gum-1.0.pc ##@gum Run tests for macOS without cross-arch support
@@ -474,11 +480,23 @@ build/frida-ios-universal/lib/frida-gadget.dylib: build/.core-ios-stamp-frida-io
 	rm $(@D)/frida-gadget-*.dylib
 	mv $@.tmp $@
 
-check-core-macos: build/frida-macos-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Run tests for macOS
-	build/tmp-macos-x86/frida-core/tests/frida-tests $(test_args)
+ifeq ($(build_arch), arm64)
+check-core-macos: build/frida-macos-arm64/lib/pkgconfig/frida-core-1.0.pc build/frida-macos-arm64e/lib/pkgconfig/frida-core-1.0.pc ##@core Run tests for macOS
+	build/tmp-macos-arm64/frida-core/tests/frida-tests $(test_args)
+	runner=build/tmp-macos-arm64e/frida-core/tests/frida-tests; \
+	if $$runner --help &>/dev/null; then \
+		$$runner $(test_args); \
+	fi
+else
+check-core-macos: build/frida-macos-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc
+	runner=build/tmp-macos-x86/frida-core/tests/frida-tests; \
+	if $$runner --help &>/dev/null; then \
+		$$runner $(test_args); \
+	fi
 	build/tmp-macos-x86_64/frida-core/tests/frida-tests $(test_args)
-check-core-macos-thin: build/frida_thin-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Run tests for macOS without cross-arch support
-	build/tmp_thin-macos-x86_64/frida-core/tests/frida-tests $(test_args)
+endif
+check-core-macos-thin: build/frida_thin-macos-$(build_arch)/lib/pkgconfig/frida-core-1.0.pc ##@core Run tests for macOS without cross-arch support
+	build/tmp_thin-macos-$(build_arch)/frida-core/tests/frida-tests $(test_args)
 
 gadget-macos: build/frida-macos-universal/lib/frida-gadget.dylib ##@gadget Build for macOS
 gadget-macos-thin: core-macos-thin ##@gadget Build for macOS without cross-arch support
