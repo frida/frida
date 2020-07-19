@@ -557,13 +557,10 @@ build/frida-macos-apple_silicon/lib/$(PYTHON_NAME)/site-packages/_frida.so: buil
 	. build/frida-env-macos-$(build_arch).rc \
 		&& $$LIPO $(@D)/_frida-arm64.so $(@D)/_frida-arm64e.so -create -output $@
 	rm $(@D)/_frida-arm64.so $(@D)/_frida-arm64e.so
-build/frida-macos-intel/lib/$(PYTHON_NAME)/site-packages/_frida.so: build/tmp-macos-x86/frida-$(PYTHON_NAME)/.frida-stamp build/tmp-macos-x86_64/frida-$(PYTHON_NAME)/.frida-stamp
+build/frida-macos-intel/lib/$(PYTHON_NAME)/site-packages/_frida.so: build/tmp-macos-x86_64/frida-$(PYTHON_NAME)/.frida-stamp
 	mkdir -p $(@D)
-	cp build/frida-macos-x86/lib/$(PYTHON_NAME)/site-packages/_frida.so $(@D)/_frida-x86.so
-	cp build/frida-macos-x86_64/lib/$(PYTHON_NAME)/site-packages/_frida.so $(@D)/_frida-x86_64.so
-	. build/frida-env-macos-$(build_arch).rc \
-		&& $$LIPO $(@D)/_frida-x86.so $(@D)/_frida-x86_64.so -create -output $@
-	rm $(@D)/_frida-x86.so $(@D)/_frida-x86_64.so
+	cp build/frida-macos-x86_64/lib/$(PYTHON_NAME)/site-packages/_frida.so $@
+	@touch $@
 
 check-python-macos: check-python-macos-$(build_cpu_flavor) ##@python Test Python bindings for macOS
 check-python-macos-%: python-macos-%
