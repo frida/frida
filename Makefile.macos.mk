@@ -48,6 +48,7 @@ distclean: clean-submodules
 	rm -rf build/
 
 clean: clean-submodules
+	rm -f build/.core-macos-stamp-*
 	rm -f build/.frida-gum-npm-stamp
 	rm -f build/*-clang*
 	rm -f build/*-pkg-config
