@@ -62,6 +62,8 @@ if __name__ == '__main__':
         subprocess.call([interpreter, "setup.py"] + targets, cwd=frida_python_dir, env=env)
 
     def upload_python_debs(distro_name, package_name_prefix, interpreter, extension, upload):
+        subprocess.check_call(["make"], cwd=frida_tools_dir)
+
         env = {}
         env.update(os.environ)
         env.update({
@@ -95,6 +97,8 @@ if __name__ == '__main__':
                     os.unlink(package)
 
     def upload_python_rpms(distro_name, package_name_prefix, interpreter, extension, upload):
+        subprocess.check_call(["make"], cwd=frida_tools_dir)
+
         env = {}
         env.update(os.environ)
         env.update({
