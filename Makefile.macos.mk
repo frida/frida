@@ -505,6 +505,7 @@ gadget-ios-thin: core-ios-thin ##@gadget Build for iOS without cross-arch suppor
 
 
 python-macos: python-macos-$(build_cpu_flavor) ##@python Build Python bindings for macOS
+python-macos-universal: build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/frida build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so
 python-macos-apple_silicon: build/frida-macos-apple_silicon/lib/$(PYTHON_NAME)/site-packages/frida build/frida-macos-apple_silicon/lib/$(PYTHON_NAME)/site-packages/_frida.so
 python-macos-intel: build/frida-macos-intel/lib/$(PYTHON_NAME)/site-packages/frida build/frida-macos-intel/lib/$(PYTHON_NAME)/site-packages/_frida.so
 python-macos-thin: build/tmp_thin-macos-$(build_arch)/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for macOS without cross-arch support
@@ -526,6 +527,11 @@ build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-sta
 endef
 $(eval $(call make-python-rule,frida,tmp))
 $(eval $(call make-python-rule,frida_thin,tmp_thin))
+build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/frida: build/tmp-macos-arm64e/frida-$(PYTHON_NAME)/.frida-stamp
+	rm -rf $@
+	mkdir -p $(@D)
+	cp -a build/frida-macos-arm64e/lib/$(PYTHON_NAME)/site-packages/frida $@
+	@touch $@
 build/frida-macos-apple_silicon/lib/$(PYTHON_NAME)/site-packages/frida: build/tmp-macos-arm64e/frida-$(PYTHON_NAME)/.frida-stamp
 	rm -rf $@
 	mkdir -p $(@D)
@@ -536,6 +542,14 @@ build/frida-macos-intel/lib/$(PYTHON_NAME)/site-packages/frida: build/tmp-macos-
 	mkdir -p $(@D)
 	cp -a build/frida-macos-x86_64/lib/$(PYTHON_NAME)/site-packages/frida $@
 	@touch $@
+build/frida-macos-universal/lib/$(PYTHON_NAME)/site-packages/_frida.so: build/tmp-macos-arm64/frida-$(PYTHON_NAME)/.frida-stamp build/tmp-macos-arm64e/frida-$(PYTHON_NAME)/.frida-stamp build/tmp-macos-x86_64/frida-$(PYTHON_NAME)/.frida-stamp
+	mkdir -p $(@D)
+	cp build/frida-macos-arm64/lib/$(PYTHON_NAME)/site-packages/_frida.so $(@D)/_frida-arm64.so
+	cp build/frida-macos-arm64e/lib/$(PYTHON_NAME)/site-packages/_frida.so $(@D)/_frida-arm64e.so
+	cp build/frida-macos-x86_64/lib/$(PYTHON_NAME)/site-packages/_frida.so $(@D)/_frida-x86_64.so
+	. build/frida-env-macos-$(build_arch).rc \
+		&& $$LIPO $(@D)/_frida-arm64.so $(@D)/_frida-arm64e.so $(@D)/_frida-x86_64.so -create -output $@
+	rm $(@D)/_frida-arm64.so $(@D)/_frida-arm64e.so $(@D)/_frida-x86_64.so
 build/frida-macos-apple_silicon/lib/$(PYTHON_NAME)/site-packages/_frida.so: build/tmp-macos-arm64/frida-$(PYTHON_NAME)/.frida-stamp build/tmp-macos-arm64e/frida-$(PYTHON_NAME)/.frida-stamp
 	mkdir -p $(@D)
 	cp build/frida-macos-arm64/lib/$(PYTHON_NAME)/site-packages/_frida.so $(@D)/_frida-arm64.so
@@ -664,7 +678,7 @@ check-tools-macos-thin: tools-macos-thin ##@tools Test CLI tools for macOS witho
 	gadget-macos gadget-macos-thin \
 		gadget-ios gadget-ios-thin \
 	python-macos python-macos-thin \
-		python-macos-apple_silicon python-macos-intel \
+		python-macos-universal python-macos-apple_silicon python-macos-intel \
 		check-python-macos check-python-macos-thin \
 		check-python-macos-apple_silicon check-python-macos-intel \
 		frida-python-update-submodule-stamp \
