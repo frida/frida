@@ -420,9 +420,16 @@ if __name__ == '__main__':
 
             upload_python_bindings_to_pypi("/usr/bin/python2.7",
                 os.path.join(build_dir, "build", "frida-macos-universal", "lib", "python2.7", "site-packages", "_frida.so"),
-                { '_PYTHON_HOST_PLATFORM': "macosx-10.9-intel" })
+                { '_PYTHON_HOST_PLATFORM': "macosx-11.0-fat64" })
+            upload_python_bindings_to_pypi("/usr/bin/python2.7",
+                os.path.join(build_dir, "build", "frida-macos-x86_64", "lib", "python2.7", "site-packages", "_frida.so"),
+                { '_PYTHON_HOST_PLATFORM': "macosx-10.9-x86_64" })
             upload_python_bindings_to_pypi("/usr/local/bin/python3.8",
-                os.path.join(build_dir, "build", "frida-macos-universal", "lib", "python3.8", "site-packages", "_frida.so"))
+                os.path.join(build_dir, "build", "frida-macos-apple_silicon", "lib", "python3.8", "site-packages", "_frida.so"),
+                { '_PYTHON_HOST_PLATFORM': "macosx-11.0-arm64" })
+            upload_python_bindings_to_pypi("/usr/local/bin/python3.8",
+                os.path.join(build_dir, "build", "frida-macos-x86_64", "lib", "python3.8", "site-packages", "_frida.so"),
+                { '_PYTHON_HOST_PLATFORM': "macosx-10.9-x86_64" })
 
             upload_node_bindings_to_npm("/usr/local/bin/node", upload, publish=True)
             upload_meta_modules_to_npm("/usr/local/bin/node")
