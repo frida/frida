@@ -215,9 +215,9 @@ if __name__ == '__main__':
                 "cp dists/stable/main/binary-iphoneos-arm/Packages.gz .",
                 "rm -f Packages",
                 "gunzip -k Packages.gz",
-                "s3cmd sync --delete-removed --acl-public pool/ s3://build.frida.re/pool/",
-                "s3cmd put --acl-public Release Packages Packages.gz s3://build.frida.re/",
-                "s3cmd put --acl-public Packages Packages.gz s3://build.frida.re/./",
+                "s3cmd sync --delete-removed pool/ s3://build.frida.re/pool/",
+                "s3cmd put Release Packages Packages.gz s3://build.frida.re/",
+                "s3cmd put Packages Packages.gz s3://build.frida.re/./",
             ])
         ])
         subprocess.call(["cfcli", "purge"] + ["https://build.frida.re" + resource for resource in [
