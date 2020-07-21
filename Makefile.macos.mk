@@ -190,6 +190,7 @@ build/tmp-macos-arm64e/frida-core/.frida-ninja-stamp: build/.frida-core-submodul
 			--prefix $(FRIDA)/build/frida-macos-arm64e \
 			$(frida_core_flags) \
 			-Dhelper_modern=$(FRIDA)/build/tmp-macos-arm64e/frida-core/src/frida-helper \
+			-Dhelper_legacy=$(FRIDA)/build/tmp-macos-arm64/frida-core/src/frida-helper \
 			-Dagent_modern=$(FRIDA)/build/tmp-macos-arm64e/frida-core/lib/agent/frida-agent.dylib \
 			-Dagent_legacy=$(FRIDA)/build/tmp-macos-arm64/frida-core/lib/agent/frida-agent.dylib \
 			frida-core $$builddir || exit 1; \
