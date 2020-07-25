@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ "$(uname -s)" = "Darwin" ]; then
-  if [ "$(sysctl -n hw.optional.arm64)" = "1" ]; then
+  if [ "$(sysctl -nq hw.optional.arm64)" = "1" ]; then
     machine=arm64e
   else
     machine=x86_64
