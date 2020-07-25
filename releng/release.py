@@ -415,7 +415,6 @@ if __name__ == '__main__':
             upload_devkits("macos-x86", upload)
             upload_devkits("macos-x86_64", upload)
 
-            upload_file("frida-server-{version}-macos-arm64", os.path.join(build_dir, "build", "frida-macos-arm64", "bin", "frida-server"), upload)
             upload_file("frida-server-{version}-macos-arm64e", os.path.join(build_dir, "build", "frida-macos-arm64e", "bin", "frida-server"), upload)
             upload_file("frida-server-{version}-macos-x86_64", os.path.join(build_dir, "build", "frida-macos-x86_64", "bin", "frida-server"), upload)
 
