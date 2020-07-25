@@ -269,7 +269,7 @@ if __name__ == '__main__':
                 status, data = repo().releases.post(body={
                     'tag_name': tag_name,
                     'name': "Frida {}".format(version),
-                    'body': "See http://www.frida.re/news/ for details.",
+                    'body': "See https://frida.re/news/ for details.",
                 })
             else:
                 raise RuntimeError("Unexpected error trying to get current release; status={} data={}".format(status, data))
