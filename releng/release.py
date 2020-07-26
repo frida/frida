@@ -526,6 +526,8 @@ if __name__ == '__main__':
             upload_python_debs("ubuntu-focal", "python3", "/usr/bin/python3.8",
                 os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python3.8", "site-packages", "_frida.so"),
                 upload)
+
+            upload_directory("frida-qml-{version}-linux-x86_64", os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "qt5", "qml"), upload)
         elif builder == 'fedora_32-x86_64':
             upload = get_github_uploader()
 
