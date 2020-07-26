@@ -384,29 +384,29 @@ if __name__ == '__main__':
         if builder == 'windows':
             upload = get_github_uploader()
 
-            upload_devkits("windows-x86", upload)
+            upload_devkits("windows-x86",    upload)
             upload_devkits("windows-x86_64", upload)
 
-            upload_file("frida-server-{version}-windows-x86.exe", os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "bin", "frida-server.exe"), upload)
-            upload_file("frida-server-{version}-windows-x86_64.exe", os.path.join(build_dir, "build", "frida-windows", "x64-Release", "bin", "frida-server.exe"), upload)
+            prefix_x86 = os.path.join(build_dir, "build", "frida-windows", "Win32-Release")
+            prefix_x64 = os.path.join(build_dir, "build", "frida-windows", "x64-Release")
 
-            upload_file("frida-gadget-{version}-windows-x86.dll", os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "bin", "frida-gadget.dll"), upload)
-            upload_file("frida-gadget-{version}-windows-x86_64.dll", os.path.join(build_dir, "build", "frida-windows", "x64-Release", "bin", "frida-gadget.dll"), upload)
+            upload_file("frida-server-{version}-windows-x86.exe",    os.path.join(prefix_x86, "bin", "frida-server.exe"), upload)
+            upload_file("frida-server-{version}-windows-x86_64.exe", os.path.join(prefix_x64, "bin", "frida-server.exe"), upload)
 
-            upload_python_bindings_to_pypi(r"C:\Program Files (x86)\Python 2.7\python.exe",
-                os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "lib", "python2.7", "site-packages", "_frida.pyd"))
-            upload_python_bindings_to_pypi(r"C:\Program Files\Python 2.7\python.exe",
-                os.path.join(build_dir, "build", "frida-windows", "x64-Release", "lib", "python2.7", "site-packages", "_frida.pyd"))
-            upload_python_bindings_to_pypi(r"C:\Program Files (x86)\Python 3.8\python.exe",
-                os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "lib", "python3.8", "site-packages", "_frida.pyd"))
-            upload_python_bindings_to_pypi(r"C:\Program Files\Python 3.8\python.exe",
-                os.path.join(build_dir, "build", "frida-windows", "x64-Release", "lib", "python3.8", "site-packages", "_frida.pyd"), sdist=True)
+            upload_file("frida-gadget-{version}-windows-x86.dll",    os.path.join(prefix_x86, "bin", "frida-gadget.dll"), upload)
+            upload_file("frida-gadget-{version}-windows-x86_64.dll", os.path.join(prefix_x64, "bin", "frida-gadget.dll"), upload)
+
+            upload_python_bindings_to_pypi(r"C:\Program Files (x86)\Python 2.7\python.exe", os.path.join(prefix_x86, "lib", "python2.7", "site-packages", "_frida.pyd"))
+            upload_python_bindings_to_pypi(r"C:\Program Files\Python 2.7\python.exe",       os.path.join(prefix_x64, "lib", "python2.7", "site-packages", "_frida.pyd"))
+            upload_python_bindings_to_pypi(r"C:\Program Files (x86)\Python 3.8\python.exe", os.path.join(prefix_x86, "lib", "python3.8", "site-packages", "_frida.pyd"))
+            upload_python_bindings_to_pypi(r"C:\Program Files\Python 3.8\python.exe",       os.path.join(prefix_x64, "lib", "python3.8", "site-packages", "_frida.pyd"), sdist=True)
 
             upload_node_bindings_to_npm(r"C:\Program Files (x86)\nodejs\node.exe", upload, publish=False)
-            upload_node_bindings_to_npm(r"C:\Program Files\nodejs\node.exe", upload, publish=False)
+            upload_node_bindings_to_npm(r"C:\Program Files\nodejs\node.exe",       upload, publish=False)
 
-            upload_file("frida-clr-{version}-windows-x86.dll", os.path.join(build_dir, "build", "frida-windows", "Win32-Release", "bin", "Frida.dll"), upload)
-            upload_file("frida-clr-{version}-windows-x86_64.dll", os.path.join(build_dir, "build", "frida-windows", "x64-Release", "bin", "Frida.dll"), upload)
+            upload_file("frida-clr-{version}-windows-x86.dll",    os.path.join(prefix_x86, "bin", "Frida.dll"), upload)
+            upload_file("frida-clr-{version}-windows-x86_64.dll", os.path.join(prefix_x64, "bin", "Frida.dll"), upload)
+
         elif builder == 'macos-modern':
             upload = get_github_uploader()
 
