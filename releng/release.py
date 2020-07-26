@@ -412,6 +412,8 @@ if __name__ == '__main__':
             upload_file("frida-clr-{version}-windows-x86.dll",    os.path.join(prefix_x86, "bin", "Frida.dll"), upload)
             upload_file("frida-clr-{version}-windows-x86_64.dll", os.path.join(prefix_x64, "bin", "Frida.dll"), upload)
 
+            upload_directory("frida-qml-{version}-windows-x86",    os.path.join(prefix_x86, "lib", "qt5", "qml"), upload)
+            upload_directory("frida-qml-{version}-windows-x86_64", os.path.join(prefix_x64, "lib", "qt5", "qml"), upload)
         elif builder == 'macos-modern':
             upload = get_github_uploader()
 
