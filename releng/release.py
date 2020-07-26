@@ -313,21 +313,26 @@ if __name__ == '__main__':
             upload(asset_filename, "application/gzip", data)
 
     def upload_directory(name_template, path, upload):
-        tarball_filename = (name_template + ".tar").format(version=version)
-        asset_filename = tarball_filename + ".xz"
-
         output_dir = tempfile.mkdtemp(prefix="frida-release")
         try:
             dist_dir = os.path.join(output_dir, "dist")
             shutil.copytree(path, dist_dir)
-            subprocess.check_call(["tar", "cf", "../" + tarball_filename, "."], cwd=dist_dir)
-            subprocess.check_call(["xz", "-T", "0", tarball_filename], cwd=output_dir)
+
+            if system == 'Windows':
+                asset_filename = (name_template + ".exe").format(version=version)
+                subprocess.check_call([szip, "a", "-sfx7zCon.sfx", "-r", "..\\" + asset_filename, "."], cwd=dist_dir)
+            else:
+                tarball_filename = (name_template + ".tar").format(version=version)
+                asset_filename = tarball_filename + ".xz"
+                subprocess.check_call(["tar", "cf", "../" + tarball_filename, "."], cwd=dist_dir)
+                subprocess.check_call(["xz", "-T", "0", tarball_filename], cwd=output_dir)
+
             with open(os.path.join(output_dir, asset_filename), 'rb') as f:
-                tarball = f.read()
+                asset_archive = f.read()
         finally:
             shutil.rmtree(output_dir)
 
-        upload(asset_filename, "application/x-xz", tarball)
+        upload(asset_filename, "application/x-xz", asset_archive)
 
     def upload_devkits(host, upload, flavor=""):
         kits = [
