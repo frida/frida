@@ -1,7 +1,7 @@
 # Frida
 
 Dynamic instrumentation toolkit for developers, reverse-engineers, and security
-researchers. Learn more at [www.frida.re](https://www.frida.re/).
+researchers. Learn more at [frida.re](https://frida.re/).
 
 Two ways to install
 ===================
@@ -57,9 +57,9 @@ To ensure that macOS accepts the newly created certificate, restart the
 
 (Requires Visual Studio 2019.)
 
-See [https://www.frida.re/docs/building/](https://www.frida.re/docs/building/)
+See [https://frida.re/docs/building/](https://frida.re/docs/building/)
 for details.
 
 ## Learn more
 
-Have a look at our [documentation](https://www.frida.re/docs/home/).
+Have a look at our [documentation](https://frida.re/docs/home/).
