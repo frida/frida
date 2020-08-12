@@ -1,7 +1,7 @@
 include config.mk
 
 build_arch := $(shell releng/detect-arch.sh)
-ifeq ($(build_arch), arm64e)
+ifeq ($(build_arch), arm64)
 build_cpu_flavor := apple_silicon
 else
 build_cpu_flavor := intel
@@ -139,7 +139,10 @@ $(eval $(call make-gum-rules,frida_thin,tmp_thin))
 ifeq ($(build_arch), arm64)
 check-gum-macos: build/frida-macos-arm64/lib/pkgconfig/frida-gum-1.0.pc build/frida-macos-arm64e/lib/pkgconfig/frida-gum-1.0.pc ##@gum Run tests for macOS
 	build/tmp-macos-arm64/frida-gum/tests/gum-tests $(test_args)
-	build/tmp-macos-arm64e/frida-gum/tests/gum-tests $(test_args)
+	runner=build/tmp-macos-arm64e/frida-gum/tests/gum-tests; \
+	if $$runner --help &>/dev/null; then \
+		$$runner $(test_args); \
+	fi
 else
 check-gum-macos: build/frida-macos-x86/lib/pkgconfig/frida-gum-1.0.pc build/frida-macos-x86_64/lib/pkgconfig/frida-gum-1.0.pc
 	runner=build/tmp-macos-x86/frida-gum/tests/gum-tests; \
@@ -172,6 +175,7 @@ build/tmp-macos-arm64/frida-core/.frida-ninja-stamp: build/.frida-core-submodule
 			--prefix $(FRIDA)/build/frida-macos-arm64 \
 			$(frida_core_flags) \
 			-Dhelper_modern=$(FRIDA)/build/tmp-macos-arm64e/frida-core/src/frida-helper \
+			-Dhelper_legacy=$(FRIDA)/build/tmp-macos-arm64/frida-core/src/frida-helper \
 			-Dagent_modern=$(FRIDA)/build/tmp-macos-arm64e/frida-core/lib/agent/frida-agent.dylib \
 			-Dagent_legacy=$(FRIDA)/build/tmp-macos-arm64/frida-core/lib/agent/frida-agent.dylib \
 			frida-core $$builddir || exit 1; \
@@ -186,6 +190,7 @@ build/tmp-macos-arm64e/frida-core/.frida-ninja-stamp: build/.frida-core-submodul
 			--prefix $(FRIDA)/build/frida-macos-arm64e \
 			$(frida_core_flags) \
 			-Dhelper_modern=$(FRIDA)/build/tmp-macos-arm64e/frida-core/src/frida-helper \
+			-Dhelper_legacy=$(FRIDA)/build/tmp-macos-arm64/frida-core/src/frida-helper \
 			-Dagent_modern=$(FRIDA)/build/tmp-macos-arm64e/frida-core/lib/agent/frida-agent.dylib \
 			-Dagent_legacy=$(FRIDA)/build/tmp-macos-arm64/frida-core/lib/agent/frida-agent.dylib \
 			frida-core $$builddir || exit 1; \
@@ -355,11 +360,11 @@ build/frida-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-macos-x86/fr
 	@rm -f build/tmp-macos-x86_64/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-macos-x86_64.rc && $(NINJA) -C build/tmp-macos-x86_64/frida-core install
 	@touch $@
-build/frida-macos-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-macos-arm64/frida-core/.frida-agent-stamp build/tmp-macos-arm64e/frida-core/.frida-helper-and-agent-stamp
+build/frida-macos-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-macos-arm64/frida-core/.frida-helper-and-agent-stamp build/tmp-macos-arm64e/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-macos-arm64/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-macos-arm64.rc && $(NINJA) -C build/tmp-macos-arm64/frida-core install
 	@touch $@
-build/frida-macos-arm64e/lib/pkgconfig/frida-core-1.0.pc: build/tmp-macos-arm64/frida-core/.frida-agent-stamp build/tmp-macos-arm64e/frida-core/.frida-helper-and-agent-stamp
+build/frida-macos-arm64e/lib/pkgconfig/frida-core-1.0.pc: build/tmp-macos-arm64/frida-core/.frida-helper-and-agent-stamp build/tmp-macos-arm64e/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-macos-arm64e/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-macos-arm64e.rc && $(NINJA) -C build/tmp-macos-arm64e/frida-core install
 	@touch $@
@@ -480,7 +485,10 @@ build/frida-ios-universal/lib/frida-gadget.dylib: build/.core-ios-stamp-frida-io
 ifeq ($(build_arch), arm64)
 check-core-macos: build/frida-macos-arm64/lib/pkgconfig/frida-core-1.0.pc build/frida-macos-arm64e/lib/pkgconfig/frida-core-1.0.pc ##@core Run tests for macOS
 	build/tmp-macos-arm64/frida-core/tests/frida-tests $(test_args)
-	build/tmp-macos-arm64e/frida-core/tests/frida-tests $(test_args)
+	runner=build/tmp-macos-arm64e/frida-core/tests/frida-tests; \
+	if $$runner --help &>/dev/null; then \
+		$$runner $(test_args); \
+	fi
 else
 check-core-macos: build/frida-macos-x86/lib/pkgconfig/frida-core-1.0.pc build/frida-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc
 	runner=build/tmp-macos-x86/frida-core/tests/frida-tests; \

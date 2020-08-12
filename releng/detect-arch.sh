@@ -2,7 +2,7 @@
 
 if [ "$(uname -s)" = "Darwin" ]; then
   if [ "$(sysctl -nq hw.optional.arm64)" = "1" ]; then
-    machine=arm64e
+    machine=arm64
   else
     machine=x86_64
   fi
