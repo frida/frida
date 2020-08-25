@@ -1,30 +1,30 @@
 [submodule "capstone"]
 	path = capstone
-	url = git://github.com/frida/capstone.git
+	url = https://github.com/frida/capstone.git
 [submodule "frida-gum"]
 	path = frida-gum
-	url = git://github.com/frida/frida-gum.git
+	url = https://github.com/frida/frida-gum.git
 [submodule "frida-core"]
 	path = frida-core
-	url = git://github.com/frida/frida-core.git
+	url = https://github.com/frida/frida-core.git
 [submodule "frida-python"]
 	path = frida-python
-	url = git://github.com/frida/frida-python.git
+	url = https://github.com/frida/frida-python.git
 [submodule "frida-node"]
 	path = frida-node
-	url = git://github.com/frida/frida-node.git
+	url = https://github.com/frida/frida-node.git
 [submodule "frida-swift"]
 	path = frida-swift
-	url = git://github.com/frida/frida-swift.git
+	url = https://github.com/frida/frida-swift.git
 [submodule "frida-clr"]
 	path = frida-clr
-	url = git://github.com/frida/frida-clr.git
+	url = https://github.com/frida/frida-clr.git
 [submodule "frida-qml"]
 	path = frida-qml
-	url = git://github.com/frida/frida-qml.git
+	url = https://github.com/frida/frida-qml.git
 [submodule "releng/meson"]
 	path = releng/meson
-	url = git://github.com/frida/meson.git
+	url = https://github.com/frida/meson.git
 [submodule "frida-tools"]
 	path = frida-tools
-	url = git://github.com/frida/frida-tools.git
+	url = https://github.com/frida/frida-tools.git
