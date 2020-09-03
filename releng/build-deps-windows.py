@@ -519,7 +519,7 @@ def package():
     for root, dirs, files in os.walk(get_prefix_path('x86', 'Release', 'static')):
         relpath = root[prefixes_skip_len:]
         included_files = map(lambda name: os.path.join(relpath, name),
-            filter(lambda filename: file_is_vala_toolchain_related(relpath, filename) or filename in ("pkg-config.exe", "glib-mkenums", "glib-genmarshal"), files))
+            filter(lambda filename: file_is_vala_toolchain_related(relpath, filename) or filename in ("pkg-config.exe", "glib-genmarshal", "glib-mkenums"), files))
         toolchain_files.extend(included_files)
 
     toolchain_mixin_files = []
