@@ -129,7 +129,7 @@ if [ "$host_platform" == "android" ]; then
       exit 1
     fi
   else
-    echo "ANDROID_NDK_ROOT must be set to the location of your $ndk_required_name NDK." > /dev/stderr
+    echo "ANDROID_NDK_ROOT must be set to the location of your r$ndk_required NDK." > /dev/stderr
     exit 1
   fi
 fi
