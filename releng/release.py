@@ -177,7 +177,10 @@ if __name__ == '__main__':
                 new_name = name.replace("-node-v68-", "-node-v72-")
                 if new_name != name:
                     new_package_path = os.path.join(os.path.dirname(package_path), new_name)
-                    os.rename(package_path, new_package_path)
+                    try:
+                        os.rename(package_path, new_package_path)
+                    except FileExistsError:
+                        continue
                     package_path = new_package_path
                     name = new_name
 
