@@ -157,6 +157,7 @@ if __name__ == '__main__':
             do(env_args + args + extra_build_args)
         def reset():
             do(["git", "clean", "-xffd"])
+            do(["git", "reset", "--hard"])
         reset()
         with package_version_temporarily_set_to(version, frida_node_dir):
             do_build_command([npm, "install"])
