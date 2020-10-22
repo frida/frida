@@ -165,9 +165,23 @@ if __name__ == '__main__':
             do_build_command([npm, "run", "prebuild", "--", "-t", "10.0.0", "-t", "12.0.0", "-t", "14.0.0"])
             do_build_command([npm, "run", "prebuild", "--", "-t", "10.0.0", "-t", "11.0.0-beta.1", "-r", "electron"])
             packages = glob.glob(os.path.join(frida_node_dir, "prebuilds", "*.tar.gz"))
-            for package in packages:
-                with open(package, 'rb') as package_file:
-                    upload_to_github(os.path.basename(package), "application/gzip", package_file.read())
+            for package_path in packages:
+                name = os.path.basename(package_path)
+
+                # Our macOS build worker produces an incorrectly versioned artifact
+                if "-node-v81-" in name:
+                    continue
+
+                # For Node.js 12.x we need a workaround for https://github.com/lgeiger/node-abi/issues/90
+                new_name = name.replace("-node-v68-", "-node-v72-")
+                if new_name != name:
+                    new_package_path = os.path.join(os.path.dirname(package_path), new_name)
+                    os.rename(package_path, new_package_path)
+                    package_path = new_package_path
+                    name = new_name
+
+                with open(package_path, 'rb') as package_file:
+                    upload_to_github(name, "application/gzip", package_file.read())
         reset()
 
     def upload_meta_modules_to_npm(node):
