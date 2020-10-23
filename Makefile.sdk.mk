@@ -38,7 +38,7 @@ else
 endif
 host_platform_arch := $(host_platform)-$(host_arch)
 
-enable_v8 := $(shell echo $(host_platform_arch) | egrep -q "^(linux-arm|linux-armbe8|linux-mips|linux-mipsel|linux-mips64|linux-mips64el|qnx-.+)$$" && echo 0 || echo 1)
+enable_v8 := $(shell echo $(host_platform_arch) | egrep -q "^(linux-arm|linux-armhf|linux-armbe8|linux-mips|linux-mipsel|linux-mips64|linux-mips64el|qnx-.+)$$" && echo 0 || echo 1)
 
 
 ifeq ($(host_platform), macos)
@@ -378,6 +378,9 @@ ifeq ($(host_arch), x86_64)
 	openssl_arch_args := linux-x86_64 enable-ec_nistp_64_gcc_128
 endif
 ifeq ($(host_arch), arm)
+	openssl_arch_args := linux-armv4
+endif
+ifeq ($(host_arch), armhf)
 	openssl_arch_args := linux-armv4
 endif
 ifeq ($(host_arch), armbe8)

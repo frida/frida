@@ -216,10 +216,10 @@ case $host_platform in
         meson_host_cpu="armv6t"
         ;;
       armhf)
-        host_arch_flags="-march=armv6"
+        host_arch_flags="-march=armv7-a"
         host_toolprefix="arm-linux-gnueabihf-"
 
-        meson_host_cpu="armv6hf"
+        meson_host_cpu="armv7a"
         ;;
       arm64)
         host_arch_flags="-march=armv8-a"
