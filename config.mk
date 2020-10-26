@@ -19,6 +19,7 @@ endif
 FRIDA_ACDBGFLAGS_COMMON ?= -g3
 FRIDA_ACDBGFLAGS_BOTTLE ?= -g1
 
+FRIDA_V8_FLAGS := -Dv8=disabled
 FRIDA_MAPPER_FLAGS := -Dmapper=auto
 
 PYTHON ?= $(shell which python)
