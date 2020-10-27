@@ -169,8 +169,7 @@ if __name__ == '__main__':
             for package_path in packages:
                 name = os.path.basename(package_path)
 
-                # Our macOS build worker produces an incorrectly versioned artifact
-                if "-node-v81-" in name:
+                if "-node-v81-" in name or "-node-v88-" in name:
                     continue
 
                 # For Node.js 12.x we need a workaround for https://github.com/lgeiger/node-abi/issues/90
