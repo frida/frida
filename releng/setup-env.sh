@@ -141,8 +141,8 @@ if [ "$host_platform" == "qnx" ]; then
   fi
 fi
 
-toolchain_version=20201027
-sdk_version=20201027
+toolchain_version=20201028
+sdk_version=20201028
 if [ "$enable_asan" == "yes" ]; then
   sdk_version="$sdk_version-asan"
 fi
