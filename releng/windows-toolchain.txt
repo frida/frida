@@ -1,1 +1,1 @@
-https://build.frida.re/toolchain-20200518-windows-x86.exe
+https://build.frida.re/toolchain-20201027-windows-x86.exe
