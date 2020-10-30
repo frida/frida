@@ -257,7 +257,7 @@ $(eval $(call make-git-meson-module-rules,glib,build/ft-%/bin/glib-genmarshal,bu
 
 $(eval $(call make-git-meson-module-rules,pkg-config,build/ft-%/bin/pkg-config,build/ft-%/bin/glib-genmarshal,))
 
-$(eval $(call make-tarball-module-rules,flex,https://github.com/westes/flex/releases/download/v$(flex_version)/flex-$(flex_version).tar.gz,build/ft-%/bin/flex,build/ft-$(build_platform_arch)/bin/m4))
+$(eval $(call make-tarball-module-rules,flex,https://github.com/westes/flex/releases/download/v$(flex_version)/flex-$(flex_version).tar.gz,build/ft-%/bin/flex,build/ft-$(build_platform_arch)/bin/m4,flex-modern-glibc.patch))
 
 $(eval $(call make-tarball-module-rules,bison,https://$(gnu_mirror)/bison/bison-$(bison_version).tar.gz,build/ft-%/bin/bison,build/ft-$(build_platform_arch)/bin/m4))
 

@@ -1,0 +1,14 @@
+diff -Nur flex-orig/src/misc.c flex/src/misc.c
+--- flex-orig/src/misc.c	2017-05-03 22:16:37.000000000 +0200
++++ flex/src/misc.c	2020-10-30 01:53:32.126876360 +0100
+@@ -33,6 +33,10 @@
+ #include "flexdef.h"
+ #include "tables.h"
+ 
++#ifdef HAVE_MALLOC_H
++#include <malloc.h>
++#endif
++
+ #define CMD_IF_TABLES_SER    "%if-tables-serialization"
+ #define CMD_TABLES_YYDMAP    "%tables-yydmap"
+ #define CMD_DEFINE_YYTABLES  "%define-yytables"
