@@ -4,6 +4,7 @@ if [ -z "$PACKAGE_TARNAME" ]; then
   PACKAGE_TARNAME=$(basename $(dirname "$0"))
 fi
 
+frida_build_platform_arch=@frida_build_platform_arch@
 frida_host_platform_arch=@frida_host_platform_arch@
 frida_libc=@frida_libc@
 frida_prefix=@frida_prefix@
@@ -26,89 +27,75 @@ esac
 case $frida_host_platform_arch in
   linux-arm)
     host_alias="arm-linux-gnueabi"
-    cross_compiling=yes
     ;;
   linux-armbe8)
     host_alias="arm-linux-gnueabi"
-    cross_compiling=yes
     ;;
   linux-armhf)
     host_alias="arm-linux-gnueabihf"
-    cross_compiling=yes
     ;;
   linux-arm64)
     host_alias="aarch64-linux-gnu"
-    cross_compiling=yes
     ;;
   linux-mips)
     host_alias="mips-linux-$frida_libc"
-    cross_compiling=yes
     ;;
   linux-mipsel)
     host_alias="mipsel-linux-$frida_libc"
-    cross_compiling=yes
     ;;
   linux-mips64)
     host_alias="mips64-linux-$frida_libc"
-    cross_compiling=yes
     ;;
   linux-x86)
     host_alias="i686-linux-gnu"
-    cross_compiling=yes
     ;;
   linux-x86_64)
     host_alias="x86_64-linux-gnu"
-    cross_compiling=no
     ;;
   qnx-x86)
     host_alias="i486-pc-nto-qnx6.6.0"
-    cross_compiling=yes
     ;;
   qnx-armeabi)
     host_alias="arm-unknown-nto-qnx6.5.0eabi"
-    cross_compiling=yes
     ;;
   qnx-arm)
     host_alias="arm-unknown-nto-qnx6.5.0"
-    cross_compiling=yes
     ;;
   android-x86)
     host_alias="i686-none-linux-android"
-    cross_compiling=yes
     ;;
   android-x86_64)
     host_alias="x86_64-none-linux-android"
-    cross_compiling=yes
     ;;
   android-arm)
     host_alias="armv7-none-linux-androideabi"
-    cross_compiling=yes
 
     frida_flags="$frida_flags -mthumb"
     ;;
   android-arm64)
     host_alias="aarch64-none-linux-android"
-    cross_compiling=yes
     ;;
   macos-x86|ios-x86)
     host_alias="i686-apple-darwin"
-    cross_compiling=yes
     ;;
   ios-x86_64)
     host_alias="x86_64-apple-darwin"
-    cross_compiling=yes
     ;;
   ios-arm)
     host_alias="arm-apple-darwin"
-    cross_compiling=yes
 
     frida_flags="$frida_flags -mthumb"
     ;;
   macos-arm64|macos-arm64e|ios-arm64|ios-arm64e)
     host_alias="aarch64-apple-darwin"
-    cross_compiling=yes
     ;;
 esac
+
+if [ $frida_host_platform_arch != $frida_build_platform_arch ]; then
+  cross_compiling=yes
+else
+  cross_compiling=no
+fi
 
 case $frida_host_platform_arch in
   android-*)
