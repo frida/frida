@@ -4,8 +4,6 @@ if [ -z "$PACKAGE_TARNAME" ]; then
   PACKAGE_TARNAME=$(basename $(dirname "$0"))
 fi
 
-frida_host_platform=@frida_host_platform@
-frida_host_arch=@frida_host_arch@
 frida_host_platform_arch=@frida_host_platform_arch@
 frida_libc=@frida_libc@
 frida_prefix=@frida_prefix@

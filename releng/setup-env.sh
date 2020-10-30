@@ -947,8 +947,6 @@ case $host_platform in
 esac
 
 sed \
-  -e "s,@frida_host_platform@,$host_platform,g" \
-  -e "s,@frida_host_arch@,$host_arch,g" \
   -e "s,@frida_host_platform_arch@,$host_platform_arch,g" \
   -e "s,@frida_prefix@,$FRIDA_PREFIX,g" \
   -e "s,@frida_optimization_flags@,$FRIDA_ACOPTFLAGS,g" \
