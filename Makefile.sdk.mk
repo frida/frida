@@ -38,7 +38,7 @@ else
 endif
 host_platform_arch := $(host_platform)-$(host_arch)
 
-enable_v8 := $(shell echo $(host_platform_arch) | egrep -q "^(linux-arm|linux-armhf|linux-armbe8|linux-mips|linux-mipsel|linux-mips64|linux-mips64el|qnx-.+)$$" && echo 0 || echo 1)
+enable_v8 := 0
 
 
 ifeq ($(host_platform), macos)
