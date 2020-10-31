@@ -33,6 +33,8 @@ case $frida_host_platform_arch in
     ;;
   linux-armhf)
     host_alias="arm-linux-gnueabihf"
+
+    frida_flags="$frida_flags -mthumb"
     ;;
   linux-arm64)
     host_alias="aarch64-linux-gnu"

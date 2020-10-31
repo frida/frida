@@ -698,7 +698,7 @@ case $host_platform in
 esac
 
 case $host_platform_arch in
-  android-arm|ios-arm)
+  linux-armhf|ios-arm|android-arm)
     meson_c_args="$meson_c_args, '-mthumb'"
     meson_cpp_args="$meson_cpp_args, '-mthumb'"
     if [ -n "$meson_objc" ]; then
