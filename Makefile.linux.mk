@@ -153,6 +153,8 @@ check-gum-linux-x86-thin: gum-linux-x86-thin ##@gum Run tests for Linux/x86 with
 	build/tmp_thin-linux-x86/frida-gum/tests/gum-tests $(test_args)
 check-gum-linux-x86_64-thin: gum-linux-x86_64-thin ##@gum Run tests for Linux/x86-64 without cross-arch support
 	build/tmp_thin-linux-x86_64/frida-gum/tests/gum-tests $(test_args)
+check-gum-linux-armhf: gum-linux-armhf ##@gum Run tests for Linux/ARMhf
+	build/tmp_thin-linux-armhf/frida-gum/tests/gum-tests $(test_args)
 check-gum-linux-arm64: gum-linux-arm64 ##@gum Run tests for Linux/ARM64
 	build/tmp_thin-linux-arm64/frida-gum/tests/gum-tests $(test_args)
 
@@ -317,6 +319,8 @@ check-core-linux-x86-thin: core-linux-x86-thin ##@core Run tests for Linux/x86 w
 	build/tmp_thin-linux-x86/frida-core/tests/frida-tests $(test_args)
 check-core-linux-x86_64-thin: core-linux-x86_64-thin ##@core Run tests for Linux/x86-64 without cross-arch support
 	build/tmp_thin-linux-x86_64/frida-core/tests/frida-tests $(test_args)
+check-core-linux-armhf: core-linux-armhf ##@core Run tests for Linux/ARMhf
+	build/tmp_thin-linux-armhf/frida-core/tests/frida-tests $(test_args)
 check-core-linux-arm64: core-linux-arm64 ##@core Run tests for Linux/ARM64
 	build/tmp_thin-linux-arm64/frida-core/tests/frida-tests $(test_args)
 
@@ -479,7 +483,7 @@ check-tools-linux-arm64: build/tmp_thin-linux-arm64/frida-tools-$(PYTHON_NAME)/.
 		gum-qnx-arm gum-qnx-armeabi \
 		check-gum-linux-x86 check-gum-linux-x86_64 \
 		check-gum-linux-x86-thin check-gum-linux-x86_64-thin \
-		check-gum-linux-arm64 \
+		check-gum-linux-armhf check-gum-linux-arm64 \
 		frida-gum-update-submodule-stamp \
 	core-linux-x86 core-linux-x86_64 \
 		core-linux-x86-thin core-linux-x86_64-thin \
@@ -491,7 +495,7 @@ check-tools-linux-arm64: build/tmp_thin-linux-arm64/frida-tools-$(PYTHON_NAME)/.
 		core-qnx-arm core-qnx-armeabi \
 		check-core-linux-x86 check-core-linux-x86_64 \
 		check-core-linux-x86-thin check-core-linux-x86_64-thin \
-		check-core-linux-arm64 \
+		check-core-linux-armhf check-core-linux-arm64 \
 		frida-core-update-submodule-stamp \
 	python-linux-x86 python-linux-x86_64 \
 		python-linux-x86-thin python-linux-x86_64-thin \
