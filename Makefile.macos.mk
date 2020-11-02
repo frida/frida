@@ -450,7 +450,8 @@ build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-sta
 			-Dpython_incdir=$$(PYTHON_INCDIR) \
 			frida-python $$$$builddir || exit 1; \
 	fi; \
-	$$(NINJA) -C $$$$builddir install || exit 1
+	$$(NINJA) -C $$$$builddir install || exit 1; \
+	$$$$STRIP $$$$STRIP_FLAGS build/$1-$$*/lib/$$(PYTHON_NAME)/site-packages/_frida.so
 	@touch $$@
 endef
 $(eval $(call make-python-rule,frida,tmp))
