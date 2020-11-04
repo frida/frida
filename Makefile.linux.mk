@@ -329,6 +329,7 @@ python-linux-x86: build/tmp-linux-x86/frida-$(PYTHON_NAME)/.frida-stamp ##@pytho
 python-linux-x86_64: build/tmp-linux-x86_64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for Linux/x86-64
 python-linux-x86-thin: build/tmp_thin-linux-x86/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for Linux/x86 without cross-arch support
 python-linux-x86_64-thin: build/tmp_thin-linux-x86_64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for Linux/x86-64 without cross-arch support
+python-linux-armhf: build/tmp_thin-linux-armhf/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for Linux/ARMhf
 python-linux-arm64: build/tmp_thin-linux-arm64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings for Linux/ARM64
 
 define make-python-rule
@@ -367,6 +368,10 @@ check-python-linux-x86_64-thin: build/tmp_thin-linux-x86_64/frida-$(PYTHON_NAME)
 	export PYTHONPATH="$(shell pwd)/build/frida_thin-linux-x86_64/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
 		&& ${PYTHON} -m unittest discover
+check-python-linux-armhf: build/tmp_thin-linux-armhf/frida-$(PYTHON_NAME)/.frida-stamp ##@python Test Python bindings for Linux/ARMhf
+	export PYTHONPATH="$(shell pwd)/build/frida_thin-linux-armhf/lib/$(PYTHON_NAME)/site-packages" \
+		&& cd frida-python \
+		&& ${PYTHON} -m unittest discover
 check-python-linux-arm64: build/tmp_thin-linux-arm64/frida-$(PYTHON_NAME)/.frida-stamp ##@python Test Python bindings for Linux/ARM64
 	export PYTHONPATH="$(shell pwd)/build/frida_thin-linux-arm64/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
@@ -377,6 +382,7 @@ node-linux-x86: build/frida-linux-x86/lib/node_modules/frida build/.frida-node-s
 node-linux-x86_64: build/frida-linux-x86_64/lib/node_modules/frida build/.frida-node-submodule-stamp ##@node Build Node.js bindings for Linux/x86-64
 node-linux-x86-thin: build/frida_thin-linux-x86/lib/node_modules/frida build/.frida-node-submodule-stamp ##@node Build Node.js bindings for Linux/x86 without cross-arch support
 node-linux-x86_64-thin: build/frida_thin-linux-x86_64/lib/node_modules/frida build/.frida-node-submodule-stamp ##@node Build Node.js bindings for Linux/x86-64 without cross-arch support
+node-linux-armhf: build/frida_thin-linux-armhf/lib/node_modules/frida build/.frida-node-submodule-stamp ##@node Build Node.js bindings for Linux/ARMhf
 node-linux-arm64: build/frida_thin-linux-arm64/lib/node_modules/frida build/.frida-node-submodule-stamp ##@node Build Node.js bindings for Linux/ARM64
 
 define make-node-rule
@@ -420,6 +426,8 @@ check-node-linux-x86-thin: node-linux-x86-thin ##@node Test Node.js bindings for
 	$(call run-node-tests,frida_thin-linux-x86,$(FRIDA),$(NODE_BIN_DIR),$(NODE),$(NPM))
 check-node-linux-x86_64-thin: node-linux-x86_64-thin ##@node Test Node.js bindings for Linux/x86-64 without cross-arch support
 	$(call run-node-tests,frida_thin-linux-x86_64,$(FRIDA),$(NODE_BIN_DIR),$(NODE),$(NPM))
+check-node-linux-armhf: node-linux-armhf ##@node Test Node.js bindings for Linux/ARMhf
+	$(call run-node-tests,frida_thin-linux-armhf,$(FRIDA),$(NODE_BIN_DIR),$(NODE),$(NPM))
 check-node-linux-arm64: node-linux-arm64 ##@node Test Node.js bindings for Linux/ARM64
 	$(call run-node-tests,frida_thin-linux-arm64,$(FRIDA),$(NODE_BIN_DIR),$(NODE),$(NPM))
 
@@ -428,6 +436,7 @@ tools-linux-x86: build/tmp-linux-x86/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@
 tools-linux-x86_64: build/tmp-linux-x86_64/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Build CLI tools for Linux/x86-64
 tools-linux-x86-thin: build/tmp_thin-linux-x86/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Build CLI tools for Linux/x86 without cross-arch support
 tools-linux-x86_64-thin: build/tmp_thin-linux-x86_64/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Build CLI tools for Linux/x86-64 without cross-arch support
+tools-linux-armhf: build/tmp_thin-linux-armhf/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Build CLI tools for Linux/ARMhf
 tools-linux-arm64: build/tmp_thin-linux-arm64/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Build CLI tools for Linux/ARM64
 
 define make-tools-rule
@@ -462,6 +471,10 @@ check-tools-linux-x86-thin: build/tmp_thin-linux-x86/frida-tools-$(PYTHON_NAME)/
 		&& ${PYTHON} -m unittest discover
 check-tools-linux-x86_64-thin: build/tmp_thin-linux-x86_64/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Test CLI tools for Linux/x86-64 without cross-arch support
 	export PYTHONPATH="$(shell pwd)/build/frida_thin-linux-x86_64/lib/$(PYTHON_NAME)/site-packages" \
+		&& cd frida-tools \
+		&& ${PYTHON} -m unittest discover
+check-tools-linux-armhf: build/tmp_thin-linux-armhf/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Test CLI tools for Linux/ARMhf
+	export PYTHONPATH="$(shell pwd)/build/frida_thin-linux-armhf/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-tools \
 		&& ${PYTHON} -m unittest discover
 check-tools-linux-arm64: build/tmp_thin-linux-arm64/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Test CLI tools for Linux/ARM64
@@ -500,24 +513,24 @@ check-tools-linux-arm64: build/tmp_thin-linux-arm64/frida-tools-$(PYTHON_NAME)/.
 		frida-core-update-submodule-stamp \
 	python-linux-x86 python-linux-x86_64 \
 		python-linux-x86-thin python-linux-x86_64-thin \
-		python-linux-arm64 \
+		python-linux-armhf python-linux-arm64 \
 		check-python-linux-x86 check-python-linux-x86_64 \
 		check-python-linux-x86-thin check-python-linux-x86_64-thin \
-		check-python-linux-arm64 \
+		check-python-linux-armhf check-python-linux-arm64 \
 		frida-python-update-submodule-stamp \
 	node-linux-x86 node-linux-x86_64 \
 		node-linux-x86-thin node-linux-x86_64-thin \
-		node-linux-arm64 \
+		node-linux-armhf node-linux-arm64 \
 		check-node-linux-x86 check-node-linux-x86_64 \
 		check-node-linux-x86-thin check-node-linux-x86_64-thin \
-		check-node-linux-arm64 \
+		check-node-linux-armhf check-node-linux-arm64 \
 		frida-node-update-submodule-stamp \
 	tools-linux-x86 tools-linux-x86_64 \
 		tools-linux-x86-thin tools-linux-x86_64-thin \
-		tools-linux-arm64 \
+		tools-linux-armhf tools-linux-arm64 \
 		check-tools-linux-x86 check-tools-linux-x86_64 \
 		check-tools-linux-x86-thin check-tools-linux-x86_64-thin \
-		check-tools-linux-arm64 \
+		check-tools-linux-armhf check-tools-linux-arm64 \
 		frida-tools-update-submodule-stamp \
 	glib glib-symlinks \
 	v8 v8-symlinks
