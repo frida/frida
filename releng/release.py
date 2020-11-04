@@ -513,7 +513,7 @@ if __name__ == '__main__':
             upload_python_bindings_to_pypi("/usr/bin/python3.7",
                 os.path.join(build_dir, "build", "frida_thin-linux-arm64", "lib", "python3.7", "site-packages", "_frida.so"))
 
-            upload_node_bindings_to_npm("/usr/bin/node", upload, publish=False)
+            upload_node_bindings_to_npm("/usr/local/bin/node", upload, publish=False)
         elif builder == 'ios':
             upload = get_github_uploader()
 
