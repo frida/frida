@@ -496,16 +496,26 @@ if __name__ == '__main__':
 
             upload_node_bindings_to_npm("/opt/node-32/bin/node", upload, publish=False)
             upload_node_bindings_to_npm("/opt/node-64/bin/node", upload, publish=False)
-        elif builder == 'rpi64':
+        elif builder == 'rpi32':
             upload = get_github_uploader()
 
             upload_devkits("linux-armhf", upload, flavor="_thin")
-            upload_devkits("linux-arm64", upload, flavor="_thin")
 
             upload_file("frida-server-{version}-linux-armhf", os.path.join(build_dir, "build", "frida_thin-linux-armhf", "bin", "frida-server"), upload)
-            upload_file("frida-server-{version}-linux-arm64", os.path.join(build_dir, "build", "frida_thin-linux-arm64", "bin", "frida-server"), upload)
-
             upload_file("frida-gadget-{version}-linux-armhf.so", os.path.join(build_dir, "build", "frida_thin-linux-armhf", "lib", "frida-gadget.so"), upload)
+
+            upload_python_bindings_to_pypi("/usr/bin/python2.7",
+                os.path.join(build_dir, "build", "frida_thin-linux-armhf", "lib", "python2.7", "site-packages", "_frida.so"))
+            upload_python_bindings_to_pypi("/usr/bin/python3.7",
+                os.path.join(build_dir, "build", "frida_thin-linux-armhf", "lib", "python3.7", "site-packages", "_frida.so"))
+
+            upload_node_bindings_to_npm("/usr/local/bin/node", upload, publish=False)
+        elif builder == 'rpi64':
+            upload = get_github_uploader()
+
+            upload_devkits("linux-arm64", upload, flavor="_thin")
+
+            upload_file("frida-server-{version}-linux-arm64", os.path.join(build_dir, "build", "frida_thin-linux-arm64", "bin", "frida-server"), upload)
             upload_file("frida-gadget-{version}-linux-arm64.so", os.path.join(build_dir, "build", "frida_thin-linux-arm64", "lib", "frida-gadget.so"), upload)
 
             upload_python_bindings_to_pypi("/usr/bin/python2.7",
