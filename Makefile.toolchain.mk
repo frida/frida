@@ -85,44 +85,43 @@ build/ft-tmp-%/.package-stamp: \
 
 
 define make-tarball-module-rules
-build/.$1-stamp:
+ext/.$1-stamp:
 	$$(call download-and-extract,$1)
 	@patches=$$($$(subst -,_,$1)_patches); \
 	if [ -n "$$$$patches" ]; then \
 		echo "[*] Applying patches"; \
-		cd $1; \
+		cd ext/$1; \
 		for patch in $$$$patches; do \
-			patch -p1 < ../releng/patches/$$$$patch; \
+			patch -p1 < ../../releng/patches/$$$$patch; \
 		done; \
 	fi
-	@mkdir -p $$(@D)
 	@touch $$@
 
-build/ft-tmp-%/$1/Makefile: build/ft-env-%.rc build/.$1-stamp $5
+build/ft-tmp-%/$1/Makefile: build/ft-env-%.rc ext/.$1-stamp $3
 	$(RM) -r $$(@D)
 	mkdir -p $$(@D)
 	. $$< \
 		&& cd $$(@D) \
-		&& PATH=$$(shell pwd)/build/ft-$$*/bin:$$$$PATH ../../../$1/configure $$($1_options)
+		&& PATH=$$(shell pwd)/build/ft-$$*/bin:$$$$PATH ../../../ext/$1/configure $$($1_options)
 
-$4: build/ft-env-%.rc build/ft-tmp-%/$1/Makefile
+$2: build/ft-env-%.rc build/ft-tmp-%/$1/Makefile
 	. $$< \
 		&& cd build/ft-tmp-$$*/$1 \
 		&& export PATH=$$(shell pwd)/build/ft-$$*/bin:$$$$PATH \
-		&& make $(MAKE_J) GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums \
-		&& make $(MAKE_J) GLIB_GENMARSHAL=glib-genmarshal GLIB_MKENUMS=glib-mkenums LN="ln -sf" install
+		&& make $(MAKE_J) \
+		&& make $(MAKE_J) install
 	@touch $$@
 endef
 
 define make-git-meson-module-rules
-build/.$1-stamp:
-	$(RM) -r $1
-	git clone --recurse-submodules $(repo_base_url)/$1$(repo_suffix)
-	cd $1 && git checkout -b $(frida_toolchain_version) $$($$(subst -,_,$1)_version)
-	@mkdir -p $$(@D)
+ext/.$1-stamp:
+	$(RM) -r ext/$1
+	@mkdir -p ext
+	git clone --recurse-submodules $(repo_base_url)/$1$(repo_suffix) ext/$1
+	cd ext/$1 && git checkout $$($$(subst -,_,$1)_version)
 	@touch $$@
 
-build/ft-tmp-%/$1/build.ninja: build/ft-env-%.rc build/.$1-stamp $2 releng/meson/meson.py
+build/ft-tmp-%/$1/build.ninja: build/ft-env-%.rc ext/.$1-stamp $3 releng/meson/meson.py
 	$(RM) -r $$(@D)
 	(. build/ft-meson-env-$$*.rc \
 		&& . build/ft-config-$$*.site \
@@ -134,11 +133,12 @@ build/ft-tmp-%/$1/build.ninja: build/ft-env-%.rc build/.$1-stamp $2 releng/meson
 			$$(FRIDA_MESONFLAGS_BOTTLE) \
 			$$($$(subst -,_,$1)_options) \
 			$$(@D) \
-			$1)
+			ext/$1)
 
 $2: build/ft-env-%.rc build/ft-tmp-%/$1/build.ninja
 	(. $$< \
-		&& PATH=$$(shell pwd)/build/ft-$(build_os_arch)/bin:$$$$PATH $(NINJA) -C build/ft-tmp-$$*/$1 install)
+		&& PATH=$$(shell pwd)/build/ft-$(build_os_arch)/bin:$$$$PATH \
+			$(NINJA) -C build/ft-tmp-$$*/$1 install)
 	@touch $$@
 endef
 

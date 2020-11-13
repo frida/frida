@@ -243,27 +243,27 @@ repo_suffix := .git
 
 
 define download-and-extract
-	@$(RM) -r $1
-	@mkdir -p $1
+	$(RM) -r ext/$1
+	mkdir -p ext/$1
 	@url=$$($$(subst -,_,$1)_url); \
 	echo "[*] Downloading $$url"; \
 	if command -v curl >/dev/null; then \
-		curl -sSfLo $1/.tarball $$url; \
+		curl -sSfLo ext/.$1-tarball $$url; \
 	else \
-		wget -qO $1/.tarball $$url; \
+		wget -qO ext/.$1-tarball $$url; \
 	fi
 	@echo "[*] Verifying"
 	@expected_hash=$$($$(subst -,_,$1)_hash); \
-	actual_hash=$$(shasum -a 256 -b $1/.tarball | awk '{ print $$1; }'); \
-	case $$actual_hash in \
-		$$expected_hash) \
+	actual_hash=$$(shasum -a 256 -b ext/.$1-tarball | awk '{ print $$1; }'); \
+	case $$$$actual_hash in \
+		$$$$expected_hash) \
 			;; \
 		*) \
-			echo "$1 tarball is corrupted; expected=$$expected_hash, actual=$$actual_hash"; \
+			echo "$1 tarball is corrupted; expected=$$$$expected_hash, actual=$$$$actual_hash"; \
 			exit 1; \
 			;; \
 	esac
 	@echo "[*] Extracting to $1"
-	@tar -x -f $1/.tarball -z -C $1 --strip-components 1
-	@rm $1/.tarball
+	@cd ext/$1 && tar -x -f ../.$1-tarball -z --strip-components 1
+	@rm ext/$1/.tarball
 endef
