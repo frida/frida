@@ -14,7 +14,7 @@ import v8
 import winenv
 
 
-PLATFORMS = ['x86_64', 'x86']
+ARCHS = ['x86_64', 'x86']
 CONFIGURATIONS = ['Debug', 'Release']
 TOOL_TARGET_RUNTIMES = ['static']
 LIBRARY_TARGET_RUNTIMES = ['static', 'dynamic']
@@ -39,7 +39,7 @@ VALA_TOOLCHAIN_VAPI_SUBPATH_PATTERN = re.compile(r"share\\vala-\d+\.\d+\\vapi$")
 
 cached_meson_params = {}
 
-build_platform = 'x86_64' if platform.machine().endswith("64") else 'x86'
+build_arch = 'x86_64' if platform.machine().endswith("64") else 'x86'
 
 
 def main():
@@ -49,14 +49,14 @@ def main():
     build_ended_at = None
     packaging_ended_at = None
     try:
-        for platform in PLATFORMS:
+        for arch in ARCHS:
             for configuration in CONFIGURATIONS:
-                build_meson_modules(platform, configuration)
+                build_meson_modules(arch, configuration)
 
-        for platform in PLATFORMS:
+        for arch in ARCHS:
             for configuration in CONFIGURATIONS:
                 for runtime in LIBRARY_TARGET_RUNTIMES:
-                    build_v8(platform, configuration, runtime)
+                    build_v8(arch, configuration, runtime)
 
         build_ended_at = time.time()
 
@@ -98,7 +98,7 @@ def check_environment():
             sys.exit(1)
 
 
-def build_meson_modules(platform, configuration):
+def build_meson_modules(arch, configuration):
     modules = [
         ("zlib", "zlib.pc", []),
         ("libffi", "libffi.pc", []),
@@ -123,17 +123,17 @@ def build_meson_modules(platform, configuration):
         else:
             raise NotImplementedError("unsupported artifact type")
         for runtime in runtime_flavors:
-            artifact_path = os.path.join(get_prefix_path(platform, configuration, runtime), artifact_subpath)
+            artifact_path = os.path.join(get_prefix_path(arch, configuration, runtime), artifact_subpath)
             if not os.path.exists(artifact_path):
-                build_meson_module(name, platform, configuration, runtime, options)
+                build_meson_module(name, arch, configuration, runtime, options)
 
-def build_meson_module(name, platform, configuration, runtime, options):
-    print("*** Building name={} platform={} runtime={} configuration={}".format(name, platform, configuration, runtime))
-    env_dir, shell_env = get_meson_params(platform, configuration, runtime)
+def build_meson_module(name, arch, configuration, runtime, options):
+    print("*** Building name={} arch={} runtime={} configuration={}".format(name, arch, configuration, runtime))
+    env_dir, shell_env = get_meson_params(arch, configuration, runtime)
 
     source_dir = os.path.join(ROOT_DIR, name)
     build_dir = os.path.join(env_dir, name)
-    prefix = get_prefix_path(platform, configuration, runtime)
+    prefix = get_prefix_path(arch, configuration, runtime)
     optimization = 's' if configuration == 'Release' else '0'
     ndebug = 'true' if configuration == 'Release' else 'false'
     option_flags = ["-D" + option for option in options]
@@ -160,42 +160,42 @@ def build_meson_module(name, platform, configuration, runtime, options):
 
     perform(NINJA, "install", cwd=build_dir, env=shell_env)
 
-def get_meson_params(platform, configuration, runtime):
+def get_meson_params(arch, configuration, runtime):
     global cached_meson_params
 
-    identifier = ":".join([platform, configuration, runtime])
+    identifier = ":".join([arch, configuration, runtime])
 
     params = cached_meson_params.get(identifier, None)
     if params is None:
-        params = generate_meson_params(platform, configuration, runtime)
+        params = generate_meson_params(arch, configuration, runtime)
         cached_meson_params[identifier] = params
 
     return params
 
-def generate_meson_params(platform, configuration, runtime):
-    env = generate_meson_env(platform, configuration, runtime)
+def generate_meson_params(arch, configuration, runtime):
+    env = generate_meson_env(arch, configuration, runtime)
     return (env.path, env.shell_env)
 
-def generate_meson_env(platform, configuration, runtime):
-    prefix = get_prefix_path(platform, configuration, runtime)
-    env_dir = get_tmp_path(platform, configuration, runtime)
+def generate_meson_env(arch, configuration, runtime):
+    prefix = get_prefix_path(arch, configuration, runtime)
+    env_dir = get_tmp_path(arch, configuration, runtime)
     if not os.path.exists(env_dir):
         os.makedirs(env_dir)
 
     vc_dir = os.path.join(winenv.get_msvs_installation_dir(), "VC")
     vc_install_dir = vc_dir + "\\"
 
-    msvc_platform = platform_to_msvc(platform)
+    msvc_platform = msvc_platform_from_arch(arch)
     msvc_dir = winenv.get_msvc_tool_dir()
-    msvc_bin_dir = os.path.join(msvc_dir, "bin", "Host" + platform_to_msvc(build_platform), msvc_platform)
+    msvc_bin_dir = os.path.join(msvc_dir, "bin", "Host" + msvc_platform_from_arch(build_arch), msvc_platform)
 
     msvc_dll_dirs = []
-    if platform != build_platform:
-        build_msvc_platform = platform_to_msvc(build_platform)
+    if arch != build_arch:
+        build_msvc_platform = msvc_platform_from_arch(build_arch)
         msvc_dll_dirs.append(os.path.join(msvc_dir, "bin", "Host" + build_msvc_platform, build_msvc_platform))
 
     (winxp_sdk_dir, winxp_sdk_version) = winenv.get_winxp_sdk()
-    if platform == 'x86':
+    if arch == 'x86':
         winxp_bin_dir = os.path.join(winxp_sdk_dir, "Bin")
         winxp_lib_dir = os.path.join(winxp_sdk_dir, "Lib")
     else:
@@ -209,7 +209,7 @@ def generate_meson_env(platform, configuration, runtime):
     ])
 
     platform_cflags = []
-    if platform == 'x86':
+    if arch == 'x86':
         platform_cflags += ["/arch:SSE2"]
 
     cflags = " ".join(platform_cflags)
@@ -372,8 +372,8 @@ class MesonEnv(object):
         self.shell_env = shell_env
 
 
-def build_v8(platform, configuration, runtime):
-    prefix = get_prefix_path(platform, configuration, runtime)
+def build_v8(arch, configuration, runtime):
+    prefix = get_prefix_path(arch, configuration, runtime)
 
     lib_dir = os.path.join(prefix, "lib")
     pkgconfig_dir = os.path.join(lib_dir, "pkgconfig")
@@ -405,7 +405,7 @@ def build_v8(platform, configuration, runtime):
     if not os.path.exists(source_dir):
         perform(gclient, "sync", cwd=checkout_dir, env=env)
 
-    build_dir = os.path.join(get_tmp_path(platform, configuration, runtime), "v8")
+    build_dir = os.path.join(get_tmp_path(arch, configuration, runtime), "v8")
     if not os.path.exists(os.path.join(build_dir, "build.ninja")):
         if os.path.exists(build_dir):
             shutil.rmtree(build_dir)
@@ -425,7 +425,7 @@ def build_v8(platform, configuration, runtime):
         (win10_sdk_dir, win10_sdk_version) = winenv.get_win10_sdk()
 
         args = " ".join([
-            "target_cpu=\"{}\"".format(platform_to_msvc(platform)),
+            "target_cpu=\"{}\"".format(msvc_platform_from_arch(arch)),
         ] + configuration_args + [
             "use_crt=\"{}\"".format(runtime),
             "is_clang=false",
@@ -599,9 +599,9 @@ def transform_sdk_dest(srcfile):
 
     filename = os.path.basename(srcfile)
 
-    platform, configuration, runtime = rootdir.split("-")
+    arch, configuration, runtime = rootdir.split("-")
     rootdir = "-".join([
-        platform_to_msvs(platform),
+        msvs_platform_from_arch(arch),
         configuration.title()
     ])
 
@@ -643,20 +643,20 @@ def ensure_bootstrap_toolchain():
     finally:
         os.unlink(toolchain_archive_path)
 
-def get_prefix_path(platform, configuration, runtime):
-    return os.path.join(ROOT_DIR, "build", "fts-windows", "{}-{}-{}".format(platform, configuration.lower(), runtime))
+def get_prefix_path(arch, configuration, runtime):
+    return os.path.join(ROOT_DIR, "build", "fts-windows", "{}-{}-{}".format(arch, configuration.lower(), runtime))
 
-def get_tmp_path(platform, configuration, runtime):
-    return os.path.join(ROOT_DIR, "build", "fts-tmp-windows", "{}-{}-{}".format(platform, configuration.lower(), runtime))
+def get_tmp_path(arch, configuration, runtime):
+    return os.path.join(ROOT_DIR, "build", "fts-tmp-windows", "{}-{}-{}".format(arch, configuration.lower(), runtime))
 
 def make_frida_repo_url(name):
     return "{}/{}.git".format(FRIDA_BASE_URL, name)
 
-def platform_to_msvs(platform):
-    return 'x64' if platform == 'x86_64' else 'Win32'
+def msvs_platform_from_arch(arch):
+    return 'x64' if arch == 'x86_64' else 'Win32'
 
-def platform_to_msvc(platform):
-    return 'x64' if platform == 'x86_64' else 'x86'
+def msvc_platform_from_arch(arch):
+    return 'x64' if arch == 'x86_64' else 'x86'
 
 def vscrt_from_configuration_and_runtime(configuration, runtime):
     result = "md" if runtime == 'dynamic' else "mt"
