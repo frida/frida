@@ -86,11 +86,12 @@ build/ft-tmp-%/.package-stamp: \
 
 define make-tarball-module-rules
 build/.$1-stamp:
-	$$(call download-and-extract,$2,$3,$1)
-	@if [ -n "$6" ]; then \
+	$$(call download-and-extract,$1)
+	@patches=$$($$(subst -,_,$1)_patches); \
+	if [ -n "$$$$patches" ]; then \
 		echo "[*] Applying patches"; \
 		cd $1; \
-		for patch in $6; do \
+		for patch in $$$$patches; do \
 			patch -p1 < ../releng/patches/$$$$patch; \
 		done; \
 	fi
@@ -102,7 +103,7 @@ build/ft-tmp-%/$1/Makefile: build/ft-env-%.rc build/.$1-stamp $5
 	mkdir -p $$(@D)
 	. $$< \
 		&& cd $$(@D) \
-		&& PATH=$$(shell pwd)/build/ft-$$*/bin:$$$$PATH ../../../$1/configure
+		&& PATH=$$(shell pwd)/build/ft-$$*/bin:$$$$PATH ../../../$1/configure $$($1_options)
 
 $4: build/ft-env-%.rc build/ft-tmp-%/$1/Makefile
 	. $$< \
@@ -117,11 +118,11 @@ define make-git-meson-module-rules
 build/.$1-stamp:
 	$(RM) -r $1
 	git clone --recurse-submodules $(repo_base_url)/$1$(repo_suffix)
-	cd $1 && git checkout -b $(frida_toolchain_version) $2
+	cd $1 && git checkout -b $(frida_toolchain_version) $$($$(subst -,_,$1)_version)
 	@mkdir -p $$(@D)
 	@touch $$@
 
-build/ft-tmp-%/$1/build.ninja: build/ft-env-%.rc build/.$1-stamp $4 releng/meson/meson.py
+build/ft-tmp-%/$1/build.ninja: build/ft-env-%.rc build/.$1-stamp $2 releng/meson/meson.py
 	$(RM) -r $$(@D)
 	(. build/ft-meson-env-$$*.rc \
 		&& . build/ft-config-$$*.site \
@@ -131,26 +132,32 @@ build/ft-tmp-%/$1/build.ninja: build/ft-env-%.rc build/.$1-stamp $4 releng/meson
 			--libdir $$$$frida_prefix/lib \
 			--default-library static \
 			$$(FRIDA_MESONFLAGS_BOTTLE) \
-			$5 \
+			$$($$(subst -,_,$1)_options) \
 			$$(@D) \
 			$1)
 
-$3: build/ft-env-%.rc build/ft-tmp-%/$1/build.ninja
+$2: build/ft-env-%.rc build/ft-tmp-%/$1/build.ninja
 	(. $$< \
 		&& PATH=$$(shell pwd)/build/ft-$(build_os_arch)/bin:$$$$PATH $(NINJA) -C build/ft-tmp-$$*/$1 install)
 	@touch $$@
 endef
 
-$(eval $(call make-tarball-module-rules,m4,https://$(gnu_mirror)/m4/m4-$(m4_version).tar.gz,$(m4_hash),build/ft-%/bin/m4,,m4-vasnprintf-apple-fix.patch m4-ftbfs-fix.patch))
+$(eval $(call make-tarball-module-rules,m4,build/ft-%/bin/m4,))
 
-$(eval $(call make-tarball-module-rules,autoconf,https://$(gnu_mirror)/autoconf/autoconf-$(autoconf_version).tar.gz,$(autoconf_hash),build/ft-%/bin/autoconf,build/ft-%/bin/m4,autoconf-uclibc.patch))
+$(eval $(call make-tarball-module-rules,autoconf,build/ft-%/bin/autoconf,build/ft-%/bin/m4))
 
-$(eval $(call make-tarball-module-rules,automake,https://$(gnu_mirror)/automake/automake-$(automake_version).tar.gz,$(automake_hash),build/ft-%/bin/automake,build/ft-%/bin/autoconf))
+$(eval $(call make-tarball-module-rules,automake,build/ft-%/bin/automake,build/ft-%/bin/autoconf))
 
 build/.libtool-stamp:
-	$(call download-and-extract,https://$(gnu_mirror)/libtool/libtool-$(libtool_version).tar.gz,$(libtool_hash),libtool)
+	$(call download-and-extract,libtool)
 	@cd libtool \
-		&& patch -p1 < ../releng/patches/libtool-fixes.patch \
+		@if [ -n "$(libtool_patches)" ]; then \
+			echo "[*] Applying patches"; \
+			cd libtool; \
+			for patch in $(libtool_patches); do \
+				patch -p1 < ../releng/patches/$$patch; \
+			done; \
+		fi
 		&& for name in aclocal.m4 config-h.in configure Makefile.in; do \
 			find . -name $$name -exec touch '{}' \;; \
 		done
@@ -160,7 +167,7 @@ build/.libtool-stamp:
 build/ft-tmp-%/libtool/Makefile: build/ft-env-%.rc build/.libtool-stamp build/ft-%/bin/automake
 	$(RM) -r $(@D)
 	mkdir -p $(@D)
-	. $< && cd $(@D) && PATH=$(shell pwd)/build/ft-$*/bin:$$PATH ../../../libtool/configure
+	. $< && cd $(@D) && PATH=$(shell pwd)/build/ft-$*/bin:$$PATH ../../../libtool/configure $(libtool_options)
 
 build/ft-%/bin/libtool: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 	. $< \
@@ -172,21 +179,21 @@ build/ft-%/bin/libtool: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 		&& make $(MAKE_J) install
 	@touch $@
 
-$(eval $(call make-tarball-module-rules,gettext,https://$(gnu_mirror)/gettext/gettext-$(gettext_version).tar.gz,$(gettext_hash),build/ft-%/bin/autopoint,build/ft-%/bin/libtool,gettext-static-only.patch))
+$(eval $(call make-tarball-module-rules,gettext,build/ft-%/bin/autopoint,build/ft-%/bin/libtool))
 
-$(eval $(call make-git-meson-module-rules,zlib,$(zlib_version),build/ft-%/lib/pkgconfig/zlib.pc,,$(zlib_options)))
+$(eval $(call make-git-meson-module-rules,zlib,build/ft-%/lib/pkgconfig/zlib.pc,))
 
-$(eval $(call make-git-meson-module-rules,libffi,$(libffi_version),build/ft-%/lib/pkgconfig/libffi.pc,,$(libffi_options)))
+$(eval $(call make-git-meson-module-rules,libffi,build/ft-%/lib/pkgconfig/libffi.pc,))
 
-$(eval $(call make-git-meson-module-rules,glib,$(glib_version),build/ft-%/bin/glib-genmarshal,build/ft-%/lib/pkgconfig/zlib.pc build/ft-%/lib/pkgconfig/libffi.pc,$(glib_options)))
+$(eval $(call make-git-meson-module-rules,glib,build/ft-%/bin/glib-genmarshal,build/ft-%/lib/pkgconfig/zlib.pc build/ft-%/lib/pkgconfig/libffi.pc))
 
-$(eval $(call make-git-meson-module-rules,pkg-config,$(pkg_config_version),build/ft-%/bin/pkg-config,build/ft-%/bin/glib-genmarshal,$(pkg_config_options)))
+$(eval $(call make-git-meson-module-rules,pkg-config,build/ft-%/bin/pkg-config,build/ft-%/bin/glib-genmarshal))
 
-$(eval $(call make-tarball-module-rules,flex,https://github.com/westes/flex/releases/download/v$(flex_version)/flex-$(flex_version).tar.gz,$(flex_hash),build/ft-%/bin/flex,build/ft-$(build_os_arch)/bin/m4,flex-modern-glibc.patch))
+$(eval $(call make-tarball-module-rules,flex,build/ft-%/bin/flex,build/ft-$(build_os_arch)/bin/m4))
 
-$(eval $(call make-tarball-module-rules,bison,https://$(gnu_mirror)/bison/bison-$(bison_version).tar.gz,$(bison_hash),build/ft-%/bin/bison,build/ft-$(build_os_arch)/bin/m4))
+$(eval $(call make-tarball-module-rules,bison,build/ft-%/bin/bison,build/ft-$(build_os_arch)/bin/m4))
 
-$(eval $(call make-git-meson-module-rules,vala,$(vala_version),build/ft-%/bin/valac,build/ft-%/bin/glib-genmarshal build/ft-$(build_os_arch)/bin/flex build/ft-$(build_os_arch)/bin/bison,$(vala_options)))
+$(eval $(call make-git-meson-module-rules,vala,build/ft-%/bin/valac,build/ft-%/bin/glib-genmarshal build/ft-$(build_os_arch)/bin/flex build/ft-$(build_os_arch)/bin/bison))
 
 
 ifeq ($(host_os), $(filter $(host_os), macos ios))

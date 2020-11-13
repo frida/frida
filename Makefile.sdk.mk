@@ -105,7 +105,7 @@ build/fs-tmp-%/libiconv/Makefile: build/fs-env-%.rc build/.libiconv-stamp
 	mkdir -p $(@D)
 	. $< \
 		&& cd $(@D) \
-		&& ../../../libiconv/configure
+		&& ../../../libiconv/configure $(libiconv_options)
 
 build/fs-%/lib/libiconv.a: build/fs-env-%.rc build/fs-tmp-%/libiconv/Makefile
 	. $< \
@@ -134,9 +134,7 @@ build/fs-tmp-%/elfutils/Makefile: build/fs-env-%.rc build/.elfutils-stamp build/
 	mkdir -p $(@D)
 	. $< \
 		&& cd $(@D) \
-		&& ../../../elfutils/configure \
-			--disable-libdebuginfod \
-			--enable-maintainer-mode
+		&& ../../../elfutils/configure $(elfutils_options)
 
 build/fs-%/lib/libelf.a: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
 	. $< \
@@ -160,7 +158,7 @@ build/.libdwarf-stamp:
 build/fs-tmp-%/libdwarf/Makefile: build/fs-env-%.rc build/.libdwarf-stamp build/fs-%/lib/libelf.a
 	$(RM) -r $(@D)
 	mkdir -p $(@D)
-	. $< && cd $(@D) && ../../../libdwarf/configure
+	. $< && cd $(@D) && ../../../libdwarf/configure $(libdwarf_options)
 
 build/fs-%/lib/libdwarf.a: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
 	. $< \
@@ -189,7 +187,7 @@ $1/configure: build/fs-env-$(build_os_arch).rc build/.$1-stamp
 build/fs-tmp-%/$1/Makefile: build/fs-env-%.rc $1/configure $4
 	$(RM) -r $$(@D)
 	mkdir -p $$(@D)
-	. $$< && cd $$(@D) && ../../../$1/configure
+	. $$< && cd $$(@D) && ../../../$1/configure $$($1_options)
 
 $3: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
 	. $$< \
@@ -217,7 +215,7 @@ build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_os_arch).rc build/fs-env-%.r
 			--libdir $$$$frida_prefix/lib \
 			--default-library static \
 			$$(FRIDA_MESONFLAGS_BOTTLE) \
-			$5 \
+			$$($1_options) \
 			$$(@D) \
 			$1)
 
@@ -227,35 +225,35 @@ $3: build/fs-env-%.rc build/fs-tmp-%/$1/build.ninja
 	@touch $$@
 endef
 
-$(eval $(call make-git-meson-module-rules,zlib,$(zlib_version),build/fs-%/lib/pkgconfig/zlib.pc,,$(zlib_options)))
+$(eval $(call make-git-meson-module-rules,zlib,$(zlib_version),build/fs-%/lib/pkgconfig/zlib.pc,))
 
 $(eval $(call make-git-autotools-module-rules,xz,$(xz_version),build/fs-%/lib/pkgconfig/liblzma.pc,))
 
-$(eval $(call make-git-meson-module-rules,sqlite,$(sqlite_version),build/fs-%/lib/pkgconfig/sqlite3.pc,,$(sqlite_options)))
+$(eval $(call make-git-meson-module-rules,sqlite,$(sqlite_version),build/fs-%/lib/pkgconfig/sqlite3.pc,))
 
 $(eval $(call make-git-autotools-module-rules,libunwind,$(libunwind_version),build/fs-%/lib/pkgconfig/libunwind.pc,build/fs-%/lib/pkgconfig/liblzma.pc))
 
-$(eval $(call make-git-meson-module-rules,libffi,$(libffi_version),build/fs-%/lib/pkgconfig/libffi.pc,,$(libffi_options)))
+$(eval $(call make-git-meson-module-rules,libffi,$(libffi_version),build/fs-%/lib/pkgconfig/libffi.pc,))
 
-$(eval $(call make-git-meson-module-rules,glib,$(glib_version),build/fs-%/lib/pkgconfig/glib-2.0.pc,$(iconv) build/fs-%/lib/pkgconfig/zlib.pc build/fs-%/lib/pkgconfig/libffi.pc,$(glib_options)))
+$(eval $(call make-git-meson-module-rules,glib,$(glib_version),build/fs-%/lib/pkgconfig/glib-2.0.pc,$(iconv) build/fs-%/lib/pkgconfig/zlib.pc build/fs-%/lib/pkgconfig/libffi.pc))
 
-$(eval $(call make-git-meson-module-rules,glib-networking,$(glib_networking_version),build/fs-%/lib/pkgconfig/gioopenssl.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/openssl.pc,$(glib_networking_options)))
+$(eval $(call make-git-meson-module-rules,glib-networking,$(glib_networking_version),build/fs-%/lib/pkgconfig/gioopenssl.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/openssl.pc))
 
-$(eval $(call make-git-meson-module-rules,libgee,$(libgee_version),build/fs-%/lib/pkgconfig/gee-0.8.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc,$(libgee_options)))
+$(eval $(call make-git-meson-module-rules,libgee,$(libgee_version),build/fs-%/lib/pkgconfig/gee-0.8.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc))
 
-$(eval $(call make-git-meson-module-rules,json-glib,$(json_glib_version),build/fs-%/lib/pkgconfig/json-glib-1.0.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc,$(json_glib_options)))
+$(eval $(call make-git-meson-module-rules,json-glib,$(json_glib_version),build/fs-%/lib/pkgconfig/json-glib-1.0.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc))
 
-$(eval $(call make-git-meson-module-rules,libpsl,$(libpsl_version),build/fs-%/lib/pkgconfig/libpsl.pc,,$(libpsl_options)))
+$(eval $(call make-git-meson-module-rules,libpsl,$(libpsl_version),build/fs-%/lib/pkgconfig/libpsl.pc,))
 
-$(eval $(call make-git-meson-module-rules,libxml2,$(libxml2_version),build/fs-%/lib/pkgconfig/libxml-2.0.pc,build/fs-%/lib/pkgconfig/zlib.pc build/fs-%/lib/pkgconfig/liblzma.pc,$(libxml2_options)))
+$(eval $(call make-git-meson-module-rules,libxml2,$(libxml2_version),build/fs-%/lib/pkgconfig/libxml-2.0.pc,build/fs-%/lib/pkgconfig/zlib.pc build/fs-%/lib/pkgconfig/liblzma.pc))
 
-$(eval $(call make-git-meson-module-rules,libsoup,$(libsoup_version),build/fs-%/lib/pkgconfig/libsoup-2.4.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/sqlite3.pc build/fs-%/lib/pkgconfig/libpsl.pc build/fs-%/lib/pkgconfig/libxml-2.0.pc,$(libsoup_options)))
+$(eval $(call make-git-meson-module-rules,libsoup,$(libsoup_version),build/fs-%/lib/pkgconfig/libsoup-2.4.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/sqlite3.pc build/fs-%/lib/pkgconfig/libpsl.pc build/fs-%/lib/pkgconfig/libxml-2.0.pc))
 
-$(eval $(call make-git-meson-module-rules,capstone,$(capstone_version),build/fs-%/lib/pkgconfig/capstone.pc,,$(capstone_options)))
+$(eval $(call make-git-meson-module-rules,capstone,$(capstone_version),build/fs-%/lib/pkgconfig/capstone.pc,))
 
-$(eval $(call make-git-meson-module-rules,quickjs,$(quickjs_version),build/fs-%/lib/pkgconfig/quickjs.pc,,$(quickjs_options)))
+$(eval $(call make-git-meson-module-rules,quickjs,$(quickjs_version),build/fs-%/lib/pkgconfig/quickjs.pc,))
 
-$(eval $(call make-git-meson-module-rules,tinycc,$(tinycc_version),build/fs-%/lib/pkgconfig/libtcc.pc,,$(tinycc_options)))
+$(eval $(call make-git-meson-module-rules,tinycc,$(tinycc_version),build/fs-%/lib/pkgconfig/libtcc.pc,))
 
 
 ifeq ($(FRIDA_ASAN), yes)
@@ -396,38 +394,13 @@ build/fs-%/lib/pkgconfig/openssl.pc: build/fs-env-%.rc build/fs-tmp-%/openssl/Co
 		&& cd build/fs-tmp-$*/openssl \
 		&& perl Configure \
 			--prefix=$$frida_prefix \
-			--openssldir=/etc/ssl \
-			no-engine \
-			no-tests \
-			no-comp \
-			no-ssl3 \
-			no-zlib \
-			no-async \
-			no-shared \
-			enable-cms \
+			$(openssl_options) \
 			$(openssl_buildtype_args) \
 			$(openssl_arch_args) \
 		&& make depend \
 		&& make build_libs \
 		&& make install_dev
 
-
-v8_common_args := \
-	use_thin_lto=false \
-	v8_monolithic=true \
-	v8_use_external_startup_data=false \
-	is_component_build=false \
-	v8_enable_debugging_features=false \
-	v8_enable_disassembler=false \
-	v8_enable_gdbjit=false \
-	v8_enable_i18n_support=false \
-	v8_untrusted_code_mitigations=false \
-	treat_warnings_as_errors=false \
-	fatal_linker_warnings=false \
-	use_glib=false \
-	use_goma=false \
-	v8_embedder_string="-frida" \
-	$(NULL)
 
 ifeq ($(FRIDA_ASAN), yes)
 v8_buildtype_args := \
@@ -572,7 +545,7 @@ build/fs-tmp-%/v8/build.ninja: v8-checkout/v8 build/fs-tmp-$(build_os_arch)/gn/g
 	cd v8-checkout/v8 \
 		&& ../../build/fs-tmp-$(build_os_arch)/gn/gn \
 			gen $(abspath $(@D)) \
-			--args='target_os="$(v8_os)" target_cpu="$(v8_cpu)" $(v8_cpu_args) $(v8_common_args) $(v8_buildtype_args) $(v8_platform_args)'
+			--args='target_os="$(v8_os)" target_cpu="$(v8_cpu)" $(v8_cpu_args) $(v8_buildtype_args) $(v8_platform_args) $(v8_options)'
 
 build/fs-tmp-%/v8/obj/libv8_monolith.a: build/fs-tmp-%/v8/build.ninja
 	$(NINJA) -C build/fs-tmp-$*/v8 v8_monolith
