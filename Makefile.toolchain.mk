@@ -148,26 +148,24 @@ $(eval $(call make-tarball-module-rules,autoconf,build/ft-%/bin/autoconf,build/f
 
 $(eval $(call make-tarball-module-rules,automake,build/ft-%/bin/automake,build/ft-%/bin/autoconf))
 
-build/.libtool-stamp:
+ext/.libtool-stamp:
 	$(call download-and-extract,libtool)
-	@cd libtool \
-		@if [ -n "$(libtool_patches)" ]; then \
+	@cd ext/libtool \
+		&& if [ -n "$(libtool_patches)" ]; then \
 			echo "[*] Applying patches"; \
-			cd libtool; \
 			for patch in $(libtool_patches); do \
-				patch -p1 < ../releng/patches/$$patch; \
+				patch -p1 < ../../releng/patches/$$patch || exit 1; \
 			done; \
-		fi
+		fi \
 		&& for name in aclocal.m4 config-h.in configure Makefile.in; do \
 			find . -name $$name -exec touch '{}' \;; \
 		done
-	@mkdir -p $(@D)
 	@touch $@
 
 build/ft-tmp-%/libtool/Makefile: build/ft-env-%.rc build/.libtool-stamp build/ft-%/bin/automake
 	$(RM) -r $(@D)
 	mkdir -p $(@D)
-	. $< && cd $(@D) && PATH=$(shell pwd)/build/ft-$*/bin:$$PATH ../../../libtool/configure $(libtool_options)
+	. $< && cd $(@D) && PATH=$(shell pwd)/build/ft-$*/bin:$$PATH ../../../ext/libtool/configure $(libtool_options)
 
 build/ft-%/bin/libtool: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 	. $< \
