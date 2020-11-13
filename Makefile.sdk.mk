@@ -16,6 +16,10 @@ ifeq ($(host_os), $(filter $(host_os), linux android qnx))
 	dwarf := build/fs-%/lib/libdwarf.a
 endif
 
+ifeq ($(host_os), $(filter $(host_os), macos ios linux android))
+	glib_tls_provider := build/fs-%/lib/pkgconfig/gioopenssl.pc
+endif
+
 ifneq ($(FRIDA_V8), disabled)
 	v8 := build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc
 endif
@@ -26,10 +30,6 @@ ifeq ($(FRIDA_ASAN), no)
 	libcxx := build/fs-%/lib/c++/libc++.a
 endif
 endif
-endif
-
-ifeq ($(host_os), $(filter $(host_os), macos ios linux android))
-	glib_tls_provider := build/fs-%/lib/pkgconfig/gioopenssl.pc
 endif
 
 
@@ -331,28 +331,16 @@ endif
 ifeq ($(host_arch), x86_64)
 	openssl_arch_args := linux-x86_64 enable-ec_nistp_64_gcc_128
 endif
-ifeq ($(host_arch), arm)
-	openssl_arch_args := linux-armv4
-endif
-ifeq ($(host_arch), armhf)
-	openssl_arch_args := linux-armv4
-endif
-ifeq ($(host_arch), armbe8)
+ifeq ($(host_arch), $(filter $(host_arch), arm armbe8 armeabi armhf))
 	openssl_arch_args := linux-armv4
 endif
 ifeq ($(host_arch), arm64)
 	openssl_arch_args := linux-aarch64
 endif
-ifeq ($(host_arch), mipsel)
+ifeq ($(host_arch), $(filter $(host_arch), mips mipsel))
 	openssl_arch_args := linux-mips32
 endif
-ifeq ($(host_arch), mips)
-	openssl_arch_args := linux-mips32
-endif
-ifeq ($(host_arch), mips64el)
-	openssl_arch_args := linux-mips64
-endif
-ifeq ($(host_arch), mips64)
+ifeq ($(host_arch), $(filter $(host_arch), mips64 mips64el))
 	openssl_arch_args := linux-mips64
 endif
 	openssl_host_env := \

@@ -6,20 +6,6 @@ MAKE_J ?= -j 8
 SHELL := /bin/bash
 
 
-ifeq ($(host_os), $(filter $(host_os), linux android qnx))
-	strip_all := --strip-all
-endif
-ifeq ($(host_os), $(filter $(host_os), macos ios))
-	strip_all := -Sx
-endif
-
-ifeq ($(host_os), $(filter $(host_os), macos ios))
-	export_ldflags := -Wl,-exported_symbols_list,$(abspath build/ft-executable.symbols)
-else
-	export_ldflags := -Wl,--version-script,$(abspath build/ft-executable.version)
-endif
-
-
 all: build/toolchain-$(host_os)-$(host_arch).tar.bz2
 	@echo ""
 	@echo -e "\\033[0;32mSuccess"'!'"\\033[0;39m Here's your toolchain: \\033[1m$<\\033[0m"
@@ -90,10 +76,10 @@ build/ft-tmp-%/.package-stamp: \
 			if [ -L $$f ]; then \
 				true; \
 			elif file -b --mime $$f | egrep -q "executable|binary"; then \
-				$$STRIP $(strip_all) $$f || exit 1; \
+				$$STRIP $$f || exit 1; \
 			fi; \
 		done \
-		&& $$STRIP $(strip_all) $(@D)/package/lib/vala-*/gen-introspect-*
+		&& $$STRIP $(@D)/package/lib/vala-*/gen-introspect-*
 	releng/relocatify.sh $(@D)/package $(abspath build/ft-$*) $(abspath releng)
 	@touch $@
 
@@ -202,6 +188,12 @@ $(eval $(call make-tarball-module-rules,bison,https://$(gnu_mirror)/bison/bison-
 
 $(eval $(call make-git-meson-module-rules,vala,$(vala_version),build/ft-%/bin/valac,build/ft-%/bin/glib-genmarshal build/ft-$(build_os_arch)/bin/flex build/ft-$(build_os_arch)/bin/bison,$(vala_options)))
 
+
+ifeq ($(host_os), $(filter $(host_os), macos ios))
+	export_ldflags := -Wl,-exported_symbols_list,$(abspath build/ft-executable.symbols)
+else
+	export_ldflags := -Wl,--version-script,$(abspath build/ft-executable.version)
+endif
 
 build/ft-env-%.rc: build/ft-executable.symbols build/ft-executable.version
 	FRIDA_HOST=$* \
