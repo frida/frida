@@ -322,11 +322,9 @@ depot_tools_options := \
 
 
 define grab-and-prepare
-	@if [ -n "$($(subst -,_,$1)_hash)" ]; then \
-		$(call grab-and-prepare-tarball,$1) \
-	else \
-		$(call grab-and-prepare-repo,$1) \
-	fi
+	$(if $($(subst -,_,$1)_hash),
+		$(call grab-and-prepare-tarball,$1),
+		$(call grab-and-prepare-repo,$1))
 endef
 
 define grab-and-prepare-tarball
@@ -336,12 +334,13 @@ define grab-and-prepare-tarball
 	@url=$($(subst -,_,$1)_url) \
 		&& version=$($(subst -,_,$1)_version) \
 		&& expected_hash=$($(subst -,_,$1)_hash) \
-		&& echo -e "╭────"\
-		&& echo -e "│ 🔨 \\033[1m$1\\033[0m $$version" \
-		&& echo -e "├─────\
-		&& echo -e "│ URL: $$url" \
-		&& echo -e "│ SHA: $$expected_hash" \
-		&& echo -e "└──────\
+		&& echo -e "\
+╭────\n\
+│ 🔨 \\033[1m$1\\033[0m $$version\n\
+├───────\n\
+│ URL: $$url\n\
+│ SHA: $$expected_hash\n\
+└────────────" \
 		&& if command -v curl >/dev/null; then \
 			curl -sSfLo ext/.$1-tarball $$url; \
 		else \
@@ -370,12 +369,13 @@ define grab-and-prepare-repo
 
 	@url=$($(subst -,_,$1)_url) \
 		&& version=$($(subst -,_,$1)_version) \
-		&& echo -e "╭────"\
-		&& echo -e "│ 🔨 \\033[1m$1\\033[0m" \
-		&& echo -e "├───────────────────────────────────────────────╮" \
-		&& echo -e "│ URL: $$url" \
-		&& echo -e "│ CID: $$version" \
-		&& echo -e "└───────────────────────────────────────────────╯" \
+		&& echo -e "\
+╭────\n\
+│ 🔨 \\033[1m$1\\033[0m\n\
+├───────────────────────────────────────────────╮\n\
+│ URL: $$url\n\
+│ CID: $$version\n\
+└───────────────────────────────────────────────╯" \
 		&& git clone --recurse-submodules $$url ext/$1 \
 		&& cd ext/$1 \ \
 		&& git checkout -q $$version
@@ -386,7 +386,7 @@ endef
 define apply-patches
 	@cd ext/$1 \
 		&& for patch in $($(subst -,_,$1)_patches); do \
-			echo "Applying \\033[1m$$patch\\033[0m"; \
+			echo -e "Applying \\033[1m$$patch\\033[0m"; \
 			patch -p1 < ../../releng/patches/$$patch || exit 1; \
 		done
 endef

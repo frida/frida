@@ -96,6 +96,9 @@ endif
 	@touch $@
 
 
+.PHONY: libiconv
+libiconv: build/fs-$(host_os_arch)/lib/libiconv.a
+
 ext/.libiconv-stamp:
 	$(call grab-and-prepare,libiconv)
 	@touch $@
@@ -115,14 +118,13 @@ build/fs-%/lib/libiconv.a: build/fs-env-%.rc build/fs-tmp-%/libiconv/Makefile
 	@touch $@
 
 
+.PHONY: elfutils
+elfutils: build/fs-$(host_os_arch)/lib/libelf.a
+
 ext/.elfutils-stamp: build/fs-env-$(build_os_arch).rc
-	$(RM) -r ext/elfutils
-	git clone git://sourceware.org/git/elfutils.git ext/elfutils
-	cd ext/elfutils && git checkout -q $(elfutils_version)
+	$(call grab-and-prepare,elfutils)
 	. $< \
 		&& cd ext/elfutils \
-		&& git checkout -q $(elfutils_version) \
-		&& $(call apply-patches,elfutils) \
 		&& autoreconf -ifv
 	@touch $@
 
@@ -138,24 +140,28 @@ build/fs-%/lib/libelf.a: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
 		&& cd build/fs-tmp-$*/elfutils \
 		&& $(MAKE) $(MAKE_J) -C libelf libelf.a
 	install -d build/fs-$*/include
-	install -m 644 elfutils/libelf/libelf.h build/fs-$*/include
-	install -m 644 elfutils/libelf/elf.h build/fs-$*/include
-	install -m 644 elfutils/libelf/gelf.h build/fs-$*/include
-	install -m 644 elfutils/libelf/nlist.h build/fs-$*/include
+	install -m 644 ext/elfutils/libelf/libelf.h build/fs-$*/include
+	install -m 644 ext/elfutils/libelf/elf.h build/fs-$*/include
+	install -m 644 ext/elfutils/libelf/gelf.h build/fs-$*/include
+	install -m 644 ext/elfutils/libelf/nlist.h build/fs-$*/include
 	install -d build/fs-$*/lib
 	install -m 644 build/fs-tmp-$*/elfutils/libelf/libelf.a build/fs-$*/lib
 	@touch $@
 
 
+.PHONY: libdwarf
+libdwarf: build/fs-$(host_os_arch)/lib/libdwarf.a
+
 ext/.libdwarf-stamp:
 	$(call grab-and-prepare,libdwarf)
-	@mkdir -p $(@D)
 	@touch $@
 
 build/fs-tmp-%/libdwarf/Makefile: build/fs-env-%.rc ext/.libdwarf-stamp build/fs-%/lib/libelf.a
 	$(RM) -r $(@D)
 	mkdir -p $(@D)
-	. $< && cd $(@D) && ../../../ext/libdwarf/configure $(libdwarf_options)
+	. $< \
+		&& cd $(@D) \
+		&& ../../../ext/libdwarf/configure $(libdwarf_options)
 
 build/fs-%/lib/libdwarf.a: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
 	. $< \
@@ -267,6 +273,9 @@ $(eval $(call make-meson-module-rules,quickjs,build/fs-%/lib/pkgconfig/quickjs.p
 
 $(eval $(call make-meson-module-rules,tinycc,build/fs-%/lib/pkgconfig/libtcc.pc,))
 
+
+.PHONY: openssl
+openssl: build/fs-$(host_os_arch)/lib/pkgconfig/openssl.pc
 
 ifeq ($(FRIDA_ASAN), yes)
 	openssl_buildtype_args := \
@@ -412,6 +421,11 @@ build/fs-%/lib/pkgconfig/openssl.pc: build/fs-env-%.rc build/fs-tmp-%/openssl/Co
 		&& $(MAKE) build_libs \
 		&& $(MAKE) install_dev
 
+
+.PHONY: v8 gn depot_tools
+v8: build/fs-$(host_os_arch)/lib/pkgconfig/v8-$(v8_api_version).pc
+gn: build/fs-tmp-$(build_os_arch)/gn/gn
+depot_tools: ext/.depot_tools-stamp
 
 ifeq ($(FRIDA_ASAN), yes)
 v8_buildtype_args := \
