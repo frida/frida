@@ -1,8 +1,8 @@
 diff --git a/configure.ac b/configure.ac
-index a2716772..1264441f 100644
+index 6896dff3..ab397c35 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -529,7 +529,7 @@ if test "$libc_has_argp" = "false" ; then
+@@ -533,7 +533,7 @@ if test "$libc_has_argp" = "false" ; then
  	AC_CHECK_LIB([argp], [argp_parse], [have_argp="true"], [have_argp="false"])
  
  	if test "$have_argp" = "false"; then
@@ -23,6 +23,18 @@ index 292082bd..172456d2 100644
  #include <sys/param.h>
  #include <endian.h>
  #include <byteswap.h>
+diff --git a/libelf/elf_error.c b/libelf/elf_error.c
+index 5364e685..e596108d 100644
+--- a/libelf/elf_error.c
++++ b/libelf/elf_error.c
+@@ -32,7 +32,6 @@
+ #endif
+ 
+ #include <assert.h>
+-#include <libintl.h>
+ #include <stdbool.h>
+ #include <stdint.h>
+ #include <stdlib.h>
 diff --git a/libelf/elf_update.c b/libelf/elf_update.c
 index 9b8867ce..afb3aa82 100644
 --- a/libelf/elf_update.c
@@ -56,15 +68,3 @@ index b55d5c48..5f13d947 100644
  
  
  /* Helper Macros to write 32 bit and 64 bit functions.  */
-diff --git a/libelf/elf_error.c b/libelf/elf_error.c
-index 5364e685..e596108d 100644
---- a/libelf/elf_error.c
-+++ b/libelf/elf_error.c
-@@ -32,7 +32,6 @@
- #endif
- 
- #include <assert.h>
--#include <libintl.h>
- #include <stdbool.h>
- #include <stdint.h>
- #include <stdlib.h>

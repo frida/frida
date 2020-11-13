@@ -1,4 +1,4 @@
-modules = capstone frida-gum frida-core frida-python frida-node frida-tools
+modules = frida-gum frida-core frida-python frida-node frida-tools
 
 all $(MAKECMDGOALS):
 	@build_os=$$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos,'); \

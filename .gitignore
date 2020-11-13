@@ -3,6 +3,7 @@
 /automake
 /bison
 /build
+/capstone
 /elfutils
 /flex
 /gettext
@@ -29,7 +30,6 @@
 /releng/modules/frida-gadget-ios/*.dylib
 /releng/modules/frida-gadget-ios/node_modules
 /sqlite
-/stlport
 /v8-checkout
 /vala
 /xz

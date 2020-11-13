@@ -14,15 +14,7 @@ test "$prefix" = NONE && prefix="$frida_prefix"
 enable_nls=no
 enable_silent_rules=yes
 
-case "$PACKAGE_TARNAME" in
-  capstone)
-    # Takes ages to compile with debug information
-    frida_flags="@frida_optimization_flags@ -pipe"
-    ;;
-  *)
-    frida_flags="@frida_optimization_flags@ -pipe @frida_debug_flags@"
-    ;;
-esac
+frida_flags="@frida_optimization_flags@ -pipe @frida_debug_flags@"
 
 case $frida_host_platform_arch in
   linux-arm)

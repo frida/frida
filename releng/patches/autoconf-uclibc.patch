@@ -1,0 +1,11 @@
+diff -Nur autoconf-orig/lib/autoconf/c.m4 autoconf/lib/autoconf/c.m4
+--- autoconf-orig/lib/autoconf/c.m4	2012-01-21 14:46:39.000000000 +0100
++++ autoconf/lib/autoconf/c.m4	2020-11-06 18:12:26.000000000 +0100
+@@ -1206,6 +1206,7 @@
+ [_AC_C_STD_TRY([c99],
+ [[#include <stdarg.h>
+ #include <stdbool.h>
++#include <stddef.h>
+ #include <stdlib.h>
+ #include <wchar.h>
+ #include <stdio.h>

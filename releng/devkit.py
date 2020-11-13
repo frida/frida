@@ -63,9 +63,8 @@ def generate_header(package, frida_root, host, kit, flavor, umbrella_header_path
             os.path.join(win10_sdk_dir, "Include", win10_sdk_version, "ucrt"),
             os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "lib", "glib-2.0", "include"),
             os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "include", "glib-2.0"),
-            os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "include", "glib-2.0"),
             os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "include", "json-glib-1.0"),
-            os.path.join(frida_root, "capstone", "include", "capstone"),
+            os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "include", "capstone"),
             os.path.join(frida_root, "frida-gum"),
             os.path.join(frida_root, "frida-gum", "bindings")
         ]
@@ -218,7 +217,7 @@ def generate_library_windows(package, frida_root, host, flavor, output_dir, libr
     ]
 
     capstone = [
-        internal_arch_lib_path("capstone", frida_root, host)
+        sdk_lib_path("libcapstone.a", frida_root, host)
     ]
 
     gum_lib = internal_arch_lib_path("gum", frida_root, host)

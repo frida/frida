@@ -2,13 +2,35 @@ include config.mk
 
 MAKE_J ?= -j 8
 
+frida_sdk_version := 20201106
+frida_bootstrap_version := 20201028
+
 repo_base_url = https://github.com/frida
 repo_suffix := .git
 
 libiconv_version := 1.16
-elfutils_version := elfutils-0.179
-libdwarf_version := 20200114
-openssl_version := 1.1.1f
+libiconv_hash := e6a1b1b589654277ee790cce3734f07876ac4ccfaecbee8afa0b649cf529cc04
+elfutils_version := elfutils-0.182
+libdwarf_version := 20201020
+libdwarf_hash := 1c5ce59e314c6fe74a1f1b4e2fa12caea9c24429309aa0ebdfa882f74f016eff
+zlib_version := 91920caec2160ffd919fd48dc4e7a0f6c3fb36d2
+xz_version := 6c84113065f603803683d30342207c73465bbc12
+sqlite_version := 9f21a054d5c24c2036e9d1b28c630ecda5ae24c3
+libunwind_version := 66ca44cd82389cd7cfbbd482e58324a79f6679ab
+libffi_version := 4612f7f4b8cfda9a1f07e66d033bb9319860af9b
+glib_version := 327fd7518d5612492723aec20c97fd2505e98fd8
+glib_networking_version := 7be8c21840cd4eb23477dc0c0d261f85d2c57778
+libgee_version := c7e96ac037610cc3d0e11dc964b7b1fca479fc2a
+json_glib_version := 9dd3b3898a2c41a1f9af24da8bab22e61526d299
+libpsl_version := 3caf6c33029b6c43fc31ce172badf976f6c37bc4
+libxml2_version := f1845f6fd1c0b6aac0f573c77a8250f8d4eb31fd
+libsoup_version := d0ac83f3952d590da09968b1e30736782b1d1c7f
+capstone_version := 03295d19d2c3b0162118a6d9742312301cde1d00
+openssl_version := 1.1.1h
+openssl_hash := 5c9ca8774bd7b03e5784f26ae9e9e6d749c9da2438545077e6b3d755a06595d9
+gn_version := 75194c124f158d7fabdc94048f1a3f850a5f0701
+depot_tools_version := b674f8a27725216bd2201652636649d83064ca4a
+v8_version := 6e74fda056e277e0c80240e7a4dd76c7225bd9ec
 v8_api_version := 8.0
 
 gnu_mirror := saimei.ftp.acc.umu.se/mirror/gnu.org/gnu
@@ -19,12 +41,6 @@ SHELL := /bin/bash
 build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos,')
 build_arch := $(shell releng/detect-arch.sh)
 build_platform_arch := $(build_platform)-$(build_arch)
-
-ifneq ($(shell which curl),)
-	download := curl -sSL
-else
-	download := wget -O - -q
-endif
 
 ifdef FRIDA_HOST
 	host_platform := $(shell echo $(FRIDA_HOST) | cut -f1 -d"-")
@@ -38,19 +54,13 @@ else
 endif
 host_platform_arch := $(host_platform)-$(host_arch)
 
-enable_v8 := 0
 
-
-ifeq ($(host_platform), macos)
+ifeq ($(host_platform),$(filter $(host_platform),macos ios))
 	iconv := build/fs-%/lib/libiconv.a
-ifeq ($(enable_v8), 1)
+ifneq ($(FRIDA_V8), disabled)
+ifeq ($(FRIDA_ASAN), no)
 	libcxx := build/fs-%/lib/c++/libc++.a
 endif
-endif
-ifeq ($(host_platform), ios)
-	iconv := build/fs-%/lib/libiconv.a
-ifeq ($(enable_v8), 1)
-	libcxx := build/fs-%/lib/c++/libc++.a
 endif
 endif
 ifeq ($(host_platform), linux)
@@ -73,7 +83,7 @@ endif
 ifeq ($(host_platform),$(filter $(host_platform),macos ios linux android))
 	glib_tls_provider := build/fs-%/lib/pkgconfig/gioopenssl.pc
 endif
-ifeq ($(enable_v8), 1)
+ifneq ($(FRIDA_V8), disabled)
 	v8 := build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc
 endif
 
@@ -113,6 +123,7 @@ build/fs-tmp-%/.package-stamp: \
 		build/fs-%/lib/pkgconfig/gee-0.8.pc \
 		build/fs-%/lib/pkgconfig/json-glib-1.0.pc \
 		build/fs-%/lib/pkgconfig/libsoup-2.4.pc \
+		build/fs-%/lib/pkgconfig/capstone.pc \
 		$(v8) \
 		$(libcxx)
 	$(RM) -r $(@D)/package
@@ -144,11 +155,33 @@ endif
 	@touch $@
 
 
+define download-and-extract
+	@$(RM) -r $3
+	@mkdir -p $3
+	@echo "[*] Downloading $1"
+	@if command -v curl >/dev/null; then \
+		curl -sSfLo $3/.tarball $1; \
+	else \
+		wget -qO $3/.tarball $1; \
+	fi
+	@echo "[*] Verifying checksum"
+	@actual_checksum=$$(shasum -a 256 -b $3/.tarball | awk '{ print $$1; }'); \
+	case $$actual_checksum in \
+		$2) \
+			;; \
+		*) \
+			echo "$1 checksum mismatch, expected=$2, actual=$$actual_checksum"; \
+			exit 1; \
+			;; \
+	esac
+	@echo "[*] Extracting to $3"
+	@tar -x -f $3/.tarball -z -C $3 --strip-components 1
+	@rm $3/.tarball
+endef
+
+
 build/.libiconv-stamp:
-	$(RM) -r libiconv
-	mkdir libiconv
-	cd libiconv \
-		&& $(download) https://$(gnu_mirror)/libiconv/libiconv-$(libiconv_version).tar.gz | tar -xz --strip-components 1
+	$(call download-and-extract,https://$(gnu_mirror)/libiconv/libiconv-$(libiconv_version).tar.gz,$(libiconv_hash),libiconv)
 	@mkdir -p $(@D)
 	@touch $@
 
@@ -172,7 +205,7 @@ build/.elfutils-stamp: build/fs-env-$(build_platform_arch).rc
 	git clone git://sourceware.org/git/elfutils.git
 	. $< \
 		&& cd elfutils \
-		&& git checkout -b release $(elfutils_version) \
+		&& git checkout -b $(frida_sdk_version) $(elfutils_version) \
 		&& patch -p1 < ../releng/patches/elfutils-clang.patch \
 		&& patch -p1 < ../releng/patches/elfutils-android.patch \
 		&& patch -p1 < ../releng/patches/elfutils-glibc-compatibility.patch \
@@ -186,7 +219,9 @@ build/fs-tmp-%/elfutils/Makefile: build/fs-env-%.rc build/.elfutils-stamp build/
 	mkdir -p $(@D)
 	. $< \
 		&& cd $(@D) \
-		&& ../../../elfutils/configure --enable-maintainer-mode
+		&& ../../../elfutils/configure \
+			--disable-libdebuginfod \
+			--enable-maintainer-mode
 
 build/fs-%/lib/libelf.a: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
 	. $< \
@@ -203,10 +238,7 @@ build/fs-%/lib/libelf.a: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
 
 
 build/.libdwarf-stamp:
-	$(RM) -r libdwarf
-	mkdir libdwarf
-	cd libdwarf \
-		&& $(download) https://www.prevanders.net/libdwarf-$(libdwarf_version).tar.gz | tar -xz --strip-components 1
+	$(call download-and-extract,https://www.prevanders.net/libdwarf-$(libdwarf_version).tar.gz,$(libdwarf_hash),libdwarf)
 	@mkdir -p $(@D)
 	@touch $@
 
@@ -230,6 +262,7 @@ define make-git-autotools-module-rules
 build/.$1-stamp:
 	$(RM) -r $1
 	git clone --recurse-submodules $(repo_base_url)/$1$(repo_suffix)
+	cd $1 && git checkout -b $(frida_sdk_version) $2
 	@mkdir -p $$(@D)
 	@touch $$@
 
@@ -237,19 +270,13 @@ $1/configure: build/fs-env-$(build_platform_arch).rc build/.$1-stamp
 	. $$< \
 		&& cd $$(@D) \
 		&& [ -f autogen.sh ] && NOCONFIGURE=1 ./autogen.sh || autoreconf -ifv
-	if [ -n "$5" ]; then \
-		cd $$(@D); \
-		for patch in $5; do \
-			patch -p1 < ../releng/patches/$$$$patch; \
-		done; \
-	fi
 
-build/fs-tmp-%/$1/Makefile: build/fs-env-%.rc $1/configure $3
+build/fs-tmp-%/$1/Makefile: build/fs-env-%.rc $1/configure $4
 	$(RM) -r $$(@D)
 	mkdir -p $$(@D)
 	. $$< && cd $$(@D) && ../../../$1/configure
 
-$2: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
+$3: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
 	. $$< \
 		&& cd build/fs-tmp-$$*/$1 \
 		&& make $(MAKE_J) \
@@ -261,10 +288,11 @@ define make-git-meson-module-rules
 build/.$1-stamp:
 	$(RM) -r $1
 	git clone --recurse-submodules $(repo_base_url)/$1$(repo_suffix)
+	cd $1 && git checkout -b $(frida_sdk_version) $2
 	@mkdir -p $$(@D)
 	@touch $$@
 
-build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_platform_arch).rc build/fs-env-%.rc build/.$1-stamp $3 releng/meson/meson.py
+build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_platform_arch).rc build/fs-env-%.rc build/.$1-stamp $4 releng/meson/meson.py
 	$(RM) -r $$(@D)
 	(. build/fs-meson-env-$$*.rc \
 		&& . build/fs-config-$$*.site \
@@ -274,39 +302,41 @@ build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_platform_arch).rc build/fs-e
 			--libdir $$$$frida_prefix/lib \
 			--default-library static \
 			$$(FRIDA_MESONFLAGS_BOTTLE) \
-			$4 \
+			$5 \
 			$$(@D) \
 			$1)
 
-$2: build/fs-env-%.rc build/fs-tmp-%/$1/build.ninja
+$3: build/fs-env-%.rc build/fs-tmp-%/$1/build.ninja
 	(. $$< \
 		&& $(NINJA) -C build/fs-tmp-$$*/$1 install)
 	@touch $$@
 endef
 
-$(eval $(call make-git-meson-module-rules,zlib,build/fs-%/lib/pkgconfig/zlib.pc,))
+$(eval $(call make-git-meson-module-rules,zlib,$(zlib_version),build/fs-%/lib/pkgconfig/zlib.pc,))
 
-$(eval $(call make-git-autotools-module-rules,xz,build/fs-%/lib/pkgconfig/liblzma.pc,,,xz-uclibc.patch))
+$(eval $(call make-git-autotools-module-rules,xz,$(xz_version),build/fs-%/lib/pkgconfig/liblzma.pc,))
 
-$(eval $(call make-git-meson-module-rules,sqlite,build/fs-%/lib/pkgconfig/sqlite3.pc,,))
+$(eval $(call make-git-meson-module-rules,sqlite,$(sqlite_version),build/fs-%/lib/pkgconfig/sqlite3.pc,,))
 
-$(eval $(call make-git-autotools-module-rules,libunwind,build/fs-%/lib/pkgconfig/libunwind.pc,build/fs-%/lib/pkgconfig/liblzma.pc))
+$(eval $(call make-git-autotools-module-rules,libunwind,$(libunwind_version),build/fs-%/lib/pkgconfig/libunwind.pc,build/fs-%/lib/pkgconfig/liblzma.pc))
 
-$(eval $(call make-git-meson-module-rules,libffi,build/fs-%/lib/pkgconfig/libffi.pc,,))
+$(eval $(call make-git-meson-module-rules,libffi,$(libffi_version),build/fs-%/lib/pkgconfig/libffi.pc,,))
 
-$(eval $(call make-git-meson-module-rules,glib,build/fs-%/lib/pkgconfig/glib-2.0.pc,$(iconv) build/fs-%/lib/pkgconfig/zlib.pc build/fs-%/lib/pkgconfig/libffi.pc,$(glib_iconv_option) -Dselinux=disabled -Dxattr=false -Dlibmount=disabled -Dinternal_pcre=true -Dtests=false))
+$(eval $(call make-git-meson-module-rules,glib,$(glib_version),build/fs-%/lib/pkgconfig/glib-2.0.pc,$(iconv) build/fs-%/lib/pkgconfig/zlib.pc build/fs-%/lib/pkgconfig/libffi.pc,$(glib_iconv_option) -Dselinux=disabled -Dxattr=false -Dlibmount=disabled -Dinternal_pcre=true -Dtests=false))
 
-$(eval $(call make-git-meson-module-rules,glib-networking,build/fs-%/lib/pkgconfig/gioopenssl.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/openssl.pc,-Dgnutls=disabled -Dopenssl=enabled -Dlibproxy=disabled -Dgnome_proxy=disabled -Dstatic_modules=true))
+$(eval $(call make-git-meson-module-rules,glib-networking,$(glib_networking_version),build/fs-%/lib/pkgconfig/gioopenssl.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/openssl.pc,-Dgnutls=disabled -Dopenssl=enabled -Dlibproxy=disabled -Dgnome_proxy=disabled -Dstatic_modules=true))
 
-$(eval $(call make-git-meson-module-rules,libgee,build/fs-%/lib/pkgconfig/gee-0.8.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc))
+$(eval $(call make-git-meson-module-rules,libgee,$(libgee_version),build/fs-%/lib/pkgconfig/gee-0.8.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc))
 
-$(eval $(call make-git-meson-module-rules,json-glib,build/fs-%/lib/pkgconfig/json-glib-1.0.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc,-Dintrospection=disabled -Dtests=false))
+$(eval $(call make-git-meson-module-rules,json-glib,$(json_glib_version),build/fs-%/lib/pkgconfig/json-glib-1.0.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc,-Dintrospection=disabled -Dtests=false))
 
-$(eval $(call make-git-meson-module-rules,libpsl,build/fs-%/lib/pkgconfig/libpsl.pc,,-Dtests=false))
+$(eval $(call make-git-meson-module-rules,libpsl,$(libpsl_version),build/fs-%/lib/pkgconfig/libpsl.pc,,-Dtests=false))
 
-$(eval $(call make-git-meson-module-rules,libxml2,build/fs-%/lib/pkgconfig/libxml-2.0.pc,build/fs-%/lib/pkgconfig/zlib.pc build/fs-%/lib/pkgconfig/liblzma.pc,))
+$(eval $(call make-git-meson-module-rules,libxml2,$(libxml2_version),build/fs-%/lib/pkgconfig/libxml-2.0.pc,build/fs-%/lib/pkgconfig/zlib.pc build/fs-%/lib/pkgconfig/liblzma.pc,))
 
-$(eval $(call make-git-meson-module-rules,libsoup,build/fs-%/lib/pkgconfig/libsoup-2.4.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/sqlite3.pc build/fs-%/lib/pkgconfig/libpsl.pc build/fs-%/lib/pkgconfig/libxml-2.0.pc,-Dgssapi=disabled -Dtls_check=false -Dgnome=false -Dintrospection=disabled -Dvapi=disabled -Dtests=false))
+$(eval $(call make-git-meson-module-rules,libsoup,$(libsoup_version),build/fs-%/lib/pkgconfig/libsoup-2.4.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/sqlite3.pc build/fs-%/lib/pkgconfig/libpsl.pc build/fs-%/lib/pkgconfig/libxml-2.0.pc,-Dgssapi=disabled -Dtls_check=false -Dgnome=false -Dintrospection=disabled -Dvapi=disabled -Dtests=false -Dsysprof=disabled))
+
+$(eval $(call make-git-meson-module-rules,capstone,$(capstone_version),build/fs-%/lib/pkgconfig/capstone.pc,,-Darchs=$(shell echo $(host_arch) | sed 's,^x86_64$$,x86,') -Dx86_att_disable=true -Dcli=disabled))
 
 
 ifeq ($(FRIDA_ASAN), yes)
@@ -364,8 +394,13 @@ endif
 		IOS_MIN_SDK_VERSION=8.0 \
 		CONFIG_DISABLE_BITCODE=true \
 		$(NULL)
+ifeq ($(host_platform_arch), macos-x86)
+ifneq ($(MACOS_X86_SDK_ROOT),)
+	openssl_host_env += MACOS_SDK_ROOT="$(MACOS_X86_SDK_ROOT)"
+endif
+endif
 ifeq ($(host_platform_arch),$(filter $(host_platform_arch),macos-arm64 macos-arm64e))
-	openssl_host_env += MACOS_MIN_SDK_VERSION=10.16
+	openssl_host_env += MACOS_MIN_SDK_VERSION=11.0
 else
 	openssl_host_env += MACOS_MIN_SDK_VERSION=10.9
 endif
@@ -436,9 +471,7 @@ endif
 endif
 
 build/.openssl-stamp:
-	$(RM) -r openssl
-	mkdir openssl
-	$(download) https://www.openssl.org/source/openssl-$(openssl_version).tar.gz | tar -C openssl -xz --strip-components 1
+	$(call download-and-extract,https://www.openssl.org/source/openssl-$(openssl_version).tar.gz,$(openssl_hash),openssl)
 	@mkdir -p $(@D)
 	@touch $@
 
@@ -497,6 +530,7 @@ v8_buildtype_args := \
 else
 v8_buildtype_args := \
 	is_official_build=true \
+	chrome_pgo_phase=0 \
 	is_debug=false \
 	v8_enable_v8_checks=false \
 	symbol_level=0 \
@@ -509,21 +543,16 @@ endif
 ifeq ($(host_arch), x86_64)
 	v8_cpu := x64
 endif
-ifeq ($(host_arch), arm)
+ifeq ($(host_arch),$(filter $(host_arch),arm armbe8 armeabi armhf))
 	v8_cpu := arm
-	v8_cpu_args := arm_version=7 arm_fpu="vfpv3-d16" arm_float_abi="softfp" arm_use_neon=false
-endif
-ifeq ($(host_arch), armbe8)
-	v8_cpu := arm
-	v8_cpu_args := arm_version=7 arm_fpu="vfpv3-d16" arm_float_abi="softfp" arm_use_neon=false
-endif
-ifeq ($(host_arch), armeabi)
-	v8_cpu := arm
-	v8_cpu_args := arm_version=7 arm_fpu="vfpv3-d16" arm_float_abi="softfp" arm_use_neon=false
-endif
+	v8_cpu_args := arm_version=7 arm_fpu="vfpv3-d16" arm_use_neon=false
+ifneq ($(host_platform), android)
 ifeq ($(host_arch), armhf)
-	v8_cpu := arm
-	v8_cpu_args := arm_version=7 arm_fpu="vfpv3-d16" arm_float_abi="hard" arm_use_neon=false
+	v8_cpu_args += arm_float_abi="hard"
+else
+	v8_cpu_args += arm_float_abi="softfp"
+endif
+endif
 endif
 ifeq ($(host_arch), arm64)
 	v8_cpu := arm64
@@ -536,33 +565,27 @@ endif
 v8_build_platform := $(shell echo $(build_platform) | sed 's,^macos$$,mac,')
 ifeq ($(host_platform), macos)
 	v8_os := mac
-	v8_platform_args := libcxx_abi_unstable=false
+	v8_platform_args := $(NULL)
 ifeq ($(host_arch),$(filter $(host_arch),arm64 arm64e))
-	v8_platform_args += mac_deployment_target="10.16.0"
+	v8_platform_args += mac_deployment_target="11.0"
 else
-	v8_platform_args += mac_deployment_target="10.9.0"
+	v8_platform_args += mac_deployment_target="10.9"
 endif
-ifeq ($(host_arch),$(filter $(host_arch),arm64 arm64e))
-	v8_platform_args += \
-		use_xcode_clang=true \
-		v8_enable_pointer_compression=false \
-		$(NULL)
-else
 ifeq ($(FRIDA_ASAN), yes)
 	v8_platform_args += use_xcode_clang=true
 else
 	v8_platform_args += use_xcode_clang=false
 endif
 endif
-endif
 ifeq ($(host_platform), ios)
 	v8_os := ios
 	v8_platform_args := \
 		use_xcode_clang=true \
-		libcxx_abi_unstable=false \
-		mac_deployment_target="10.9.0" \
+		mac_deployment_target="10.9" \
 		ios_deployment_target="8.0" \
 		$(NULL)
+endif
+ifeq ($(host_platform),$(filter $(host_platform),macos ios))
 ifeq ($(host_arch),$(filter $(host_arch),arm64 arm64e))
 	v8_platform_args += v8_enable_pointer_compression=false
 endif
@@ -573,7 +596,6 @@ ifeq ($(host_platform), linux)
 		is_clang=false \
 		is_cfi=false \
 		use_sysroot=false \
-		use_custom_libcxx=false \
 		linux_use_bundled_binutils=false \
 		use_gold=false
 	v8_libs_private := "-lrt"
@@ -592,8 +614,14 @@ ifeq ($(host_platform), android)
 	v8_libs_private := "-llog -lm"
 endif
 
-ifneq ($(MACOS_SDK_ROOT),)
-	v8_platform_args += mac_sdk_path="$(MACOS_SDK_ROOT)"
+ifeq ($(host_platform),$(filter $(host_platform),linux android))
+	v8_platform_args += enable_resource_allowlist_generation=false
+endif
+
+ifeq ($(host_arch),$(filter $(host_arch),x86 arm))
+ifneq ($(MACOS_X86_SDK_ROOT),)
+	v8_platform_args += mac_sdk_path="$(MACOS_X86_SDK_ROOT)"
+endif
 endif
 ifneq ($(IOS_SDK_ROOT),)
 	v8_platform_args += ios_sdk_path="$(IOS_SDK_ROOT)"
@@ -602,6 +630,7 @@ endif
 gn:
 	# Google's prebuilt GN requires a newer glibc than our Debian Squeeze buildroot has.
 	git clone $(repo_base_url)/gn$(repo_suffix)
+	cd gn && git checkout -b $(frida_sdk_version) $(gn_version)
 
 build/fs-tmp-%/gn/build.ninja: build/fs-env-%.rc gn
 	. $< \
@@ -615,11 +644,12 @@ build/fs-tmp-%/gn/gn: build/fs-tmp-%/gn/build.ninja
 v8-checkout/depot_tools/gclient:
 	$(RM) -r v8-checkout/depot_tools
 	git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git v8-checkout/depot_tools
+	cd v8-checkout/depot_tools && git checkout -b $(frida_sdk_version) $(depot_tools_version)
 
 v8-checkout/.gclient: v8-checkout/depot_tools/gclient
 	cd v8-checkout && PATH=$(abspath v8-checkout/depot_tools):$$PATH depot_tools/gclient config --spec 'solutions = [ \
   { \
-    "url": "$(repo_base_url)/v8.git", \
+    "url": "$(repo_base_url)/v8.git@$(v8_version)", \
     "managed": False, \
     "name": "v8", \
     "deps_file": "DEPS", \
@@ -648,6 +678,10 @@ build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc: build/fs-tmp-%/v8/obj/libv8_mo
 	install -m 644 build/fs-tmp-$*/v8/gen/include/inspector/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/inspector/
 	install -d build/fs-$*/include/v8-$(v8_api_version)/v8/libplatform
 	install -m 644 v8-checkout/v8/include/libplatform/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/libplatform/
+	install -d build/fs-$*/include/v8-$(v8_api_version)/v8/cppgc
+	install -m 644 v8-checkout/v8/include/cppgc/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/cppgc/
+	install -d build/fs-$*/include/v8-$(v8_api_version)/v8/cppgc/internal
+	install -m 644 v8-checkout/v8/include/cppgc/internal/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/cppgc/internal/
 	install -d build/fs-$*/lib
 	install -m 644 $< build/fs-$*/lib/libv8-$(v8_api_version).a
 	install -d $(@D)
@@ -706,6 +740,8 @@ build/fs-env-%.rc:
 		FRIDA_ASAN=$(FRIDA_ASAN) \
 		FRIDA_ENV_NAME=fs \
 		FRIDA_ENV_SDK=none \
+		FRIDA_TOOLCHAIN_VERSION=$(frida_bootstrap_version) \
+		FRIDA_SDK_VERSION=$(frida_bootstrap_version) \
 		./releng/setup-env.sh
 
 releng/meson/meson.py:
