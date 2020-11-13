@@ -33,6 +33,8 @@ endif
 endif
 
 
+.PHONY: all
+
 all: build/sdk-$(host_os)-$(host_arch).tar.bz2
 	@echo ""
 	@echo -e "\\033[0;32mSuccess"'!'"\\033[0;39m Here's your SDK: \\033[1m$<\\033[0m"
@@ -97,6 +99,7 @@ endif
 
 
 .PHONY: libiconv
+
 libiconv: build/fs-$(host_os_arch)/lib/libiconv.a
 
 ext/.libiconv-stamp:
@@ -119,6 +122,7 @@ build/fs-%/lib/libiconv.a: build/fs-env-%.rc build/fs-tmp-%/libiconv/Makefile
 
 
 .PHONY: elfutils
+
 elfutils: build/fs-$(host_os_arch)/lib/libelf.a
 
 ext/.elfutils-stamp: build/fs-env-$(build_os_arch).rc
@@ -150,6 +154,7 @@ build/fs-%/lib/libelf.a: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
 
 
 .PHONY: libdwarf
+
 libdwarf: build/fs-$(host_os_arch)/lib/libdwarf.a
 
 ext/.libdwarf-stamp:
@@ -176,6 +181,7 @@ build/fs-%/lib/libdwarf.a: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
 
 define make-meson-module-rules
 .PHONY: $1
+
 $1: $(subst %,$(host_os_arch),$2)
 
 ext/.$1-stamp:
@@ -204,6 +210,7 @@ endef
 
 define make-autotools-module-rules
 .PHONY: $1
+
 $1: $(subst %,$(host_os_arch),$2)
 
 ext/.$1-stamp:
@@ -274,9 +281,6 @@ $(eval $(call make-meson-module-rules,quickjs,build/fs-%/lib/pkgconfig/quickjs.p
 $(eval $(call make-meson-module-rules,tinycc,build/fs-%/lib/pkgconfig/libtcc.pc,))
 
 
-.PHONY: openssl
-openssl: build/fs-$(host_os_arch)/lib/pkgconfig/openssl.pc
-
 ifeq ($(FRIDA_ASAN), yes)
 	openssl_buildtype_args := \
 		enable-asan \
@@ -297,10 +301,6 @@ ifeq ($(host_os_arch), macos-x86_64)
 	xcode_platform := MacOSX
 endif
 ifeq ($(host_os_arch), macos-arm64)
-	openssl_arch_args := macos64-cross-arm64 enable-ec_nistp_64_gcc_128
-	xcode_platform := MacOSX
-endif
-ifeq ($(host_os_arch), macos-arm64e)
 	openssl_arch_args := macos64-cross-arm64e enable-ec_nistp_64_gcc_128
 	xcode_platform := MacOSX
 endif
@@ -396,6 +396,10 @@ endif
 		$(NULL)
 endif
 
+.PHONY: openssl
+
+openssl: build/fs-$(host_os_arch)/lib/pkgconfig/openssl.pc
+
 ext/.openssl-stamp:
 	$(call grab-and-prepare,openssl)
 	@touch $@
@@ -421,11 +425,6 @@ build/fs-%/lib/pkgconfig/openssl.pc: build/fs-env-%.rc build/fs-tmp-%/openssl/Co
 		&& $(MAKE) build_libs \
 		&& $(MAKE) install_dev
 
-
-.PHONY: v8 gn depot_tools
-v8: build/fs-$(host_os_arch)/lib/pkgconfig/v8-$(v8_api_version).pc
-gn: build/fs-tmp-$(build_os_arch)/gn/gn
-depot_tools: ext/.depot_tools-stamp
 
 ifeq ($(FRIDA_ASAN), yes)
 v8_buildtype_args := \
@@ -532,6 +531,12 @@ ifneq ($(IOS_SDK_ROOT),)
 	v8_platform_args += ios_sdk_path="$(IOS_SDK_ROOT)"
 endif
 
+.PHONY: v8 gn depot_tools
+
+v8: build/fs-$(host_os_arch)/lib/pkgconfig/v8-$(v8_api_version).pc
+gn: build/fs-tmp-$(build_os_arch)/gn/gn
+depot_tools: ext/.depot_tools-stamp
+
 ext/.gn-stamp:
 	# Google's prebuilt GN requires a newer glibc than our Debian Squeeze buildroot has.
 	$(call grab-and-prepare,gn)
@@ -621,6 +626,10 @@ endif
 	mv $@.tmp $@
 
 
+.PHONY: libcxx
+
+libcxx: build/fs-$(host_os_arch)/lib/c++/libc++.a
+
 build/fs-%/lib/c++/libc++.a: build/fs-tmp-%/v8/obj/libv8_monolith.a
 	$(NINJA) -C build/fs-tmp-$*/v8 libc++
 	install -d build/fs-$*/include/c++/
@@ -666,5 +675,4 @@ releng/meson/meson.py:
 	@touch $@
 
 
-.PHONY: all
 .SECONDARY:

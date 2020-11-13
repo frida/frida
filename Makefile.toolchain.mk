@@ -6,6 +6,8 @@ MAKE_J ?= -j 8
 SHELL := /bin/bash
 
 
+.PHONY: all
+
 all: build/toolchain-$(host_os)-$(host_arch).tar.bz2
 	@echo ""
 	@echo -e "\\033[0;32mSuccess"'!'"\\033[0;39m Here's your toolchain: \\033[1m$<\\033[0m"
@@ -86,6 +88,7 @@ build/ft-tmp-%/.package-stamp: \
 
 define make-meson-module-rules
 .PHONY: $1
+
 $1: $(subst %,$(host_os_arch),$2)
 
 ext/.$1-stamp:
@@ -115,6 +118,7 @@ endef
 
 define make-autotools-module-rules
 .PHONY: $1
+
 $1: $(subst %,$(host_os_arch),$2)
 
 ext/.$1-stamp:
@@ -224,5 +228,4 @@ build/ft-executable.version:
 	) > $@
 
 
-.PHONY: all
 .SECONDARY:
