@@ -70,14 +70,22 @@ gettext_options := \
 
 zlib_version := 91920caec2160ffd919fd48dc4e7a0f6c3fb36d2
 zlib_url := $(frida_base_url)/zlib.git
+zlib_patches := \
+	$(NULL)
 zlib_options := \
 	$(NULL)
 
 libffi_version := 4612f7f4b8cfda9a1f07e66d033bb9319860af9b
+libffi_url := $(frida_base_url)/libffi.git
+libffi_patches := \
+	$(NULL)
 libffi_options := \
 	$(NULL)
 
 glib_version := 327fd7518d5612492723aec20c97fd2505e98fd8
+glib_url := $(frida_base_url)/glib.git
+glib_patches := \
+	$(NULL)
 ifeq ($(host_os), $(filter $(host_os),macos ios android qnx))
 	glib_iconv_option := -Diconv=external
 endif
@@ -94,6 +102,9 @@ glib_options := \
 	$(NULL)
 
 pkg_config_version := b7fb5edc1f1a4fb17cd5cb94f4cf21912184da43
+pkg_config_url := $(frida_base_url)/pkg-config.git
+pkg_config_patches := \
+	$(NULL)
 pkg_config_options := \
 	$(NULL)
 
@@ -115,16 +126,22 @@ bison_options := \
 	$(NULL)
 
 vala_version := 5067d99e7b9b8ab1c9393f70596fc5bd4f8b46a2
+vala_url := $(frida_base_url)/vala.git
+vala_patches := \
+	$(NULL)
 vala_options := \
 	$(NULL)
 
 libiconv_version := 1.16
 libiconv_url := https://$(gnu_mirror)/libiconv/libiconv-$(libiconv_version).tar.gz
 libiconv_hash := e6a1b1b589654277ee790cce3734f07876ac4ccfaecbee8afa0b649cf529cc04
+libiconv_patches := \
+	$(NULL)
 libiconv_options := \
 	$(NULL)
 
-elfutils_version := elfutils-0.182
+elfutils_version := b503c358dde835d8a1ae3ebd4968755ff396f814
+elfutils_url := git://sourceware.org/git/elfutils.git
 elfutils_patches := \
 	elfutils-clang.patch \
 	elfutils-android.patch \
@@ -139,22 +156,36 @@ elfutils_options := \
 libdwarf_version := 20201020
 libdwarf_url := https://www.prevanders.net/libdwarf-$(libdwarf_version).tar.gz
 libdwarf_hash := 1c5ce59e314c6fe74a1f1b4e2fa12caea9c24429309aa0ebdfa882f74f016eff
+libdwarf_patches := \
+	$(NULL)
 libdwarf_options := \
 	$(NULL)
 
 xz_version := 6c84113065f603803683d30342207c73465bbc12
+xz_url := $(frida_base_url)/xz.git
+xz_patches := \
+	$(NULL)
 xz_options := \
 	$(NULL)
 
 sqlite_version := 9f21a054d5c24c2036e9d1b28c630ecda5ae24c3
+sqlite_url := $(frida_base_url)/sqlite.git
+sqlite_patches := \
+	$(NULL)
 sqlite_options := \
 	$(NULL)
 
 libunwind_version := 66ca44cd82389cd7cfbbd482e58324a79f6679ab
+libunwind_url := $(frida_base_url)/libunwind.git
+libunwind_patches := \
+	$(NULL)
 libunwind_options := \
 	$(NULL)
 
 glib_networking_version := 7be8c21840cd4eb23477dc0c0d261f85d2c57778
+glib_networking_url := $(frida_base_url)/glib-networking.git
+glib_networking_patches := \
+	$(NULL)
 glib_networking_options := \
 	-Dgnutls=disabled \
 	-Dopenssl=enabled \
@@ -164,25 +195,40 @@ glib_networking_options := \
 	$(NULL)
 
 libgee_version := c7e96ac037610cc3d0e11dc964b7b1fca479fc2a
+libgee_url := $(frida_base_url)/libgee.git
+libgee_patches := \
+	$(NULL)
 libgee_options := \
 	$(NULL)
 
 json_glib_version := 9dd3b3898a2c41a1f9af24da8bab22e61526d299
+json_glib_url := $(frida_base_url)/json-glib.git
+json_glib_patches := \
+	$(NULL)
 json_glib_options := \
 	-Dintrospection=disabled \
 	-Dtests=false \
 	$(NULL)
 
 libpsl_version := 3caf6c33029b6c43fc31ce172badf976f6c37bc4
+libpsl_url := $(frida_base_url)/libpsl.git
+libpsl_patches := \
+	$(NULL)
 libpsl_options := \
 	-Dtests=false \
 	$(NULL)
 
 libxml2_version := f1845f6fd1c0b6aac0f573c77a8250f8d4eb31fd
+libxml2_url := $(frida_base_url)/libxml2.git
+libxml2_patches := \
+	$(NULL)
 libxml2_options := \
 	$(NULL)
 
 libsoup_version := d0ac83f3952d590da09968b1e30736782b1d1c7f
+libsoup_url := $(frida_base_url)/libsoup.git
+libsoup_patches := \
+	$(NULL)
 libsoup_options := \
 	-Dgssapi=disabled \
 	-Dtls_check=false \
@@ -194,6 +240,9 @@ libsoup_options := \
 	$(NULL)
 
 capstone_version := 03295d19d2c3b0162118a6d9742312301cde1d00
+capstone_url := $(frida_base_url)/capstone.git
+capstone_patches := \
+	$(NULL)
 capstone_options := \
 	-Darchs=$(shell echo $(host_arch) | sed 's,^x86_64$$,x86,') \
 	-Dx86_att_disable=true \
@@ -201,6 +250,9 @@ capstone_options := \
 	$(NULL)
 
 quickjs_version := 26ce42ea32a3318b1c6318d4db6cf01ade54be61
+quickjs_url := $(frida_base_url)/quickjs.git
+quickjs_patches := \
+	$(NULL)
 quickjs_options := \
 	-Dlibc=false \
 	-Dbignum=true \
@@ -209,12 +261,17 @@ quickjs_options := \
 	$(NULL)
 
 tinycc_version := c9f502d1a14aca5209eae8bdc9de1784ba27cb6f
+tinycc_url := $(frida_base_url)/tinycc.git
+tinycc_patches := \
+	$(NULL)
 tinycc_options := \
 	$(NULL)
 
 openssl_version := 1.1.1h
 openssl_url := https://www.openssl.org/source/openssl-$(openssl_version).tar.gz
 openssl_hash := 5c9ca8774bd7b03e5784f26ae9e9e6d749c9da2438545077e6b3d755a06595d9
+openssl_patches := \
+	$(NULL)
 openssl_options := \
 	--openssldir=/etc/ssl \
 	no-engine \
@@ -228,7 +285,9 @@ openssl_options := \
 	$(NULL)
 
 v8_version := 6e74fda056e277e0c80240e7a4dd76c7225bd9ec
-v8_api_version := 8.0
+v8_url := $(frida_base_url)/v8.git
+v8_patches := \
+	$(NULL)
 v8_options := \
 	use_thin_lto=false \
 	v8_monolithic=true \
@@ -245,8 +304,21 @@ v8_options := \
 	use_goma=false \
 	v8_embedder_string="-frida" \
 	$(NULL)
+v8_api_version := 8.0
+
 gn_version := 75194c124f158d7fabdc94048f1a3f850a5f0701
+gn_url := $(frida_base_url)/gn.git
+gn_patches := \
+	$(NULL)
+gn_options := \
+	$(NULL)
+
 depot_tools_version := b674f8a27725216bd2201652636649d83064ca4a
+depot_tools_url := https://chromium.googlesource.com/chromium/tools/depot_tools.git
+depot_tools_patches := \
+	$(NULL)
+depot_tools_options := \
+	$(NULL)
 
 
 define clone-and-prepare

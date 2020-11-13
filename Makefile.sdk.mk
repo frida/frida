@@ -131,7 +131,7 @@ build/fs-tmp-%/elfutils/Makefile: build/fs-env-%.rc ext/.elfutils-stamp build/fs
 	mkdir -p $(@D)
 	. $< \
 		&& cd $(@D) \
-		&& ../../../elfutils/configure $(elfutils_options)
+		&& ../../../ext/elfutils/configure $(elfutils_options)
 
 build/fs-%/lib/libelf.a: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
 	. $< \
@@ -155,7 +155,7 @@ ext/.libdwarf-stamp:
 build/fs-tmp-%/libdwarf/Makefile: build/fs-env-%.rc ext/.libdwarf-stamp build/fs-%/lib/libelf.a
 	$(RM) -r $(@D)
 	mkdir -p $(@D)
-	. $< && cd $(@D) && ../../../libdwarf/configure $(libdwarf_options)
+	. $< && cd $(@D) && ../../../ext/libdwarf/configure $(libdwarf_options)
 
 build/fs-%/lib/libdwarf.a: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
 	. $< \
@@ -519,27 +519,27 @@ endif
 
 gn:
 	# Google's prebuilt GN requires a newer glibc than our Debian Squeeze buildroot has.
-	git clone $(repo_base_url)/gn$(repo_suffix)
-	cd gn && git checkout -q $(gn_version)
+	$(call clone-and-prepare,gn)
 
 build/fs-tmp-%/gn/build.ninja: build/fs-env-%.rc gn
 	. $< \
-		&& CC="$$CC" CXX="$$CXX" python gn/build/gen.py \
-			--out-path $(abspath $(@D))
+		&& CC="$$CC" CXX="$$CXX" python ext/gn/build/gen.py \
+			--out-path $(abspath $(@D)) \
+			$(gn_options)
 
 build/fs-tmp-%/gn/gn: build/fs-tmp-%/gn/build.ninja
 	$(NINJA) -C build/fs-tmp-$*/gn
 	@touch $@
 
-v8-checkout/depot_tools/gclient:
-	$(RM) -r v8-checkout/depot_tools
-	git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git v8-checkout/depot_tools
-	cd v8-checkout/depot_tools && git checkout -q $(depot_tools_version)
+ext/v8-checkout/depot_tools/gclient:
+	@$(RM) -r $(@D)
+	git clone $(depot_tools_url) $(@D)
+	cd $(@D) && git checkout -q $(depot_tools_version)
 
-v8-checkout/.gclient: v8-checkout/depot_tools/gclient
-	cd v8-checkout && PATH=$(abspath v8-checkout/depot_tools):$$PATH depot_tools/gclient config --spec 'solutions = [ \
+ext/v8-checkout/.gclient: ext/v8-checkout/depot_tools/gclient
+	cd ext/v8-checkout && PATH=$(abspath ext/v8-checkout/depot_tools):$$PATH depot_tools/gclient config --spec 'solutions = [ \
   { \
-    "url": "$(repo_base_url)/v8.git@$(v8_version)", \
+    "url": "$(v8_url)@$(v8_version)", \
     "managed": False, \
     "name": "v8", \
     "deps_file": "DEPS", \
@@ -547,13 +547,13 @@ v8-checkout/.gclient: v8-checkout/depot_tools/gclient
   }, \
 ]'
 
-v8-checkout/v8: v8-checkout/.gclient
-	cd v8-checkout && PATH=$(abspath v8-checkout/depot_tools):$$PATH gclient sync
+ext/v8-checkout/v8: ext/v8-checkout/.gclient
+	cd ext/v8-checkout && PATH=$(abspath ext/v8-checkout/depot_tools):$$PATH gclient sync
 	@touch $@
 
-build/fs-tmp-%/v8/build.ninja: v8-checkout/v8 build/fs-tmp-$(build_os_arch)/gn/gn
-	cd v8-checkout/v8 \
-		&& ../../build/fs-tmp-$(build_os_arch)/gn/gn \
+build/fs-tmp-%/v8/build.ninja: ext/v8-checkout/v8 build/fs-tmp-$(build_os_arch)/gn/gn
+	cd ext/v8-checkout/v8 \
+		&& ../../../build/fs-tmp-$(build_os_arch)/gn/gn \
 			gen $(abspath $(@D)) \
 			--args='target_os="$(v8_os)" target_cpu="$(v8_cpu)" $(v8_cpu_args) $(v8_buildtype_args) $(v8_platform_args) $(v8_options)'
 
@@ -563,21 +563,21 @@ build/fs-tmp-%/v8/obj/libv8_monolith.a: build/fs-tmp-%/v8/build.ninja
 
 build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc: build/fs-tmp-%/v8/obj/libv8_monolith.a
 	install -d build/fs-$*/include/v8-$(v8_api_version)/v8
-	install -m 644 v8-checkout/v8/include/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/
+	install -m 644 ext/v8-checkout/v8/include/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/
 	install -d build/fs-$*/include/v8-$(v8_api_version)/v8/inspector
 	install -m 644 build/fs-tmp-$*/v8/gen/include/inspector/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/inspector/
 	install -d build/fs-$*/include/v8-$(v8_api_version)/v8/libplatform
-	install -m 644 v8-checkout/v8/include/libplatform/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/libplatform/
+	install -m 644 ext/v8-checkout/v8/include/libplatform/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/libplatform/
 	install -d build/fs-$*/include/v8-$(v8_api_version)/v8/cppgc
-	install -m 644 v8-checkout/v8/include/cppgc/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/cppgc/
+	install -m 644 ext/v8-checkout/v8/include/cppgc/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/cppgc/
 	install -d build/fs-$*/include/v8-$(v8_api_version)/v8/cppgc/internal
-	install -m 644 v8-checkout/v8/include/cppgc/internal/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/cppgc/internal/
+	install -m 644 ext/v8-checkout/v8/include/cppgc/internal/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/cppgc/internal/
 	install -d build/fs-$*/lib
 	install -m 644 $< build/fs-$*/lib/libv8-$(v8_api_version).a
 	install -d $(@D)
 	$(PYTHON3) releng/v8.py \
 		patch build/fs-$*/include/v8-$(v8_api_version)/v8/v8config.h \
-		-s v8-checkout/v8 \
+		-s ext/v8-checkout/v8 \
 		-b build/fs-tmp-$*/v8 \
 		-G build/fs-tmp-$(build_os_arch)/gn/gn
 	echo "prefix=\$${frida_sdk_prefix}" > $@.tmp
@@ -586,7 +586,7 @@ build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc: build/fs-tmp-%/v8/obj/libv8_mo
 	echo "" >> $@.tmp
 	echo "Name: V8" >> $@.tmp
 	echo "Description: V8 JavaScript Engine" >> $@.tmp
-	echo "Version: $$($(PYTHON3) releng/v8.py get version -s v8-checkout/v8)" >> $@.tmp
+	echo "Version: $$($(PYTHON3) releng/v8.py get version -s ext/v8-checkout/v8)" >> $@.tmp
 	echo "Libs: -L\$${libdir} -lv8-$(v8_api_version)" >> $@.tmp
 ifdef v8_libs_private
 	echo Libs.private: $(v8_libs_private) >> $@.tmp
@@ -598,7 +598,7 @@ endif
 build/fs-%/lib/c++/libc++.a: build/fs-tmp-%/v8/obj/libv8_monolith.a
 	$(NINJA) -C build/fs-tmp-$*/v8 libc++
 	install -d build/fs-$*/include/c++/
-	cp -a v8-checkout/v8/buildtools/third_party/libc++/trunk/include/* build/fs-$*/include/c++/
+	cp -a ext/v8-checkout/v8/buildtools/third_party/libc++/trunk/include/* build/fs-$*/include/c++/
 	rm build/fs-$*/include/c++/CMakeLists.txt build/fs-$*/include/c++/__config_site.in
 	( \
 		echo "#ifndef _LIBCPP_CONFIG_SITE"; \
@@ -612,7 +612,7 @@ build/fs-%/lib/c++/libc++.a: build/fs-tmp-%/v8/obj/libv8_monolith.a
 		echo ""; \
 	) | cat \
 		- \
-		v8-checkout/v8/buildtools/third_party/libc++/trunk/include/__config \
+		ext/v8-checkout/v8/buildtools/third_party/libc++/trunk/include/__config \
 		> build/fs-$*/include/c++/__config
 	install -d build/fs-$*/lib/c++
 	$(shell xcrun -f libtool) -static -no_warning_for_no_symbols \
