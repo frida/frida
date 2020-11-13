@@ -1,5 +1,5 @@
 include config.mk
-include releng/dependencies.mk
+include releng/deps.mk
 
 
 MAKE_J ?= -j 8
