@@ -90,46 +90,43 @@ build/fs-tmp-%/.package-stamp: \
 			| tar -C $(abspath $(@D)/package) -xf -
 	releng/relocatify.sh $(@D)/package $(abspath build/fs-$*) $(abspath releng)
 ifeq ($(host_os), ios)
-	cp $(shell xcrun --sdk macosx --show-sdk-path)/usr/include/mach/mach_vm.h $(@D)/package/include/frida_mach_vm.h
+	cp $(shell xcrun --sdk macosx --show-sdk-path)/usr/include/mach/mach_vm.h \
+		$(@D)/package/include/frida_mach_vm.h
 endif
 	@touch $@
 
 
-build/.libiconv-stamp:
-	$(call download-and-extract,https://$(gnu_mirror)/libiconv/libiconv-$(libiconv_version).tar.gz,$(libiconv_hash),libiconv)
-	@mkdir -p $(@D)
+ext/.libiconv-stamp:
+	$(call download-and-prepare,libiconv)
 	@touch $@
 
-build/fs-tmp-%/libiconv/Makefile: build/fs-env-%.rc build/.libiconv-stamp
+build/fs-tmp-%/libiconv/Makefile: build/fs-env-%.rc ext/.libiconv-stamp
 	$(RM) -r $(@D)
 	mkdir -p $(@D)
 	. $< \
 		&& cd $(@D) \
-		&& ../../../libiconv/configure $(libiconv_options)
+		&& ../../../ext/libiconv/configure $(libiconv_options)
 
 build/fs-%/lib/libiconv.a: build/fs-env-%.rc build/fs-tmp-%/libiconv/Makefile
 	. $< \
 		&& cd build/fs-tmp-$*/libiconv \
-		&& make $(MAKE_J) \
-		&& make $(MAKE_J) install
+		&& $(MAKE) $(MAKE_J) \
+		&& $(MAKE) $(MAKE_J) install
 	@touch $@
 
 
-build/.elfutils-stamp: build/fs-env-$(build_os_arch).rc
-	$(RM) -r elfutils
-	git clone git://sourceware.org/git/elfutils.git
+ext/.elfutils-stamp: build/fs-env-$(build_os_arch).rc
+	$(RM) -r ext/elfutils
+	git clone git://sourceware.org/git/elfutils.git ext/elfutils
+	cd ext/elfutils && git checkout -q $(elfutils_version)
 	. $< \
-		&& cd elfutils \
-		&& git checkout -b $(frida_sdk_version) $(elfutils_version) \
-		&& patch -p1 < ../releng/patches/elfutils-clang.patch \
-		&& patch -p1 < ../releng/patches/elfutils-android.patch \
-		&& patch -p1 < ../releng/patches/elfutils-glibc-compatibility.patch \
-		&& patch -p1 < ../releng/patches/elfutils-musl.patch \
+		&& cd ext/elfutils \
+		&& git checkout -q $(elfutils_version) \
+		&& $(call apply-patches,elfutils) \
 		&& autoreconf -ifv
-	@mkdir -p $(@D)
 	@touch $@
 
-build/fs-tmp-%/elfutils/Makefile: build/fs-env-%.rc build/.elfutils-stamp build/fs-%/lib/pkgconfig/liblzma.pc build/fs-%/lib/pkgconfig/zlib.pc
+build/fs-tmp-%/elfutils/Makefile: build/fs-env-%.rc ext/.elfutils-stamp build/fs-%/lib/pkgconfig/liblzma.pc build/fs-%/lib/pkgconfig/zlib.pc
 	$(RM) -r $(@D)
 	mkdir -p $(@D)
 	. $< \
@@ -139,7 +136,7 @@ build/fs-tmp-%/elfutils/Makefile: build/fs-env-%.rc build/.elfutils-stamp build/
 build/fs-%/lib/libelf.a: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
 	. $< \
 		&& cd build/fs-tmp-$*/elfutils \
-		&& make $(MAKE_J) -C libelf libelf.a
+		&& $(MAKE) $(MAKE_J) -C libelf libelf.a
 	install -d build/fs-$*/include
 	install -m 644 elfutils/libelf/libelf.h build/fs-$*/include
 	install -m 644 elfutils/libelf/elf.h build/fs-$*/include
@@ -150,19 +147,19 @@ build/fs-%/lib/libelf.a: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
 	@touch $@
 
 
-build/.libdwarf-stamp:
-	$(call download-and-extract,https://www.prevanders.net/libdwarf-$(libdwarf_version).tar.gz,$(libdwarf_hash),libdwarf)
+ext/.libdwarf-stamp:
+	$(call download-and-prepare,libdwarf)
 	@mkdir -p $(@D)
 	@touch $@
 
-build/fs-tmp-%/libdwarf/Makefile: build/fs-env-%.rc build/.libdwarf-stamp build/fs-%/lib/libelf.a
+build/fs-tmp-%/libdwarf/Makefile: build/fs-env-%.rc ext/.libdwarf-stamp build/fs-%/lib/libelf.a
 	$(RM) -r $(@D)
 	mkdir -p $(@D)
 	. $< && cd $(@D) && ../../../libdwarf/configure $(libdwarf_options)
 
 build/fs-%/lib/libdwarf.a: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
 	. $< \
-		&& make $(MAKE_J) -C build/fs-tmp-$*/libdwarf/libdwarf libdwarf.la
+		&& $(MAKE) $(MAKE_J) -C build/fs-tmp-$*/libdwarf/libdwarf libdwarf.la
 	install -d build/fs-$*/include
 	install -m 644 libdwarf/libdwarf/dwarf.h build/fs-$*/include
 	install -m 644 libdwarf/libdwarf/libdwarf.h build/fs-$*/include
@@ -172,14 +169,14 @@ build/fs-%/lib/libdwarf.a: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
 
 
 define make-git-autotools-module-rules
-build/.$1-stamp:
-	$(RM) -r $1
+ext/.$1-stamp:
+	$(RM) -r ext/$1
 	git clone --recurse-submodules $(repo_base_url)/$1$(repo_suffix)
-	cd $1 && git checkout -b $(frida_sdk_version) $2
+	cd $1 && git checkout -q $2
 	@mkdir -p $$(@D)
 	@touch $$@
 
-$1/configure: build/fs-env-$(build_os_arch).rc build/.$1-stamp
+$1/configure: build/fs-env-$(build_os_arch).rc ext/.$1-stamp
 	. $$< \
 		&& cd $$(@D) \
 		&& [ -f autogen.sh ] && NOCONFIGURE=1 ./autogen.sh || autoreconf -ifv
@@ -192,20 +189,20 @@ build/fs-tmp-%/$1/Makefile: build/fs-env-%.rc $1/configure $4
 $3: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
 	. $$< \
 		&& cd build/fs-tmp-$$*/$1 \
-		&& make $(MAKE_J) \
-		&& make $(MAKE_J) install
+		&& $(MAKE) $(MAKE_J) \
+		&& $(MAKE) $(MAKE_J) install
 	@touch $$@
 endef
 
 define make-git-meson-module-rules
-build/.$1-stamp:
+ext/.$1-stamp:
 	$(RM) -r $1
 	git clone --recurse-submodules $(repo_base_url)/$1$(repo_suffix)
-	cd $1 && git checkout -b $(frida_sdk_version) $2
+	cd $1 && git checkout -q $2
 	@mkdir -p $$(@D)
 	@touch $$@
 
-build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_os_arch).rc build/fs-env-%.rc build/.$1-stamp $4 releng/meson/meson.py
+build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_os_arch).rc build/fs-env-%.rc ext/.$1-stamp $4 releng/meson/meson.py
 	$(RM) -r $$(@D)
 	(. build/fs-meson-env-$$*.rc \
 		&& . build/fs-config-$$*.site \
@@ -225,35 +222,48 @@ $3: build/fs-env-%.rc build/fs-tmp-%/$1/build.ninja
 	@touch $$@
 endef
 
-$(eval $(call make-git-meson-module-rules,zlib,$(zlib_version),build/fs-%/lib/pkgconfig/zlib.pc,))
+$(eval $(call make-git-meson-module-rules,zlib,build/fs-%/lib/pkgconfig/zlib.pc,))
 
-$(eval $(call make-git-autotools-module-rules,xz,$(xz_version),build/fs-%/lib/pkgconfig/liblzma.pc,))
+$(eval $(call make-git-autotools-module-rules,xz,build/fs-%/lib/pkgconfig/liblzma.pc,))
 
-$(eval $(call make-git-meson-module-rules,sqlite,$(sqlite_version),build/fs-%/lib/pkgconfig/sqlite3.pc,))
+$(eval $(call make-git-meson-module-rules,sqlite,build/fs-%/lib/pkgconfig/sqlite3.pc,))
 
-$(eval $(call make-git-autotools-module-rules,libunwind,$(libunwind_version),build/fs-%/lib/pkgconfig/libunwind.pc,build/fs-%/lib/pkgconfig/liblzma.pc))
+$(eval $(call make-git-autotools-module-rules,libunwind,build/fs-%/lib/pkgconfig/libunwind.pc, \
+	build/fs-%/lib/pkgconfig/liblzma.pc))
 
-$(eval $(call make-git-meson-module-rules,libffi,$(libffi_version),build/fs-%/lib/pkgconfig/libffi.pc,))
+$(eval $(call make-git-meson-module-rules,libffi,build/fs-%/lib/pkgconfig/libffi.pc,))
 
-$(eval $(call make-git-meson-module-rules,glib,$(glib_version),build/fs-%/lib/pkgconfig/glib-2.0.pc,$(iconv) build/fs-%/lib/pkgconfig/zlib.pc build/fs-%/lib/pkgconfig/libffi.pc))
+$(eval $(call make-git-meson-module-rules,glib,build/fs-%/lib/pkgconfig/glib-2.0.pc, \
+	$(iconv) \
+	build/fs-%/lib/pkgconfig/zlib.pc \
+	build/fs-%/lib/pkgconfig/libffi.pc))
 
-$(eval $(call make-git-meson-module-rules,glib-networking,$(glib_networking_version),build/fs-%/lib/pkgconfig/gioopenssl.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/openssl.pc))
+$(eval $(call make-git-meson-module-rules,glib-networking,build/fs-%/lib/pkgconfig/gioopenssl.pc, \
+	build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/openssl.pc))
 
-$(eval $(call make-git-meson-module-rules,libgee,$(libgee_version),build/fs-%/lib/pkgconfig/gee-0.8.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc))
+$(eval $(call make-git-meson-module-rules,libgee,build/fs-%/lib/pkgconfig/gee-0.8.pc, \
+	build/fs-%/lib/pkgconfig/glib-2.0.pc))
 
-$(eval $(call make-git-meson-module-rules,json-glib,$(json_glib_version),build/fs-%/lib/pkgconfig/json-glib-1.0.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc))
+$(eval $(call make-git-meson-module-rules,json-glib,build/fs-%/lib/pkgconfig/json-glib-1.0.pc, \
+	build/fs-%/lib/pkgconfig/glib-2.0.pc))
 
-$(eval $(call make-git-meson-module-rules,libpsl,$(libpsl_version),build/fs-%/lib/pkgconfig/libpsl.pc,))
+$(eval $(call make-git-meson-module-rules,libpsl,build/fs-%/lib/pkgconfig/libpsl.pc,))
 
-$(eval $(call make-git-meson-module-rules,libxml2,$(libxml2_version),build/fs-%/lib/pkgconfig/libxml-2.0.pc,build/fs-%/lib/pkgconfig/zlib.pc build/fs-%/lib/pkgconfig/liblzma.pc))
+$(eval $(call make-git-meson-module-rules,libxml2,build/fs-%/lib/pkgconfig/libxml-2.0.pc, \
+	build/fs-%/lib/pkgconfig/zlib.pc \
+	build/fs-%/lib/pkgconfig/liblzma.pc))
 
-$(eval $(call make-git-meson-module-rules,libsoup,$(libsoup_version),build/fs-%/lib/pkgconfig/libsoup-2.4.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/sqlite3.pc build/fs-%/lib/pkgconfig/libpsl.pc build/fs-%/lib/pkgconfig/libxml-2.0.pc))
+$(eval $(call make-git-meson-module-rules,libsoup,build/fs-%/lib/pkgconfig/libsoup-2.4.pc, \
+	build/fs-%/lib/pkgconfig/glib-2.0.pc \
+	build/fs-%/lib/pkgconfig/sqlite3.pc \
+	build/fs-%/lib/pkgconfig/libpsl.pc \
+	build/fs-%/lib/pkgconfig/libxml-2.0.pc))
 
-$(eval $(call make-git-meson-module-rules,capstone,$(capstone_version),build/fs-%/lib/pkgconfig/capstone.pc,))
+$(eval $(call make-git-meson-module-rules,capstone,build/fs-%/lib/pkgconfig/capstone.pc,))
 
-$(eval $(call make-git-meson-module-rules,quickjs,$(quickjs_version),build/fs-%/lib/pkgconfig/quickjs.pc,))
+$(eval $(call make-git-meson-module-rules,quickjs,build/fs-%/lib/pkgconfig/quickjs.pc,))
 
-$(eval $(call make-git-meson-module-rules,tinycc,$(tinycc_version),build/fs-%/lib/pkgconfig/libtcc.pc,))
+$(eval $(call make-git-meson-module-rules,tinycc,build/fs-%/lib/pkgconfig/libtcc.pc,))
 
 
 ifeq ($(FRIDA_ASAN), yes)
@@ -375,12 +385,12 @@ endif
 		$(NULL)
 endif
 
-build/.openssl-stamp:
-	$(call download-and-extract,https://www.openssl.org/source/openssl-$(openssl_version).tar.gz,$(openssl_hash),openssl)
+ext/.openssl-stamp:
+	$(call download-and-prepare,openssl)
 	@mkdir -p $(@D)
 	@touch $@
 
-build/fs-tmp-%/openssl/Configure: build/.openssl-stamp
+build/fs-tmp-%/openssl/Configure: ext/.openssl-stamp
 	$(RM) -r $(@D)
 	mkdir -p build/fs-tmp-$*
 	cp -a openssl $(@D)
@@ -397,9 +407,9 @@ build/fs-%/lib/pkgconfig/openssl.pc: build/fs-env-%.rc build/fs-tmp-%/openssl/Co
 			$(openssl_options) \
 			$(openssl_buildtype_args) \
 			$(openssl_arch_args) \
-		&& make depend \
-		&& make build_libs \
-		&& make install_dev
+		&& $(MAKE) depend \
+		&& $(MAKE) build_libs \
+		&& $(MAKE) install_dev
 
 
 ifeq ($(FRIDA_ASAN), yes)
@@ -510,7 +520,7 @@ endif
 gn:
 	# Google's prebuilt GN requires a newer glibc than our Debian Squeeze buildroot has.
 	git clone $(repo_base_url)/gn$(repo_suffix)
-	cd gn && git checkout -b $(frida_sdk_version) $(gn_version)
+	cd gn && git checkout -q $(gn_version)
 
 build/fs-tmp-%/gn/build.ninja: build/fs-env-%.rc gn
 	. $< \
@@ -524,7 +534,7 @@ build/fs-tmp-%/gn/gn: build/fs-tmp-%/gn/build.ninja
 v8-checkout/depot_tools/gclient:
 	$(RM) -r v8-checkout/depot_tools
 	git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git v8-checkout/depot_tools
-	cd v8-checkout/depot_tools && git checkout -b $(frida_sdk_version) $(depot_tools_version)
+	cd v8-checkout/depot_tools && git checkout -q $(depot_tools_version)
 
 v8-checkout/.gclient: v8-checkout/depot_tools/gclient
 	cd v8-checkout && PATH=$(abspath v8-checkout/depot_tools):$$PATH depot_tools/gclient config --spec 'solutions = [ \

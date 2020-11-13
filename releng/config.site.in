@@ -116,9 +116,6 @@ if [ -z "$enable_static" ]; then
 fi
 
 case "$PACKAGE_TARNAME" in
-  gettext|libtextstyle)
-    enable_curses=no
-    ;;
   elfutils)
     enable_debuginfod=no
     case $frida_host_os_arch in

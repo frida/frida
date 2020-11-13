@@ -3,6 +3,7 @@ frida_sdk_version := 20201106
 frida_bootstrap_version := 20201028
 
 
+frida_base_url := https://github.com/frida
 gnu_mirror := saimei.ftp.acc.umu.se/mirror/gnu.org/gnu
 
 
@@ -64,9 +65,11 @@ gettext_patches := \
 	gettext-static-only.patch \
 	$(NULL)
 gettext_options := \
+	--disable-curses \
 	$(NULL)
 
 zlib_version := 91920caec2160ffd919fd48dc4e7a0f6c3fb36d2
+zlib_url := $(frida_base_url)/zlib.git
 zlib_options := \
 	$(NULL)
 
@@ -116,17 +119,25 @@ vala_options := \
 	$(NULL)
 
 libiconv_version := 1.16
+libiconv_url := https://$(gnu_mirror)/libiconv/libiconv-$(libiconv_version).tar.gz
 libiconv_hash := e6a1b1b589654277ee790cce3734f07876ac4ccfaecbee8afa0b649cf529cc04
 libiconv_options := \
 	$(NULL)
 
 elfutils_version := elfutils-0.182
+elfutils_patches := \
+	elfutils-clang.patch \
+	elfutils-android.patch \
+	elfutils-glibc-compatibility.patch \
+	elfutils-musl.patch \
+	$(NULL)
 elfutils_options := \
 	--enable-maintainer-mode \
 	--disable-libdebuginfod \
 	$(NULL)
 
 libdwarf_version := 20201020
+libdwarf_url := https://www.prevanders.net/libdwarf-$(libdwarf_version).tar.gz
 libdwarf_hash := 1c5ce59e314c6fe74a1f1b4e2fa12caea9c24429309aa0ebdfa882f74f016eff
 libdwarf_options := \
 	$(NULL)
@@ -202,6 +213,7 @@ tinycc_options := \
 	$(NULL)
 
 openssl_version := 1.1.1h
+openssl_url := https://www.openssl.org/source/openssl-$(openssl_version).tar.gz
 openssl_hash := 5c9ca8774bd7b03e5784f26ae9e9e6d749c9da2438545077e6b3d755a06595d9
 openssl_options := \
 	--openssldir=/etc/ssl \
@@ -237,32 +249,59 @@ gn_version := 75194c124f158d7fabdc94048f1a3f850a5f0701
 depot_tools_version := b674f8a27725216bd2201652636649d83064ca4a
 
 
-repo_base_url := https://github.com/frida
-repo_suffix := .git
 
 
-define download-and-extract
+define clone-and-prepare
 	$(RM) -r ext/$1
-	mkdir -p ext/$1
-	@url=$($(subst -,_,$1)_url); \
-	echo "[*] Downloading $$url"; \
-	if command -v curl >/dev/null; then \
-		curl -sSfLo ext/.$1-tarball $$url; \
-	else \
-		wget -qO ext/.$1-tarball $$url; \
-	fi
-	@echo "[*] Verifying"
-	@expected_hash=$($(subst -,_,$1)_hash); \
-	actual_hash=$$(shasum -a 256 -b ext/.$1-tarball | awk '{ print $$1; }'); \
-	case $$actual_hash in \
-		$$expected_hash) \
-			;; \
-		*) \
-			echo "$1 tarball is corrupted; expected=$$expected_hash, actual=$$actual_hash"; \
-			exit 1; \
-			;; \
-	esac
-	@echo "[*] Extracting to $1"
-	@cd ext/$1 && tar -x -f ../.$1-tarball -z --strip-components 1
+
+	@url=$($(subst -,_,$1)_url) \
+		&& echo "[*] Cloning $$url" \
+		&& git clone --recurse-submodules $$url ext/$1
+
+	@version=$($(subst -,_,$1)_version) \
+		&& echo "[*] Checking out $$version" \
+		&& cd ext/$1 \
+		&& git checkout -q $$version
+
+	$(call apply-patches,$1)
+endef
+
+define download-and-prepare
+	$(RM) -r ext/$1
+	@mkdir -p ext/$1
+
+	@url=$($(subst -,_,$1)_url) \
+		&& echo "[*] Downloading $$url" \
+		&& if command -v curl >/dev/null; then \
+			curl -sSfLo ext/.$1-tarball $$url; \
+		else \
+			wget -qO ext/.$1-tarball $$url; \
+		fi
+
+	@echo "[*] Verifying" \
+		&& expected_hash=$($(subst -,_,$1)_hash) \
+		&& actual_hash=$$(shasum -a 256 -b ext/.$1-tarball | awk '{ print $$1; }') \
+		&& case $$actual_hash in \
+			$$expected_hash) \
+				;; \
+			*) \
+				echo "$1 tarball is corrupted; expected=$$expected_hash, actual=$$actual_hash"; \
+				exit 1; \
+				;; \
+		esac
+
+	@echo "[*] Extracting to ext/$1"
+	@tar -C ext/$1 -x -f ext/.$1-tarball -z --strip-components 1
+
+	$(call apply-patches,$1)
+
 	@rm ext/.$1-tarball
+endef
+
+define apply-patches
+	@cd ext/$1 \
+		&& for patch in $($(subst -,_,$1)_patches); do \
+			echo "[*] Applying: $$patch"; \
+			patch -p1 < ../../releng/patches/$$patch || exit 1; \
+		done
 endef
