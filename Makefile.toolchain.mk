@@ -84,36 +84,12 @@ build/ft-tmp-%/.package-stamp: \
 	@touch $@
 
 
-define make-tarball-module-rules
+define make-meson-module-rules
 .PHONY: $1
 $1: $(subst %,$(host_os_arch),$2)
 
 ext/.$1-stamp:
-	$$(call download-and-prepare,$1)
-	@touch $$@
-
-build/ft-tmp-%/$1/Makefile: build/ft-env-%.rc ext/.$1-stamp $3
-	$(RM) -r $$(@D)
-	mkdir -p $$(@D)
-	. $$< \
-		&& cd $$(@D) \
-		&& PATH="$$(shell pwd)/build/ft-$$*/bin:$$$$PATH" ../../../ext/$1/configure $$($1_options)
-
-$2: build/ft-env-%.rc build/ft-tmp-%/$1/Makefile
-	. $$< \
-		&& cd build/ft-tmp-$$*/$1 \
-		&& export PATH="$$(shell pwd)/build/ft-$$*/bin:$$$$PATH" \
-		&& $(MAKE) $(MAKE_J) \
-		&& $(MAKE) $(MAKE_J) install
-	@touch $$@
-endef
-
-define make-git-meson-module-rules
-.PHONY: $1
-$1: $(subst %,$(host_os_arch),$2)
-
-ext/.$1-stamp:
-	$$(call clone-and-prepare,$1)
+	$$(call grab-and-prepare,$1)
 	@touch $$@
 
 build/ft-tmp-%/$1/build.ninja: build/ft-env-%.rc ext/.$1-stamp $3 releng/meson/meson.py
@@ -137,14 +113,38 @@ $2: build/ft-env-%.rc build/ft-tmp-%/$1/build.ninja
 	@touch $$@
 endef
 
-$(eval $(call make-tarball-module-rules,m4,build/ft-%/bin/m4,))
+define make-autotools-module-rules
+.PHONY: $1
+$1: $(subst %,$(host_os_arch),$2)
 
-$(eval $(call make-tarball-module-rules,autoconf,build/ft-%/bin/autoconf,build/ft-%/bin/m4))
+ext/.$1-stamp:
+	$$(call grab-and-prepare,$1)
+	@touch $$@
 
-$(eval $(call make-tarball-module-rules,automake,build/ft-%/bin/automake,build/ft-%/bin/autoconf))
+build/ft-tmp-%/$1/Makefile: build/ft-env-%.rc ext/.$1-stamp $3
+	$(RM) -r $$(@D)
+	mkdir -p $$(@D)
+	. $$< \
+		&& cd $$(@D) \
+		&& PATH="$$(shell pwd)/build/ft-$$*/bin:$$$$PATH" ../../../ext/$1/configure $$($1_options)
+
+$2: build/ft-env-%.rc build/ft-tmp-%/$1/Makefile
+	. $$< \
+		&& cd build/ft-tmp-$$*/$1 \
+		&& export PATH="$$(shell pwd)/build/ft-$$*/bin:$$$$PATH" \
+		&& $(MAKE) $(MAKE_J) \
+		&& $(MAKE) $(MAKE_J) install
+	@touch $$@
+endef
+
+$(eval $(call make-autotools-module-rules,m4,build/ft-%/bin/m4,))
+
+$(eval $(call make-autotools-module-rules,autoconf,build/ft-%/bin/autoconf,build/ft-%/bin/m4))
+
+$(eval $(call make-autotools-module-rules,automake,build/ft-%/bin/automake,build/ft-%/bin/autoconf))
 
 ext/.libtool-stamp:
-	$(call download-and-prepare,libtool)
+	$(call grab-and-prepare,libtool)
 	@cd ext/libtool \
 		&& for name in aclocal.m4 config-h.in configure Makefile.in; do \
 			find . -name $$name -exec touch '{}' \;; \
@@ -166,27 +166,27 @@ build/ft-%/bin/libtool: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 		&& $(MAKE) $(MAKE_J) install
 	@touch $@
 
-$(eval $(call make-tarball-module-rules,gettext,build/ft-%/bin/autopoint, \
+$(eval $(call make-autotools-module-rules,gettext,build/ft-%/bin/autopoint, \
 	build/ft-%/bin/libtool))
 
-$(eval $(call make-git-meson-module-rules,zlib,build/ft-%/lib/pkgconfig/zlib.pc,))
+$(eval $(call make-meson-module-rules,zlib,build/ft-%/lib/pkgconfig/zlib.pc,))
 
-$(eval $(call make-git-meson-module-rules,libffi,build/ft-%/lib/pkgconfig/libffi.pc,))
+$(eval $(call make-meson-module-rules,libffi,build/ft-%/lib/pkgconfig/libffi.pc,))
 
-$(eval $(call make-git-meson-module-rules,glib,build/ft-%/bin/glib-genmarshal, \
+$(eval $(call make-meson-module-rules,glib,build/ft-%/bin/glib-genmarshal, \
 	build/ft-%/lib/pkgconfig/zlib.pc \
 	build/ft-%/lib/pkgconfig/libffi.pc))
 
-$(eval $(call make-git-meson-module-rules,pkg-config,build/ft-%/bin/pkg-config, \
+$(eval $(call make-meson-module-rules,pkg-config,build/ft-%/bin/pkg-config, \
 	build/ft-%/bin/glib-genmarshal))
 
-$(eval $(call make-tarball-module-rules,flex,build/ft-%/bin/flex, \
+$(eval $(call make-autotools-module-rules,flex,build/ft-%/bin/flex, \
 	build/ft-$(build_os_arch)/bin/m4))
 
-$(eval $(call make-tarball-module-rules,bison,build/ft-%/bin/bison, \
+$(eval $(call make-autotools-module-rules,bison,build/ft-%/bin/bison, \
 	build/ft-$(build_os_arch)/bin/m4))
 
-$(eval $(call make-git-meson-module-rules,vala,build/ft-%/bin/valac, \
+$(eval $(call make-meson-module-rules,vala,build/ft-%/bin/valac, \
 	build/ft-%/bin/glib-genmarshal \
 	build/ft-$(build_os_arch)/bin/flex \
 	build/ft-$(build_os_arch)/bin/bison))

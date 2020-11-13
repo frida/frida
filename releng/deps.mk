@@ -321,25 +321,15 @@ depot_tools_options := \
 	$(NULL)
 
 
-define clone-and-prepare
-	@$(RM) -r ext/$1
-
-	@url=$($(subst -,_,$1)_url) \
-		&& version=$($(subst -,_,$1)_version) \
-		&& echo -e "╭────"\
-		&& echo -e "│ 🔨 \\033[1m$1\\033[0m" \
-		&& echo -e "├───────────────────────────────────────────────╮" \
-		&& echo -e "│ URL: $$url" \
-		&& echo -e "│ CID: $$version" \
-		&& echo -e "└───────────────────────────────────────────────╯" \
-		&& git clone --recurse-submodules $$url ext/$1 \
-		&& cd ext/$1 \ \
-		&& git checkout -q $$version
-
-	$(call apply-patches,$1)
+define grab-and-prepare
+	@if [ -n "$($(subst -,_,$1)_hash)" ]; then \
+		$(call grab-and-prepare-tarball,$1) \
+	else \
+		$(call grab-and-prepare-repo,$1) \
+	fi
 endef
 
-define download-and-prepare
+define grab-and-prepare-tarball
 	@$(RM) -r ext/$1
 	@mkdir -p ext/$1
 
@@ -373,6 +363,24 @@ define download-and-prepare
 	$(call apply-patches,$1)
 
 	@rm ext/.$1-tarball
+endef
+
+define grab-and-prepare-repo
+	@$(RM) -r ext/$1
+
+	@url=$($(subst -,_,$1)_url) \
+		&& version=$($(subst -,_,$1)_version) \
+		&& echo -e "╭────"\
+		&& echo -e "│ 🔨 \\033[1m$1\\033[0m" \
+		&& echo -e "├───────────────────────────────────────────────╮" \
+		&& echo -e "│ URL: $$url" \
+		&& echo -e "│ CID: $$version" \
+		&& echo -e "└───────────────────────────────────────────────╯" \
+		&& git clone --recurse-submodules $$url ext/$1 \
+		&& cd ext/$1 \ \
+		&& git checkout -q $$version
+
+	$(call apply-patches,$1)
 endef
 
 define apply-patches

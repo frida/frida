@@ -97,7 +97,7 @@ endif
 
 
 ext/.libiconv-stamp:
-	$(call download-and-prepare,libiconv)
+	$(call grab-and-prepare,libiconv)
 	@touch $@
 
 build/fs-tmp-%/libiconv/Makefile: build/fs-env-%.rc ext/.libiconv-stamp
@@ -148,7 +148,7 @@ build/fs-%/lib/libelf.a: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
 
 
 ext/.libdwarf-stamp:
-	$(call download-and-prepare,libdwarf)
+	$(call grab-and-prepare,libdwarf)
 	@mkdir -p $(@D)
 	@touch $@
 
@@ -168,41 +168,15 @@ build/fs-%/lib/libdwarf.a: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
 	@touch $@
 
 
-define make-git-autotools-module-rules
+define make-meson-module-rules
+.PHONY: $1
+$1: $(subst %,$(host_os_arch),$2)
+
 ext/.$1-stamp:
-	$(RM) -r ext/$1
-	git clone --recurse-submodules $(repo_base_url)/$1$(repo_suffix)
-	cd $1 && git checkout -q $2
-	@mkdir -p $$(@D)
+	$$(call grab-and-prepare,$1)
 	@touch $$@
 
-$1/configure: build/fs-env-$(build_os_arch).rc ext/.$1-stamp
-	. $$< \
-		&& cd $$(@D) \
-		&& [ -f autogen.sh ] && NOCONFIGURE=1 ./autogen.sh || autoreconf -ifv
-
-build/fs-tmp-%/$1/Makefile: build/fs-env-%.rc $1/configure $4
-	$(RM) -r $$(@D)
-	mkdir -p $$(@D)
-	. $$< && cd $$(@D) && ../../../$1/configure $$($1_options)
-
-$3: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
-	. $$< \
-		&& cd build/fs-tmp-$$*/$1 \
-		&& $(MAKE) $(MAKE_J) \
-		&& $(MAKE) $(MAKE_J) install
-	@touch $$@
-endef
-
-define make-git-meson-module-rules
-ext/.$1-stamp:
-	$(RM) -r $1
-	git clone --recurse-submodules $(repo_base_url)/$1$(repo_suffix)
-	cd $1 && git checkout -q $2
-	@mkdir -p $$(@D)
-	@touch $$@
-
-build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_os_arch).rc build/fs-env-%.rc ext/.$1-stamp $4 releng/meson/meson.py
+build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_os_arch).rc build/fs-env-%.rc ext/.$1-stamp $3 releng/meson/meson.py
 	$(RM) -r $$(@D)
 	(. build/fs-meson-env-$$*.rc \
 		&& . build/fs-config-$$*.site \
@@ -214,56 +188,84 @@ build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_os_arch).rc build/fs-env-%.r
 			$$(FRIDA_MESONFLAGS_BOTTLE) \
 			$$($1_options) \
 			$$(@D) \
-			$1)
+			ext/$1)
 
-$3: build/fs-env-%.rc build/fs-tmp-%/$1/build.ninja
+$2: build/fs-env-%.rc build/fs-tmp-%/$1/build.ninja
 	(. $$< \
 		&& $(NINJA) -C build/fs-tmp-$$*/$1 install)
 	@touch $$@
 endef
 
-$(eval $(call make-git-meson-module-rules,zlib,build/fs-%/lib/pkgconfig/zlib.pc,))
+define make-autotools-module-rules
+.PHONY: $1
+$1: $(subst %,$(host_os_arch),$2)
 
-$(eval $(call make-git-autotools-module-rules,xz,build/fs-%/lib/pkgconfig/liblzma.pc,))
+ext/.$1-stamp:
+	$$(call grab-and-prepare,$1)
+	@touch $$@
 
-$(eval $(call make-git-meson-module-rules,sqlite,build/fs-%/lib/pkgconfig/sqlite3.pc,))
+ext/$1/configure: build/fs-env-$(build_os_arch).rc ext/.$1-stamp
+	. $$< \
+		&& cd $$(@D) \
+		&& [ -f autogen.sh ] && NOCONFIGURE=1 ./autogen.sh || autoreconf -ifv
 
-$(eval $(call make-git-autotools-module-rules,libunwind,build/fs-%/lib/pkgconfig/libunwind.pc, \
+build/fs-tmp-%/$1/Makefile: build/fs-env-%.rc ext/$1/configure $3
+	$(RM) -r $$(@D)
+	mkdir -p $$(@D)
+	. $$< \
+		&& cd $$(@D) \
+		&& ../../../ext/$1/configure $$($1_options)
+
+$2: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
+	. $$< \
+		&& cd build/fs-tmp-$$*/$1 \
+		&& $(MAKE) $(MAKE_J) \
+		&& $(MAKE) $(MAKE_J) install
+	@touch $$@
+endef
+
+$(eval $(call make-meson-module-rules,zlib,build/fs-%/lib/pkgconfig/zlib.pc,))
+
+$(eval $(call make-autotools-module-rules,xz,build/fs-%/lib/pkgconfig/liblzma.pc,))
+
+$(eval $(call make-meson-module-rules,sqlite,build/fs-%/lib/pkgconfig/sqlite3.pc,))
+
+$(eval $(call make-autotools-module-rules,libunwind,build/fs-%/lib/pkgconfig/libunwind.pc, \
 	build/fs-%/lib/pkgconfig/liblzma.pc))
 
-$(eval $(call make-git-meson-module-rules,libffi,build/fs-%/lib/pkgconfig/libffi.pc,))
+$(eval $(call make-meson-module-rules,libffi,build/fs-%/lib/pkgconfig/libffi.pc,))
 
-$(eval $(call make-git-meson-module-rules,glib,build/fs-%/lib/pkgconfig/glib-2.0.pc, \
+$(eval $(call make-meson-module-rules,glib,build/fs-%/lib/pkgconfig/glib-2.0.pc, \
 	$(iconv) \
 	build/fs-%/lib/pkgconfig/zlib.pc \
 	build/fs-%/lib/pkgconfig/libffi.pc))
 
-$(eval $(call make-git-meson-module-rules,glib-networking,build/fs-%/lib/pkgconfig/gioopenssl.pc, \
+$(eval $(call make-meson-module-rules,glib-networking,build/fs-%/lib/pkgconfig/gioopenssl.pc, \
 	build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/openssl.pc))
 
-$(eval $(call make-git-meson-module-rules,libgee,build/fs-%/lib/pkgconfig/gee-0.8.pc, \
+$(eval $(call make-meson-module-rules,libgee,build/fs-%/lib/pkgconfig/gee-0.8.pc, \
 	build/fs-%/lib/pkgconfig/glib-2.0.pc))
 
-$(eval $(call make-git-meson-module-rules,json-glib,build/fs-%/lib/pkgconfig/json-glib-1.0.pc, \
+$(eval $(call make-meson-module-rules,json-glib,build/fs-%/lib/pkgconfig/json-glib-1.0.pc, \
 	build/fs-%/lib/pkgconfig/glib-2.0.pc))
 
-$(eval $(call make-git-meson-module-rules,libpsl,build/fs-%/lib/pkgconfig/libpsl.pc,))
+$(eval $(call make-meson-module-rules,libpsl,build/fs-%/lib/pkgconfig/libpsl.pc,))
 
-$(eval $(call make-git-meson-module-rules,libxml2,build/fs-%/lib/pkgconfig/libxml-2.0.pc, \
+$(eval $(call make-meson-module-rules,libxml2,build/fs-%/lib/pkgconfig/libxml-2.0.pc, \
 	build/fs-%/lib/pkgconfig/zlib.pc \
 	build/fs-%/lib/pkgconfig/liblzma.pc))
 
-$(eval $(call make-git-meson-module-rules,libsoup,build/fs-%/lib/pkgconfig/libsoup-2.4.pc, \
+$(eval $(call make-meson-module-rules,libsoup,build/fs-%/lib/pkgconfig/libsoup-2.4.pc, \
 	build/fs-%/lib/pkgconfig/glib-2.0.pc \
 	build/fs-%/lib/pkgconfig/sqlite3.pc \
 	build/fs-%/lib/pkgconfig/libpsl.pc \
 	build/fs-%/lib/pkgconfig/libxml-2.0.pc))
 
-$(eval $(call make-git-meson-module-rules,capstone,build/fs-%/lib/pkgconfig/capstone.pc,))
+$(eval $(call make-meson-module-rules,capstone,build/fs-%/lib/pkgconfig/capstone.pc,))
 
-$(eval $(call make-git-meson-module-rules,quickjs,build/fs-%/lib/pkgconfig/quickjs.pc,))
+$(eval $(call make-meson-module-rules,quickjs,build/fs-%/lib/pkgconfig/quickjs.pc,))
 
-$(eval $(call make-git-meson-module-rules,tinycc,build/fs-%/lib/pkgconfig/libtcc.pc,))
+$(eval $(call make-meson-module-rules,tinycc,build/fs-%/lib/pkgconfig/libtcc.pc,))
 
 
 ifeq ($(FRIDA_ASAN), yes)
@@ -386,14 +388,13 @@ endif
 endif
 
 ext/.openssl-stamp:
-	$(call download-and-prepare,openssl)
-	@mkdir -p $(@D)
+	$(call grab-and-prepare,openssl)
 	@touch $@
 
 build/fs-tmp-%/openssl/Configure: ext/.openssl-stamp
 	$(RM) -r $(@D)
 	mkdir -p build/fs-tmp-$*
-	cp -a openssl $(@D)
+	cp -a ext/openssl $(@D)
 	@touch $@
 
 build/fs-%/lib/pkgconfig/openssl.pc: build/fs-env-%.rc build/fs-tmp-%/openssl/Configure
@@ -517,11 +518,12 @@ ifneq ($(IOS_SDK_ROOT),)
 	v8_platform_args += ios_sdk_path="$(IOS_SDK_ROOT)"
 endif
 
-gn:
+ext/.gn-stamp:
 	# Google's prebuilt GN requires a newer glibc than our Debian Squeeze buildroot has.
-	$(call clone-and-prepare,gn)
+	$(call grab-and-prepare,gn)
+	@touch $@
 
-build/fs-tmp-%/gn/build.ninja: build/fs-env-%.rc gn
+build/fs-tmp-%/gn/build.ninja: build/fs-env-%.rc ext/.gn-stamp
 	. $< \
 		&& CC="$$CC" CXX="$$CXX" python ext/gn/build/gen.py \
 			--out-path $(abspath $(@D)) \
@@ -531,13 +533,14 @@ build/fs-tmp-%/gn/gn: build/fs-tmp-%/gn/build.ninja
 	$(NINJA) -C build/fs-tmp-$*/gn
 	@touch $@
 
-ext/v8-checkout/depot_tools/gclient:
-	@$(RM) -r $(@D)
-	git clone $(depot_tools_url) $(@D)
-	cd $(@D) && git checkout -q $(depot_tools_version)
+ext/.depot_tools-stamp:
+	$(call grab-and-prepare,depot_tools)
+	@touch $@
 
-ext/v8-checkout/.gclient: ext/v8-checkout/depot_tools/gclient
-	cd ext/v8-checkout && PATH=$(abspath ext/v8-checkout/depot_tools):$$PATH depot_tools/gclient config --spec 'solutions = [ \
+ext/v8-checkout/.gclient: ext/.depot_tools-stamp
+	cd ext/v8-checkout \
+		&& PATH="$(abspath ext/depot_tools):$$PATH" \
+			gclient config --spec 'solutions = [ \
   { \
     "url": "$(v8_url)@$(v8_version)", \
     "managed": False, \
@@ -548,14 +551,23 @@ ext/v8-checkout/.gclient: ext/v8-checkout/depot_tools/gclient
 ]'
 
 ext/v8-checkout/v8: ext/v8-checkout/.gclient
-	cd ext/v8-checkout && PATH=$(abspath ext/v8-checkout/depot_tools):$$PATH gclient sync
+	cd ext/v8-checkout \
+		&& PATH="$(abspath ext/depot_tools):$$PATH" \
+			gclient sync
 	@touch $@
 
 build/fs-tmp-%/v8/build.ninja: ext/v8-checkout/v8 build/fs-tmp-$(build_os_arch)/gn/gn
 	cd ext/v8-checkout/v8 \
 		&& ../../../build/fs-tmp-$(build_os_arch)/gn/gn \
 			gen $(abspath $(@D)) \
-			--args='target_os="$(v8_os)" target_cpu="$(v8_cpu)" $(v8_cpu_args) $(v8_buildtype_args) $(v8_platform_args) $(v8_options)'
+			--args=' \
+				target_os="$(v8_os)" \
+				target_cpu="$(v8_cpu)" \
+				$(v8_cpu_args) \
+				$(v8_buildtype_args) \
+				$(v8_platform_args) \
+				$(v8_options) \
+			'
 
 build/fs-tmp-%/v8/obj/libv8_monolith.a: build/fs-tmp-%/v8/build.ninja
 	$(NINJA) -C build/fs-tmp-$*/v8 v8_monolith
