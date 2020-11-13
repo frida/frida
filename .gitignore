@@ -25,11 +25,13 @@
 /m4
 /openssl
 /pkg-config
+/quickjs
 /releng/*.user
 /releng/__pycache__/
 /releng/modules/frida-gadget-ios/*.dylib
 /releng/modules/frida-gadget-ios/node_modules
 /sqlite
+/tinycc
 /v8-checkout
 /vala
 /xz

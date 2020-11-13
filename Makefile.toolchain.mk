@@ -8,31 +8,44 @@ frida_bootstrap_version := 20201028
 repo_base_url = "https://github.com/frida"
 repo_suffix = ".git"
 
-m4_version := 1.4.18
-m4_hash := ab2633921a5cd38e48797bf5521ad259bdc4b979078034a3b790d7fec5493fab
-autoconf_version := 2.69
-autoconf_hash := 954bd69b391edc12d6a4a51a2dd1476543da5c6bbf05a95b59dc0dd6fd4c2969
-automake_version := 1.16.2
-automake_api_version := 1.16
-automake_hash := b2f361094b410b4acbf4efba7337bdb786335ca09eb2518635a09fb7319ca5c1
-libtool_version := 2.4.6
-libtool_hash := e3bd4d5d3d025a36c21dd6af7ea818a2afcd4dfc1ea5a17b39d7854bcd0c06e3
-gettext_version := 0.21
-gettext_hash := c77d0da3102aec9c07f43671e60611ebff89a996ef159497ce8e59d075786b12
-zlib_version := 91920caec2160ffd919fd48dc4e7a0f6c3fb36d2
-libffi_version := 4612f7f4b8cfda9a1f07e66d033bb9319860af9b
-glib_version := 327fd7518d5612492723aec20c97fd2505e98fd8
-pkg_config_version := b7fb5edc1f1a4fb17cd5cb94f4cf21912184da43
-flex_version := 2.6.4
-flex_hash := e87aae032bf07c26f85ac0ed3250998c37621d95f8bd748b31f15b33c45ee995
-bison_version := 3.7.3
-bison_hash := 104fe912f2212ab4e4a59df888a93b719a046ffc38d178e943f6c54b1f27b3c7
-vala_version := 5067d99e7b9b8ab1c9393f70596fc5bd4f8b46a2
-
 gnu_mirror := saimei.ftp.acc.umu.se/mirror/gnu.org/gnu
 
 
+m4_version := 1.4.18
+m4_hash := ab2633921a5cd38e48797bf5521ad259bdc4b979078034a3b790d7fec5493fab
+
+autoconf_version := 2.69
+autoconf_hash := 954bd69b391edc12d6a4a51a2dd1476543da5c6bbf05a95b59dc0dd6fd4c2969
+
+automake_version := 1.16.2
+automake_api_version := 1.16
+automake_hash := b2f361094b410b4acbf4efba7337bdb786335ca09eb2518635a09fb7319ca5c1
+
+libtool_version := 2.4.6
+libtool_hash := e3bd4d5d3d025a36c21dd6af7ea818a2afcd4dfc1ea5a17b39d7854bcd0c06e3
+
+gettext_version := 0.21
+gettext_hash := c77d0da3102aec9c07f43671e60611ebff89a996ef159497ce8e59d075786b12
+
+zlib_version := 91920caec2160ffd919fd48dc4e7a0f6c3fb36d2
+
+libffi_version := 4612f7f4b8cfda9a1f07e66d033bb9319860af9b
+
+glib_version := 327fd7518d5612492723aec20c97fd2505e98fd8
+
+pkg_config_version := b7fb5edc1f1a4fb17cd5cb94f4cf21912184da43
+
+flex_version := 2.6.4
+flex_hash := e87aae032bf07c26f85ac0ed3250998c37621d95f8bd748b31f15b33c45ee995
+
+bison_version := 3.7.3
+bison_hash := 104fe912f2212ab4e4a59df888a93b719a046ffc38d178e943f6c54b1f27b3c7
+
+vala_version := 5067d99e7b9b8ab1c9393f70596fc5bd4f8b46a2
+
+
 SHELL := /bin/bash
+
 
 build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos,')
 build_arch := $(shell releng/detect-arch.sh)

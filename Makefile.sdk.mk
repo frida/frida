@@ -8,35 +8,58 @@ frida_bootstrap_version := 20201028
 repo_base_url = https://github.com/frida
 repo_suffix := .git
 
-libiconv_version := 1.16
-libiconv_hash := e6a1b1b589654277ee790cce3734f07876ac4ccfaecbee8afa0b649cf529cc04
-elfutils_version := elfutils-0.182
-libdwarf_version := 20201020
-libdwarf_hash := 1c5ce59e314c6fe74a1f1b4e2fa12caea9c24429309aa0ebdfa882f74f016eff
-zlib_version := 91920caec2160ffd919fd48dc4e7a0f6c3fb36d2
-xz_version := 6c84113065f603803683d30342207c73465bbc12
-sqlite_version := 9f21a054d5c24c2036e9d1b28c630ecda5ae24c3
-libunwind_version := 66ca44cd82389cd7cfbbd482e58324a79f6679ab
-libffi_version := 4612f7f4b8cfda9a1f07e66d033bb9319860af9b
-glib_version := 327fd7518d5612492723aec20c97fd2505e98fd8
-glib_networking_version := 7be8c21840cd4eb23477dc0c0d261f85d2c57778
-libgee_version := c7e96ac037610cc3d0e11dc964b7b1fca479fc2a
-json_glib_version := 9dd3b3898a2c41a1f9af24da8bab22e61526d299
-libpsl_version := 3caf6c33029b6c43fc31ce172badf976f6c37bc4
-libxml2_version := f1845f6fd1c0b6aac0f573c77a8250f8d4eb31fd
-libsoup_version := d0ac83f3952d590da09968b1e30736782b1d1c7f
-capstone_version := 03295d19d2c3b0162118a6d9742312301cde1d00
-openssl_version := 1.1.1h
-openssl_hash := 5c9ca8774bd7b03e5784f26ae9e9e6d749c9da2438545077e6b3d755a06595d9
-gn_version := 75194c124f158d7fabdc94048f1a3f850a5f0701
-depot_tools_version := b674f8a27725216bd2201652636649d83064ca4a
-v8_version := 6e74fda056e277e0c80240e7a4dd76c7225bd9ec
-v8_api_version := 8.0
-
 gnu_mirror := saimei.ftp.acc.umu.se/mirror/gnu.org/gnu
 
 
+libiconv_version := 1.16
+libiconv_hash := e6a1b1b589654277ee790cce3734f07876ac4ccfaecbee8afa0b649cf529cc04
+
+elfutils_version := elfutils-0.182
+
+libdwarf_version := 20201020
+libdwarf_hash := 1c5ce59e314c6fe74a1f1b4e2fa12caea9c24429309aa0ebdfa882f74f016eff
+
+zlib_version := 91920caec2160ffd919fd48dc4e7a0f6c3fb36d2
+
+xz_version := 6c84113065f603803683d30342207c73465bbc12
+
+sqlite_version := 9f21a054d5c24c2036e9d1b28c630ecda5ae24c3
+
+libunwind_version := 66ca44cd82389cd7cfbbd482e58324a79f6679ab
+
+libffi_version := 4612f7f4b8cfda9a1f07e66d033bb9319860af9b
+
+glib_version := 327fd7518d5612492723aec20c97fd2505e98fd8
+
+glib_networking_version := 7be8c21840cd4eb23477dc0c0d261f85d2c57778
+
+libgee_version := c7e96ac037610cc3d0e11dc964b7b1fca479fc2a
+
+json_glib_version := 9dd3b3898a2c41a1f9af24da8bab22e61526d299
+
+libpsl_version := 3caf6c33029b6c43fc31ce172badf976f6c37bc4
+
+libxml2_version := f1845f6fd1c0b6aac0f573c77a8250f8d4eb31fd
+
+libsoup_version := d0ac83f3952d590da09968b1e30736782b1d1c7f
+
+capstone_version := 03295d19d2c3b0162118a6d9742312301cde1d00
+
+quickjs_version := 26ce42ea32a3318b1c6318d4db6cf01ade54be61
+
+tinycc_version := c9f502d1a14aca5209eae8bdc9de1784ba27cb6f
+
+openssl_version := 1.1.1h
+openssl_hash := 5c9ca8774bd7b03e5784f26ae9e9e6d749c9da2438545077e6b3d755a06595d9
+
+v8_version := 6e74fda056e277e0c80240e7a4dd76c7225bd9ec
+v8_api_version := 8.0
+gn_version := 75194c124f158d7fabdc94048f1a3f850a5f0701
+depot_tools_version := b674f8a27725216bd2201652636649d83064ca4a
+
+
 SHELL := /bin/bash
+
 
 build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos,')
 build_arch := $(shell releng/detect-arch.sh)
@@ -124,6 +147,8 @@ build/fs-tmp-%/.package-stamp: \
 		build/fs-%/lib/pkgconfig/json-glib-1.0.pc \
 		build/fs-%/lib/pkgconfig/libsoup-2.4.pc \
 		build/fs-%/lib/pkgconfig/capstone.pc \
+		build/fs-%/lib/pkgconfig/quickjs.pc \
+		build/fs-%/lib/pkgconfig/libtcc.pc \
 		$(v8) \
 		$(libcxx)
 	$(RM) -r $(@D)/package
@@ -337,6 +362,10 @@ $(eval $(call make-git-meson-module-rules,libxml2,$(libxml2_version),build/fs-%/
 $(eval $(call make-git-meson-module-rules,libsoup,$(libsoup_version),build/fs-%/lib/pkgconfig/libsoup-2.4.pc,build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/sqlite3.pc build/fs-%/lib/pkgconfig/libpsl.pc build/fs-%/lib/pkgconfig/libxml-2.0.pc,-Dgssapi=disabled -Dtls_check=false -Dgnome=false -Dintrospection=disabled -Dvapi=disabled -Dtests=false -Dsysprof=disabled))
 
 $(eval $(call make-git-meson-module-rules,capstone,$(capstone_version),build/fs-%/lib/pkgconfig/capstone.pc,,-Darchs=$(shell echo $(host_arch) | sed 's,^x86_64$$,x86,') -Dx86_att_disable=true -Dcli=disabled))
+
+$(eval $(call make-git-meson-module-rules,quickjs,$(quickjs_version),build/fs-%/lib/pkgconfig/quickjs.pc,,-Dlibc=false -Dbignum=true -Datomics=disabled -Dstack_check=disabled))
+
+$(eval $(call make-git-meson-module-rules,tinycc,$(tinycc_version),build/fs-%/lib/pkgconfig/libtcc.pc,,))
 
 
 ifeq ($(FRIDA_ASAN), yes)
