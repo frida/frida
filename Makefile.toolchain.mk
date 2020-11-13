@@ -87,14 +87,11 @@ build/ft-tmp-%/.package-stamp: \
 define make-tarball-module-rules
 ext/.$1-stamp:
 	$$(call download-and-extract,$1)
-	@patches=$$($$(subst -,_,$1)_patches); \
-	if [ -n "$$$$patches" ]; then \
-		echo "[*] Applying patches"; \
-		cd ext/$1; \
-		for patch in $$$$patches; do \
-			patch -p1 < ../../releng/patches/$$$$patch; \
-		done; \
-	fi
+	cd ext/$1 \
+		&& for patch in $$($$(subst -,_,$1)_patches); do \
+			echo "[*] Applying: $$$$patch"; \
+			patch -p1 < ../../releng/patches/$$$$patch || exit 1; \
+		done
 	@touch $$@
 
 build/ft-tmp-%/$1/Makefile: build/ft-env-%.rc ext/.$1-stamp $3

@@ -1104,6 +1104,3 @@ meson_cross_file=build/${FRIDA_ENV_NAME:-frida}-${host_os_arch}.txt
   echo "cpu = '$meson_host_cpu'"
   echo "endian = '$meson_host_endian'"
 ) > $meson_cross_file
-
-echo "Environment created. To enter:"
-echo "# source ${FRIDA_ROOT}/$env_rc"

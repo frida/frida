@@ -241,11 +241,10 @@ repo_base_url := https://github.com/frida
 repo_suffix := .git
 
 
-
 define download-and-extract
 	$(RM) -r ext/$1
 	mkdir -p ext/$1
-	@url=$$($$(subst -,_,$1)_url); \
+	@url=$($(subst -,_,$1)_url); \
 	echo "[*] Downloading $$url"; \
 	if command -v curl >/dev/null; then \
 		curl -sSfLo ext/.$1-tarball $$url; \
@@ -253,17 +252,17 @@ define download-and-extract
 		wget -qO ext/.$1-tarball $$url; \
 	fi
 	@echo "[*] Verifying"
-	@expected_hash=$$($$(subst -,_,$1)_hash); \
+	@expected_hash=$($(subst -,_,$1)_hash); \
 	actual_hash=$$(shasum -a 256 -b ext/.$1-tarball | awk '{ print $$1; }'); \
-	case $$$$actual_hash in \
-		$$$$expected_hash) \
+	case $$actual_hash in \
+		$$expected_hash) \
 			;; \
 		*) \
-			echo "$1 tarball is corrupted; expected=$$$$expected_hash, actual=$$$$actual_hash"; \
+			echo "$1 tarball is corrupted; expected=$$expected_hash, actual=$$actual_hash"; \
 			exit 1; \
 			;; \
 	esac
 	@echo "[*] Extracting to $1"
 	@cd ext/$1 && tar -x -f ../.$1-tarball -z --strip-components 1
-	@rm ext/$1/.tarball
+	@rm ext/.$1-tarball
 endef
