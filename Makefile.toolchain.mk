@@ -159,7 +159,7 @@ ext/.libtool-stamp:
 		done
 	@touch $@
 
-build/ft-tmp-%/libtool/Makefile: build/ft-env-%.rc build/.libtool-stamp build/ft-%/bin/automake
+build/ft-tmp-%/libtool/Makefile: build/ft-env-%.rc ext/.libtool-stamp build/ft-%/bin/automake
 	$(RM) -r $(@D)
 	mkdir -p $(@D)
 	. $< && cd $(@D) && PATH=$(shell pwd)/build/ft-$*/bin:$$PATH ../../../ext/libtool/configure $(libtool_options)
