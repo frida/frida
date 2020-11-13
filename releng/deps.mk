@@ -249,48 +249,53 @@ gn_version := 75194c124f158d7fabdc94048f1a3f850a5f0701
 depot_tools_version := b674f8a27725216bd2201652636649d83064ca4a
 
 
-
-
 define clone-and-prepare
-	$(RM) -r ext/$1
+	@$(RM) -r ext/$1
 
 	@url=$($(subst -,_,$1)_url) \
-		&& echo "[*] Cloning $$url" \
-		&& git clone --recurse-submodules $$url ext/$1
-
-	@version=$($(subst -,_,$1)_version) \
-		&& echo "[*] Checking out $$version" \
-		&& cd ext/$1 \
+		&& version=$($(subst -,_,$1)_version) \
+		&& echo -e "╭────"\
+		&& echo -e "│ 🔨 \\033[1m$1\\033[0m" \
+		&& echo -e "├───────────────────────────────────────────────╮" \
+		&& echo -e "│ URL: $$url" \
+		&& echo -e "│ CID: $$version" \
+		&& echo -e "└───────────────────────────────────────────────╯" \
+		&& git clone --recurse-submodules $$url ext/$1 \
+		&& cd ext/$1 \ \
 		&& git checkout -q $$version
 
 	$(call apply-patches,$1)
 endef
 
 define download-and-prepare
-	$(RM) -r ext/$1
+	@$(RM) -r ext/$1
 	@mkdir -p ext/$1
 
 	@url=$($(subst -,_,$1)_url) \
-		&& echo "[*] Downloading $$url" \
+		&& version=$($(subst -,_,$1)_version) \
+		&& expected_hash=$($(subst -,_,$1)_hash) \
+		&& echo -e "╭────"\
+		&& echo -e "│ 🔨 \\033[1m$1\\033[0m $$version" \
+		&& echo -e "├─────\
+		&& echo -e "│ URL: $$url" \
+		&& echo -e "│ SHA: $$expected_hash" \
+		&& echo -e "└──────\
 		&& if command -v curl >/dev/null; then \
 			curl -sSfLo ext/.$1-tarball $$url; \
 		else \
 			wget -qO ext/.$1-tarball $$url; \
-		fi
-
-	@echo "[*] Verifying" \
-		&& expected_hash=$($(subst -,_,$1)_hash) \
+		fi \
 		&& actual_hash=$$(shasum -a 256 -b ext/.$1-tarball | awk '{ print $$1; }') \
 		&& case $$actual_hash in \
 			$$expected_hash) \
 				;; \
 			*) \
-				echo "$1 tarball is corrupted; expected=$$expected_hash, actual=$$actual_hash"; \
+				echo "$1 tarball is corrupted; its hash is: $$actual_hash"; \
 				exit 1; \
 				;; \
 		esac
 
-	@echo "[*] Extracting to ext/$1"
+	@echo "Extracting to ext/$1"
 	@tar -C ext/$1 -x -f ext/.$1-tarball -z --strip-components 1
 
 	$(call apply-patches,$1)
@@ -301,7 +306,7 @@ endef
 define apply-patches
 	@cd ext/$1 \
 		&& for patch in $($(subst -,_,$1)_patches); do \
-			echo "[*] Applying: $$patch"; \
+			echo "Applying \\033[1m$$patch\\033[0m"; \
 			patch -p1 < ../../releng/patches/$$patch || exit 1; \
 		done
 endef
