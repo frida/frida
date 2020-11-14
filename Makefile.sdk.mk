@@ -200,7 +200,7 @@ ext/.$1-stamp:
 	$$(call grab-and-prepare,$1)
 	@touch $$@
 
-build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_os_arch).rc build/fs-env-%.rc ext/.$1-stamp $3 releng/meson/meson.py
+build/fs-tmp-%/$1/build.ninja: build/fs-env-%.rc ext/.$1-stamp $3 releng/meson/meson.py
 	$(RM) -r $$(@D)
 	. build/fs-meson-env-$$*.rc \
 		&& . build/fs-config-$$*.site \

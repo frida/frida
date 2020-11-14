@@ -111,7 +111,8 @@ build/ft-tmp-%/$1/build.ninja: build/ft-env-%.rc ext/.$1-stamp $3 releng/meson/m
 	$(RM) -r $$(@D)
 	. build/ft-meson-env-$$*.rc \
 		&& . build/ft-config-$$*.site \
-		&& PATH="$$(shell pwd)/build/ft-$(build_os_arch)/bin:$$$$PATH" $(MESON) \
+		&& export PATH="$$(shell pwd)/build/ft-$(build_os_arch)/bin:$$$$PATH" \
+		&& $(MESON) \
 			--cross-file build/ft-$$*.txt \
 			--prefix $$$$frida_prefix \
 			--libdir $$$$frida_prefix/lib \
