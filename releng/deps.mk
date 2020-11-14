@@ -329,6 +329,50 @@ depot_tools_options := \
 	$(NULL)
 
 
+define make-meson-module-rules-with-env-prefix
+.PHONY: $1 clean-$1 distclean-$1
+
+$1: $(subst %,$(host_os_arch),$2)
+
+clean-$1:
+	@if [ -f build/$4tmp-$(host_os_arch)/$1/build.ninja ]; then \
+		. build/$4env-$(host_os_arch).rc; \
+		$(NINJA) -C build/$4tmp-$(host_os_arch)/$1 uninstall; \
+	fi
+	$(RM) $(subst %,$(host_os_arch),$2)
+	$(RM) -r build/$4tmp-$(host_os_arch)/$1
+
+distclean-$1: clean-$1
+	$(RM) ext/.$1-stamp
+	$(RM) -r ext/$1
+
+ext/.$1-stamp:
+	$$(call grab-and-prepare,$1)
+	@touch $$@
+
+build/$4tmp-%/$1/build.ninja: build/$4env-%.rc ext/.$1-stamp $3 releng/meson/meson.py
+	$(RM) -r $$(@D)
+	. build/$4meson-env-$$*.rc \
+		&& . build/$4config-$$*.site \
+		&& export PATH="$$(shell pwd)/build/$4$(build_os_arch)/bin:$$$$PATH" \
+		&& $(MESON) \
+			--cross-file build/$4$$*.txt \
+			--prefix $$$$frida_prefix \
+			--libdir $$$$frida_prefix/lib \
+			--default-library static \
+			$$(FRIDA_MESONFLAGS_BOTTLE) \
+			$$($$(subst -,_,$1)_options) \
+			$$(@D) \
+			ext/$1
+
+$2: build/$4env-%.rc build/$4tmp-%/$1/build.ninja
+	. $$< \
+		&& export PATH="$$(shell pwd)/build/$4$(build_os_arch)/bin:$$$$PATH" \
+		&& $(NINJA) -C build/$4tmp-$$*/$1 install
+	@touch $$@
+endef
+
+
 define grab-and-prepare
 	$(if $($(subst -,_,$1)_hash),
 		$(call grab-and-prepare-tarball,$1),

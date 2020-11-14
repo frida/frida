@@ -87,46 +87,7 @@ build/ft-tmp-%/.package-stamp: \
 
 
 define make-meson-module-rules
-.PHONY: $1 clean-$1 distclean-$1
-
-$1: $(subst %,$(host_os_arch),$2)
-
-clean-$1:
-	@if [ -f build/ft-tmp-$(host_os_arch)/$1/build.ninja ]; then \
-		. build/ft-env-$(host_os_arch).rc; \
-		$(NINJA) -C build/ft-tmp-$(host_os_arch)/$1 uninstall; \
-	fi
-	$(RM) $(subst %,$(host_os_arch),$2)
-	$(RM) -r build/ft-tmp-$(host_os_arch)/$1
-
-distclean-$1: clean-$1
-	$(RM) ext/.$1-stamp
-	$(RM) -r ext/$1
-
-ext/.$1-stamp:
-	$$(call grab-and-prepare,$1)
-	@touch $$@
-
-build/ft-tmp-%/$1/build.ninja: build/ft-env-%.rc ext/.$1-stamp $3 releng/meson/meson.py
-	$(RM) -r $$(@D)
-	. build/ft-meson-env-$$*.rc \
-		&& . build/ft-config-$$*.site \
-		&& export PATH="$$(shell pwd)/build/ft-$(build_os_arch)/bin:$$$$PATH" \
-		&& $(MESON) \
-			--cross-file build/ft-$$*.txt \
-			--prefix $$$$frida_prefix \
-			--libdir $$$$frida_prefix/lib \
-			--default-library static \
-			$$(FRIDA_MESONFLAGS_BOTTLE) \
-			$$($$(subst -,_,$1)_options) \
-			$$(@D) \
-			ext/$1
-
-$2: build/ft-env-%.rc build/ft-tmp-%/$1/build.ninja
-	. $$< \
-		&& export PATH="$$(shell pwd)/build/ft-$(build_os_arch)/bin:$$$$PATH" \
-		&& $(NINJA) -C build/ft-tmp-$$*/$1 install
-	@touch $$@
+$(call make-meson-module-rules-with-env-prefix,$1,$2,$3,ft-)
 endef
 
 
@@ -170,11 +131,11 @@ endef
 $(eval $(call make-autotools-module-rules,m4,build/ft-%/bin/m4,))
 
 $(eval $(call make-autotools-module-rules,autoconf,build/ft-%/bin/autoconf, \
-	build/ft-%/bin/m4
+	build/ft-%/bin/m4 \
 ))
 
 $(eval $(call make-autotools-module-rules,automake,build/ft-%/bin/automake, \
-	build/ft-%/bin/autoconf
+	build/ft-%/bin/autoconf \
 ))
 
 ext/.libtool-stamp:
