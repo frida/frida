@@ -469,6 +469,7 @@ ext/.depot_tools-stamp:
 	@touch $@
 
 ext/v8-checkout/.gclient: ext/.depot_tools-stamp
+	mkdir -p $(@D)
 	cd ext/v8-checkout \
 		&& PATH="$(abspath ext/depot_tools):$$PATH" \
 			gclient config --spec 'solutions = [ \
