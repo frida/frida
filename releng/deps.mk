@@ -268,7 +268,7 @@ quickjs_options := \
 	-Dstack_check=disabled \
 	$(NULL)
 
-tinycc_version := fad085a622e01c45f152bdd531678d6545a34187
+tinycc_version := 71c2e2c3d5009bf4ec0c242715250fdc772d49d1
 tinycc_url := $(frida_base_url)/tinycc.git
 tinycc_patches := \
 	$(NULL)
