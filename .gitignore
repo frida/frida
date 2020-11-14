@@ -1,6 +1,6 @@
 /.vs
-/ext
 /build
+/deps
 /ipch
 /releng/*.user
 /releng/__pycache__/

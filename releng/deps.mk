@@ -335,7 +335,7 @@ define make-base-module-rules
 
 $1: $(subst %,$(host_os_arch),$2)
 
-ext/.$1-stamp:
+deps/.$1-stamp:
 	$$(call grab-and-prepare,$1)
 	@touch $$@
 
@@ -346,7 +346,7 @@ define make-meson-module-rules-for-env
 
 $(call make-base-module-rules,$1,$2)
 
-build/$4-tmp-%/$1/build.ninja: build/$4-env-%.rc ext/.$1-stamp $3 releng/meson/meson.py
+build/$4-tmp-%/$1/build.ninja: build/$4-env-%.rc deps/.$1-stamp $3 releng/meson/meson.py
 	$(RM) -r $$(@D)
 	. build/$4-meson-env-$$*.rc \
 		&& . build/$4-config-$$*.site \
@@ -359,7 +359,7 @@ build/$4-tmp-%/$1/build.ninja: build/$4-env-%.rc ext/.$1-stamp $3 releng/meson/m
 			$$(FRIDA_MESONFLAGS_BOTTLE) \
 			$$($$(subst -,_,$1)_options) \
 			$$(@D) \
-			ext/$1
+			deps/$1
 
 $2: build/$4-env-%.rc build/$4-tmp-%/$1/build.ninja
 	. $$< \
@@ -378,8 +378,8 @@ clean-$1:
 	$(RM) -r build/$4-tmp-$(host_os_arch)/$1
 
 distclean-$1: clean-$1
-	$(RM) ext/.$1-stamp
-	$(RM) -r ext/$1
+	$(RM) deps/.$1-stamp
+	$(RM) -r deps/$1
 
 endef
 
@@ -388,7 +388,7 @@ define make-autotools-base-module-rules-for-env
 
 $(call make-base-module-rules,$1,$2)
 
-ext/$1/configure: build/$4-env-$(build_os_arch).rc ext/.$1-stamp
+deps/$1/configure: build/$4-env-$(build_os_arch).rc deps/.$1-stamp
 	. $$< \
 		&& cd $$(@D) \
 		&& if [ ! -f configure ] || [ -f ../.$1-reconf-needed ]; then \
@@ -400,13 +400,13 @@ ext/$1/configure: build/$4-env-$(build_os_arch).rc ext/.$1-stamp
 		fi
 	@touch $$@
 
-build/$4-tmp-%/$1/Makefile: build/$4-env-%.rc ext/$1/configure $3
+build/$4-tmp-%/$1/Makefile: build/$4-env-%.rc deps/$1/configure $3
 	$(RM) -r $$(@D)
 	mkdir -p $$(@D)
 	. $$< \
 		&& cd $$(@D) \
 		&& export PATH="$$(shell pwd)/build/$4-$(build_os_arch)/bin:$$$$PATH" \
-		&& ../../../ext/$1/configure $$($$(subst -,_,$1)_options)
+		&& ../../../deps/$1/configure $$($$(subst -,_,$1)_options)
 
 endef
 
@@ -432,8 +432,8 @@ clean-$1:
 	$(RM) -r build/$4-tmp-$(host_os_arch)/$1
 
 distclean-$1: clean-$1
-	$(RM) ext/.$1-stamp
-	$(RM) -r ext/$1
+	$(RM) deps/.$1-stamp
+	$(RM) -r deps/$1
 
 endef
 
@@ -446,8 +446,8 @@ endef
 
 
 define grab-and-prepare-tarball
-	@$(RM) -r ext/$1
-	@mkdir -p ext/$1
+	@$(RM) -r deps/$1
+	@mkdir -p deps/$1
 
 	@url=$($(subst -,_,$1)_url) \
 		&& version=$($(subst -,_,$1)_version) \
@@ -460,11 +460,11 @@ define grab-and-prepare-tarball
 │ SHA: $$expected_hash\n\
 └────────────" \
 		&& if command -v curl >/dev/null; then \
-			curl -sSfLo ext/.$1-tarball $$url; \
+			curl -sSfLo deps/.$1-tarball $$url; \
 		else \
-			wget -qO ext/.$1-tarball $$url; \
+			wget -qO deps/.$1-tarball $$url; \
 		fi \
-		&& actual_hash=$$(shasum -a 256 -b ext/.$1-tarball | awk '{ print $$1; }') \
+		&& actual_hash=$$(shasum -a 256 -b deps/.$1-tarball | awk '{ print $$1; }') \
 		&& case $$actual_hash in \
 			$$expected_hash) \
 				;; \
@@ -474,17 +474,17 @@ define grab-and-prepare-tarball
 				;; \
 		esac
 
-	@echo "Extracting to ext/$1"
-	@tar -C ext/$1 -x -f ext/.$1-tarball -z --strip-components 1
+	@echo "Extracting to deps/$1"
+	@tar -C deps/$1 -x -f deps/.$1-tarball -z --strip-components 1
 
 	$(call apply-patches,$1)
 
-	@rm ext/.$1-tarball
+	@rm deps/.$1-tarball
 endef
 
 
 define grab-and-prepare-repo
-	@$(RM) -r ext/$1
+	@$(RM) -r deps/$1
 
 	@url=$($(subst -,_,$1)_url) \
 		&& version=$($(subst -,_,$1)_version) \
@@ -495,8 +495,8 @@ define grab-and-prepare-repo
 │ URL: $$url\n\
 │ CID: $$version\n\
 └───────────────────────────────────────────────╯" \
-		&& git clone --recurse-submodules $$url ext/$1 \
-		&& cd ext/$1 \ \
+		&& git clone --recurse-submodules $$url deps/$1 \
+		&& cd deps/$1 \ \
 		&& git checkout -q $$version
 
 	$(call apply-patches,$1)
@@ -504,7 +504,7 @@ endef
 
 
 define apply-patches
-	@cd ext/$1 \
+	@cd deps/$1 \
 		&& for patch in $($(subst -,_,$1)_patches); do \
 			file=../../releng/patches/$$patch; \
 			\

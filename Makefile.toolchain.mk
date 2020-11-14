@@ -108,28 +108,28 @@ $(eval $(call make-autotools-module-rules,automake,build/ft-%/bin/automake, \
 
 libtool: build/ft-$(host_os_arch)/bin/libtool
 
-ext/.libtool-stamp:
+deps/.libtool-stamp:
 	$(call grab-and-prepare,libtool)
-	@cd ext/libtool \
+	@cd deps/libtool \
 		&& for name in aclocal.m4 config-h.in configure Makefile.in; do \
 			find . -name $$name -exec touch '{}' \;; \
 		done
 	@touch $@
 
-build/ft-tmp-%/libtool/Makefile: build/ft-env-%.rc ext/.libtool-stamp build/ft-%/bin/automake
+build/ft-tmp-%/libtool/Makefile: build/ft-env-%.rc deps/.libtool-stamp build/ft-%/bin/automake
 	$(RM) -r $(@D)
 	mkdir -p $(@D)
 	. $< \
 		&& cd $(@D) \
 		&& export PATH="$(shell pwd)/build/ft-$(build_os_arch)/bin:$$PATH" \
-		&& ../../../ext/libtool/configure $(libtool_options)
+		&& ../../../deps/libtool/configure $(libtool_options)
 
 build/ft-%/bin/libtool: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 	. $< \
 		&& cd build/ft-tmp-$*/libtool \
 		&& export PATH="$(shell pwd)/build/ft-$(build_os_arch)/bin:$$PATH" \
 		&& $(MAKE) build-aux/ltmain.sh \
-		&& touch ../../../ext/libtool/doc/*.1 ../../../ext/libtool/doc/stamp-vti \
+		&& touch ../../../deps/libtool/doc/*.1 ../../../deps/libtool/doc/stamp-vti \
 		&& $(MAKE) $(MAKE_J) \
 		&& $(MAKE) $(MAKE_J) install
 	@touch $@

@@ -120,10 +120,10 @@ $(eval $(call make-autotools-base-module-rules,elfutils,build/fs-%/lib/libelf.a,
 build/fs-%/lib/libelf.a: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
 	. $< && $(MAKE) $(MAKE_J) -C build/fs-tmp-$*/elfutils/libelf libelf.a
 	install -d build/fs-$*/include
-	install -m 644 ext/elfutils/libelf/libelf.h build/fs-$*/include
-	install -m 644 ext/elfutils/libelf/elf.h build/fs-$*/include
-	install -m 644 ext/elfutils/libelf/gelf.h build/fs-$*/include
-	install -m 644 ext/elfutils/libelf/nlist.h build/fs-$*/include
+	install -m 644 deps/elfutils/libelf/libelf.h build/fs-$*/include
+	install -m 644 deps/elfutils/libelf/elf.h build/fs-$*/include
+	install -m 644 deps/elfutils/libelf/gelf.h build/fs-$*/include
+	install -m 644 deps/elfutils/libelf/nlist.h build/fs-$*/include
 	install -d build/fs-$*/lib
 	install -m 644 build/fs-tmp-$*/elfutils/libelf/libelf.a build/fs-$*/lib
 	@touch $@
@@ -135,8 +135,8 @@ $(eval $(call make-autotools-base-module-rules,libdwarf,build/fs-%/lib/libdwarf.
 build/fs-%/lib/libdwarf.a: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
 	. $< && $(MAKE) $(MAKE_J) -C build/fs-tmp-$*/libdwarf/libdwarf libdwarf.la
 	install -d build/fs-$*/include
-	install -m 644 ext/libdwarf/libdwarf/dwarf.h build/fs-$*/include
-	install -m 644 ext/libdwarf/libdwarf/libdwarf.h build/fs-$*/include
+	install -m 644 deps/libdwarf/libdwarf/dwarf.h build/fs-$*/include
+	install -m 644 deps/libdwarf/libdwarf/libdwarf.h build/fs-$*/include
 	install -d build/fs-$*/lib
 	install -m 644 build/fs-tmp-$*/libdwarf/libdwarf/.libs/libdwarf.a build/fs-$*/lib
 	@touch $@
@@ -312,14 +312,14 @@ endif
 
 openssl: build/fs-$(host_os_arch)/lib/pkgconfig/openssl.pc
 
-ext/.openssl-stamp:
+deps/.openssl-stamp:
 	$(call grab-and-prepare,openssl)
 	@touch $@
 
-build/fs-tmp-%/openssl/Configure: ext/.openssl-stamp
+build/fs-tmp-%/openssl/Configure: deps/.openssl-stamp
 	$(RM) -r $(@D)
 	mkdir -p build/fs-tmp-$*
-	cp -a ext/openssl $(@D)
+	cp -a deps/openssl $(@D)
 	@touch $@
 
 build/fs-%/lib/pkgconfig/openssl.pc: build/fs-env-%.rc build/fs-tmp-%/openssl/Configure
@@ -447,16 +447,16 @@ endif
 
 v8: build/fs-$(host_os_arch)/lib/pkgconfig/v8-$(v8_api_version).pc
 gn: build/fs-tmp-$(build_os_arch)/gn/gn
-depot_tools: ext/.depot_tools-stamp
+depot_tools: deps/.depot_tools-stamp
 
-ext/.gn-stamp:
+deps/.gn-stamp:
 	# Google's prebuilt GN requires a newer glibc than our Debian Squeeze buildroot has.
 	$(call grab-and-prepare,gn)
 	@touch $@
 
-build/fs-tmp-%/gn/build.ninja: build/fs-env-%.rc ext/.gn-stamp
+build/fs-tmp-%/gn/build.ninja: build/fs-env-%.rc deps/.gn-stamp
 	. $< \
-		&& CC="$$CC" CXX="$$CXX" python ext/gn/build/gen.py \
+		&& CC="$$CC" CXX="$$CXX" python deps/gn/build/gen.py \
 			--out-path $(abspath $(@D)) \
 			$(gn_options)
 
@@ -464,14 +464,14 @@ build/fs-tmp-%/gn/gn: build/fs-tmp-%/gn/build.ninja
 	$(NINJA) -C build/fs-tmp-$*/gn
 	@touch $@
 
-ext/.depot_tools-stamp:
+deps/.depot_tools-stamp:
 	$(call grab-and-prepare,depot_tools)
 	@touch $@
 
-ext/v8-checkout/.gclient: ext/.depot_tools-stamp
+deps/v8-checkout/.gclient: deps/.depot_tools-stamp
 	mkdir -p $(@D)
-	cd ext/v8-checkout \
-		&& PATH="$(abspath ext/depot_tools):$$PATH" \
+	cd deps/v8-checkout \
+		&& PATH="$(abspath deps/depot_tools):$$PATH" \
 			gclient config --spec 'solutions = [ \
   { \
     "url": "$(v8_url)@$(v8_version)", \
@@ -482,14 +482,14 @@ ext/v8-checkout/.gclient: ext/.depot_tools-stamp
   }, \
 ]'
 
-ext/v8-checkout/v8: ext/v8-checkout/.gclient
-	cd ext/v8-checkout \
-		&& PATH="$(abspath ext/depot_tools):$$PATH" \
+deps/v8-checkout/v8: deps/v8-checkout/.gclient
+	cd deps/v8-checkout \
+		&& PATH="$(abspath deps/depot_tools):$$PATH" \
 			gclient sync
 	@touch $@
 
-build/fs-tmp-%/v8/build.ninja: ext/v8-checkout/v8 build/fs-tmp-$(build_os_arch)/gn/gn
-	cd ext/v8-checkout/v8 \
+build/fs-tmp-%/v8/build.ninja: deps/v8-checkout/v8 build/fs-tmp-$(build_os_arch)/gn/gn
+	cd deps/v8-checkout/v8 \
 		&& ../../../build/fs-tmp-$(build_os_arch)/gn/gn \
 			gen $(abspath $(@D)) \
 			--args='$(strip \
@@ -507,21 +507,21 @@ build/fs-tmp-%/v8/obj/libv8_monolith.a: build/fs-tmp-%/v8/build.ninja
 
 build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc: build/fs-tmp-%/v8/obj/libv8_monolith.a
 	install -d build/fs-$*/include/v8-$(v8_api_version)/v8
-	install -m 644 ext/v8-checkout/v8/include/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/
+	install -m 644 deps/v8-checkout/v8/include/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/
 	install -d build/fs-$*/include/v8-$(v8_api_version)/v8/inspector
 	install -m 644 build/fs-tmp-$*/v8/gen/include/inspector/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/inspector/
 	install -d build/fs-$*/include/v8-$(v8_api_version)/v8/libplatform
-	install -m 644 ext/v8-checkout/v8/include/libplatform/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/libplatform/
+	install -m 644 deps/v8-checkout/v8/include/libplatform/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/libplatform/
 	install -d build/fs-$*/include/v8-$(v8_api_version)/v8/cppgc
-	install -m 644 ext/v8-checkout/v8/include/cppgc/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/cppgc/
+	install -m 644 deps/v8-checkout/v8/include/cppgc/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/cppgc/
 	install -d build/fs-$*/include/v8-$(v8_api_version)/v8/cppgc/internal
-	install -m 644 ext/v8-checkout/v8/include/cppgc/internal/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/cppgc/internal/
+	install -m 644 deps/v8-checkout/v8/include/cppgc/internal/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/cppgc/internal/
 	install -d build/fs-$*/lib
 	install -m 644 $< build/fs-$*/lib/libv8-$(v8_api_version).a
 	install -d $(@D)
 	$(PYTHON3) releng/v8.py \
 		patch build/fs-$*/include/v8-$(v8_api_version)/v8/v8config.h \
-		-s ext/v8-checkout/v8 \
+		-s deps/v8-checkout/v8 \
 		-b build/fs-tmp-$*/v8 \
 		-G build/fs-tmp-$(build_os_arch)/gn/gn
 	echo "prefix=\$${frida_sdk_prefix}" > $@.tmp
@@ -530,7 +530,7 @@ build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc: build/fs-tmp-%/v8/obj/libv8_mo
 	echo "" >> $@.tmp
 	echo "Name: V8" >> $@.tmp
 	echo "Description: V8 JavaScript Engine" >> $@.tmp
-	echo "Version: $$($(PYTHON3) releng/v8.py get version -s ext/v8-checkout/v8)" >> $@.tmp
+	echo "Version: $$($(PYTHON3) releng/v8.py get version -s deps/v8-checkout/v8)" >> $@.tmp
 	echo "Libs: -L\$${libdir} -lv8-$(v8_api_version)" >> $@.tmp
 ifdef v8_libs_private
 	echo Libs.private: $(v8_libs_private) >> $@.tmp
@@ -546,7 +546,7 @@ libcxx: build/fs-$(host_os_arch)/lib/c++/libc++.a
 build/fs-%/lib/c++/libc++.a: build/fs-tmp-%/v8/obj/libv8_monolith.a
 	$(NINJA) -C build/fs-tmp-$*/v8 libc++
 	install -d build/fs-$*/include/c++/
-	cp -a ext/v8-checkout/v8/buildtools/third_party/libc++/trunk/include/* build/fs-$*/include/c++/
+	cp -a deps/v8-checkout/v8/buildtools/third_party/libc++/trunk/include/* build/fs-$*/include/c++/
 	rm build/fs-$*/include/c++/CMakeLists.txt build/fs-$*/include/c++/__config_site.in
 	( \
 		echo "#ifndef _LIBCPP_CONFIG_SITE"; \
@@ -560,7 +560,7 @@ build/fs-%/lib/c++/libc++.a: build/fs-tmp-%/v8/obj/libv8_monolith.a
 		echo ""; \
 	) | cat \
 		- \
-		ext/v8-checkout/v8/buildtools/third_party/libc++/trunk/include/__config \
+		deps/v8-checkout/v8/buildtools/third_party/libc++/trunk/include/__config \
 		> build/fs-$*/include/c++/__config
 	install -d build/fs-$*/lib/c++
 	$(shell xcrun -f libtool) -static -no_warning_for_no_symbols \
