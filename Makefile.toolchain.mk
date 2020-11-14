@@ -87,7 +87,7 @@ build/ft-tmp-%/.package-stamp: \
 
 
 define make-meson-module-rules
-$(call make-meson-module-rules-with-env-prefix,$1,$2,$3,ft-)
+$(call make-meson-module-rules-for-env,$1,$2,$3,ft)
 endef
 
 

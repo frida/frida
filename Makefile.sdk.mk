@@ -180,7 +180,7 @@ build/fs-%/lib/libdwarf.a: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
 
 
 define make-meson-module-rules
-$(call make-meson-module-rules-with-env-prefix,$1,$2,$3,fs-)
+$(call make-meson-module-rules-for-env,$1,$2,$3,fs)
 endef
 
 
