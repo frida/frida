@@ -329,26 +329,22 @@ depot_tools_options := \
 	$(NULL)
 
 
-define make-meson-module-rules-for-env
-.PHONY: $1 clean-$1 distclean-$1
+define make-base-module-rules
+
+.PHONY: $1
 
 $1: $(subst %,$(host_os_arch),$2)
-
-clean-$1:
-	@if [ -f build/$4-tmp-$(host_os_arch)/$1/build.ninja ]; then \
-		. build/$4-env-$(host_os_arch).rc; \
-		$(NINJA) -C build/$4-tmp-$(host_os_arch)/$1 uninstall; \
-	fi
-	$(RM) $(subst %,$(host_os_arch),$2)
-	$(RM) -r build/$4-tmp-$(host_os_arch)/$1
-
-distclean-$1: clean-$1
-	$(RM) ext/.$1-stamp
-	$(RM) -r ext/$1
 
 ext/.$1-stamp:
 	$$(call grab-and-prepare,$1)
 	@touch $$@
+
+endef
+
+
+define make-meson-module-rules-for-env
+
+$(call make-base-module-rules,$1,$2)
 
 build/$4-tmp-%/$1/build.ninja: build/$4-env-%.rc ext/.$1-stamp $3 releng/meson/meson.py
 	$(RM) -r $$(@D)
@@ -370,13 +366,64 @@ $2: build/$4-env-%.rc build/$4-tmp-%/$1/build.ninja
 		&& export PATH="$$(shell pwd)/build/$4-$(build_os_arch)/bin:$$$$PATH" \
 		&& $(NINJA) -C build/$4-tmp-$$*/$1 install
 	@touch $$@
+
+.PHONY: clean-$1 distclean-$1
+
+clean-$1:
+	@if [ -f build/$4-tmp-$(host_os_arch)/$1/build.ninja ]; then \
+		. build/$4-env-$(host_os_arch).rc; \
+		$(NINJA) -C build/$4-tmp-$(host_os_arch)/$1 uninstall; \
+	fi
+	$(RM) $(subst %,$(host_os_arch),$2)
+	$(RM) -r build/$4-tmp-$(host_os_arch)/$1
+
+distclean-$1: clean-$1
+	$(RM) ext/.$1-stamp
+	$(RM) -r ext/$1
+
+endef
+
+
+define make-autotools-base-module-rules-for-env
+
+$(call make-base-module-rules,$1,$2)
+
+ext/$1/configure: build/$4-env-$(build_os_arch).rc ext/.$1-stamp
+	. $$< \
+		&& cd $$(@D) \
+		&& if [ ! -f configure ] || [ -f ../.$1-reconf-needed ]; then \
+			echo "$1: Performing reconf"; \
+			autoreconf -if || exit 1; \
+			rm -f ../.$1-reconf-needed; \
+		else \
+			echo "$1: Skipping reconf"; \
+		fi
+	@touch $$@
+
+build/$4-tmp-%/$1/Makefile: build/$4-env-%.rc ext/$1/configure $3
+	$(RM) -r $$(@D)
+	mkdir -p $$(@D)
+	. $$< \
+		&& cd $$(@D) \
+		&& export PATH="$$(shell pwd)/build/$4-$(build_os_arch)/bin:$$$$PATH" \
+		&& ../../../ext/$1/configure $$($$(subst -,_,$1)_options)
+
 endef
 
 
 define make-autotools-module-rules-for-env
-.PHONY: $1 clean-$1 distclean-$1
 
-$1: $(subst %,$(host_os_arch),$2)
+$(call make-autotools-base-module-rules-for-env,$1,$2,$3,$4)
+
+$2: build/$4-env-%.rc build/$4-tmp-%/$1/Makefile
+	. $$< \
+		&& cd build/$4-tmp-$$*/$1 \
+		&& export PATH="$$(shell pwd)/build/$4-$(build_os_arch)/bin:$$$$PATH" \
+		&& $(MAKE) $(MAKE_J) \
+		&& $(MAKE) $(MAKE_J) install
+	@touch $$@
+
+.PHONY: clean-$1 distclean-$1
 
 clean-$1:
 	@[ -f build/$4-tmp-$(host_os_arch)/$1/Makefile ] \
@@ -388,30 +435,6 @@ distclean-$1: clean-$1
 	$(RM) ext/.$1-stamp
 	$(RM) -r ext/$1
 
-ext/.$1-stamp:
-	$$(call grab-and-prepare,$1)
-	@touch $$@
-
-ext/$1/configure: build/$4-env-$(build_os_arch).rc ext/.$1-stamp
-	. $$< \
-		&& cd $$(@D) \
-		&& [ -f autogen.sh ] && NOCONFIGURE=1 ./autogen.sh || autoreconf -if
-
-build/$4-tmp-%/$1/Makefile: build/$4-env-%.rc ext/$1/configure $3
-	$(RM) -r $$(@D)
-	mkdir -p $$(@D)
-	. $$< \
-		&& cd $$(@D) \
-		&& export PATH="$$(shell pwd)/build/$4-$(build_os_arch)/bin:$$$$PATH" \
-		&& ../../../ext/$1/configure $$($$(subst -,_,$1)_options)
-
-$2: build/$4-env-%.rc build/$4-tmp-%/$1/Makefile
-	. $$< \
-		&& cd build/$4-tmp-$$*/$1 \
-		&& export PATH="$$(shell pwd)/build/$4-$(build_os_arch)/bin:$$$$PATH" \
-		&& $(MAKE) $(MAKE_J) \
-		&& $(MAKE) $(MAKE_J) install
-	@touch $$@
 endef
 
 
@@ -483,7 +506,13 @@ endef
 define apply-patches
 	@cd ext/$1 \
 		&& for patch in $($(subst -,_,$1)_patches); do \
+			file=../../releng/patches/$$patch; \
+			\
 			echo -e "Applying \\033[1m$$patch\\033[0m"; \
-			patch -p1 < ../../releng/patches/$$patch || exit 1; \
+			patch -p1 < $$file || exit 1; \
+			\
+			if grep '+++' $$file | grep -Eq 'configure\.ac|Makefile\.am'; then \
+				touch ../.$1-reconf-needed; \
+			fi \
 		done
 endef

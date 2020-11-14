@@ -98,48 +98,27 @@ endif
 	@touch $@
 
 
-.PHONY: libiconv
+define make-meson-module-rules
+$(call make-meson-module-rules-for-env,$1,$2,$3,fs)
+endef
 
-libiconv: build/fs-$(host_os_arch)/lib/libiconv.a
+define make-autotools-module-rules
+$(call make-autotools-module-rules-for-env,$1,$2,$3,fs)
+endef
 
-ext/.libiconv-stamp:
-	$(call grab-and-prepare,libiconv)
-	@touch $@
+define make-autotools-base-module-rules
+$(call make-autotools-base-module-rules-for-env,$1,$2,$3,fs)
+endef
 
-build/fs-tmp-%/libiconv/Makefile: build/fs-env-%.rc ext/.libiconv-stamp
-	$(RM) -r $(@D)
-	mkdir -p $(@D)
-	. $< \
-		&& cd $(@D) \
-		&& ../../../ext/libiconv/configure $(libiconv_options)
+$(eval $(call make-autotools-module-rules,libiconv,build/fs-%/lib/libiconv.a,))
 
-build/fs-%/lib/libiconv.a: build/fs-env-%.rc build/fs-tmp-%/libiconv/Makefile
-	. $< \
-		&& cd build/fs-tmp-$*/libiconv \
-		&& $(MAKE) $(MAKE_J) \
-		&& $(MAKE) $(MAKE_J) install
-	@touch $@
-
-
-.PHONY: elfutils
-
-elfutils: build/fs-$(host_os_arch)/lib/libelf.a
-
-ext/.elfutils-stamp:
-	$(call grab-and-prepare,elfutils)
-	@touch $@
-
-build/fs-tmp-%/elfutils/Makefile: build/fs-env-%.rc ext/.elfutils-stamp build/fs-%/lib/pkgconfig/liblzma.pc build/fs-%/lib/pkgconfig/zlib.pc
-	$(RM) -r $(@D)
-	mkdir -p $(@D)
-	. $< \
-		&& cd $(@D) \
-		&& ../../../ext/elfutils/configure $(elfutils_options)
+$(eval $(call make-autotools-base-module-rules,elfutils,build/fs-%/lib/libelf.a, \
+	build/fs-%/lib/pkgconfig/liblzma.pc \
+	build/fs-%/lib/pkgconfig/zlib.pc \
+))
 
 build/fs-%/lib/libelf.a: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
-	. $< \
-		&& cd build/fs-tmp-$*/elfutils \
-		&& $(MAKE) $(MAKE_J) -C libelf libelf.a
+	. $< && $(MAKE) $(MAKE_J) -C build/fs-tmp-$*/elfutils/libelf libelf.a
 	install -d build/fs-$*/include
 	install -m 644 ext/elfutils/libelf/libelf.h build/fs-$*/include
 	install -m 644 ext/elfutils/libelf/elf.h build/fs-$*/include
@@ -149,40 +128,18 @@ build/fs-%/lib/libelf.a: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
 	install -m 644 build/fs-tmp-$*/elfutils/libelf/libelf.a build/fs-$*/lib
 	@touch $@
 
-
-.PHONY: libdwarf
-
-libdwarf: build/fs-$(host_os_arch)/lib/libdwarf.a
-
-ext/.libdwarf-stamp:
-	$(call grab-and-prepare,libdwarf)
-	@touch $@
-
-build/fs-tmp-%/libdwarf/Makefile: build/fs-env-%.rc ext/.libdwarf-stamp build/fs-%/lib/libelf.a
-	$(RM) -r $(@D)
-	mkdir -p $(@D)
-	. $< \
-		&& cd $(@D) \
-		&& ../../../ext/libdwarf/configure $(libdwarf_options)
+$(eval $(call make-autotools-base-module-rules,libdwarf,build/fs-%/lib/libdwarf.a, \
+	build/fs-%/lib/libelf.a \
+))
 
 build/fs-%/lib/libdwarf.a: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
-	. $< \
-		&& $(MAKE) $(MAKE_J) -C build/fs-tmp-$*/libdwarf/libdwarf libdwarf.la
+	. $< && $(MAKE) $(MAKE_J) -C build/fs-tmp-$*/libdwarf/libdwarf libdwarf.la
 	install -d build/fs-$*/include
 	install -m 644 libdwarf/libdwarf/dwarf.h build/fs-$*/include
 	install -m 644 libdwarf/libdwarf/libdwarf.h build/fs-$*/include
 	install -d build/fs-$*/lib
 	install -m 644 build/fs-tmp-$*/libdwarf/libdwarf/.libs/libdwarf.a build/fs-$*/lib
 	@touch $@
-
-
-define make-meson-module-rules
-$(call make-meson-module-rules-for-env,$1,$2,$3,fs)
-endef
-
-define make-autotools-module-rules
-$(call make-autotools-module-rules-for-env,$1,$2,$3,fs)
-endef
 
 $(eval $(call make-meson-module-rules,zlib,build/fs-%/lib/pkgconfig/zlib.pc,))
 

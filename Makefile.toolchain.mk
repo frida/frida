@@ -104,6 +104,10 @@ $(eval $(call make-autotools-module-rules,automake,build/ft-%/bin/automake, \
 	build/ft-%/bin/autoconf \
 ))
 
+.PHONY: libtool
+
+libtool: build/ft-$(host_os_arch)/bin/libtool
+
 ext/.libtool-stamp:
 	$(call grab-and-prepare,libtool)
 	@cd ext/libtool \
@@ -117,13 +121,13 @@ build/ft-tmp-%/libtool/Makefile: build/ft-env-%.rc ext/.libtool-stamp build/ft-%
 	mkdir -p $(@D)
 	. $< \
 		&& cd $(@D) \
-		&& PATH="$(shell pwd)/build/ft-$*/bin:$$PATH" \
-			../../../ext/libtool/configure $(libtool_options)
+		&& export PATH="$(shell pwd)/build/ft-$(build_os_arch)/bin:$$PATH" \
+		&& ../../../ext/libtool/configure $(libtool_options)
 
 build/ft-%/bin/libtool: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 	. $< \
 		&& cd build/ft-tmp-$*/libtool \
-		&& export PATH=$(shell pwd)/build/ft-$*/bin:$$PATH \
+		&& export PATH="$(shell pwd)/build/ft-$(build_os_arch)/bin:$$PATH" \
 		&& $(MAKE) build-aux/ltmain.sh \
 		&& touch ../../../ext/libtool/doc/*.1 ../../../ext/libtool/doc/stamp-vti \
 		&& $(MAKE) $(MAKE_J) \
