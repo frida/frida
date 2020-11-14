@@ -90,43 +90,9 @@ define make-meson-module-rules
 $(call make-meson-module-rules-for-env,$1,$2,$3,ft)
 endef
 
-
 define make-autotools-module-rules
-.PHONY: $1 clean-$1 distclean-$1
-
-$1: $(subst %,$(host_os_arch),$2)
-
-clean-$1:
-	@[ -f build/ft-tmp-$(host_os_arch)/$1/Makefile ] \
-		&& $(MAKE) -C build/ft-tmp-$(host_os_arch)/$1 uninstall
-	$(RM) $(subst %,$(host_os_arch),$2)
-	$(RM) -r build/ft-tmp-$(host_os_arch)/$1
-
-distclean-$1: clean-$1
-	$(RM) ext/.$1-stamp
-	$(RM) -r ext/$1
-
-ext/.$1-stamp:
-	$$(call grab-and-prepare,$1)
-	@touch $$@
-
-build/ft-tmp-%/$1/Makefile: build/ft-env-%.rc ext/.$1-stamp $3
-	$(RM) -r $$(@D)
-	mkdir -p $$(@D)
-	. $$< \
-		&& cd $$(@D) \
-		&& export PATH="$$(shell pwd)/build/ft-$$*/bin:$$$$PATH" \
-		&& ../../../ext/$1/configure $$($$(subst -,_,$1)_options)
-
-$2: build/ft-env-%.rc build/ft-tmp-%/$1/Makefile
-	. $$< \
-		&& cd build/ft-tmp-$$*/$1 \
-		&& export PATH="$$(shell pwd)/build/ft-$$*/bin:$$$$PATH" \
-		&& $(MAKE) $(MAKE_J) \
-		&& $(MAKE) $(MAKE_J) install
-	@touch $$@
+$(call make-autotools-module-rules-for-env,$1,$2,$3,ft)
 endef
-
 
 $(eval $(call make-autotools-module-rules,m4,build/ft-%/bin/m4,))
 

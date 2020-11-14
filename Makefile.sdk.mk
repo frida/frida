@@ -127,9 +127,6 @@ elfutils: build/fs-$(host_os_arch)/lib/libelf.a
 
 ext/.elfutils-stamp: build/fs-env-$(build_os_arch).rc
 	$(call grab-and-prepare,elfutils)
-	. $< \
-		&& cd ext/elfutils \
-		&& autoreconf -if
 	@touch $@
 
 build/fs-tmp-%/elfutils/Makefile: build/fs-env-%.rc ext/.elfutils-stamp build/fs-%/lib/pkgconfig/liblzma.pc build/fs-%/lib/pkgconfig/zlib.pc
@@ -183,46 +180,9 @@ define make-meson-module-rules
 $(call make-meson-module-rules-for-env,$1,$2,$3,fs)
 endef
 
-
 define make-autotools-module-rules
-.PHONY: $1 clean-$1 distclean-$1
-
-$1: $(subst %,$(host_os_arch),$2)
-
-clean-$1:
-	@[ -f build/fs-tmp-$(host_os_arch)/$1/Makefile ] \
-		&& $(MAKE) -C build/fs-tmp-$(host_os_arch)/$1 uninstall
-	$(RM) $(subst %,$(host_os_arch),$2)
-	$(RM) -r build/fs-tmp-$(host_os_arch)/$1
-
-distclean-$1: clean-$1
-	$(RM) ext/.$1-stamp
-	$(RM) -r ext/$1
-
-ext/.$1-stamp:
-	$$(call grab-and-prepare,$1)
-	@touch $$@
-
-ext/$1/configure: build/fs-env-$(build_os_arch).rc ext/.$1-stamp
-	. $$< \
-		&& cd $$(@D) \
-		&& [ -f autogen.sh ] && NOCONFIGURE=1 ./autogen.sh || autoreconf -if
-
-build/fs-tmp-%/$1/Makefile: build/fs-env-%.rc ext/$1/configure $3
-	$(RM) -r $$(@D)
-	mkdir -p $$(@D)
-	. $$< \
-		&& cd $$(@D) \
-		&& ../../../ext/$1/configure $$($$(subst -,_,$1)_options)
-
-$2: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
-	. $$< \
-		&& cd build/fs-tmp-$$*/$1 \
-		&& $(MAKE) $(MAKE_J) \
-		&& $(MAKE) $(MAKE_J) install
-	@touch $$@
+$(call make-autotools-module-rules-for-env,$1,$2,$3,fs)
 endef
-
 
 $(eval $(call make-meson-module-rules,zlib,build/fs-%/lib/pkgconfig/zlib.pc,))
 

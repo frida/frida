@@ -373,6 +373,48 @@ $2: build/$4-env-%.rc build/$4-tmp-%/$1/build.ninja
 endef
 
 
+define make-autotools-module-rules-for-env
+.PHONY: $1 clean-$1 distclean-$1
+
+$1: $(subst %,$(host_os_arch),$2)
+
+clean-$1:
+	@[ -f build/$4-tmp-$(host_os_arch)/$1/Makefile ] \
+		&& $(MAKE) -C build/$4-tmp-$(host_os_arch)/$1 uninstall
+	$(RM) $(subst %,$(host_os_arch),$2)
+	$(RM) -r build/$4-tmp-$(host_os_arch)/$1
+
+distclean-$1: clean-$1
+	$(RM) ext/.$1-stamp
+	$(RM) -r ext/$1
+
+ext/.$1-stamp:
+	$$(call grab-and-prepare,$1)
+	@touch $$@
+
+ext/$1/configure: build/$4-env-$(build_os_arch).rc ext/.$1-stamp
+	. $$< \
+		&& cd $$(@D) \
+		&& [ -f autogen.sh ] && NOCONFIGURE=1 ./autogen.sh || autoreconf -if
+
+build/$4-tmp-%/$1/Makefile: build/$4-env-%.rc ext/$1/configure $3
+	$(RM) -r $$(@D)
+	mkdir -p $$(@D)
+	. $$< \
+		&& cd $$(@D) \
+		&& export PATH="$$(shell pwd)/build/$4-$(build_os_arch)/bin:$$$$PATH" \
+		&& ../../../ext/$1/configure $$($$(subst -,_,$1)_options)
+
+$2: build/$4-env-%.rc build/$4-tmp-%/$1/Makefile
+	. $$< \
+		&& cd build/$4-tmp-$$*/$1 \
+		&& export PATH="$$(shell pwd)/build/$4-$(build_os_arch)/bin:$$$$PATH" \
+		&& $(MAKE) $(MAKE_J) \
+		&& $(MAKE) $(MAKE_J) install
+	@touch $$@
+endef
+
+
 define grab-and-prepare
 	$(if $($(subst -,_,$1)_hash),
 		$(call grab-and-prepare-tarball,$1),
