@@ -129,7 +129,7 @@ ext/.elfutils-stamp: build/fs-env-$(build_os_arch).rc
 	$(call grab-and-prepare,elfutils)
 	. $< \
 		&& cd ext/elfutils \
-		&& autoreconf -ifv
+		&& autoreconf -if
 	@touch $@
 
 build/fs-tmp-%/elfutils/Makefile: build/fs-env-%.rc ext/.elfutils-stamp build/fs-%/lib/pkgconfig/liblzma.pc build/fs-%/lib/pkgconfig/zlib.pc
@@ -180,9 +180,21 @@ build/fs-%/lib/libdwarf.a: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
 
 
 define make-meson-module-rules
-.PHONY: $1
+.PHONY: $1 clean-$1 distclean-$1
 
 $1: $(subst %,$(host_os_arch),$2)
+
+clean-$1:
+	@if [ -f build/fs-tmp-$(host_os_arch)/$1/build.ninja ]; then \
+		. build/fs-env-$(host_os_arch).rc; \
+		$(NINJA) -C build/fs-tmp-$(host_os_arch)/$1 uninstall; \
+	fi
+	$(RM) $(subst %,$(host_os_arch),$2)
+	$(RM) -r build/fs-tmp-$(host_os_arch)/$1
+
+distclean-$1: clean-$1
+	$(RM) ext/.$1-stamp
+	$(RM) -r ext/$1
 
 ext/.$1-stamp:
 	$$(call grab-and-prepare,$1)
@@ -190,7 +202,7 @@ ext/.$1-stamp:
 
 build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_os_arch).rc build/fs-env-%.rc ext/.$1-stamp $3 releng/meson/meson.py
 	$(RM) -r $$(@D)
-	(. build/fs-meson-env-$$*.rc \
+	. build/fs-meson-env-$$*.rc \
 		&& . build/fs-config-$$*.site \
 		&& $(MESON) \
 			--cross-file build/fs-$$*.txt \
@@ -198,20 +210,31 @@ build/fs-tmp-%/$1/build.ninja: build/fs-env-$(build_os_arch).rc build/fs-env-%.r
 			--libdir $$$$frida_prefix/lib \
 			--default-library static \
 			$$(FRIDA_MESONFLAGS_BOTTLE) \
-			$$($1_options) \
+			$$($$(subst -,_,$1)_options) \
 			$$(@D) \
-			ext/$1)
+			ext/$1
 
 $2: build/fs-env-%.rc build/fs-tmp-%/$1/build.ninja
-	(. $$< \
-		&& $(NINJA) -C build/fs-tmp-$$*/$1 install)
+	. $$< \
+		&& $(NINJA) -C build/fs-tmp-$$*/$1 install
 	@touch $$@
 endef
 
+
 define make-autotools-module-rules
-.PHONY: $1
+.PHONY: $1 clean-$1 distclean-$1
 
 $1: $(subst %,$(host_os_arch),$2)
+
+clean-$1:
+	@[ -f build/fs-tmp-$(host_os_arch)/$1/Makefile ] \
+		&& $(MAKE) -C build/fs-tmp-$(host_os_arch)/$1 uninstall
+	$(RM) $(subst %,$(host_os_arch),$2)
+	$(RM) -r build/fs-tmp-$(host_os_arch)/$1
+
+distclean-$1: clean-$1
+	$(RM) ext/.$1-stamp
+	$(RM) -r ext/$1
 
 ext/.$1-stamp:
 	$$(call grab-and-prepare,$1)
@@ -220,14 +243,14 @@ ext/.$1-stamp:
 ext/$1/configure: build/fs-env-$(build_os_arch).rc ext/.$1-stamp
 	. $$< \
 		&& cd $$(@D) \
-		&& [ -f autogen.sh ] && NOCONFIGURE=1 ./autogen.sh || autoreconf -ifv
+		&& [ -f autogen.sh ] && NOCONFIGURE=1 ./autogen.sh || autoreconf -if
 
 build/fs-tmp-%/$1/Makefile: build/fs-env-%.rc ext/$1/configure $3
 	$(RM) -r $$(@D)
 	mkdir -p $$(@D)
 	. $$< \
 		&& cd $$(@D) \
-		&& ../../../ext/$1/configure $$($1_options)
+		&& ../../../ext/$1/configure $$($$(subst -,_,$1)_options)
 
 $2: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
 	. $$< \
@@ -237,6 +260,7 @@ $2: build/fs-env-%.rc build/fs-tmp-%/$1/Makefile
 	@touch $$@
 endef
 
+
 $(eval $(call make-meson-module-rules,zlib,build/fs-%/lib/pkgconfig/zlib.pc,))
 
 $(eval $(call make-autotools-module-rules,xz,build/fs-%/lib/pkgconfig/liblzma.pc,))
@@ -244,35 +268,43 @@ $(eval $(call make-autotools-module-rules,xz,build/fs-%/lib/pkgconfig/liblzma.pc
 $(eval $(call make-meson-module-rules,sqlite,build/fs-%/lib/pkgconfig/sqlite3.pc,))
 
 $(eval $(call make-autotools-module-rules,libunwind,build/fs-%/lib/pkgconfig/libunwind.pc, \
-	build/fs-%/lib/pkgconfig/liblzma.pc))
+	build/fs-%/lib/pkgconfig/zlib.pc \
+	build/fs-%/lib/pkgconfig/liblzma.pc \
+))
 
 $(eval $(call make-meson-module-rules,libffi,build/fs-%/lib/pkgconfig/libffi.pc,))
 
 $(eval $(call make-meson-module-rules,glib,build/fs-%/lib/pkgconfig/glib-2.0.pc, \
 	$(iconv) \
 	build/fs-%/lib/pkgconfig/zlib.pc \
-	build/fs-%/lib/pkgconfig/libffi.pc))
+	build/fs-%/lib/pkgconfig/libffi.pc \
+))
 
 $(eval $(call make-meson-module-rules,glib-networking,build/fs-%/lib/pkgconfig/gioopenssl.pc, \
-	build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/openssl.pc))
+	build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/openssl.pc \
+))
 
 $(eval $(call make-meson-module-rules,libgee,build/fs-%/lib/pkgconfig/gee-0.8.pc, \
-	build/fs-%/lib/pkgconfig/glib-2.0.pc))
+	build/fs-%/lib/pkgconfig/glib-2.0.pc \
+))
 
 $(eval $(call make-meson-module-rules,json-glib,build/fs-%/lib/pkgconfig/json-glib-1.0.pc, \
-	build/fs-%/lib/pkgconfig/glib-2.0.pc))
+	build/fs-%/lib/pkgconfig/glib-2.0.pc \
+))
 
 $(eval $(call make-meson-module-rules,libpsl,build/fs-%/lib/pkgconfig/libpsl.pc,))
 
 $(eval $(call make-meson-module-rules,libxml2,build/fs-%/lib/pkgconfig/libxml-2.0.pc, \
 	build/fs-%/lib/pkgconfig/zlib.pc \
-	build/fs-%/lib/pkgconfig/liblzma.pc))
+	build/fs-%/lib/pkgconfig/liblzma.pc \
+))
 
 $(eval $(call make-meson-module-rules,libsoup,build/fs-%/lib/pkgconfig/libsoup-2.4.pc, \
 	build/fs-%/lib/pkgconfig/glib-2.0.pc \
 	build/fs-%/lib/pkgconfig/sqlite3.pc \
 	build/fs-%/lib/pkgconfig/libpsl.pc \
-	build/fs-%/lib/pkgconfig/libxml-2.0.pc))
+	build/fs-%/lib/pkgconfig/libxml-2.0.pc \
+))
 
 $(eval $(call make-meson-module-rules,capstone,build/fs-%/lib/pkgconfig/capstone.pc,))
 

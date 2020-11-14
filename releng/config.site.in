@@ -117,7 +117,6 @@ fi
 
 case "$PACKAGE_TARNAME" in
   elfutils)
-    enable_debuginfod=no
     case $frida_host_os_arch in
       android-x86|android-arm)
         ac_cv_have_decl_mempcpy=no
@@ -125,13 +124,6 @@ case "$PACKAGE_TARNAME" in
     esac
     ;;
   libunwind)
-    enable_coredump=no
-    enable_ptrace=no
-    enable_setjmp=no
-    enable_debug=no
-    enable_msabi_support=no
-    enable_minidebuginfo=yes
-
     CFLAGS="$CFLAGS -I$frida_prefix/include"
     LDFLAGS="$LDFLAGS -L$frida_prefix/lib"
     ;;

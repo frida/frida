@@ -151,6 +151,7 @@ elfutils_patches := \
 elfutils_options := \
 	--enable-maintainer-mode \
 	--disable-libdebuginfod \
+	--disable-debuginfod \
 	$(NULL)
 
 libdwarf_version := 20201020
@@ -180,6 +181,13 @@ libunwind_url := $(frida_base_url)/libunwind.git
 libunwind_patches := \
 	$(NULL)
 libunwind_options := \
+	--disable-coredump \
+	--disable-ptrace \
+	--disable-setjmp \
+	--disable-debug \
+	--disable-msabi-support \
+	--enable-minidebuginfo \
+	--enable-zlibdebuginfo \
 	$(NULL)
 
 glib_networking_version := 7be8c21840cd4eb23477dc0c0d261f85d2c57778
@@ -327,6 +335,7 @@ define grab-and-prepare
 		$(call grab-and-prepare-repo,$1))
 endef
 
+
 define grab-and-prepare-tarball
 	@$(RM) -r ext/$1
 	@mkdir -p ext/$1
@@ -364,6 +373,7 @@ define grab-and-prepare-tarball
 	@rm ext/.$1-tarball
 endef
 
+
 define grab-and-prepare-repo
 	@$(RM) -r ext/$1
 
@@ -382,6 +392,7 @@ define grab-and-prepare-repo
 
 	$(call apply-patches,$1)
 endef
+
 
 define apply-patches
 	@cd ext/$1 \
