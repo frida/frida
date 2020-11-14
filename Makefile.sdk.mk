@@ -492,14 +492,14 @@ build/fs-tmp-%/v8/build.ninja: ext/v8-checkout/v8 build/fs-tmp-$(build_os_arch)/
 	cd ext/v8-checkout/v8 \
 		&& ../../../build/fs-tmp-$(build_os_arch)/gn/gn \
 			gen $(abspath $(@D)) \
-			--args=' \
+			--args='$(strip \
 				target_os="$(v8_os)" \
 				target_cpu="$(v8_cpu)" \
 				$(v8_cpu_args) \
 				$(v8_buildtype_args) \
 				$(v8_platform_args) \
 				$(v8_options) \
-			'
+			)'
 
 build/fs-tmp-%/v8/obj/libv8_monolith.a: build/fs-tmp-%/v8/build.ninja
 	$(NINJA) -C build/fs-tmp-$*/v8 v8_monolith
