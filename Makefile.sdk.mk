@@ -125,7 +125,7 @@ build/fs-%/lib/libiconv.a: build/fs-env-%.rc build/fs-tmp-%/libiconv/Makefile
 
 elfutils: build/fs-$(host_os_arch)/lib/libelf.a
 
-ext/.elfutils-stamp: build/fs-env-$(build_os_arch).rc
+ext/.elfutils-stamp:
 	$(call grab-and-prepare,elfutils)
 	@touch $@
 
