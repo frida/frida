@@ -135,8 +135,8 @@ $(eval $(call make-autotools-base-module-rules,libdwarf,build/fs-%/lib/libdwarf.
 build/fs-%/lib/libdwarf.a: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
 	. $< && $(MAKE) $(MAKE_J) -C build/fs-tmp-$*/libdwarf/libdwarf libdwarf.la
 	install -d build/fs-$*/include
-	install -m 644 libdwarf/libdwarf/dwarf.h build/fs-$*/include
-	install -m 644 libdwarf/libdwarf/libdwarf.h build/fs-$*/include
+	install -m 644 ext/libdwarf/libdwarf/dwarf.h build/fs-$*/include
+	install -m 644 ext/libdwarf/libdwarf/libdwarf.h build/fs-$*/include
 	install -d build/fs-$*/lib
 	install -m 644 build/fs-tmp-$*/libdwarf/libdwarf/.libs/libdwarf.a build/fs-$*/lib
 	@touch $@
