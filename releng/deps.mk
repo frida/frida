@@ -63,6 +63,7 @@ gettext_url := https://$(gnu_mirror)/gettext/gettext-$(gettext_version).tar.gz
 gettext_hash := c77d0da3102aec9c07f43671e60611ebff89a996ef159497ce8e59d075786b12
 gettext_patches := \
 	gettext-static-only.patch \
+	gettext-gnulib-glibc.patch \
 	$(NULL)
 gettext_options := \
 	--disable-curses \
