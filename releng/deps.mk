@@ -83,7 +83,7 @@ libffi_patches := \
 libffi_options := \
 	$(NULL)
 
-glib_version := 327fd7518d5612492723aec20c97fd2505e98fd8
+glib_version := 2930430c4ed9bf7373f1027d6fc41fd54a93b51b
 glib_url := $(frida_base_url)/glib.git
 glib_patches := \
 	$(NULL)
