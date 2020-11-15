@@ -255,6 +255,7 @@ capstone_options = \
 			-e 's,^x86_64$$,x86,' \
 			-e 's,^arm[^0-9].+,arm,' \
 			-e 's,^arm64e$$,arm64,' \
+			-e 's,^mips.*,mips,' \
 		) \
 	-Dx86_att_disable=true \
 	-Dcli=disabled \
