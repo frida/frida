@@ -251,7 +251,11 @@ capstone_url := $(frida_base_url)/capstone.git
 capstone_patches := \
 	$(NULL)
 capstone_options := \
-	-Darchs=$(shell echo $(host_arch) | sed -e 's,^x86_64$$,x86,' -e 's,^arm64e$$,arm64,') \
+	-Darchs=$(shell echo $(host_arch) | sed -r \
+			-e 's,^x86_64$$,x86,' \
+			-e 's,^arm[^0-9].+,arm,' \
+			-e 's,^arm64e$$,arm64,' \
+		) \
 	-Dx86_att_disable=true \
 	-Dcli=disabled \
 	$(NULL)
