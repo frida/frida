@@ -1,6 +1,6 @@
 FRIDA_VERSION := $(shell git describe --tags --always --long | sed 's,-,.,g' | cut -f1-3 -d'.')
 
-include system.mk
+include releng/system.mk
 
 FOR_HOST ?= $(build_os_arch)
 

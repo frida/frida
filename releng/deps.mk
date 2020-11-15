@@ -7,7 +7,7 @@ frida_base_url := https://github.com/frida
 gnu_mirror := saimei.ftp.acc.umu.se/mirror/gnu.org/gnu
 
 
-include system.mk
+include releng/system.mk
 
 ifdef FRIDA_HOST
 	host_os := $(shell echo $(FRIDA_HOST) | cut -f1 -d"-")
