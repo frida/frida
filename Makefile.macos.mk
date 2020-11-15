@@ -42,7 +42,7 @@ help:
 	@LC_ALL=C perl -e '$(HELP_FUN)' $(MAKEFILE_LIST)
 
 
-include releng/common.mk
+include releng/frida.mk
 
 distclean: clean-submodules
 	rm -rf build/

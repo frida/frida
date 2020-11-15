@@ -7,9 +7,7 @@ frida_base_url := https://github.com/frida
 gnu_mirror := saimei.ftp.acc.umu.se/mirror/gnu.org/gnu
 
 
-build_os := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos,')
-build_arch := $(shell releng/detect-arch.sh)
-build_os_arch := $(build_os)-$(build_arch)
+include system.mk
 
 ifdef FRIDA_HOST
 	host_os := $(shell echo $(FRIDA_HOST) | cut -f1 -d"-")
