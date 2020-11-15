@@ -189,7 +189,7 @@ libunwind_options := \
 	--enable-zlibdebuginfo \
 	$(NULL)
 
-glib_networking_version := 7be8c21840cd4eb23477dc0c0d261f85d2c57778
+glib_networking_version := 85e5a1430517a4682fa4f415b720a870bb35276c
 glib_networking_url := $(frida_base_url)/glib-networking.git
 glib_networking_patches := \
 	$(NULL)
