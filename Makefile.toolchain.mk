@@ -3,7 +3,7 @@ include releng/deps.mk
 
 
 MAKE_J ?= -j 8
-SHELL := /bin/bash
+SHELL = /bin/bash
 
 
 .PHONY: all

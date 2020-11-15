@@ -7,9 +7,9 @@ FOR_HOST ?= $(build_os_arch)
 frida_gum_flags := --default-library static $(FRIDA_MESONFLAGS_COMMON) -Dv8=$(FRIDA_V8)
 frida_core_flags := --default-library static $(FRIDA_MESONFLAGS_COMMON) $(FRIDA_MAPPER_FLAGS)
 
-frida_tools := frida frida-discover frida-kill frida-ls-devices frida-ps frida-trace
+frida_tools = frida frida-discover frida-kill frida-ls-devices frida-ps frida-trace
 
-v8_api_version := 8.0
+v8_api_version = 8.0
 
 build/frida-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida-version.h
 	FRIDA_HOST=$* \
