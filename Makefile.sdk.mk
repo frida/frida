@@ -412,7 +412,6 @@ ifeq ($(host_os), linux)
 		is_clang=false \
 		is_cfi=false \
 		use_sysroot=false \
-		linux_use_bundled_binutils=false \
 		use_gold=false
 	v8_libs_private := "-lrt"
 endif
