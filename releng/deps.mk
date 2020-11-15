@@ -234,7 +234,7 @@ libxml2_patches := \
 libxml2_options := \
 	$(NULL)
 
-libsoup_version := d0ac83f3952d590da09968b1e30736782b1d1c7f
+libsoup_version := fecd985fa710fa494f62b7bfc9d0728185db2798
 libsoup_url := $(frida_base_url)/libsoup.git
 libsoup_patches := \
 	$(NULL)
