@@ -295,7 +295,7 @@ openssl_options := \
 	enable-cms \
 	$(NULL)
 
-v8_version := 6e74fda056e277e0c80240e7a4dd76c7225bd9ec
+v8_version := 9c2e0e6653a4d8a1a7fd2d4109a0b301e81ab7fb
 v8_url := $(frida_base_url)/v8.git
 v8_patches := \
 	$(NULL)
