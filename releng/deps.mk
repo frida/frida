@@ -495,7 +495,7 @@ define grab-and-prepare-repo
 │ CID: $$version\n\
 └───────────────────────────────────────────────╯" \
 		&& git clone --recurse-submodules $$url deps/$1 \
-		&& cd deps/$1 \ \
+		&& cd deps/$1 \
 		&& git checkout -q $$version
 
 	$(call apply-patches,$1)
