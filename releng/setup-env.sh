@@ -181,10 +181,10 @@ if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/.version" 2>/dev/null; th
 
   local_toolchain=$FRIDA_BUILD/toolchain-${build_os}-${build_arch}.tar.bz2
   if [ -f $local_toolchain ]; then
-    echo "Deploying local toolchain $(basename $local_toolchain)..."
+    echo "Deploying local toolchain \\033[1m$(basename $local_toolchain)\\033[0m..."
     tar -C "$FRIDA_TOOLROOT" -xjf $local_toolchain || exit 1
   else
-    echo "Downloading and deploying toolchain..."
+    echo -e "Downloading and deploying toolchain for \\033[1m${build_os_arch}\\033[0m..."
     $download_command "https://build.frida.re/toolchain-${toolchain_version}-${build_os}-${build_arch}.tar.bz2" | tar -C "$FRIDA_TOOLROOT" -xjf - || exit 1
   fi
 
@@ -222,10 +222,10 @@ if [ "$FRIDA_ENV_SDK" != 'none' ] && ! grep -Eq "^$sdk_version\$" "$FRIDA_SDKROO
 
   local_sdk=$FRIDA_BUILD/sdk-${host_os}-${host_arch}.tar.bz2
   if [ -f $local_sdk ]; then
-    echo "Deploying local SDK $(basename $local_sdk)..."
+    echo "Deploying local SDK \\033[1m$(basename $local_sdk)\\033[0m..."
     tar -C "$FRIDA_SDKROOT" -xjf $local_sdk || exit 1
   else
-    echo "Downloading and deploying SDK for ${host_os_arch}..."
+    echo -e "Downloading and deploying SDK for \\033[1m${host_os_arch}\\033[0m..."
     $download_command "https://build.frida.re/sdk-${sdk_version}-${host_os}-${host_arch}.tar.bz2" | tar -C "$FRIDA_SDKROOT" -xjf - 2> /dev/null
     if [ $? -ne 0 ]; then
       echo ""

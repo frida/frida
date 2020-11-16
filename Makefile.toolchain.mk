@@ -17,11 +17,12 @@ all: build/toolchain-$(host_os)-$(host_arch).tar.bz2
 
 
 build/toolchain-$(host_os)-$(host_arch).tar.bz2: build/ft-tmp-$(host_os_arch)/.package-stamp
-	tar \
+	@echo "Compressing 📦"
+	@tar \
 		-C build/ft-tmp-$(host_os_arch)/package \
 		-cjf $(abspath $@.tmp) \
 		.
-	mv $@.tmp $@
+	@mv $@.tmp $@
 
 build/ft-tmp-%/.package-stamp: \
 		build/ft-env-%.rc \
@@ -33,9 +34,10 @@ build/ft-tmp-%/.package-stamp: \
 		build/ft-%/bin/glib-genmarshal \
 		build/ft-%/bin/pkg-config \
 		build/ft-%/bin/valac
-	$(RM) -r $(@D)/package
-	mkdir -p $(@D)/package
-	cd build/ft-$* \
+	@echo "Assembling 📦"
+	@$(RM) -r $(@D)/package
+	@mkdir -p $(@D)/package
+	@cd build/ft-$* \
 		&& tar -c \
 			--exclude bin/bison \
 			--exclude bin/flex \
@@ -67,13 +69,13 @@ build/ft-tmp-%/.package-stamp: \
 			--exclude "*.pyc" \
 			--exclude "*.pyo" \
 			. | tar -C $(abspath $(@D)/package) -xf -
-	cd $(abspath $(@D)/package)/bin \
+	@cd $(abspath $(@D)/package)/bin \
 		&& for tool in aclocal automake; do \
 			rm $$tool-$(automake_api_version); \
 			mv $$tool $$tool-$(automake_api_version); \
 			ln -s $$tool-$(automake_api_version) $$tool; \
 		done
-	. $< \
+	@. $< \
 		&& for f in $(@D)/package/bin/*; do \
 			if [ -L $$f ]; then \
 				true; \
@@ -82,7 +84,7 @@ build/ft-tmp-%/.package-stamp: \
 			fi; \
 		done \
 		&& $$STRIP $(@D)/package/lib/vala-*/gen-introspect-*
-	releng/relocatify.sh $(@D)/package $(abspath build/ft-$*) $(abspath releng)
+	@releng/relocatify.sh $(@D)/package $(abspath build/ft-$*) $(abspath releng)
 	@touch $@
 
 
@@ -117,21 +119,27 @@ deps/.libtool-stamp:
 	@touch $@
 
 build/ft-tmp-%/libtool/Makefile: build/ft-env-%.rc deps/.libtool-stamp build/ft-%/bin/automake
-	$(RM) -r $(@D)
-	mkdir -p $(@D)
-	. $< \
-		&& cd $(@D) \
+	@$(call print-status,libtool,Configuring)
+	@$(RM) -r $(@D)
+	@mkdir -p $(@D)
+	@(set -x \
+		&& . $< \
 		&& export PATH="$(shell pwd)/build/ft-$(build_os_arch)/bin:$$PATH" \
-		&& ../../../deps/libtool/configure $(libtool_options)
+		&& cd $(@D) \
+		&& ../../../deps/libtool/configure $(libtool_options) \
+	) > $(@D)/build.log 2>&1
 
 build/ft-%/bin/libtool: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
-	. $< \
+	@$(call print-status,libtool,Building)
+	@(set -x \
+		&& . $< \
 		&& cd build/ft-tmp-$*/libtool \
 		&& export PATH="$(shell pwd)/build/ft-$(build_os_arch)/bin:$$PATH" \
 		&& $(MAKE) build-aux/ltmain.sh \
 		&& touch ../../../deps/libtool/doc/*.1 ../../../deps/libtool/doc/stamp-vti \
 		&& $(MAKE) $(MAKE_J) \
-		&& $(MAKE) $(MAKE_J) install
+		&& $(MAKE) $(MAKE_J) install \
+	) >> build/ft-tmp-$*/libtool/build.log 2>&1
 	@touch $@
 
 $(eval $(call make-autotools-module-rules,gettext,build/ft-%/bin/autopoint, \
@@ -173,7 +181,7 @@ else
 endif
 
 build/ft-env-%.rc: build/ft-executable.symbols build/ft-executable.version
-	FRIDA_HOST=$* \
+	@FRIDA_HOST=$* \
 		FRIDA_ACOPTFLAGS="$(FRIDA_ACOPTFLAGS_BOTTLE)" \
 		FRIDA_ACDBGFLAGS="$(FRIDA_ACDBGFLAGS_BOTTLE)" \
 		FRIDA_EXTRA_LDFLAGS="$(export_ldflags)" \

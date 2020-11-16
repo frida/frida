@@ -351,8 +351,11 @@ define make-meson-module-rules-for-env
 $(call make-base-module-rules,$1,$2)
 
 build/$4-tmp-%/$1/build.ninja: build/$4-env-%.rc deps/.$1-stamp $3 releng/meson/meson.py
-	$(RM) -r $$(@D)
-	. build/$4-meson-env-$$*.rc \
+	@$(call print-status,$1,Configuring)
+	@$(RM) -r $$(@D)
+	@mkdir -p $$(@D)
+	@(set -x \
+		&& . build/$4-meson-env-$$*.rc \
 		&& . build/$4-config-$$*.site \
 		&& export PATH="$$(shell pwd)/build/$4-$(build_os_arch)/bin:$$$$PATH" \
 		&& $(MESON) \
@@ -363,12 +366,16 @@ build/$4-tmp-%/$1/build.ninja: build/$4-env-%.rc deps/.$1-stamp $3 releng/meson/
 			$$(FRIDA_MESONFLAGS_BOTTLE) \
 			$$($$(subst -,_,$1)_options) \
 			$$(@D) \
-			deps/$1
+			deps/$1 \
+	) > $$(@D)/build.log 2>&1
 
 $2: build/$4-env-%.rc build/$4-tmp-%/$1/build.ninja
-	. $$< \
+	@$(call print-status,$1,Building)
+	@(set -x \
+		&& . $$< \
 		&& export PATH="$$(shell pwd)/build/$4-$(build_os_arch)/bin:$$$$PATH" \
-		&& $(NINJA) -C build/$4-tmp-$$*/$1 install
+		&& $(NINJA) -C build/$4-tmp-$$*/$1 install \
+	) >> build/$4-tmp-$$*/$1/build.log 2>&1
 	@touch $$@
 
 .PHONY: clean-$1 distclean-$1
@@ -376,7 +383,7 @@ $2: build/$4-env-%.rc build/$4-tmp-%/$1/build.ninja
 clean-$1:
 	@if [ -f build/$4-tmp-$(host_os_arch)/$1/build.ninja ]; then \
 		. build/$4-env-$(host_os_arch).rc; \
-		$(NINJA) -C build/$4-tmp-$(host_os_arch)/$1 uninstall; \
+		$(NINJA) -C build/$4-tmp-$(host_os_arch)/$1 uninstall &>/dev/null; \
 	fi
 	$(RM) $(subst %,$(host_os_arch),$2)
 	$(RM) -r build/$4-tmp-$(host_os_arch)/$1
@@ -393,24 +400,25 @@ define make-autotools-base-module-rules-for-env
 $(call make-base-module-rules,$1,$2)
 
 deps/$1/configure: build/$4-env-$(build_os_arch).rc deps/.$1-stamp
-	. $$< \
+	@. $$< \
 		&& cd $$(@D) \
 		&& if [ ! -f configure ] || [ -f ../.$1-reconf-needed ]; then \
-			echo "$1: Performing reconf"; \
-			autoreconf -if || exit 1; \
+			$(call print-status,$1,Generating build system); \
+			autoreconf -if &> /dev/null || exit 1; \
 			rm -f ../.$1-reconf-needed; \
-		else \
-			echo "$1: Skipping reconf"; \
 		fi
 	@touch $$@
 
 build/$4-tmp-%/$1/Makefile: build/$4-env-%.rc deps/$1/configure $3
-	$(RM) -r $$(@D)
-	mkdir -p $$(@D)
-	. $$< \
-		&& cd $$(@D) \
+	@$(call print-status,$1,Configuring)
+	@$(RM) -r $$(@D)
+	@mkdir -p $$(@D)
+	@(set -x \
+		&& . $$< \
 		&& export PATH="$$(shell pwd)/build/$4-$(build_os_arch)/bin:$$$$PATH" \
-		&& ../../../deps/$1/configure $$($$(subst -,_,$1)_options)
+		&& cd $$(@D) \
+		&& ../../../deps/$1/configure $$($$(subst -,_,$1)_options) \
+	) > $$(@D)/build.log 2>&1
 
 endef
 
@@ -420,18 +428,21 @@ define make-autotools-module-rules-for-env
 $(call make-autotools-base-module-rules-for-env,$1,$2,$3,$4)
 
 $2: build/$4-env-%.rc build/$4-tmp-%/$1/Makefile
-	. $$< \
-		&& cd build/$4-tmp-$$*/$1 \
+	@$(call print-status,$1,Building)
+	@(set -x \
+		&& . $$< \
 		&& export PATH="$$(shell pwd)/build/$4-$(build_os_arch)/bin:$$$$PATH" \
+		&& cd build/$4-tmp-$$*/$1 \
 		&& $(MAKE) $(MAKE_J) \
-		&& $(MAKE) $(MAKE_J) install
+		&& $(MAKE) $(MAKE_J) install \
+	) >> build/$4-tmp-$$*/$1/build.log 2>&1
 	@touch $$@
 
 .PHONY: clean-$1 distclean-$1
 
 clean-$1:
 	@[ -f build/$4-tmp-$(host_os_arch)/$1/Makefile ] \
-		&& $(MAKE) -C build/$4-tmp-$(host_os_arch)/$1 uninstall
+		&& $(MAKE) -C build/$4-tmp-$(host_os_arch)/$1 uninstall &>/dev/null || true
 	$(RM) $(subst %,$(host_os_arch),$2)
 	$(RM) -r build/$4-tmp-$(host_os_arch)/$1
 
@@ -456,18 +467,14 @@ define grab-and-prepare-tarball
 	@url=$($(subst -,_,$1)_url) \
 		&& version=$($(subst -,_,$1)_version) \
 		&& expected_hash=$($(subst -,_,$1)_hash) \
-		&& echo -e "\
-╭────\n\
-│ 🔨 \\033[1m$1\\033[0m $$version\n\
-├───────\n\
-│ URL: $$url\n\
-│ SHA: $$expected_hash\n\
-└────────────" \
+		&& $(call print-tarball-banner,$1,$$version,$$url,$$expected_hash) \
+		&& $(call print-status,$1,Downloading) \
 		&& if command -v curl >/dev/null; then \
 			curl -sSfLo deps/.$1-tarball $$url; \
 		else \
 			wget -qO deps/.$1-tarball $$url; \
 		fi \
+		&& $(call print-status,$1,Verifying) \
 		&& actual_hash=$$(shasum -a 256 -b deps/.$1-tarball | awk '{ print $$1; }') \
 		&& case $$actual_hash in \
 			$$expected_hash) \
@@ -478,7 +485,7 @@ define grab-and-prepare-tarball
 				;; \
 		esac
 
-	@echo "Extracting to deps/$1"
+	@$(call print-status,$1,Extracting to deps/$1)
 	@tar -C deps/$1 -x -f deps/.$1-tarball -z --strip-components 1
 
 	$(call apply-patches,$1)
@@ -492,14 +499,9 @@ define grab-and-prepare-repo
 
 	@url=$($(subst -,_,$1)_url) \
 		&& version=$($(subst -,_,$1)_version) \
-		&& echo -e "\
-╭────\n\
-│ 🔨 \\033[1m$1\\033[0m\n\
-├───────────────────────────────────────────────╮\n\
-│ URL: $$url\n\
-│ CID: $$version\n\
-└───────────────────────────────────────────────╯" \
-		&& git clone --recurse-submodules $$url deps/$1 \
+		&& $(call print-repo-banner,$1,$$version,$$url) \
+		&& $(call print-status,$1,Cloning into deps/$1) \
+		&& git clone -q --recurse-submodules $$url deps/$1 \
 		&& cd deps/$1 \
 		&& git checkout -q $$version
 
@@ -512,11 +514,26 @@ define apply-patches
 		&& for patch in $($(subst -,_,$1)_patches); do \
 			file=../../releng/patches/$$patch; \
 			\
-			echo -e "Applying \\033[1m$$patch\\033[0m"; \
-			patch -p1 < $$file || exit 1; \
+			$(call print-status,$1,Applying $$patch); \
+			patch -p1 < $$file &> /dev/null || exit 1; \
 			\
 			if grep '+++' $$file | grep -Eq 'configure\.ac|Makefile\.am'; then \
 				touch ../.$1-reconf-needed; \
 			fi \
 		done
+endef
+
+
+define print-status
+	echo -e "│ \\033[1m$1\\033[0m: $2"
+endef
+
+
+define print-tarball-banner
+	echo -e "╭────\n│ 📦 \\033[1m$1\\033[0m $2\n├───────\n│ URL: $3\n│ SHA: $4\n├────────────"
+endef
+
+
+define print-repo-banner
+	echo -e "╭────\n│ 📦 \\033[1m$1\\033[0m\n├───────────────────────────────────────────────╮\n│ URL: $3\n│ CID: $2\n├───────────────────────────────────────────────╯"
 endef

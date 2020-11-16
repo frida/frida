@@ -12,13 +12,13 @@ frida_tools = frida frida-discover frida-kill frida-ls-devices frida-ps frida-tr
 v8_api_version = 8.0
 
 build/frida-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida-version.h
-	FRIDA_HOST=$* \
+	@FRIDA_HOST=$* \
 		FRIDA_ACOPTFLAGS="$(FRIDA_ACOPTFLAGS_COMMON)" \
 		FRIDA_ACDBGFLAGS="$(FRIDA_ACDBGFLAGS_COMMON)" \
 		FRIDA_ASAN=$(FRIDA_ASAN) \
 		./releng/setup-env.sh
 build/frida_thin-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida-version.h
-	FRIDA_HOST=$* \
+	@FRIDA_HOST=$* \
 		FRIDA_ACOPTFLAGS="$(FRIDA_ACOPTFLAGS_COMMON)" \
 		FRIDA_ACDBGFLAGS="$(FRIDA_ACDBGFLAGS_COMMON)" \
 		FRIDA_ASAN=$(FRIDA_ASAN) \
