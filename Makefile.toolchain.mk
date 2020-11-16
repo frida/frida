@@ -6,7 +6,23 @@ MAKE_J ?= -j 8
 SHELL = /bin/bash
 
 
-.PHONY: all
+packages = \
+	m4 \
+	autoconf \
+	automake \
+	libtool \
+	gettext \
+	zlib \
+	libffi \
+	glib \
+	pkg-config \
+	flex \
+	bison \
+	vala \
+	$(NULL)
+
+
+.PHONY: all clean distclean
 
 all: build/toolchain-$(host_os)-$(host_arch).tar.bz2
 	@echo ""
@@ -14,6 +30,10 @@ all: build/toolchain-$(host_os)-$(host_arch).tar.bz2
 	@echo ""
 	@echo "It will be picked up automatically if you now proceed to build Frida."
 	@echo ""
+
+clean: $(foreach pkg,$(packages),clean-$(pkg))
+
+distclean: $(foreach pkg,$(packages),distclean-$(pkg))
 
 
 build/toolchain-$(host_os)-$(host_arch).tar.bz2: build/ft-tmp-$(host_os_arch)/.package-stamp
@@ -88,27 +108,35 @@ build/ft-tmp-%/.package-stamp: \
 	@touch $@
 
 
-define make-meson-module-rules
-$(call make-meson-module-rules-for-env,$1,$2,$3,ft)
+define make-meson-package-rules
+$(call make-meson-package-rules-for-env,$1,$2,$3,ft)
 endef
 
-define make-autotools-module-rules
-$(call make-autotools-module-rules-for-env,$1,$2,$3,ft)
+define make-autotools-package-rules
+$(call make-autotools-package-rules-for-env,$1,$2,$3,ft)
 endef
 
-$(eval $(call make-autotools-module-rules,m4,build/ft-%/bin/m4,))
+$(eval $(call make-autotools-package-rules,m4,build/ft-%/bin/m4,))
 
-$(eval $(call make-autotools-module-rules,autoconf,build/ft-%/bin/autoconf, \
+$(eval $(call make-autotools-package-rules,autoconf,build/ft-%/bin/autoconf, \
 	build/ft-%/bin/m4 \
 ))
 
-$(eval $(call make-autotools-module-rules,automake,build/ft-%/bin/automake, \
+$(eval $(call make-autotools-package-rules,automake,build/ft-%/bin/automake, \
 	build/ft-%/bin/autoconf \
 ))
 
-.PHONY: libtool
+.PHONY: libtool clean-libtool distclean-libtool
 
 libtool: build/ft-$(host_os_arch)/bin/libtool
+
+clean-libtool:
+	@[ -f build/ft-tmp-$(host_os_arch)/libtool/Makefile ] \
+		&& $(MAKE) -C build/ft-tmp-$(host_os_arch)/libtool uninstall &>/dev/null || true
+	$(call make-base-clean-commands,libtool,build/ft-%/bin/libtool,ft,$(host_os_arch))
+
+distclean-libtool: clean-libtool
+	$(call make-base-distclean-commands,libtool)
 
 deps/.libtool-stamp:
 	$(call grab-and-prepare,libtool)
@@ -142,32 +170,32 @@ build/ft-%/bin/libtool: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 	) >> build/ft-tmp-$*/libtool/build.log 2>&1
 	@touch $@
 
-$(eval $(call make-autotools-module-rules,gettext,build/ft-%/bin/autopoint, \
+$(eval $(call make-autotools-package-rules,gettext,build/ft-%/bin/autopoint, \
 	build/ft-%/bin/libtool \
 ))
 
-$(eval $(call make-meson-module-rules,zlib,build/ft-%/lib/pkgconfig/zlib.pc,))
+$(eval $(call make-meson-package-rules,zlib,build/ft-%/lib/pkgconfig/zlib.pc,))
 
-$(eval $(call make-meson-module-rules,libffi,build/ft-%/lib/pkgconfig/libffi.pc,))
+$(eval $(call make-meson-package-rules,libffi,build/ft-%/lib/pkgconfig/libffi.pc,))
 
-$(eval $(call make-meson-module-rules,glib,build/ft-%/bin/glib-genmarshal, \
+$(eval $(call make-meson-package-rules,glib,build/ft-%/bin/glib-genmarshal, \
 	build/ft-%/lib/pkgconfig/zlib.pc \
 	build/ft-%/lib/pkgconfig/libffi.pc \
 ))
 
-$(eval $(call make-meson-module-rules,pkg-config,build/ft-%/bin/pkg-config, \
+$(eval $(call make-meson-package-rules,pkg-config,build/ft-%/bin/pkg-config, \
 	build/ft-%/bin/glib-genmarshal \
 ))
 
-$(eval $(call make-autotools-module-rules,flex,build/ft-%/bin/flex, \
+$(eval $(call make-autotools-package-rules,flex,build/ft-%/bin/flex, \
 	build/ft-$(build_os_arch)/bin/m4 \
 ))
 
-$(eval $(call make-autotools-module-rules,bison,build/ft-%/bin/bison, \
+$(eval $(call make-autotools-package-rules,bison,build/ft-%/bin/bison, \
 	build/ft-$(build_os_arch)/bin/m4 \
 ))
 
-$(eval $(call make-meson-module-rules,vala,build/ft-%/bin/valac, \
+$(eval $(call make-meson-package-rules,vala,build/ft-%/bin/valac, \
 	build/ft-%/bin/glib-genmarshal \
 	build/ft-$(build_os_arch)/bin/flex \
 	build/ft-$(build_os_arch)/bin/bison \

@@ -333,7 +333,7 @@ depot_tools_options = \
 	$(NULL)
 
 
-define make-base-module-rules
+define make-base-package-rules
 
 .PHONY: $1
 
@@ -346,9 +346,21 @@ deps/.$1-stamp:
 endef
 
 
-define make-meson-module-rules-for-env
+define make-base-clean-commands
+	$(RM) $(subst %,$4,$2)
+	$(RM) -r build/$3-tmp-$4/$1
+endef
 
-$(call make-base-module-rules,$1,$2)
+
+define make-base-distclean-commands
+	$(RM) deps/.$1-stamp
+	$(RM) -r deps/$1
+endef
+
+
+define make-meson-package-rules-for-env
+
+$(call make-base-package-rules,$1,$2)
 
 build/$4-tmp-%/$1/build.ninja: build/$4-env-%.rc deps/.$1-stamp $3 releng/meson/meson.py
 	@$(call print-status,$1,Configuring)
@@ -385,19 +397,17 @@ clean-$1:
 		. build/$4-env-$(host_os_arch).rc; \
 		$(NINJA) -C build/$4-tmp-$(host_os_arch)/$1 uninstall &>/dev/null; \
 	fi
-	$(RM) $(subst %,$(host_os_arch),$2)
-	$(RM) -r build/$4-tmp-$(host_os_arch)/$1
+	$(call make-base-clean-commands,$1,$2,$4,$(host_os_arch))
 
 distclean-$1: clean-$1
-	$(RM) deps/.$1-stamp
-	$(RM) -r deps/$1
+	$(call make-base-distclean-commands,$1)
 
 endef
 
 
-define make-autotools-base-module-rules-for-env
+define make-autotools-base-package-rules-for-env
 
-$(call make-base-module-rules,$1,$2)
+$(call make-base-package-rules,$1,$2)
 
 deps/$1/configure: build/$4-env-$(build_os_arch).rc deps/.$1-stamp
 	@. $$< \
@@ -423,9 +433,9 @@ build/$4-tmp-%/$1/Makefile: build/$4-env-%.rc deps/$1/configure $3
 endef
 
 
-define make-autotools-module-rules-for-env
+define make-autotools-package-rules-for-env
 
-$(call make-autotools-base-module-rules-for-env,$1,$2,$3,$4)
+$(call make-autotools-base-package-rules-for-env,$1,$2,$3,$4)
 
 $2: build/$4-env-%.rc build/$4-tmp-%/$1/Makefile
 	@$(call print-status,$1,Building)
@@ -443,12 +453,10 @@ $2: build/$4-env-%.rc build/$4-tmp-%/$1/Makefile
 clean-$1:
 	@[ -f build/$4-tmp-$(host_os_arch)/$1/Makefile ] \
 		&& $(MAKE) -C build/$4-tmp-$(host_os_arch)/$1 uninstall &>/dev/null || true
-	$(RM) $(subst %,$(host_os_arch),$2)
-	$(RM) -r build/$4-tmp-$(host_os_arch)/$1
+	$(call make-base-clean-commands,$1,$2,$4,$(host_os_arch))
 
 distclean-$1: clean-$1
-	$(RM) deps/.$1-stamp
-	$(RM) -r deps/$1
+	$(call make-base-distclean-commands,$1)
 
 endef
 
