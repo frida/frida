@@ -567,9 +567,9 @@ build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc: build/fs-tmp-%/v8/obj/libv8_mo
 		&& echo "Description: V8 JavaScript Engine" >> $@.tmp \
 		&& echo "Version: $$($(PYTHON3) releng/v8.py get version -s deps/v8-checkout/v8)" >> $@.tmp \
 		&& echo "Libs: -L\$${libdir} -lv8-$(v8_api_version)" >> $@.tmp \
-ifdef v8_libs_private
-		&& echo Libs.private: $(v8_libs_private) >> $@.tmp \
-endif
+		&& if [ -n $(v8_libs_private) ]; then \
+			echo "Libs.private: $(v8_libs_private)" >> $@.tmp; \
+		fi \
 		&& echo "Cflags: -I\$${includedir} -I\$${includedir}/v8" >> $@.tmp \
 		&& mv $@.tmp $@ \
 	) >> build/fs-tmp-$*/v8/build.log 2>&1
