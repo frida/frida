@@ -179,7 +179,7 @@ build/fs-%/lib/libelf.a: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
 		done \
 		&& install -d build/fs-$*/lib \
 		&& install -m 644 build/fs-tmp-$*/elfutils/libelf/libelf.a build/fs-$*/lib \
-	) >> build/fs-tmp-$*/elfutils/build.log 2>&1
+	) >>build/fs-tmp-$*/elfutils/build.log 2>&1
 	@touch $@
 
 .PHONY: clean-libdwarf distclean-libdwarf
@@ -213,7 +213,7 @@ build/fs-%/lib/libdwarf.a: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
 		done \
 		&& install -d build/fs-$*/lib \
 		&& install -m 644 build/fs-tmp-$*/libdwarf/libdwarf/.libs/libdwarf.a build/fs-$*/lib \
-	) >> build/fs-tmp-$*/libdwarf/build.log 2>&1
+	) >>build/fs-tmp-$*/libdwarf/build.log 2>&1
 	@touch $@
 
 $(eval $(call make-meson-package-rules,zlib,build/fs-%/lib/pkgconfig/zlib.pc,))
@@ -388,7 +388,7 @@ endif
 openssl: build/fs-$(host_os_arch)/lib/pkgconfig/openssl.pc
 
 clean-openssl:
-	@[ -f build/fs-tmp-$(host_os_arch)/openssl/Makefile ] \
+	[ -f build/fs-tmp-$(host_os_arch)/openssl/Makefile ] \
 		&& $(MAKE) -C build/fs-tmp-$(host_os_arch)/openssl uninstall_dev &>/dev/null || true
 	$(call make-base-clean-commands,openssl,build/fs-%/lib/pkgconfig/openssl.pc,fs,$(host_os_arch))
 
@@ -422,7 +422,7 @@ build/fs-%/lib/pkgconfig/openssl.pc: build/fs-env-%.rc build/fs-tmp-%/openssl/Co
 		&& $(MAKE) depend \
 		&& $(MAKE) build_libs \
 		&& $(MAKE) install_dev \
-	) > build/fs-tmp-$*/openssl/build.log 2>&1
+	) >build/fs-tmp-$*/openssl/build.log 2>&1
 
 
 ifeq ($(FRIDA_ASAN), yes)
@@ -529,6 +529,8 @@ ifneq ($(IOS_SDK_ROOT),)
 	v8_platform_args += ios_sdk_path="$(IOS_SDK_ROOT)"
 endif
 
+# Google's prebuilt GN requires a newer glibc than our Debian Squeeze buildroot has.
+
 .PHONY: gn clean-gn distclean-gn
 
 gn: build/fs-tmp-$(build_os_arch)/gn/gn
@@ -540,7 +542,6 @@ distclean-gn: clean-gn
 	$(call make-base-distclean-commands,gn)
 
 deps/.gn-stamp:
-	# Google's prebuilt GN requires a newer glibc than our Debian Squeeze buildroot has.
 	$(call grab-and-prepare,gn)
 	@touch $@
 
@@ -553,13 +554,13 @@ build/fs-tmp-%/gn/build.ninja: build/fs-env-%.rc deps/.gn-stamp
 		&& CC="$$CC" CXX="$$CXX" python deps/gn/build/gen.py \
 			--out-path $(abspath $(@D)) \
 			$(gn_options) \
-	) > $(@D)/build.log 2>&1
+	) >$(@D)/build.log 2>&1
 
 build/fs-tmp-%/gn/gn: build/fs-tmp-%/gn/build.ninja
 	@$(call print-status,gn,Building)
 	@(set -x \
 		&& $(NINJA) -C $(@D) \
-	) >> $(@D)/build.log 2>&1
+	) >>$(@D)/build.log 2>&1
 	@touch $@
 
 .PHONY: depot_tools clean-depot_tools distclean-depot_tools
@@ -626,13 +627,13 @@ build/fs-tmp-%/v8/build.ninja: deps/v8-checkout/v8 build/fs-tmp-$(build_os_arch)
 				$(v8_platform_args) \
 				$(v8_options) \
 			)' \
-	) > $(@D)/build.log 2>&1
+	) >$(@D)/build.log 2>&1
 
 build/fs-tmp-%/v8/obj/libv8_monolith.a: build/fs-tmp-%/v8/build.ninja
 	@$(call print-status,v8,Building)
 	@(set -x \
 		&& $(NINJA) -C build/fs-tmp-$*/v8 v8_monolith \
-	) >> build/fs-tmp-$*/v8/build.log 2>&1
+	) >>build/fs-tmp-$*/v8/build.log 2>&1
 	@touch $@
 
 build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc: build/fs-tmp-%/v8/obj/libv8_monolith.a
@@ -669,7 +670,7 @@ build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc: build/fs-tmp-%/v8/obj/libv8_mo
 		fi \
 		&& echo "Cflags: -I\$${includedir} -I\$${includedir}/v8" >> $@.tmp \
 		&& mv $@.tmp $@ \
-	) >> build/fs-tmp-$*/v8/build.log 2>&1
+	) >>build/fs-tmp-$*/v8/build.log 2>&1
 
 
 .PHONY: libcxx clean-libcxx distclean-libcxx
@@ -680,6 +681,8 @@ clean-libcxx:
 	$(RM) -r build/fs-$(host_os_arch)/include/c++/
 	$(RM) build/fs-$(host_os_arch)/lib/c++/libc++abi.a
 	$(RM) build/fs-$(host_os_arch)/lib/c++/libc++.a
+	@[ -f build/fs-tmp-$(host_os_arch)/v8/build.ninja ] \
+		&& $(NINJA) -C build/fs-tmp-$(host_os_arch)/v8 -t clean libc++ >/dev/null 2>&1 || true
 
 distclean-libcxx: clean-libcxx
 
@@ -711,7 +714,7 @@ build/fs-%/lib/c++/libc++.a: build/fs-tmp-%/v8/obj/libv8_monolith.a
 		&& $(shell xcrun -f libtool) -static -no_warning_for_no_symbols \
 			-o build/fs-$*/lib/c++/libc++.a \
 			build/fs-tmp-$*/v8/obj/buildtools/third_party/libc++/libc++/*.o \
-	) >> build/fs-tmp-$*/v8/libc++-build.log 2>&1
+	) >build/fs-tmp-$*/v8/libc++-build.log 2>&1
 
 
 build/fs-env-%.rc:

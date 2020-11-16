@@ -379,7 +379,7 @@ build/$4-tmp-%/$1/build.ninja: build/$4-env-%.rc deps/.$1-stamp $3 releng/meson/
 			$$($$(subst -,_,$1)_options) \
 			$$(@D) \
 			deps/$1 \
-	) > $$(@D)/build.log 2>&1
+	) >$$(@D)/build.log 2>&1
 
 $2: build/$4-env-%.rc build/$4-tmp-%/$1/build.ninja
 	@$(call print-status,$1,Building)
@@ -387,13 +387,13 @@ $2: build/$4-env-%.rc build/$4-tmp-%/$1/build.ninja
 		&& . $$< \
 		&& export PATH="$$(shell pwd)/build/$4-$(build_os_arch)/bin:$$$$PATH" \
 		&& $(NINJA) -C build/$4-tmp-$$*/$1 install \
-	) >> build/$4-tmp-$$*/$1/build.log 2>&1
+	) >>build/$4-tmp-$$*/$1/build.log 2>&1
 	@touch $$@
 
 .PHONY: clean-$1 distclean-$1
 
 clean-$1:
-	@if [ -f build/$4-tmp-$(host_os_arch)/$1/build.ninja ]; then \
+	if [ -f build/$4-tmp-$(host_os_arch)/$1/build.ninja ]; then \
 		. build/$4-env-$(host_os_arch).rc; \
 		$(NINJA) -C build/$4-tmp-$(host_os_arch)/$1 uninstall &>/dev/null; \
 	fi
@@ -414,7 +414,7 @@ deps/$1/configure: build/$4-env-$(build_os_arch).rc deps/.$1-stamp
 		&& cd $$(@D) \
 		&& if [ ! -f configure ] || [ -f ../.$1-reconf-needed ]; then \
 			$(call print-status,$1,Generating build system); \
-			autoreconf -if &> /dev/null || exit 1; \
+			autoreconf -if &>/dev/null || exit 1; \
 			rm -f ../.$1-reconf-needed; \
 		fi
 	@touch $$@
@@ -428,7 +428,7 @@ build/$4-tmp-%/$1/Makefile: build/$4-env-%.rc deps/$1/configure $3
 		&& export PATH="$$(shell pwd)/build/$4-$(build_os_arch)/bin:$$$$PATH" \
 		&& cd $$(@D) \
 		&& ../../../deps/$1/configure $$($$(subst -,_,$1)_options) \
-	) > $$(@D)/build.log 2>&1
+	) >$$(@D)/build.log 2>&1
 
 endef
 
@@ -445,13 +445,13 @@ $2: build/$4-env-%.rc build/$4-tmp-%/$1/Makefile
 		&& cd build/$4-tmp-$$*/$1 \
 		&& $(MAKE) $(MAKE_J) \
 		&& $(MAKE) $(MAKE_J) install \
-	) >> build/$4-tmp-$$*/$1/build.log 2>&1
+	) >>build/$4-tmp-$$*/$1/build.log 2>&1
 	@touch $$@
 
 .PHONY: clean-$1 distclean-$1
 
 clean-$1:
-	@[ -f build/$4-tmp-$(host_os_arch)/$1/Makefile ] \
+	[ -f build/$4-tmp-$(host_os_arch)/$1/Makefile ] \
 		&& $(MAKE) -C build/$4-tmp-$(host_os_arch)/$1 uninstall &>/dev/null || true
 	$(call make-base-clean-commands,$1,$2,$4,$(host_os_arch))
 
@@ -523,7 +523,7 @@ define apply-patches
 			file=../../releng/patches/$$patch; \
 			\
 			$(call print-status,$1,Applying $$patch); \
-			patch -p1 < $$file &> /dev/null || exit 1; \
+			patch -p1 < $$file &>/dev/null || exit 1; \
 			\
 			if grep '+++' $$file | grep -Eq 'configure\.ac|Makefile\.am'; then \
 				touch ../.$1-reconf-needed; \
@@ -533,7 +533,7 @@ endef
 
 
 define print-status
-	echo -e "│ \\033[1m$1\\033[0m: $2"
+	echo -e "│ \\033[1m$1\\033[0m :: $2"
 endef
 
 

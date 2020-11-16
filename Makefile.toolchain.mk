@@ -131,7 +131,7 @@ $(eval $(call make-autotools-package-rules,automake,build/ft-%/bin/automake, \
 libtool: build/ft-$(host_os_arch)/bin/libtool
 
 clean-libtool:
-	@[ -f build/ft-tmp-$(host_os_arch)/libtool/Makefile ] \
+	[ -f build/ft-tmp-$(host_os_arch)/libtool/Makefile ] \
 		&& $(MAKE) -C build/ft-tmp-$(host_os_arch)/libtool uninstall &>/dev/null || true
 	$(call make-base-clean-commands,libtool,build/ft-%/bin/libtool,ft,$(host_os_arch))
 
@@ -155,7 +155,7 @@ build/ft-tmp-%/libtool/Makefile: build/ft-env-%.rc deps/.libtool-stamp build/ft-
 		&& export PATH="$(shell pwd)/build/ft-$(build_os_arch)/bin:$$PATH" \
 		&& cd $(@D) \
 		&& ../../../deps/libtool/configure $(libtool_options) \
-	) > $(@D)/build.log 2>&1
+	) >$(@D)/build.log 2>&1
 
 build/ft-%/bin/libtool: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 	@$(call print-status,libtool,Building)
@@ -167,7 +167,7 @@ build/ft-%/bin/libtool: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 		&& touch ../../../deps/libtool/doc/*.1 ../../../deps/libtool/doc/stamp-vti \
 		&& $(MAKE) $(MAKE_J) \
 		&& $(MAKE) $(MAKE_J) install \
-	) >> build/ft-tmp-$*/libtool/build.log 2>&1
+	) >>build/ft-tmp-$*/libtool/build.log 2>&1
 	@touch $@
 
 $(eval $(call make-autotools-package-rules,gettext,build/ft-%/bin/autopoint, \
