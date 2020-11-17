@@ -75,18 +75,17 @@ distclean: $(foreach pkg,$(packages),distclean-$(pkg))
 
 
 build/sdk-$(host_os)-$(host_arch).tar.bz2: build/fs-tmp-$(host_os_arch)/.package-stamp
-	@echo "Compressing 📦"
+	@$(call print-status,📦,Compressing)
 	@tar \
 		-C build/fs-tmp-$(host_os_arch)/package \
 		-cjf $(abspath $@.tmp) \
 		.
 	@mv $@.tmp $@
 
-build/fs-tmp-%/.package-stamp: \
+build/fs-tmp-%/.package-stamp: $(foreach pkg,$(packages),build/ft-%/manifest/$(pkg).pkg) \
 		build/fs-%/lib/pkgconfig/liblzma.pc \
 		build/fs-%/lib/pkgconfig/sqlite3.pc \
 		$(unwind) \
-		$(iconv) \
 		$(elf) \
 		$(dwarf) \
 		build/fs-%/lib/pkgconfig/glib-2.0.pc \
@@ -99,7 +98,7 @@ build/fs-tmp-%/.package-stamp: \
 		build/fs-%/lib/pkgconfig/libtcc.pc \
 		$(v8) \
 		$(libcxx)
-	@echo "Assembling 📦"
+	@$(call print-status,📦,Assembling)
 	@$(RM) -r $(@D)/package
 	@mkdir -p $(@D)/package
 	@cd build/fs-$* \
@@ -123,7 +122,7 @@ build/fs-tmp-%/.package-stamp: \
 			share/glib-2.0/schemas \
 			share/vala \
 			| tar -C $(abspath $(@D)/package) -xf -
-	@releng/relocatify.sh $(@D)/package $(abspath build/fs-$*) $(abspath releng)
+	@releng/pkgify.sh $(@D)/package $(abspath build/fs-$*) $(abspath releng)
 ifeq ($(host_os), ios)
 	@cp $(shell xcrun --sdk macosx --show-sdk-path)/usr/include/mach/mach_vm.h \
 		$(@D)/package/include/frida_mach_vm.h
@@ -132,18 +131,18 @@ endif
 
 
 define make-meson-package-rules
-$(call make-meson-package-rules-for-env,$1,$2,$3,fs)
+$(call make-meson-package-rules-for-env,$1,fs)
 endef
 
 define make-autotools-package-rules
-$(call make-autotools-package-rules-for-env,$1,$2,$3,fs)
+$(call make-autotools-package-rules-for-env,$1,fs)
 endef
 
 define make-autotools-base-package-rules
-$(call make-autotools-base-package-rules-for-env,$1,$2,$3,fs)
+$(call make-autotools-base-package-rules-for-env,$1,fs)
 endef
 
-$(eval $(call make-autotools-package-rules,libiconv,build/fs-%/lib/libiconv.a,))
+$(eval $(call make-autotools-package-rules,libiconv))
 
 .PHONY: clean-elfutils distclean-elfutils
 
@@ -158,17 +157,14 @@ clean-elfutils:
 	for header in $(libelf_headers); do \
 		$(RM) build/fs-$(host_os_arch)/include/$$header; \
 	done
-	$(call make-base-clean-commands,elfutils,build/fs-%/lib/libelf.a,fs,$(host_os_arch))
+	$(call make-base-clean-commands,elfutils,fs,$(host_os_arch))
 
 distclean-elfutils: clean-elfutils
 	$(call make-base-distclean-commands,elfutils)
 
-$(eval $(call make-autotools-base-package-rules,elfutils,build/fs-%/lib/libelf.a, \
-	build/fs-%/lib/pkgconfig/liblzma.pc \
-	build/fs-%/lib/pkgconfig/zlib.pc \
-))
+$(eval $(call make-autotools-base-package-rules,elfutils))
 
-build/fs-%/lib/libelf.a: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
+build/fs-%/$(elfutils_target): build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
 	@$(call print-status,libelf,Building)
 	@(set -x \
 		&& . $< \
@@ -193,16 +189,14 @@ clean-libdwarf:
 	for header in $(libdwarf_headers); do \
 		$(RM) build/fs-$(host_os_arch)/include/$$header; \
 	done
-	$(call make-base-clean-commands,libdwarf,build/fs-%/lib/libdwarf.a,fs,$(host_os_arch))
+	$(call make-base-clean-commands,libdwarf,fs,$(host_os_arch))
 
 distclean-libdwarf: clean-libdwarf
 	$(call make-base-distclean-commands,libdwarf)
 
-$(eval $(call make-autotools-base-package-rules,libdwarf,build/fs-%/lib/libdwarf.a, \
-	build/fs-%/lib/libelf.a \
-))
+$(eval $(call make-autotools-base-package-rules,libdwarf))
 
-build/fs-%/lib/libdwarf.a: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
+build/fs-%/$(libdwarf_target): build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
 	@$(call print-status,libdwarf,Building)
 	@(set -x \
 		&& . $< \
@@ -216,56 +210,35 @@ build/fs-%/lib/libdwarf.a: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
 	) >>build/fs-tmp-$*/libdwarf/build.log 2>&1
 	@touch $@
 
-$(eval $(call make-meson-package-rules,zlib,build/fs-%/lib/pkgconfig/zlib.pc,))
+$(eval $(call make-meson-package-rules,zlib))
 
-$(eval $(call make-autotools-package-rules,xz,build/fs-%/lib/pkgconfig/liblzma.pc,))
+$(eval $(call make-autotools-package-rules,xz))
 
-$(eval $(call make-meson-package-rules,sqlite,build/fs-%/lib/pkgconfig/sqlite3.pc,))
+$(eval $(call make-meson-package-rules,sqlite))
 
-$(eval $(call make-autotools-package-rules,libunwind,build/fs-%/lib/pkgconfig/libunwind.pc, \
-	build/fs-%/lib/pkgconfig/zlib.pc \
-	build/fs-%/lib/pkgconfig/liblzma.pc \
-))
+$(eval $(call make-autotools-package-rules,libunwind))
 
-$(eval $(call make-meson-package-rules,libffi,build/fs-%/lib/pkgconfig/libffi.pc,))
+$(eval $(call make-meson-package-rules,libffi))
 
-$(eval $(call make-meson-package-rules,glib,build/fs-%/lib/pkgconfig/glib-2.0.pc, \
-	$(iconv) \
-	build/fs-%/lib/pkgconfig/zlib.pc \
-	build/fs-%/lib/pkgconfig/libffi.pc \
-))
+$(eval $(call make-meson-package-rules,glib))
 
-$(eval $(call make-meson-package-rules,glib-networking,build/fs-%/lib/pkgconfig/gioopenssl.pc, \
-	build/fs-%/lib/pkgconfig/glib-2.0.pc build/fs-%/lib/pkgconfig/openssl.pc \
-))
+$(eval $(call make-meson-package-rules,glib-networking))
 
-$(eval $(call make-meson-package-rules,libgee,build/fs-%/lib/pkgconfig/gee-0.8.pc, \
-	build/fs-%/lib/pkgconfig/glib-2.0.pc \
-))
+$(eval $(call make-meson-package-rules,libgee))
 
-$(eval $(call make-meson-package-rules,json-glib,build/fs-%/lib/pkgconfig/json-glib-1.0.pc, \
-	build/fs-%/lib/pkgconfig/glib-2.0.pc \
-))
+$(eval $(call make-meson-package-rules,json-glib))
 
-$(eval $(call make-meson-package-rules,libpsl,build/fs-%/lib/pkgconfig/libpsl.pc,))
+$(eval $(call make-meson-package-rules,libpsl))
 
-$(eval $(call make-meson-package-rules,libxml2,build/fs-%/lib/pkgconfig/libxml-2.0.pc, \
-	build/fs-%/lib/pkgconfig/zlib.pc \
-	build/fs-%/lib/pkgconfig/liblzma.pc \
-))
+$(eval $(call make-meson-package-rules,libxml2))
 
-$(eval $(call make-meson-package-rules,libsoup,build/fs-%/lib/pkgconfig/libsoup-2.4.pc, \
-	build/fs-%/lib/pkgconfig/glib-2.0.pc \
-	build/fs-%/lib/pkgconfig/sqlite3.pc \
-	build/fs-%/lib/pkgconfig/libpsl.pc \
-	build/fs-%/lib/pkgconfig/libxml-2.0.pc \
-))
+$(eval $(call make-meson-package-rules,libsoup))
 
-$(eval $(call make-meson-package-rules,capstone,build/fs-%/lib/pkgconfig/capstone.pc,))
+$(eval $(call make-meson-package-rules,capstone))
 
-$(eval $(call make-meson-package-rules,quickjs,build/fs-%/lib/pkgconfig/quickjs.pc,))
+$(eval $(call make-meson-package-rules,quickjs))
 
-$(eval $(call make-meson-package-rules,tinycc,build/fs-%/lib/pkgconfig/libtcc.pc,))
+$(eval $(call make-meson-package-rules,tinycc))
 
 
 ifeq ($(FRIDA_ASAN), yes)
@@ -390,7 +363,7 @@ openssl: build/fs-$(host_os_arch)/lib/pkgconfig/openssl.pc
 clean-openssl:
 	[ -f build/fs-tmp-$(host_os_arch)/openssl/Makefile ] \
 		&& $(MAKE) -C build/fs-tmp-$(host_os_arch)/openssl uninstall_dev &>/dev/null || true
-	$(call make-base-clean-commands,openssl,build/fs-%/lib/pkgconfig/openssl.pc,fs,$(host_os_arch))
+	$(call make-base-clean-commands,openssl,fs,$(host_os_arch))
 
 distclean-openssl: clean-openssl
 	$(call make-base-distclean-commands,openssl)
@@ -406,7 +379,8 @@ build/fs-tmp-%/openssl/Configure: deps/.openssl-stamp
 	@cp -a deps/openssl $(@D)
 	@touch $@
 
-build/fs-%/lib/pkgconfig/openssl.pc: build/fs-env-%.rc build/fs-tmp-%/openssl/Configure
+build/fs-%/$(openssl_target): build/fs-env-%.rc build/fs-tmp-%/openssl/Configure \
+		$(foreach dep,$(openssl_deps),build/fs-%/manifest/$(dep).pkg)
 	@$(call print-status,openssl,Building)
 	@(set -x \
 		&& . $< \
@@ -533,10 +507,10 @@ endif
 
 .PHONY: gn clean-gn distclean-gn
 
-gn: build/fs-tmp-$(build_os_arch)/gn/gn
+gn: build/fs-$(build_os_arch)/$(gn_target)
 
 clean-gn:
-	$(call make-base-clean-commands,gn,build/fs-tmp-%/gn/gn,fs,$(build_os_arch))
+	$(call make-base-clean-commands,gn,fs,$(build_os_arch))
 
 distclean-gn: clean-gn
 	$(call make-base-distclean-commands,gn)
@@ -545,7 +519,8 @@ deps/.gn-stamp:
 	$(call grab-and-prepare,gn)
 	@touch $@
 
-build/fs-tmp-%/gn/build.ninja: build/fs-env-%.rc deps/.gn-stamp
+build/fs-tmp-%/gn/build.ninja: build/fs-env-%.rc deps/.gn-stamp \
+		$(foreach dep,$(gn_deps),build/fs-%/manifest/$(dep).pkg)
 	@$(call print-status,gn,Configuring)
 	@$(RM) -r $(@D)
 	@mkdir -p $(@D)
@@ -556,10 +531,13 @@ build/fs-tmp-%/gn/build.ninja: build/fs-env-%.rc deps/.gn-stamp
 			$(gn_options) \
 	) >$(@D)/build.log 2>&1
 
-build/fs-tmp-%/gn/gn: build/fs-tmp-%/gn/build.ninja
+build/fs-%/$(gn_target): build/fs-tmp-%/gn/build.ninja
 	@$(call print-status,gn,Building)
 	@(set -x \
-		&& $(NINJA) -C $(@D) \
+		&& cd $(@D) \
+		&& $(NINJA) \
+		&& install -d $(@D) \
+		&& install -m 755 gn $@ \
 	) >>$(@D)/build.log 2>&1
 	@touch $@
 
@@ -572,7 +550,7 @@ clean-depot_tools:
 distclean-depot_tools: clean-depot_tools
 	$(call make-base-distclean-commands,depot_tools)
 
-deps/.depot_tools-stamp:
+deps/.depot_tools-stamp: $(foreach dep,$(depot_tools_deps),build/fs-$(build_os_arch)/manifest/$(dep).pkg)
 	$(call grab-and-prepare,depot_tools)
 	@echo '{"is-googler": false, "countdown": 10, "opt-in": null, "version": 1}' > deps/depot_tools/metrics.cfg
 	@touch $@
@@ -584,7 +562,7 @@ v8: build/fs-$(host_os_arch)/lib/pkgconfig/v8-$(v8_api_version).pc
 clean-v8:
 	$(RM) -r build/fs-$(host_os_arch)/include/v8-$(v8_api_version)
 	$(RM) build/fs-$(host_os_arch)/lib/libv8-$(v8_api_version).a
-	$(call make-base-clean-commands,v8,build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc,fs,$(host_os_arch))
+	$(call make-base-clean-commands,v8,fs,$(host_os_arch))
 
 distclean-v8: clean-v8
 	$(RM) -r deps/v8-checkout
@@ -611,7 +589,8 @@ deps/v8-checkout/v8: deps/v8-checkout/.gclient
 			gclient sync
 	@touch $@
 
-build/fs-tmp-%/v8/build.ninja: deps/v8-checkout/v8 build/fs-tmp-$(build_os_arch)/gn/gn
+build/fs-tmp-%/v8/build.ninja: deps/v8-checkout/v8 build/fs-tmp-$(build_os_arch)/gn/gn \
+		$(foreach dep,$(v8_deps),build/fs-%/manifest/$(dep).pkg)
 	@$(call print-status,v8,Configuring)
 	@$(RM) -r $(@D)
 	@mkdir -p $(@D)
@@ -636,7 +615,7 @@ build/fs-tmp-%/v8/obj/libv8_monolith.a: build/fs-tmp-%/v8/build.ninja
 	) >>build/fs-tmp-$*/v8/build.log 2>&1
 	@touch $@
 
-build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc: build/fs-tmp-%/v8/obj/libv8_monolith.a
+build/fs-%/$(v8_target): build/fs-tmp-%/v8/obj/libv8_monolith.a
 	@$(call print-status,v8,Packaging)
 	@(set -x \
 		&& install -d build/fs-$*/include/v8-$(v8_api_version)/v8 \

@@ -43,3 +43,16 @@ for file in $(find "$package" -type f); do
     fi
   fi
 done
+
+cd "$package" || exit 1
+for pkg in manifest/*.pkg; do
+  cat $pkg | while read entry
+  do
+    [ -e $entry ] && echo $entry >> $pkg.filtered
+  done
+  if [ -f $pkg.filtered ]; then
+    mv $pkg.filtered $pkg
+  else
+    rm $pkg
+  fi
+done

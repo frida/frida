@@ -37,24 +37,15 @@ distclean: $(foreach pkg,$(packages),distclean-$(pkg))
 
 
 build/toolchain-$(host_os)-$(host_arch).tar.bz2: build/ft-tmp-$(host_os_arch)/.package-stamp
-	@echo "Compressing 📦"
+	@$(call print-status,📦,Compressing)
 	@tar \
 		-C build/ft-tmp-$(host_os_arch)/package \
 		-cjf $(abspath $@.tmp) \
 		.
 	@mv $@.tmp $@
 
-build/ft-tmp-%/.package-stamp: \
-		build/ft-env-%.rc \
-		build/ft-%/bin/m4 \
-		build/ft-%/bin/autoconf \
-		build/ft-%/bin/automake \
-		build/ft-%/bin/libtool \
-		build/ft-%/bin/autopoint \
-		build/ft-%/bin/glib-genmarshal \
-		build/ft-%/bin/pkg-config \
-		build/ft-%/bin/valac
-	@echo "Assembling 📦"
+build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg,$(packages),build/ft-%/manifest/$(pkg).pkg)
+	@$(call print-status,📦,Assembling)
 	@$(RM) -r $(@D)/package
 	@mkdir -p $(@D)/package
 	@cd build/ft-$* \
@@ -96,35 +87,33 @@ build/ft-tmp-%/.package-stamp: \
 			ln -s $$tool-$(automake_api_version) $$tool; \
 		done
 	@. $< \
-		&& for f in $(@D)/package/bin/*; do \
+		&& for f in $(@D)/manifest/bin/*; do \
 			if [ -L $$f ]; then \
 				true; \
 			elif file -b --mime $$f | egrep -q "executable|binary"; then \
 				$$STRIP $$f || exit 1; \
 			fi; \
 		done \
-		&& $$STRIP $(@D)/package/lib/vala-*/gen-introspect-*
-	@releng/relocatify.sh $(@D)/package $(abspath build/ft-$*) $(abspath releng)
+		&& $STRIP $(@D)/package/lib/vala-*/gen-introspect-*
+	@releng/pkgify.sh $(@D)/package $(abspath build/ft-$*) $(abspath releng)
 	@touch $@
 
 
 define make-meson-package-rules
-$(call make-meson-package-rules-for-env,$1,$2,$3,ft)
+$(call make-meson-package-rules-for-env,$1,ft)
 endef
 
 define make-autotools-package-rules
-$(call make-autotools-package-rules-for-env,$1,$2,$3,ft)
+$(call make-autotools-package-rules-for-env,$1,ft)
 endef
 
-$(eval $(call make-autotools-package-rules,m4,build/ft-%/bin/m4,))
+$(eval $(call make-autotools-package-rules,libiconv))
 
-$(eval $(call make-autotools-package-rules,autoconf,build/ft-%/bin/autoconf, \
-	build/ft-%/bin/m4 \
-))
+$(eval $(call make-autotools-package-rules,m4))
 
-$(eval $(call make-autotools-package-rules,automake,build/ft-%/bin/automake, \
-	build/ft-%/bin/autoconf \
-))
+$(eval $(call make-autotools-package-rules,autoconf))
+
+$(eval $(call make-autotools-package-rules,automake))
 
 .PHONY: libtool clean-libtool distclean-libtool
 
@@ -133,7 +122,7 @@ libtool: build/ft-$(host_os_arch)/bin/libtool
 clean-libtool:
 	[ -f build/ft-tmp-$(host_os_arch)/libtool/Makefile ] \
 		&& $(MAKE) -C build/ft-tmp-$(host_os_arch)/libtool uninstall &>/dev/null || true
-	$(call make-base-clean-commands,libtool,build/ft-%/bin/libtool,ft,$(host_os_arch))
+	$(call make-base-clean-commands,libtool,ft,$(host_os_arch))
 
 distclean-libtool: clean-libtool
 	$(call make-base-distclean-commands,libtool)
@@ -146,7 +135,8 @@ deps/.libtool-stamp:
 		done
 	@touch $@
 
-build/ft-tmp-%/libtool/Makefile: build/ft-env-%.rc deps/.libtool-stamp build/ft-%/bin/automake
+build/ft-tmp-%/libtool/Makefile: build/ft-env-%.rc deps/.libtool-stamp \
+		$(foreach dep,$(libtool_deps),build/ft-%/manifest/$(dep).pkg)
 	@$(call print-status,libtool,Configuring)
 	@$(RM) -r $(@D)
 	@mkdir -p $(@D)
@@ -157,7 +147,7 @@ build/ft-tmp-%/libtool/Makefile: build/ft-env-%.rc deps/.libtool-stamp build/ft-
 		&& ../../../deps/libtool/configure $(libtool_options) \
 	) >$(@D)/build.log 2>&1
 
-build/ft-%/bin/libtool: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
+build/ft-%/$(libtool_target): build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 	@$(call print-status,libtool,Building)
 	@(set -x \
 		&& . $< \
@@ -170,36 +160,23 @@ build/ft-%/bin/libtool: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 	) >>build/ft-tmp-$*/libtool/build.log 2>&1
 	@touch $@
 
-$(eval $(call make-autotools-package-rules,gettext,build/ft-%/bin/autopoint, \
-	build/ft-%/bin/libtool \
-))
+$(eval $(call make-autotools-manifest-rule,libtool,ft))
 
-$(eval $(call make-meson-package-rules,zlib,build/ft-%/lib/pkgconfig/zlib.pc,))
+$(eval $(call make-autotools-package-rules,gettext))
 
-$(eval $(call make-meson-package-rules,libffi,build/ft-%/lib/pkgconfig/libffi.pc,))
+$(eval $(call make-meson-package-rules,zlib))
 
-$(eval $(call make-meson-package-rules,glib,build/ft-%/bin/glib-genmarshal, \
-	build/ft-%/lib/pkgconfig/zlib.pc \
-	build/ft-%/lib/pkgconfig/libffi.pc \
-))
+$(eval $(call make-meson-package-rules,libffi))
 
-$(eval $(call make-meson-package-rules,pkg-config,build/ft-%/bin/pkg-config, \
-	build/ft-%/bin/glib-genmarshal \
-))
+$(eval $(call make-meson-package-rules,glib))
 
-$(eval $(call make-autotools-package-rules,flex,build/ft-%/bin/flex, \
-	build/ft-$(build_os_arch)/bin/m4 \
-))
+$(eval $(call make-meson-package-rules,pkg-config))
 
-$(eval $(call make-autotools-package-rules,bison,build/ft-%/bin/bison, \
-	build/ft-$(build_os_arch)/bin/m4 \
-))
+$(eval $(call make-autotools-package-rules,flex))
 
-$(eval $(call make-meson-package-rules,vala,build/ft-%/bin/valac, \
-	build/ft-%/bin/glib-genmarshal \
-	build/ft-$(build_os_arch)/bin/flex \
-	build/ft-$(build_os_arch)/bin/bison \
-))
+$(eval $(call make-autotools-package-rules,bison))
+
+$(eval $(call make-meson-package-rules,vala))
 
 
 ifeq ($(host_os), $(filter $(host_os), macos ios))
