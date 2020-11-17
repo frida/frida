@@ -7,54 +7,34 @@ SHELL = /bin/bash
 
 
 packages = \
-	libiconv \
-	elfutils \
-	libdwarf \
 	zlib \
 	xz \
 	sqlite \
-	libunwind \
 	libffi \
 	glib \
 	glib-networking \
 	libgee \
 	json-glib \
-	libpsl \
-	libxml2 \
 	libsoup \
 	capstone \
 	quickjs \
 	tinycc \
-	openssl \
-	v8 \
-	gn \
-	depot_tools \
-	libcxx \
 	$(NULL)
 
 
-ifeq ($(glib_iconv_option), -Diconv=external)
-	iconv := build/fs-%/lib/libiconv.a
-endif
-
 ifeq ($(host_os), $(filter $(host_os), linux android qnx))
-	unwind := build/fs-%/lib/pkgconfig/libunwind.pc
-	elf := build/fs-%/lib/libelf.a
-	dwarf := build/fs-%/lib/libdwarf.a
+	packages += elfutils libdwarf libunwind
 endif
 
 ifeq ($(host_os), $(filter $(host_os), macos ios linux android))
-	glib_tls_provider := build/fs-%/lib/pkgconfig/gioopenssl.pc
+	packages += glib-networking
 endif
 
 ifneq ($(FRIDA_V8), disabled)
-	v8 := build/fs-%/lib/pkgconfig/v8-$(v8_api_version).pc
-endif
-
+	packages += v8
 ifeq ($(host_os), $(filter $(host_os), macos ios))
-ifneq ($(FRIDA_V8), disabled)
 ifeq ($(FRIDA_ASAN), no)
-	libcxx := build/fs-%/lib/c++/libc++.a
+	packages += libcxx
 endif
 endif
 endif
@@ -82,22 +62,7 @@ build/sdk-$(host_os)-$(host_arch).tar.bz2: build/fs-tmp-$(host_os_arch)/.package
 		.
 	@mv $@.tmp $@
 
-build/fs-tmp-%/.package-stamp: $(foreach pkg,$(packages),build/ft-%/manifest/$(pkg).pkg) \
-		build/fs-%/lib/pkgconfig/liblzma.pc \
-		build/fs-%/lib/pkgconfig/sqlite3.pc \
-		$(unwind) \
-		$(elf) \
-		$(dwarf) \
-		build/fs-%/lib/pkgconfig/glib-2.0.pc \
-		$(glib_tls_provider) \
-		build/fs-%/lib/pkgconfig/gee-0.8.pc \
-		build/fs-%/lib/pkgconfig/json-glib-1.0.pc \
-		build/fs-%/lib/pkgconfig/libsoup-2.4.pc \
-		build/fs-%/lib/pkgconfig/capstone.pc \
-		build/fs-%/lib/pkgconfig/quickjs.pc \
-		build/fs-%/lib/pkgconfig/libtcc.pc \
-		$(v8) \
-		$(libcxx)
+build/fs-tmp-%/.package-stamp: $(foreach pkg,$(packages),build/ft-%/manifest/$(pkg).pkg)
 	@$(call print-status,📦,Assembling)
 	@$(RM) -r $(@D)/package
 	@mkdir -p $(@D)/package
