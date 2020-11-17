@@ -46,8 +46,7 @@ done
 
 cd "$package" || exit 1
 for pkg in manifest/*.pkg; do
-  cat $pkg | while read entry
-  do
+  cat $pkg | while read entry; do
     [ -e $entry ] && echo $entry >> $pkg.filtered
   done
   if [ -f $pkg.filtered ]; then

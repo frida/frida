@@ -99,33 +99,10 @@ build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg,$(packages),build
 	@touch $@
 
 
-define make-meson-package-rules
-$(call make-meson-package-rules-for-env,$1,ft)
-endef
+$(eval $(call make-package-rules,$(packages),ft))
 
-define make-autotools-package-rules
-$(call make-autotools-package-rules-for-env,$1,ft)
-endef
 
-$(eval $(call make-autotools-package-rules,libiconv))
-
-$(eval $(call make-autotools-package-rules,m4))
-
-$(eval $(call make-autotools-package-rules,autoconf))
-
-$(eval $(call make-autotools-package-rules,automake))
-
-.PHONY: libtool clean-libtool distclean-libtool
-
-libtool: build/ft-$(host_os_arch)/bin/libtool
-
-clean-libtool:
-	[ -f build/ft-tmp-$(host_os_arch)/libtool/Makefile ] \
-		&& $(MAKE) -C build/ft-tmp-$(host_os_arch)/libtool uninstall &>/dev/null || true
-	$(call make-base-clean-commands,libtool,ft,$(host_os_arch))
-
-distclean-libtool: clean-libtool
-	$(call make-base-distclean-commands,libtool)
+$(eval $(call make-base-package-rules,libtool,$(host_os_arch),ft))
 
 deps/.libtool-stamp:
 	$(call grab-and-prepare,libtool)
@@ -135,8 +112,7 @@ deps/.libtool-stamp:
 		done
 	@touch $@
 
-build/ft-tmp-%/libtool/Makefile: build/ft-env-%.rc deps/.libtool-stamp \
-		$(foreach dep,$(libtool_deps),build/ft-%/manifest/$(dep).pkg)
+build/ft-tmp-%/libtool/Makefile: build/ft-env-%.rc deps/.libtool-stamp $(foreach dep,$(libtool_deps),build/ft-%/manifest/$(dep).pkg)
 	@$(call print-status,libtool,Configuring)
 	@$(RM) -r $(@D)
 	@mkdir -p $(@D)
@@ -161,22 +137,6 @@ build/ft-%/$(libtool_target): build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 	@touch $@
 
 $(eval $(call make-autotools-manifest-rule,libtool,ft))
-
-$(eval $(call make-autotools-package-rules,gettext))
-
-$(eval $(call make-meson-package-rules,zlib))
-
-$(eval $(call make-meson-package-rules,libffi))
-
-$(eval $(call make-meson-package-rules,glib))
-
-$(eval $(call make-meson-package-rules,pkg-config))
-
-$(eval $(call make-autotools-package-rules,flex))
-
-$(eval $(call make-autotools-package-rules,bison))
-
-$(eval $(call make-meson-package-rules,vala))
 
 
 ifeq ($(host_os), $(filter $(host_os), macos ios))
