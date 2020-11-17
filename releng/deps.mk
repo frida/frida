@@ -490,7 +490,7 @@ endef
 
 define make-base-clean-commands
 	$(RM) build/$2-$3/manifest/$1.pkg
-	$(RM) build/$2-$3/$$($$(subst -,_,$1)_target)
+	$(RM) build/$2-$3/$($(subst -,_,$1)_target)
 	$(RM) -r build/$2-tmp-$3/$1
 endef
 
@@ -526,7 +526,7 @@ build/$2-tmp-%/$1/build.ninja: build/$2-env-%.rc deps/.$1-stamp \
 			deps/$1 \
 	) >$$(@D)/build.log 2>&1
 
-build/$2-%/$$($$(subst -,_,$1)_target): build/$2-env-%.rc build/$2-tmp-%/$1/build.ninja
+build/$2-%/$($(subst -,_,$1)_target): build/$2-env-%.rc build/$2-tmp-%/$1/build.ninja
 	@$(call print-status,$1,Building)
 	@(set -x \
 		&& . $$< \
@@ -535,7 +535,7 @@ build/$2-%/$$($$(subst -,_,$1)_target): build/$2-env-%.rc build/$2-tmp-%/$1/buil
 	) >>build/$2-tmp-$$*/$1/build.log 2>&1
 	@touch $$@
 
-build/$2-%/manifest/$1.pkg: build/$2-%/$$($$(subst -,_,$1)_target)
+build/$2-%/manifest/$1.pkg: build/$2-%/$($(subst -,_,$1)_target)
 	@mkdir -p $$(@D)
 	@cd build/$2-tmp-$$*/$1 && $(MESON) introspect --installed --indent \
 		| grep ": " \
@@ -619,7 +619,7 @@ endef
 
 define make-autotools-manifest-rule
 
-build/$2-%/manifest/$1.pkg: build/$2-%/$$($$(subst -,_,$1)_target)
+build/$2-%/manifest/$1.pkg: build/$2-%/$($(subst -,_,$1)_target)
 	@mkdir -p $$(@D)
 	@cd build/$2-tmp-$$*/$1 \
 		&& $(RM) -r __pkg__ \

@@ -62,7 +62,7 @@ build/sdk-$(host_os)-$(host_arch).tar.bz2: build/fs-tmp-$(host_os_arch)/.package
 		.
 	@mv $@.tmp $@
 
-build/fs-tmp-%/.package-stamp: $(foreach pkg,$(packages),build/ft-%/manifest/$(pkg).pkg)
+build/fs-tmp-%/.package-stamp: $(foreach pkg,$(packages),build/fs-%/manifest/$(pkg).pkg)
 	@$(call print-status,📦,Assembling)
 	@$(RM) -r $(@D)/package
 	@mkdir -p $(@D)/package
