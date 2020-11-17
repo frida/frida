@@ -617,7 +617,8 @@ define make-autotools-manifest-commands
 		&& find . -type f \
 			| cut -c$$(strip $$(shell echo $$$${prefix}xx | wc -c))- \
 			> $$$$prefix/manifest/$1.pkg \
-		&& $(RM) -r __pkg__
+		&& $(RM) -r __pkg__ \
+	)
 endef
 
 
