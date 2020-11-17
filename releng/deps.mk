@@ -607,7 +607,7 @@ endef
 
 
 define make-autotools-manifest-commands
-	@$(call print-status,$1,Generating manifest)
+	$(call print-status,$1,Generating manifest)
 	(prefix=$2; builddir=$3 \
 		&& mkdir -p $$$$prefix/manifest \
 		&& cd "$$$$builddir" \
