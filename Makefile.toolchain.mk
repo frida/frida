@@ -128,8 +128,8 @@ build/ft-%/manifest/libtool.pkg: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefi
 	@prefix=$(abspath build/ft-$*); \
 	builddir=$(abspath build/ft-tmp-$*/libtool); \
 	(set -x \
-		&& . $< \
 		&& cd "$$builddir" \
+		&& . $< \
 		&& export PATH="$(shell pwd)/build/ft-$(build_os_arch)/bin:$$PATH" \
 		&& $(MAKE) build-aux/ltmain.sh \
 		&& touch ../../../deps/libtool/doc/*.1 ../../../deps/libtool/doc/stamp-vti \
