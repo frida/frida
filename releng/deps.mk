@@ -477,11 +477,9 @@ depot_tools_deps = \
 
 define make-package-rules
 
-$(foreach pkg, $1,
-	$(ifeq $($(subst -,_,$(pkg))_recipe, meson),
-		$(call make-meson-package-rules,$(pkg),$2),
-		$(ifeq $($(subst -,_,$(pkg))_recipe, autotools),
-			$(call make-autotools-package-rules,$(pkg),$2))))
+$(foreach pkg, $1, \
+	$(if $(findstring meson,$($(subst -,_,$(pkg))_recipe)), $(call make-meson-package-rules,$(pkg),$2), \
+	$(if $(findstring autotools,$($(subst -,_,$(pkg))_recipe)), $(call make-autotools-package-rules,$(pkg),$2),)))
 
 endef
 
