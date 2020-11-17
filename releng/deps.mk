@@ -478,47 +478,22 @@ depot_tools_deps = \
 define make-package-rules
 
 $(foreach pkg, $1, \
-	$(if $(findstring meson,$($(subst -,_,$(pkg))_recipe)), \
-		$(call make-meson-package-rules,$(pkg),$2,$(foreach dep,$($(subst -,_,$1)_deps),build/$2-%/manifest/$(dep).pkg)), \
-	$(if $(findstring autotools,$($(subst -,_,$(pkg))_recipe)), \
-		$(call make-autotools-package-rules,$(pkg),$2,$(foreach dep,$($(subst -,_,$1)_deps),build/$2-%/manifest/$(dep).pkg)),)))
-
-endef
-
-
-define make-base-package-rules
-
-.PHONY: $1 clean-$1 distclean-$1
-
-$1: build/$3-$2/manifest/$1.pkg
-
-clean-$1:
-	@cd build/$2-$(host_os_arch) \
-		&& if [ -f manifest/$1.pkg ]; then \
-			cat manifest/$1.pkg | while read entry; do \
-				echo $(RM) $$$$entry; \
-				$(RM) $$$$entry \
-			done \
-		fi
-	$(RM) build/$2-$3/manifest/$1.pkg
-	$(RM) -r build/$2-tmp-$3/$1
-
-distclean-$1: clean-$1
-	$(RM) deps/.$1-stamp
-	$(RM) -r deps/$1
+	$(if $(findstring meson,$($(subst -,_,$(pkg))_recipe)), $(call make-meson-package-rules,$(pkg),$2), \
+	$(if $(findstring autotools,$($(subst -,_,$(pkg))_recipe)), $(call make-autotools-package-rules,$(pkg),$2),)))
 
 endef
 
 
 define make-meson-package-rules
 
-$(call make-base-package-rules,$1,$(host_os_arch),$2)
+$(call make-base-package-rules,$1,$2,$(host_os_arch))
 
 deps/.$1-stamp:
 	$$(call grab-and-prepare,$1)
 	@touch $$@
 
-build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp $3 \
+build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
+		$(foreach dep,$($(subst -,_,$1)_deps),build/$2-%/manifest/$(dep).pkg) \
 		releng/meson/meson.py
 	@prefix=$$(abspath build/$2-$$*); \
 	builddir=build/$2-tmp-$$*/$1; \
@@ -554,15 +529,31 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp $3 \
 endef
 
 
-define make-autotools-base-package-rules
+define make-autotools-package-rules
 
-$(call make-base-package-rules,$1,$(host_os_arch),$2)
+$(call make-autotools-package-rules-without-build-rule,$1,$2)
+$(call make-autotools-build-rule,$1,$2)
+
+endef
+
+
+define make-autotools-package-rules-without-build-rule
+
+$(call make-base-package-rules,$1,$2,$(host_os_arch))
 
 deps/.$1-stamp:
 	$$(call grab-and-prepare,$1)
 	@touch $$@
 
-deps/$1/configure: build/$2-env-$(build_os_arch).rc deps/.$1-stamp $3
+$(call make-autotools-autoreconf-rule,$1,$2)
+$(call make-autotools-configure-rule,$1,$2)
+
+endef
+
+
+define make-autotools-autoreconf-rule
+
+deps/$1/configure: build/$2-env-$(build_os_arch).rc deps/.$1-stamp
 	@. $$< \
 		&& cd $$(@D) \
 		&& if [ ! -f configure ] || [ -f ../.$1-reconf-needed ]; then \
@@ -572,7 +563,13 @@ deps/$1/configure: build/$2-env-$(build_os_arch).rc deps/.$1-stamp $3
 		fi
 	@touch $$@
 
-build/$2-tmp-%/$1/Makefile: build/$2-env-%.rc deps/$1/configure
+endef
+
+
+define make-autotools-configure-rule
+
+build/$2-tmp-%/$1/Makefile: build/$2-env-%.rc deps/$1/configure deps/.$1-stamp \
+		$(foreach dep,$($(subst -,_,$1)_deps),build/$2-%/manifest/$(dep).pkg)
 	@$(call print-status,$1,Configuring)
 	@$(RM) -r $$(@D)
 	@mkdir -p $$(@D)
@@ -586,9 +583,7 @@ build/$2-tmp-%/$1/Makefile: build/$2-env-%.rc deps/$1/configure
 endef
 
 
-define make-autotools-package-rules
-
-$(call make-autotools-base-package-rules,$1,$2,$3)
+define make-autotools-build-rule
 
 build/$2-%/manifest/$1.pkg: build/$2-env-%.rc build/$2-tmp-%/$1/Makefile
 	@$(call print-status,$1,Building)
@@ -602,9 +597,9 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc build/$2-tmp-%/$1/Makefile
 		&& $(MAKE) $(MAKE_J) install \
 	) >>$$$$builddir/build.log 2>&1 \
 	&& $(call print-status,$1,Generating manifest) \
-	&& $(call make-autotools-manifest-commands,$1,$2,$$*,)
-
-$(call make-autotools-manifest-rule,$1,$2)
+	&& (set -x; \
+		$(call make-autotools-manifest-commands,$1,$2,$$*,) \
+	) >>$$$$builddir/build.log 2>&1
 
 endef
 
@@ -624,6 +619,30 @@ define make-autotools-manifest-commands
 			> $$$$prefix/manifest/$1.pkg \
 		&& $(RM) -r __pkg__ \
 	)
+endef
+
+
+define make-base-package-rules
+
+.PHONY: $1 clean-$1 distclean-$1
+
+$1: build/$2-$3/manifest/$1.pkg
+
+clean-$1:
+	@cd build/$2-$(host_os_arch) \
+		&& if [ -f manifest/$1.pkg ]; then \
+			cat manifest/$1.pkg | while read entry; do \
+				echo $(RM) $$$$entry; \
+				$(RM) $$$$entry \
+			done \
+		fi
+	$(RM) build/$2-$3/manifest/$1.pkg
+	$(RM) -r build/$2-tmp-$3/$1
+
+distclean-$1: clean-$1
+	$(RM) deps/.$1-stamp
+	$(RM) -r deps/$1
+
 endef
 
 

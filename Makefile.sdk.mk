@@ -105,21 +105,25 @@ libelf_headers = \
 	nlist.h \
 	$(NULL)
 
-$(eval $(call make-autotools-base-package-rules,elfutils))
+$(eval $(call make-autotools-package-rules-without-build-rule,elfutils))
 
-build/fs-%/$(elfutils_target): build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
+build/fs-%/manifest/elfutils.pkg: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
 	@$(call print-status,libelf,Building)
-	@(set -x \
+	@builddir=build/fs-tmp-$*/elfutils; \
+	(set -x \
 		&& . $< \
-		&& $(MAKE) $(MAKE_J) -C build/fs-tmp-$*/elfutils/libelf libelf.a \
+		&& $(MAKE) $(MAKE_J) -C $$builddir/libelf libelf.a \
 		&& install -d build/fs-$*/include \
 		&& for header in $(libelf_headers); do \
 			install -m 644 deps/elfutils/libelf/$$header build/fs-$*/include; \
 		done \
 		&& install -d build/fs-$*/lib \
-		&& install -m 644 build/fs-tmp-$*/elfutils/libelf/libelf.a build/fs-$*/lib \
-	) >>build/fs-tmp-$*/elfutils/build.log 2>&1
-	@touch $@
+		&& install -m 644 $$builddir/libelf/libelf.a build/fs-$*/lib \
+	) >>$$builddir/build.log 2>&1 \
+	&& $(call print-status,libelf,Generating manifest) \
+	&& (set -x; \
+		$(call make-autotools-manifest-commands,elfutils,fs,$*,) \
+	) >>$$builddir/build.log 2>&1
 
 
 libdwarf_headers = \
@@ -127,21 +131,25 @@ libdwarf_headers = \
 	libdwarf.h \
 	$(NULL)
 
-$(eval $(call make-autotools-base-package-rules,libdwarf))
+$(eval $(call make-autotools-package-rules-without-build-rule,libdwarf))
 
-build/fs-%/$(libdwarf_target): build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
+build/fs-%/manifest/libdwarf.pkg: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
 	@$(call print-status,libdwarf,Building)
-	@(set -x \
+	@builddir=build/fs-tmp-$*/libdwarf; \
+	(set -x \
 		&& . $< \
-		&& $(MAKE) $(MAKE_J) -C build/fs-tmp-$*/libdwarf/libdwarf libdwarf.la \
+		&& $(MAKE) $(MAKE_J) -C $$builddir/libdwarf libdwarf.la \
 		&& install -d build/fs-$*/include \
 		&& for header in $(libdwarf_headers); do \
 			install -m 644 deps/libdwarf/libdwarf/$$header build/fs-$*/include; \
 		done \
 		&& install -d build/fs-$*/lib \
-		&& install -m 644 build/fs-tmp-$*/libdwarf/libdwarf/.libs/libdwarf.a build/fs-$*/lib \
-	) >>build/fs-tmp-$*/libdwarf/build.log 2>&1
-	@touch $@
+		&& install -m 644 $$builddir/libdwarf/.libs/libdwarf.a build/fs-$*/lib \
+	) >>$$builddir/build.log 2>&1 \
+	&& $(call print-status,libdwarf,Generating manifest) \
+	&& (set -x; \
+		$(call make-autotools-manifest-commands,libdwarf,fs,$*,) \
+	) >>$$builddir/build.log 2>&1
 
 
 ifeq ($(FRIDA_ASAN), yes)
@@ -259,6 +267,8 @@ endif
 		$(NULL)
 endif
 
+$(eval $(call make-base-package-rules,openssl,fs,$(host_os_arch)))
+
 deps/.openssl-stamp:
 	$(call grab-and-prepare,openssl)
 	@touch $@
@@ -270,15 +280,16 @@ build/fs-tmp-%/openssl/Configure: deps/.openssl-stamp
 	@cp -a deps/openssl $(@D)
 	@touch $@
 
-build/fs-%/$(openssl_target): build/fs-env-%.rc build/fs-tmp-%/openssl/Configure \
+build/fs-%/manifest/openssl.pkg: build/fs-env-%.rc build/fs-tmp-%/openssl/Configure \
 		$(foreach dep,$(openssl_deps),build/fs-%/manifest/$(dep).pkg)
 	@$(call print-status,openssl,Building)
-	@(set -x \
+	@builddir=build/fs-tmp-$*/openssl; \
+	(set -x \
 		&& . $< \
 		&& . $$CONFIG_SITE \
 		&& export CC CFLAGS \
 		&& export $(openssl_host_env) OPENSSL_LOCAL_CONFIG_DIR="$(abspath releng/openssl-config)" \
-		&& cd build/fs-tmp-$*/openssl \
+		&& cd $$builddir \
 		&& perl Configure \
 			--prefix=$$frida_prefix \
 			$(openssl_options) \
@@ -287,9 +298,11 @@ build/fs-%/$(openssl_target): build/fs-env-%.rc build/fs-tmp-%/openssl/Configure
 		&& $(MAKE) depend \
 		&& $(MAKE) build_libs \
 		&& $(MAKE) install_dev \
-	) >build/fs-tmp-$*/openssl/build.log 2>&1
-
-$(eval $(call make-autotools-manifest-rule,openssl,fs,install_dev))
+	) >$$builddir/build.log 2>&1 \
+	&& $(call print-status,openssl,Generating manifest) \
+	&& (set -x; \
+		$(call make-autotools-manifest-commands,openssl,fs,$*,) \
+	) >>$$builddir/build.log 2>&1
 
 
 ifeq ($(FRIDA_ASAN), yes)
@@ -416,15 +429,17 @@ build/fs-tmp-%/gn/build.ninja: build/fs-env-%.rc deps/.gn-stamp \
 			$(gn_options) \
 	) >$(@D)/build.log 2>&1
 
-build/fs-%/$(gn_target): build/fs-tmp-%/gn/build.ninja
+build/fs-%/manifest/gn.pkg: build/fs-tmp-%/gn/build.ninja
 	@$(call print-status,gn,Building)
-	@(set -x \
-		&& cd $(@D) \
-		&& $(NINJA) \
-		&& install -d $(@D) \
-		&& install -m 755 gn $@ \
-	) >>$(@D)/build.log 2>&1
-	@touch $@
+	@prefix=build/fs-$*; \
+	builddir=build/fs-tmp-$*/gn; \
+	(set -x \
+		&& $(NINJA) -C $$builddir \
+		&& install -d $$prefix/bin \
+		&& install -m 755 $$builddir/gn $$prefix/bin \
+	) >>$$builddir/build.log 2>&1
+	$(call print-status,gn,Generating manifest)
+	echo "bin/gn" > $@
 
 .PHONY: depot_tools clean-depot_tools distclean-depot_tools
 
@@ -433,7 +448,8 @@ depot_tools: deps/.depot_tools-stamp
 clean-depot_tools:
 
 distclean-depot_tools: clean-depot_tools
-	$(call make-base-distclean-commands,depot_tools)
+	$(RM) deps/.depot_tools-stamp
+	$(RM) -r deps/depot_tools
 
 deps/.depot_tools-stamp: $(foreach dep,$(depot_tools_deps),build/fs-$(build_os_arch)/manifest/$(dep).pkg)
 	$(call grab-and-prepare,depot_tools)
@@ -483,48 +499,50 @@ build/fs-tmp-%/v8/build.ninja: deps/v8-checkout/v8 build/fs-tmp-$(build_os_arch)
 			)' \
 	) >$(@D)/build.log 2>&1
 
-build/fs-tmp-%/v8/obj/libv8_monolith.a: build/fs-tmp-%/v8/build.ninja
+build/fs-%/manifest/v8.pkg: build/fs-tmp-%/v8/build.ninja
 	@$(call print-status,v8,Building)
-	@(set -x \
-		&& $(NINJA) -C build/fs-tmp-$*/v8 v8_monolith \
-	) >>build/fs-tmp-$*/v8/build.log 2>&1
-	@touch $@
-
-build/fs-%/$(v8_target): build/fs-tmp-%/v8/obj/libv8_monolith.a
-	@$(call print-status,v8,Packaging)
-	@(set -x \
-		&& install -d build/fs-$*/include/v8-$(v8_api_version)/v8 \
-		&& install -m 644 deps/v8-checkout/v8/include/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/ \
-		&& install -d build/fs-$*/include/v8-$(v8_api_version)/v8/inspector \
-		&& install -m 644 build/fs-tmp-$*/v8/gen/include/inspector/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/inspector/ \
-		&& install -d build/fs-$*/include/v8-$(v8_api_version)/v8/libplatform \
-		&& install -m 644 deps/v8-checkout/v8/include/libplatform/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/libplatform/ \
-		&& install -d build/fs-$*/include/v8-$(v8_api_version)/v8/cppgc \
-		&& install -m 644 deps/v8-checkout/v8/include/cppgc/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/cppgc/ \
-		&& install -d build/fs-$*/include/v8-$(v8_api_version)/v8/cppgc/internal \
-		&& install -m 644 deps/v8-checkout/v8/include/cppgc/internal/*.h build/fs-$*/include/v8-$(v8_api_version)/v8/cppgc/internal/ \
-		&& install -d build/fs-$*/lib \
-		&& install -m 644 $< build/fs-$*/lib/libv8-$(v8_api_version).a \
+	@prefix=build/fs-$*; \
+	srcdir=deps/v8-checkout/v8; \
+	builddir=build/fs-tmp-$*/v8; \
+	pcfile=$$prefix/lib/pkgconfig/v8-$(v8_api_version).pc; \
+	(set -x \
+		&& $(NINJA) -C $$builddir v8_monolith \
+		&& install -d $$prefix/include/v8-$(v8_api_version)/v8 \
+		&& install -m 644 $$srcdir/include/*.h $$prefix/include/v8-$(v8_api_version)/v8/ \
+		&& install -d $$prefix/include/v8-$(v8_api_version)/v8/inspector \
+		&& install -m 644 $$builddir/gen/include/inspector/*.h $$prefix/include/v8-$(v8_api_version)/v8/inspector/ \
+		&& install -d $$prefix/include/v8-$(v8_api_version)/v8/libplatform \
+		&& install -m 644 $$srcdir/include/libplatform/*.h $$prefix/include/v8-$(v8_api_version)/v8/libplatform/ \
+		&& install -d $$prefix/include/v8-$(v8_api_version)/v8/cppgc \
+		&& install -m 644 $$srcdir/include/cppgc/*.h $$prefix/include/v8-$(v8_api_version)/v8/cppgc/ \
+		&& install -d $$prefix/include/v8-$(v8_api_version)/v8/cppgc/internal \
+		&& install -m 644 $$srcdir/include/cppgc/internal/*.h $$prefix/include/v8-$(v8_api_version)/v8/cppgc/internal/ \
+		&& install -d $$prefix/lib \
+		&& install -m 644 $< $$prefix/lib/libv8-$(v8_api_version).a \
 		&& install -d $(@D) \
 		&& $(PYTHON3) releng/v8.py \
-			patch build/fs-$*/include/v8-$(v8_api_version)/v8/v8config.h \
-			-s deps/v8-checkout/v8 \
-			-b build/fs-tmp-$*/v8 \
+			patch $$prefix/include/v8-$(v8_api_version)/v8/v8config.h \
+			-s $$srcdir \
+			-b $$builddir \
 			-G build/fs-tmp-$(build_os_arch)/gn/gn \
-		&& echo "prefix=\$${frida_sdk_prefix}" > $@.tmp \
-		&& echo "libdir=\$${prefix}/lib" >> $@.tmp \
-		&& echo "includedir=\$${prefix}/include/v8-$(v8_api_version)" >> $@.tmp \
-		&& echo "" >> $@.tmp \
-		&& echo "Name: V8" >> $@.tmp \
-		&& echo "Description: V8 JavaScript Engine" >> $@.tmp \
-		&& echo "Version: $$($(PYTHON3) releng/v8.py get version -s deps/v8-checkout/v8)" >> $@.tmp \
-		&& echo "Libs: -L\$${libdir} -lv8-$(v8_api_version)" >> $@.tmp \
-		&& if [ -n $(v8_libs_private) ]; then \
-			echo "Libs.private: $(v8_libs_private)" >> $@.tmp; \
-		fi \
-		&& echo "Cflags: -I\$${includedir} -I\$${includedir}/v8" >> $@.tmp \
-		&& mv $@.tmp $@ \
-	) >>build/fs-tmp-$*/v8/build.log 2>&1
+		&& ( \
+			echo "prefix=\$${frida_sdk_prefix}"; \
+			echo "libdir=\$${prefix}/lib"; \
+			echo "includedir=\$${prefix}/include/v8-$(v8_api_version)"; \
+			echo ""; \
+			echo "Name: V8"; \
+			echo "Description: V8 JavaScript Engine"; \
+			echo "Version: $$($(PYTHON3) releng/v8.py get version -s $$srcdir)"; \
+			echo "Libs: -L\$${libdir} -lv8-$(v8_api_version)"; \
+			if [ -n $(v8_libs_private) ]; then \
+				echo "Libs.private: $(v8_libs_private)"; \
+			fi \
+			echo "Cflags: -I\$${includedir} -I\$${includedir}/v8"
+		) > $$pcfile \
+	) >>$$builddir/build.log 2>&1 \
+	&& $(call print-status,v8,Generating manifest) \
+	&& (set -x \
+	) >>$$builddir/build.log 2>&1
 
 
 $(eval $(call make-base-package-rules,libcxx,$(host_os_arch),fs))

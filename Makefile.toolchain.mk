@@ -102,7 +102,7 @@ build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg,$(packages),build
 $(eval $(call make-package-rules,$(packages),ft))
 
 
-$(eval $(call make-base-package-rules,libtool,$(host_os_arch),ft))
+$(eval $(call make-base-package-rules,libtool,ft,$(host_os_arch)))
 
 deps/.libtool-stamp:
 	$(call grab-and-prepare,libtool)
@@ -112,16 +112,7 @@ deps/.libtool-stamp:
 		done
 	@touch $@
 
-build/ft-tmp-%/libtool/Makefile: build/ft-env-%.rc deps/.libtool-stamp $(foreach dep,$(libtool_deps),build/ft-%/manifest/$(dep).pkg)
-	@$(call print-status,libtool,Configuring)
-	@$(RM) -r $(@D)
-	@mkdir -p $(@D)
-	@(set -x \
-		&& . $< \
-		&& export PATH="$(shell pwd)/build/ft-$(build_os_arch)/bin:$$PATH" \
-		&& cd $(@D) \
-		&& ../../../deps/libtool/configure $(libtool_options) \
-	) >$(@D)/build.log 2>&1
+$(eval $(call make-autotools-configure-rule,libtool,ft))
 
 build/ft-%/manifest/libtool.pkg: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 	@$(call print-status,libtool,Building)
@@ -137,8 +128,6 @@ build/ft-%/manifest/libtool.pkg: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefi
 		&& $(MAKE) $(MAKE_J) install \
 		&& $(call make-autotools-manifest-commands,libtool,$$prefix,$$builddir,) \
 	) >>build/ft-tmp-$*/libtool/build.log 2>&1
-
-$(eval $(call make-autotools-manifest-rule,libtool,ft))
 
 
 ifeq ($(host_os), $(filter $(host_os), macos ios))
