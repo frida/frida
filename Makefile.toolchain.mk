@@ -123,18 +123,20 @@ build/ft-tmp-%/libtool/Makefile: build/ft-env-%.rc deps/.libtool-stamp $(foreach
 		&& ../../../deps/libtool/configure $(libtool_options) \
 	) >$(@D)/build.log 2>&1
 
-build/ft-%/$(libtool_target): build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
+build/ft-%/manifest/libtool.pkg: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 	@$(call print-status,libtool,Building)
-	@(set -x \
+	@prefix=$(abspath build/ft-$*); \
+	builddir=$(abspath build/ft-tmp-$*/libtool); \
+	(set -x \
 		&& . $< \
-		&& cd build/ft-tmp-$*/libtool \
+		&& cd "$$builddir" \
 		&& export PATH="$(shell pwd)/build/ft-$(build_os_arch)/bin:$$PATH" \
 		&& $(MAKE) build-aux/ltmain.sh \
 		&& touch ../../../deps/libtool/doc/*.1 ../../../deps/libtool/doc/stamp-vti \
 		&& $(MAKE) $(MAKE_J) \
 		&& $(MAKE) $(MAKE_J) install \
+		&& $(call make-autotools-manifest-commands,libtool,$$prefix,$$builddir,) \
 	) >>build/ft-tmp-$*/libtool/build.log 2>&1
-	@touch $@
 
 $(eval $(call make-autotools-manifest-rule,libtool,ft))
 
