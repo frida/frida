@@ -592,34 +592,34 @@ $(call make-autotools-base-package-rules,$1,$2)
 
 build/$2-%/manifest/$1.pkg: build/$2-env-%.rc build/$2-tmp-%/$1/Makefile
 	@$(call print-status,$1,Building)
-	@(set -x \
+	@prefix=$$(abspath build/$2-$$*); \
+	builddir=build/$2-tmp-$$*/$1; \
+	(set -x \
 		&& . $$< \
 		&& export PATH="$$(shell pwd)/build/$2-$(build_os_arch)/bin:$$$$PATH" \
-		&& cd build/$2-tmp-$$*/$1 \
+		&& cd $$$$builddir \
 		&& $(MAKE) $$(MAKE_J) \
 		&& $(MAKE) $$(MAKE_J) install \
-	) >>build/$2-tmp-$$*/$1/build.log 2>&1
-	@touch $$@
+		&& $(call make-autotools-manifest-commands,$1,$$(abspath build/$2-$$*),$$(abspath build/$2-tmp-$$*/$1),) \
+	) >>$$$$builddir/build.log 2>&1
 
 $(call make-autotools-manifest-rule,$1,$2)
 
 endef
 
 
-define make-autotools-manifest-rule
-
-build/$2-%/manifest/$1.pkg: build/$2-%/$($(subst -,_,$1)_target)
-	@mkdir -p $$(@D)
-	@cd build/$2-tmp-$$*/$1 \
+define make-autotools-manifest-commands
+	(prefix=$2; builddir=$3 \
+		&& mkdir -p $$$$prefix/manifest \
+		&& cd $$$$builddir \
 		&& $(RM) -r __pkg__ \
 		&& mkdir __pkg__ \
-		&& $(MAKE) $$(MAKE_J) $(if $3,$3,install) DESTDIR=$$$$(pwd)/__pkg__ &>/dev/null \
+		&& $(MAKE) $$(MAKE_J) $(if $4,$4,install) DESTDIR=$$$$(pwd)/__pkg__ &>/dev/null \
 		&& cd __pkg__ \
 		&& find . -type f \
-			| cut -c$$(strip $$(shell echo $$(abspath build/$2-$$*xx) | wc -c))- \
-			> $$(abspath $$@) \
+			| cut -c$$(strip $$(shell echo $$$${prefix}xx | wc -c))- \
+			> $$$$prefix/manifest/$1.pkg \
 		&& $(RM) -r __pkg__
-
 endef
 
 
