@@ -523,7 +523,7 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 	builddir=build/$2-tmp-$$*/$1; \
 	$(RM) -r $$$$builddir; \
 	mkdir -p $$$$builddir; \
-	@(set -x \
+	(set -x \
 		&& . build/$2-meson-env-$$*.rc \
 		&& export PATH="$$(shell pwd)/build/$2-$(build_os_arch)/bin:$$$$PATH" \
 		&& $(call print-status,$1,Configuring) \
@@ -538,7 +538,9 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 			deps/$1 \
 		&& $(call print-status,$1,Building) \
 		&& $(NINJA) -C $$$$builddir install \
-		&& $(call print-status,$1,Generating manifest) \
+	) >$$$$builddir/build.log 2>&1 \
+	&& $(call print-status,$1,Generating manifest) \
+	&& (set -x \
 		&& cd $$$$builddir \
 		&& mkdir -p $$$$prefix/manifest \
 		&& $(MESON) introspect --installed --indent \
@@ -546,7 +548,7 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 			| cut -f4 -d'"' \
 			| cut -c$$(strip $$(shell echo $$(abspath $$$${prefix}x) | wc -c))- \
 			> $$$$prefix/manifest/$1.pkg \
-	) >$$$$builddir/build.log 2>&1
+	) >$$$$builddir/build.log 2>&1 \
 
 endef
 
@@ -596,10 +598,11 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc build/$2-tmp-%/$1/Makefile
 		&& . $$< \
 		&& export PATH="$$(shell pwd)/build/$2-$(build_os_arch)/bin:$$$$PATH" \
 		&& cd "$$$$builddir" \
-		&& $(MAKE) $$(MAKE_J) \
-		&& $(MAKE) $$(MAKE_J) install \
-		&& $(call make-autotools-manifest-commands,$1,$$$$prefix,$$$$builddir,) \
-	) >>$$$$builddir/build.log 2>&1
+		&& $(MAKE) $(MAKE_J) \
+		&& $(MAKE) $(MAKE_J) install \
+	) >>$$$$builddir/build.log 2>&1 \
+	&& $(call print-status,$1,Generating manifest) \
+	&& $(call make-autotools-manifest-commands,$1,$2,$$*,)
 
 $(call make-autotools-manifest-rule,$1,$2)
 
@@ -607,13 +610,14 @@ endef
 
 
 define make-autotools-manifest-commands
-	$(call print-status,$1,Generating manifest)
-	(prefix=$2; builddir=$3 \
-		&& mkdir -p $$$$prefix/manifest \
+	( \
+		prefix=$$(abspath build/$2-$3); \
+		builddir=$$(abspath build/$2-tmp-$3/$1) \
+		&& mkdir -p "$$$$prefix/manifest" \
 		&& cd "$$$$builddir" \
 		&& $(RM) -r __pkg__ \
 		&& mkdir __pkg__ \
-		&& $(MAKE) $$(MAKE_J) $(if $4,$4,install) DESTDIR=$$$$(pwd)/__pkg__ &>/dev/null \
+		&& $(MAKE) $(MAKE_J) $(if $4,$4,install) DESTDIR=$$$$(pwd)/__pkg__ &>/dev/null \
 		&& cd __pkg__ \
 		&& find . -type f \
 			| cut -c$$(strip $$(shell echo $$$${prefix}xx | wc -c))- \
