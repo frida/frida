@@ -620,7 +620,7 @@ define make-autotools-manifest-commands
 		&& $(MAKE) $(MAKE_J) $(if $4,$4,install) DESTDIR=$$$$(pwd)/__pkg__ &>/dev/null \
 		&& cd __pkg__ \
 		&& find . -type f \
-			| cut -c$$(strip $$(shell echo $$$${prefix}xx | wc -c))- \
+			| cut -c$$(strip $$(shell echo $$(abspath build/$2-$3)xx | wc -c))- \
 			> $$$$prefix/manifest/$1.pkg \
 		&& $(RM) -r __pkg__ \
 	)
