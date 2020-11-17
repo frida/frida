@@ -12,7 +12,6 @@ packages = \
 	sqlite \
 	libffi \
 	glib \
-	glib-networking \
 	libgee \
 	json-glib \
 	libsoup \
