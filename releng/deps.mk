@@ -589,27 +589,27 @@ endef
 
 define make-autotools-package-rules-for-env
 
-$(call make-autotools-base-package-rules-for-env,$1,$2,$3)
+$(call make-autotools-base-package-rules-for-env,$1,$2)
 
 .PHONY: clean-$1 distclean-$1
 
 clean-$1:
-	[ -f build/$3-tmp-$(host_os_arch)/$1/Makefile ] \
-		&& $(MAKE) -C build/$3-tmp-$(host_os_arch)/$1 uninstall &>/dev/null || true
+	[ -f build/$2-tmp-$(host_os_arch)/$1/Makefile ] \
+		&& $(MAKE) -C build/$2-tmp-$(host_os_arch)/$1 uninstall &>/dev/null || true
 	$(call make-base-clean-commands,$1,$2,$(host_os_arch))
 
 distclean-$1: clean-$1
 	$(call make-base-distclean-commands,$1)
 
-build/$2-%/$$($$(subst -,_,$1)_target): build/$3-env-%.rc build/$3-tmp-%/$1/Makefile
+build/$2-%/$($(subst -,_,$1)_target): build/$2-env-%.rc build/$2-tmp-%/$1/Makefile
 	@$(call print-status,$1,Building)
 	@(set -x \
 		&& . $$< \
-		&& export PATH="$$(shell pwd)/build/$3-$(build_os_arch)/bin:$$$$PATH" \
-		&& cd build/$3-tmp-$$*/$1 \
+		&& export PATH="$$(shell pwd)/build/$2-$(build_os_arch)/bin:$$$$PATH" \
+		&& cd build/$2-tmp-$$*/$1 \
 		&& $(MAKE) $$(MAKE_J) \
 		&& $(MAKE) $$(MAKE_J) install \
-	) >>build/$3-tmp-$$*/$1/build.log 2>&1
+	) >>build/$2-tmp-$$*/$1/build.log 2>&1
 	@touch $$@
 
 $(call make-autotools-manifest-rule,$1,$2)
