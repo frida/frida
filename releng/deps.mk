@@ -517,7 +517,7 @@ deps/.$1-stamp:
 	@touch $$@
 
 build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
-		$$(foreach dep,$$($$(subst -,_,$1)_deps),build/$2-%/manifest/$$(dep).pkg) \
+		$(foreach dep,$($(subst -,_,$1)_deps),build/$2-%/manifest/$(dep).pkg) \
 		releng/meson/meson.py
 	@prefix=$$(abspath build/$2-$$*); \
 	builddir=build/$2-tmp-$$*/$1; \
@@ -560,7 +560,7 @@ deps/.$1-stamp:
 	@touch $$@
 
 deps/$1/configure: build/$2-env-$(build_os_arch).rc deps/.$1-stamp \
-		$$(foreach dep,$$($$(subst -,_,$1)_deps),build/$2-%/manifest/$$(dep).pkg)
+		$(foreach dep,$($(subst -,_,$1)_deps),build/$2-%/manifest/$(dep).pkg)
 	@. $$< \
 		&& cd $$(@D) \
 		&& if [ ! -f configure ] || [ -f ../.$1-reconf-needed ]; then \
@@ -607,6 +607,7 @@ endef
 
 
 define make-autotools-manifest-commands
+	@$(call print-status,$1,Generating manifest)
 	(prefix=$2; builddir=$3 \
 		&& mkdir -p $$$$prefix/manifest \
 		&& cd "$$$$builddir" \
