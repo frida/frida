@@ -478,8 +478,10 @@ depot_tools_deps = \
 define make-package-rules
 
 $(foreach pkg, $1, \
-	$(if $(findstring meson,$($(subst -,_,$(pkg))_recipe)), $(call make-meson-package-rules,$(pkg),$2), \
-	$(if $(findstring autotools,$($(subst -,_,$(pkg))_recipe)), $(call make-autotools-package-rules,$(pkg),$2),)))
+	$(if $(findstring meson,$($(subst -,_,$(pkg))_recipe)), \
+		$(call make-meson-package-rules,$(pkg),$2,$(foreach dep,$($(subst -,_,$1)_deps),build/$2-%/manifest/$(dep).pkg)), \
+	$(if $(findstring autotools,$($(subst -,_,$(pkg))_recipe)), \
+		$(call make-autotools-package-rules,$(pkg),$2,$(foreach dep,$($(subst -,_,$1)_deps),build/$2-%/manifest/$(dep).pkg)),)))
 
 endef
 
@@ -516,8 +518,7 @@ deps/.$1-stamp:
 	$$(call grab-and-prepare,$1)
 	@touch $$@
 
-build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
-		$(foreach dep,$($(subst -,_,$1)_deps),build/$2-%/manifest/$(dep).pkg) \
+build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp $3 \
 		releng/meson/meson.py
 	@prefix=$$(abspath build/$2-$$*); \
 	builddir=build/$2-tmp-$$*/$1; \
@@ -561,8 +562,7 @@ deps/.$1-stamp:
 	$$(call grab-and-prepare,$1)
 	@touch $$@
 
-deps/$1/configure: build/$2-env-$(build_os_arch).rc deps/.$1-stamp \
-		$(foreach dep,$($(subst -,_,$1)_deps),build/$2-%/manifest/$(dep).pkg)
+deps/$1/configure: build/$2-env-$(build_os_arch).rc deps/.$1-stamp $3
 	@. $$< \
 		&& cd $$(@D) \
 		&& if [ ! -f configure ] || [ -f ../.$1-reconf-needed ]; then \
@@ -588,7 +588,7 @@ endef
 
 define make-autotools-package-rules
 
-$(call make-autotools-base-package-rules,$1,$2)
+$(call make-autotools-base-package-rules,$1,$2,$3)
 
 build/$2-%/manifest/$1.pkg: build/$2-env-%.rc build/$2-tmp-%/$1/Makefile
 	@$(call print-status,$1,Building)
