@@ -522,7 +522,7 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 		&& $(MESON) introspect --installed --indent \
 			| grep ": " \
 			| cut -f4 -d'"' \
-			| cut -c$$(strip $$(shell echo $$(abspath build/$2-$$*)x) | wc -c))- \
+			| cut -c$$(strip $$(shell echo $$(abspath build/$2-$$*)x | wc -c))- \
 			> "$$$$prefix/manifest/$1.pkg" \
 	) >$$$$builddir/build.log 2>&1 \
 
