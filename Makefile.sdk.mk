@@ -128,7 +128,7 @@ build/fs-%/manifest/elfutils.pkg: build/fs-env-%.rc build/fs-tmp-%/elfutils/Make
 			echo "include/$$header"; \
 		done; \
 		echo "lib/libelf.a" \
-	) > $@
+	) | sort > $@
 
 
 libdwarf_headers = \
@@ -158,7 +158,7 @@ build/fs-%/manifest/libdwarf.pkg: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Make
 			echo "include/$$header"; \
 		done; \
 		echo "lib/libdwarf.a" \
-	) > $@
+	) | sort > $@
 
 
 ifeq ($(FRIDA_ASAN), yes)
@@ -389,7 +389,7 @@ v8_platform_args := \
 	is_cfi=false \
 	use_sysroot=false \
 	use_gold=false
-v8_libs_private := "-lrt"
+v8_libs_private := -lrt
 endif
 ifeq ($(host_os), android)
 v8_os := android
@@ -402,7 +402,7 @@ v8_platform_args := \
 	android32_ndk_api_level=18 \
 	android64_ndk_api_level=21 \
 	clang_base_path="$(abspath $(ANDROID_NDK_ROOT)/toolchains/llvm/prebuilt/$(ndk_build_os_arch))"
-v8_libs_private := "-llog -lm"
+v8_libs_private := -llog -lm
 endif
 
 ifeq ($(host_os), $(filter $(host_os), linux android))
@@ -542,9 +542,7 @@ build/fs-%/manifest/v8.pkg: build/fs-tmp-%/v8/build.ninja
 			echo "Description: V8 JavaScript Engine"; \
 			echo "Version: $$($(PYTHON3) releng/v8.py get version -s $$srcdir)"; \
 			echo "Libs: -L\$${libdir} -lv8-$(v8_api_version)"; \
-			if [ -n $(v8_libs_private) ]; then \
-				echo "Libs.private: $(v8_libs_private)"; \
-			fi; \
+			$(if $(v8_libs_private),echo "Libs.private: $(v8_libs_private)";,) \
 			echo "Cflags: -I\$${includedir} -I\$${includedir}/v8" \
 		) > $$prefix/lib/pkgconfig/v8-$(v8_api_version).pc \
 	) >>$$builddir/build.log 2>&1 \
@@ -554,7 +552,7 @@ build/fs-%/manifest/v8.pkg: build/fs-tmp-%/v8/build.ninja
 		find include/v8-$(v8_api_version) -type f; \
 		echo "lib/libv8-$(v8_api_version).a"; \
 		echo "lib/pkgconfig/v8-$(v8_api_version).pc" \
-	) > $@
+	) | sort > $@
 
 
 $(eval $(call make-base-package-rules,libcxx,fs,$(host_os_arch)))
