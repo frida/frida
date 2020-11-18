@@ -501,12 +501,12 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 	mkdir -p $$$$builddir; \
 	(set -x \
 		&& . build/$2-meson-env-$$*.rc \
-		&& export PATH="$$(shell pwd)/build/$2-$(build_os_arch)/bin:$$$$PATH" \
+		&& export PATH="$$(abspath build/$2-$(build_os_arch))/bin:$$$$PATH" \
 		&& $(call print-status,$1,Configuring) \
 		&& $(MESON) \
 			--cross-file build/$2-$$*.txt \
-			--prefix $$$$prefix \
-			--libdir $$$$prefix/lib \
+			--prefix "$$$$prefix" \
+			--libdir "$$$$prefix/lib" \
 			--default-library static \
 			$$(FRIDA_MESONFLAGS_BOTTLE) \
 			$$($$(subst -,_,$1)_options) \
@@ -518,12 +518,12 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 	&& $(call print-status,$1,Generating manifest) \
 	&& (set -x \
 		&& cd $$$$builddir \
-		&& mkdir -p $$$$prefix/manifest \
+		&& mkdir -p "$$$$prefix/manifest" \
 		&& $(MESON) introspect --installed --indent \
 			| grep ": " \
 			| cut -f4 -d'"' \
-			| cut -c$$(strip $$(shell echo $$(abspath $$$${prefix}x) | wc -c))- \
-			> $$$$prefix/manifest/$1.pkg \
+			| cut -c$$(strip $$(shell echo $$(abspath build/$2-$$*)x) | wc -c))- \
+			> "$$$$prefix/manifest/$1.pkg" \
 	) >$$$$builddir/build.log 2>&1 \
 
 endef
@@ -575,7 +575,7 @@ build/$2-tmp-%/$1/Makefile: build/$2-env-%.rc deps/$1/configure deps/.$1-stamp \
 	@mkdir -p $$(@D)
 	@(set -x \
 		&& . $$< \
-		&& export PATH="$$(shell pwd)/build/$2-$(build_os_arch)/bin:$$$$PATH" \
+		&& export PATH="$$(abspath build/$2-$(build_os_arch))/bin:$$$$PATH" \
 		&& cd $$(@D) \
 		&& ../../../deps/$1/configure $$($$(subst -,_,$1)_options) \
 	) >$$(@D)/build.log 2>&1
@@ -587,18 +587,17 @@ define make-autotools-build-rule
 
 build/$2-%/manifest/$1.pkg: build/$2-env-%.rc build/$2-tmp-%/$1/Makefile
 	@$(call print-status,$1,Building)
-	@prefix=$$(abspath build/$2-$$*); \
-	builddir=$$(abspath build/$2-tmp-$$*/$1); \
+	@builddir=build/$2-tmp-$$*/$1; \
 	(set -x \
 		&& . $$< \
-		&& export PATH="$$(shell pwd)/build/$2-$(build_os_arch)/bin:$$$$PATH" \
+		&& export PATH="$$(abspath build/$2-$(build_os_arch))/bin:$$$$PATH" \
 		&& cd "$$$$builddir" \
 		&& $(MAKE) $(MAKE_J) \
 		&& $(MAKE) $(MAKE_J) install \
 	) >>$$$$builddir/build.log 2>&1 \
 	&& $(call print-status,$1,Generating manifest) \
 	&& (set -x; \
-		$(call make-autotools-manifest-commands,$1,$2,$$*,) \
+		$$(call make-autotools-manifest-commands,$1,$2,$$*,) \
 	) >>$$$$builddir/build.log 2>&1
 
 endef
@@ -606,17 +605,16 @@ endef
 
 define make-autotools-manifest-commands
 	( \
-		prefix=$$(abspath build/$2-$3); \
-		builddir=$$(abspath build/$2-tmp-$3/$1) \
-		&& mkdir -p "$$$$prefix/manifest" \
-		&& cd "$$$$builddir" \
+		prefix=$(abspath build/$2-$3) \
+		&& mkdir -p $$prefix/manifest \
+		&& cd build/$2-tmp-$3/$1 \
 		&& $(RM) -r __pkg__ \
 		&& mkdir __pkg__ \
-		&& $(MAKE) $(MAKE_J) $(if $4,$4,install) DESTDIR=$$$$(pwd)/__pkg__ &>/dev/null \
+		&& $(MAKE) $(MAKE_J) $(if $4,$4,install) DESTDIR="$(abspath build/$2-tmp-$3/$1/__pkg__)" &>/dev/null \
 		&& cd __pkg__ \
 		&& find . -type f \
-			| cut -c$$(strip $$(shell echo $$(abspath build/$2-$3)xx | wc -c))- \
-			> $$$$prefix/manifest/$1.pkg \
+			| cut -c$(strip $(shell echo $(abspath build/$2-$3)xx | wc -c))- \
+			> "$$prefix/manifest/$1.pkg" \
 		&& $(RM) -r __pkg__ \
 	)
 endef

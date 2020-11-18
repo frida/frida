@@ -112,22 +112,26 @@ deps/.libtool-stamp:
 		done
 	@touch $@
 
+$(eval $(call make-autotools-autoreconf-rule,libtool,ft))
+
 $(eval $(call make-autotools-configure-rule,libtool,ft))
 
 build/ft-%/manifest/libtool.pkg: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 	@$(call print-status,libtool,Building)
-	@prefix=$(abspath build/ft-$*); \
-	builddir=$(abspath build/ft-tmp-$*/libtool); \
+	@builddir=build/ft-tmp-$*/libtool; \
 	(set -x \
-		&& cd "$$builddir" \
 		&& . $< \
-		&& export PATH="$(shell pwd)/build/ft-$(build_os_arch)/bin:$$PATH" \
+		&& export PATH="$(abspath build/ft-$(build_os_arch))/bin:$$PATH" \
+		&& cd $$builddir \
 		&& $(MAKE) build-aux/ltmain.sh \
 		&& touch ../../../deps/libtool/doc/*.1 ../../../deps/libtool/doc/stamp-vti \
 		&& $(MAKE) $(MAKE_J) \
 		&& $(MAKE) $(MAKE_J) install \
-		&& $(call make-autotools-manifest-commands,libtool,$$prefix,$$builddir,) \
-	) >>build/ft-tmp-$*/libtool/build.log 2>&1
+	) >>$$builddir/build.log 2>&1 \
+	&& $(call print-status,libtool,Generating manifest) \
+	&& (set -x; \
+		$(call make-autotools-manifest-commands,libtool,ft,$*,) \
+	) >>$$builddir/build.log 2>&1
 
 
 ifeq ($(host_os), $(filter $(host_os), macos ios))
