@@ -62,6 +62,7 @@ build/sdk-$(host_os)-$(host_arch).tar.bz2: build/fs-tmp-$(host_os_arch)/.package
 	@mv $@.tmp $@
 
 build/fs-tmp-%/.package-stamp: $(foreach pkg,$(packages),build/fs-%/manifest/$(pkg).pkg)
+	@echo
 	@$(call print-status,📦,Assembling)
 	@$(RM) -r $(@D)/package
 	@mkdir -p $(@D)/package
@@ -105,10 +106,10 @@ libelf_headers = \
 	nlist.h \
 	$(NULL)
 
-$(eval $(call make-autotools-package-rules-without-build-rule,elfutils))
+$(eval $(call make-autotools-package-rules-without-build-rule,elfutils,fs))
 
 build/fs-%/manifest/elfutils.pkg: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
-	@$(call print-status,libelf,Building)
+	@$(call print-status,elfutils,Building)
 	@builddir=build/fs-tmp-$*/elfutils; \
 	(set -x \
 		&& . $< \
@@ -120,7 +121,7 @@ build/fs-%/manifest/elfutils.pkg: build/fs-env-%.rc build/fs-tmp-%/elfutils/Make
 		&& install -d build/fs-$*/lib \
 		&& install -m 644 $$builddir/libelf/libelf.a build/fs-$*/lib \
 	) >>$$builddir/build.log 2>&1 \
-	&& $(call print-status,libelf,Generating manifest) \
+	&& $(call print-status,elfutils,Generating manifest) \
 	&& (set -x; \
 		$(call make-autotools-manifest-commands,elfutils,fs,$*,) \
 	) >>$$builddir/build.log 2>&1
@@ -131,7 +132,7 @@ libdwarf_headers = \
 	libdwarf.h \
 	$(NULL)
 
-$(eval $(call make-autotools-package-rules-without-build-rule,libdwarf))
+$(eval $(call make-autotools-package-rules-without-build-rule,libdwarf,fs))
 
 build/fs-%/manifest/libdwarf.pkg: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
 	@$(call print-status,libdwarf,Building)
@@ -411,7 +412,7 @@ endif
 
 # Google's prebuilt GN requires a newer glibc than our Debian Squeeze buildroot has.
 
-$(eval $(call make-base-package-rules,gn,$(build_os_arch),fs))
+$(eval $(call make-base-package-rules,gn,fs,$(build_os_arch)))
 
 deps/.gn-stamp:
 	$(call grab-and-prepare,gn)
@@ -456,7 +457,7 @@ deps/.depot_tools-stamp: $(foreach dep,$(depot_tools_deps),build/fs-$(build_os_a
 	@echo '{"is-googler": false, "countdown": 10, "opt-in": null, "version": 1}' > deps/depot_tools/metrics.cfg
 	@touch $@
 
-$(eval $(call make-base-package-rules,v8,$(host_os_arch),fs))
+$(eval $(call make-base-package-rules,v8,fs,$(host_os_arch)))
 
 deps/v8-checkout/.gclient: deps/.depot_tools-stamp
 	@$(call print-repo-banner,v8,$(v8_version),$(v8_url))
@@ -545,7 +546,7 @@ build/fs-%/manifest/v8.pkg: build/fs-tmp-%/v8/build.ninja
 	) >>$$builddir/build.log 2>&1
 
 
-$(eval $(call make-base-package-rules,libcxx,$(host_os_arch),fs))
+$(eval $(call make-base-package-rules,libcxx,fs,$(host_os_arch)))
 
 build/fs-%/lib/c++/libc++.a: build/fs-tmp-%/v8/obj/libv8_monolith.a
 	@$(call print-status,libc++,Building)

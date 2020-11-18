@@ -532,6 +532,7 @@ endef
 define make-autotools-package-rules
 
 $(call make-autotools-package-rules-without-build-rule,$1,$2)
+
 $(call make-autotools-build-rule,$1,$2)
 
 endef
@@ -546,6 +547,7 @@ deps/.$1-stamp:
 	@touch $$@
 
 $(call make-autotools-autoreconf-rule,$1,$2)
+
 $(call make-autotools-configure-rule,$1,$2)
 
 endef
@@ -627,13 +629,13 @@ define make-base-package-rules
 $1: build/$2-$3/manifest/$1.pkg
 
 clean-$1:
-	@cd build/$2-$(host_os_arch) \
-		&& if [ -f manifest/$1.pkg ]; then \
-			cat manifest/$1.pkg | while read entry; do \
-				echo $(RM) $$$$entry; \
-				$(RM) $$$$entry \
-			done \
-		fi
+	@if [ -f build/$2-$3/manifest/$1.pkg ]; then \
+		cd build/$2-$3; \
+		cat manifest/$1.pkg | while read entry; do \
+			echo $(RM) $$$$entry; \
+			$(RM) $$$$entry \
+		done \
+	fi
 	$(RM) build/$2-$3/manifest/$1.pkg
 	$(RM) -r build/$2-tmp-$3/$1
 
