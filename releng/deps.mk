@@ -475,9 +475,16 @@ depot_tools_deps = \
 	$(NULL)
 
 
+define expand-packages
+
+$(sort $(foreach pkg, $1, $(pkg) $($(subst -,_,$(pkg))_deps)))
+
+endef
+
+
 define make-package-rules
 
-$(foreach pkg, $(sort $(foreach pkg, $1, $(pkg) $($(subst -,_,$(pkg))_deps))), \
+$(foreach pkg, $(call expand-packages,$1), \
 	$(if $(findstring meson,$($(subst -,_,$(pkg))_recipe)), $(call make-meson-package-rules,$(pkg),$2), \
 	$(if $(findstring autotools,$($(subst -,_,$(pkg))_recipe)), $(call make-autotools-package-rules,$(pkg),$2),)))
 
@@ -634,8 +641,9 @@ clean-$1:
 	@if [ -f build/$2-$3/manifest/$1.pkg ]; then \
 		cd build/$2-$3; \
 		cat manifest/$1.pkg | while read entry; do \
-			echo $(RM) $$$$entry; \
+			echo $(RM) build/$2-$3/$$$$entry; \
 			$(RM) $$$$entry; \
+			rmdir -p $$$$(dirname $$$$entry) 2>/dev/null || true; \
 		done \
 	fi
 	$(RM) build/$2-$3/manifest/$1.pkg
