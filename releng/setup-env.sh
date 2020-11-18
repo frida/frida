@@ -71,6 +71,11 @@ case $host_arch in
     meson_host_cpu=mips
     meson_host_endian=big
     ;;
+  s390x)
+    meson_host_cpu_family=s390x
+    meson_host_cpu=s390x
+    meson_host_endian=big
+    ;;
   *)
     meson_host_cpu_family=$host_arch
     meson_host_cpu=$host_arch
@@ -344,6 +349,10 @@ case $host_os in
         host_toolprefix="mips64el-linux-$frida_libc-"
 
         meson_host_cpu="mips64r2"
+        ;;
+      s390x)
+        host_arch_flags="-march=z10 -m64"
+        host_toolprefix="s390x-linux-gnu-"
         ;;
     esac
 

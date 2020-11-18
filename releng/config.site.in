@@ -46,6 +46,9 @@ case $frida_host_os_arch in
   linux-x86_64)
     host_alias="x86_64-linux-gnu"
     ;;
+  linux-s390x)
+    host_alias="s390x-linux-gnu"
+    ;;
   qnx-x86)
     host_alias="i486-pc-nto-qnx6.6.0"
     ;;
