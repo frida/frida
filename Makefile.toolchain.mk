@@ -22,6 +22,13 @@ packages = \
 	$(NULL)
 
 
+ifeq ($(host_os), $(filter $(host_os), macos ios))
+export_ldflags := -Wl,-exported_symbols_list,$(abspath build/ft-executable.symbols)
+else
+export_ldflags := -Wl,--version-script,$(abspath build/ft-executable.version)
+endif
+
+
 .PHONY: all clean distclean
 
 all: build/toolchain-$(host_os)-$(host_arch).tar.bz2
@@ -133,12 +140,6 @@ build/ft-%/manifest/libtool.pkg: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefi
 		$(call make-autotools-manifest-commands,libtool,ft,$*,) \
 	) >>$$builddir/build.log 2>&1
 
-
-ifeq ($(host_os), $(filter $(host_os), macos ios))
-	export_ldflags := -Wl,-exported_symbols_list,$(abspath build/ft-executable.symbols)
-else
-	export_ldflags := -Wl,--version-script,$(abspath build/ft-executable.version)
-endif
 
 build/ft-env-%.rc: build/ft-executable.symbols build/ft-executable.version
 	@FRIDA_HOST=$* \
