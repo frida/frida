@@ -1019,15 +1019,13 @@ case $host_os in
     ;;
 esac
 
-if [ "$host_os_arch" != "$build_os_arch" ]; then
-  build_env_rc=build/${FRIDA_ENV_NAME:-frida}-meson-env-${build_os_arch}.rc
-  if [ ! -f $build_env_rc ]; then
-    FRIDA_HOST=${build_os_arch} releng/setup-env.sh
-  fi
-  egrep "^export (PKG_CONFIG_PATH|CC|CXX|OBJC|OBJCXX|CPPFLAGS|CFLAGS|CXXFLAGS|CC_LD|CXX_LD|OBJC_LD|OBJCXX_LD|LDFLAGS|AR)=" $build_env_rc \
-    | sed -e "s,=,_FOR_BUILD=," \
-    >> $meson_env_rc
+build_env_rc=build/${FRIDA_ENV_NAME:-frida}-meson-env-${build_os_arch}.rc
+if [ ! -f $build_env_rc ]; then
+  FRIDA_HOST=${build_os_arch} releng/setup-env.sh
 fi
+egrep "^export (PKG_CONFIG|CC|CXX|OBJC|OBJCXX|CPPFLAGS|CFLAGS|CXXFLAGS|CC_LD|CXX_LD|OBJC_LD|OBJCXX_LD|LDFLAGS|AR)=" $build_env_rc \
+  | sed -e "s,=,_FOR_BUILD=," \
+  >> $meson_env_rc
 
 meson_cross_file=build/${FRIDA_ENV_NAME:-frida}-${host_os_arch}.txt
 
