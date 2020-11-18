@@ -448,6 +448,7 @@ capstone_archs := $(shell echo $(host_arch) | sed $(sed_regex_option) \
 		-e 's,^arm[^0-9].+,arm,' \
 		-e 's,^arm64e$$,arm64,' \
 		-e 's,^mips.*,mips,' \
+		-e 's,^s390x$$,sysz,' \
 	)
 
 quickjs_version = 3026500048050c6e29ea376dcd8207af27a25d13

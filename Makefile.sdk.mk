@@ -260,6 +260,9 @@ endif
 ifeq ($(host_arch), $(filter $(host_arch), mips64 mips64el))
 openssl_arch_args := linux-mips64
 endif
+ifeq ($(host_arch), s390x)
+openssl_arch_args := linux64-s390x
+endif
 
 openssl_host_env := \
 	$(NULL)
