@@ -373,7 +373,7 @@ capstone_recipe = meson
 capstone_patches = \
 	$(NULL)
 capstone_options = \
-	-Darchs=$(shell echo $(host_arch) | sed -r \
+	-Darchs=$(shell echo $(host_arch) | sed $(sed_regex_option) \
 			-e 's,^x86_64$$,x86,' \
 			-e 's,^arm[^0-9].+,arm,' \
 			-e 's,^arm64e$$,arm64,' \
