@@ -22,18 +22,18 @@ packages = \
 
 
 ifeq ($(host_os), $(filter $(host_os), linux android qnx))
-	packages += elfutils libdwarf libunwind
+packages += elfutils libdwarf libunwind
 endif
 
 ifeq ($(host_os), $(filter $(host_os), macos ios linux android))
-	packages += glib-networking
+packages += glib-networking
 endif
 
 ifneq ($(FRIDA_V8), disabled)
-	packages += v8
+packages += v8
 ifeq ($(host_os), $(filter $(host_os), macos ios))
 ifeq ($(FRIDA_ASAN), no)
-	packages += libcxx
+packages += libcxx
 endif
 endif
 endif
@@ -110,16 +110,17 @@ $(eval $(call make-autotools-package-rules-without-build-rule,elfutils,fs))
 
 build/fs-%/manifest/elfutils.pkg: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
 	@$(call print-status,elfutils,Building)
-	@builddir=build/fs-tmp-$*/elfutils; \
+	@prefix=build/fs-$*; \
+	builddir=build/fs-tmp-$*/elfutils; \
 	(set -x \
 		&& . $< \
 		&& $(MAKE) $(MAKE_J) -C $$builddir/libelf libelf.a \
-		&& install -d build/fs-$*/include \
+		&& install -d $$prefix/include \
 		&& for header in $(libelf_headers); do \
-			install -m 644 deps/elfutils/libelf/$$header build/fs-$*/include; \
+			install -m 644 deps/elfutils/libelf/$$header $$prefix/include; \
 		done \
-		&& install -d build/fs-$*/lib \
-		&& install -m 644 $$builddir/libelf/libelf.a build/fs-$*/lib \
+		&& install -d $$prefix/lib \
+		&& install -m 644 $$builddir/libelf/libelf.a $$prefix/lib \
 	) >>$$builddir/build.log 2>&1
 	@$(call print-status,elfutils,Generating manifest)
 	@( \
@@ -139,136 +140,140 @@ $(eval $(call make-autotools-package-rules-without-build-rule,libdwarf,fs))
 
 build/fs-%/manifest/libdwarf.pkg: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
 	@$(call print-status,libdwarf,Building)
-	@builddir=build/fs-tmp-$*/libdwarf; \
+	@prefix=build/fs-$*; \
+	builddir=build/fs-tmp-$*/libdwarf; \
 	(set -x \
 		&& . $< \
 		&& $(MAKE) $(MAKE_J) -C $$builddir/libdwarf libdwarf.la \
-		&& install -d build/fs-$*/include \
+		&& install -d $$prefix/include \
 		&& for header in $(libdwarf_headers); do \
-			install -m 644 deps/libdwarf/libdwarf/$$header build/fs-$*/include; \
+			install -m 644 deps/libdwarf/libdwarf/$$header $$prefix/include; \
 		done \
-		&& install -d build/fs-$*/lib \
-		&& install -m 644 $$builddir/libdwarf/.libs/libdwarf.a build/fs-$*/lib \
-	) >>$$builddir/build.log 2>&1 \
-	&& $(call print-status,libdwarf,Generating manifest) \
-	&& (set -x; \
-		$(call make-autotools-manifest-commands,libdwarf,fs,$*,) \
+		&& install -d $$prefix/lib \
+		&& install -m 644 $$builddir/libdwarf/.libs/libdwarf.a $$prefix/lib \
 	) >>$$builddir/build.log 2>&1
+	@$(call print-status,libdwarf,Generating manifest)
+	@( \
+		for header in $(libdwarf_headers); do \
+			echo "include/$$header"; \
+		done; \
+		echo "lib/libdwarf.a" \
+	) > $@
 
 
 ifeq ($(FRIDA_ASAN), yes)
-	openssl_buildtype_args := \
-		enable-asan \
-		$(NULL)
+openssl_buildtype_args := \
+	enable-asan \
+	$(NULL)
 else
-	openssl_buildtype_args := \
-		$(NULL)
+openssl_buildtype_args := \
+	$(NULL)
 endif
 
 ifeq ($(host_os), $(filter $(host_os), macos ios))
-	xcode_developer_dir := $(shell xcode-select -print-path)
+xcode_developer_dir := $(shell xcode-select -print-path)
 ifeq ($(host_os_arch), macos-x86)
-	openssl_arch_args := macos-i386
-	xcode_platform := MacOSX
+openssl_arch_args := macos-i386
+xcode_platform := MacOSX
 endif
 ifeq ($(host_os_arch), macos-x86_64)
-	openssl_arch_args := macos64-x86_64 enable-ec_nistp_64_gcc_128
-	xcode_platform := MacOSX
+openssl_arch_args := macos64-x86_64 enable-ec_nistp_64_gcc_128
+xcode_platform := MacOSX
 endif
 ifeq ($(host_os_arch), macos-arm64)
-	openssl_arch_args := macos64-cross-arm64e enable-ec_nistp_64_gcc_128
-	xcode_platform := MacOSX
+openssl_arch_args := macos64-cross-arm64e enable-ec_nistp_64_gcc_128
+xcode_platform := MacOSX
 endif
 ifeq ($(host_os_arch), ios-x86)
-	openssl_arch_args := ios-sim-cross-i386
-	xcode_platform := iPhoneSimulator
+openssl_arch_args := ios-sim-cross-i386
+xcode_platform := iPhoneSimulator
 endif
 ifeq ($(host_os_arch), ios-x86_64)
-	openssl_arch_args := ios-sim-cross-x86_64 enable-ec_nistp_64_gcc_128
-	xcode_platform := iPhoneSimulator
+openssl_arch_args := ios-sim-cross-x86_64 enable-ec_nistp_64_gcc_128
+xcode_platform := iPhoneSimulator
 endif
 ifeq ($(host_os_arch), ios-arm)
-	openssl_arch_args := ios-cross-armv7 -D__ARM_MAX_ARCH__=7
-	xcode_platform := iPhoneOS
+openssl_arch_args := ios-cross-armv7 -D__ARM_MAX_ARCH__=7
+xcode_platform := iPhoneOS
 endif
 ifeq ($(host_os_arch), ios-arm64)
-	openssl_arch_args := ios64-cross-arm64 enable-ec_nistp_64_gcc_128
-	xcode_platform := iPhoneOS
+openssl_arch_args := ios64-cross-arm64 enable-ec_nistp_64_gcc_128
+xcode_platform := iPhoneOS
 endif
 ifeq ($(host_os_arch), ios-arm64e)
-	openssl_arch_args := ios64-cross-arm64e enable-ec_nistp_64_gcc_128
-	xcode_platform := iPhoneOS
+openssl_arch_args := ios64-cross-arm64e enable-ec_nistp_64_gcc_128
+xcode_platform := iPhoneOS
 endif
-	openssl_host_env := \
-		CPP=clang CC=clang CXX=clang++ LD= LDFLAGS= AR= RANLIB= \
-		CROSS_COMPILE="$(xcode_developer_dir)/Toolchains/XcodeDefault.xctoolchain/usr/bin/" \
-		CROSS_TOP="${xcode_developer_dir}/Platforms/$(xcode_platform).platform/Developer" \
-		CROSS_SDK=$(xcode_platform)$(shell xcrun --sdk $(shell echo $(xcode_platform) | tr A-Z a-z) --show-sdk-version | cut -f1-2 -d'.').sdk \
-		IOS_MIN_SDK_VERSION=8.0 \
-		CONFIG_DISABLE_BITCODE=true \
-		$(NULL)
+openssl_host_env := \
+	CPP=clang CC=clang CXX=clang++ LD= LDFLAGS= AR= RANLIB= \
+	CROSS_COMPILE="$(xcode_developer_dir)/Toolchains/XcodeDefault.xctoolchain/usr/bin/" \
+	CROSS_TOP="${xcode_developer_dir}/Platforms/$(xcode_platform).platform/Developer" \
+	CROSS_SDK=$(xcode_platform)$(shell xcrun --sdk $(shell echo $(xcode_platform) | tr A-Z a-z) --show-sdk-version | cut -f1-2 -d'.').sdk \
+	IOS_MIN_SDK_VERSION=8.0 \
+	CONFIG_DISABLE_BITCODE=true \
+	$(NULL)
 ifeq ($(host_os_arch), macos-x86)
 ifneq ($(MACOS_X86_SDK_ROOT),)
-	openssl_host_env += MACOS_SDK_ROOT="$(MACOS_X86_SDK_ROOT)"
+openssl_host_env += MACOS_SDK_ROOT="$(MACOS_X86_SDK_ROOT)"
 endif
 endif
 ifeq ($(host_os_arch), $(filter $(host_os_arch), macos-arm64 macos-arm64e))
-	openssl_host_env += MACOS_MIN_SDK_VERSION=11.0
+openssl_host_env += MACOS_MIN_SDK_VERSION=11.0
 else
-	openssl_host_env += MACOS_MIN_SDK_VERSION=10.9
+openssl_host_env += MACOS_MIN_SDK_VERSION=10.9
 endif
 endif
 ifeq ($(host_os), linux)
 ifeq ($(host_arch), x86)
-	openssl_arch_args := linux-x86
+openssl_arch_args := linux-x86
 endif
 ifeq ($(host_arch), x86_64)
-	openssl_arch_args := linux-x86_64 enable-ec_nistp_64_gcc_128
+openssl_arch_args := linux-x86_64 enable-ec_nistp_64_gcc_128
 endif
 ifeq ($(host_arch), $(filter $(host_arch), arm armbe8 armeabi armhf))
-	openssl_arch_args := linux-armv4
+openssl_arch_args := linux-armv4
 endif
 ifeq ($(host_arch), arm64)
-	openssl_arch_args := linux-aarch64
+openssl_arch_args := linux-aarch64
 endif
 ifeq ($(host_arch), $(filter $(host_arch), mips mipsel))
-	openssl_arch_args := linux-mips32
+openssl_arch_args := linux-mips32
 endif
 ifeq ($(host_arch), $(filter $(host_arch), mips64 mips64el))
-	openssl_arch_args := linux-mips64
+openssl_arch_args := linux-mips64
 endif
-	openssl_host_env := \
-		$(NULL)
+openssl_host_env := \
+	$(NULL)
 endif
 ifeq ($(host_os), android)
 ifeq ($(host_arch), x86)
-	openssl_arch_args := android-x86 -D__ANDROID_API__=18
-	ndk_abi := x86
-	ndk_triplet := i686-linux-android
+openssl_arch_args := android-x86 -D__ANDROID_API__=18
+ndk_abi := x86
+ndk_triplet := i686-linux-android
 endif
 ifeq ($(host_arch), x86_64)
-	openssl_arch_args := android-x86_64 -D__ANDROID_API__=21
-	ndk_abi := x86_64
-	ndk_triplet := x86_64-linux-android
+openssl_arch_args := android-x86_64 -D__ANDROID_API__=21
+ndk_abi := x86_64
+ndk_triplet := x86_64-linux-android
 endif
 ifeq ($(host_arch), arm)
-	openssl_arch_args := android-arm -D__ANDROID_API__=18 -D__ARM_MAX_ARCH__=7 -fno-integrated-as
-	ndk_abi := arm-linux-androideabi
-	ndk_triplet := arm-linux-androideabi
+openssl_arch_args := android-arm -D__ANDROID_API__=18 -D__ARM_MAX_ARCH__=7 -fno-integrated-as
+ndk_abi := arm-linux-androideabi
+ndk_triplet := arm-linux-androideabi
 endif
 ifeq ($(host_arch), arm64)
-	openssl_arch_args := android-arm64 -D__ANDROID_API__=21
-	ndk_abi := aarch64-linux-android
-	ndk_triplet := aarch64-linux-android
+openssl_arch_args := android-arm64 -D__ANDROID_API__=21
+ndk_abi := aarch64-linux-android
+ndk_triplet := aarch64-linux-android
 endif
-	ndk_build_os_arch := $(shell uname -s | tr '[A-Z]' '[a-z]')-$(build_arch)
-	ndk_llvm_prefix := $(ANDROID_NDK_ROOT)/toolchains/llvm/prebuilt/$(ndk_build_os_arch)
-	ndk_gcc_prefix := $(ANDROID_NDK_ROOT)/toolchains/$(ndk_abi)-4.9/prebuilt/$(ndk_build_os_arch)
-	openssl_host_env := \
-		CPP=clang CC=clang CXX=clang++ LD= LDFLAGS= AR=$(ndk_triplet)-ar RANLIB=$(ndk_triplet)-ranlib \
-		ANDROID_NDK=$(ANDROID_NDK_ROOT) \
-		PATH=$(ndk_llvm_prefix)/bin:$(ndk_gcc_prefix)/bin:$$PATH \
-		$(NULL)
+ndk_build_os_arch := $(shell uname -s | tr '[A-Z]' '[a-z]')-$(build_arch)
+ndk_llvm_prefix := $(ANDROID_NDK_ROOT)/toolchains/llvm/prebuilt/$(ndk_build_os_arch)
+ndk_gcc_prefix := $(ANDROID_NDK_ROOT)/toolchains/$(ndk_abi)-4.9/prebuilt/$(ndk_build_os_arch)
+openssl_host_env := \
+	CPP=clang CC=clang CXX=clang++ LD= LDFLAGS= AR=$(ndk_triplet)-ar RANLIB=$(ndk_triplet)-ranlib \
+	ANDROID_NDK=$(ANDROID_NDK_ROOT) \
+	PATH=$(ndk_llvm_prefix)/bin:$(ndk_gcc_prefix)/bin:$$PATH \
+	$(NULL)
 endif
 
 $(eval $(call make-base-package-rules,openssl,fs,$(host_os_arch)))
@@ -305,7 +310,7 @@ build/fs-%/manifest/openssl.pkg: build/fs-env-%.rc build/fs-tmp-%/openssl/Config
 	) >$$builddir/build.log 2>&1 \
 	&& $(call print-status,openssl,Generating manifest) \
 	&& (set -x; \
-		$(call make-autotools-manifest-commands,openssl,fs,$*,) \
+		$(call make-autotools-manifest-commands,openssl,fs,$*,install_dev) \
 	) >>$$builddir/build.log 2>&1
 
 
@@ -325,92 +330,92 @@ v8_buildtype_args := \
 endif
 
 ifeq ($(host_arch), x86)
-	v8_cpu := x86
+v8_cpu := x86
 endif
 ifeq ($(host_arch), x86_64)
-	v8_cpu := x64
+v8_cpu := x64
 endif
 ifeq ($(host_arch), $(filter $(host_arch), arm armbe8 armeabi armhf))
-	v8_cpu := arm
-	v8_cpu_args := arm_version=7 arm_fpu="vfpv3-d16" arm_use_neon=false
+v8_cpu := arm
+v8_cpu_args := arm_version=7 arm_fpu="vfpv3-d16" arm_use_neon=false
 ifneq ($(host_os), android)
 ifeq ($(host_arch), armhf)
-	v8_cpu_args += arm_float_abi="hard"
+v8_cpu_args += arm_float_abi="hard"
 else
-	v8_cpu_args += arm_float_abi="softfp"
+v8_cpu_args += arm_float_abi="softfp"
 endif
 endif
 endif
 ifeq ($(host_arch), arm64)
-	v8_cpu := arm64
+v8_cpu := arm64
 endif
 ifeq ($(host_arch), arm64e)
-	v8_cpu := arm64
-	v8_cpu_args := arm_version=83
+v8_cpu := arm64
+v8_cpu_args := arm_version=83
 endif
 
 v8_build_os := $(shell echo $(build_os) | sed 's,^macos$$,mac,')
 ifeq ($(host_os), macos)
-	v8_os := mac
-	v8_platform_args := $(NULL)
+v8_os := mac
+v8_platform_args := $(NULL)
 ifeq ($(host_arch), $(filter $(host_arch), arm64 arm64e))
-	v8_platform_args += mac_deployment_target="11.0"
+v8_platform_args += mac_deployment_target="11.0"
 else
-	v8_platform_args += mac_deployment_target="10.9"
+v8_platform_args += mac_deployment_target="10.9"
 endif
 ifeq ($(FRIDA_ASAN), yes)
-	v8_platform_args += use_xcode_clang=true
+v8_platform_args += use_xcode_clang=true
 else
-	v8_platform_args += use_xcode_clang=false
+v8_platform_args += use_xcode_clang=false
 endif
 endif
 ifeq ($(host_os), ios)
-	v8_os := ios
-	v8_platform_args := \
-		use_xcode_clang=true \
-		mac_deployment_target="10.9" \
-		ios_deployment_target="8.0" \
-		$(NULL)
+v8_os := ios
+v8_platform_args := \
+	use_xcode_clang=true \
+	mac_deployment_target="10.9" \
+	ios_deployment_target="8.0" \
+	$(NULL)
 endif
 ifeq ($(host_os), $(filter $(host_os), macos ios))
 ifeq ($(host_arch), $(filter $(host_arch), arm64 arm64e))
-	v8_platform_args += v8_enable_pointer_compression=false
+v8_platform_args += v8_enable_pointer_compression=false
 endif
 endif
 ifeq ($(host_os), linux)
-	v8_os := linux
-	v8_platform_args := \
-		is_clang=false \
-		is_cfi=false \
-		use_sysroot=false \
-		use_gold=false
-	v8_libs_private := "-lrt"
+v8_os := linux
+v8_platform_args := \
+	is_clang=false \
+	is_cfi=false \
+	use_sysroot=false \
+	use_gold=false
+v8_libs_private := "-lrt"
 endif
 ifeq ($(host_os), android)
-	v8_os := android
-	v8_platform_args := \
-		use_xcode_clang=true \
-		use_custom_libcxx=false \
-		android_ndk_root="$(ANDROID_NDK_ROOT)" \
-		android_ndk_version="r21" \
-		android_ndk_major_version=21 \
-		android32_ndk_api_level=18 \
-		android64_ndk_api_level=21 \
-		clang_base_path="$(abspath $(ANDROID_NDK_ROOT)/toolchains/llvm/prebuilt/$(ndk_build_os_arch))"
-	v8_libs_private := "-llog -lm"
+v8_os := android
+v8_platform_args := \
+	use_xcode_clang=true \
+	use_custom_libcxx=false \
+	android_ndk_root="$(ANDROID_NDK_ROOT)" \
+	android_ndk_version="r21" \
+	android_ndk_major_version=21 \
+	android32_ndk_api_level=18 \
+	android64_ndk_api_level=21 \
+	clang_base_path="$(abspath $(ANDROID_NDK_ROOT)/toolchains/llvm/prebuilt/$(ndk_build_os_arch))"
+v8_libs_private := "-llog -lm"
 endif
 
 ifeq ($(host_os), $(filter $(host_os), linux android))
-	v8_platform_args += enable_resource_allowlist_generation=false
+v8_platform_args += enable_resource_allowlist_generation=false
 endif
 
 ifeq ($(host_arch), $(filter $(host_arch), x86 arm))
 ifneq ($(MACOS_X86_SDK_ROOT),)
-	v8_platform_args += mac_sdk_path="$(MACOS_X86_SDK_ROOT)"
+v8_platform_args += mac_sdk_path="$(MACOS_X86_SDK_ROOT)"
 endif
 endif
 ifneq ($(IOS_SDK_ROOT),)
-	v8_platform_args += ios_sdk_path="$(IOS_SDK_ROOT)"
+v8_platform_args += ios_sdk_path="$(IOS_SDK_ROOT)"
 endif
 
 # Google's prebuilt GN requires a newer glibc than our Debian Squeeze buildroot has.

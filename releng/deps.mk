@@ -10,11 +10,11 @@ gnu_mirror = saimei.ftp.acc.umu.se/mirror/gnu.org/gnu
 include releng/system.mk
 
 ifdef FRIDA_HOST
-	host_os := $(shell echo $(FRIDA_HOST) | cut -f1 -d"-")
-	host_arch := $(shell echo $(FRIDA_HOST) | cut -f2 -d"-")
+host_os := $(shell echo $(FRIDA_HOST) | cut -f1 -d"-")
+host_arch := $(shell echo $(FRIDA_HOST) | cut -f2 -d"-")
 else
-	host_os := $(build_os)
-	host_arch := $(build_arch)
+host_os := $(build_os)
+host_arch := $(build_arch)
 endif
 host_os_arch := $(host_os)-$(host_arch)
 
@@ -108,7 +108,7 @@ zlib_options = \
 zlib_deps = \
 	$(NULL)
 
-libffi_version = 4612f7f4b8cfda9a1f07e66d033bb9319860af9b
+libffi_version = 183fff6038741f27738ea256a2477389cd64abdb
 libffi_url = $(frida_base_url)/libffi.git
 libffi_hash = $(NULL)
 libffi_recipe = meson
@@ -523,6 +523,7 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 			| grep ": " \
 			| cut -f4 -d'"' \
 			| cut -c$$(strip $$(shell echo $$(abspath build/$2-$$*)x | wc -c))- \
+			| sort \
 			> "$$$$prefix/manifest/$1.pkg" \
 	) >$$$$builddir/build.log 2>&1 \
 
@@ -616,6 +617,7 @@ define make-autotools-manifest-commands
 		&& cd __pkg__ \
 		&& find . -type f \
 			| cut -c$(strip $(shell echo $(abspath build/$2-$3)xx | wc -c))- \
+			| sort \
 			> "$$prefix/manifest/$1.pkg" \
 		&& $(RM) -r __pkg__ \
 	)
@@ -633,7 +635,7 @@ clean-$1:
 		cd build/$2-$3; \
 		cat manifest/$1.pkg | while read entry; do \
 			echo $(RM) $$$$entry; \
-			$(RM) $$$$entry \
+			$(RM) $$$$entry; \
 		done \
 	fi
 	$(RM) build/$2-$3/manifest/$1.pkg
