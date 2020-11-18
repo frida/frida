@@ -453,6 +453,7 @@ build/fs-%/manifest/gn.pkg: build/fs-tmp-%/gn/build.ninja
 		&& install -m 755 $$builddir/gn $$prefix/bin \
 	) >>$$builddir/build.log 2>&1
 	@$(call print-status,gn,Generating manifest)
+	@mkdir -p $(@D)
 	@echo "bin/gn" > $@
 
 .PHONY: depot_tools clean-depot_tools distclean-depot_tools
