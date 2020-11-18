@@ -176,19 +176,25 @@ openssl_buildtype_args := \
 endif
 
 ifeq ($(host_os), $(filter $(host_os), macos ios))
+
 xcode_developer_dir := $(shell xcode-select -print-path)
+
 ifeq ($(host_os_arch), macos-x86)
 openssl_arch_args := macos-i386
-xcode_platform := MacOSX
 endif
 ifeq ($(host_os_arch), macos-x86_64)
 openssl_arch_args := macos64-x86_64 enable-ec_nistp_64_gcc_128
-xcode_platform := MacOSX
 endif
 ifeq ($(host_os_arch), macos-arm64)
+openssl_arch_args := macos64-cross-arm64 enable-ec_nistp_64_gcc_128
+endif
+ifeq ($(host_os_arch), macos-arm64e)
 openssl_arch_args := macos64-cross-arm64e enable-ec_nistp_64_gcc_128
+endif
+ifeq ($(host_os), macos)
 xcode_platform := MacOSX
 endif
+
 ifeq ($(host_os_arch), ios-x86)
 openssl_arch_args := ios-sim-cross-i386
 xcode_platform := iPhoneSimulator
@@ -209,6 +215,7 @@ ifeq ($(host_os_arch), ios-arm64e)
 openssl_arch_args := ios64-cross-arm64e enable-ec_nistp_64_gcc_128
 xcode_platform := iPhoneOS
 endif
+
 openssl_host_env := \
 	CPP=clang CC=clang CXX=clang++ LD= LDFLAGS= AR= RANLIB= \
 	CROSS_COMPILE="$(xcode_developer_dir)/Toolchains/XcodeDefault.xctoolchain/usr/bin/" \
@@ -217,18 +224,23 @@ openssl_host_env := \
 	IOS_MIN_SDK_VERSION=8.0 \
 	CONFIG_DISABLE_BITCODE=true \
 	$(NULL)
+
 ifeq ($(host_os_arch), macos-x86)
 ifneq ($(MACOS_X86_SDK_ROOT),)
 openssl_host_env += MACOS_SDK_ROOT="$(MACOS_X86_SDK_ROOT)"
 endif
 endif
+
 ifeq ($(host_os_arch), $(filter $(host_os_arch), macos-arm64 macos-arm64e))
 openssl_host_env += MACOS_MIN_SDK_VERSION=11.0
 else
 openssl_host_env += MACOS_MIN_SDK_VERSION=10.9
 endif
+
 endif
+
 ifeq ($(host_os), linux)
+
 ifeq ($(host_arch), x86)
 openssl_arch_args := linux-x86
 endif
@@ -247,10 +259,14 @@ endif
 ifeq ($(host_arch), $(filter $(host_arch), mips64 mips64el))
 openssl_arch_args := linux-mips64
 endif
+
 openssl_host_env := \
 	$(NULL)
+
 endif
+
 ifeq ($(host_os), android)
+
 ifeq ($(host_arch), x86)
 openssl_arch_args := android-x86 -D__ANDROID_API__=18
 ndk_abi := x86
@@ -271,6 +287,7 @@ openssl_arch_args := android-arm64 -D__ANDROID_API__=21
 ndk_abi := aarch64-linux-android
 ndk_triplet := aarch64-linux-android
 endif
+
 ndk_build_os_arch := $(shell uname -s | tr '[A-Z]' '[a-z]')-$(build_arch)
 ndk_llvm_prefix := $(ANDROID_NDK_ROOT)/toolchains/llvm/prebuilt/$(ndk_build_os_arch)
 ndk_gcc_prefix := $(ANDROID_NDK_ROOT)/toolchains/$(ndk_abi)-4.9/prebuilt/$(ndk_build_os_arch)
@@ -279,6 +296,7 @@ openssl_host_env := \
 	ANDROID_NDK=$(ANDROID_NDK_ROOT) \
 	PATH=$(ndk_llvm_prefix)/bin:$(ndk_gcc_prefix)/bin:$$PATH \
 	$(NULL)
+
 endif
 
 $(eval $(call make-base-package-rules,openssl,fs,$(host_os_arch)))
