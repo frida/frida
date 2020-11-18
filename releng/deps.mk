@@ -476,9 +476,7 @@ depot_tools_deps = \
 
 
 define expand-packages
-
 $(sort $(foreach pkg, $1, $(pkg) $($(subst -,_,$(pkg))_deps)))
-
 endef
 
 

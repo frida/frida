@@ -48,9 +48,9 @@ all: build/sdk-$(host_os)-$(host_arch).tar.bz2
 	@echo "It will be picked up automatically if you now proceed to build Frida."
 	@echo ""
 
-clean: $(foreach pkg,$(packages),clean-$(pkg))
+clean: $(foreach pkg, $(call expand-packages,$(packages)), clean-$(pkg))
 
-distclean: $(foreach pkg,$(packages),distclean-$(pkg))
+distclean: $(foreach pkg, $(call expand-packages,$(packages)), distclean-$(pkg))
 
 
 build/sdk-$(host_os)-$(host_arch).tar.bz2: build/fs-tmp-$(host_os_arch)/.package-stamp
