@@ -557,13 +557,16 @@ build/fs-%/manifest/v8.pkg: build/fs-tmp-%/v8/build.ninja
 
 $(eval $(call make-base-package-rules,libcxx,fs,$(host_os_arch)))
 
-build/fs-%/lib/c++/libc++.a: build/fs-tmp-%/v8/obj/libv8_monolith.a
-	@$(call print-status,libc++,Building)
-	@(set -x \
-		&& $(NINJA) -C build/fs-tmp-$*/v8 libc++ \
-		&& install -d build/fs-$*/include/c++/ \
-		&& cp -a deps/v8-checkout/v8/buildtools/third_party/libc++/trunk/include/* build/fs-$*/include/c++/ \
-		&& rm build/fs-$*/include/c++/CMakeLists.txt build/fs-$*/include/c++/__config_site.in \
+build/fs-%/manifest/libcxx.pkg: build/fs-%/manifest/v8.pkg
+	@$(call print-status,libcxx,Building)
+	@prefix=build/fs-$*; \
+	srcdir=deps/v8-checkout/v8; \
+	builddir=build/fs-tmp-$*/v8; \
+	(set -x \
+		&& $(NINJA) -C $$builddir libc++ \
+		&& install -d $$prefix/include/c++/ \
+		&& cp -a $$srcdir/buildtools/third_party/libc++/trunk/include/* $$prefix/include/c++/ \
+		&& rm $$prefix/include/c++/CMakeLists.txt $$prefix/include/c++/__config_site.in \
 		&& ( \
 			echo "#ifndef _LIBCPP_CONFIG_SITE"; \
 			echo "#define _LIBCPP_CONFIG_SITE"; \
@@ -576,16 +579,22 @@ build/fs-%/lib/c++/libc++.a: build/fs-tmp-%/v8/obj/libv8_monolith.a
 			echo ""; \
 		) | cat \
 			- \
-			deps/v8-checkout/v8/buildtools/third_party/libc++/trunk/include/__config \
-			> build/fs-$*/include/c++/__config \
-		&& install -d build/fs-$*/lib/c++ \
+			$$srcdir/buildtools/third_party/libc++/trunk/include/__config \
+			> $$prefix/include/c++/__config \
+		&& install -d $$prefix/lib/c++ \
 		&& $(shell xcrun -f libtool) -static -no_warning_for_no_symbols \
-			-o build/fs-$*/lib/c++/libc++abi.a \
-			build/fs-tmp-$*/v8/obj/buildtools/third_party/libc++abi/libc++abi/*.o \
+			-o $$prefix/lib/c++/libc++abi.a \
+			$$builddir/obj/buildtools/third_party/libc++abi/libc++abi/*.o \
 		&& $(shell xcrun -f libtool) -static -no_warning_for_no_symbols \
-			-o build/fs-$*/lib/c++/libc++.a \
-			build/fs-tmp-$*/v8/obj/buildtools/third_party/libc++/libc++/*.o \
-	) >build/fs-tmp-$*/v8/libc++-build.log 2>&1
+			-o $$prefix/lib/c++/libc++.a \
+			$$builddir/obj/buildtools/third_party/libc++/libc++/*.o \
+	) >$$builddir/libcxx-build.log 2>&1 \
+	&& $(call print-status,libcxx,Generating manifest) \
+	&& ( \
+		cd $$prefix; \
+		find include/c++ -type f; \
+		find lib/c++ -type f; \
+	) | sort > $@
 
 
 build/fs-env-%.rc:
