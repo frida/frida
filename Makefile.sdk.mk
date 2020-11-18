@@ -489,14 +489,14 @@ deps/v8-checkout/v8: deps/v8-checkout/.gclient
 			gclient sync
 	@touch $@
 
-build/fs-tmp-%/v8/build.ninja: deps/v8-checkout/v8 build/fs-tmp-$(build_os_arch)/gn/gn \
+build/fs-tmp-%/v8/build.ninja: deps/v8-checkout/v8 build/fs-$(build_os_arch)/manifest/gn.pkg \
 		$(foreach dep,$(v8_deps),build/fs-%/manifest/$(dep).pkg)
 	@$(call print-status,v8,Configuring)
 	@$(RM) -r $(@D)
 	@mkdir -p $(@D)
 	@(set -x \
 		&& cd deps/v8-checkout/v8 \
-		&& ../../../build/fs-tmp-$(build_os_arch)/gn/gn \
+		&& ../../../build/fs-$(build_os_arch)/bin/gn \
 			gen $(abspath $(@D)) \
 			--args='$(strip \
 				target_os="$(v8_os)" \
@@ -513,7 +513,6 @@ build/fs-%/manifest/v8.pkg: build/fs-tmp-%/v8/build.ninja
 	@prefix=build/fs-$*; \
 	srcdir=deps/v8-checkout/v8; \
 	builddir=build/fs-tmp-$*/v8; \
-	pcfile=$$prefix/lib/pkgconfig/v8-$(v8_api_version).pc; \
 	(set -x \
 		&& $(NINJA) -C $$builddir v8_monolith \
 		&& install -d $$prefix/include/v8-$(v8_api_version)/v8 \
@@ -527,13 +526,13 @@ build/fs-%/manifest/v8.pkg: build/fs-tmp-%/v8/build.ninja
 		&& install -d $$prefix/include/v8-$(v8_api_version)/v8/cppgc/internal \
 		&& install -m 644 $$srcdir/include/cppgc/internal/*.h $$prefix/include/v8-$(v8_api_version)/v8/cppgc/internal/ \
 		&& install -d $$prefix/lib \
-		&& install -m 644 $< $$prefix/lib/libv8-$(v8_api_version).a \
-		&& install -d $(@D) \
+		&& install -m 644 $$builddir/obj/libv8_monolith.a $$prefix/lib/libv8-$(v8_api_version).a \
 		&& $(PYTHON3) releng/v8.py \
 			patch $$prefix/include/v8-$(v8_api_version)/v8/v8config.h \
 			-s $$srcdir \
 			-b $$builddir \
-			-G build/fs-tmp-$(build_os_arch)/gn/gn \
+			-G build/fs-$(build_os_arch)/bin/gn \
+		&& install -d $$prefix/lib/pkgconfig \
 		&& ( \
 			echo "prefix=\$${frida_sdk_prefix}"; \
 			echo "libdir=\$${prefix}/lib"; \
@@ -545,13 +544,17 @@ build/fs-%/manifest/v8.pkg: build/fs-tmp-%/v8/build.ninja
 			echo "Libs: -L\$${libdir} -lv8-$(v8_api_version)"; \
 			if [ -n $(v8_libs_private) ]; then \
 				echo "Libs.private: $(v8_libs_private)"; \
-			fi \
-			echo "Cflags: -I\$${includedir} -I\$${includedir}/v8"
-		) > $$pcfile \
+			fi; \
+			echo "Cflags: -I\$${includedir} -I\$${includedir}/v8" \
+		) > $$prefix/lib/pkgconfig/v8-$(v8_api_version).pc \
 	) >>$$builddir/build.log 2>&1 \
 	&& $(call print-status,v8,Generating manifest) \
-	&& (set -x \
-	) >>$$builddir/build.log 2>&1
+	&& ( \
+		cd $$prefix; \
+		find include/v8-$(v8_api_version) -type f; \
+		echo "lib/libv8-$(v8_api_version).a"; \
+		echo "lib/pkgconfig/v8-$(v8_api_version).pc" \
+	) > $@
 
 
 $(eval $(call make-base-package-rules,libcxx,fs,$(host_os_arch)))
