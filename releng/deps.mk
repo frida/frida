@@ -136,13 +136,18 @@ glib_options = \
 	-Dinternal_pcre=true \
 	-Dtests=false \
 	$(NULL)
-ifeq ($(host_os), $(filter $(host_os),macos ios android qnx))
-	glib_deps += libiconv
-	glib_options += -Diconv=external
+ifeq ($(host_os), $(filter $(host_os),macos ios))
+# Use Apple's iconv by default to make our toolchain smaller.
+# Our SDK will pull in its own.
+glib_options += -Diconv=external
+endif
+ifeq ($(host_os), $(filter $(host_os),android qnx))
+glib_options += -Diconv=external
+glib_deps += libiconv
 endif
 ifeq ($(FRIDA_LIBC), uclibc)
-	glib_deps += libiconv
-	glib_options += -Diconv=external
+glib_options += -Diconv=external
+glib_deps += libiconv
 endif
 
 pkg_config_version = b7fb5edc1f1a4fb17cd5cb94f4cf21912184da43

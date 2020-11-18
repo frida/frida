@@ -66,6 +66,7 @@ build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg,$(packages),build
 			--exclude bin/gio-launch-desktop \
 			--exclude bin/gobject-query \
 			--exclude bin/gsettings \
+			--exclude bin/iconv \
 			--exclude bin/yacc \
 			--exclude etc \
 			--exclude include \
@@ -87,14 +88,14 @@ build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg,$(packages),build
 			--exclude "*.pyc" \
 			--exclude "*.pyo" \
 			. | tar -C $(abspath $(@D)/package) -xf -
-	@cd $(abspath $(@D)/package)/bin \
+	@cd $(@D)/package/bin \
 		&& for tool in aclocal automake; do \
 			rm $$tool-$(automake_api_version); \
 			mv $$tool $$tool-$(automake_api_version); \
 			ln -s $$tool-$(automake_api_version) $$tool; \
 		done
 	@. $< \
-		&& for f in $(@D)/manifest/bin/*; do \
+		&& for f in $(@D)/package/bin/*; do \
 			if [ -L $$f ]; then \
 				true; \
 			elif file -b --mime $$f | egrep -q "executable|binary"; then \
