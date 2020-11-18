@@ -495,6 +495,7 @@ deps/.$1-stamp:
 build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 		$(foreach dep,$($(subst -,_,$1)_deps),build/$2-%/manifest/$(dep).pkg) \
 		releng/meson/meson.py
+	@$(call print-status,$1,Building)
 	@prefix=$$(abspath build/$2-$$*); \
 	builddir=build/$2-tmp-$$*/$1; \
 	$(RM) -r $$$$builddir; \
@@ -512,7 +513,6 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 			$$($$(subst -,_,$1)_options) \
 			$$$$builddir \
 			deps/$1 \
-		&& $(call print-status,$1,Building) \
 		&& $(NINJA) -C $$$$builddir install \
 	) >$$$$builddir/build.log 2>&1 \
 	&& $(call print-status,$1,Generating manifest) \

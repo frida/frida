@@ -120,11 +120,14 @@ build/fs-%/manifest/elfutils.pkg: build/fs-env-%.rc build/fs-tmp-%/elfutils/Make
 		done \
 		&& install -d build/fs-$*/lib \
 		&& install -m 644 $$builddir/libelf/libelf.a build/fs-$*/lib \
-	) >>$$builddir/build.log 2>&1 \
-	&& $(call print-status,elfutils,Generating manifest) \
-	&& (set -x; \
-		$(call make-autotools-manifest-commands,elfutils,fs,$*,) \
 	) >>$$builddir/build.log 2>&1
+	@$(call print-status,elfutils,Generating manifest)
+	@( \
+		for header in $(libelf_headers); do \
+			echo "include/$$header"; \
+		done; \
+		echo "lib/libelf.a" \
+	) > $@
 
 
 libdwarf_headers = \
