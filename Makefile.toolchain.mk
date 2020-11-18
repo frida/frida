@@ -101,7 +101,7 @@ build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg,$(packages),build
 				$$STRIP $$f || exit 1; \
 			fi; \
 		done \
-		&& $STRIP $(@D)/package/lib/vala-*/gen-introspect-*
+		&& $$STRIP $(@D)/package/lib/vala-*/gen-introspect-*
 	@releng/pkgify.sh $(@D)/package $(abspath build/ft-$*) $(abspath releng)
 	@touch $@
 
