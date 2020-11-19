@@ -159,12 +159,12 @@ FRIDA_SDKROOT="$FRIDA_BUILD/${frida_env_name_prefix}sdk-${host_os_arch}"
 if [ -n $FRIDA_TOOLCHAIN_VERSION ]; then
   toolchain_version=$FRIDA_TOOLCHAIN_VERSION
 else
-  toolchain_version=$(grep "frida_toolchain_version :=" "$FRIDA_ROOT/Makefile.toolchain.mk" | awk '{ print $NF }')
+  toolchain_version=$(grep "frida_toolchain_version =" "$FRIDA_RELENG/deps.mk" | awk '{ print $NF }')
 fi
 if [ -n $FRIDA_SDK_VERSION ]; then
   sdk_version=$FRIDA_SDK_VERSION
 else
-  sdk_version=$(grep "frida_sdk_version :=" "$FRIDA_ROOT/Makefile.sdk.mk" | awk '{ print $NF }')
+  sdk_version=$(grep "frida_sdk_version =" "$FRIDA_RELENG/deps.mk" | awk '{ print $NF }')
 fi
 if [ "$enable_asan" == "yes" ]; then
   sdk_version="$sdk_version-asan"

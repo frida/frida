@@ -22,8 +22,7 @@ TOOL_TARGET_RUNTIMES = ['static']
 LIBRARY_TARGET_RUNTIMES = ['static', 'dynamic']
 COMPRESSION_LEVEL = 9
 
-FRIDA_BASE_URL = "https://github.com/frida"
-BOOTSTRAP_TOOLCHAIN_URL = "https://build.frida.re/toolchain-20201028-windows-x86.exe"
+BOOTSTRAP_TOOLCHAIN_URL = "https://build.frida.re/toolchain-{version}-windows-x86.exe"
 VALA_VERSION = "0.50"
 VALA_TARGET_GLIB = "2.66"
 
@@ -48,6 +47,29 @@ cached_meson_params = {}
 build_arch = 'x86_64' if platform.machine().endswith("64") else 'x86'
 
 
+@dataclass
+class PackageSpec:
+    version: str
+    url: str
+    hash: str
+    recipe: str
+    patches: List[str]
+    deps: List[str]
+    deps_for_build: List[str]
+    options: List[str]
+
+
+@dataclass
+class DependencyParameters:
+    toolchain_version: str
+    sdk_version: str
+    bootstrap_version: str
+    packages: Dict[str, PackageSpec]
+
+    def get_package_spec(self, name: str) -> PackageSpec:
+        return self.packages[name.replace("-", "_")]
+
+
 def main():
     check_environment()
 
@@ -55,16 +77,16 @@ def main():
     build_ended_at = None
     packaging_ended_at = None
     try:
-        config = read_config()
+        params = read_dependency_parameters()
 
         for arch in ARCHS:
             for configuration in CONFIGURATIONS:
-                build_meson_modules(arch, configuration)
+                build_meson_modules(arch, configuration, params)
 
         for arch in ARCHS:
             for configuration in CONFIGURATIONS:
                 for runtime in LIBRARY_TARGET_RUNTIMES:
-                    build_v8(arch, configuration, runtime)
+                    build_v8(arch, configuration, runtime, params)
 
         build_ended_at = time.time()
 
@@ -106,22 +128,25 @@ def check_environment():
             sys.exit(1)
 
 
-def build_meson_modules(arch, configuration):
+def build_meson_modules(arch: str, configuration: str, params: DependencyParameters):
     modules = [
-        ("zlib", "zlib.pc", []),
-        ("libffi", "libffi.pc", []),
-        ("sqlite", "sqlite3.pc", []),
-        ("glib", "glib-2.0.pc", ["internal_pcre=true", "tests=false"]),
-        ("glib-schannel", "gioschannel.pc", []),
-        ("libgee", "gee-0.8.pc", []),
-        ("json-glib", "json-glib-1.0.pc", ["introspection=disabled", "tests=false"]),
-        ("libpsl", "libpsl.pc", ["tests=false"]),
-        ("libxml2", "libxml-2.0.pc", []),
-        ("libsoup", "libsoup-2.4.pc", ["gssapi=disabled", "tls_check=false", "gnome=false", "introspection=disabled", "vapi=disabled", "tests=false"]),
-        ("vala", VALAC_FILENAME, []),
-        ("pkg-config", "pkg-config.exe", []),
+        ("zlib", "zlib.pc"),
+        ("sqlite", "sqlite3.pc"),
+        ("libffi", "libffi.pc"),
+        ("glib", "glib-2.0.pc"),
+        ("glib-schannel", "gioschannel.pc"),
+        ("libgee", "gee-0.8.pc"),
+        ("json-glib", "json-glib-1.0.pc"),
+        ("libpsl", "libpsl.pc"),
+        ("libxml2", "libxml-2.0.pc"),
+        ("libsoup", "libsoup-2.4.pc"),
+        ("capstone", "capstone.pc"),
+        ("quickjs", "quickjs.pc"),
+        ("tinycc", "libtcc.pc"),
+        ("vala", VALAC_FILENAME),
+        ("pkg-config", "pkg-config.exe"),
     ]
-    for (name, artifact_name, options) in modules:
+    for (name, artifact_name) in modules:
         if artifact_name.endswith(".pc"):
             artifact_subpath = os.path.join("lib", "pkgconfig", artifact_name)
             runtime_flavors = LIBRARY_TARGET_RUNTIMES
@@ -133,10 +158,14 @@ def build_meson_modules(arch, configuration):
         for runtime in runtime_flavors:
             artifact_path = os.path.join(get_prefix_path(arch, configuration, runtime), artifact_subpath)
             if not os.path.exists(artifact_path):
-                build_meson_module(name, arch, configuration, runtime, options)
+                build_meson_module(name, arch, configuration, runtime, params.get_package_spec(name))
 
-def build_meson_module(name, arch, configuration, runtime, options):
-    print("*** Building name={} arch={} runtime={} configuration={}".format(name, arch, configuration, runtime))
+def build_meson_module(name: str, arch: str, configuration: str, runtime: str, spec: PackageSpec):
+    print("*** Building name={} arch={} runtime={} configuration={} spec={}".format(name, arch, configuration, runtime, spec))
+    assert spec.hash == ""
+    assert spec.recipe == 'meson'
+    assert spec.patches == []
+
     env_dir, shell_env = get_meson_params(arch, configuration, runtime)
 
     source_dir = os.path.join(DEPS_DIR, name)
@@ -144,12 +173,12 @@ def build_meson_module(name, arch, configuration, runtime, options):
     prefix = get_prefix_path(arch, configuration, runtime)
     optimization = 's' if configuration == 'Release' else '0'
     ndebug = 'true' if configuration == 'Release' else 'false'
-    option_flags = ["-D" + option for option in options]
 
     if not os.path.exists(source_dir):
         if not os.path.exists(DEPS_DIR):
             os.makedirs(DEPS_DIR)
-        perform("git", "clone", "--recurse-submodules", make_frida_repo_url(name), cwd=DEPS_DIR)
+        perform("git", "clone", "-q", "--recurse-submodules", spec.url, name, cwd=DEPS_DIR)
+        perform("git", "checkout", "-q", spec.version, cwd=source_dir)
 
     if os.path.exists(build_dir):
         shutil.rmtree(build_dir)
@@ -163,7 +192,7 @@ def build_meson_module(name, arch, configuration, runtime, options):
         "-Doptimization=" + optimization,
         "-Db_ndebug=" + ndebug,
         "-Db_vscrt=" + vscrt_from_configuration_and_runtime(configuration, runtime),
-        *option_flags,
+        *spec.options,
         cwd=source_dir,
         env=shell_env
     )
@@ -382,7 +411,17 @@ class MesonEnv:
     shell_env: Dict[str, str]
 
 
-def build_v8(arch, configuration, runtime):
+def build_v8(arch: str, configuration: str, runtime: str, params: DependencyParameters):
+    v8_spec = params.get_package_spec("v8")
+    assert v8_spec.hash == ""
+    assert v8_spec.recipe == 'custom'
+    assert v8_spec.patches == []
+
+    depot_spec = params.get_package_spec("depot_tools")
+    assert depot_spec.hash == ""
+    assert depot_spec.recipe == 'custom'
+    assert depot_spec.patches == []
+
     prefix = get_prefix_path(arch, configuration, runtime)
 
     lib_dir = os.path.join(prefix, "lib")
@@ -390,12 +429,10 @@ def build_v8(arch, configuration, runtime):
     if len(glob.glob(os.path.join(pkgconfig_dir, "v8-*.pc"))) > 0:
         return
 
-    checkout_dir = os.path.join(ROOT_DIR, "v8-checkout")
-
-    depot_dir = os.path.join(checkout_dir, "depot_tools")
+    depot_dir = os.path.join(DEPS_DIR, "depot_tools")
     if not os.path.exists(depot_dir):
-        perform("git", "clone", "--recurse-submodules", "https://chromium.googlesource.com/chromium/tools/depot_tools.git",
-            r"v8-checkout\depot_tools", cwd=ROOT_DIR)
+        perform("git", "clone", "-q", "--recurse-submodules", depot_spec.url, "depot_tools", cwd=DEPS_DIR)
+        perform("git", "checkout", "-q", depot_spec.version, cwd=depot_dir)
 
     gclient = os.path.join(depot_dir, "gclient.bat")
     gn = os.path.join(depot_dir, "gn.bat")
@@ -405,10 +442,11 @@ def build_v8(arch, configuration, runtime):
     env["PATH"] = depot_dir + ";" + env["PATH"]
     env["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
 
+    checkout_dir = os.path.join(DEPS_DIR, "v8-checkout")
     config_path = os.path.join(checkout_dir, ".gclient")
     if not os.path.exists(config_path):
-        spec = """solutions = [ {{ "url": "{url}", "managed": False, "name": "v8", "deps_file": "DEPS", "custom_deps": {{}}, }}, ]""" \
-            .format(url=make_frida_repo_url("v8"))
+        spec = """solutions = [ {{ "url": "{url}@{version}", "managed": False, "name": "v8", "deps_file": "DEPS", "custom_deps": {{}}, }}, ]""" \
+            .format(url=v8_spec.url, version=v8_spec.version)
         perform(gclient, "config", "--spec", spec, cwd=checkout_dir, env=env)
 
     source_dir = os.path.join(checkout_dir, "v8")
@@ -444,20 +482,8 @@ def build_v8(arch, configuration, runtime):
             "wdk_path=\"{}\"".format(win10_sdk_dir),
             "windows_sdk_path=\"{}\"".format(win10_sdk_dir),
             "symbol_level=0",
-            "use_thin_lto=false",
-            "v8_monolithic=true",
-            "v8_use_external_startup_data=false",
-            "is_component_build=false",
-            "v8_enable_debugging_features=false",
-            "v8_enable_disassembler=false",
-            "v8_enable_gdbjit=false",
-            "v8_enable_i18n_support=false",
-            "v8_untrusted_code_mitigations=false",
-            "treat_warnings_as_errors=false",
             "strip_absolute_paths_from_debug_symbols=true",
-            "use_goma=false",
-            "v8_embedder_string=\"-frida\"",
-        ])
+        ] + v8_spec.options)
 
         perform(gn, "gen", os.path.relpath(build_dir, start=source_dir), "--args=" + args, cwd=source_dir, env=env)
 
@@ -659,9 +685,6 @@ def get_prefix_path(arch, configuration, runtime):
 def get_tmp_path(arch, configuration, runtime):
     return os.path.join(ROOT_DIR, "build", "fts-tmp-windows", "{}-{}-{}".format(arch, configuration.lower(), runtime))
 
-def make_frida_repo_url(name):
-    return "{}/{}.git".format(FRIDA_BASE_URL, name)
-
 def msvs_platform_from_arch(arch):
     return 'x64' if arch == 'x86_64' else 'Win32'
 
@@ -675,8 +698,8 @@ def vscrt_from_configuration_and_runtime(configuration, runtime):
     return result
 
 
-def read_config():
-    raw_config = {
+def read_dependency_parameters():
+    raw_params = {
         "capstone_archs": "x86",
     }
     with open(os.path.join(RELENG_DIR, "deps.mk"), encoding='utf-8') as f:
@@ -689,55 +712,35 @@ def read_config():
                     .strip()
             while "  " in value:
                 value = value.replace("  ", " ")
-            raw_config[key] = value
+            raw_params[key] = value
 
     packages = {}
-    for key in [k for k in raw_config.keys() if k.endswith("_recipe")]:
+    for key in [k for k in raw_params.keys() if k.endswith("_recipe")]:
         name = key[:-7]
-        packages[name] = Package(
-                parse_config_string_value(raw_config[name + "_version"], raw_config),
-                parse_config_string_value(raw_config[name + "_url"], raw_config),
-                parse_config_string_value(raw_config[name + "_hash"], raw_config),
-                parse_config_string_value(raw_config[name + "_recipe"], raw_config),
-                parse_config_array_value(raw_config[name + "_patches"], raw_config),
-                parse_config_array_value(raw_config[name + "_deps"], raw_config),
-                parse_config_array_value(raw_config[name + "_deps_for_build"], raw_config),
-                parse_config_array_value(raw_config[name + "_options"], raw_config))
+        packages[name] = PackageSpec(
+                parse_params_string_value(raw_params[name + "_version"], raw_params),
+                parse_params_string_value(raw_params[name + "_url"], raw_params),
+                parse_params_string_value(raw_params[name + "_hash"], raw_params),
+                parse_params_string_value(raw_params[name + "_recipe"], raw_params),
+                parse_params_array_value(raw_params[name + "_patches"], raw_params),
+                parse_params_array_value(raw_params[name + "_deps"], raw_params),
+                parse_params_array_value(raw_params[name + "_deps_for_build"], raw_params),
+                parse_params_array_value(raw_params[name + "_options"], raw_params))
 
-    return Config(
-            raw_config["frida_toolchain_version"],
-            raw_config["frida_sdk_version"],
-            raw_config["frida_bootstrap_version"],
+    return DependencyParameters(
+            raw_params["frida_toolchain_version"],
+            raw_params["frida_sdk_version"],
+            raw_params["frida_bootstrap_version"],
             packages)
 
-def parse_config_string_value(v, raw_config):
-    return CONFIG_VARIABLE_REF_PATTERN.sub(lambda match: raw_config[match.group(1)], v)
+def parse_params_string_value(v, raw_params):
+    return CONFIG_VARIABLE_REF_PATTERN.sub(lambda match: raw_params[match.group(1)], v)
 
-def parse_config_array_value(v, raw_config):
-    v = parse_config_string_value(v, raw_config)
+def parse_params_array_value(v, raw_params):
+    v = parse_params_string_value(v, raw_params)
     if v == "":
         return []
     return v.split(" ")
-
-
-@dataclass
-class Package:
-    version: str
-    url: str
-    hash: str
-    recipe: str
-    patches: List[str]
-    deps: List[str]
-    deps_for_build: List[str]
-    options: List[str]
-
-
-@dataclass
-class Config:
-    toolchain_version: str
-    sdk_version: str
-    bootstrap_version: str
-    packages: Dict[str, Package]
 
 
 def perform(*args, **kwargs):
