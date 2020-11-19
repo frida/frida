@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from dataclasses import dataclass
 import glob
 import os
 import platform
@@ -9,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from typing import Dict, List
 import urllib.request
 import v8
 import winenv
@@ -28,6 +30,7 @@ VALA_TARGET_GLIB = "2.66"
 
 RELENG_DIR = os.path.abspath(os.path.dirname(__file__))
 ROOT_DIR = os.path.dirname(RELENG_DIR)
+DEPS_DIR = os.path.join(ROOT_DIR, "deps")
 BOOTSTRAP_TOOLCHAIN_DIR = os.path.join(ROOT_DIR, "build", "fts-toolchain-windows")
 BOOTSTRAP_VALAC = "valac-0.50.exe"
 
@@ -36,6 +39,9 @@ NINJA = os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "bin", "ninja.exe")
 VALAC_FILENAME = "valac-{}.exe".format(VALA_VERSION)
 VALAC_PATTERN = re.compile(r"valac-\d+\.\d+.exe$")
 VALA_TOOLCHAIN_VAPI_SUBPATH_PATTERN = re.compile(r"share\\vala-\d+\.\d+\\vapi$")
+
+CONFIG_KEY_VALUE_PATTERN = re.compile(r"^([a-z]\w+) = (.*?)(?<!\\)$", re.MULTILINE | re.DOTALL)
+CONFIG_VARIABLE_REF_PATTERN = re.compile(r"\$\((\w+)\)")
 
 cached_meson_params = {}
 
@@ -49,6 +55,8 @@ def main():
     build_ended_at = None
     packaging_ended_at = None
     try:
+        config = read_config()
+
         for arch in ARCHS:
             for configuration in CONFIGURATIONS:
                 build_meson_modules(arch, configuration)
@@ -131,7 +139,7 @@ def build_meson_module(name, arch, configuration, runtime, options):
     print("*** Building name={} arch={} runtime={} configuration={}".format(name, arch, configuration, runtime))
     env_dir, shell_env = get_meson_params(arch, configuration, runtime)
 
-    source_dir = os.path.join(ROOT_DIR, name)
+    source_dir = os.path.join(DEPS_DIR, name)
     build_dir = os.path.join(env_dir, name)
     prefix = get_prefix_path(arch, configuration, runtime)
     optimization = 's' if configuration == 'Release' else '0'
@@ -139,7 +147,9 @@ def build_meson_module(name, arch, configuration, runtime, options):
     option_flags = ["-D" + option for option in options]
 
     if not os.path.exists(source_dir):
-        perform("git", "clone", "--recurse-submodules", make_frida_repo_url(name), cwd=ROOT_DIR)
+        if not os.path.exists(DEPS_DIR):
+            os.makedirs(DEPS_DIR)
+        perform("git", "clone", "--recurse-submodules", make_frida_repo_url(name), cwd=DEPS_DIR)
 
     if os.path.exists(build_dir):
         shutil.rmtree(build_dir)
@@ -366,10 +376,10 @@ sys.exit(subprocess.call([r"{bison_path}"] + args))
     return MesonEnv(env_dir, shell_env)
 
 
-class MesonEnv(object):
-    def __init__(self, path, shell_env):
-        self.path = path
-        self.shell_env = shell_env
+@dataclass
+class MesonEnv:
+    path: str
+    shell_env: Dict[str, str]
 
 
 def build_v8(arch, configuration, runtime):
@@ -664,6 +674,70 @@ def vscrt_from_configuration_and_runtime(configuration, runtime):
         result += "d"
     return result
 
+
+def read_config():
+    raw_config = {
+        "capstone_archs": "x86",
+    }
+    with open(os.path.join(RELENG_DIR, "deps.mk"), encoding='utf-8') as f:
+        for match in CONFIG_KEY_VALUE_PATTERN.finditer(f.read()):
+            key, value = match.group(1, 2)
+            value = value \
+                    .replace("\\\n", " ") \
+                    .replace("\t", " ") \
+                    .replace("$(NULL)", "") \
+                    .strip()
+            while "  " in value:
+                value = value.replace("  ", " ")
+            raw_config[key] = value
+
+    packages = {}
+    for key in [k for k in raw_config.keys() if k.endswith("_recipe")]:
+        name = key[:-7]
+        packages[name] = Package(
+                parse_config_string_value(raw_config[name + "_version"], raw_config),
+                parse_config_string_value(raw_config[name + "_url"], raw_config),
+                parse_config_string_value(raw_config[name + "_hash"], raw_config),
+                parse_config_string_value(raw_config[name + "_recipe"], raw_config),
+                parse_config_array_value(raw_config[name + "_patches"], raw_config),
+                parse_config_array_value(raw_config[name + "_deps"], raw_config),
+                parse_config_array_value(raw_config[name + "_deps_for_build"], raw_config),
+                parse_config_array_value(raw_config[name + "_options"], raw_config))
+
+    return Config(
+            raw_config["frida_toolchain_version"],
+            raw_config["frida_sdk_version"],
+            raw_config["frida_bootstrap_version"],
+            packages)
+
+def parse_config_string_value(v, raw_config):
+    return CONFIG_VARIABLE_REF_PATTERN.sub(lambda match: raw_config[match.group(1)], v)
+
+def parse_config_array_value(v, raw_config):
+    v = parse_config_string_value(v, raw_config)
+    if v == "":
+        return []
+    return v.split(" ")
+
+
+@dataclass
+class Package:
+    version: str
+    url: str
+    hash: str
+    recipe: str
+    patches: List[str]
+    deps: List[str]
+    deps_for_build: List[str]
+    options: List[str]
+
+
+@dataclass
+class Config:
+    toolchain_version: str
+    sdk_version: str
+    bootstrap_version: str
+    packages: Dict[str, Package]
 
 
 def perform(*args, **kwargs):

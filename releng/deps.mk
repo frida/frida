@@ -421,12 +421,7 @@ capstone_recipe = meson
 capstone_patches = \
 	$(NULL)
 capstone_options = \
-	-Darchs=$(shell echo $(host_arch) | sed $(sed_regex_option) \
-			-e 's,^x86_64$$,x86,' \
-			-e 's,^arm[^0-9].+,arm,' \
-			-e 's,^arm64e$$,arm64,' \
-			-e 's,^mips.*,mips,' \
-		) \
+	-Darchs=$(capstone_archs) \
 	-Dx86_att_disable=true \
 	-Dcli=disabled \
 	$(NULL)
@@ -434,6 +429,12 @@ capstone_deps = \
 	$(NULL)
 capstone_deps_for_build = \
 	$(NULL)
+capstone_archs := $(shell echo $(host_arch) | sed $(sed_regex_option) \
+		-e 's,^x86_64$$,x86,' \
+		-e 's,^arm[^0-9].+,arm,' \
+		-e 's,^arm64e$$,arm64,' \
+		-e 's,^mips.*,mips,' \
+	)
 
 quickjs_version = 26ce42ea32a3318b1c6318d4db6cf01ade54be61
 quickjs_url = $(frida_base_url)/quickjs.git
