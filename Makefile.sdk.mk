@@ -66,7 +66,7 @@ build/sdk-$(host_os)-$(host_arch).tar.bz2: build/fs-tmp-$(host_os_arch)/.package
 		.
 	@mv $@.tmp $@
 
-build/fs-tmp-%/.package-stamp: $(foreach pkg,$(packages),build/fs-%/manifest/$(pkg).pkg)
+build/fs-tmp-%/.package-stamp: $(foreach pkg, $(packages), build/fs-%/manifest/$(pkg).pkg)
 	@echo
 	@$(call print-status,📦,Assembling)
 	@$(RM) -r $(@D)/package
@@ -313,7 +313,8 @@ build/fs-tmp-%/openssl/Configure: deps/.openssl-stamp
 	@touch $@
 
 build/fs-%/manifest/openssl.pkg: build/fs-env-%.rc build/fs-tmp-%/openssl/Configure \
-		$(foreach dep,$(openssl_deps),build/fs-%/manifest/$(dep).pkg)
+		$(foreach dep, $(openssl_deps), build/fs-%/manifest/$(dep).pkg) \
+		$(foreach dep, $(openssl_deps_for_build), build/fs-$(build_os_arch)/manifest/$(dep).pkg)
 	@$(call print-status,openssl,Building)
 	@builddir=build/fs-tmp-$*/openssl; \
 	(set -x \
@@ -450,7 +451,8 @@ deps/.gn-stamp:
 	@touch $@
 
 build/fs-tmp-%/gn/build.ninja: build/fs-env-%.rc deps/.gn-stamp \
-		$(foreach dep,$(gn_deps),build/fs-%/manifest/$(dep).pkg)
+		$(foreach dep, $(gn_deps), build/fs-%/manifest/$(dep).pkg) \
+		$(foreach dep, $(gn_deps_for_build), build/fs-$(build_os_arch)/manifest/$(dep).pkg)
 	@$(call print-status,gn,Configuring)
 	@$(RM) -r $(@D)
 	@mkdir -p $(@D)
@@ -484,7 +486,9 @@ distclean-depot_tools: clean-depot_tools
 	$(RM) deps/.depot_tools-stamp
 	$(RM) -r deps/depot_tools
 
-deps/.depot_tools-stamp: $(foreach dep,$(depot_tools_deps),build/fs-$(build_os_arch)/manifest/$(dep).pkg)
+deps/.depot_tools-stamp: \
+		$(foreach dep, $(depot_tools_deps), build/fs-$(build_os_arch)/manifest/$(dep).pkg) \
+		$(foreach dep, $(depot_tools_deps_for_build), build/fs-$(build_os_arch)/manifest/$(dep).pkg)
 	$(call grab-and-prepare,depot_tools)
 	@echo '{"is-googler": false, "countdown": 10, "opt-in": null, "version": 1}' > deps/depot_tools/metrics.cfg
 	@touch $@
@@ -514,7 +518,8 @@ deps/v8-checkout/v8: deps/v8-checkout/.gclient
 	@touch $@
 
 build/fs-tmp-%/v8/build.ninja: deps/v8-checkout/v8 build/fs-$(build_os_arch)/manifest/gn.pkg \
-		$(foreach dep,$(v8_deps),build/fs-%/manifest/$(dep).pkg)
+		$(foreach dep, $(v8_deps), build/fs-%/manifest/$(dep).pkg) \
+		$(foreach dep, $(v8_deps_for_build), build/fs-$(build_os_arch)/manifest/$(dep).pkg)
 	@$(call print-status,v8,Configuring)
 	@$(RM) -r $(@D)
 	@mkdir -p $(@D)

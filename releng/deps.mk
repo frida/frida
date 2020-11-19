@@ -29,6 +29,8 @@ libiconv_options = \
 	$(NULL)
 libiconv_deps = \
 	$(NULL)
+libiconv_deps_for_build = \
+	$(NULL)
 
 m4_version = 1.4.18
 m4_url = https://$(gnu_mirror)/m4/m4-$(m4_version).tar.gz
@@ -41,6 +43,8 @@ m4_patches = \
 m4_options = \
 	$(NULL)
 m4_deps = \
+	$(NULL)
+m4_deps_for_build = \
 	$(NULL)
 
 autoconf_version = 2.69
@@ -55,6 +59,8 @@ autoconf_options = \
 autoconf_deps = \
 	m4 \
 	$(NULL)
+autoconf_deps_for_build = \
+	$(NULL)
 
 automake_version = 1.16.2
 automake_url = https://$(gnu_mirror)/automake/automake-$(automake_version).tar.gz
@@ -66,6 +72,8 @@ automake_options = \
 	$(NULL)
 automake_deps = \
 	autoconf \
+	$(NULL)
+automake_deps_for_build = \
 	$(NULL)
 automake_api_version = 1.16
 
@@ -80,6 +88,8 @@ libtool_options = \
 	$(NULL)
 libtool_deps = \
 	automake \
+	$(NULL)
+libtool_deps_for_build = \
 	$(NULL)
 
 gettext_version = 0.21
@@ -96,6 +106,8 @@ gettext_options = \
 gettext_deps = \
 	libtool \
 	$(NULL)
+gettext_deps_for_build = \
+	$(NULL)
 
 zlib_version = 91920caec2160ffd919fd48dc4e7a0f6c3fb36d2
 zlib_url = $(frida_base_url)/zlib.git
@@ -106,6 +118,8 @@ zlib_patches = \
 zlib_options = \
 	$(NULL)
 zlib_deps = \
+	$(NULL)
+zlib_deps_for_build = \
 	$(NULL)
 
 libffi_version = 183fff6038741f27738ea256a2477389cd64abdb
@@ -118,6 +132,8 @@ libffi_options = \
 	$(NULL)
 libffi_deps = \
 	$(NULL)
+libffi_deps_for_build = \
+	$(NULL)
 
 glib_version = 2930430c4ed9bf7373f1027d6fc41fd54a93b51b
 glib_url = $(frida_base_url)/glib.git
@@ -128,6 +144,8 @@ glib_patches = \
 glib_deps = \
 	zlib \
 	libffi \
+	$(NULL)
+glib_deps_for_build = \
 	$(NULL)
 glib_options = \
 	-Dselinux=disabled \
@@ -161,6 +179,8 @@ pkg_config_options = \
 pkg_config_deps = \
 	glib \
 	$(NULL)
+pkg_config_deps_for_build = \
+	$(NULL)
 
 flex_version = 2.6.4
 flex_url = https://github.com/westes/flex/releases/download/v$(flex_version)/flex-$(flex_version).tar.gz
@@ -174,6 +194,8 @@ flex_options = \
 flex_deps = \
 	m4 \
 	$(NULL)
+flex_deps_for_build = \
+	$(NULL)
 
 bison_version = 3.7.3
 bison_url = https://$(gnu_mirror)/bison/bison-$(bison_version).tar.gz
@@ -186,6 +208,8 @@ bison_options = \
 bison_deps = \
 	m4 \
 	$(NULL)
+bison_deps_for_build = \
+	$(NULL)
 
 vala_version = 5067d99e7b9b8ab1c9393f70596fc5bd4f8b46a2
 vala_url = $(frida_base_url)/vala.git
@@ -197,6 +221,8 @@ vala_options = \
 	$(NULL)
 vala_deps = \
 	glib \
+	$(NULL)
+vala_deps_for_build = \
 	flex \
 	bison \
 	$(NULL)
@@ -220,6 +246,8 @@ elfutils_deps = \
 	xz \
 	zlib \
 	$(NULL)
+elfutils_deps_for_build = \
+	$(NULL)
 
 libdwarf_version = 20201020
 libdwarf_url = https://www.prevanders.net/libdwarf-$(libdwarf_version).tar.gz
@@ -232,6 +260,8 @@ libdwarf_options = \
 libdwarf_deps = \
 	elfutils \
 	$(NULL)
+libdwarf_deps_for_build = \
+	$(NULL)
 
 xz_version = 6c84113065f603803683d30342207c73465bbc12
 xz_url = $(frida_base_url)/xz.git
@@ -243,6 +273,8 @@ xz_options = \
 	$(NULL)
 xz_deps = \
 	$(NULL)
+xz_deps_for_build = \
+	$(NULL)
 
 sqlite_version = 9f21a054d5c24c2036e9d1b28c630ecda5ae24c3
 sqlite_url = $(frida_base_url)/sqlite.git
@@ -253,6 +285,8 @@ sqlite_patches = \
 sqlite_options = \
 	$(NULL)
 sqlite_deps = \
+	$(NULL)
+sqlite_deps_for_build = \
 	$(NULL)
 
 libunwind_version = 66ca44cd82389cd7cfbbd482e58324a79f6679ab
@@ -274,6 +308,8 @@ libunwind_deps = \
 	zlib \
 	xz \
 	$(NULL)
+libunwind_deps_for_build = \
+	$(NULL)
 
 glib_networking_version = 85e5a1430517a4682fa4f415b720a870bb35276c
 glib_networking_url = $(frida_base_url)/glib-networking.git
@@ -292,6 +328,8 @@ glib_networking_deps = \
 	glib \
 	openssl \
 	$(NULL)
+glib_networking_deps_for_build = \
+	$(NULL)
 
 libgee_version = c7e96ac037610cc3d0e11dc964b7b1fca479fc2a
 libgee_url = $(frida_base_url)/libgee.git
@@ -303,6 +341,8 @@ libgee_options = \
 	$(NULL)
 libgee_deps = \
 	glib \
+	$(NULL)
+libgee_deps_for_build = \
 	$(NULL)
 
 json_glib_version = 9dd3b3898a2c41a1f9af24da8bab22e61526d299
@@ -318,6 +358,8 @@ json_glib_options = \
 json_glib_deps = \
 	glib \
 	$(NULL)
+json_glib_deps_for_build = \
+	$(NULL)
 
 libpsl_version = 3caf6c33029b6c43fc31ce172badf976f6c37bc4
 libpsl_url = $(frida_base_url)/libpsl.git
@@ -329,6 +371,8 @@ libpsl_options = \
 	-Dtests=false \
 	$(NULL)
 libpsl_deps = \
+	$(NULL)
+libpsl_deps_for_build = \
 	$(NULL)
 
 libxml2_version = f1845f6fd1c0b6aac0f573c77a8250f8d4eb31fd
@@ -342,6 +386,8 @@ libxml2_options = \
 libxml2_deps = \
 	zlib \
 	xz \
+	$(NULL)
+libxml2_deps_for_build = \
 	$(NULL)
 
 libsoup_version = fecd985fa710fa494f62b7bfc9d0728185db2798
@@ -365,6 +411,8 @@ libsoup_deps = \
 	libpsl \
 	libxml2 \
 	$(NULL)
+libsoup_deps_for_build = \
+	$(NULL)
 
 capstone_version = 03295d19d2c3b0162118a6d9742312301cde1d00
 capstone_url = $(frida_base_url)/capstone.git
@@ -384,6 +432,8 @@ capstone_options = \
 	$(NULL)
 capstone_deps = \
 	$(NULL)
+capstone_deps_for_build = \
+	$(NULL)
 
 quickjs_version = 26ce42ea32a3318b1c6318d4db6cf01ade54be61
 quickjs_url = $(frida_base_url)/quickjs.git
@@ -399,6 +449,8 @@ quickjs_options = \
 	$(NULL)
 quickjs_deps = \
 	$(NULL)
+quickjs_deps_for_build = \
+	$(NULL)
 
 tinycc_version = 71c2e2c3d5009bf4ec0c242715250fdc772d49d1
 tinycc_url = $(frida_base_url)/tinycc.git
@@ -409,6 +461,8 @@ tinycc_patches = \
 tinycc_options = \
 	$(NULL)
 tinycc_deps = \
+	$(NULL)
+tinycc_deps_for_build = \
 	$(NULL)
 
 openssl_version = 1.1.1h
@@ -429,6 +483,8 @@ openssl_options = \
 	enable-cms \
 	$(NULL)
 openssl_deps = \
+	$(NULL)
+openssl_deps_for_build = \
 	$(NULL)
 
 v8_version = 9c2e0e6653a4d8a1a7fd2d4109a0b301e81ab7fb
@@ -455,6 +511,8 @@ v8_options = \
 	$(NULL)
 v8_deps = \
 	$(NULL)
+v8_deps_for_build = \
+	$(NULL)
 v8_api_version = 8.0
 
 gn_version = 75194c124f158d7fabdc94048f1a3f850a5f0701
@@ -467,6 +525,8 @@ gn_options = \
 	$(NULL)
 gn_deps = \
 	$(NULL)
+gn_deps_for_build = \
+	$(NULL)
 
 depot_tools_version = b674f8a27725216bd2201652636649d83064ca4a
 depot_tools_url = https://chromium.googlesource.com/chromium/tools/depot_tools.git
@@ -478,10 +538,12 @@ depot_tools_options = \
 	$(NULL)
 depot_tools_deps = \
 	$(NULL)
+depot_tools_deps_for_build = \
+	$(NULL)
 
 
 define expand-packages
-$(sort $(foreach pkg, $1, $(pkg) $($(subst -,_,$(pkg))_deps)))
+$(sort $(foreach pkg, $1, $(pkg) $($(subst -,_,$(pkg))_deps) $($(subst -,_,$(pkg))_deps_for_build)))
 endef
 
 
@@ -503,7 +565,8 @@ deps/.$1-stamp:
 	@touch $$@
 
 build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
-		$(foreach dep,$($(subst -,_,$1)_deps),build/$2-%/manifest/$(dep).pkg) \
+		$(foreach dep, $($(subst -,_,$1)_deps), build/$2-%/manifest/$(dep).pkg) \
+		$(foreach dep, $($(subst -,_,$1)_deps_for_build), build/$2-$(build_os_arch)/manifest/$(dep).pkg) \
 		releng/meson/meson.py
 	@$(call print-status,$1,Building)
 	@prefix=$$(abspath build/$2-$$*); \
@@ -582,7 +645,8 @@ endef
 define make-autotools-configure-rule
 
 build/$2-tmp-%/$1/Makefile: build/$2-env-%.rc deps/$1/configure deps/.$1-stamp \
-		$(foreach dep,$($(subst -,_,$1)_deps),build/$2-%/manifest/$(dep).pkg)
+		$(foreach dep, $($(subst -,_,$1)_deps), build/$2-%/manifest/$(dep).pkg) \
+		$(foreach dep, $($(subst -,_,$1)_deps_for_build), build/$2-$(build_os_arch)/manifest/$(dep).pkg)
 	@$(call print-status,$1,Configuring)
 	@$(RM) -r $$(@D)
 	@mkdir -p $$(@D)

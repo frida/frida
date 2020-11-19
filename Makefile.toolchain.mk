@@ -50,7 +50,7 @@ build/toolchain-$(host_os)-$(host_arch).tar.bz2: build/ft-tmp-$(host_os_arch)/.p
 		.
 	@mv $@.tmp $@
 
-build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg,$(packages),build/ft-%/manifest/$(pkg).pkg)
+build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages), build/ft-%/manifest/$(pkg).pkg)
 	@echo
 	@$(call print-status,📦,Assembling)
 	@$(RM) -r $(@D)/package
