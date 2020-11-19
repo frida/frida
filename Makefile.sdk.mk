@@ -381,16 +381,13 @@ endif
 v8_build_os := $(shell echo $(build_os) | sed 's,^macos$$,mac,')
 ifeq ($(host_os), macos)
 v8_os := mac
-v8_platform_args := $(NULL)
+v8_platform_args := \
+	use_xcode_clang=true \
+	$(NULL)
 ifeq ($(host_arch), $(filter $(host_arch), arm64 arm64e))
 v8_platform_args += mac_deployment_target="11.0"
 else
 v8_platform_args += mac_deployment_target="10.9"
-endif
-ifeq ($(FRIDA_ASAN), yes)
-v8_platform_args += use_xcode_clang=true
-else
-v8_platform_args += use_xcode_clang=false
 endif
 endif
 ifeq ($(host_os), ios)
