@@ -275,6 +275,7 @@ def build(name: str, artifact_name: str, spec: PackageSpec, extra_options: List[
                         build_v8(arch, config, runtime, spec, extra_options)
 
 def build_using_meson(name: str, arch: str, config: str, runtime: str, spec: PackageSpec, extra_options: List[str]):
+    print()
     print("*** Building name={} arch={} runtime={} config={} spec={}".format(name, arch, config, runtime, spec))
     env_dir, shell_env = get_meson_params(arch, config, runtime)
 
