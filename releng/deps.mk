@@ -331,6 +331,20 @@ glib_networking_deps = \
 glib_networking_deps_for_build = \
 	$(NULL)
 
+glib_schannel_version = c077fcafb4ef42228cac4b889efe210565a05764
+glib_schannel_url = $(frida_base_url)/glib-schannel.git
+glib_schannel_hash = $(NULL)
+glib_schannel_recipe = meson
+glib_schannel_patches = \
+	$(NULL)
+glib_schannel_options = \
+	$(NULL)
+glib_schannel_deps = \
+	glib \
+	$(NULL)
+glib_schannel_deps_for_build = \
+	$(NULL)
+
 libgee_version = c7e96ac037610cc3d0e11dc964b7b1fca479fc2a
 libgee_url = $(frida_base_url)/libgee.git
 libgee_hash = $(NULL)

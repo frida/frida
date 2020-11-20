@@ -750,12 +750,12 @@ def ensure_bootstrap_toolchain(bootstrap_version: str) -> SourceState:
 
     print("Extracting bootstrap toolchain...")
     try:
-        tempdir = tempfile.mkdtemp(prefix="frida-bootstrap-toolchain")
+        tempdir = Path(tempfile.mkdtemp(prefix="frida-bootstrap-toolchain"))
         try:
             try:
                 subprocess.check_output([
                     toolchain_archive_path,
-                    "-o" + tempdir,
+                    "-o" + str(tempdir),
                     "-y"
                 ])
             except subprocess.CalledProcessError as e:
@@ -797,7 +797,7 @@ def vscrt_from_configuration_and_runtime(config: str, runtime: str) -> str:
 
 
 def perform(*args, **kwargs):
-    print(" ".join(args))
+    print(">", " ".join(args))
     subprocess.run(args, check=True, **kwargs)
 
 def query_git_head(repo_path: str) -> str:
