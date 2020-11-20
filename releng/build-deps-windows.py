@@ -266,7 +266,7 @@ def build(name: str, artifact_name: str, spec: PackageSpec):
     for arch in archs:
         for config in configs:
             for runtime in runtimes:
-                existing_artifacts = glob(get_prefix_path(arch, config, runtime) / artifact_subpath)
+                existing_artifacts = glob(str(get_prefix_path(arch, config, runtime) / artifact_subpath))
                 if len(existing_artifacts) == 0:
                     if spec.recipe == 'meson':
                         build_using_meson(name, arch, config, runtime, spec)
