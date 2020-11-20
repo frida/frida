@@ -77,22 +77,22 @@ VALA_TOOLCHAIN_VAPI_SUBPATH_PATTERN = re.compile(r"share\\vala-\d+\.\d+\\vapi$")
 
 
 PACKAGES = [
-    ("zlib", "zlib.pc"),
-    ("sqlite", "sqlite3.pc"),
-    ("libffi", "libffi.pc"),
-    ("glib", "glib-2.0.pc"),
-    ("glib-schannel", "gioschannel.pc"),
-    ("libgee", "gee-0.8.pc"),
-    ("json-glib", "json-glib-1.0.pc"),
-    ("libpsl", "libpsl.pc"),
-    ("libxml2", "libxml-2.0.pc"),
-    ("libsoup", "libsoup-2.4.pc"),
-    ("capstone", "capstone.pc"),
-    ("quickjs", "quickjs.pc"),
-    ("tinycc", "libtcc.pc"),
-    ("vala", "valac*.exe"),
-    ("pkg-config", "pkg-config.exe"),
-    ("v8", "v8*.pc"),
+    ("zlib", "zlib.pc", []),
+    ("sqlite", "sqlite3.pc", []),
+    ("libffi", "libffi.pc", []),
+    ("glib", "glib-2.0.pc", ["-Dc_std=c99"]),
+    ("glib-schannel", "gioschannel.pc", []),
+    ("libgee", "gee-0.8.pc", []),
+    ("json-glib", "json-glib-1.0.pc", []),
+    ("libpsl", "libpsl.pc", []),
+    ("libxml2", "libxml-2.0.pc", []),
+    ("libsoup", "libsoup-2.4.pc", []),
+    ("capstone", "capstone.pc", []),
+    ("quickjs", "quickjs.pc", []),
+    ("tinycc", "libtcc.pc", []),
+    ("vala", "valac*.exe", []),
+    ("pkg-config", "pkg-config.exe", []),
+    ("v8", "v8*.pc", []),
 ]
 
 HOST_DEFINES = {
@@ -117,8 +117,8 @@ def main():
         synchronize(params)
         sync_ended_at = time.time()
 
-        for name, artifact_name in PACKAGES:
-            build(name, artifact_name, params.get_package_spec(name))
+        for name, artifact_name, extra_options in PACKAGES:
+            build(name, artifact_name, params.get_package_spec(name), extra_options)
         build_ended_at = time.time()
 
         package()
@@ -149,7 +149,7 @@ def synchronize(params: DependencyParameters):
 
     check_environment()
 
-    for name, _ in PACKAGES:
+    for name, _, _ in PACKAGES:
         pkg_state = grab_and_prepare(name, params.get_package_spec(name), params)
         if pkg_state == SourceState.MODIFIED:
             wipe_build_state()
@@ -192,8 +192,7 @@ def grab_and_prepare_regular_package(name: str, spec: PackageSpec) -> SourceStat
     else:
         print()
         print("{name}: cloning into deps\\{name}".format(name=name))
-        if not DEPS_DIR.exists():
-            os.makedirs(DEPS_DIR)
+        DEPS_DIR.mkdir(parents=True, exist_ok=True)
         perform("git", "clone", "-q", "--recurse-submodules", spec.url, name, cwd=DEPS_DIR)
         perform("git", "checkout", "-q", spec.version, cwd=source_dir)
         source_state = SourceState.PRISTINE
@@ -250,7 +249,7 @@ def wipe_build_state():
             shutil.rmtree(path)
 
 
-def build(name: str, artifact_name: str, spec: PackageSpec):
+def build(name: str, artifact_name: str, spec: PackageSpec, extra_options: List[str]):
     if artifact_name.endswith(".exe"):
         artifact_subpath = PurePath("bin", artifact_name)
         pkg_type = PackageType.TOOL
@@ -270,13 +269,13 @@ def build(name: str, artifact_name: str, spec: PackageSpec):
                 existing_artifacts = glob(str(get_prefix_path(arch, config, runtime) / artifact_subpath))
                 if len(existing_artifacts) == 0:
                     if spec.recipe == 'meson':
-                        build_using_meson(name, arch, config, runtime, spec)
+                        build_using_meson(name, arch, config, runtime, spec, extra_options)
                     else:
                         assert name == 'v8'
                         assert spec.recipe == 'custom'
-                        build_v8(arch, config, runtime, spec)
+                        build_v8(arch, config, runtime, spec, extra_options)
 
-def build_using_meson(name: str, arch: str, config: str, runtime: str, spec: PackageSpec):
+def build_using_meson(name: str, arch: str, config: str, runtime: str, spec: PackageSpec, extra_options: List[str]):
     print("*** Building name={} arch={} runtime={} config={} spec={}".format(name, arch, config, runtime, spec))
     env_dir, shell_env = get_meson_params(arch, config, runtime)
 
@@ -299,6 +298,7 @@ def build_using_meson(name: str, arch: str, config: str, runtime: str, spec: Pac
         "-Db_ndebug=" + ndebug,
         "-Db_vscrt=" + vscrt_from_configuration_and_runtime(config, runtime),
         *spec.options,
+        *extra_options,
         cwd=source_dir,
         env=shell_env
     )
@@ -397,8 +397,7 @@ def generate_meson_env(arch: str, config: str, runtime: str) -> MesonEnv:
     ]])
 
     env_path = env_dir / "env.bat"
-    with open(env_path, "w", encoding='utf-8') as f:
-        f.write("""@ECHO OFF
+    env_path.write_text("""@ECHO OFF
 set PATH={exe_path};%PATH%
 set INCLUDE={include_path}
 set LIB={library_path}
@@ -420,67 +419,65 @@ set DEPOT_TOOLS_WIN_TOOLCHAIN=0
             vc_install_dir=vc_install_dir,
             platform=msvc_platform,
             valac=BOOTSTRAP_VALAC,
-            vala_flags=vala_flags
-        ))
+            vala_flags=vala_flags,
+        ),
+        encoding='utf-8')
 
     rc_path = winxp_bin_dir / "rc.exe"
     rc_wrapper_path = env_dir / "rc.bat"
-    with open(rc_wrapper_path, "w", encoding='utf-8') as f:
-        f.write("""@ECHO OFF
+    rc_wrapper_path.write_text("""@ECHO OFF
 SETLOCAL EnableExtensions
 SET _res=0
 "{rc_path}" {flags} %* || SET _res=1
 ENDLOCAL & SET _res=%_res%
-EXIT /B %_res%""".format(rc_path=rc_path, flags=clflags))
+EXIT /B %_res%""".format(rc_path=rc_path, flags=clflags), encoding='utf-8')
 
-    with open(env_dir / "meson.bat", "w", encoding='utf-8') as f:
-        f.write("""@ECHO OFF
+    (env_dir / "meson.bat").write_text("""@ECHO OFF
 SETLOCAL EnableExtensions
 SET _res=0
 py -3 "{meson_path}" %* || SET _res=1
 ENDLOCAL & SET _res=%_res%
-EXIT /B %_res%""".format(meson_path=MESON))
+EXIT /B %_res%""".format(meson_path=MESON), encoding='utf-8')
 
-    pkgconfig_path = BOOTSTRAP_TOOLCHAIN_DIR / "bin", "pkg-config.exe"
+    pkgconfig_path = BOOTSTRAP_TOOLCHAIN_DIR / "bin" / "pkg-config.exe"
     pkgconfig_lib_dir = prefix / "lib" / "pkgconfig"
     pkgconfig_wrapper_path = env_dir / "pkg-config.bat"
-    with open(pkgconfig_wrapper_path, "w", encoding='utf-8') as f:
-        f.write("""@ECHO OFF
+    pkgconfig_wrapper_path.write_text("""@ECHO OFF
 SETLOCAL EnableExtensions
 SET _res=0
 SET PKG_CONFIG_PATH={pkgconfig_lib_dir}
 "{pkgconfig_path}" --static %* || SET _res=1
 ENDLOCAL & SET _res=%_res%
-EXIT /B %_res%""".format(pkgconfig_path=pkgconfig_path, pkgconfig_lib_dir=pkgconfig_lib_dir))
+EXIT /B %_res%""".format(
+            pkgconfig_path=pkgconfig_path,
+            pkgconfig_lib_dir=pkgconfig_lib_dir,
+        ),
+        encoding='utf-8')
 
     flex_path = BOOTSTRAP_TOOLCHAIN_DIR / "bin" / "flex.exe"
     flex_wrapper_path = env_dir / "flex.py"
-    with open(env_dir / "flex.bat", "w", encoding='utf-8') as f:
-        f.write("""@ECHO OFF
+    (env_dir / "flex.bat").write_text("""@ECHO OFF
 SETLOCAL EnableExtensions
 SET _res=0
 py -3 "{wrapper_path}" %* || SET _res=1
 ENDLOCAL & SET _res=%_res%
-EXIT /B %_res%""".format(wrapper_path=flex_wrapper_path))
-    with open(flex_wrapper_path, "w", encoding='utf-8') as f:
-        f.write("""import subprocess
+EXIT /B %_res%""".format(wrapper_path=flex_wrapper_path), encoding='utf-8')
+    flex_wrapper_path.write_text("""import subprocess
 import sys
 
 args = [arg.replace("/", "\\\\") for arg in sys.argv[1:]]
 sys.exit(subprocess.call([r"{flex_path}"] + args))
-""".format(flex_path=flex_path))
+""".format(flex_path=flex_path), encoding='utf-8')
 
     bison_path = BOOTSTRAP_TOOLCHAIN_DIR / "bin" / "bison.exe"
     bison_wrapper_path = env_dir / "bison.py"
-    with open(env_dir / "bison.bat", "w", encoding='utf-8') as f:
-        f.write("""@ECHO OFF
+    (env_dir / "bison.bat").write_text("""@ECHO OFF
 SETLOCAL EnableExtensions
 SET _res=0
 py -3 "{wrapper_path}" %* || SET _res=1
 ENDLOCAL & SET _res=%_res%
-EXIT /B %_res%""".format(wrapper_path=bison_wrapper_path))
-    with open(bison_wrapper_path, "w", encoding='utf-8') as f:
-        f.write("""\
+EXIT /B %_res%""".format(wrapper_path=bison_wrapper_path), encoding='utf-8')
+    bison_wrapper_path.write_text("""\
 import os
 import subprocess
 import sys
@@ -491,10 +488,11 @@ os.environ["M4"] = r"{m4_path}"
 args = [arg.replace("/", "\\\\") for arg in sys.argv[1:]]
 sys.exit(subprocess.call([r"{bison_path}"] + args))
 """.format(
-        bison_path=bison_path,
-        bison_pkgdatadir=bison_pkgdatadir,
-        m4_path=m4_path
-    ))
+            bison_path=bison_path,
+            bison_pkgdatadir=bison_pkgdatadir,
+            m4_path=m4_path
+        ),
+        encoding='utf-8')
 
     shell_env = {}
     shell_env.update(os.environ)
@@ -514,8 +512,8 @@ sys.exit(subprocess.call([r"{bison_path}"] + args))
 def detect_target_glib() -> str:
     global cached_target_glib
     if cached_target_glib is None:
-        with open(DEPS_DIR / "glib" / "meson.build", "r", encoding='utf-8') as f:
-            major, minor = re.search(r"  version : '(\d+)\.(\d+)\.(\d+)'", f.read()).group(1, 2)
+        major, minor = re.search(r"  version : '(\d+)\.(\d+)\.(\d+)'",
+            (DEPS_DIR / "glib" / "meson.build").read_text(encoding='utf-8')).group(1, 2)
         major = int(major)
         minor = int(minor)
         if minor % 2 != 0:
@@ -524,7 +522,7 @@ def detect_target_glib() -> str:
     return cached_target_glib
 
 
-def build_v8(arch: str, config: str, runtime: str, spec: PackageSpec):
+def build_v8(arch: str, config: str, runtime: str, spec: PackageSpec, extra_options: List[str]):
     depot_dir = DEPS_DIR / "depot_tools"
     gn = depot_dir / "gn.bat"
     env = make_v8_env(depot_dir)
@@ -561,7 +559,7 @@ def build_v8(arch: str, config: str, runtime: str, spec: PackageSpec):
             "windows_sdk_path=\"{}\"".format(win10_sdk_dir),
             "symbol_level=0",
             "strip_absolute_paths_from_debug_symbols=true",
-        ] + spec.options)
+        ] + spec.options + extra_options)
 
         perform(gn, "gen", build_dir.relative_to(source_dir), "--args=" + args, cwd=source_dir, env=env)
 
@@ -587,8 +585,7 @@ def build_v8(arch: str, config: str, runtime: str, spec: PackageSpec):
     libv8_path = lib_dir / "libv8-{}.a".format(api_version)
     shutil.copyfile(monolith_path, libv8_path)
 
-    with open(pkgconfig_dir / "v8-{}.pc".format(api_version), "w", encoding='utf-8') as f:
-        f.write("""\
+    (pkgconfig_dir / "v8-{}.pc".format(api_version)).write_text("""\
 prefix={prefix}
 libdir=${{prefix}}/lib
 includedir=${{prefix}}/include/v8-{api_version}
@@ -598,12 +595,14 @@ Description: V8 JavaScript Engine
 Version: {version}
 Libs: -L${{libdir}} -lv8-{api_version}
 Libs.private: {libs_private}
-Cflags: -I${{includedir}} -I${{includedir}}/v8""".format(
+Cflags: -I${{includedir}} -I${{includedir}}/v8""" \
+        .format(
             prefix=prefix.replace("\\", "/"),
             version=version,
             api_version=api_version,
             libs_private="-lshlwapi -lwinmm"
-        ))
+        ),
+        encoding='utf-8')
 
 def make_v8_env(depot_dir: Path) -> ShellEnv:
     env = {}
@@ -632,9 +631,9 @@ def package():
     sdk_built_files = []
     for prefix in glob(prefixes_dir / "*-static"):
         for root, dirs, files in os.walk(prefix):
-            relpath = root[prefixes_skip_len:]
-            included_files = map(lambda name: PurePath(relpath, name),
-                filter(lambda filename: file_is_sdk_related(relpath, filename), files))
+            relpath = PurePath(root[prefixes_skip_len:])
+            all_files = [relpath / f for f in files]
+            included_files = [f for f in all_files if file_is_sdk_related(f)]
             sdk_built_files.extend(included_files)
         dynamic_libs = glob(PurePath(prefix[:-7] + "-dynamic", "lib", "**", "*.a"), recursive=True)
         dynamic_libs = [path[prefixes_skip_len:] for path in dynamic_libs]
@@ -642,16 +641,16 @@ def package():
 
     toolchain_files = []
     for root, dirs, files in os.walk(get_prefix_path('x86', 'Release', 'static')):
-        relpath = root[prefixes_skip_len:]
-        included_files = map(lambda name: PurePath(relpath, name),
-            filter(lambda filename: file_is_vala_toolchain_related(relpath, filename) or filename in ("pkg-config.exe", "glib-genmarshal", "glib-mkenums"), files))
+        relpath = PurePath(root[prefixes_skip_len:])
+        all_files = [relpath / f for f in files]
+        included_files = [f for f in all_files if file_is_vala_toolchain_related(f) or f.name in ["pkg-config.exe", "glib-genmarshal", "glib-mkenums"]]
         toolchain_files.extend(included_files)
 
     toolchain_mixin_files = []
     for root, dirs, files in os.walk(BOOTSTRAP_TOOLCHAIN_DIR):
-        relpath = root[len(BOOTSTRAP_TOOLCHAIN_DIR) + 1:]
-        included_files = map(lambda name: PurePath(relpath, name),
-            filter(lambda filename: not file_is_vala_toolchain_related(relpath, filename), files))
+        relpath = PurePath(root[len(BOOTSTRAP_TOOLCHAIN_DIR) + 1:])
+        all_files = [relpath / f for f in files]
+        included_files = [f for f in all_files if not file_is_vala_toolchain_related(f)]
         toolchain_mixin_files.extend(included_files)
 
     sdk_built_files.sort()
@@ -681,33 +680,29 @@ def package():
 
     print("All done.")
 
-def file_is_sdk_related(directory: str, filename: str):
-    parts = directory.split("\\")
-    rootdir = parts[0]
+def file_is_sdk_related(candidate: PurePath) -> bool:
+    parts = candidate.parts
+
     subdir = parts[1]
-    subpath = "\\".join(parts[1:])
 
     if subdir == "bin":
         return False
 
-    if subdir == "lib" and ("vala" in subpath or "vala" in filename or "vapigen" in filename):
+    if subdir == "lib" and ("vala" in parts[1:] or "vala" in filename or "vapigen" in filename):
         return False
 
-    base, ext = os.path.splitext(filename)
-    ext = ext[1:]
+    suffix = candidate.suffix
 
-    if ext == "h" and base.startswith("vala"):
+    if suffix == ".h" and candidate.stem.startswith("vala"):
         return False
 
-    if ext in ("vapi", "deps"):
+    if suffix in [".vapi", ".deps"]:
         return not is_vala_toolchain_vapi_directory(directory)
 
-    return "\\share\\" not in directory
+    return "share" not in parts
 
-def file_is_vala_toolchain_related(directory: str, filename: str) -> bool:
-    base, ext = os.path.splitext(filename)
-    ext = ext[1:]
-    if ext in ('vapi', 'deps'):
+def file_is_vala_toolchain_related(candidate: PurePath) -> bool:
+    if candiate.suffix in [".vapi", ".deps"]:
         return is_vala_toolchain_vapi_directory(directory)
     return VALAC_PATTERN.match(filename) is not None
 
@@ -739,10 +734,10 @@ def transform_toolchain_dest(srcfile: PurePath) -> PurePath:
 
 def ensure_bootstrap_toolchain(bootstrap_version: str) -> SourceState:
     version_stamp_path = BOOTSTRAP_TOOLCHAIN_DIR / "VERSION.txt"
+
     if BOOTSTRAP_TOOLCHAIN_DIR.exists():
         try:
-            with open(version_stamp_path, "r", encoding='utf-8') as f:
-                version = f.read().strip()
+            version = version_stamp_path.read_text(encoding='utf-8').strip()
             if version == bootstrap_version:
                 return SourceState.PRISTINE
         except:
@@ -773,8 +768,7 @@ def ensure_bootstrap_toolchain(bootstrap_version: str) -> SourceState:
                 print("Oops:", e.output.decode('utf-8'))
                 raise e
             shutil.move(tempdir / "toolchain-windows", BOOTSTRAP_TOOLCHAIN_DIR)
-            with open(version_stamp_path, "w", encoding='utf-8') as f:
-                f.write(bootstrap_version)
+            version_stamp_path.write_text(bootstrap_version, encoding='utf-8')
         finally:
             shutil.rmtree(tempdir)
     finally:
