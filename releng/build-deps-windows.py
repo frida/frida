@@ -78,7 +78,7 @@ PACKAGES = [
     ("zlib", "zlib.pc", []),
     ("sqlite", "sqlite3.pc", []),
     ("libffi", "libffi.pc", []),
-    ("glib", "glib-2.0.pc", ["-Dc_std=c99"]),
+    ("glib", "glib-2.0.pc", []),
     ("glib-schannel", "gioschannel.pc", []),
     ("libgee", "gee-0.8.pc", []),
     ("json-glib", "json-glib-1.0.pc", []),
@@ -523,9 +523,9 @@ def detect_target_glib() -> str:
 def detect_bootstrap_valac() -> str:
     global cached_bootstrap_valac
     if cached_bootstrap_valac is None:
-        cached_bootstrap_valac = next((BOOTSTRAP_TOOLCHAIN_DIR / "bin").glob("valac*.exe")).name
+        compilers = (BOOTSTRAP_TOOLCHAIN_DIR / "bin").glob("valac*.exe")
+        cached_bootstrap_valac = next(compilers).name
     return cached_bootstrap_valac
-
 
 
 def build_v8(arch: str, config: str, runtime: str, spec: PackageSpec, extra_options: List[str]):
