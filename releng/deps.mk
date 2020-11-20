@@ -135,7 +135,7 @@ libffi_deps = \
 libffi_deps_for_build = \
 	$(NULL)
 
-glib_version = daf9797c39fa0eeaa5abce6114137cf9babff68c
+glib_version = 99c6c01ecb5c81d90592f1f0a3c93108c5e44359
 glib_url = $(frida_base_url)/glib.git
 glib_hash = $(NULL)
 glib_recipe = meson
