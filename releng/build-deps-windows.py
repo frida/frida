@@ -101,6 +101,7 @@ HOST_DEFINES = {
 
 
 cached_meson_params = {}
+cached_target_glib = None
 
 build_arch = 'x86_64' if platform.machine().endswith("64") else 'x86'
 
@@ -335,7 +336,7 @@ def generate_meson_env(arch: str, config: str, runtime: str) -> MesonEnv:
     msvc_dll_dirs = []
     if arch != build_arch:
         build_msvc_platform = msvc_platform_from_arch(build_arch)
-        msvc_dll_dirs.append(msvc_dir / "bin", ("Host" + build_msvc_platform) / build_msvc_platform)
+        msvc_dll_dirs.append(msvc_dir / "bin" / ("Host" + build_msvc_platform) / build_msvc_platform)
 
     (winxp_sdk_dir, winxp_sdk_version) = winenv.get_winxp_sdk()
     winxp_sdk_dir = Path(winxp_sdk_dir)
@@ -364,35 +365,36 @@ def generate_meson_env(arch: str, config: str, runtime: str) -> MesonEnv:
     ])
 
     (win10_sdk_dir, win10_sdk_version) = winenv.get_win10_sdk()
+    win10_sdk_dir = Path(win10_sdk_dir)
 
     m4_path = BOOTSTRAP_TOOLCHAIN_DIR / "bin" / "m4.exe"
     bison_pkgdatadir = BOOTSTRAP_TOOLCHAIN_DIR / "share" / "bison"
 
     vala_flags = "--target-glib=" + detect_target_glib()
 
-    exe_path = ";".join([
+    exe_path = ";".join([str(path) for path in [
         prefix / "bin",
         env_dir,
         BOOTSTRAP_TOOLCHAIN_DIR / "bin",
         winxp_bin_dir,
         msvc_bin_dir,
-    ] + msvc_dll_dirs)
+    ] + msvc_dll_dirs])
 
-    include_path = ";".join([
+    include_path = ";".join([str(path) for path in [
         msvc_dir / "include",
         msvc_dir / "atlmfc" / "include",
         vc_dir / "Auxiliary" / "VS" / "include",
         win10_sdk_dir / "Include" / win10_sdk_version / "ucrt",
         winxp_sdk_dir / "Include",
-    ])
+    ]])
 
-    library_path = ";".join([
+    library_path = ";".join([str(path) for path in [
         msvc_dir / "lib" / msvc_platform,
         msvc_dir / "atlmfc" / "lib" / msvc_platform,
         vc_dir / "Auxiliary" / "VS" / "lib" / msvc_platform,
         win10_sdk_dir / "Lib" / win10_sdk_version / "ucrt" / msvc_platform,
         winxp_lib_dir,
-    ])
+    ]])
 
     env_path = env_dir / "env.bat"
     with open(env_path, "w", encoding='utf-8') as f:
@@ -510,7 +512,16 @@ sys.exit(subprocess.call([r"{bison_path}"] + args))
     return MesonEnv(env_dir, shell_env)
 
 def detect_target_glib() -> str:
-    pass
+    global cached_target_glib
+    if cached_target_glib is None:
+        with open(DEPS_DIR / "glib" / "meson.build", "r", encoding='utf-8') as f:
+            major, minor = re.search(r"  version : '(\d+)\.(\d+)\.(\d+)'", f.read()).group(1, 2)
+        major = int(major)
+        minor = int(minor)
+        if minor % 2 != 0:
+            minor += 1
+        cached_target_glib = "{}.{}".format(major, minor)
+    return cached_target_glib
 
 
 def build_v8(arch: str, config: str, runtime: str, spec: PackageSpec):
