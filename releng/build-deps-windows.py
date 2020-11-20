@@ -70,9 +70,6 @@ BOOTSTRAP_TOOLCHAIN_DIR = ROOT_DIR / "build" / "fts-toolchain-windows"
 
 MESON = RELENG_DIR / "meson" / "meson.py"
 NINJA = BOOTSTRAP_TOOLCHAIN_DIR / "bin" / "ninja.exe"
-VALAC_PATTERN = re.compile(r"valac-\d+\.\d+.exe$")
-VALA_TOOLCHAIN_VAPI_SUBPATH_PATTERN = re.compile(r"share\\vala-\d+\.\d+\\vapi$")
-
 
 PACKAGES = [
     ("zlib", "zlib.pc", []),
@@ -633,29 +630,27 @@ def package():
     print("Determining what to include...")
 
     prefixes_dir = get_prefix_root()
-    prefixes_skip_len = len(prefixes_dir) + 1
 
     sdk_built_files = []
-    for prefix in glob(prefixes_dir / "*-static"):
+    for prefix in prefixes_dir.glob("*-static"):
         for root, dirs, files in os.walk(prefix):
-            relpath = PurePath(root[prefixes_skip_len:])
+            relpath = PurePath(root).relative_to(prefixes_dir)
             all_files = [relpath / f for f in files]
             included_files = [f for f in all_files if file_is_sdk_related(f)]
             sdk_built_files.extend(included_files)
-        dynamic_libs = glob(PurePath(prefix[:-7] + "-dynamic", "lib", "**", "*.a"), recursive=True)
-        dynamic_libs = [path[prefixes_skip_len:] for path in dynamic_libs]
+        dynamic_libs = [f.relative_(prefixes_dir) for f in (prefix.parent / (prefix.name[:-7] + "-dynamic") / "lib").glob("**/*.a")]
         sdk_built_files.extend(dynamic_libs)
 
     toolchain_files = []
     for root, dirs, files in os.walk(get_prefix_path('x86', 'Release', 'static')):
-        relpath = PurePath(root[prefixes_skip_len:])
+        relpath = PurePath(root).relative_to(prefixes_dir)
         all_files = [relpath / f for f in files]
         included_files = [f for f in all_files if file_is_vala_toolchain_related(f) or f.name in ["pkg-config.exe", "glib-genmarshal", "glib-mkenums"]]
         toolchain_files.extend(included_files)
 
     toolchain_mixin_files = []
     for root, dirs, files in os.walk(BOOTSTRAP_TOOLCHAIN_DIR):
-        relpath = PurePath(root[len(BOOTSTRAP_TOOLCHAIN_DIR) + 1:])
+        relpath = PurePath(root).relative_to(BOOTSTRAP_TOOLCHAIN_DIR)
         all_files = [relpath / f for f in files]
         included_files = [f for f in all_files if not file_is_vala_toolchain_related(f)]
         toolchain_mixin_files.extend(included_files)
@@ -689,14 +684,15 @@ def package():
 
 def file_is_sdk_related(candidate: PurePath) -> bool:
     parts = candidate.parts
-
     subdir = parts[1]
 
     if subdir == "bin":
         return False
 
-    if subdir == "lib" and ("vala" in parts[1:] or "vala" in filename or "vapigen" in filename):
-        return False
+    if subdir == "lib":
+        filename = candidate.name
+        if "vala" in parts[1:] or "vala" in filename or "vapigen" in filename:
+            return False
 
     suffix = candidate.suffix
 
@@ -704,17 +700,22 @@ def file_is_sdk_related(candidate: PurePath) -> bool:
         return False
 
     if suffix in [".vapi", ".deps"]:
-        return not is_vala_toolchain_vapi_directory(directory)
+        return not is_vala_toolchain_vapi_directory(candidate.parent)
 
     return "share" not in parts
 
 def file_is_vala_toolchain_related(candidate: PurePath) -> bool:
-    if candiate.suffix in [".vapi", ".deps"]:
-        return is_vala_toolchain_vapi_directory(directory)
-    return VALAC_PATTERN.match(filename) is not None
+    if candidate.suffix in [".vapi", ".deps"]:
+        return is_vala_toolchain_vapi_directory(candidate.parent)
+    return candidate.name.startswith("valac-")
 
 def is_vala_toolchain_vapi_directory(directory: PurePath) -> bool:
-    return VALA_TOOLCHAIN_VAPI_SUBPATH_PATTERN.search(directory) is not None
+    parts = directory.parts[:-3]
+    if len(parts) != 3:
+        return False
+    return parts[0] == "share" and \
+        parts[1].startswith("vala-") and \
+        parts[2] == "vapi"
 
 def transform_identity(srcfile: PurePath) -> PurePath:
     return srcfile
