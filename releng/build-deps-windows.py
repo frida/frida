@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 from dataclasses import dataclass
-import glob
+from enum import Enum
+from glob import glob
 import os
 import platform
 import re
@@ -10,20 +11,54 @@ import subprocess
 import sys
 import tempfile
 import time
-from typing import Dict, List
+from typing import Callable, Dict, List, Tuple
 import urllib.request
+
+from deps import read_dependency_parameters, DependencyParameters, PackageSpec
 import v8
 import winenv
 
 
-ARCHS = ['x86_64', 'x86']
-CONFIGURATIONS = ['Debug', 'Release']
-TOOL_TARGET_RUNTIMES = ['static']
-LIBRARY_TARGET_RUNTIMES = ['static', 'dynamic']
+class PackageType(Enum):
+    TOOL = 1,
+    LIBRARY = 2,
+
+
+class SourceState(Enum):
+    PRISTINE = 1,
+    MODIFIED = 2,
+
+
+EnvDir = str
+ShellEnv = Dict[str, str]
+
+
+@dataclass
+class MesonEnv:
+    path: str
+    shell_env: ShellEnv
+
+
+
+class MissingDependencyError(Exception):
+    pass
+
+
+ARCHITECTURES = {
+    PackageType.TOOL: ['x86'],
+    PackageType.LIBRARY: ['x86_64', 'x86'],
+}
+CONFIGURATIONS = {
+    PackageType.TOOL: ['Release'],
+    PackageType.LIBRARY: ['Debug', 'Release'],
+}
+RUNTIMES = {
+    PackageType.TOOL: ['static'],
+    PackageType.LIBRARY: ['static', 'dynamic'],
+}
 COMPRESSION_LEVEL = 9
 
 BOOTSTRAP_TOOLCHAIN_URL = "https://build.frida.re/toolchain-{version}-windows-x86.exe"
-VALA_VERSION = "0.50"
 VALA_TARGET_GLIB = "2.66"
 
 
@@ -35,85 +70,78 @@ BOOTSTRAP_VALAC = "valac-0.50.exe"
 
 MESON = os.path.join(RELENG_DIR, "meson", "meson.py")
 NINJA = os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "bin", "ninja.exe")
-VALAC_FILENAME = "valac-{}.exe".format(VALA_VERSION)
 VALAC_PATTERN = re.compile(r"valac-\d+\.\d+.exe$")
 VALA_TOOLCHAIN_VAPI_SUBPATH_PATTERN = re.compile(r"share\\vala-\d+\.\d+\\vapi$")
 
-CONFIG_KEY_VALUE_PATTERN = re.compile(r"^([a-z]\w+) = (.*?)(?<!\\)$", re.MULTILINE | re.DOTALL)
-CONFIG_VARIABLE_REF_PATTERN = re.compile(r"\$\((\w+)\)")
+
+PACKAGES = [
+    ("zlib", "zlib.pc"),
+    ("sqlite", "sqlite3.pc"),
+    ("libffi", "libffi.pc"),
+    ("glib", "glib-2.0.pc"),
+    ("glib-schannel", "gioschannel.pc"),
+    ("libgee", "gee-0.8.pc"),
+    ("json-glib", "json-glib-1.0.pc"),
+    ("libpsl", "libpsl.pc"),
+    ("libxml2", "libxml-2.0.pc"),
+    ("libsoup", "libsoup-2.4.pc"),
+    ("capstone", "capstone.pc"),
+    ("quickjs", "quickjs.pc"),
+    ("tinycc", "libtcc.pc"),
+    ("vala", "valac*.exe"),
+    ("pkg-config", "pkg-config.exe"),
+    ("v8", "v8*.pc"),
+]
+
+HOST_DEFINES = {
+    "capstone_archs": "x86",
+}
+
 
 cached_meson_params = {}
 
 build_arch = 'x86_64' if platform.machine().endswith("64") else 'x86'
 
 
-@dataclass
-class PackageSpec:
-    version: str
-    url: str
-    hash: str
-    recipe: str
-    patches: List[str]
-    deps: List[str]
-    deps_for_build: List[str]
-    options: List[str]
-
-
-@dataclass
-class DependencyParameters:
-    toolchain_version: str
-    sdk_version: str
-    bootstrap_version: str
-    packages: Dict[str, PackageSpec]
-
-    def get_package_spec(self, name: str) -> PackageSpec:
-        return self.packages[name.replace("-", "_")]
-
-
 def main():
     check_environment()
 
+    params = read_dependency_parameters(HOST_DEFINES)
+
     started_at = time.time()
+    sync_ended_at = None
     build_ended_at = None
     packaging_ended_at = None
     try:
-        params = read_dependency_parameters()
+        synchronize(params)
+        sync_ended_at = time.time()
 
-        for arch in ARCHS:
-            for configuration in CONFIGURATIONS:
-                build_meson_modules(arch, configuration, params)
-
-        for arch in ARCHS:
-            for configuration in CONFIGURATIONS:
-                for runtime in LIBRARY_TARGET_RUNTIMES:
-                    build_v8(arch, configuration, runtime, params)
-
+        for name, artifact_name in PACKAGES:
+            build(name, artifact_name, params.get_package_spec(name))
         build_ended_at = time.time()
 
         package()
-
         packaging_ended_at = time.time()
     finally:
         ended_at = time.time()
 
-        if build_ended_at is not None:
+        if sync_ended_at is not None:
             print("")
             print("*** TIME SPENT")
             print("")
             print("      Total: {}".format(format_duration(ended_at - started_at)))
 
+        if sync_ended_at is not None:
+            print("       Sync: {}".format(format_duration(sync_ended_at - started_at)))
+
         if build_ended_at is not None:
-            print("      Build: {}".format(format_duration(build_ended_at - started_at)))
+            print("      Build: {}".format(format_duration(build_ended_at - sync_ended_at)))
 
         if packaging_ended_at is not None:
             print("  Packaging: {}".format(format_duration(packaging_ended_at - build_ended_at)))
 
-    end = time.time()
-
 
 def check_environment():
-    ensure_bootstrap_toolchain()
-
     try:
         winenv.get_msvs_installation_dir()
         winenv.get_winxp_sdk()
@@ -128,57 +156,128 @@ def check_environment():
             sys.exit(1)
 
 
-def build_meson_modules(arch: str, configuration: str, params: DependencyParameters):
-    modules = [
-        ("zlib", "zlib.pc"),
-        ("sqlite", "sqlite3.pc"),
-        ("libffi", "libffi.pc"),
-        ("glib", "glib-2.0.pc"),
-        ("glib-schannel", "gioschannel.pc"),
-        ("libgee", "gee-0.8.pc"),
-        ("json-glib", "json-glib-1.0.pc"),
-        ("libpsl", "libpsl.pc"),
-        ("libxml2", "libxml-2.0.pc"),
-        ("libsoup", "libsoup-2.4.pc"),
-        ("capstone", "capstone.pc"),
-        ("quickjs", "quickjs.pc"),
-        ("tinycc", "libtcc.pc"),
-        ("vala", VALAC_FILENAME),
-        ("pkg-config", "pkg-config.exe"),
-    ]
-    for (name, artifact_name) in modules:
-        if artifact_name.endswith(".pc"):
-            artifact_subpath = os.path.join("lib", "pkgconfig", artifact_name)
-            runtime_flavors = LIBRARY_TARGET_RUNTIMES
-        elif artifact_name.endswith(".exe"):
-            artifact_subpath = os.path.join("bin", artifact_name)
-            runtime_flavors = TOOL_TARGET_RUNTIMES
-        else:
-            raise NotImplementedError("unsupported artifact type")
-        for runtime in runtime_flavors:
-            artifact_path = os.path.join(get_prefix_path(arch, configuration, runtime), artifact_subpath)
-            if not os.path.exists(artifact_path):
-                build_meson_module(name, arch, configuration, runtime, params.get_package_spec(name))
+def synchronize(params: DependencyParameters):
+    toolchain_state = ensure_bootstrap_toolchain(params.bootstrap_version)
+    if toolchain_state == SourceState.MODIFIED:
+        wipe_build_state()
+    for name, _ in PACKAGES:
+        pkg_state = grab_and_prepare(name, params.get_package_spec(name), params)
+        if pkg_state == SourceState.MODIFIED:
+            wipe_build_state()
 
-def build_meson_module(name: str, arch: str, configuration: str, runtime: str, spec: PackageSpec):
-    print("*** Building name={} arch={} runtime={} configuration={} spec={}".format(name, arch, configuration, runtime, spec))
+def grab_and_prepare(name: str, spec: PackageSpec, params: DependencyParameters) -> SourceState:
+    if spec.recipe != 'custom':
+        return grab_and_prepare_regular_package(name, spec)
+
+    assert name == 'v8'
+    return grab_and_prepare_v8_package(spec, params.get_package_spec("depot_tools"))
+
+def grab_and_prepare_regular_package(name: str, spec: PackageSpec) -> SourceState:
     assert spec.hash == ""
-    assert spec.recipe == 'meson'
     assert spec.patches == []
 
-    env_dir, shell_env = get_meson_params(arch, configuration, runtime)
-
     source_dir = os.path.join(DEPS_DIR, name)
-    build_dir = os.path.join(env_dir, name)
-    prefix = get_prefix_path(arch, configuration, runtime)
-    optimization = 's' if configuration == 'Release' else '0'
-    ndebug = 'true' if configuration == 'Release' else 'false'
-
-    if not os.path.exists(source_dir):
+    if os.path.exists(source_dir):
+        if query_git_head(source_dir) == spec.version:
+            source_state = SourceState.PRISTINE
+        else:
+            print("{name}: synchronizing".format(name=name))
+            perform("git", "fetch", "-q", cwd=source_dir)
+            perform("git", "checkout", "-q", spec.version, cwd=source_dir)
+            source_state = SourceState.MODIFIED
+    else:
+        print("{name}: cloning into deps\\{name}".format(name=name))
         if not os.path.exists(DEPS_DIR):
             os.makedirs(DEPS_DIR)
         perform("git", "clone", "-q", "--recurse-submodules", spec.url, name, cwd=DEPS_DIR)
         perform("git", "checkout", "-q", spec.version, cwd=source_dir)
+        source_state = SourceState.PRISTINE
+
+    return source_state
+
+def grab_and_prepare_v8_package(v8_spec: PackageSpec, depot_spec: PackageSpec) -> SourceState:
+    assert v8_spec.hash == ""
+    assert v8_spec.patches == []
+    assert v8_spec.deps == []
+    assert v8_spec.deps_for_build == []
+
+    assert depot_spec.deps == []
+    assert depot_spec.deps_for_build == []
+    grab_and_prepare_regular_package("depot_tools", depot_spec)
+    depot_dir = os.path.join(DEPS_DIR, "depot_tools")
+    gclient = os.path.join(depot_dir, "gclient.bat")
+    env = make_v8_env(depot_dir)
+
+    checkout_dir = os.path.join(DEPS_DIR, "v8-checkout")
+
+    source_dir = os.path.join(checkout_dir, "v8")
+    source_exists = os.path.exists(source_dir)
+    if source_exists and query_git_head(source_dir) == v8_spec.version:
+        return SourceState.PRISTINE
+
+    if source_exists:
+        print("v8: synchronizing")
+        source_state = SourceState.MODIFIED
+    else:
+        print("v8: cloning into deps\\v8-checkout")
+        source_state = SourceState.PRISTINE
+
+    spec = """solutions = [ {{ "url": "{url}@{version}", "managed": False, "name": "v8", "deps_file": "DEPS", "custom_deps": {{}}, }}, ]""" \
+        .format(url=v8_spec.url, version=v8_spec.version)
+    perform(gclient, "config", "--spec", spec, cwd=checkout_dir, env=env)
+
+    perform(gclient, "sync", cwd=checkout_dir, env=env)
+
+    return source_state
+
+
+def wipe_build_state():
+    print("*** Wiping build state")
+    locations = [
+        ("existing packages", get_prefix_root()),
+        ("build directories", get_tmp_root()),
+    ]
+    for description, path in locations:
+        if os.path.exists(path):
+            print("Wiping", description)
+            shutil.rmtree(path)
+
+
+def build(name: str, artifact_name: str, spec: PackageSpec):
+    if artifact_name.endswith(".exe"):
+        artifact_subpath = os.path.join("bin", artifact_name)
+        pkg_type = PackageType.TOOL
+    elif artifact_name.endswith(".pc"):
+        artifact_subpath = os.path.join("lib", "pkgconfig", artifact_name)
+        pkg_type = PackageType.LIBRARY
+    else:
+        raise NotImplementedError("unsupported artifact type")
+
+    archs = ARCHITECTURES[pkg_type]
+    configs = CONFIGURATIONS[pkg_type]
+    runtimes = RUNTIMES[pkg_type]
+
+    for arch in archs:
+        for config in configs:
+            for runtime in runtimes:
+                existing_artifacts = glob(os.path.join(get_prefix_path(arch, config, runtime), artifact_subpath))
+                if len(existing_artifacts) == 0:
+                    if spec.recipe == 'meson':
+                        build_using_meson(name, arch, config, runtime, spec)
+                    else:
+                        assert name == 'v8'
+                        assert spec.recipe == 'custom'
+                        build_v8(arch, config, runtime, spec)
+
+def build_using_meson(name: str, arch: str, config: str, runtime: str, spec: PackageSpec):
+    print("*** Building name={} arch={} runtime={} config={} spec={}".format(name, arch, config, runtime, spec))
+    env_dir, shell_env = get_meson_params(arch, config, runtime)
+
+    source_dir = os.path.join(DEPS_DIR, name)
+    build_dir = os.path.join(env_dir, name)
+    prefix = get_prefix_path(arch, config, runtime)
+    optimization = 's' if config == 'Release' else '0'
+    ndebug = 'true' if config == 'Release' else 'false'
 
     if os.path.exists(build_dir):
         shutil.rmtree(build_dir)
@@ -191,7 +290,7 @@ def build_meson_module(name: str, arch: str, configuration: str, runtime: str, s
         "--backend", "ninja",
         "-Doptimization=" + optimization,
         "-Db_ndebug=" + ndebug,
-        "-Db_vscrt=" + vscrt_from_configuration_and_runtime(configuration, runtime),
+        "-Db_vscrt=" + vscrt_from_configuration_and_runtime(config, runtime),
         *spec.options,
         cwd=source_dir,
         env=shell_env
@@ -199,25 +298,25 @@ def build_meson_module(name: str, arch: str, configuration: str, runtime: str, s
 
     perform(NINJA, "install", cwd=build_dir, env=shell_env)
 
-def get_meson_params(arch, configuration, runtime):
+def get_meson_params(arch: str, config: str, runtime: str) -> Tuple[EnvDir, ShellEnv]:
     global cached_meson_params
 
-    identifier = ":".join([arch, configuration, runtime])
+    identifier = ":".join([arch, config, runtime])
 
     params = cached_meson_params.get(identifier, None)
     if params is None:
-        params = generate_meson_params(arch, configuration, runtime)
+        params = generate_meson_params(arch, config, runtime)
         cached_meson_params[identifier] = params
 
     return params
 
-def generate_meson_params(arch, configuration, runtime):
-    env = generate_meson_env(arch, configuration, runtime)
+def generate_meson_params(arch: str, config: str, runtime: str) -> Tuple[EnvDir, ShellEnv]:
+    env = generate_meson_env(arch, config, runtime)
     return (env.path, env.shell_env)
 
-def generate_meson_env(arch, configuration, runtime):
-    prefix = get_prefix_path(arch, configuration, runtime)
-    env_dir = get_tmp_path(arch, configuration, runtime)
+def generate_meson_env(arch: str, config: str, runtime: str) -> MesonEnv:
+    prefix = get_prefix_path(arch, config, runtime)
+    env_dir = get_tmp_path(arch, config, runtime)
     if not os.path.exists(env_dir):
         os.makedirs(env_dir)
 
@@ -405,60 +504,19 @@ sys.exit(subprocess.call([r"{bison_path}"] + args))
     return MesonEnv(env_dir, shell_env)
 
 
-@dataclass
-class MesonEnv:
-    path: str
-    shell_env: Dict[str, str]
-
-
-def build_v8(arch: str, configuration: str, runtime: str, params: DependencyParameters):
-    v8_spec = params.get_package_spec("v8")
-    assert v8_spec.hash == ""
-    assert v8_spec.recipe == 'custom'
-    assert v8_spec.patches == []
-
-    depot_spec = params.get_package_spec("depot_tools")
-    assert depot_spec.hash == ""
-    assert depot_spec.recipe == 'custom'
-    assert depot_spec.patches == []
-
-    prefix = get_prefix_path(arch, configuration, runtime)
-
-    lib_dir = os.path.join(prefix, "lib")
-    pkgconfig_dir = os.path.join(lib_dir, "pkgconfig")
-    if len(glob.glob(os.path.join(pkgconfig_dir, "v8-*.pc"))) > 0:
-        return
-
+def build_v8(arch: str, config: str, runtime: str, spec: PackageSpec):
     depot_dir = os.path.join(DEPS_DIR, "depot_tools")
-    if not os.path.exists(depot_dir):
-        perform("git", "clone", "-q", "--recurse-submodules", depot_spec.url, "depot_tools", cwd=DEPS_DIR)
-        perform("git", "checkout", "-q", depot_spec.version, cwd=depot_dir)
-
-    gclient = os.path.join(depot_dir, "gclient.bat")
     gn = os.path.join(depot_dir, "gn.bat")
+    env = make_v8_env(depot_dir)
 
-    env = {}
-    env.update(os.environ)
-    env["PATH"] = depot_dir + ";" + env["PATH"]
-    env["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
+    source_dir = os.path.join(DEPS_DIR, "v8-checkout", "v8")
 
-    checkout_dir = os.path.join(DEPS_DIR, "v8-checkout")
-    config_path = os.path.join(checkout_dir, ".gclient")
-    if not os.path.exists(config_path):
-        spec = """solutions = [ {{ "url": "{url}@{version}", "managed": False, "name": "v8", "deps_file": "DEPS", "custom_deps": {{}}, }}, ]""" \
-            .format(url=v8_spec.url, version=v8_spec.version)
-        perform(gclient, "config", "--spec", spec, cwd=checkout_dir, env=env)
-
-    source_dir = os.path.join(checkout_dir, "v8")
-    if not os.path.exists(source_dir):
-        perform(gclient, "sync", cwd=checkout_dir, env=env)
-
-    build_dir = os.path.join(get_tmp_path(arch, configuration, runtime), "v8")
+    build_dir = os.path.join(get_tmp_path(arch, config, runtime), "v8")
     if not os.path.exists(os.path.join(build_dir, "build.ninja")):
         if os.path.exists(build_dir):
             shutil.rmtree(build_dir)
 
-        if configuration == 'Release':
+        if config == 'Release':
             configuration_args = [
                 "is_official_build=true",
                 "is_debug=false",
@@ -483,7 +541,7 @@ def build_v8(arch: str, configuration: str, runtime: str, params: DependencyPara
             "windows_sdk_path=\"{}\"".format(win10_sdk_dir),
             "symbol_level=0",
             "strip_absolute_paths_from_debug_symbols=true",
-        ] + v8_spec.options)
+        ] + spec.options)
 
         perform(gn, "gen", os.path.relpath(build_dir, start=source_dir), "--args=" + args, cwd=source_dir, env=env)
 
@@ -492,13 +550,18 @@ def build_v8(arch: str, configuration: str, runtime: str, params: DependencyPara
 
     version, api_version = v8.detect_version(source_dir)
 
+    prefix = get_prefix_path(arch, config, runtime)
+
     include_dir = os.path.join(prefix, "include", "v8-" + api_version, "v8")
     for header_dir in [os.path.join(source_dir, "include"), os.path.join(build_dir, "gen", "include")]:
-        header_files = [os.path.relpath(path, header_dir) for path in glob.glob(os.path.join(header_dir, "**", "*.h"), recursive=True)]
+        header_files = [os.path.relpath(path, header_dir) for path in glob(os.path.join(header_dir, "**", "*.h"), recursive=True)]
         copy_files(header_dir, header_files, include_dir)
 
     v8.patch_config_header(os.path.join(include_dir, "v8config.h"), source_dir, build_dir, gn, env)
 
+    lib_dir = os.path.join(prefix, "lib")
+
+    pkgconfig_dir = os.path.join(lib_dir, "pkgconfig")
     if not os.path.exists(pkgconfig_dir):
         os.makedirs(pkgconfig_dir)
 
@@ -523,6 +586,13 @@ Cflags: -I${{includedir}} -I${{includedir}}/v8""".format(
             libs_private="-lshlwapi -lwinmm"
         ))
 
+def make_v8_env(depot_dir: str) -> ShellEnv:
+    env = {}
+    env.update(os.environ)
+    env["PATH"] = depot_dir + ";" + env["PATH"]
+    env["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
+    return env
+
 
 def package():
     toolchain_filename = "toolchain-windows-x86.exe"
@@ -537,17 +607,17 @@ def package():
     print()
     print("Determining what to include...")
 
-    prefixes_dir = os.path.join(ROOT_DIR, "build", "fts-windows")
+    prefixes_dir = get_prefix_root()
     prefixes_skip_len = len(prefixes_dir) + 1
 
     sdk_built_files = []
-    for prefix in glob.glob(os.path.join(prefixes_dir, "*-static")):
+    for prefix in glob(os.path.join(prefixes_dir, "*-static")):
         for root, dirs, files in os.walk(prefix):
             relpath = root[prefixes_skip_len:]
             included_files = map(lambda name: os.path.join(relpath, name),
                 filter(lambda filename: file_is_sdk_related(relpath, filename), files))
             sdk_built_files.extend(included_files)
-        dynamic_libs = glob.glob(os.path.join(prefix[:-7] + "-dynamic", "lib", "**", "*.a"), recursive=True)
+        dynamic_libs = glob(os.path.join(prefix[:-7] + "-dynamic", "lib", "**", "*.a"), recursive=True)
         dynamic_libs = [path[prefixes_skip_len:] for path in dynamic_libs]
         sdk_built_files.extend(dynamic_libs)
 
@@ -592,7 +662,7 @@ def package():
 
     print("All done.")
 
-def file_is_sdk_related(directory, filename):
+def file_is_sdk_related(directory: str, filename: str):
     parts = directory.split("\\")
     rootdir = parts[0]
     subdir = parts[1]
@@ -615,30 +685,30 @@ def file_is_sdk_related(directory, filename):
 
     return "\\share\\" not in directory
 
-def file_is_vala_toolchain_related(directory, filename):
+def file_is_vala_toolchain_related(directory: str, filename: str) -> bool:
     base, ext = os.path.splitext(filename)
     ext = ext[1:]
     if ext in ('vapi', 'deps'):
         return is_vala_toolchain_vapi_directory(directory)
     return VALAC_PATTERN.match(filename) is not None
 
-def is_vala_toolchain_vapi_directory(directory):
+def is_vala_toolchain_vapi_directory(directory: str) -> bool:
     return VALA_TOOLCHAIN_VAPI_SUBPATH_PATTERN.search(directory) is not None
 
-def transform_identity(srcfile):
+def transform_identity(srcfile: str) -> str:
     return srcfile
 
-def transform_sdk_dest(srcfile):
+def transform_sdk_dest(srcfile: str) -> str:
     parts = os.path.dirname(srcfile).split("\\")
     rootdir = parts[0]
     subpath = "\\".join(parts[1:])
 
     filename = os.path.basename(srcfile)
 
-    arch, configuration, runtime = rootdir.split("-")
+    arch, config, runtime = rootdir.split("-")
     rootdir = "-".join([
         msvs_platform_from_arch(arch),
-        configuration.title()
+        config.title()
     ])
 
     if runtime == 'dynamic' and subpath.split("\\")[0] == "lib":
@@ -646,16 +716,28 @@ def transform_sdk_dest(srcfile):
 
     return os.path.join(rootdir, subpath, filename)
 
-def transform_toolchain_dest(srcfile):
+def transform_toolchain_dest(srcfile: str) -> str:
     return srcfile[srcfile.index("\\") + 1:]
 
 
-def ensure_bootstrap_toolchain():
+def ensure_bootstrap_toolchain(bootstrap_version: str) -> SourceState:
+    version_stamp_path = os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "VERSION.txt")
     if os.path.exists(BOOTSTRAP_TOOLCHAIN_DIR):
-        return
+        try:
+            with open(version_stamp_path, "r", encoding='utf-8') as f:
+                version = f.read().strip()
+            if version == bootstrap_version:
+                return SourceState.PRISTINE
+        except:
+            pass
+        shutil.rmtree(BOOTSTRAP_TOOLCHAIN_DIR)
+
+        source_state = SourceState.MODIFIED
+    else:
+        source_state = SourceState.PRISTINE
 
     print("Downloading bootstrap toolchain...")
-    with urllib.request.urlopen(BOOTSTRAP_TOOLCHAIN_URL) as response, \
+    with urllib.request.urlopen(BOOTSTRAP_TOOLCHAIN_URL.format(version=bootstrap_version)) as response, \
             tempfile.NamedTemporaryFile(suffix=".exe", delete=False) as archive:
         shutil.copyfileobj(response, archive)
         toolchain_archive_path = archive.name
@@ -674,80 +756,48 @@ def ensure_bootstrap_toolchain():
                 print("Oops:", e.output.decode('utf-8'))
                 raise e
             shutil.move(os.path.join(tempdir, "toolchain-windows"), BOOTSTRAP_TOOLCHAIN_DIR)
+            with open(version_stamp_path, "w", encoding='utf-8') as f:
+                f.write(bootstrap_version)
         finally:
             shutil.rmtree(tempdir)
     finally:
         os.unlink(toolchain_archive_path)
 
-def get_prefix_path(arch, configuration, runtime):
-    return os.path.join(ROOT_DIR, "build", "fts-windows", "{}-{}-{}".format(arch, configuration.lower(), runtime))
+    return source_state
 
-def get_tmp_path(arch, configuration, runtime):
-    return os.path.join(ROOT_DIR, "build", "fts-tmp-windows", "{}-{}-{}".format(arch, configuration.lower(), runtime))
+def get_prefix_root() -> str:
+    return os.path.join(ROOT_DIR, "build", "fts-windows")
 
-def msvs_platform_from_arch(arch):
+def get_prefix_path(arch: str, config: str, runtime: str) -> str:
+    return os.path.join(get_prefix_root(), "{}-{}-{}".format(arch, config.lower(), runtime))
+
+def get_tmp_root() -> str:
+    return os.path.join(ROOT_DIR, "build", "fts-tmp-windows")
+
+def get_tmp_path(arch: str, config: str, runtime: str) -> str:
+    return os.path.join(get_tmp_root(), "{}-{}-{}".format(arch, config.lower(), runtime))
+
+def msvs_platform_from_arch(arch: str) -> str:
     return 'x64' if arch == 'x86_64' else 'Win32'
 
-def msvc_platform_from_arch(arch):
+def msvc_platform_from_arch(arch: str) -> str:
     return 'x64' if arch == 'x86_64' else 'x86'
 
-def vscrt_from_configuration_and_runtime(configuration, runtime):
+def vscrt_from_configuration_and_runtime(config: str, runtime: str) -> str:
     result = "md" if runtime == 'dynamic' else "mt"
-    if configuration == 'Debug':
+    if config == 'Debug':
         result += "d"
     return result
-
-
-def read_dependency_parameters():
-    raw_params = {
-        "capstone_archs": "x86",
-    }
-    with open(os.path.join(RELENG_DIR, "deps.mk"), encoding='utf-8') as f:
-        for match in CONFIG_KEY_VALUE_PATTERN.finditer(f.read()):
-            key, value = match.group(1, 2)
-            value = value \
-                    .replace("\\\n", " ") \
-                    .replace("\t", " ") \
-                    .replace("$(NULL)", "") \
-                    .strip()
-            while "  " in value:
-                value = value.replace("  ", " ")
-            raw_params[key] = value
-
-    packages = {}
-    for key in [k for k in raw_params.keys() if k.endswith("_recipe")]:
-        name = key[:-7]
-        packages[name] = PackageSpec(
-                parse_params_string_value(raw_params[name + "_version"], raw_params),
-                parse_params_string_value(raw_params[name + "_url"], raw_params),
-                parse_params_string_value(raw_params[name + "_hash"], raw_params),
-                parse_params_string_value(raw_params[name + "_recipe"], raw_params),
-                parse_params_array_value(raw_params[name + "_patches"], raw_params),
-                parse_params_array_value(raw_params[name + "_deps"], raw_params),
-                parse_params_array_value(raw_params[name + "_deps_for_build"], raw_params),
-                parse_params_array_value(raw_params[name + "_options"], raw_params))
-
-    return DependencyParameters(
-            raw_params["frida_toolchain_version"],
-            raw_params["frida_sdk_version"],
-            raw_params["frida_bootstrap_version"],
-            packages)
-
-def parse_params_string_value(v, raw_params):
-    return CONFIG_VARIABLE_REF_PATTERN.sub(lambda match: raw_params[match.group(1)], v)
-
-def parse_params_array_value(v, raw_params):
-    v = parse_params_string_value(v, raw_params)
-    if v == "":
-        return []
-    return v.split(" ")
 
 
 def perform(*args, **kwargs):
     print(" ".join(args))
     subprocess.run(args, check=True, **kwargs)
 
-def copy_files(fromdir, files, todir, transformdest=transform_identity):
+def query_git_head(repo_path: str) -> str:
+    return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo_path, encoding='utf-8').strip()
+
+def copy_files(fromdir: str, files: List[str], todir: str, transformdest: Callable[[str], str] = transform_identity):
     for file in files:
         src = os.path.join(fromdir, file)
         dst = os.path.join(todir, transformdest(file))
@@ -756,14 +806,10 @@ def copy_files(fromdir, files, todir, transformdest=transform_identity):
             os.makedirs(dstdir)
         shutil.copyfile(src, dst)
 
-def format_duration(duration_in_seconds):
+def format_duration(duration_in_seconds: float) -> str:
     hours, remainder = divmod(duration_in_seconds, 3600)
     minutes, seconds = divmod(remainder, 60)
     return "{:02d}:{:02d}:{:02d}".format(int(hours), int(minutes), int(seconds))
-
-
-class MissingDependencyError(Exception):
-    pass
 
 
 if __name__ == '__main__':
