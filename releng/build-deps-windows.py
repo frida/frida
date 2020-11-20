@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from enum import Enum
 from glob import glob
 import os
+import pathlib
+from pathlib import Path, PurePath
 import platform
 import re
 import shutil
@@ -62,14 +64,14 @@ BOOTSTRAP_TOOLCHAIN_URL = "https://build.frida.re/toolchain-{version}-windows-x8
 VALA_TARGET_GLIB = "2.66"
 
 
-RELENG_DIR = os.path.abspath(os.path.dirname(__file__))
-ROOT_DIR = os.path.dirname(RELENG_DIR)
-DEPS_DIR = os.path.join(ROOT_DIR, "deps")
-BOOTSTRAP_TOOLCHAIN_DIR = os.path.join(ROOT_DIR, "build", "fts-toolchain-windows")
+RELENG_DIR = Path(__file__).parent.resolve()
+ROOT_DIR = RELENG_DIR.parent
+DEPS_DIR = ROOT_DIR / "deps"
+BOOTSTRAP_TOOLCHAIN_DIR = ROOT_DIR / "build" / "fts-toolchain-windows"
 BOOTSTRAP_VALAC = "valac-0.50.exe"
 
-MESON = os.path.join(RELENG_DIR, "meson", "meson.py")
-NINJA = os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "bin", "ninja.exe")
+MESON = RELENG_DIR / "meson" / "meson.py"
+NINJA = BOOTSTRAP_TOOLCHAIN_DIR / "bin" / "ninja.exe"
 VALAC_PATTERN = re.compile(r"valac-\d+\.\d+.exe$")
 VALA_TOOLCHAIN_VAPI_SUBPATH_PATTERN = re.compile(r"share\\vala-\d+\.\d+\\vapi$")
 
@@ -176,7 +178,7 @@ def grab_and_prepare_regular_package(name: str, spec: PackageSpec) -> SourceStat
     assert spec.hash == ""
     assert spec.patches == []
 
-    source_dir = os.path.join(DEPS_DIR, name)
+    source_dir = DEPS_DIR / name
     if os.path.exists(source_dir):
         if query_git_head(source_dir) == spec.version:
             source_state = SourceState.PRISTINE
@@ -204,13 +206,13 @@ def grab_and_prepare_v8_package(v8_spec: PackageSpec, depot_spec: PackageSpec) -
     assert depot_spec.deps == []
     assert depot_spec.deps_for_build == []
     grab_and_prepare_regular_package("depot_tools", depot_spec)
-    depot_dir = os.path.join(DEPS_DIR, "depot_tools")
-    gclient = os.path.join(depot_dir, "gclient.bat")
+    depot_dir = DEPS_DIR / "depot_tools"
+    gclient = depot_dir / "gclient.bat"
     env = make_v8_env(depot_dir)
 
-    checkout_dir = os.path.join(DEPS_DIR, "v8-checkout")
+    checkout_dir = DEPS_DIR / "v8-checkout"
 
-    source_dir = os.path.join(checkout_dir, "v8")
+    source_dir = checkout_dir / "v8"
     source_exists = os.path.exists(source_dir)
     if source_exists and query_git_head(source_dir) == v8_spec.version:
         return SourceState.PRISTINE
@@ -245,10 +247,10 @@ def wipe_build_state():
 
 def build(name: str, artifact_name: str, spec: PackageSpec):
     if artifact_name.endswith(".exe"):
-        artifact_subpath = os.path.join("bin", artifact_name)
+        artifact_subpath = PurePath("bin", artifact_name)
         pkg_type = PackageType.TOOL
     elif artifact_name.endswith(".pc"):
-        artifact_subpath = os.path.join("lib", "pkgconfig", artifact_name)
+        artifact_subpath = PurePath("lib", "pkgconfig", artifact_name)
         pkg_type = PackageType.LIBRARY
     else:
         raise NotImplementedError("unsupported artifact type")
@@ -260,7 +262,7 @@ def build(name: str, artifact_name: str, spec: PackageSpec):
     for arch in archs:
         for config in configs:
             for runtime in runtimes:
-                existing_artifacts = glob(os.path.join(get_prefix_path(arch, config, runtime), artifact_subpath))
+                existing_artifacts = glob(get_prefix_path(arch, config, runtime) / artifact_subpath)
                 if len(existing_artifacts) == 0:
                     if spec.recipe == 'meson':
                         build_using_meson(name, arch, config, runtime, spec)
@@ -273,8 +275,8 @@ def build_using_meson(name: str, arch: str, config: str, runtime: str, spec: Pac
     print("*** Building name={} arch={} runtime={} config={} spec={}".format(name, arch, config, runtime, spec))
     env_dir, shell_env = get_meson_params(arch, config, runtime)
 
-    source_dir = os.path.join(DEPS_DIR, name)
-    build_dir = os.path.join(env_dir, name)
+    source_dir = DEPS_DIR / name
+    build_dir = env_dir / name
     prefix = get_prefix_path(arch, config, runtime)
     optimization = 's' if config == 'Release' else '0'
     ndebug = 'true' if config == 'Release' else 'false'
@@ -320,25 +322,26 @@ def generate_meson_env(arch: str, config: str, runtime: str) -> MesonEnv:
     if not os.path.exists(env_dir):
         os.makedirs(env_dir)
 
-    vc_dir = os.path.join(winenv.get_msvs_installation_dir(), "VC")
-    vc_install_dir = vc_dir + "\\"
+    vc_dir = Path(winenv.get_msvs_installation_dir()) / "VC"
+    vc_install_dir = str(vc_dir) + "\\"
 
     msvc_platform = msvc_platform_from_arch(arch)
-    msvc_dir = winenv.get_msvc_tool_dir()
-    msvc_bin_dir = os.path.join(msvc_dir, "bin", "Host" + msvc_platform_from_arch(build_arch), msvc_platform)
+    msvc_dir = Path(winenv.get_msvc_tool_dir())
+    msvc_bin_dir = msvc_dir / "bin" / ("Host" + msvc_platform_from_arch(build_arch)) / msvc_platform
 
     msvc_dll_dirs = []
     if arch != build_arch:
         build_msvc_platform = msvc_platform_from_arch(build_arch)
-        msvc_dll_dirs.append(os.path.join(msvc_dir, "bin", "Host" + build_msvc_platform, build_msvc_platform))
+        msvc_dll_dirs.append(msvc_dir / "bin", ("Host" + build_msvc_platform) / build_msvc_platform)
 
     (winxp_sdk_dir, winxp_sdk_version) = winenv.get_winxp_sdk()
+    winxp_sdk_dir = Path(winxp_sdk_dir)
     if arch == 'x86':
-        winxp_bin_dir = os.path.join(winxp_sdk_dir, "Bin")
-        winxp_lib_dir = os.path.join(winxp_sdk_dir, "Lib")
+        winxp_bin_dir = winxp_sdk_dir / "Bin"
+        winxp_lib_dir = winxp_sdk_dir / "Lib"
     else:
-        winxp_bin_dir = os.path.join(winxp_sdk_dir, "Bin", msvc_platform)
-        winxp_lib_dir = os.path.join(winxp_sdk_dir, "Lib", msvc_platform)
+        winxp_bin_dir = winxp_sdk_dir / "Bin" / msvc_platform
+        winxp_lib_dir = winxp_sdk_dir / "Lib" / msvc_platform
 
     clflags = "/D" + " /D".join([
       "_USING_V110_SDK71_",
@@ -359,36 +362,36 @@ def generate_meson_env(arch: str, config: str, runtime: str) -> MesonEnv:
 
     (win10_sdk_dir, win10_sdk_version) = winenv.get_win10_sdk()
 
-    m4_path = os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "bin", "m4.exe")
-    bison_pkgdatadir = os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "share", "bison")
+    m4_path = BOOTSTRAP_TOOLCHAIN_DIR / "bin" / "m4.exe"
+    bison_pkgdatadir = BOOTSTRAP_TOOLCHAIN_DIR / "share" / "bison"
 
-    vala_flags = "--target-glib=" + VALA_TARGET_GLIB
+    vala_flags = "--target-glib=" + detect_target_glib()
 
     exe_path = ";".join([
-        os.path.join(prefix, "bin"),
+        prefix / "bin",
         env_dir,
-        os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "bin"),
+        BOOTSTRAP_TOOLCHAIN_DIR / "bin",
         winxp_bin_dir,
         msvc_bin_dir,
     ] + msvc_dll_dirs)
 
     include_path = ";".join([
-        os.path.join(msvc_dir, "include"),
-        os.path.join(msvc_dir, "atlmfc", "include"),
-        os.path.join(vc_dir, "Auxiliary", "VS", "include"),
-        os.path.join(win10_sdk_dir, "Include", win10_sdk_version, "ucrt"),
-        os.path.join(winxp_sdk_dir, "Include"),
+        msvc_dir / "include",
+        msvc_dir / "atlmfc" / "include",
+        vc_dir / "Auxiliary" / "VS" / "include",
+        win10_sdk_dir / "Include" / win10_sdk_version / "ucrt",
+        winxp_sdk_dir / "Include",
     ])
 
     library_path = ";".join([
-        os.path.join(msvc_dir, "lib", msvc_platform),
-        os.path.join(msvc_dir, "atlmfc", "lib", msvc_platform),
-        os.path.join(vc_dir, "Auxiliary", "VS", "lib", msvc_platform),
-        os.path.join(win10_sdk_dir, "Lib", win10_sdk_version, "ucrt", msvc_platform),
+        msvc_dir / "lib" / msvc_platform,
+        msvc_dir / "atlmfc" / "lib" / msvc_platform,
+        vc_dir / "Auxiliary" / "VS" / "lib" / msvc_platform,
+        win10_sdk_dir / "Lib" / win10_sdk_version / "ucrt" / msvc_platform,
         winxp_lib_dir,
     ])
 
-    env_path = os.path.join(env_dir, "env.bat")
+    env_path = env_dir / "env.bat"
     with open(env_path, "w", encoding='utf-8') as f:
         f.write("""@ECHO OFF
 set PATH={exe_path};%PATH%
@@ -415,8 +418,8 @@ set DEPOT_TOOLS_WIN_TOOLCHAIN=0
             vala_flags=vala_flags
         ))
 
-    rc_path = os.path.join(winxp_bin_dir, "rc.exe")
-    rc_wrapper_path = os.path.join(env_dir, "rc.bat")
+    rc_path = winxp_bin_dir / "rc.exe"
+    rc_wrapper_path = env_dir / "rc.bat"
     with open(rc_wrapper_path, "w", encoding='utf-8') as f:
         f.write("""@ECHO OFF
 SETLOCAL EnableExtensions
@@ -425,7 +428,7 @@ SET _res=0
 ENDLOCAL & SET _res=%_res%
 EXIT /B %_res%""".format(rc_path=rc_path, flags=clflags))
 
-    with open(os.path.join(env_dir, "meson.bat"), "w", encoding='utf-8') as f:
+    with open(env_dir / "meson.bat", "w", encoding='utf-8') as f:
         f.write("""@ECHO OFF
 SETLOCAL EnableExtensions
 SET _res=0
@@ -433,9 +436,9 @@ py -3 "{meson_path}" %* || SET _res=1
 ENDLOCAL & SET _res=%_res%
 EXIT /B %_res%""".format(meson_path=MESON))
 
-    pkgconfig_path = os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "bin", "pkg-config.exe")
-    pkgconfig_lib_dir = os.path.join(prefix, "lib", "pkgconfig")
-    pkgconfig_wrapper_path = os.path.join(env_dir, "pkg-config.bat")
+    pkgconfig_path = BOOTSTRAP_TOOLCHAIN_DIR / "bin", "pkg-config.exe"
+    pkgconfig_lib_dir = prefix / "lib" / "pkgconfig"
+    pkgconfig_wrapper_path = env_dir / "pkg-config.bat"
     with open(pkgconfig_wrapper_path, "w", encoding='utf-8') as f:
         f.write("""@ECHO OFF
 SETLOCAL EnableExtensions
@@ -445,9 +448,9 @@ SET PKG_CONFIG_PATH={pkgconfig_lib_dir}
 ENDLOCAL & SET _res=%_res%
 EXIT /B %_res%""".format(pkgconfig_path=pkgconfig_path, pkgconfig_lib_dir=pkgconfig_lib_dir))
 
-    flex_path = os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "bin", "flex.exe")
-    flex_wrapper_path = os.path.join(env_dir, "flex.py")
-    with open(os.path.join(env_dir, "flex.bat"), "w", encoding='utf-8') as f:
+    flex_path = BOOTSTRAP_TOOLCHAIN_DIR / "bin" / "flex.exe"
+    flex_wrapper_path = env_dir / "flex.py"
+    with open(env_dir / "flex.bat", "w", encoding='utf-8') as f:
         f.write("""@ECHO OFF
 SETLOCAL EnableExtensions
 SET _res=0
@@ -462,9 +465,9 @@ args = [arg.replace("/", "\\\\") for arg in sys.argv[1:]]
 sys.exit(subprocess.call([r"{flex_path}"] + args))
 """.format(flex_path=flex_path))
 
-    bison_path = os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "bin", "bison.exe")
-    bison_wrapper_path = os.path.join(env_dir, "bison.py")
-    with open(os.path.join(env_dir, "bison.bat"), "w", encoding='utf-8') as f:
+    bison_path = BOOTSTRAP_TOOLCHAIN_DIR / "bin" / "bison.exe"
+    bison_wrapper_path = env_dir / "bison.py"
+    with open(env_dir / "bison.bat", "w", encoding='utf-8') as f:
         f.write("""@ECHO OFF
 SETLOCAL EnableExtensions
 SET _res=0
@@ -503,16 +506,19 @@ sys.exit(subprocess.call([r"{bison_path}"] + args))
 
     return MesonEnv(env_dir, shell_env)
 
+def detect_target_glib() -> str:
+    pass
+
 
 def build_v8(arch: str, config: str, runtime: str, spec: PackageSpec):
-    depot_dir = os.path.join(DEPS_DIR, "depot_tools")
-    gn = os.path.join(depot_dir, "gn.bat")
+    depot_dir = DEPS_DIR / "depot_tools"
+    gn = depot_dir / "gn.bat"
     env = make_v8_env(depot_dir)
 
-    source_dir = os.path.join(DEPS_DIR, "v8-checkout", "v8")
+    source_dir = DEPS_DIR / "v8-checkout" / "v8"
 
-    build_dir = os.path.join(get_tmp_path(arch, config, runtime), "v8")
-    if not os.path.exists(os.path.join(build_dir, "build.ninja")):
+    build_dir = get_tmp_path(arch, config, runtime) / "v8"
+    if not os.path.exists(build_dir / "build.ninja"):
         if os.path.exists(build_dir):
             shutil.rmtree(build_dir)
 
@@ -545,30 +551,30 @@ def build_v8(arch: str, config: str, runtime: str, spec: PackageSpec):
 
         perform(gn, "gen", os.path.relpath(build_dir, start=source_dir), "--args=" + args, cwd=source_dir, env=env)
 
-    monolith_path = os.path.join(build_dir, "obj", "v8_monolith.lib")
+    monolith_path = build_dir / "obj" / "v8_monolith.lib"
     perform(NINJA, "v8_monolith", cwd=build_dir, env=env)
 
     version, api_version = v8.detect_version(source_dir)
 
     prefix = get_prefix_path(arch, config, runtime)
 
-    include_dir = os.path.join(prefix, "include", "v8-" + api_version, "v8")
-    for header_dir in [os.path.join(source_dir, "include"), os.path.join(build_dir, "gen", "include")]:
-        header_files = [os.path.relpath(path, header_dir) for path in glob(os.path.join(header_dir, "**", "*.h"), recursive=True)]
+    include_dir = prefix / "include" / ("v8-" + api_version) / "v8"
+    for header_dir in [source_dir / "include", build_dir / "gen" / "include"]:
+        header_files = [PurePath(path).relative_to(header_dir) for path in glob(header_dir / "**" / "*.h", recursive=True)]
         copy_files(header_dir, header_files, include_dir)
 
-    v8.patch_config_header(os.path.join(include_dir, "v8config.h"), source_dir, build_dir, gn, env)
+    v8.patch_config_header(include_dir / "v8config.h", source_dir, build_dir, gn, env)
 
-    lib_dir = os.path.join(prefix, "lib")
+    lib_dir = prefix / "lib"
 
-    pkgconfig_dir = os.path.join(lib_dir, "pkgconfig")
+    pkgconfig_dir = lib_dir / "pkgconfig"
     if not os.path.exists(pkgconfig_dir):
         os.makedirs(pkgconfig_dir)
 
-    libv8_path = os.path.join(lib_dir, "libv8-{}.a".format(api_version))
+    libv8_path = lib_dir / "libv8-{}.a".format(api_version)
     shutil.copyfile(monolith_path, libv8_path)
 
-    with open(os.path.join(pkgconfig_dir, "v8-{}.pc".format(api_version)), "w", encoding='utf-8') as f:
+    with open(pkgconfig_dir / "v8-{}.pc".format(api_version), "w", encoding='utf-8') as f:
         f.write("""\
 prefix={prefix}
 libdir=${{prefix}}/lib
@@ -596,10 +602,10 @@ def make_v8_env(depot_dir: str) -> ShellEnv:
 
 def package():
     toolchain_filename = "toolchain-windows-x86.exe"
-    toolchain_path = os.path.join(ROOT_DIR, "build", toolchain_filename)
+    toolchain_path = ROOT_DIR / "build" / toolchain_filename
 
     sdk_filename = "sdk-windows-any.exe"
-    sdk_path = os.path.join(ROOT_DIR, "build", sdk_filename)
+    sdk_path = ROOT_DIR / "build" / sdk_filename
 
     print("About to assemble:")
     print("\t* " + toolchain_filename)
@@ -611,27 +617,27 @@ def package():
     prefixes_skip_len = len(prefixes_dir) + 1
 
     sdk_built_files = []
-    for prefix in glob(os.path.join(prefixes_dir, "*-static")):
+    for prefix in glob(prefixes_dir / "*-static"):
         for root, dirs, files in os.walk(prefix):
             relpath = root[prefixes_skip_len:]
-            included_files = map(lambda name: os.path.join(relpath, name),
+            included_files = map(lambda name: PurePath(relpath, name),
                 filter(lambda filename: file_is_sdk_related(relpath, filename), files))
             sdk_built_files.extend(included_files)
-        dynamic_libs = glob(os.path.join(prefix[:-7] + "-dynamic", "lib", "**", "*.a"), recursive=True)
+        dynamic_libs = glob(PurePath(prefix[:-7] + "-dynamic", "lib", "**", "*.a"), recursive=True)
         dynamic_libs = [path[prefixes_skip_len:] for path in dynamic_libs]
         sdk_built_files.extend(dynamic_libs)
 
     toolchain_files = []
     for root, dirs, files in os.walk(get_prefix_path('x86', 'Release', 'static')):
         relpath = root[prefixes_skip_len:]
-        included_files = map(lambda name: os.path.join(relpath, name),
+        included_files = map(lambda name: PurePath(relpath, name),
             filter(lambda filename: file_is_vala_toolchain_related(relpath, filename) or filename in ("pkg-config.exe", "glib-genmarshal", "glib-mkenums"), files))
         toolchain_files.extend(included_files)
 
     toolchain_mixin_files = []
     for root, dirs, files in os.walk(BOOTSTRAP_TOOLCHAIN_DIR):
         relpath = root[len(BOOTSTRAP_TOOLCHAIN_DIR) + 1:]
-        included_files = map(lambda name: os.path.join(relpath, name),
+        included_files = map(lambda name: PurePath(relpath, name),
             filter(lambda filename: not file_is_vala_toolchain_related(relpath, filename), files))
         toolchain_mixin_files.extend(included_files)
 
@@ -639,11 +645,11 @@ def package():
     toolchain_files.sort()
 
     print("Copying files...")
-    tempdir = tempfile.mkdtemp(prefix="frida-package")
+    tempdir = Path(tempfile.mkdtemp(prefix="frida-package"))
 
-    copy_files(prefixes_dir, sdk_built_files, os.path.join(tempdir, "sdk-windows"), transform_sdk_dest)
+    copy_files(prefixes_dir, sdk_built_files, tempdir / "sdk-windows", transform_sdk_dest)
 
-    toolchain_tempdir = os.path.join(tempdir, "toolchain-windows")
+    toolchain_tempdir = tempdir / "toolchain-windows"
     copy_files(BOOTSTRAP_TOOLCHAIN_DIR, toolchain_mixin_files, toolchain_tempdir)
     copy_files(prefixes_dir, toolchain_files, toolchain_tempdir, transform_toolchain_dest)
 
@@ -695,13 +701,13 @@ def file_is_vala_toolchain_related(directory: str, filename: str) -> bool:
 def is_vala_toolchain_vapi_directory(directory: str) -> bool:
     return VALA_TOOLCHAIN_VAPI_SUBPATH_PATTERN.search(directory) is not None
 
-def transform_identity(srcfile: str) -> str:
+def transform_identity(srcfile: PurePath) -> PurePath:
     return srcfile
 
-def transform_sdk_dest(srcfile: str) -> str:
-    parts = os.path.dirname(srcfile).split("\\")
+def transform_sdk_dest(srcfile: PurePath) -> PurePath:
+    parts = srcfile.parent.parts
     rootdir = parts[0]
-    subpath = "\\".join(parts[1:])
+    subpath = PurePath(*parts[1:])
 
     filename = os.path.basename(srcfile)
 
@@ -711,17 +717,17 @@ def transform_sdk_dest(srcfile: str) -> str:
         config.title()
     ])
 
-    if runtime == 'dynamic' and subpath.split("\\")[0] == "lib":
-        subpath = "lib-dynamic" + subpath[3:]
+    if runtime == 'dynamic' and subpath.parts[0] == "lib":
+        subpath = PurePath("lib-dynamic") / subpath.parts[1:]
 
-    return os.path.join(rootdir, subpath, filename)
+    return PurePath(rootdir) / subpath / filename
 
-def transform_toolchain_dest(srcfile: str) -> str:
+def transform_toolchain_dest(srcfile: PurePath) -> PurePath:
     return srcfile[srcfile.index("\\") + 1:]
 
 
 def ensure_bootstrap_toolchain(bootstrap_version: str) -> SourceState:
-    version_stamp_path = os.path.join(BOOTSTRAP_TOOLCHAIN_DIR, "VERSION.txt")
+    version_stamp_path = BOOTSTRAP_TOOLCHAIN_DIR / "VERSION.txt"
     if os.path.exists(BOOTSTRAP_TOOLCHAIN_DIR):
         try:
             with open(version_stamp_path, "r", encoding='utf-8') as f:
@@ -755,7 +761,7 @@ def ensure_bootstrap_toolchain(bootstrap_version: str) -> SourceState:
             except subprocess.CalledProcessError as e:
                 print("Oops:", e.output.decode('utf-8'))
                 raise e
-            shutil.move(os.path.join(tempdir, "toolchain-windows"), BOOTSTRAP_TOOLCHAIN_DIR)
+            shutil.move(tempdir / "toolchain-windows", BOOTSTRAP_TOOLCHAIN_DIR)
             with open(version_stamp_path, "w", encoding='utf-8') as f:
                 f.write(bootstrap_version)
         finally:
@@ -765,17 +771,17 @@ def ensure_bootstrap_toolchain(bootstrap_version: str) -> SourceState:
 
     return source_state
 
-def get_prefix_root() -> str:
-    return os.path.join(ROOT_DIR, "build", "fts-windows")
+def get_prefix_root() -> Path:
+    return ROOT_DIR / "build" / "fts-windows"
 
-def get_prefix_path(arch: str, config: str, runtime: str) -> str:
-    return os.path.join(get_prefix_root(), "{}-{}-{}".format(arch, config.lower(), runtime))
+def get_prefix_path(arch: str, config: str, runtime: str) -> Path:
+    return get_prefix_root() / "{}-{}-{}".format(arch, config.lower(), runtime)
 
-def get_tmp_root() -> str:
-    return os.path.join(ROOT_DIR, "build", "fts-tmp-windows")
+def get_tmp_root() -> Path:
+    return ROOT_DIR / "build" / "fts-tmp-windows"
 
-def get_tmp_path(arch: str, config: str, runtime: str) -> str:
-    return os.path.join(get_tmp_root(), "{}-{}-{}".format(arch, config.lower(), runtime))
+def get_tmp_path(arch: str, config: str, runtime: str) -> Path:
+    return get_tmp_root() / "{}-{}-{}".format(arch, config.lower(), runtime)
 
 def msvs_platform_from_arch(arch: str) -> str:
     return 'x64' if arch == 'x86_64' else 'Win32'
@@ -797,11 +803,11 @@ def perform(*args, **kwargs):
 def query_git_head(repo_path: str) -> str:
     return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo_path, encoding='utf-8').strip()
 
-def copy_files(fromdir: str, files: List[str], todir: str, transformdest: Callable[[str], str] = transform_identity):
-    for file in files:
-        src = os.path.join(fromdir, file)
-        dst = os.path.join(todir, transformdest(file))
-        dstdir = os.path.dirname(dst)
+def copy_files(fromdir: Path, files: List[PurePath], todir: Path, transformdest: Callable[[PurePath], PurePath] = transform_identity):
+    for filename in files:
+        src = fromdir / filename
+        dst = todir / transformdest(filename)
+        dstdir = dst.parent
         if not os.path.isdir(dstdir):
             os.makedirs(dstdir)
         shutil.copyfile(src, dst)
