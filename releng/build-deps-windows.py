@@ -61,14 +61,12 @@ RUNTIMES = {
 COMPRESSION_LEVEL = 9
 
 BOOTSTRAP_TOOLCHAIN_URL = "https://build.frida.re/toolchain-{version}-windows-x86.exe"
-VALA_TARGET_GLIB = "2.66"
 
 
 RELENG_DIR = Path(__file__).parent.resolve()
 ROOT_DIR = RELENG_DIR.parent
 DEPS_DIR = ROOT_DIR / "deps"
 BOOTSTRAP_TOOLCHAIN_DIR = ROOT_DIR / "build" / "fts-toolchain-windows"
-BOOTSTRAP_VALAC = "valac-0.50.exe"
 
 MESON = RELENG_DIR / "meson" / "meson.py"
 NINJA = BOOTSTRAP_TOOLCHAIN_DIR / "bin" / "ninja.exe"
@@ -102,6 +100,7 @@ HOST_DEFINES = {
 
 cached_meson_params = {}
 cached_target_glib = None
+cached_bootstrap_valac = None
 
 build_arch = 'x86_64' if platform.machine().endswith("64") else 'x86'
 
@@ -418,7 +417,7 @@ set DEPOT_TOOLS_WIN_TOOLCHAIN=0
             cxxflags=cxxflags,
             vc_install_dir=vc_install_dir,
             platform=msvc_platform,
-            valac=BOOTSTRAP_VALAC,
+            valac=detect_bootstrap_valac(),
             vala_flags=vala_flags,
         ),
         encoding='utf-8')
@@ -504,7 +503,7 @@ sys.exit(subprocess.call([r"{bison_path}"] + args))
     shell_env["CXXFLAGS"] = cxxflags
     shell_env["VCINSTALLDIR"] = vc_install_dir
     shell_env["Platform"] = msvc_platform
-    shell_env["VALAC"] = BOOTSTRAP_VALAC
+    shell_env["VALAC"] = detect_bootstrap_valac()
     shell_env["VALAFLAGS"] = vala_flags
 
     return MesonEnv(env_dir, shell_env)
@@ -520,6 +519,13 @@ def detect_target_glib() -> str:
             minor += 1
         cached_target_glib = "{}.{}".format(major, minor)
     return cached_target_glib
+
+def detect_bootstrap_valac() -> str:
+    global cached_bootstrap_valac
+    if cached_bootstrap_valac is None:
+        cached_bootstrap_valac = next((BOOTSTRAP_TOOLCHAIN_DIR / "bin").glob("valac*.exe")).name
+    return cached_bootstrap_valac
+
 
 
 def build_v8(arch: str, config: str, runtime: str, spec: PackageSpec, extra_options: List[str]):
@@ -706,7 +712,7 @@ def file_is_vala_toolchain_related(candidate: PurePath) -> bool:
         return is_vala_toolchain_vapi_directory(directory)
     return VALAC_PATTERN.match(filename) is not None
 
-def is_vala_toolchain_vapi_directory(directory: str) -> bool:
+def is_vala_toolchain_vapi_directory(directory: PurePath) -> bool:
     return VALA_TOOLCHAIN_VAPI_SUBPATH_PATTERN.search(directory) is not None
 
 def transform_identity(srcfile: PurePath) -> PurePath:
