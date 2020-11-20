@@ -135,7 +135,7 @@ libffi_deps = \
 libffi_deps_for_build = \
 	$(NULL)
 
-glib_version = 2930430c4ed9bf7373f1027d6fc41fd54a93b51b
+glib_version = daf9797c39fa0eeaa5abce6114137cf9babff68c
 glib_url = $(frida_base_url)/glib.git
 glib_hash = $(NULL)
 glib_recipe = meson
@@ -331,7 +331,7 @@ glib_networking_deps = \
 glib_networking_deps_for_build = \
 	$(NULL)
 
-glib_schannel_version = c077fcafb4ef42228cac4b889efe210565a05764
+glib_schannel_version = 7e8db12466b1337358611fa79f920e153430be31
 glib_schannel_url = $(frida_base_url)/glib-schannel.git
 glib_schannel_hash = $(NULL)
 glib_schannel_recipe = meson
