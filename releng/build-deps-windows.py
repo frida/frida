@@ -179,17 +179,19 @@ def grab_and_prepare_regular_package(name: str, spec: PackageSpec) -> SourceStat
     assert spec.patches == []
 
     source_dir = DEPS_DIR / name
-    if os.path.exists(source_dir):
+    if source_dir.exists():
         if query_git_head(source_dir) == spec.version:
             source_state = SourceState.PRISTINE
         else:
+            print()
             print("{name}: synchronizing".format(name=name))
             perform("git", "fetch", "-q", cwd=source_dir)
             perform("git", "checkout", "-q", spec.version, cwd=source_dir)
             source_state = SourceState.MODIFIED
     else:
+        print()
         print("{name}: cloning into deps\\{name}".format(name=name))
-        if not os.path.exists(DEPS_DIR):
+        if not DEPS_DIR.exists():
             os.makedirs(DEPS_DIR)
         perform("git", "clone", "-q", "--recurse-submodules", spec.url, name, cwd=DEPS_DIR)
         perform("git", "checkout", "-q", spec.version, cwd=source_dir)
@@ -211,12 +213,14 @@ def grab_and_prepare_v8_package(v8_spec: PackageSpec, depot_spec: PackageSpec) -
     env = make_v8_env(depot_dir)
 
     checkout_dir = DEPS_DIR / "v8-checkout"
+    checkout_dir.mkdir(parents=True, exist_ok=True)
 
     source_dir = checkout_dir / "v8"
-    source_exists = os.path.exists(source_dir)
+    source_exists = source_dir.exists()
     if source_exists and query_git_head(source_dir) == v8_spec.version:
         return SourceState.PRISTINE
 
+    print()
     if source_exists:
         print("v8: synchronizing")
         source_state = SourceState.MODIFIED
@@ -240,7 +244,7 @@ def wipe_build_state():
         ("build directories", get_tmp_root()),
     ]
     for description, path in locations:
-        if os.path.exists(path):
+        if path.exists():
             print("Wiping", description)
             shutil.rmtree(path)
 
@@ -281,7 +285,7 @@ def build_using_meson(name: str, arch: str, config: str, runtime: str, spec: Pac
     optimization = 's' if config == 'Release' else '0'
     ndebug = 'true' if config == 'Release' else 'false'
 
-    if os.path.exists(build_dir):
+    if build_dir.exists():
         shutil.rmtree(build_dir)
 
     perform(
@@ -319,8 +323,7 @@ def generate_meson_params(arch: str, config: str, runtime: str) -> Tuple[EnvDir,
 def generate_meson_env(arch: str, config: str, runtime: str) -> MesonEnv:
     prefix = get_prefix_path(arch, config, runtime)
     env_dir = get_tmp_path(arch, config, runtime)
-    if not os.path.exists(env_dir):
-        os.makedirs(env_dir)
+    env_dir.mkdir(parents=True, exist_ok=True)
 
     vc_dir = Path(winenv.get_msvs_installation_dir()) / "VC"
     vc_install_dir = str(vc_dir) + "\\"
@@ -518,8 +521,8 @@ def build_v8(arch: str, config: str, runtime: str, spec: PackageSpec):
     source_dir = DEPS_DIR / "v8-checkout" / "v8"
 
     build_dir = get_tmp_path(arch, config, runtime) / "v8"
-    if not os.path.exists(build_dir / "build.ninja"):
-        if os.path.exists(build_dir):
+    if not (build_dir / "build.ninja").exists():
+        if build_dir.exists():
             shutil.rmtree(build_dir)
 
         if config == 'Release':
@@ -549,7 +552,7 @@ def build_v8(arch: str, config: str, runtime: str, spec: PackageSpec):
             "strip_absolute_paths_from_debug_symbols=true",
         ] + spec.options)
 
-        perform(gn, "gen", os.path.relpath(build_dir, start=source_dir), "--args=" + args, cwd=source_dir, env=env)
+        perform(gn, "gen", build_dir.relative_to(source_dir), "--args=" + args, cwd=source_dir, env=env)
 
     monolith_path = build_dir / "obj" / "v8_monolith.lib"
     perform(NINJA, "v8_monolith", cwd=build_dir, env=env)
@@ -568,8 +571,7 @@ def build_v8(arch: str, config: str, runtime: str, spec: PackageSpec):
     lib_dir = prefix / "lib"
 
     pkgconfig_dir = lib_dir / "pkgconfig"
-    if not os.path.exists(pkgconfig_dir):
-        os.makedirs(pkgconfig_dir)
+    pkgconfig_dir.mkdir(parents=True, exist_ok=True)
 
     libv8_path = lib_dir / "libv8-{}.a".format(api_version)
     shutil.copyfile(monolith_path, libv8_path)
@@ -592,10 +594,10 @@ Cflags: -I${{includedir}} -I${{includedir}}/v8""".format(
             libs_private="-lshlwapi -lwinmm"
         ))
 
-def make_v8_env(depot_dir: str) -> ShellEnv:
+def make_v8_env(depot_dir: Path) -> ShellEnv:
     env = {}
     env.update(os.environ)
-    env["PATH"] = depot_dir + ";" + env["PATH"]
+    env["PATH"] = str(depot_dir) + ";" + env["PATH"]
     env["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
     return env
 
@@ -709,8 +711,6 @@ def transform_sdk_dest(srcfile: PurePath) -> PurePath:
     rootdir = parts[0]
     subpath = PurePath(*parts[1:])
 
-    filename = os.path.basename(srcfile)
-
     arch, config, runtime = rootdir.split("-")
     rootdir = "-".join([
         msvs_platform_from_arch(arch),
@@ -720,7 +720,7 @@ def transform_sdk_dest(srcfile: PurePath) -> PurePath:
     if runtime == 'dynamic' and subpath.parts[0] == "lib":
         subpath = PurePath("lib-dynamic") / subpath.parts[1:]
 
-    return PurePath(rootdir) / subpath / filename
+    return PurePath(rootdir) / subpath / srcfile.name
 
 def transform_toolchain_dest(srcfile: PurePath) -> PurePath:
     return srcfile[srcfile.index("\\") + 1:]
@@ -728,7 +728,7 @@ def transform_toolchain_dest(srcfile: PurePath) -> PurePath:
 
 def ensure_bootstrap_toolchain(bootstrap_version: str) -> SourceState:
     version_stamp_path = BOOTSTRAP_TOOLCHAIN_DIR / "VERSION.txt"
-    if os.path.exists(BOOTSTRAP_TOOLCHAIN_DIR):
+    if BOOTSTRAP_TOOLCHAIN_DIR.exists():
         try:
             with open(version_stamp_path, "r", encoding='utf-8') as f:
                 version = f.read().strip()
@@ -797,7 +797,7 @@ def vscrt_from_configuration_and_runtime(config: str, runtime: str) -> str:
 
 
 def perform(*args, **kwargs):
-    print(">", " ".join(args))
+    print(">", " ".join([str(arg) for arg in args]))
     subprocess.run(args, check=True, **kwargs)
 
 def query_git_head(repo_path: str) -> str:
@@ -808,8 +808,7 @@ def copy_files(fromdir: Path, files: List[PurePath], todir: Path, transformdest:
         src = fromdir / filename
         dst = todir / transformdest(filename)
         dstdir = dst.parent
-        if not os.path.isdir(dstdir):
-            os.makedirs(dstdir)
+        dstdir.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(src, dst)
 
 def format_duration(duration_in_seconds: float) -> str:
