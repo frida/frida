@@ -106,8 +106,6 @@ build_arch = 'x86_64' if platform.machine().endswith("64") else 'x86'
 
 
 def main():
-    check_environment()
-
     params = read_dependency_parameters(HOST_DEFINES)
 
     started_at = time.time()
@@ -143,6 +141,18 @@ def main():
             print("  Packaging: {}".format(format_duration(packaging_ended_at - build_ended_at)))
 
 
+def synchronize(params: DependencyParameters):
+    toolchain_state = ensure_bootstrap_toolchain(params.bootstrap_version)
+    if toolchain_state == SourceState.MODIFIED:
+        wipe_build_state()
+
+    check_environment()
+
+    for name, _ in PACKAGES:
+        pkg_state = grab_and_prepare(name, params.get_package_spec(name), params)
+        if pkg_state == SourceState.MODIFIED:
+            wipe_build_state()
+
 def check_environment():
     try:
         winenv.get_msvs_installation_dir()
@@ -156,16 +166,6 @@ def check_environment():
         if shutil.which(tool) is None:
             print("ERROR: {} not found".format(tool), file=sys.stderr)
             sys.exit(1)
-
-
-def synchronize(params: DependencyParameters):
-    toolchain_state = ensure_bootstrap_toolchain(params.bootstrap_version)
-    if toolchain_state == SourceState.MODIFIED:
-        wipe_build_state()
-    for name, _ in PACKAGES:
-        pkg_state = grab_and_prepare(name, params.get_package_spec(name), params)
-        if pkg_state == SourceState.MODIFIED:
-            wipe_build_state()
 
 def grab_and_prepare(name: str, spec: PackageSpec, params: DependencyParameters) -> SourceState:
     if spec.recipe != 'custom':
