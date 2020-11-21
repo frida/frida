@@ -4,6 +4,7 @@ import argparse
 from dataclasses import dataclass
 from enum import Enum
 from glob import glob
+import json
 import os
 import pathlib
 from pathlib import Path, PurePath
@@ -27,12 +28,12 @@ class Bundle(Enum):
     SDK = 2,
 
 
-Package = Tuple[str, str, List[str]]
-
-
-class PackageType(Enum):
+class PackageRole(Enum):
     TOOL = 1,
     LIBRARY = 2,
+
+
+Package = Tuple[str, PackageRole, List[str]]
 
 
 class SourceState(Enum):
@@ -56,16 +57,16 @@ class MissingDependencyError(Exception):
 
 
 ARCHITECTURES = {
-    PackageType.TOOL: ['x86'],
-    PackageType.LIBRARY: ['x86_64', 'x86'],
+    PackageRole.TOOL: ['x86'],
+    PackageRole.LIBRARY: ['x86_64', 'x86'],
 }
 CONFIGURATIONS = {
-    PackageType.TOOL: ['Release'],
-    PackageType.LIBRARY: ['Debug', 'Release'],
+    PackageRole.TOOL: ['Release'],
+    PackageRole.LIBRARY: ['Debug', 'Release'],
 }
 RUNTIMES = {
-    PackageType.TOOL: ['static'],
-    PackageType.LIBRARY: ['static', 'dynamic'],
+    PackageRole.TOOL: ['static'],
+    PackageRole.LIBRARY: ['static', 'dynamic'],
 }
 COMPRESSION_LEVEL = 9
 
@@ -80,22 +81,22 @@ MESON = RELENG_DIR / "meson" / "meson.py"
 NINJA = BOOTSTRAP_TOOLCHAIN_DIR / "bin" / "ninja.exe"
 
 ALL_PACKAGES: List[Package] = [
-    ("zlib", "zlib.pc", []),
-    ("libffi", "libffi.pc", []),
-    ("glib", "glib-2.0.pc", []),
-    ("pkg-config", "pkg-config.exe", []),
-    ("vala", "valac*.exe", []),
-    ("sqlite", "sqlite3.pc", []),
-    ("glib-schannel", "gioschannel.pc", []),
-    ("libgee", "gee-0.8.pc", []),
-    ("json-glib", "json-glib-1.0.pc", []),
-    ("libpsl", "libpsl.pc", []),
-    ("libxml2", "libxml-2.0.pc", []),
-    ("libsoup", "libsoup-2.4.pc", []),
-    ("capstone", "capstone.pc", []),
-    ("quickjs", "quickjs.pc", []),
-    ("tinycc", "libtcc.pc", []),
-    ("v8", "v8*.pc", []),
+    ("zlib", PackageRole.LIBRARY, []),
+    ("libffi", PackageRole.LIBRARY, []),
+    ("glib", PackageRole.LIBRARY, []),
+    ("pkg-config", PackageRole.TOOL, []),
+    ("vala", PackageRole.TOOL, []),
+    ("sqlite", PackageRole.LIBRARY, []),
+    ("glib-schannel", PackageRole.LIBRARY, []),
+    ("libgee", PackageRole.LIBRARY, []),
+    ("json-glib", PackageRole.LIBRARY, []),
+    ("libpsl", PackageRole.LIBRARY, []),
+    ("libxml2", PackageRole.LIBRARY, []),
+    ("libsoup", PackageRole.LIBRARY, []),
+    ("capstone", PackageRole.LIBRARY, []),
+    ("quickjs", PackageRole.LIBRARY, []),
+    ("tinycc", PackageRole.LIBRARY, []),
+    ("v8", PackageRole.LIBRARY, []),
 ]
 
 ALL_BUNDLES = {
@@ -297,34 +298,29 @@ def wipe_build_state():
 
 
 def build(packages: List[Package], params: DependencyParameters):
-    for name, artifact_name, extra_options in packages:
-        build_package(name, artifact_name, params.get_package_spec(name), extra_options)
+    for name, role, extra_options in packages:
+        build_package(name, role, params.get_package_spec(name), extra_options)
 
-def build_package(name: str, artifact_name: str, spec: PackageSpec, extra_options: List[str]):
-    if artifact_name.endswith(".exe"):
-        artifact_subpath = PurePath("bin", artifact_name)
-        pkg_type = PackageType.TOOL
-    elif artifact_name.endswith(".pc"):
-        artifact_subpath = PurePath("lib", "pkgconfig", artifact_name)
-        pkg_type = PackageType.LIBRARY
-    else:
-        raise NotImplementedError("unsupported artifact type")
-
-    archs = ARCHITECTURES[pkg_type]
-    configs = CONFIGURATIONS[pkg_type]
-    runtimes = RUNTIMES[pkg_type]
+def build_package(name: str, role: PackageRole, spec: PackageSpec, extra_options: List[str]):
+    archs = ARCHITECTURES[role]
+    configs = CONFIGURATIONS[role]
+    runtimes = RUNTIMES[role]
 
     for arch in archs:
         for config in configs:
             for runtime in runtimes:
-                existing_artifacts = glob(str(get_prefix_path(arch, config, runtime) / artifact_subpath))
-                if len(existing_artifacts) == 0:
-                    if spec.recipe == 'meson':
-                        build_using_meson(name, arch, config, runtime, spec, extra_options)
-                    else:
-                        assert name == 'v8'
-                        assert spec.recipe == 'custom'
-                        build_v8(arch, config, runtime, spec, extra_options)
+                manifest_path = get_manifest_path(name, arch, config, runtime)
+                if manifest_path.exists():
+                    continue
+
+                if spec.recipe == 'meson':
+                    build_using_meson(name, arch, config, runtime, spec, extra_options)
+                else:
+                    assert name == "v8"
+                    assert spec.recipe == 'custom'
+                    build_v8(arch, config, runtime, spec, extra_options)
+
+                assert manifest_path.exists()
 
 def build_using_meson(name: str, arch: str, config: str, runtime: str, spec: PackageSpec, extra_options: List[str]):
     print()
@@ -356,6 +352,22 @@ def build_using_meson(name: str, arch: str, config: str, runtime: str, spec: Pac
     )
 
     perform(NINJA, "install", cwd=build_dir, env=shell_env)
+
+    manifest_lines = []
+    install_locations = json.loads(subprocess.check_output([
+            "py", "-3", MESON,
+            "introspect",
+            "--installed"
+        ],
+        cwd=build_dir,
+        encoding='utf-8',
+        env=shell_env))
+    for installed_path in install_locations.values():
+        manifest_lines.append(Path(installed_path).relative_to(prefix).as_posix())
+    manifest_lines.sort()
+    manifest_path = get_manifest_path(name, arch, config, runtime)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text("\n".join(manifest_lines), encoding='utf-8')
 
 def get_meson_params(arch: str, config: str, runtime: str) -> Tuple[EnvDir, ShellEnv]:
     global cached_meson_params
@@ -668,6 +680,17 @@ Cflags: -I${{includedir}} -I${{includedir}}/v8""" \
         ),
         encoding='utf-8')
 
+    manifest_lines = [line.format(api_version=api_version) for line in [
+        "lib/libv8-{api_version}.a",
+        "lib/pkgconfig/v8-{api_version}.pc",
+    ]]
+    for header in include_dir.glob("**/*"):
+        manifest_lines.append(str(header.relative_to(prefix).as_posix()))
+    manifest_lines.sort()
+    manifest_path = get_manifest_path("v8", arch, config, runtime)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text("\n".join(manifest_lines), encoding='utf-8')
+
 def make_v8_env(depot_dir: Path) -> ShellEnv:
     env = {}
     env.update(os.environ)
@@ -855,6 +878,9 @@ def get_prefix_root() -> Path:
 
 def get_prefix_path(arch: str, config: str, runtime: str) -> Path:
     return get_prefix_root() / "{}-{}-{}".format(arch, config.lower(), runtime)
+
+def get_manifest_path(name: str, arch: str, config: str, runtime: str) -> Path:
+    return get_prefix_path(arch, config, runtime) / "manifest" / (name + ".pkg")
 
 def get_tmp_root() -> Path:
     return ROOT_DIR / "build" / "fts-tmp-windows"
