@@ -745,7 +745,8 @@ def package(bundle_ids: List[Bundle], params: DependencyParameters):
                     relpath = PurePath(root).relative_to(prefixes_dir)
                     all_files = [relpath / f for f in files]
                     sdk_built_files += [f for f in all_files if file_is_sdk_related(f)]
-                sdk_built_files += [f.relative_to(prefixes_dir) for f in (prefix.parent / (prefix.name[:-7] + "-dynamic") / "lib").glob("**/*.a")]
+                sdk_built_files += [f.relative_to(prefixes_dir) for f in \
+                        (prefix.parent / (prefix.name[:-7] + "-dynamic") / "lib").glob("**/*.a")]
             sdk_built_files.sort()
 
         print("Copying files...")
@@ -753,13 +754,13 @@ def package(bundle_ids: List[Bundle], params: DependencyParameters):
             toolchain_tempdir = tempdir / "toolchain-windows"
             copy_files(BOOTSTRAP_TOOLCHAIN_DIR, toolchain_mixin_files, toolchain_tempdir)
             copy_files(prefixes_dir, toolchain_files, toolchain_tempdir, transform_toolchain_dest)
-            trim_manifests(toolchain_tempdir)
+            fix_manifests(toolchain_tempdir)
             (toolchain_tempdir / "VERSION.txt").write_text(params.toolchain_version + "\n", encoding='utf-8')
 
         if Bundle.SDK in bundle_ids:
             sdk_tempdir = tempdir / "sdk-windows"
             copy_files(prefixes_dir, sdk_built_files, sdk_tempdir, transform_sdk_dest)
-            trim_manifests(sdk_tempdir)
+            fix_manifests(sdk_tempdir)
             (sdk_tempdir / "VERSION.txt").write_text(params.sdk_version + "\n", encoding='utf-8')
 
         print("Compressing...")
@@ -775,14 +776,22 @@ def package(bundle_ids: List[Bundle], params: DependencyParameters):
 
         print("All done.")
 
-def trim_manifests(root: Path):
+def fix_manifests(root: Path):
     for manifest_path in root.glob("**/manifest/*.pkg"):
         manifest_lines = []
+
         prefix = manifest_path.parent.parent
         for entry in manifest_path.read_text(encoding='utf-8').strip().split("\n"):
             if prefix.joinpath(entry).exists():
                 manifest_lines.append(entry)
+
+            if entry.startswith("lib/") and entry.endswith(".a"):
+                dynamic_entry = "lib-dynamic/" + entry[4:]
+                if prefix.joinpath(dynamic_entry).exists():
+                    manifest_lines.append(dynamic_entry)
+
         if len(manifest_lines) > 0:
+            manifest_lines.sort()
             manifest_path.write_text("\n".join(manifest_lines), encoding='utf-8')
         else:
             manifest_path.unlink()
