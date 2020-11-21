@@ -30,8 +30,14 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gum-64", "frida-gum\gum-64.vcxproj", "{DC30A450-95BC-4476-A2F9-45100562424E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gumjs-32", "frida-gum\bindings\gumjs\gumjs-32.vcxproj", "{8381538F-3CB5-480B-BFA4-960299AF6485}"
+	ProjectSection(ProjectDependencies) = postProject
+		{625577F7-611C-4965-A9B6-CE7B32074C49} = {625577F7-611C-4965-A9B6-CE7B32074C49}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gumjs-64", "frida-gum\bindings\gumjs\gumjs-64.vcxproj", "{0B39885E-731C-4A45-A7DE-44CBDBBF0067}"
+	ProjectSection(ProjectDependencies) = postProject
+		{625577F7-611C-4965-A9B6-CE7B32074C49} = {625577F7-611C-4965-A9B6-CE7B32074C49}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gum-tests", "frida-gum\tests\gum-tests.vcxproj", "{B6CA6DE9-B48B-47C0-B738-87DC3C06655F}"
 EndProject
@@ -84,6 +90,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-payload-64", "frida-c
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gumjs-inspector", "frida-gum\bindings\gumjs\gumjs-inspector.vcxproj", "{0B28EC3C-CC22-4067-9F08-6A3FAC4FB454}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gumquickcompile", "frida-gum\bindings\gumjs\gumquickcompile.vcxproj", "{625577F7-611C-4965-A9B6-CE7B32074C49}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -309,6 +317,14 @@ Global
 		{0B28EC3C-CC22-4067-9F08-6A3FAC4FB454}.Release|Win32.Build.0 = Release|Win32
 		{0B28EC3C-CC22-4067-9F08-6A3FAC4FB454}.Release|x64.ActiveCfg = Release|x64
 		{0B28EC3C-CC22-4067-9F08-6A3FAC4FB454}.Release|x64.Build.0 = Release|x64
+		{625577F7-611C-4965-A9B6-CE7B32074C49}.Debug|Win32.ActiveCfg = Debug|Win32
+		{625577F7-611C-4965-A9B6-CE7B32074C49}.Debug|Win32.Build.0 = Debug|Win32
+		{625577F7-611C-4965-A9B6-CE7B32074C49}.Debug|x64.ActiveCfg = Debug|x64
+		{625577F7-611C-4965-A9B6-CE7B32074C49}.Debug|x64.Build.0 = Debug|x64
+		{625577F7-611C-4965-A9B6-CE7B32074C49}.Release|Win32.ActiveCfg = Release|Win32
+		{625577F7-611C-4965-A9B6-CE7B32074C49}.Release|Win32.Build.0 = Release|Win32
+		{625577F7-611C-4965-A9B6-CE7B32074C49}.Release|x64.ActiveCfg = Release|x64
+		{625577F7-611C-4965-A9B6-CE7B32074C49}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
