@@ -168,7 +168,7 @@ def main():
         build(packages, params)
         build_ended_at = time.time()
 
-        package(bundle_ids)
+        package(bundle_ids, params)
         packaging_ended_at = time.time()
     finally:
         ended_at = time.time()
