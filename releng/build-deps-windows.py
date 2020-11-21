@@ -631,8 +631,12 @@ def build_v8(arch: str, config: str, runtime: str, spec: PackageSpec, extra_opti
     prefix = get_prefix_path(arch, config, runtime)
 
     include_dir = prefix / "include" / ("v8-" + api_version) / "v8"
-    for header_dir in [source_dir / "include", build_dir / "gen" / "include"]:
-        header_files = [PurePath(path).relative_to(header_dir) for path in glob(header_dir / "**" / "*.h", recursive=True)]
+    header_dirs = [
+        source_dir / "include",
+        build_dir / "gen" / "include",
+    ]
+    for header_dir in header_dirs:
+        header_files = [PurePath(path.relative_to(header_dir)) for path in header_dir.glob("**/*.h")]
         copy_files(header_dir, header_files, include_dir)
 
     v8.patch_config_header(include_dir / "v8config.h", source_dir, build_dir, gn, env)
@@ -657,7 +661,7 @@ Libs: -L${{libdir}} -lv8-{api_version}
 Libs.private: {libs_private}
 Cflags: -I${{includedir}} -I${{includedir}}/v8""" \
         .format(
-            prefix=prefix.replace("\\", "/"),
+            prefix=prefix.as_posix(),
             version=version,
             api_version=api_version,
             libs_private="-lshlwapi -lwinmm"
