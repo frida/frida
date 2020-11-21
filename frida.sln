@@ -13,7 +13,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-tests", "frida-core\t
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-resource-compiler", "frida-core\tools\frida-resource-compiler.vcxproj", "{81B3E411-8676-41EB-84C6-1E5307F0C5FF}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-builddeps", "releng\frida-builddeps.vcxproj", "{4AFCE7C4-6D9A-4663-B43C-D2E518486910}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-deps", "releng\frida-deps.vcxproj", "{4AFCE7C4-6D9A-4663-B43C-D2E518486910}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winjector-helper-32", "frida-core\src\windows\winjector-helper-32.vcxproj", "{E0AC03F2-F077-4BA7-88DD-BBE95B4E4EF0}"
 	ProjectSection(ProjectDependencies) = postProject
