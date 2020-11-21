@@ -726,13 +726,16 @@ def package(bundle_ids: List[Bundle], params: DependencyParameters):
             for root, dirs, files in os.walk(get_prefix_path('x86', 'Release', 'static')):
                 relpath = PurePath(root).relative_to(prefixes_dir)
                 all_files = [relpath / f for f in files]
-                toolchain_files += [f for f in all_files if file_is_vala_toolchain_related(f) or f.name in ["pkg-config.exe", "glib-genmarshal", "glib-mkenums"]]
+                toolchain_files += [f for f in all_files if file_is_vala_toolchain_related(f) or \
+                        f.name in ["pkg-config.exe", "glib-genmarshal", "glib-mkenums"] or \
+                        f.parent.name == "manifest"]
             toolchain_files.sort()
 
             for root, dirs, files in os.walk(BOOTSTRAP_TOOLCHAIN_DIR):
                 relpath = PurePath(root).relative_to(BOOTSTRAP_TOOLCHAIN_DIR)
                 all_files = [relpath / f for f in files]
-                toolchain_mixin_files += [f for f in all_files if not file_is_vala_toolchain_related(f)]
+                toolchain_mixin_files += [f for f in all_files if not (file_is_vala_toolchain_related(f) or \
+                        f.parent.name == "manifest")]
             toolchain_mixin_files.sort()
 
         sdk_built_files = []
@@ -750,11 +753,13 @@ def package(bundle_ids: List[Bundle], params: DependencyParameters):
             toolchain_tempdir = tempdir / "toolchain-windows"
             copy_files(BOOTSTRAP_TOOLCHAIN_DIR, toolchain_mixin_files, toolchain_tempdir)
             copy_files(prefixes_dir, toolchain_files, toolchain_tempdir, transform_toolchain_dest)
+            trim_manifests(toolchain_tempdir)
             (toolchain_tempdir / "VERSION.txt").write_text(params.toolchain_version + "\n", encoding='utf-8')
 
         if Bundle.SDK in bundle_ids:
             sdk_tempdir = tempdir / "sdk-windows"
             copy_files(prefixes_dir, sdk_built_files, sdk_tempdir, transform_sdk_dest)
+            trim_manifests(sdk_tempdir)
             (sdk_tempdir / "VERSION.txt").write_text(params.sdk_version + "\n", encoding='utf-8')
 
         print("Compressing...")
@@ -769,6 +774,18 @@ def package(bundle_ids: List[Bundle], params: DependencyParameters):
             perform("7z", *compression_switches, "-r", sdk_path, "sdk-windows", cwd=tempdir)
 
         print("All done.")
+
+def trim_manifests(root: Path):
+    for manifest_path in root.glob("**/manifest/*.pkg"):
+        manifest_lines = []
+        prefix = manifest_path.parent.parent
+        for entry in manifest_path.read_text(encoding='utf-8').strip().split("\n"):
+            if prefix.joinpath(entry).exists():
+                manifest_lines.append(entry)
+        if len(manifest_lines) > 0:
+            manifest_path.write_text("\n".join(manifest_lines), encoding='utf-8')
+        else:
+            manifest_path.unlink()
 
 def file_is_sdk_related(candidate: PurePath) -> bool:
     parts = candidate.parts
