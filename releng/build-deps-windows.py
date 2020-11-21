@@ -104,7 +104,7 @@ ALL_BUNDLES = {
         "libffi",
         "glib",
         "pkg-config",
-        "vala"
+        "vala",
     ],
     Bundle.SDK: [
         "zlib",
@@ -671,7 +671,7 @@ def make_v8_env(depot_dir: Path) -> ShellEnv:
     return env
 
 
-def package(bundle_ids: List[Bundle]):
+def package(bundle_ids: List[Bundle], params: DependencyParameters):
     with tempfile.TemporaryDirectory(prefix="frida-deps") as tempdir:
         tempdir = Path(tempdir)
 
@@ -693,21 +693,19 @@ def package(bundle_ids: List[Bundle]):
         prefixes_dir = get_prefix_root()
 
         toolchain_files = []
+        toolchain_mixin_files = []
         if Bundle.TOOLCHAIN in bundle_ids:
             for root, dirs, files in os.walk(get_prefix_path('x86', 'Release', 'static')):
                 relpath = PurePath(root).relative_to(prefixes_dir)
                 all_files = [relpath / f for f in files]
-                included_files = [f for f in all_files if file_is_vala_toolchain_related(f) or f.name in ["pkg-config.exe", "glib-genmarshal", "glib-mkenums"]]
-                toolchain_files.extend(included_files)
+                toolchain_files += [f for f in all_files if file_is_vala_toolchain_related(f) or f.name in ["pkg-config.exe", "glib-genmarshal", "glib-mkenums"]]
+            toolchain_files.sort()
 
-            toolchain_mixin_files = []
             for root, dirs, files in os.walk(BOOTSTRAP_TOOLCHAIN_DIR):
                 relpath = PurePath(root).relative_to(BOOTSTRAP_TOOLCHAIN_DIR)
                 all_files = [relpath / f for f in files]
-                included_files = [f for f in all_files if not file_is_vala_toolchain_related(f)]
-                toolchain_mixin_files.extend(included_files)
-
-            toolchain_files.sort()
+                toolchain_mixin_files += [f for f in all_files if not file_is_vala_toolchain_related(f)]
+            toolchain_mixin_files.sort()
 
         sdk_built_files = []
         if Bundle.SDK in bundle_ids:
@@ -715,27 +713,31 @@ def package(bundle_ids: List[Bundle]):
                 for root, dirs, files in os.walk(prefix):
                     relpath = PurePath(root).relative_to(prefixes_dir)
                     all_files = [relpath / f for f in files]
-                    included_files = [f for f in all_files if file_is_sdk_related(f)]
-                    sdk_built_files.extend(included_files)
-                dynamic_libs = [f.relative_(prefixes_dir) for f in (prefix.parent / (prefix.name[:-7] + "-dynamic") / "lib").glob("**/*.a")]
-                sdk_built_files.extend(dynamic_libs)
-
+                    sdk_built_files += [f for f in all_files if file_is_sdk_related(f)]
+                sdk_built_files += [f.relative_(prefixes_dir) for f in (prefix.parent / (prefix.name[:-7] + "-dynamic") / "lib").glob("**/*.a")]
             sdk_built_files.sort()
 
         print("Copying files...")
-        copy_files(prefixes_dir, sdk_built_files, tempdir / "sdk-windows", transform_sdk_dest)
+        if Bundle.TOOLCHAIN in bundle_ids:
+            toolchain_tempdir = tempdir / "toolchain-windows"
+            copy_files(BOOTSTRAP_TOOLCHAIN_DIR, toolchain_mixin_files, toolchain_tempdir)
+            copy_files(prefixes_dir, toolchain_files, toolchain_tempdir, transform_toolchain_dest)
+            (toolchain_tempdir / "VERSION.txt").write_text(params.toolchain_version + "\n", encoding='utf-8')
 
-        toolchain_tempdir = tempdir / "toolchain-windows"
-        copy_files(BOOTSTRAP_TOOLCHAIN_DIR, toolchain_mixin_files, toolchain_tempdir)
-        copy_files(prefixes_dir, toolchain_files, toolchain_tempdir, transform_toolchain_dest)
+        if Bundle.SDK in bundle_ids:
+            sdk_tempdir = tempdir / "sdk-windows"
+            copy_files(prefixes_dir, sdk_built_files, sdk_tempdir, transform_sdk_dest)
+            (sdk_tempdir / "VERSION.txt").write_text(params.sdk_version + "\n", encoding='utf-8')
 
         print("Compressing...")
         compression_switches = ["a", "-mx{}".format(COMPRESSION_LEVEL), "-sfx7zCon.sfx"]
 
         if Bundle.TOOLCHAIN in bundle_ids:
+            toolchain_path.unlink(missing_ok=True)
             perform("7z", *compression_switches, "-r", toolchain_path, "toolchain-windows", cwd=tempdir)
 
         if Bundle.SDK in bundle_ids:
+            sdk_path.unlink(missing_ok=True)
             perform("7z", *compression_switches, "-r", sdk_path, "sdk-windows", cwd=tempdir)
 
         print("All done.")
@@ -765,11 +767,12 @@ def file_is_sdk_related(candidate: PurePath) -> bool:
 def file_is_vala_toolchain_related(candidate: PurePath) -> bool:
     if candidate.suffix in [".vapi", ".deps"]:
         return is_vala_toolchain_vapi_directory(candidate.parent)
-    return candidate.name.startswith("valac-")
+    return candidate.name.startswith("valac-") and candidate.suffix == ".exe"
 
 def is_vala_toolchain_vapi_directory(directory: PurePath) -> bool:
-    parts = directory.parts[:-3]
+    parts = directory.parts[-3:]
     if len(parts) != 3:
+        print("D parts:", parts)
         return False
     return parts[0] == "share" and \
         parts[1].startswith("vala-") and \
@@ -795,7 +798,7 @@ def transform_sdk_dest(srcfile: PurePath) -> PurePath:
     return PurePath(rootdir) / subpath / srcfile.name
 
 def transform_toolchain_dest(srcfile: PurePath) -> PurePath:
-    return srcfile[srcfile.index("\\") + 1:]
+    return PurePath(*srcfile.parts[1:])
 
 
 def ensure_bootstrap_toolchain(bootstrap_version: str) -> SourceState:
@@ -834,7 +837,7 @@ def ensure_bootstrap_toolchain(bootstrap_version: str) -> SourceState:
                 print("Oops:", e.output.decode('utf-8'))
                 raise e
             shutil.move(tempdir / "toolchain-windows", BOOTSTRAP_TOOLCHAIN_DIR)
-            version_stamp_path.write_text(bootstrap_version, encoding='utf-8')
+            version_stamp_path.write_text(bootstrap_version + "\n", encoding='utf-8')
         finally:
             shutil.rmtree(tempdir)
     finally:
