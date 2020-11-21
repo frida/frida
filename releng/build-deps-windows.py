@@ -745,7 +745,7 @@ def package(bundle_ids: List[Bundle], params: DependencyParameters):
                     relpath = PurePath(root).relative_to(prefixes_dir)
                     all_files = [relpath / f for f in files]
                     sdk_built_files += [f for f in all_files if file_is_sdk_related(f)]
-                sdk_built_files += [f.relative_(prefixes_dir) for f in (prefix.parent / (prefix.name[:-7] + "-dynamic") / "lib").glob("**/*.a")]
+                sdk_built_files += [f.relative_to(prefixes_dir) for f in (prefix.parent / (prefix.name[:-7] + "-dynamic") / "lib").glob("**/*.a")]
             sdk_built_files.sort()
 
         print("Copying files...")
@@ -838,7 +838,7 @@ def transform_sdk_dest(srcfile: PurePath) -> PurePath:
     ])
 
     if runtime == 'dynamic' and subpath.parts[0] == "lib":
-        subpath = PurePath("lib-dynamic") / subpath.parts[1:]
+        subpath = PurePath("lib-dynamic").joinpath(*subpath.parts[1:])
 
     return PurePath(rootdir) / subpath / srcfile.name
 
