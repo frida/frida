@@ -6,14 +6,14 @@
     <IntDir>$(SolutionDir)build\tmp-windows\$(PlatformName)-$(Configuration)\$(ProjectName)\</IntDir>
     <GLibGenmarshal>py -3 $(SolutionDir)build\toolchain-windows\bin\glib-genmarshal</GLibGenmarshal>
     <GLibMkenums>py -3 $(SolutionDir)build\toolchain-windows\bin\glib-mkenums</GLibMkenums>
-    <ValaCompiler>$(SolutionDir)build\toolchain-windows\bin\valac-0.50.exe</ValaCompiler>
-    <ValaFlags>--target-glib=2.66 --vapidir="$(SolutionDir)frida-core\vapi" --vapidir="$(SolutionDir)frida-gum\vapi" --vapidir="$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\share\vala\vapi"</ValaFlags>
+    <ValaCompiler>$(SolutionDir)build\toolchain-windows\bin\valac-0.52.exe</ValaCompiler>
+    <ValaFlags>--target-glib=2.68 --vapidir="$(SolutionDir)frida-core\vapi" --vapidir="$(SolutionDir)frida-gum\vapi" --vapidir="$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\share\vala\vapi"</ValaFlags>
     <XPDeprecationWarning>false</XPDeprecationWarning>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <ForcedIncludeFiles>$(SolutionDir)build\tmp-windows\frida-version.h</ForcedIncludeFiles>
-      <AdditionalIncludeDirectories>$(IntDir);$(SolutionDir)frida-gum;$(SolutionDir)frida-gum\libs;$(SolutionDir)frida-gum\bindings;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\v8-8.0;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\v8-8.0\v8;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\libsoup-2.4;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\capstone;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\json-glib-1.0;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\gee-0.8;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\gio-win32-2.0;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\lib\glib-2.0\include;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\glib-2.0;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\lib\libffi-3.1\include;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IntDir);$(SolutionDir)frida-gum;$(SolutionDir)frida-gum\libs;$(SolutionDir)frida-gum\bindings;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\quickjs;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\v8-8.0;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\v8-8.0\v8;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\libsoup-2.4;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\capstone;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\json-glib-1.0;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\gee-0.8;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\gio-win32-2.0;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\lib\glib-2.0\include;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include\glib-2.0;$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <DisableSpecificWarnings>4100;4127;4201;4204;4244;4302;4305;4311;4702;4715;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>PSAPI_VERSION=1;WIN32;_WINDOWS;WINVER=0x0501;_WIN32_WINNT=0x0501;GUM_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -24,7 +24,7 @@
     <Link>
       <ImportLibrary>$(IntDir)$(ProjectName).lib</ImportLibrary>
       <AdditionalLibraryDirectories>$(IntDir)..\gum-32;$(IntDir)..\gum-64;$(IntDir)..\gumjs-32;$(IntDir)..\gumjs-64;$(SolutionDir)build\sdk-windows\$(PlatformName)-$(ConfigurationName)\lib;$(SolutionDir)build\sdk-windows\$(PlatformName)-$(ConfigurationName)\lib\gio\modules;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libffi.a;libgee-0.8.a;libgio-2.0.a;libgioschannel.a;libglib-2.0.a;libgmodule-2.0.a;libgobject-2.0.a;libgthread-2.0.a;libjson-glib-1.0.a;libsoup-2.4.a;libsqlite3.a;libv8-8.0.a;libz.a;crypt32.lib;dnsapi.lib;iphlpapi.lib;ole32.lib;psapi.lib;secur32.lib;shlwapi.lib;winmm.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libffi.a;libgee-0.8.a;libgio-2.0.a;libgioschannel.a;libglib-2.0.a;libgmodule-2.0.a;libgobject-2.0.a;libgthread-2.0.a;libjson-glib-1.0.a;libsoup-2.4.a;libsqlite3.a;libcapstone.a;libquickjs.a;libtcc.a;libv8-8.0.a;libz.a;crypt32.lib;dnsapi.lib;iphlpapi.lib;ole32.lib;psapi.lib;secur32.lib;shlwapi.lib;winmm.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <PropertyGroup Label="Configuration">
