@@ -620,7 +620,8 @@ def build_v8(arch: str, config: str, runtime: str, spec: PackageSpec, extra_opti
             "strip_absolute_paths_from_debug_symbols=true",
         ] + spec.options + extra_options)
 
-        perform(gn, "gen", build_dir.relative_to(source_dir), "--args=" + args, cwd=source_dir, env=env)
+        perform(gn, "gen", PurePath("..", "..", "..") / build_dir.relative_to(ROOT_DIR),
+                "--args=" + args, cwd=source_dir, env=env)
 
     monolith_path = build_dir / "obj" / "v8_monolith.lib"
     perform(NINJA, "v8_monolith", cwd=build_dir, env=env)
