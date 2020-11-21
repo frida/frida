@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 from dataclasses import dataclass
 from enum import Enum
 from glob import glob
@@ -19,6 +20,14 @@ import urllib.request
 from deps import read_dependency_parameters, DependencyParameters, PackageSpec
 import v8
 import winenv
+
+
+class Bundle(Enum):
+    TOOLCHAIN = 1,
+    SDK = 2,
+
+
+Package = Tuple[str, str, List[str]]
 
 
 class PackageType(Enum):
@@ -62,7 +71,6 @@ COMPRESSION_LEVEL = 9
 
 BOOTSTRAP_TOOLCHAIN_URL = "https://build.frida.re/toolchain-{version}-windows-x86.exe"
 
-
 RELENG_DIR = Path(__file__).parent.resolve()
 ROOT_DIR = RELENG_DIR.parent
 DEPS_DIR = ROOT_DIR / "deps"
@@ -71,11 +79,13 @@ BOOTSTRAP_TOOLCHAIN_DIR = ROOT_DIR / "build" / "fts-toolchain-windows"
 MESON = RELENG_DIR / "meson" / "meson.py"
 NINJA = BOOTSTRAP_TOOLCHAIN_DIR / "bin" / "ninja.exe"
 
-PACKAGES = [
+ALL_PACKAGES: List[Package] = [
     ("zlib", "zlib.pc", []),
-    ("sqlite", "sqlite3.pc", []),
     ("libffi", "libffi.pc", []),
     ("glib", "glib-2.0.pc", []),
+    ("pkg-config", "pkg-config.exe", []),
+    ("vala", "valac*.exe", []),
+    ("sqlite", "sqlite3.pc", []),
     ("glib-schannel", "gioschannel.pc", []),
     ("libgee", "gee-0.8.pc", []),
     ("json-glib", "json-glib-1.0.pc", []),
@@ -85,10 +95,34 @@ PACKAGES = [
     ("capstone", "capstone.pc", []),
     ("quickjs", "quickjs.pc", []),
     ("tinycc", "libtcc.pc", []),
-    ("vala", "valac*.exe", []),
-    ("pkg-config", "pkg-config.exe", []),
     ("v8", "v8*.pc", []),
 ]
+
+ALL_BUNDLES = {
+    Bundle.TOOLCHAIN: [
+        "zlib",
+        "libffi",
+        "glib",
+        "pkg-config",
+        "vala"
+    ],
+    Bundle.SDK: [
+        "zlib",
+        "libffi",
+        "glib",
+        "sqlite",
+        "glib-schannel",
+        "libgee",
+        "json-glib",
+        "libpsl",
+        "libxml2",
+        "libsoup",
+        "capstone",
+        "quickjs",
+        "tinycc",
+        "v8",
+    ],
+}
 
 HOST_DEFINES = {
     "capstone_archs": "x86",
@@ -103,6 +137,24 @@ build_arch = 'x86_64' if platform.machine().endswith("64") else 'x86'
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--bundle", help="only build one specific bundle",
+                        default=None, choices=[name.lower() for name in Bundle.__members__])
+    parser.add_argument("--v8", help="whether to include V8 in the SDK",
+                        default='disabled', choices=['enabled', 'disabled'])
+
+    arguments = parser.parse_args()
+
+    if arguments.bundle is None:
+        bundle_ids = [Bundle.TOOLCHAIN, Bundle.SDK]
+    else:
+        bundle_ids = [Bundle[arguments.bundle.upper()]]
+
+    selected = set([pkg_name for bundle_id in bundle_ids for pkg_name in ALL_BUNDLES[bundle_id]])
+    packages = [pkg for pkg in ALL_PACKAGES if pkg[0] in selected]
+    if arguments.v8 == 'disabled':
+        packages = [pkg for pkg in packages if pkg[0] != "v8"]
+
     params = read_dependency_parameters(HOST_DEFINES)
 
     started_at = time.time()
@@ -110,14 +162,13 @@ def main():
     build_ended_at = None
     packaging_ended_at = None
     try:
-        synchronize(params)
+        synchronize(packages, params)
         sync_ended_at = time.time()
 
-        for name, artifact_name, extra_options in PACKAGES:
-            build(name, artifact_name, params.get_package_spec(name), extra_options)
+        build(packages, params)
         build_ended_at = time.time()
 
-        package()
+        package(bundle_ids)
         packaging_ended_at = time.time()
     finally:
         ended_at = time.time()
@@ -138,14 +189,14 @@ def main():
             print("  Packaging: {}".format(format_duration(packaging_ended_at - build_ended_at)))
 
 
-def synchronize(params: DependencyParameters):
+def synchronize(packages: List[Package], params: DependencyParameters):
     toolchain_state = ensure_bootstrap_toolchain(params.bootstrap_version)
     if toolchain_state == SourceState.MODIFIED:
         wipe_build_state()
 
     check_environment()
 
-    for name, _, _ in PACKAGES:
+    for name, _, _ in packages:
         pkg_state = grab_and_prepare(name, params.get_package_spec(name), params)
         if pkg_state == SourceState.MODIFIED:
             wipe_build_state()
@@ -245,7 +296,11 @@ def wipe_build_state():
             shutil.rmtree(path)
 
 
-def build(name: str, artifact_name: str, spec: PackageSpec, extra_options: List[str]):
+def build(packages: List[Package], params: DependencyParameters):
+    for name, artifact_name, extra_options in packages:
+        build_package(name, artifact_name, params.get_package_spec(name), extra_options)
+
+def build_package(name: str, artifact_name: str, spec: PackageSpec, extra_options: List[str]):
     if artifact_name.endswith(".exe"):
         artifact_subpath = PurePath("bin", artifact_name)
         pkg_type = PackageType.TOOL
@@ -616,71 +671,74 @@ def make_v8_env(depot_dir: Path) -> ShellEnv:
     return env
 
 
-def package():
-    toolchain_filename = "toolchain-windows-x86.exe"
-    toolchain_path = ROOT_DIR / "build" / toolchain_filename
+def package(bundle_ids: List[Bundle]):
+    with tempfile.TemporaryDirectory(prefix="frida-deps") as tempdir:
+        tempdir = Path(tempdir)
 
-    sdk_filename = "sdk-windows-any.exe"
-    sdk_path = ROOT_DIR / "build" / sdk_filename
+        toolchain_filename = "toolchain-windows-x86.exe"
+        toolchain_path = ROOT_DIR / "build" / toolchain_filename
 
-    print("About to assemble:")
-    print("\t* " + toolchain_filename)
-    print("\t* " + sdk_filename)
-    print()
-    print("Determining what to include...")
+        sdk_filename = "sdk-windows-any.exe"
+        sdk_path = ROOT_DIR / "build" / sdk_filename
 
-    prefixes_dir = get_prefix_root()
+        print("About to assemble:")
+        if Bundle.TOOLCHAIN in bundle_ids:
+            print("\t* " + toolchain_filename)
+        if Bundle.SDK in bundle_ids:
+            print("\t* " + sdk_filename)
 
-    sdk_built_files = []
-    for prefix in prefixes_dir.glob("*-static"):
-        for root, dirs, files in os.walk(prefix):
-            relpath = PurePath(root).relative_to(prefixes_dir)
-            all_files = [relpath / f for f in files]
-            included_files = [f for f in all_files if file_is_sdk_related(f)]
-            sdk_built_files.extend(included_files)
-        dynamic_libs = [f.relative_(prefixes_dir) for f in (prefix.parent / (prefix.name[:-7] + "-dynamic") / "lib").glob("**/*.a")]
-        sdk_built_files.extend(dynamic_libs)
+        print()
+        print("Determining what to include...")
 
-    toolchain_files = []
-    for root, dirs, files in os.walk(get_prefix_path('x86', 'Release', 'static')):
-        relpath = PurePath(root).relative_to(prefixes_dir)
-        all_files = [relpath / f for f in files]
-        included_files = [f for f in all_files if file_is_vala_toolchain_related(f) or f.name in ["pkg-config.exe", "glib-genmarshal", "glib-mkenums"]]
-        toolchain_files.extend(included_files)
+        prefixes_dir = get_prefix_root()
 
-    toolchain_mixin_files = []
-    for root, dirs, files in os.walk(BOOTSTRAP_TOOLCHAIN_DIR):
-        relpath = PurePath(root).relative_to(BOOTSTRAP_TOOLCHAIN_DIR)
-        all_files = [relpath / f for f in files]
-        included_files = [f for f in all_files if not file_is_vala_toolchain_related(f)]
-        toolchain_mixin_files.extend(included_files)
+        toolchain_files = []
+        if Bundle.TOOLCHAIN in bundle_ids:
+            for root, dirs, files in os.walk(get_prefix_path('x86', 'Release', 'static')):
+                relpath = PurePath(root).relative_to(prefixes_dir)
+                all_files = [relpath / f for f in files]
+                included_files = [f for f in all_files if file_is_vala_toolchain_related(f) or f.name in ["pkg-config.exe", "glib-genmarshal", "glib-mkenums"]]
+                toolchain_files.extend(included_files)
 
-    sdk_built_files.sort()
-    toolchain_files.sort()
+            toolchain_mixin_files = []
+            for root, dirs, files in os.walk(BOOTSTRAP_TOOLCHAIN_DIR):
+                relpath = PurePath(root).relative_to(BOOTSTRAP_TOOLCHAIN_DIR)
+                all_files = [relpath / f for f in files]
+                included_files = [f for f in all_files if not file_is_vala_toolchain_related(f)]
+                toolchain_mixin_files.extend(included_files)
 
-    print("Copying files...")
-    tempdir = Path(tempfile.mkdtemp(prefix="frida-package"))
+            toolchain_files.sort()
 
-    copy_files(prefixes_dir, sdk_built_files, tempdir / "sdk-windows", transform_sdk_dest)
+        sdk_built_files = []
+        if Bundle.SDK in bundle_ids:
+            for prefix in prefixes_dir.glob("*-static"):
+                for root, dirs, files in os.walk(prefix):
+                    relpath = PurePath(root).relative_to(prefixes_dir)
+                    all_files = [relpath / f for f in files]
+                    included_files = [f for f in all_files if file_is_sdk_related(f)]
+                    sdk_built_files.extend(included_files)
+                dynamic_libs = [f.relative_(prefixes_dir) for f in (prefix.parent / (prefix.name[:-7] + "-dynamic") / "lib").glob("**/*.a")]
+                sdk_built_files.extend(dynamic_libs)
 
-    toolchain_tempdir = tempdir / "toolchain-windows"
-    copy_files(BOOTSTRAP_TOOLCHAIN_DIR, toolchain_mixin_files, toolchain_tempdir)
-    copy_files(prefixes_dir, toolchain_files, toolchain_tempdir, transform_toolchain_dest)
+            sdk_built_files.sort()
 
-    print("Compressing...")
-    prevdir = os.getcwd()
-    os.chdir(tempdir)
+        print("Copying files...")
+        copy_files(prefixes_dir, sdk_built_files, tempdir / "sdk-windows", transform_sdk_dest)
 
-    compression_switch = "-mx{}".format(COMPRESSION_LEVEL)
+        toolchain_tempdir = tempdir / "toolchain-windows"
+        copy_files(BOOTSTRAP_TOOLCHAIN_DIR, toolchain_mixin_files, toolchain_tempdir)
+        copy_files(prefixes_dir, toolchain_files, toolchain_tempdir, transform_toolchain_dest)
 
-    perform("7z", "a", compression_switch, "-sfx7zCon.sfx", "-r", toolchain_path, "toolchain-windows")
+        print("Compressing...")
+        compression_switches = ["a", "-mx{}".format(COMPRESSION_LEVEL), "-sfx7zCon.sfx"]
 
-    perform("7z", "a", compression_switch, "-sfx7zCon.sfx", "-r", sdk_path, "sdk-windows")
+        if Bundle.TOOLCHAIN in bundle_ids:
+            perform("7z", *compression_switches, "-r", toolchain_path, "toolchain-windows", cwd=tempdir)
 
-    os.chdir(prevdir)
-    shutil.rmtree(tempdir)
+        if Bundle.SDK in bundle_ids:
+            perform("7z", *compression_switches, "-r", sdk_path, "sdk-windows", cwd=tempdir)
 
-    print("All done.")
+        print("All done.")
 
 def file_is_sdk_related(candidate: PurePath) -> bool:
     parts = candidate.parts
