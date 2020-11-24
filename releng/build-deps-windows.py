@@ -250,6 +250,9 @@ def grab_and_prepare_v8_package(v8_spec: PackageSpec, depot_spec: PackageSpec) -
     depot_dir = DEPS_DIR / "depot_tools"
     gclient = depot_dir / "gclient.bat"
     env = make_v8_env(depot_dir)
+    metrics_cfg = depot_dir / "metrics.cfg"
+    if not metrics_cfg.exists():
+        metrics_cfg.write_text("""{"is-googler": false, "countdown": 10, "opt-in": null, "version": 1}""", encoding='utf-8')
 
     checkout_dir = DEPS_DIR / "v8-checkout"
     checkout_dir.mkdir(parents=True, exist_ok=True)
