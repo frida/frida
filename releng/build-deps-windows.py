@@ -63,8 +63,6 @@ RUNTIMES = {
 }
 COMPRESSION_LEVEL = 9
 
-BOOTSTRAP_TOOLCHAIN_URL = "https://build.frida.re/toolchain-{version}-windows-x86.exe"
-
 RELENG_DIR = Path(__file__).parent.resolve()
 ROOT_DIR = RELENG_DIR.parent
 DEPS_DIR = ROOT_DIR / "deps"
@@ -863,7 +861,8 @@ def ensure_bootstrap_toolchain(bootstrap_version: str) -> SourceState:
         source_state = SourceState.PRISTINE
 
     print("Downloading bootstrap toolchain...")
-    with urllib.request.urlopen(BOOTSTRAP_TOOLCHAIN_URL.format(version=bootstrap_version)) as response, \
+    with urllib.request.urlopen("https://build.frida.re/deps/{version}/toolchain-windows-x86.exe" \
+            .format(version=bootstrap_version)) as response, \
             tempfile.NamedTemporaryFile(suffix=".exe", delete=False) as archive:
         shutil.copyfileobj(response, archive)
         toolchain_archive_path = archive.name
