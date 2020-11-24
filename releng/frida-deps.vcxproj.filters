@@ -15,9 +15,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="windows-sdk.txt" />
-    <CustomBuild Include="windows-toolchain.txt" />
     <CustomBuild Include="generate-version-header.py" />
-    <CustomBuild Include="windows-babel.txt" />
+    <CustomBuild Include="windows-node-modules.txt" />
+    <CustomBuild Include="deps.py" />
   </ItemGroup>
 </Project>

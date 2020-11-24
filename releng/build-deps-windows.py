@@ -3,10 +3,8 @@
 import argparse
 from dataclasses import dataclass
 from enum import Enum
-from glob import glob
 import json
 import os
-import pathlib
 from pathlib import Path, PurePath
 import platform
 import re
@@ -18,14 +16,9 @@ import time
 from typing import Callable, Dict, List, Tuple
 import urllib.request
 
-from deps import read_dependency_parameters, DependencyParameters, PackageSpec
+from deps import read_dependency_parameters, Bundle, DependencyParameters, PackageSpec
 import v8
 import winenv
-
-
-class Bundle(Enum):
-    TOOLCHAIN = 1,
-    SDK = 2,
 
 
 class PackageRole(Enum):
@@ -856,11 +849,9 @@ def transform_toolchain_dest(srcfile: PurePath) -> PurePath:
 
 
 def ensure_bootstrap_toolchain(bootstrap_version: str) -> SourceState:
-    version_stamp_path = BOOTSTRAP_TOOLCHAIN_DIR / "VERSION.txt"
-
     if BOOTSTRAP_TOOLCHAIN_DIR.exists():
         try:
-            version = version_stamp_path.read_text(encoding='utf-8').strip()
+            version = (BOOTSTRAP_TOOLCHAIN_DIR / "VERSION.txt").read_text(encoding='utf-8').strip()
             if version == bootstrap_version:
                 return SourceState.PRISTINE
         except:
@@ -891,7 +882,6 @@ def ensure_bootstrap_toolchain(bootstrap_version: str) -> SourceState:
                 print("Oops:", e.output.decode('utf-8'))
                 raise e
             shutil.move(tempdir / "toolchain-windows", BOOTSTRAP_TOOLCHAIN_DIR)
-            version_stamp_path.write_text(bootstrap_version + "\n", encoding='utf-8')
         finally:
             shutil.rmtree(tempdir)
     finally:

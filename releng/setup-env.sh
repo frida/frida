@@ -175,17 +175,19 @@ detect_vala_api_version ()
   vala_api_version=$(ls -1 "$FRIDA_TOOLROOT/share" | grep "vala-" | cut -f2 -d"-")
 }
 
-if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/.version" 2>/dev/null; then
+if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/VERSION.txt" 2>/dev/null; then
   rm -rf "$FRIDA_TOOLROOT"
   mkdir -p "$FRIDA_TOOLROOT"
 
-  local_toolchain=$FRIDA_BUILD/toolchain-${build_os}-${build_arch}.tar.bz2
+  filename=toolchain-$build_os-$build_arch.tar.bz2
+
+  local_toolchain=$FRIDA_BUILD/$filename
   if [ -f $local_toolchain ]; then
     echo -e "Deploying local toolchain \\033[1m$(basename $local_toolchain)\\033[0m..."
     tar -C "$FRIDA_TOOLROOT" -xjf $local_toolchain || exit 1
   else
-    echo -e "Downloading and deploying toolchain for \\033[1m${build_os_arch}\\033[0m..."
-    $download_command "https://build.frida.re/toolchain-${toolchain_version}-${build_os}-${build_arch}.tar.bz2" | tar -C "$FRIDA_TOOLROOT" -xjf - || exit 1
+    echo -e "Downloading and deploying toolchain for \\033[1m$build_os_arch\\033[0m..."
+    $download_command "https://build.frida.re/deps/$toolchain_version/$filename" | tar -C "$FRIDA_TOOLROOT" -xjf - || exit 1
   fi
 
   for template in $(find $FRIDA_TOOLROOT -name "*.frida.in"); do
@@ -208,25 +210,25 @@ if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/.version" 2>/dev/null; th
   ) > "$vala_wrapper"
   chmod 755 "$vala_wrapper"
 
-  ln -s "${FRIDA_ROOT}/releng/ninja-${build_os_arch}" "$FRIDA_TOOLROOT/bin/ninja"
-  ln -s "${FRIDA_ROOT}/releng/frida-resource-compiler-${build_os_arch}" "$FRIDA_TOOLROOT/bin/frida-resource-compiler"
-
-  echo $toolchain_version > "$FRIDA_TOOLROOT/.version"
+  ln -s "$FRIDA_ROOT/releng/ninja-$build_os_arch" "$FRIDA_TOOLROOT/bin/ninja"
+  ln -s "$FRIDA_ROOT/releng/frida-resource-compiler-$build_os_arch" "$FRIDA_TOOLROOT/bin/frida-resource-compiler"
 else
   detect_vala_api_version
 fi
 
-if [ "$FRIDA_ENV_SDK" != 'none' ] && ! grep -Eq "^$sdk_version\$" "$FRIDA_SDKROOT/.version" 2>/dev/null; then
+if [ "$FRIDA_ENV_SDK" != 'none' ] && ! grep -Eq "^$sdk_version\$" "$FRIDA_SDKROOT/VERSION.txt" 2>/dev/null; then
   rm -rf "$FRIDA_SDKROOT"
   mkdir -p "$FRIDA_SDKROOT"
 
-  local_sdk=$FRIDA_BUILD/sdk-${host_os}-${host_arch}.tar.bz2
+  filename=sdk-$host_os-$host_arch.tar.bz2
+
+  local_sdk=$FRIDA_BUILD/$filename
   if [ -f $local_sdk ]; then
     echo -e "Deploying local SDK \\033[1m$(basename $local_sdk)\\033[0m..."
     tar -C "$FRIDA_SDKROOT" -xjf $local_sdk || exit 1
   else
-    echo -e "Downloading and deploying SDK for \\033[1m${host_os_arch}\\033[0m..."
-    $download_command "https://build.frida.re/sdk-${sdk_version}-${host_os}-${host_arch}.tar.bz2" | tar -C "$FRIDA_SDKROOT" -xjf - 2> /dev/null
+    echo -e "Downloading and deploying SDK for \\033[1m$host_os_arch\\033[0m..."
+    $download_command "https://build.frida.re/deps/$sdk_version/$filename" | tar -C "$FRIDA_SDKROOT" -xjf - 2> /dev/null
     if [ $? -ne 0 ]; then
       echo ""
       echo "Bummer. It seems we don't have a prebuilt SDK for your system."
@@ -248,8 +250,6 @@ if [ "$FRIDA_ENV_SDK" != 'none' ] && ! grep -Eq "^$sdk_version\$" "$FRIDA_SDKROO
       -e "s,@FRIDA_RELENG@,$releng_path,g" \
       "$template" > "$target"
   done
-
-  echo $sdk_version > "$FRIDA_SDKROOT/.version"
 fi
 
 if [ -f "$FRIDA_SDKROOT/lib/c++/libc++.a" ]; then
