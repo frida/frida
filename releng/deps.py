@@ -71,7 +71,11 @@ def main():
     command.set_defaults(func=lambda args: roll(Bundle[args.bundle.upper()], args.os_arch, args.activate))
 
     args = parser.parse_args()
-    args.func(args)
+    if 'func' in args:
+        args.func(args)
+    else:
+        parser.print_usage(file=sys.stderr)
+        sys.exit(1)
 
 
 def sync(bundle: Bundle, os_arch: str, location: Path):
@@ -122,12 +126,11 @@ def roll(bundle: Bundle, os_arch: str, activate: bool):
 
     (public_url, filename, suffix) = compute_bundle_parameters(bundle, os_arch, version)
 
-    ## First do a quick check to avoid hitting S3 in most cases.
+    # First do a quick check to avoid hitting S3 in most cases.
     request = urllib.request.Request(public_url)
     request.get_method = lambda: "HEAD"
     try:
         with urllib.request.urlopen(request) as r:
-            print("it exists:", public_url)
             return
     except urllib.request.HTTPError as e:
         if e.code != 404:
@@ -165,17 +168,15 @@ def roll(bundle: Bundle, os_arch: str, activate: bool):
                        ],
                        check=True)
 
-    subprocess.run(s3cmd + [
-                       "put",
-                       artifact,
-                       s3_url
-                   ],
-                   check=True)
+    subprocess.run(s3cmd + ["put", artifact, s3_url], check=True)
+
+    # Use the shell for Windows compatibility, where npm generates a .bat script.
+    subprocess.run("cfcli purge " + public_url, shell=True, check=True)
 
     if activate:
         deps_content = DEPS_MK_PATH.read_text(encoding='utf-8')
-        deps_content = deps_content.replace("^frida_bootstrap_version = (.+)$", "frida_bootstrap_version = {}".format(version),
-                                            re.MULTILINE)
+        deps_content = re.sub("^frida_bootstrap_version = (.+)$", "frida_bootstrap_version = {}".format(version),
+                              deps_content, flags=re.MULTILINE)
         DEPS_MK_PATH.write_bytes(deps_content.encode('utf-8'))
 
 
