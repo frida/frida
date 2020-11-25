@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from typing import Dict, List, Tuple
 import urllib.request
 
@@ -70,6 +71,11 @@ def main():
     command.add_argument("os_arch", help="OS/arch")
     command.add_argument("--activate", default=False, action='store_true')
     command.set_defaults(func=lambda args: roll(Bundle[args.bundle.upper()], args.os_arch, args.activate))
+
+    command = subparsers.add_parser("wait", help="wait for prebuilt dependencies if needed")
+    command.add_argument("bundle", help="bundle to wait for", choices=bundle_choices)
+    command.add_argument("os_arch", help="OS/arch")
+    command.set_defaults(func=lambda args: wait(Bundle[args.bundle.upper()], args.os_arch))
 
     args = parser.parse_args()
     if 'func' in args:
@@ -181,6 +187,25 @@ def roll(bundle: Bundle, os_arch: str, activate: bool):
         deps_content = re.sub("^frida_bootstrap_version = (.+)$", "frida_bootstrap_version = {}".format(version),
                               deps_content, flags=re.MULTILINE)
         DEPS_MK_PATH.write_bytes(deps_content.encode('utf-8'))
+
+
+def wait(bundle: Bundle, os_arch: str):
+    params = read_dependency_parameters()
+    version = params.toolchain_version if bundle == Bundle.TOOLCHAIN else params.sdk_version
+    (url, filename, suffix) = compute_bundle_parameters(bundle, os_arch, version)
+
+    request = urllib.request.Request(url)
+    request.get_method = lambda: "HEAD"
+    started_at = time.time()
+    while True:
+        try:
+            with urllib.request.urlopen(request) as r:
+                return
+        except urllib.request.HTTPError as e:
+            if e.code != 404:
+                return
+        print("Waiting for: {}  Elapsed: {}  Retrying in 5 minutes...".format(url, int(time.time() - started_at)))
+        time.sleep(5 * 60)
 
 
 def compute_bundle_parameters(bundle: Bundle, os_arch: str, version: str) -> Tuple[str, str, str]:
