@@ -5,12 +5,12 @@ prefix=$2
 releng=$3
 [ -z "$package" -o -z "$prefix" -o -z "$releng" ] && exit 1
 
-build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,macos,')
+build_os=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,macos,')
 
 toolchain_prefix=$(dirname $(dirname $(which perl)))
 
 shopt -s expand_aliases
-if [ "$build_platform" = "macos" ]; then
+if [ "$build_os" = "macos" ]; then
   alias sed_inplace='sed -i ""'
 else
   alias sed_inplace='sed -i'
@@ -41,5 +41,17 @@ for file in $(find "$package" -type f); do
         -e "s,$prefix,\${frida_sdk_prefix},g" \
         $file || exit 1
     fi
+  fi
+done
+
+cd "$package" || exit 1
+for pkg in manifest/*.pkg; do
+  cat $pkg | while read entry; do
+    [ -e $entry ] && echo $entry >> $pkg.filtered
+  done
+  if [ -f $pkg.filtered ]; then
+    mv $pkg.filtered $pkg
+  else
+    rm $pkg
   fi
 done

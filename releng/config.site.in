@@ -4,8 +4,8 @@ if [ -z "$PACKAGE_TARNAME" ]; then
   PACKAGE_TARNAME=$(basename $(dirname "$0"))
 fi
 
-frida_build_platform_arch=@frida_build_platform_arch@
-frida_host_platform_arch=@frida_host_platform_arch@
+frida_build_os_arch=@frida_build_os_arch@
+frida_host_os_arch=@frida_host_os_arch@
 frida_libc=@frida_libc@
 frida_prefix=@frida_prefix@
 
@@ -14,17 +14,9 @@ test "$prefix" = NONE && prefix="$frida_prefix"
 enable_nls=no
 enable_silent_rules=yes
 
-case "$PACKAGE_TARNAME" in
-  capstone)
-    # Takes ages to compile with debug information
-    frida_flags="@frida_optimization_flags@ -pipe"
-    ;;
-  *)
-    frida_flags="@frida_optimization_flags@ -pipe @frida_debug_flags@"
-    ;;
-esac
+frida_flags="@frida_optimization_flags@ -pipe @frida_debug_flags@"
 
-case $frida_host_platform_arch in
+case $frida_host_os_arch in
   linux-arm)
     host_alias="arm-linux-gnueabi"
     ;;
@@ -93,7 +85,7 @@ case $frida_host_platform_arch in
     ;;
 esac
 
-if [ $frida_host_platform_arch != $frida_build_platform_arch ]; then
+if [ $frida_host_os_arch != $frida_build_os_arch ]; then
   cross_compiling=yes
 else
   cross_compiling=no
@@ -102,7 +94,7 @@ fi
 ac_cv_func_malloc_0_nonnull=yes
 ac_cv_func_realloc_0_nonnull=yes
 
-case $frida_host_platform_arch in
+case $frida_host_os_arch in
   android-*)
     ac_cv_sys_file_offset_bits=no
     ;;
@@ -124,25 +116,14 @@ if [ -z "$enable_static" ]; then
 fi
 
 case "$PACKAGE_TARNAME" in
-  gettext|libtextstyle)
-    enable_curses=no
-    ;;
   elfutils)
-    enable_debuginfod=no
-    case $frida_host_platform_arch in
+    case $frida_host_os_arch in
       android-x86|android-arm)
         ac_cv_have_decl_mempcpy=no
         ;;
     esac
     ;;
   libunwind)
-    enable_coredump=no
-    enable_ptrace=no
-    enable_setjmp=no
-    enable_debug=no
-    enable_msabi_support=no
-    enable_minidebuginfo=yes
-
     CFLAGS="$CFLAGS -I$frida_prefix/include"
     LDFLAGS="$LDFLAGS -L$frida_prefix/lib"
     ;;

@@ -2,14 +2,14 @@
 
 releng_path=`dirname $0`
 
-build_platform=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,macos,')
+build_os=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,macos,')
 build_arch=$($releng_path/detect-arch.sh)
-build_platform_arch=${build_platform}-${build_arch}
+build_os_arch=${build_os}-${build_arch}
 
 if [ -n "$FRIDA_HOST" ]; then
-  host_platform=$(echo -n $FRIDA_HOST | cut -f1 -d"-")
+  host_os=$(echo -n $FRIDA_HOST | cut -f1 -d"-")
 else
-  host_platform=$build_platform
+  host_os=$build_os
 fi
 if [ -n "$FRIDA_HOST" ]; then
   host_arch=$(echo -n $FRIDA_HOST | cut -f2 -d"-")
@@ -22,9 +22,9 @@ else
   frida_libc=glibc
 fi
 host_clang_arch=$(echo -n $host_arch | sed 's,^x86$,i386,')
-host_platform_arch=${host_platform}-${host_arch}
+host_os_arch=${host_os}-${host_arch}
 
-meson_host_system=$(echo $host_platform | sed 's,^macos$,darwin,' | sed 's,^ios$,darwin,' | sed 's,^android$,linux,')
+meson_host_system=$(echo $host_os | sed 's,^macos$,darwin,' | sed 's,^ios$,darwin,')
 case $host_arch in
   i?86)
     meson_host_cpu_family=x86
@@ -97,10 +97,10 @@ else
 fi
 
 if [ -z "$FRIDA_HOST" ]; then
-  echo "Assuming host is $host_platform_arch Set FRIDA_HOST to override."
+  echo "Assuming host is $host_os_arch Set FRIDA_HOST to override."
 fi
 
-if [ "$host_platform" == "android" ]; then
+if [ "$host_os" == "android" ]; then
   ndk_required=21
   if [ -n "$ANDROID_NDK_ROOT" ]; then
     if [ -f "$ANDROID_NDK_ROOT/source.properties" ]; then
@@ -134,17 +134,11 @@ if [ "$host_platform" == "android" ]; then
   fi
 fi
 
-if [ "$host_platform" == "qnx" ]; then
+if [ "$host_os" == "qnx" ]; then
   if [ ! -n "$QNX_HOST" ]; then
     echo "You need to specify QNX_HOST and QNX_TARGET"
     exit 1
   fi
-fi
-
-toolchain_version=20201028
-sdk_version=20201028
-if [ "$enable_asan" == "yes" ]; then
-  sdk_version="$sdk_version-asan"
 fi
 
 if [ -n "$FRIDA_ENV_NAME" ]; then
@@ -157,10 +151,112 @@ pushd $releng_path/../ > /dev/null
 FRIDA_ROOT=`pwd`
 popd > /dev/null
 FRIDA_BUILD="$FRIDA_ROOT/build"
-FRIDA_PREFIX="$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}"
+FRIDA_PREFIX="$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}"
 FRIDA_PREFIX_LIB="$FRIDA_PREFIX/lib"
-FRIDA_TOOLROOT="$FRIDA_BUILD/${frida_env_name_prefix}toolchain-${build_platform_arch}"
-FRIDA_SDKROOT="$FRIDA_BUILD/${frida_env_name_prefix}sdk-${host_platform_arch}"
+FRIDA_TOOLROOT="$FRIDA_BUILD/${frida_env_name_prefix}toolchain-${build_os_arch}"
+FRIDA_SDKROOT="$FRIDA_BUILD/${frida_env_name_prefix}sdk-${host_os_arch}"
+
+if [ -n $FRIDA_TOOLCHAIN_VERSION ]; then
+  toolchain_version=$FRIDA_TOOLCHAIN_VERSION
+else
+  toolchain_version=$(grep "frida_toolchain_version =" "$FRIDA_RELENG/deps.mk" | awk '{ print $NF }')
+fi
+if [ -n $FRIDA_SDK_VERSION ]; then
+  sdk_version=$FRIDA_SDK_VERSION
+else
+  sdk_version=$(grep "frida_sdk_version =" "$FRIDA_RELENG/deps.mk" | awk '{ print $NF }')
+fi
+if [ "$enable_asan" == "yes" ]; then
+  sdk_version="$sdk_version-asan"
+fi
+
+detect_vala_api_version ()
+{
+  vala_api_version=$(ls -1 "$FRIDA_TOOLROOT/share" | grep "vala-" | cut -f2 -d"-")
+}
+
+if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/VERSION.txt" 2>/dev/null; then
+  rm -rf "$FRIDA_TOOLROOT"
+  mkdir -p "$FRIDA_TOOLROOT"
+
+  filename=toolchain-$build_os-$build_arch.tar.bz2
+
+  local_toolchain=$FRIDA_BUILD/$filename
+  if [ -f $local_toolchain ]; then
+    echo -e "Deploying local toolchain \\033[1m$(basename $local_toolchain)\\033[0m..."
+    tar -C "$FRIDA_TOOLROOT" -xjf $local_toolchain || exit 1
+  else
+    echo -e "Downloading and deploying toolchain for \\033[1m$build_os_arch\\033[0m..."
+    $download_command "https://build.frida.re/deps/$toolchain_version/$filename" | tar -C "$FRIDA_TOOLROOT" -xjf - || exit 1
+  fi
+
+  for template in $(find $FRIDA_TOOLROOT -name "*.frida.in"); do
+    target=$(echo $template | sed 's,\.frida\.in$,,')
+    cp -a "$template" "$target"
+    sed \
+      -e "s,@FRIDA_TOOLROOT@,$FRIDA_TOOLROOT,g" \
+      -e "s,@FRIDA_RELENG@,$releng_path,g" \
+      "$template" > "$target"
+  done
+
+  detect_vala_api_version
+
+  vala_wrapper=$FRIDA_TOOLROOT/bin/valac-$vala_api_version
+  vala_impl=$FRIDA_TOOLROOT/bin/valac-$vala_api_version-impl
+  mv "$vala_wrapper" "$vala_impl"
+  (
+    echo "#!/bin/sh"
+    echo "exec \"$vala_impl\" --target-glib=2.68 \"\$@\" --vapidir=\"$FRIDA_TOOLROOT/share/vala-$vala_api_version/vapi\""
+  ) > "$vala_wrapper"
+  chmod 755 "$vala_wrapper"
+
+  ln -s "$FRIDA_ROOT/releng/ninja-$build_os_arch" "$FRIDA_TOOLROOT/bin/ninja"
+  ln -s "$FRIDA_ROOT/releng/frida-resource-compiler-$build_os_arch" "$FRIDA_TOOLROOT/bin/frida-resource-compiler"
+else
+  detect_vala_api_version
+fi
+
+if [ "$FRIDA_ENV_SDK" != 'none' ] && ! grep -Eq "^$sdk_version\$" "$FRIDA_SDKROOT/VERSION.txt" 2>/dev/null; then
+  rm -rf "$FRIDA_SDKROOT"
+  mkdir -p "$FRIDA_SDKROOT"
+
+  filename=sdk-$host_os-$host_arch.tar.bz2
+
+  local_sdk=$FRIDA_BUILD/$filename
+  if [ -f $local_sdk ]; then
+    echo -e "Deploying local SDK \\033[1m$(basename $local_sdk)\\033[0m..."
+    tar -C "$FRIDA_SDKROOT" -xjf $local_sdk || exit 1
+  else
+    echo -e "Downloading and deploying SDK for \\033[1m$host_os_arch\\033[0m..."
+    $download_command "https://build.frida.re/deps/$sdk_version/$filename" | tar -C "$FRIDA_SDKROOT" -xjf - 2> /dev/null
+    if [ $? -ne 0 ]; then
+      echo ""
+      echo "Bummer. It seems we don't have a prebuilt SDK for your system."
+      echo ""
+      echo "Please go ahead and build it yourself:"
+      echo "$ make -f Makefile.sdk.mk"
+      echo ""
+      echo "Afterwards just retry and the SDK will get picked up automatically."
+      echo ""
+      exit 1
+    fi
+  fi
+
+  for template in $(find $FRIDA_SDKROOT -name "*.frida.in"); do
+    target=$(echo $template | sed 's,\.frida\.in$,,')
+    cp -a "$template" "$target"
+    sed \
+      -e "s,@FRIDA_SDKROOT@,$FRIDA_SDKROOT,g" \
+      -e "s,@FRIDA_RELENG@,$releng_path,g" \
+      "$template" > "$target"
+  done
+fi
+
+if [ -f "$FRIDA_SDKROOT/lib/c++/libc++.a" ]; then
+  have_static_libcxx=yes
+else
+  have_static_libcxx=no
+fi
 
 LIBTOOL=""
 STRIP_FLAGS=""
@@ -172,8 +268,7 @@ CXXFLAGS=""
 CPPFLAGS=""
 LDFLAGS=""
 
-meson_root=""
-
+meson_common_flags="[]"
 meson_objc=""
 meson_objcpp=""
 meson_linker_flavor=""
@@ -190,7 +285,7 @@ flags_to_args () {
 
 mkdir -p "$FRIDA_BUILD"
 
-case $host_platform in
+case $host_os in
   linux)
     host_arch_flags=""
     host_cflags=""
@@ -317,7 +412,7 @@ case $host_platform in
   macos)
     case $host_arch in
       arm64|arm64e)
-        macos_minver="10.16"
+        macos_minver="11.0"
         ;;
       *)
         macos_minver="10.9"
@@ -334,7 +429,7 @@ case $host_platform in
     clang_cc="$(xcrun --sdk $macos_sdk -f clang)"
     clang_cxx="$(xcrun --sdk $macos_sdk -f clang++)"
 
-    cc_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang
+    cc_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-clang
     sed \
       -e "s,@driver@,$clang_cc,g" \
       -e "s,@sysroot@,$macos_sdk_path,g" \
@@ -342,8 +437,8 @@ case $host_platform in
       "$releng_path/driver-wrapper-xcode-default.sh.in" > "$cc_wrapper"
     chmod +x "$cc_wrapper"
 
-    cxx_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang++
-    if [ "$FRIDA_ENV_SDK" != 'none' ] && [ $enable_asan = no ]; then
+    cxx_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-clang++
+    if [ $have_static_libcxx = yes ] && [ $enable_asan = no ]; then
       sed \
         -e "s,@driver@,$clang_cxx,g" \
         -e "s,@sysroot@,$macos_sdk_path,g" \
@@ -359,7 +454,7 @@ case $host_platform in
     fi
     chmod +x "$cxx_wrapper"
 
-    ar_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-ar
+    ar_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-ar
     sed \
       -e "s,@ar@,$(xcrun --sdk $macos_sdk -f ar),g" \
       -e "s,@libtool@,$(xcrun --sdk $macos_sdk -f libtool),g" \
@@ -388,8 +483,6 @@ case $host_platform in
     CPPFLAGS="-mmacosx-version-min=$macos_minver"
     CXXFLAGS="-stdlib=libc++"
     LDFLAGS="-isysroot $macos_sdk_path -arch $host_clang_arch -Wl,-dead_strip"
-
-    meson_root="$macos_sdk_path"
 
     base_toolchain_args="'-mmacosx-version-min=$macos_minver'"
     base_compiler_args="$base_toolchain_args"
@@ -443,7 +536,7 @@ case $host_platform in
         ;;
     esac
 
-    cc_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang
+    cc_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-clang
     sed \
       -e "s,@driver@,$clang_cc,g" \
       -e "s,@sysroot@,$ios_sdk_path,g" \
@@ -451,8 +544,8 @@ case $host_platform in
       "$releng_path/driver-wrapper-xcode-default.sh.in" > "$cc_wrapper"
     chmod +x "$cc_wrapper"
 
-    cxx_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang++
-    if [ "$FRIDA_ENV_SDK" != 'none' ] && [ $enable_asan = no ]; then
+    cxx_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-clang++
+    if [ $have_static_libcxx = yes ] && [ $enable_asan = no ]; then
       sed \
         -e "s,@driver@,$clang_cxx,g" \
         -e "s,@sysroot@,$ios_sdk_path,g" \
@@ -468,7 +561,7 @@ case $host_platform in
     fi
     chmod +x "$cxx_wrapper"
 
-    ar_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-ar
+    ar_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-ar
     sed \
       -e "s,@ar@,$(xcrun --sdk $ios_sdk -f ar),g" \
       -e "s,@libtool@,$(xcrun --sdk $ios_sdk -f libtool),g" \
@@ -498,8 +591,6 @@ case $host_platform in
     CXXFLAGS="-stdlib=libc++"
     LDFLAGS="-isysroot $ios_sdk_path -arch $ios_arch -Wl,-dead_strip"
 
-    meson_root="$ios_sdk_path"
-
     base_toolchain_args="'-miphoneos-version-min=$ios_minver'"
     base_compiler_args="$base_toolchain_args"
     base_linker_args="$base_toolchain_args, '-Wl,-dead_strip'"
@@ -520,8 +611,8 @@ case $host_platform in
     meson_objcpp_link_args="$base_linker_args, '-stdlib=libc++'"
     ;;
   android)
-    android_build_platform=$(echo ${build_platform} | sed 's,^macos$,darwin,')
-    android_toolroot="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/${android_build_platform}-${build_arch}"
+    android_build_os=$(echo ${build_os} | sed 's,^macos$,darwin,')
+    android_toolroot="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/${android_build_os}-${build_arch}"
 
     host_arch_flags=""
     host_cflags=""
@@ -592,16 +683,16 @@ case $host_platform in
     LDFLAGS="$base_linker_flags"
     meson_linker_flavor=gold
 
-    elf_cleaner=${FRIDA_ROOT}/releng/frida-elf-cleaner-${build_platform_arch}
+    elf_cleaner=${FRIDA_ROOT}/releng/frida-elf-cleaner-${build_os_arch}
 
-    meson_cc_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang
+    meson_cc_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-clang
     sed \
       -e "s,@driver@,${android_toolroot}/bin/${host_compiler_prefix}clang,g" \
       -e "s,@elf_cleaner@,$elf_cleaner,g" \
       "$releng_path/driver-wrapper-android.sh.in" > "$meson_cc_wrapper"
     chmod +x "$meson_cc_wrapper"
 
-    meson_cpp_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-clang++
+    meson_cpp_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-clang++
     sed \
       -e "s,@driver@,${android_toolroot}/bin/${host_compiler_prefix}clang++,g" \
       -e "s,@elf_cleaner@,$elf_cleaner,g" \
@@ -678,8 +769,6 @@ case $host_platform in
     CFLAGS="-ffunction-sections -fdata-sections"
     LDFLAGS="-Wl,--gc-sections -L$(dirname $qnx_sysroot/lib/gcc/4.8.3/libstdc++.a)"
 
-    meson_root="$qnx_sysroot"
-
     arch_args=$(flags_to_args "$host_arch_flags")
 
     base_toolchain_args="'--sysroot=$qnx_sysroot', $arch_args, '-static-libgcc'"
@@ -697,7 +786,7 @@ case $host_platform in
     ;;
 esac
 
-case $host_platform_arch in
+case $host_os_arch in
   linux-armhf|ios-arm|android-arm)
     meson_c_args="$meson_c_args, '-mthumb'"
     meson_cpp_args="$meson_cpp_args, '-mthumb'"
@@ -766,10 +855,10 @@ if [ "$FRIDA_ENV_SDK" != 'none' ]; then
 fi
 ACLOCAL_FLAGS="$ACLOCAL_FLAGS -I $FRIDA_TOOLROOT/share/aclocal"
 ACLOCAL="aclocal $ACLOCAL_FLAGS"
-CONFIG_SITE="$FRIDA_BUILD/${frida_env_name_prefix}config-${host_platform_arch}.site"
+CONFIG_SITE="$FRIDA_BUILD/${frida_env_name_prefix}config-${host_os_arch}.site"
 
-VALAC="$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-valac"
-vala_impl="$FRIDA_TOOLROOT/bin/valac-0.50"
+VALAC="$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-valac"
+vala_impl="$FRIDA_TOOLROOT/bin/valac-$vala_api_version"
 vala_flags="--vapidir=\"$FRIDA_PREFIX/share/vala/vapi\""
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   vala_flags="$vala_flags --vapidir=\"$FRIDA_SDKROOT/share/vala/vapi\""
@@ -783,80 +872,7 @@ chmod 755 "$VALAC"
 [ ! -d "$FRIDA_PREFIX/share/aclocal}" ] && mkdir -p "$FRIDA_PREFIX/share/aclocal"
 [ ! -d "$FRIDA_PREFIX/lib}" ] && mkdir -p "$FRIDA_PREFIX/lib"
 
-if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/.version" 2>/dev/null; then
-  rm -rf "$FRIDA_TOOLROOT"
-  mkdir -p "$FRIDA_TOOLROOT"
-
-  local_toolchain=$FRIDA_BUILD/toolchain-${build_platform}-${build_arch}.tar.bz2
-  if [ -f $local_toolchain ]; then
-    echo "Deploying local toolchain $(basename $local_toolchain)..."
-    tar -C "$FRIDA_TOOLROOT" -xjf $local_toolchain || exit 1
-  else
-    echo "Downloading and deploying toolchain..."
-    $download_command "https://build.frida.re/toolchain-${toolchain_version}-${build_platform}-${build_arch}.tar.bz2" | tar -C "$FRIDA_TOOLROOT" -xjf - || exit 1
-  fi
-
-  for template in $(find $FRIDA_TOOLROOT -name "*.frida.in"); do
-    target=$(echo $template | sed 's,\.frida\.in$,,')
-    cp -a "$template" "$target"
-    sed \
-      -e "s,@FRIDA_TOOLROOT@,$FRIDA_TOOLROOT,g" \
-      -e "s,@FRIDA_RELENG@,$releng_path,g" \
-      "$template" > "$target"
-  done
-
-  vala_wrapper=$FRIDA_TOOLROOT/bin/valac-0.50
-  vala_impl=$FRIDA_TOOLROOT/bin/valac-0.50-impl
-  mv "$vala_wrapper" "$vala_impl"
-  (
-    echo "#!/bin/sh"
-    echo "exec \"$vala_impl\" --target-glib=2.66 \"\$@\" --vapidir=\"$FRIDA_TOOLROOT/share/vala-0.50/vapi\""
-  ) > "$vala_wrapper"
-  chmod 755 "$vala_wrapper"
-
-  ln -s "${FRIDA_ROOT}/releng/ninja-${build_platform_arch}" "$FRIDA_TOOLROOT/bin/ninja"
-  ln -s "${FRIDA_ROOT}/releng/frida-resource-compiler-${build_platform_arch}" "$FRIDA_TOOLROOT/bin/frida-resource-compiler"
-
-  echo $toolchain_version > "$FRIDA_TOOLROOT/.version"
-fi
-
-if [ "$FRIDA_ENV_SDK" != 'none' ] && ! grep -Eq "^$sdk_version\$" "$FRIDA_SDKROOT/.version" 2>/dev/null; then
-  rm -rf "$FRIDA_SDKROOT"
-  mkdir -p "$FRIDA_SDKROOT"
-
-  local_sdk=$FRIDA_BUILD/sdk-${host_platform}-${host_arch}.tar.bz2
-  if [ -f $local_sdk ]; then
-    echo "Deploying local SDK $(basename $local_sdk)..."
-    tar -C "$FRIDA_SDKROOT" -xjf $local_sdk || exit 1
-  else
-    echo "Downloading and deploying SDK for ${host_platform_arch}..."
-    $download_command "https://build.frida.re/sdk-${sdk_version}-${host_platform}-${host_arch}.tar.bz2" | tar -C "$FRIDA_SDKROOT" -xjf - 2> /dev/null
-    if [ $? -ne 0 ]; then
-      echo ""
-      echo "Bummer. It seems we don't have a prebuilt SDK for your system."
-      echo ""
-      echo "Please go ahead and build it yourself:"
-      echo "$ make -f Makefile.sdk.mk"
-      echo ""
-      echo "Afterwards just retry and the SDK will get picked up automatically."
-      echo ""
-      exit 1
-    fi
-  fi
-
-  for template in $(find $FRIDA_SDKROOT -name "*.frida.in"); do
-    target=$(echo $template | sed 's,\.frida\.in$,,')
-    cp -a "$template" "$target"
-    sed \
-      -e "s,@FRIDA_SDKROOT@,$FRIDA_SDKROOT,g" \
-      -e "s,@FRIDA_RELENG@,$releng_path,g" \
-      "$template" > "$target"
-  done
-
-  echo $sdk_version > "$FRIDA_SDKROOT/.version"
-fi
-
-strip_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-strip
+strip_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-strip
 (
   echo "#!/bin/sh"
   echo "for arg in \"\$@\"; do"
@@ -868,7 +884,7 @@ strip_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-strip
 ) > "$strip_wrapper"
 chmod 755 "$strip_wrapper"
 
-PKG_CONFIG=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-pkg-config
+PKG_CONFIG=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-pkg-config
 
 pkg_config="$FRIDA_TOOLROOT/bin/pkg-config"
 pkg_config_flags=""
@@ -884,8 +900,8 @@ fi
 ) > "$PKG_CONFIG"
 chmod 755 "$PKG_CONFIG"
 
-env_rc=build/${FRIDA_ENV_NAME:-frida}-env-${host_platform_arch}.rc
-meson_env_rc=build/${FRIDA_ENV_NAME:-frida}-meson-env-${host_platform_arch}.rc
+env_rc=build/${FRIDA_ENV_NAME:-frida}-env-${host_os_arch}.rc
+meson_env_rc=build/${FRIDA_ENV_NAME:-frida}-meson-env-${host_os_arch}.rc
 
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   env_path_sdk="$FRIDA_SDKROOT/bin:"
@@ -923,7 +939,7 @@ if [ -n "$OBJDUMP" ]; then
   echo "export OBJDUMP=\"$OBJDUMP\"" >> $env_rc
 fi
 
-case $host_platform in
+case $host_os in
   macos|ios)
     (
       echo "export INSTALL_NAME_TOOL=\"$INSTALL_NAME_TOOL\""
@@ -938,7 +954,7 @@ case $host_platform in
     ;;
 esac
 
-case $host_platform in
+case $host_os in
   macos)
     (
       echo "export MACOSX_DEPLOYMENT_TARGET=$macos_minver"
@@ -947,8 +963,8 @@ case $host_platform in
 esac
 
 sed \
-  -e "s,@frida_build_platform_arch@,$build_platform_arch,g" \
-  -e "s,@frida_host_platform_arch@,$host_platform_arch,g" \
+  -e "s,@frida_build_os_arch@,$build_os_arch,g" \
+  -e "s,@frida_host_os_arch@,$host_os_arch,g" \
   -e "s,@frida_prefix@,$FRIDA_PREFIX,g" \
   -e "s,@frida_optimization_flags@,$FRIDA_ACOPTFLAGS,g" \
   -e "s,@frida_debug_flags@,$FRIDA_ACDBGFLAGS,g" \
@@ -971,7 +987,7 @@ sed \
   echo "export STRIP=\"$strip_wrapper\""
 ) > $meson_env_rc
 
-case $host_platform in
+case $host_os in
   macos|ios)
     (
       echo "export INSTALL_NAME_TOOL=\"$INSTALL_NAME_TOOL\""
@@ -995,7 +1011,7 @@ if [ -n "$meson_linker_flavor" ]; then
   [ -n "$meson_objcpp" ] && echo "export OBJCXX_LD=$meson_linker_flavor" >> $meson_env_rc
 fi
 
-case $host_platform in
+case $host_os in
   macos)
     (
       echo "export MACOSX_DEPLOYMENT_TARGET=$macos_minver"
@@ -1003,19 +1019,20 @@ case $host_platform in
     ;;
 esac
 
-if [ "$host_platform_arch" != "$build_platform_arch" ]; then
-  build_env_rc=build/${FRIDA_ENV_NAME:-frida}-meson-env-${build_platform_arch}.rc
-  if [ ! -f $build_env_rc ]; then
-    FRIDA_HOST=${build_platform_arch} releng/setup-env.sh
-  fi
-  egrep "^export (PKG_CONFIG_PATH|CC|CXX|OBJC|OBJCXX|CPPFLAGS|CFLAGS|CXXFLAGS|CC_LD|CXX_LD|OBJC_LD|OBJCXX_LD|LDFLAGS|AR)=" $build_env_rc \
-    | sed -e "s,=,_FOR_BUILD=," \
-    >> $meson_env_rc
+build_env_rc=build/${FRIDA_ENV_NAME:-frida}-meson-env-${build_os_arch}.rc
+if [ ! -f $build_env_rc ]; then
+  FRIDA_HOST=${build_os_arch} releng/setup-env.sh
 fi
+egrep "^export (PKG_CONFIG|CC|CXX|OBJC|OBJCXX|CPPFLAGS|CFLAGS|CXXFLAGS|CC_LD|CXX_LD|OBJC_LD|OBJCXX_LD|LDFLAGS|AR)=" $build_env_rc \
+  | sed -e "s,=,_FOR_BUILD=," \
+  >> $meson_env_rc
 
-meson_cross_file=build/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}.txt
+meson_cross_file=build/${FRIDA_ENV_NAME:-frida}-${host_os_arch}.txt
 
 (
+  echo "[constants]"
+  echo "common_flags = $meson_common_flags"
+  echo ""
   echo "[binaries]"
   echo "c = '$meson_c'"
   echo "cpp = '$meson_cpp'"
@@ -1049,30 +1066,28 @@ meson_cross_file=build/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}.txt
   echo "strip = '$strip_wrapper'"
   echo "pkgconfig = '$PKG_CONFIG'"
   echo ""
+  echo "[built-in options]"
+  echo "c_args = common_flags + [${meson_c_args}${meson_version_include}]"
+  echo "cpp_args = common_flags + [${meson_cpp_args}${meson_version_include}]"
+  if [ -n "$meson_objc" ]; then
+    echo "objc_args = common_flags + [${meson_objc_args}${meson_version_include}]"
+  fi
+  if [ -n "$meson_objcpp" ]; then
+    echo "objcpp_args = common_flags + [${meson_objcpp_args}${meson_version_include}]"
+  fi
+  echo "c_link_args = common_flags + [$meson_c_link_args]"
+  echo "cpp_link_args = common_flags + [$meson_cpp_link_args]"
+  if [ -n "$meson_objc" ]; then
+    echo "objc_link_args = common_flags + [$meson_objc_link_args]"
+  fi
+  if [ -n "$meson_objcpp" ]; then
+    echo "objcpp_link_args = common_flags + [$meson_objcpp_link_args]"
+  fi
+  echo ""
   echo "[properties]"
-  if [ $host_platform != $build_platform ]; then
+  if [ $host_os != $build_os ]; then
     echo "needs_exe_wrapper = true"
     echo ""
-  fi
-  if [ -n "$meson_root" ]; then
-    echo "root = '$meson_root'"
-    echo ""
-  fi
-  echo "c_args = [${meson_c_args}${meson_version_include}]"
-  echo "cpp_args = [${meson_cpp_args}${meson_version_include}]"
-  if [ -n "$meson_objc" ]; then
-    echo "objc_args = [${meson_objc_args}${meson_version_include}]"
-  fi
-  if [ -n "$meson_objcpp" ]; then
-    echo "objcpp_args = [${meson_objcpp_args}${meson_version_include}]"
-  fi
-  echo "c_link_args = [$meson_c_link_args]"
-  echo "cpp_link_args = [$meson_cpp_link_args]"
-  if [ -n "$meson_objc" ]; then
-    echo "objc_link_args = [$meson_objc_link_args]"
-  fi
-  if [ -n "$meson_objcpp" ]; then
-    echo "objcpp_link_args = [$meson_objcpp_link_args]"
   fi
   if [ ${#meson_platform_properties[@]} -gt 0 ]; then
     echo ""
@@ -1087,6 +1102,3 @@ meson_cross_file=build/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}.txt
   echo "cpu = '$meson_host_cpu'"
   echo "endian = '$meson_host_endian'"
 ) > $meson_cross_file
-
-echo "Environment created. To enter:"
-echo "# source ${FRIDA_ROOT}/$env_rc"

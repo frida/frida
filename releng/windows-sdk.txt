@@ -1,1 +1,0 @@
-https://build.frida.re/sdk-20201028-windows-any.exe

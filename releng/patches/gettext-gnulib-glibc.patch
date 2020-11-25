@@ -1,0 +1,45 @@
+commit b2d4b6c87827e34a694278d085a31508af052a37
+Author: Harald van Dijk <harald@gigawatt.nl>
+Date:   Mon Aug 3 21:59:04 2020 +0200
+
+    fopen: Avoid undesired interactions with glibc headers.
+    
+    * lib/fopen.c (_GL_ALREADY_INCLUDING_STDIO_H): Define this instead of
+    __need_FILE, as the latter does not work with glibc.
+
+diff -Nur gettext-orig/gettext-tools/gnulib-lib/fopen.c gettext/gettext-tools/gnulib-lib/fopen.c
+--- gettext-orig/gettext-tools/gnulib-lib/fopen.c	2020-07-05 20:10:31.000000000 +0000
++++ gettext/gettext-tools/gnulib-lib/fopen.c	2020-11-15 00:06:36.844147517 +0000
+@@ -19,12 +19,12 @@
+ /* If the user's config.h happens to include <stdio.h>, let it include only
+    the system's <stdio.h> here, so that orig_fopen doesn't recurse to
+    rpl_fopen.  */
+-#define __need_FILE
++#define _GL_ALREADY_INCLUDING_STDIO_H
+ #include <config.h>
+ 
+ /* Get the original definition of fopen.  It might be defined as a macro.  */
+ #include <stdio.h>
+-#undef __need_FILE
++#undef _GL_ALREADY_INCLUDING_STDIO_H
+ 
+ static FILE *
+ orig_fopen (const char *filename, const char *mode)
+diff -Nur gettext-orig/gettext-tools/libgettextpo/fopen.c gettext/gettext-tools/libgettextpo/fopen.c
+--- gettext-orig/gettext-tools/libgettextpo/fopen.c	2020-07-05 20:11:43.000000000 +0000
++++ gettext/gettext-tools/libgettextpo/fopen.c	2020-11-15 00:07:00.963889285 +0000
+@@ -19,12 +19,12 @@
+ /* If the user's config.h happens to include <stdio.h>, let it include only
+    the system's <stdio.h> here, so that orig_fopen doesn't recurse to
+    rpl_fopen.  */
+-#define __need_FILE
++#define _GL_ALREADY_INCLUDING_STDIO_H
+ #include <config.h>
+ 
+ /* Get the original definition of fopen.  It might be defined as a macro.  */
+ #include <stdio.h>
+-#undef __need_FILE
++#undef _GL_ALREADY_INCLUDING_STDIO_H
+ 
+ static FILE *
+ orig_fopen (const char *filename, const char *mode)

@@ -37,7 +37,7 @@ help:
 	@LC_ALL=C perl -e '$(HELP_FUN)' $(MAKEFILE_LIST)
 
 
-include releng/common.mk
+include releng/frida.mk
 
 distclean: clean-submodules
 	rm -rf build/
@@ -63,43 +63,11 @@ clean: clean-submodules
 	rm -rf build/ft-tmp-*-*
 
 clean-submodules:
-	cd capstone && git clean -xfd
 	cd frida-gum && git clean -xfd
 	cd frida-core && git clean -xfd
 	cd frida-python && git clean -xfd
 	cd frida-node && git clean -xfd
 	cd frida-tools && git clean -xfd
-
-
-define make-capstone-rule
-build/$1-%/lib/pkgconfig/capstone.pc: build/$1-env-%.rc build/.capstone-submodule-stamp
-	. build/$1-env-$$*.rc \
-		&& export PACKAGE_TARNAME=capstone \
-		&& . $$$$CONFIG_SITE \
-		&& case $$* in \
-			*-x86)       capstone_archs="x86"     ;; \
-			*-x86_64)    capstone_archs="x86"     ;; \
-			*-arm)       capstone_archs="arm"     ;; \
-			*-armbe8)    capstone_archs="arm"     ;; \
-			*-armhf)     capstone_archs="arm"     ;; \
-			*-armeabi)   capstone_archs="arm"     ;; \
-			*-arm64)     capstone_archs="aarch64" ;; \
-			*-mips)      capstone_archs="mips"    ;; \
-			*-mipsel)    capstone_archs="mips"    ;; \
-			*-mips64)    capstone_archs="mips64"    ;; \
-			*-mips64el)  capstone_archs="mips64"    ;; \
-		esac \
-		&& CFLAGS="$$$$CPPFLAGS $$$$CFLAGS -w" make -C capstone \
-			PREFIX=$$$$frida_prefix \
-			BUILDDIR=../build/$2-$$*/capstone \
-			CAPSTONE_BUILD_CORE_ONLY=yes \
-			CAPSTONE_ARCHS="$$$$capstone_archs" \
-			CAPSTONE_SHARED=$$$$enable_shared \
-			CAPSTONE_STATIC=$$$$enable_static \
-			install
-endef
-$(eval $(call make-capstone-rule,frida,tmp))
-$(eval $(call make-capstone-rule,frida_thin,tmp_thin))
 
 
 gum-linux-x86: build/frida-linux-x86/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/x86
@@ -128,7 +96,7 @@ build/.$1-gum-npm-stamp: build/$1-env-linux-$$(build_arch).rc
 	. build/$1-meson-env-linux-$$(build_arch).rc && cd frida-gum/bindings/gumjs && $(NPM) install
 	@touch $$@
 
-build/$1-%/lib/pkgconfig/frida-gum-1.0.pc: build/.frida-gum-submodule-stamp build/.$1-gum-npm-stamp build/$1-%/lib/pkgconfig/capstone.pc
+build/$1-%/lib/pkgconfig/frida-gum-1.0.pc: build/.frida-gum-submodule-stamp build/.$1-gum-npm-stamp
 	. build/$1-meson-env-$$*.rc; \
 	builddir=build/$2-$$*/frida-gum; \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
@@ -486,7 +454,6 @@ check-tools-linux-arm64: build/tmp_thin-linux-arm64/frida-tools-$(PYTHON_NAME)/.
 .PHONY: \
 	help \
 	distclean clean clean-submodules git-submodules git-submodule-stamps \
-	capstone-update-submodule-stamp \
 	gum-linux-x86 gum-linux-x86_64 \
 		gum-linux-x86-thin gum-linux-x86_64-thin \
 		gum-linux-arm gum-linux-armbe8 gum-linux-armhf gum-linux-arm64 \

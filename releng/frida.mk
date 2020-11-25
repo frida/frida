@@ -1,26 +1,24 @@
 FRIDA_VERSION := $(shell git describe --tags --always --long | sed 's,-,.,g' | cut -f1-3 -d'.')
 
-build_platform := $(shell uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos,')
-build_arch := $(shell releng/detect-arch.sh)
-build_platform_arch := $(build_platform)-$(build_arch)
+include releng/system.mk
 
-FOR_HOST ?= $(build_platform_arch)
+FOR_HOST ?= $(build_os_arch)
 
-frida_gum_flags := --default-library static $(FRIDA_MESONFLAGS_COMMON) $(FRIDA_V8_FLAGS)
+frida_gum_flags := --default-library static $(FRIDA_MESONFLAGS_COMMON) -Dv8=$(FRIDA_V8)
 frida_core_flags := --default-library static $(FRIDA_MESONFLAGS_COMMON) $(FRIDA_MAPPER_FLAGS)
 
-frida_tools := frida frida-discover frida-kill frida-ls-devices frida-ps frida-trace
+frida_tools = frida frida-discover frida-kill frida-ls-devices frida-ps frida-trace
 
-v8_api_version := 8.0
+v8_api_version = 8.0
 
 build/frida-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida-version.h
-	FRIDA_HOST=$* \
+	@FRIDA_HOST=$* \
 		FRIDA_ACOPTFLAGS="$(FRIDA_ACOPTFLAGS_COMMON)" \
 		FRIDA_ACDBGFLAGS="$(FRIDA_ACDBGFLAGS_COMMON)" \
 		FRIDA_ASAN=$(FRIDA_ASAN) \
 		./releng/setup-env.sh
 build/frida_thin-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida-version.h
-	FRIDA_HOST=$* \
+	@FRIDA_HOST=$* \
 		FRIDA_ACOPTFLAGS="$(FRIDA_ACOPTFLAGS_COMMON)" \
 		FRIDA_ACDBGFLAGS="$(FRIDA_ACDBGFLAGS_COMMON)" \
 		FRIDA_ASAN=$(FRIDA_ASAN) \
@@ -40,9 +38,9 @@ build/frida-version.h: releng/generate-version-header.py .git/refs/heads/master
 
 glib:
 	@if [ ! -e build/fs-$(FOR_HOST)/lib/pkgconfig/glib-2.0.pc ]; then \
-		make -f Makefile.sdk.mk FRIDA_HOST=$(FOR_HOST) build/fs-$(FOR_HOST)/lib/pkgconfig/glib-2.0.pc; \
+		make -f Makefile.sdk.mk FRIDA_HOST=$(FOR_HOST) glib; \
 	else \
-		. build/fs-meson-env-$(build_platform_arch).rc && $(NINJA) -C build/fs-tmp-$(FOR_HOST)/glib; \
+		. build/fs-meson-env-$(build_os_arch).rc && $(NINJA) -C build/fs-tmp-$(FOR_HOST)/glib; \
 	fi
 glib-symlinks:
 	@cd build; \
@@ -78,7 +76,7 @@ glib-symlinks:
 
 v8:
 	@if [ ! -e build/fs-$(FOR_HOST)/lib/pkgconfig/v8-$(v8_api_version).pc ]; then \
-		make -f Makefile.sdk.mk FRIDA_HOST=$(FOR_HOST) build/fs-$(FOR_HOST)/lib/pkgconfig/v8-$(v8_api_version).pc; \
+		make -f Makefile.sdk.mk FRIDA_HOST=$(FOR_HOST) v8; \
 	else \
 		$(NINJA) -C build/fs-tmp-$(FOR_HOST)/v8 v8_monolith; \
 	fi

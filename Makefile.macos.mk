@@ -42,7 +42,7 @@ help:
 	@LC_ALL=C perl -e '$(HELP_FUN)' $(MAKEFILE_LIST)
 
 
-include releng/common.mk
+include releng/frida.mk
 
 distclean: clean-submodules
 	rm -rf build/
@@ -69,37 +69,11 @@ clean: clean-submodules
 	rm -rf build/ft-tmp-*-*
 
 clean-submodules:
-	cd capstone && git clean -xfd
 	cd frida-gum && git clean -xfd
 	cd frida-core && git clean -xfd
 	cd frida-python && git clean -xfd
 	cd frida-node && git clean -xfd
 	cd frida-tools && git clean -xfd
-
-
-define make-capstone-rule
-build/$1-%/lib/pkgconfig/capstone.pc: build/$1-env-%.rc build/.capstone-submodule-stamp
-	. build/$1-env-$$*.rc \
-		&& export PACKAGE_TARNAME=capstone \
-		&& . $$$$CONFIG_SITE \
-		&& case $1-$$* in \
-			*-x86)           capstone_archs="x86"         ;; \
-			*-x86_64)        capstone_archs="x86"         ;; \
-			*-arm)           capstone_archs="arm"         ;; \
-			*-arm64*)        capstone_archs="aarch64"     ;; \
-		esac \
-		&& CFLAGS="$$$$CPPFLAGS $$$$CFLAGS -w" make -C capstone \
-			PREFIX=$$$$frida_prefix \
-			BUILDDIR=../build/$2-$$*/capstone \
-			CAPSTONE_BUILD_CORE_ONLY=yes \
-			CAPSTONE_ARCHS="$$$$capstone_archs" \
-			CAPSTONE_SHARED=$$$$enable_shared \
-			CAPSTONE_STATIC=$$$$enable_static \
-			LIBARCHS="" \
-			install
-endef
-$(eval $(call make-capstone-rule,frida,tmp))
-$(eval $(call make-capstone-rule,frida_thin,tmp_thin))
 
 
 gum-macos: gum-macos-$(build_cpu_flavor) ##@gum Build for macOS
@@ -118,7 +92,7 @@ build/.$1-gum-npm-stamp: build/$1-env-macos-$$(build_arch).rc
 	. build/$1-meson-env-macos-$$(build_arch).rc && cd frida-gum/bindings/gumjs && npm install
 	@touch $$@
 
-build/$1-%/lib/pkgconfig/frida-gum-1.0.pc: build/.frida-gum-submodule-stamp build/.$1-gum-npm-stamp build/$1-%/lib/pkgconfig/capstone.pc
+build/$1-%/lib/pkgconfig/frida-gum-1.0.pc: build/.frida-gum-submodule-stamp build/.$1-gum-npm-stamp
 	. build/$1-meson-env-$$*.rc; \
 	builddir=build/$2-$$*/frida-gum; \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
@@ -574,7 +548,6 @@ check-tools-macos: tools-macos ##@tools Test CLI tools for macOS
 
 .PHONY: \
 	distclean clean clean-submodules git-submodules git-submodule-stamps \
-	capstone-update-submodule-stamp \
 	gum-macos \
 		gum-macos-apple_silicon gum-macos-intel \
 		gum-ios gum-ios-thin \

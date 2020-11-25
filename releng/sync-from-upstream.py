@@ -14,7 +14,7 @@ upstreams = {
     "zlib": "https://github.com/madler/zlib.git",
     "libffi": "https://github.com/libffi/libffi.git",
     "glib": make_gnome_url("glib"),
-    "glib-openssl": make_gnome_url("glib-openssl"),
+    "glib-networking": make_gnome_url("glib-networking"),
     "glib-schannel": "https://github.com/centricular/glib-schannel.git",
     "libgee": make_gnome_url("libgee"),
     "json-glib": make_gnome_url("json-glib"),
@@ -23,12 +23,15 @@ upstreams = {
     "libsoup": make_gnome_url("libsoup"),
     "vala": make_gnome_url("vala"),
     "pkg-config": "https://anongit.freedesktop.org/git/pkg-config.git",
-    "duktape": "https://github.com/svaarala/duktape.git",
+    "quickjs": "https://github.com/bellard/quickjs.git",
     "gn": "https://gn.googlesource.com/gn",
     "v8": "https://chromium.googlesource.com/v8/v8",
     "v8/build": "https://chromium.googlesource.com/chromium/src/build",
     "v8/buildtools": "https://chromium.googlesource.com/chromium/src/buildtools",
+    "v8/third_party/zlib": "https://chromium.googlesource.com/chromium/src/third_party/zlib",
     "capstone": "https://github.com/aquynh/capstone.git",
+    "tinycc": "https://repo.or.cz/tinycc.git",
+    "quickjs": "https://github.com/bellard/quickjs.git",
 }
 
 
@@ -36,6 +39,8 @@ def sync(repo_path):
     repo_name = os.path.basename(repo_path)
     if repo_name in ("build", "buildtools") and os.path.basename(os.path.dirname(repo_path)) == "v8":
         repo_name = "v8/" + repo_name
+    elif repo_name == "zlib" and os.path.basename(os.path.dirname(repo_path)) == "third_party":
+        repo_name = "v8/third_party/zlib"
 
     patches_path = os.path.join(str(Path.home()), ".frida-sync-" + re.sub(r"[^\w\d]", "-", repo_path.lower()).lstrip("-"))
     if os.path.exists(patches_path):

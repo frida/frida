@@ -72,142 +72,6 @@
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CustomBuild Include="windows-sdk.txt">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Checking SDK</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">if exist "$(ProjectDir)..\build\sdk-windows\" goto warn
-
-"$(ProjectDir)wget.exe" --dot-style=mega --ca-certificate="$(ProjectDir)ca-bundle.crt" --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)..\build\sdk-windows.exe" || exit 1
-"$(ProjectDir)..\build\sdk-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
-del "$(ProjectDir)..\build\sdk-windows.exe"
-goto done
-
-:warn
-echo Assuming SDK is up to date - delete build\sdk-windows if in doubt
-
-:done
-echo &gt; "$(IntDir)windows-sdk.stamp"
-</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)windows-sdk.stamp;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Checking SDK</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">if exist "$(ProjectDir)..\build\sdk-windows\" goto warn
-
-"$(ProjectDir)wget.exe" --dot-style=mega --ca-certificate="$(ProjectDir)ca-bundle.crt" --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)..\build\sdk-windows.exe" || exit 1
-"$(ProjectDir)..\build\sdk-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
-del "$(ProjectDir)..\build\sdk-windows.exe"
-goto done
-
-:warn
-echo Assuming SDK is up to date - delete build\sdk-windows if in doubt
-
-:done
-echo &gt; "$(IntDir)windows-sdk.stamp"
-</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)windows-sdk.stamp;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Checking SDK</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">if exist "$(ProjectDir)..\build\sdk-windows\" goto warn
-
-"$(ProjectDir)wget.exe" --dot-style=mega --ca-certificate="$(ProjectDir)ca-bundle.crt" --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)..\build\sdk-windows.exe" || exit 1
-"$(ProjectDir)..\build\sdk-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
-del "$(ProjectDir)..\build\sdk-windows.exe"
-goto done
-
-:warn
-echo Assuming SDK is up to date - delete build\sdk-windows if in doubt
-
-:done
-echo &gt; "$(IntDir)windows-sdk.stamp"
-</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)windows-sdk.stamp;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Checking SDK</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">if exist "$(ProjectDir)..\build\sdk-windows\" goto warn
-
-"$(ProjectDir)wget.exe" --dot-style=mega --ca-certificate="$(ProjectDir)ca-bundle.crt" --input-file="$(ProjectDir)windows-sdk.txt" --output-document="$(ProjectDir)..\build\sdk-windows.exe" || exit 1
-"$(ProjectDir)..\build\sdk-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
-del "$(ProjectDir)..\build\sdk-windows.exe"
-goto done
-
-:warn
-echo Assuming SDK is up to date - delete build\sdk-windows if in doubt
-
-:done
-echo &gt; "$(IntDir)windows-sdk.stamp"
-</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)windows-sdk.stamp;%(Outputs)</Outputs>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="windows-toolchain.txt">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">if exist "$(ProjectDir)..\build\toolchain-windows\" goto warn
-
-"$(ProjectDir)wget.exe" --dot-style=mega --ca-certificate="$(ProjectDir)ca-bundle.crt" --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)..\build\toolchain-windows.exe" || exit 1
-"$(ProjectDir)..\build\toolchain-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
-del "$(ProjectDir)..\build\toolchain-windows.exe"
-goto done
-
-:warn
-echo Assuming toolchain is up to date - delete build\toolchain-windows if in doubt
-
-:done
-echo &gt; "$(IntDir)windows-toolchain.stamp"
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">if exist "$(ProjectDir)..\build\toolchain-windows\" goto warn
-
-"$(ProjectDir)wget.exe" --dot-style=mega --ca-certificate="$(ProjectDir)ca-bundle.crt" --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)..\build\toolchain-windows.exe" || exit 1
-"$(ProjectDir)..\build\toolchain-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
-del "$(ProjectDir)..\build\toolchain-windows.exe"
-goto done
-
-:warn
-echo Assuming toolchain is up to date - delete build\toolchain-windows if in doubt
-
-:done
-echo &gt; "$(IntDir)windows-toolchain.stamp"
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">if exist "$(ProjectDir)..\build\toolchain-windows\" goto warn
-
-"$(ProjectDir)wget.exe" --dot-style=mega --ca-certificate="$(ProjectDir)ca-bundle.crt" --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)..\build\toolchain-windows.exe" || exit 1
-"$(ProjectDir)..\build\toolchain-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
-del "$(ProjectDir)..\build\toolchain-windows.exe"
-goto done
-
-:warn
-echo Assuming toolchain is up to date - delete build\toolchain-windows if in doubt
-
-:done
-echo &gt; "$(IntDir)windows-toolchain.stamp"
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">if exist "$(ProjectDir)..\build\toolchain-windows\" goto warn
-
-"$(ProjectDir)wget.exe" --dot-style=mega --ca-certificate="$(ProjectDir)ca-bundle.crt" --input-file="$(ProjectDir)windows-toolchain.txt" --output-document="$(ProjectDir)..\build\toolchain-windows.exe" || exit 1
-"$(ProjectDir)..\build\toolchain-windows.exe" -o"$(ProjectDir)..\build\" || exit 1
-del "$(ProjectDir)..\build\toolchain-windows.exe"
-goto done
-
-:warn
-echo Assuming toolchain is up to date - delete build\toolchain-windows if in doubt
-
-:done
-echo &gt; "$(IntDir)windows-toolchain.stamp"
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)windows-toolchain.stamp;%(Outputs)</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)windows-toolchain.stamp;%(Outputs)</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)windows-toolchain.stamp;%(Outputs)</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)windows-toolchain.stamp;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Checking toolchain</Message>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Checking toolchain</Message>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Checking toolchain</Message>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Checking toolchain</Message>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
     <CustomBuild Include="generate-version-header.py">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -286,6 +150,38 @@ if errorlevel 1 (
 cd "$(ProjectDir)..\frida-gum\bindings\gumjs\"
 call npm install || exit 1
 echo &gt; "$(IntDir)windows-node-modules.stamp"</Command>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="deps.py">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Checking prebuilt dependencies</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)deps.stamp;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)deps.mk;$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Checking prebuilt dependencies</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)deps.stamp;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)deps.mk;$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Checking prebuilt dependencies</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)deps.stamp;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)deps.mk;$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Checking prebuilt dependencies</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)deps.stamp;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)deps.mk;$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(ProjectDir)deps.py" sync toolchain windows-x86 "$(ProjectDir)..\build\toolchain-windows" || exit 1
+"$(ProjectDir)deps.py" sync sdk windows-any "$(ProjectDir)..\build\sdk-windows" || exit 1
+echo &gt; "$(IntDir)deps.stamp"
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(ProjectDir)deps.py" sync toolchain windows-x86 "$(ProjectDir)..\build\toolchain-windows" || exit 1
+"$(ProjectDir)deps.py" sync sdk windows-any "$(ProjectDir)..\build\sdk-windows" || exit 1
+echo &gt; "$(IntDir)deps.stamp"
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(ProjectDir)deps.py" sync toolchain windows-x86 "$(ProjectDir)..\build\toolchain-windows" || exit 1
+"$(ProjectDir)deps.py" sync sdk windows-any "$(ProjectDir)..\build\sdk-windows" || exit 1
+echo &gt; "$(IntDir)deps.stamp"
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(ProjectDir)deps.py" sync toolchain windows-x86 "$(ProjectDir)..\build\toolchain-windows" || exit 1
+"$(ProjectDir)deps.py" sync sdk windows-any "$(ProjectDir)..\build\sdk-windows" || exit 1
+echo &gt; "$(IntDir)deps.stamp"
+</Command>
     </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
