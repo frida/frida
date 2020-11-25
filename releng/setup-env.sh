@@ -151,17 +151,18 @@ pushd $releng_path/../ > /dev/null
 FRIDA_ROOT=`pwd`
 popd > /dev/null
 FRIDA_BUILD="$FRIDA_ROOT/build"
+FRIDA_RELENG="$FRIDA_ROOT/releng"
 FRIDA_PREFIX="$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}"
 FRIDA_PREFIX_LIB="$FRIDA_PREFIX/lib"
 FRIDA_TOOLROOT="$FRIDA_BUILD/${frida_env_name_prefix}toolchain-${build_os_arch}"
 FRIDA_SDKROOT="$FRIDA_BUILD/${frida_env_name_prefix}sdk-${host_os_arch}"
 
-if [ -n $FRIDA_TOOLCHAIN_VERSION ]; then
+if [ -n "$FRIDA_TOOLCHAIN_VERSION" ]; then
   toolchain_version=$FRIDA_TOOLCHAIN_VERSION
 else
   toolchain_version=$(grep "frida_toolchain_version =" "$FRIDA_RELENG/deps.mk" | awk '{ print $NF }')
 fi
-if [ -n $FRIDA_SDK_VERSION ]; then
+if [ -n "$FRIDA_SDK_VERSION" ]; then
   sdk_version=$FRIDA_SDK_VERSION
 else
   sdk_version=$(grep "frida_sdk_version =" "$FRIDA_RELENG/deps.mk" | awk '{ print $NF }')
@@ -195,7 +196,7 @@ if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/VERSION.txt" 2>/dev/null;
     cp -a "$template" "$target"
     sed \
       -e "s,@FRIDA_TOOLROOT@,$FRIDA_TOOLROOT,g" \
-      -e "s,@FRIDA_RELENG@,$releng_path,g" \
+      -e "s,@FRIDA_RELENG@,$FRIDA_RELENG,g" \
       "$template" > "$target"
   done
 
@@ -247,7 +248,7 @@ if [ "$FRIDA_ENV_SDK" != 'none' ] && ! grep -Eq "^$sdk_version\$" "$FRIDA_SDKROO
     cp -a "$template" "$target"
     sed \
       -e "s,@FRIDA_SDKROOT@,$FRIDA_SDKROOT,g" \
-      -e "s,@FRIDA_RELENG@,$releng_path,g" \
+      -e "s,@FRIDA_RELENG@,$FRIDA_RELENG,g" \
       "$template" > "$target"
   done
 fi
@@ -434,7 +435,7 @@ case $host_os in
       -e "s,@driver@,$clang_cc,g" \
       -e "s,@sysroot@,$macos_sdk_path,g" \
       -e "s,@arch@,$host_clang_arch,g" \
-      "$releng_path/driver-wrapper-xcode-default.sh.in" > "$cc_wrapper"
+      "$FRIDA_RELENG/driver-wrapper-xcode-default.sh.in" > "$cc_wrapper"
     chmod +x "$cc_wrapper"
 
     cxx_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-clang++
@@ -444,13 +445,13 @@ case $host_os in
         -e "s,@sysroot@,$macos_sdk_path,g" \
         -e "s,@arch@,$host_clang_arch,g" \
         -e "s,@frida_sdkroot@,$FRIDA_SDKROOT,g" \
-        "$releng_path/driver-wrapper-xcode-static-libc++.sh.in" > "$cxx_wrapper"
+        "$FRIDA_RELENG/driver-wrapper-xcode-static-libc++.sh.in" > "$cxx_wrapper"
     else
       sed \
         -e "s,@driver@,$clang_cxx,g" \
         -e "s,@sysroot@,$macos_sdk_path,g" \
         -e "s,@arch@,$host_clang_arch,g" \
-        "$releng_path/driver-wrapper-xcode-default.sh.in" > "$cxx_wrapper"
+        "$FRIDA_RELENG/driver-wrapper-xcode-default.sh.in" > "$cxx_wrapper"
     fi
     chmod +x "$cxx_wrapper"
 
@@ -458,7 +459,7 @@ case $host_os in
     sed \
       -e "s,@ar@,$(xcrun --sdk $macos_sdk -f ar),g" \
       -e "s,@libtool@,$(xcrun --sdk $macos_sdk -f libtool),g" \
-      "$releng_path/ar-wrapper-xcode.sh.in" > "$ar_wrapper"
+      "$FRIDA_RELENG/ar-wrapper-xcode.sh.in" > "$ar_wrapper"
     chmod +x "$ar_wrapper"
 
     CPP="$cc_wrapper -E"
@@ -541,7 +542,7 @@ case $host_os in
       -e "s,@driver@,$clang_cc,g" \
       -e "s,@sysroot@,$ios_sdk_path,g" \
       -e "s,@arch@,$ios_arch,g" \
-      "$releng_path/driver-wrapper-xcode-default.sh.in" > "$cc_wrapper"
+      "$FRIDA_RELENG/driver-wrapper-xcode-default.sh.in" > "$cc_wrapper"
     chmod +x "$cc_wrapper"
 
     cxx_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-clang++
@@ -551,13 +552,13 @@ case $host_os in
         -e "s,@sysroot@,$ios_sdk_path,g" \
         -e "s,@arch@,$ios_arch,g" \
         -e "s,@frida_sdkroot@,$FRIDA_SDKROOT,g" \
-        "$releng_path/driver-wrapper-xcode-static-libc++.sh.in" > "$cxx_wrapper"
+        "$FRIDA_RELENG/driver-wrapper-xcode-static-libc++.sh.in" > "$cxx_wrapper"
     else
       sed \
         -e "s,@driver@,$clang_cxx,g" \
         -e "s,@sysroot@,$ios_sdk_path,g" \
         -e "s,@arch@,$ios_arch,g" \
-        "$releng_path/driver-wrapper-xcode-default.sh.in" > "$cxx_wrapper"
+        "$FRIDA_RELENG/driver-wrapper-xcode-default.sh.in" > "$cxx_wrapper"
     fi
     chmod +x "$cxx_wrapper"
 
@@ -565,7 +566,7 @@ case $host_os in
     sed \
       -e "s,@ar@,$(xcrun --sdk $ios_sdk -f ar),g" \
       -e "s,@libtool@,$(xcrun --sdk $ios_sdk -f libtool),g" \
-      "$releng_path/ar-wrapper-xcode.sh.in" > "$ar_wrapper"
+      "$FRIDA_RELENG/ar-wrapper-xcode.sh.in" > "$ar_wrapper"
     chmod +x "$ar_wrapper"
 
     CPP="$cc_wrapper -E"
@@ -689,14 +690,14 @@ case $host_os in
     sed \
       -e "s,@driver@,${android_toolroot}/bin/${host_compiler_prefix}clang,g" \
       -e "s,@elf_cleaner@,$elf_cleaner,g" \
-      "$releng_path/driver-wrapper-android.sh.in" > "$meson_cc_wrapper"
+      "$FRIDA_RELENG/driver-wrapper-android.sh.in" > "$meson_cc_wrapper"
     chmod +x "$meson_cc_wrapper"
 
     meson_cpp_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-clang++
     sed \
       -e "s,@driver@,${android_toolroot}/bin/${host_compiler_prefix}clang++,g" \
       -e "s,@elf_cleaner@,$elf_cleaner,g" \
-      "$releng_path/driver-wrapper-android.sh.in" > "$meson_cpp_wrapper"
+      "$FRIDA_RELENG/driver-wrapper-android.sh.in" > "$meson_cpp_wrapper"
     chmod +x "$meson_cpp_wrapper"
 
     base_compiler_args=$(flags_to_args "$base_compiler_flags")
@@ -969,7 +970,7 @@ sed \
   -e "s,@frida_optimization_flags@,$FRIDA_ACOPTFLAGS,g" \
   -e "s,@frida_debug_flags@,$FRIDA_ACDBGFLAGS,g" \
   -e "s,@frida_libc@,$frida_libc,g" \
-  $releng_path/config.site.in > "$CONFIG_SITE"
+  "$FRIDA_RELENG/config.site.in" > "$CONFIG_SITE"
 
 (
   echo "export PATH=\"${env_path_sdk}${FRIDA_TOOLROOT}/bin:\$PATH\""
