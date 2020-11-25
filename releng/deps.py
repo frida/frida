@@ -163,8 +163,9 @@ def roll(bundle: Bundle, os_arch: str, activate: bool):
                        check=True)
     else:
         subprocess.run([
-                           "make", "-C", ROOT_DIR,
-                           "Makefile.{}.mk".format(bundle.name.lower()),
+                           "make",
+                           "-C", ROOT_DIR,
+                           "-f", "Makefile.{}.mk".format(bundle.name.lower()),
                            "FRIDA_HOST=" + os_arch,
                            "FRIDA_V8=enabled",
                        ],
