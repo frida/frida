@@ -158,7 +158,8 @@ def roll(bundle: Bundle, os_arch: str, activate: bool):
         return
 
     artifact = BUILD_DIR / filename
-    artifact.unlink(missing_ok=True)
+    if artifact.exists():
+        artifact.unlink()
 
     if os_arch.startswith("windows-"):
         subprocess.run([
