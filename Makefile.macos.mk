@@ -94,7 +94,7 @@ build/.$1-gum-npm-stamp: build/$1-env-macos-$$(build_arch).rc
 	. build/$1-meson-env-macos-$$(build_arch).rc && cd frida-gum/bindings/gumjs && npm install
 	@touch $$@
 
-build/$1-%/lib/pkgconfig/frida-gum-1.0.pc: build/.frida-gum-submodule-stamp build/.$1-gum-npm-stamp
+build/$1-%/lib/pkgconfig/frida-gum-1.0.pc: build/$1-env-%.rc build/.frida-gum-submodule-stamp build/.$1-gum-npm-stamp
 	. build/$1-meson-env-$$*.rc; \
 	builddir=build/$2-$$*/frida-gum; \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
