@@ -212,18 +212,26 @@ def generate_library_windows(package, frida_root, host, flavor, output_dir, libr
         sdk_lib_path("libxml2.a", frida_root, host),
     ]
 
-    v8 = [
-        sdk_lib_path("libv8-8.0.a", frida_root, host),
-    ]
-
     capstone = [
         sdk_lib_path("libcapstone.a", frida_root, host)
     ]
 
+    quickjs = [
+        sdk_lib_path("libquickjs.a", frida_root, host)
+    ]
+
+    tinycc = [
+        sdk_lib_path("libtcc.a", frida_root, host)
+    ]
+
+    v8 = [
+        sdk_lib_path("libv8-8.0.a", frida_root, host),
+    ]
+
     gum_lib = internal_arch_lib_path("gum", frida_root, host)
     gum_deps = deduplicate(glib + gobject + gio + capstone)
-    gumjs_deps = deduplicate([gum_lib] + gum_deps + tls_provider + json_glib + sqlite + libsoup + v8)
-    frida_core_deps = deduplicate(glib + gobject + gio + tls_provider + json_glib + gmodule + gee + libsoup)
+    gumjs_deps = deduplicate([gum_lib] + gum_deps + quickjs + v8 + tls_provider + json_glib + tinycc + sqlite + libsoup)
+    frida_core_deps = deduplicate(glib + gobject + gio + tls_provider + json_glib + gmodule + gee + libsoup + capstone)
 
     if package == "frida-gum-1.0":
         package_lib_path = gum_lib
