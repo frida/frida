@@ -205,7 +205,7 @@ def wait(bundle: Bundle, os_arch: str):
         except urllib.request.HTTPError as e:
             if e.code != 404:
                 return
-        print("Waiting for: {}  Elapsed: {}  Retrying in 5 minutes...".format(url, int(time.time() - started_at)))
+        print("Waiting for: {}  Elapsed: {}  Retrying in 5 minutes...".format(url, int(time.time() - started_at)), flush=True)
         time.sleep(5 * 60)
 
 
