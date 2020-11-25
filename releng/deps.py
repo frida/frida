@@ -166,6 +166,7 @@ def roll(bundle: Bundle, os_arch: str, activate: bool):
                            "make", "-C", ROOT_DIR,
                            "Makefile.{}.mk".format(bundle.name.lower()),
                            "FRIDA_HOST=" + os_arch,
+                           "FRIDA_V8=enabled",
                        ],
                        check=True)
 
