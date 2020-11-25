@@ -46,6 +46,7 @@ include releng/frida.mk
 
 distclean: clean-submodules
 	rm -rf build/
+	rm -rf deps/
 
 clean: clean-submodules
 	rm -f build/.core-macos-stamp-*
@@ -57,6 +58,7 @@ clean: clean-submodules
 	rm -f build/*.rc
 	rm -f build/*.sh
 	rm -f build/*.site
+	rm -f build/*.tar.bz2
 	rm -f build/*.txt
 	rm -f build/frida-version.h
 	rm -rf build/frida-*-*
