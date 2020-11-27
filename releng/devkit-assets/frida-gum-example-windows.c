@@ -4,7 +4,7 @@
  * [Runtime Library]
  * Multi-threaded (/MT)
  *
- * Visit www.frida.re to learn more about Frida.
+ * Visit https://frida.re to learn more about Frida.
  */
 
 #include "frida-gum.h"

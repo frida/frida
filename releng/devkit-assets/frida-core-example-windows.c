@@ -4,7 +4,7 @@
  * [Runtime Library]
  * Multi-threaded (/MT)
  *
- * Visit www.frida.re to learn more about Frida.
+ * Visit https://frida.re to learn more about Frida.
  */
 
 #include "frida-core.h"
@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+static void on_detached (FridaSession * session, FridaSessionDetachReason reason, FridaCrash * crash, gpointer user_data);
 static void on_message (FridaScript * script, const gchar * message, GBytes * data, gpointer user_data);
 static void on_signal (int signo);
 static gboolean stop (gpointer user_data);
@@ -72,21 +73,25 @@ main (int argc,
     FridaScript * script;
     FridaScriptOptions * options;
 
+    g_signal_connect (session, "detached", G_CALLBACK (on_detached), NULL);
+    if (frida_session_is_detached (session))
+      goto session_detached_prematurely;
+
     g_print ("[*] Attached\n");
 
     options = frida_script_options_new ();
     frida_script_options_set_name (options, "example");
-    frida_script_options_set_runtime (options, FRIDA_SCRIPT_RUNTIME_V8);
+    frida_script_options_set_runtime (options, FRIDA_SCRIPT_RUNTIME_QJS);
 
     script = frida_session_create_script_sync (session,
         "Interceptor.attach(Module.getExportByName('kernel32.dll', 'CreateFileW'), {\n"
         "  onEnter(args) {\n"
-        "    console.log('[*] CreateFileW(\"' + args[0].readUtf16String() + '\")');\n"
+        "    console.log(`[*] CreateFileW(\"${args[0].readUtf16String()}\")`);\n"
         "  }\n"
         "});\n"
         "Interceptor.attach(Module.getExportByName('kernel32.dll', 'CloseHandle'), {\n"
         "  onEnter(args) {\n"
-        "    console.log('[*] CloseHandle(' + args[0] + ')');\n"
+        "    console.log(`[*] CloseHandle(${args[0]})`);\n"
         "  }\n"
         "});",
         options, NULL, &error);
@@ -111,6 +116,7 @@ main (int argc,
     g_print ("[*] Unloaded\n");
 
     frida_session_detach_sync (session, NULL, NULL);
+session_detached_prematurely:
     frida_unref (session);
     g_print ("[*] Detached\n");
   }
@@ -129,6 +135,21 @@ main (int argc,
   g_main_loop_unref (loop);
 
   return 0;
+}
+
+static void
+on_detached (FridaSession * session,
+             FridaSessionDetachReason reason,
+             FridaCrash * crash,
+             gpointer user_data)
+{
+  gchar * reason_str;
+
+  reason_str = g_enum_to_string (FRIDA_TYPE_SESSION_DETACH_REASON, reason);
+  g_print ("on_detached: reason=%s crash=%p\n", reason_str, crash);
+  g_free (reason_str);
+
+  g_idle_add (stop, NULL);
 }
 
 static void

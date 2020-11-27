@@ -18,17 +18,17 @@ main (int argc,
 
   gum_init_embedded ();
 
-  backend = gum_script_backend_obtain_v8 ();
+  backend = gum_script_backend_obtain_qjs ();
 
   script = gum_script_backend_create_sync (backend, "example",
       "Interceptor.attach(Module.getExportByName(null, 'open'), {\n"
       "  onEnter(args) {\n"
-      "    console.log('[*] open(\"' + args[0].readUtf8String() + '\")');\n"
+      "    console.log(`[*] open(\"${args[0].readUtf8String()}\")`);\n"
       "  }\n"
       "});\n"
-      "Interceptor.attach(Module.getExportByName(null, \"close\"), {\n"
+      "Interceptor.attach(Module.getExportByName(null, 'close'), {\n"
       "  onEnter(args) {\n"
-      "    console.log('[*] close(' + args[0].toInt32() + ')');\n"
+      "    console.log(`[*] close(${args[0].toInt32()})`);\n"
       "  }\n"
       "});",
       cancellable, &error);

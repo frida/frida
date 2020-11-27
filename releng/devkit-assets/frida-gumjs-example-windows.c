@@ -4,7 +4,7 @@
  * [Runtime Library]
  * Multi-threaded (/MT)
  *
- * Visit www.frida.re to learn more about Frida.
+ * Visit https://frida.re to learn more about Frida.
  */
 
 #include "frida-gumjs.h"
@@ -25,17 +25,17 @@ main (int argc,
 
   gum_init_embedded ();
 
-  backend = gum_script_backend_obtain_duk ();
+  backend = gum_script_backend_obtain_qjs ();
 
   script = gum_script_backend_create_sync (backend, "example",
       "Interceptor.attach(Module.getExportByName('user32.dll', 'MessageBeep'), {\n"
-      "  onEnter: function (args) {\n"
-      "    console.log('[*] MessageBeep(' + args[0].toInt32() + ')');\n"
+      "  onEnter(args) {\n"
+      "    console.log(`[*] MessageBeep(${args[0].toInt32()})`);\n"
       "  }\n"
       "});\n"
       "Interceptor.attach(Module.getExportByName('kernel32.dll', 'Sleep'), {\n"
-      "  onEnter: function (args) {\n"
-      "    console.log('[*] Sleep(' + args[0].toInt32() + ')');\n"
+      "  onEnter(args) {\n"
+      "    console.log(`[*] Sleep(${args[0].toInt32()})`);\n"
       "  }\n"
       "});",
       cancellable, &error);
