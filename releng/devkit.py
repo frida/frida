@@ -65,6 +65,7 @@ def generate_header(package, frida_root, host, kit, flavor, umbrella_header_path
             os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "include", "glib-2.0"),
             os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "include", "json-glib-1.0"),
             os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "include", "capstone"),
+            internal_include_path("gum", frida_root, host),
             os.path.join(frida_root, "frida-gum"),
             os.path.join(frida_root, "frida-gum", "bindings")
         ]
@@ -481,6 +482,9 @@ def compute_umbrella_header_path(frida_root, host, flavor, package, umbrella_hea
 
 def sdk_lib_path(name, frida_root, host):
     return os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "lib", name)
+
+def internal_include_path(name, frida_root, host):
+    return os.path.join(frida_root, "build", "tmp-windows", msvs_arch_config(host), name + msvs_arch_suffix(host))
 
 def internal_noarch_lib_path(name, frida_root, host):
     return os.path.join(frida_root, "build", "tmp-windows", msvs_arch_config(host), name, name + ".lib")
