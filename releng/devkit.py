@@ -388,10 +388,7 @@ def resolve_library_paths(names, dirs):
     return (deduplicate(paths), flags)
 
 def generate_example(filename, package, frida_root, host, kit, flavor, extra_ldflags):
-    if platform.system() == 'Windows':
-        os_flavor = "windows"
-    else:
-        os_flavor = "unix"
+    os_flavor = "windows" if platform.system() == 'Windows' else "unix"
 
     example_filename = "{}-example-{}.c".format(kit, os_flavor)
     with codecs.open(asset_path(example_filename), "rb", 'utf-8') as f:
@@ -409,7 +406,7 @@ def generate_example(filename, package, frida_root, host, kit, flavor, extra_ldf
         (cflags, ldflags) = trim_flags(cflags, " ".join([" ".join(extra_ldflags), ldflags]))
 
         params = {
-            "cc": cc,
+            "cc": "clang" if host.split("-")[0] in ["macos", "ios", "android"] else "gcc",
             "cflags": cflags,
             "ldflags": ldflags,
             "source_filename": filename,
@@ -514,11 +511,28 @@ def trim_flags(cflags, ldflags):
     existing_cflags = set(trimmed_cflags)
 
     pending_ldflags = ldflags.split(" ")
+    seen_libs = set()
     while len(pending_ldflags) > 0:
         flag = pending_ldflags.pop(0)
         if flag in ("-arch", "-isysroot") and flag in existing_cflags:
             pending_ldflags.pop(0)
         else:
+            if flag == "-isysroot":
+                sysroot = pending_ldflags.pop(0)
+                if "MacOSX" in sysroot:
+                    trimmed_ldflags.append("-isysroot \"$(xcrun --sdk macosx --show-sdk-path)\"")
+                elif "iPhoneOS" in sysroot:
+                    trimmed_ldflags.append("-isysroot \"$(xcrun --sdk iphoneos --show-sdk-path)\"")
+                continue
+            elif flag == "-L":
+                pending_ldflags.pop(0)
+                continue
+            elif flag.startswith("-L"):
+                continue
+            elif flag.startswith("-l"):
+                if flag in seen_libs:
+                    continue
+                seen_libs.add(flag)
             trimmed_ldflags.append(flag)
 
     pending_ldflags = trimmed_ldflags
