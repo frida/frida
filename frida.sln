@@ -90,6 +90,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-payload-64", "frida-c
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gumjs-inspector", "frida-gum\bindings\gumjs\gumjs-inspector.vcxproj", "{0B28EC3C-CC22-4067-9F08-6A3FAC4FB454}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0B39885E-731C-4A45-A7DE-44CBDBBF0067} = {0B39885E-731C-4A45-A7DE-44CBDBBF0067}
+		{8381538F-3CB5-480B-BFA4-960299AF6485} = {8381538F-3CB5-480B-BFA4-960299AF6485}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gumquickcompile", "frida-gum\bindings\gumjs\gumquickcompile.vcxproj", "{625577F7-611C-4965-A9B6-CE7B32074C49}"
 EndProject
