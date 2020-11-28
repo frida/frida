@@ -15,12 +15,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-resource-compiler", "
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-deps", "releng\frida-deps.vcxproj", "{4AFCE7C4-6D9A-4663-B43C-D2E518486910}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winjector-helper-32", "frida-core\src\windows\winjector-helper-32.vcxproj", "{E0AC03F2-F077-4BA7-88DD-BBE95B4E4EF0}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-helper-32", "frida-core\src\windows\frida-helper-32.vcxproj", "{E0AC03F2-F077-4BA7-88DD-BBE95B4E4EF0}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C4203124-C838-437B-8662-CA477B146655} = {C4203124-C838-437B-8662-CA477B146655}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winjector-helper-64", "frida-core\src\windows\winjector-helper-64.vcxproj", "{037E8466-F87B-486D-B6AD-FECB5740CE2C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-helper-64", "frida-core\src\windows\frida-helper-64.vcxproj", "{037E8466-F87B-486D-B6AD-FECB5740CE2C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{A31522D9-715B-4E04-AA57-DF7AFEBE082C} = {A31522D9-715B-4E04-AA57-DF7AFEBE082C}
 	EndProjectSection
@@ -92,6 +92,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gumjs-inspector", "frida-gum\bindings\gumjs\gumjs-inspector.vcxproj", "{0B28EC3C-CC22-4067-9F08-6A3FAC4FB454}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gumquickcompile", "frida-gum\bindings\gumjs\gumquickcompile.vcxproj", "{625577F7-611C-4965-A9B6-CE7B32074C49}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-helper-backend-32", "frida-core\src\windows\frida-helper-backend-32.vcxproj", "{1D46480B-527B-4E0D-9280-56C2833B712E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-helper-backend-64", "frida-core\src\windows\frida-helper-backend-64.vcxproj", "{F6A4E20F-2FD9-423F-B4F0-D86A5C99CEB0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -325,6 +329,22 @@ Global
 		{625577F7-611C-4965-A9B6-CE7B32074C49}.Release|Win32.Build.0 = Release|Win32
 		{625577F7-611C-4965-A9B6-CE7B32074C49}.Release|x64.ActiveCfg = Release|Win32
 		{625577F7-611C-4965-A9B6-CE7B32074C49}.Release|x64.Build.0 = Release|Win32
+		{1D46480B-527B-4E0D-9280-56C2833B712E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1D46480B-527B-4E0D-9280-56C2833B712E}.Debug|Win32.Build.0 = Debug|Win32
+		{1D46480B-527B-4E0D-9280-56C2833B712E}.Debug|x64.ActiveCfg = Debug|Win32
+		{1D46480B-527B-4E0D-9280-56C2833B712E}.Debug|x64.Build.0 = Debug|Win32
+		{1D46480B-527B-4E0D-9280-56C2833B712E}.Release|Win32.ActiveCfg = Release|Win32
+		{1D46480B-527B-4E0D-9280-56C2833B712E}.Release|Win32.Build.0 = Release|Win32
+		{1D46480B-527B-4E0D-9280-56C2833B712E}.Release|x64.ActiveCfg = Release|Win32
+		{1D46480B-527B-4E0D-9280-56C2833B712E}.Release|x64.Build.0 = Release|Win32
+		{F6A4E20F-2FD9-423F-B4F0-D86A5C99CEB0}.Debug|Win32.ActiveCfg = Debug|x64
+		{F6A4E20F-2FD9-423F-B4F0-D86A5C99CEB0}.Debug|Win32.Build.0 = Debug|x64
+		{F6A4E20F-2FD9-423F-B4F0-D86A5C99CEB0}.Debug|x64.ActiveCfg = Debug|x64
+		{F6A4E20F-2FD9-423F-B4F0-D86A5C99CEB0}.Debug|x64.Build.0 = Debug|x64
+		{F6A4E20F-2FD9-423F-B4F0-D86A5C99CEB0}.Release|Win32.ActiveCfg = Release|x64
+		{F6A4E20F-2FD9-423F-B4F0-D86A5C99CEB0}.Release|Win32.Build.0 = Release|x64
+		{F6A4E20F-2FD9-423F-B4F0-D86A5C99CEB0}.Release|x64.ActiveCfg = Release|x64
+		{F6A4E20F-2FD9-423F-B4F0-D86A5C99CEB0}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
