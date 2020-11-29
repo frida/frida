@@ -835,6 +835,7 @@ meson_cpp_link_args="$meson_cpp_link_args, $meson_legacy_libpaths"
 
 if [ $enable_asan = yes ]; then
   sanitizer_flag="-fsanitize=address"
+  meson_sanitizer_arg=$(flags_to_args "$sanitizer_flag")
 
   CC="$CC $sanitizer_flag"
   CXX="$CXX $sanitizer_flag"
@@ -845,6 +846,8 @@ if [ $enable_asan = yes ]; then
     OBJCXX="$OBJCXX $sanitizer_flag"
   fi
   LD="$LD $sanitizer_flag"
+  meson_c_args="$meson_c_args, $meson_sanitizer_arg"
+  meson_cpp_args="$meson_cpp_args, $meson_sanitizer_arg"
 fi
 
 CFLAGS="-fPIC $CFLAGS"
