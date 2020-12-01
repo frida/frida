@@ -720,6 +720,15 @@ define make-base-package-rules
 .PHONY: $1 clean-$1 distclean-$1 symlinks-$1
 
 $1: build/$2-$3/manifest/$1.pkg
+	builddir=build/$2-tmp-$3/$1; \
+	export PATH="$$(abspath build/$2-$(build_os_arch))/bin:$$$$PATH"; \
+	if [ -f deps/$1/meson.build ]; then \
+		. build/$2-meson-env-$3.rc; \
+		$(NINJA) -C $$$$builddir install; \
+	else \
+		. build/$2-env-$3.rc; \
+		$(MAKE) -C $$$$builddir $(MAKE_J) install; \
+	fi
 
 clean-$1:
 	@if [ -f build/$2-$3/manifest/$1.pkg ]; then \
