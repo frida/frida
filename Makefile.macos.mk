@@ -576,7 +576,5 @@ check-tools-macos: tools-macos ##@tools Test CLI tools for macOS
 		frida-node-update-submodule-stamp \
 	tools-macos \
 		check-tools-macos \
-		frida-tools-update-submodule-stamp \
-	glib glib-symlinks \
-	v8 v8-symlinks
+		frida-tools-update-submodule-stamp
 .SECONDARY:

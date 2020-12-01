@@ -500,7 +500,5 @@ check-tools-linux-arm64: build/tmp_thin-linux-arm64/frida-tools-$(PYTHON_NAME)/.
 		check-tools-linux-x86 check-tools-linux-x86_64 \
 		check-tools-linux-x86-thin check-tools-linux-x86_64-thin \
 		check-tools-linux-armhf check-tools-linux-arm64 \
-		frida-tools-update-submodule-stamp \
-	glib glib-symlinks \
-	v8 v8-symlinks
+		frida-tools-update-submodule-stamp
 .SECONDARY:
