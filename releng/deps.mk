@@ -717,7 +717,7 @@ endef
 
 define make-base-package-rules
 
-.PHONY: $1 clean-$1 distclean-$1
+.PHONY: $1 clean-$1 distclean-$1 symlinks-$1
 
 $1: build/$2-$3/manifest/$1.pkg
 
@@ -736,6 +736,22 @@ clean-$1:
 distclean-$1: clean-$1
 	$(RM) deps/.$1-stamp
 	$(RM) -r deps/$1
+
+symlinks-$1: build/$2-$3/manifest/$1.pkg
+	@sdkroot=build/sdk-$$(host_os_arch); \
+	if [ -d $$$$sdkroot ]; then \
+		cd $$$$sdkroot; \
+		for old_entry in $$$$(cat manifest/$1.pkg); do \
+			$(RM) $$$$old_entry; \
+		done; \
+		for entry in $$$$(cat ../$2-$3/manifest/$1.pkg); do \
+			echo "✓ $$$$entry"; \
+			$(RM) $$$$entry; \
+			original_relpath=$$$$($(PYTHON3) -c "import os.path; import sys; \
+				print(os.path.relpath('../$2-$3/$$$$entry', os.path.dirname('$$$$entry')))"); \
+			ln -s $$$$original_relpath $$$$entry; \
+		done; \
+	fi
 
 endef
 
