@@ -635,7 +635,6 @@ build/fs-env-%.rc:
 		FRIDA_ENV_NAME=fs \
 		FRIDA_ENV_SDK=none \
 		FRIDA_TOOLCHAIN_VERSION=$(frida_bootstrap_version) \
-		FRIDA_SDK_VERSION=$(frida_bootstrap_version) \
 		./releng/setup-env.sh
 
 releng/meson/meson.py:
