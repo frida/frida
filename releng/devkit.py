@@ -15,6 +15,8 @@ import tempfile
 
 if platform.system() == 'Windows':
     import winenv
+    from xml.etree import ElementTree
+    from xml.etree.ElementTree import QName
 
 
 INCLUDE_PATTERN = re.compile("#include\s+[<\"](.*?)[>\"]")
@@ -225,9 +227,18 @@ def generate_library_windows(package, frida_root, host, flavor, output_dir, libr
         sdk_lib_path("libtcc.a", frida_root, host)
     ]
 
-    v8 = [
-        sdk_lib_path("libv8-8.0.a", frida_root, host),
-    ]
+    v8 = []
+
+    build_props = ElementTree.parse(os.path.join(frida_root, "releng", "frida.props"))
+    frida_v8_tag = str(QName("http://schemas.microsoft.com/developer/msbuild/2003", "FridaV8"))
+
+    for elem in build_props.iter():
+        if elem.tag == frida_v8_tag:
+            if elem.text == "Enabled":
+                v8 += [
+                    sdk_lib_path("libv8-8.0.a", frida_root, host),
+                ]
+            break
 
     gum_lib = internal_arch_lib_path("gum", frida_root, host)
     gum_deps = deduplicate(glib + gobject + gio + capstone)
