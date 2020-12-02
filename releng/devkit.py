@@ -380,7 +380,7 @@ def infer_library_names(flags):
     return [flag[2:] for flag in flags if flag.startswith("-l")]
 
 def infer_linker_flags(flags):
-    return [flag for flag in flags if flag.startswith("-Wl")]
+    return [flag for flag in flags if flag.startswith("-Wl") or flag == "-pthread"]
 
 def resolve_library_paths(names, dirs):
     paths = []
@@ -414,7 +414,7 @@ def generate_example(filename, package, frida_root, host, kit, flavor, extra_ldf
         cflags = probe_env(rc, "echo $CFLAGS")
         ldflags = probe_env(rc, "echo $LDFLAGS")
 
-        (cflags, ldflags) = trim_flags(cflags, " ".join([" ".join(extra_ldflags), ldflags]))
+        (cflags, ldflags) = tweak_flags(cflags, " ".join([" ".join(extra_ldflags), ldflags]))
 
         params = {
             "cc": "clang" if host.split("-")[0] in ["macos", "ios", "android"] else "gcc",
@@ -506,9 +506,9 @@ def probe_env(rc, command):
         "(. \"{rc}\" && PACKAGE_TARNAME=frida-devkit . $CONFIG_SITE && {command})".format(rc=rc, command=command)
     ], shell=True).decode('utf-8').strip()
 
-def trim_flags(cflags, ldflags):
-    trimmed_cflags = []
-    trimmed_ldflags = []
+def tweak_flags(cflags, ldflags):
+    tweaked_cflags = []
+    tweaked_ldflags = []
 
     pending_cflags = cflags.split(" ")
     while len(pending_cflags) > 0:
@@ -516,13 +516,14 @@ def trim_flags(cflags, ldflags):
         if flag == "-include":
             pending_cflags.pop(0)
         else:
-            trimmed_cflags.append(flag)
+            tweaked_cflags.append(flag)
 
-    trimmed_cflags = deduplicate(trimmed_cflags)
-    existing_cflags = set(trimmed_cflags)
+    tweaked_cflags = deduplicate(tweaked_cflags)
+    existing_cflags = set(tweaked_cflags)
 
     pending_ldflags = ldflags.split(" ")
     seen_libs = set()
+    seen_flags = set()
     while len(pending_ldflags) > 0:
         flag = pending_ldflags.pop(0)
         if flag in ("-arch", "-isysroot") and flag in existing_cflags:
@@ -531,9 +532,9 @@ def trim_flags(cflags, ldflags):
             if flag == "-isysroot":
                 sysroot = pending_ldflags.pop(0)
                 if "MacOSX" in sysroot:
-                    trimmed_ldflags.append("-isysroot \"$(xcrun --sdk macosx --show-sdk-path)\"")
+                    tweaked_ldflags.append("-isysroot \"$(xcrun --sdk macosx --show-sdk-path)\"")
                 elif "iPhoneOS" in sysroot:
-                    trimmed_ldflags.append("-isysroot \"$(xcrun --sdk iphoneos --show-sdk-path)\"")
+                    tweaked_ldflags.append("-isysroot \"$(xcrun --sdk iphoneos --show-sdk-path)\"")
                 continue
             elif flag == "-L":
                 pending_ldflags.pop(0)
@@ -544,10 +545,14 @@ def trim_flags(cflags, ldflags):
                 if flag in seen_libs:
                     continue
                 seen_libs.add(flag)
-            trimmed_ldflags.append(flag)
+            elif flag == "-pthread":
+                if flag in seen_flags:
+                    continue
+                seen_flags.add(flag)
+            tweaked_ldflags.append(flag)
 
-    pending_ldflags = trimmed_ldflags
-    trimmed_ldflags = []
+    pending_ldflags = tweaked_ldflags
+    tweaked_ldflags = []
     while len(pending_ldflags) > 0:
         flag = pending_ldflags.pop(0)
 
@@ -560,12 +565,15 @@ def trim_flags(cflags, ldflags):
                 flag = None
                 break
         if len(raw_flags) > 0:
-            trimmed_ldflags.append("-Wl," + ",".join(raw_flags))
+            merged_flags = "-Wl," + ",".join(raw_flags)
+            if "--icf=" in merged_flags:
+                tweaked_ldflags.append("-fuse-ld=gold")
+            tweaked_ldflags.append(merged_flags)
 
         if flag is not None and flag not in existing_cflags:
-            trimmed_ldflags.append(flag)
+            tweaked_ldflags.append(flag)
 
-    return (" ".join(trimmed_cflags), " ".join(trimmed_ldflags))
+    return (" ".join(tweaked_cflags), " ".join(tweaked_ldflags))
 
 def deduplicate(items):
     return list(OrderedDict.fromkeys(items))
