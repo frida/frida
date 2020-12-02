@@ -290,7 +290,7 @@ sqlite_deps = \
 sqlite_deps_for_build = \
 	$(NULL)
 
-libunwind_version = 66ca44cd82389cd7cfbbd482e58324a79f6679ab
+libunwind_version = 84b9222db9bbe22bde766b1e7654360320735dfd
 libunwind_url = $(frida_base_url)/libunwind.git
 libunwind_hash = $(NULL)
 libunwind_recipe = autotools
