@@ -83,10 +83,10 @@ example_listener_on_enter (GumInvocationListener * listener,
   switch (hook_id)
   {
     case EXAMPLE_HOOK_OPEN:
-      g_print ("[*] open(\"%s\")\n", gum_invocation_context_get_nth_argument (ic, 0));
+      g_print ("[*] open(\"%s\")\n", (const gchar *) gum_invocation_context_get_nth_argument (ic, 0));
       break;
     case EXAMPLE_HOOK_CLOSE:
-      g_print ("[*] close(%d)\n", (int) gum_invocation_context_get_nth_argument (ic, 0));
+      g_print ("[*] close(%d)\n", GPOINTER_TO_INT (gum_invocation_context_get_nth_argument (ic, 0)));
       break;
   }
 

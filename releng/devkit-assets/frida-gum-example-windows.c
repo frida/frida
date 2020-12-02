@@ -91,10 +91,10 @@ example_listener_on_enter (GumInvocationListener * listener,
   switch (hook_id)
   {
     case EXAMPLE_HOOK_MESSAGE_BEEP:
-      g_print ("[*] MessageBeep(%u)\n", (guint) GPOINTER_TO_SIZE (gum_invocation_context_get_nth_argument (ic, 0)));
+      g_print ("[*] MessageBeep(%u)\n", GPOINTER_TO_UINT (gum_invocation_context_get_nth_argument (ic, 0)));
       break;
     case EXAMPLE_HOOK_SLEEP:
-      g_print ("[*] Sleep(%u)\n", (guint) GPOINTER_TO_SIZE (gum_invocation_context_get_nth_argument (ic, 0)));
+      g_print ("[*] Sleep(%u)\n", GPOINTER_TO_UINT (gum_invocation_context_get_nth_argument (ic, 0)));
       break;
   }
 
