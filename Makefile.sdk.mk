@@ -434,13 +434,17 @@ ifeq ($(host_os), $(filter $(host_os), linux android))
 v8_platform_args += enable_resource_allowlist_generation=false
 endif
 
-ifeq ($(host_arch), $(filter $(host_arch), x86 arm))
 ifneq ($(MACOS_X86_SDK_ROOT),)
+ifeq ($(build_os), macos)
+ifeq ($(host_arch), $(filter $(host_arch), x86 arm))
 v8_platform_args += mac_sdk_path="$(MACOS_X86_SDK_ROOT)"
 endif
 endif
+endif
 ifneq ($(IOS_SDK_ROOT),)
+ifeq ($(host_os), ios)
 v8_platform_args += ios_sdk_path="$(IOS_SDK_ROOT)"
+endif
 endif
 
 # Google's prebuilt GN requires a newer glibc than our Debian Squeeze buildroot has.
