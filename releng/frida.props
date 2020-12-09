@@ -4,7 +4,7 @@
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <OutDir>$(SolutionDir)build\frida-windows\$(PlatformName)-$(Configuration)\bin\</OutDir>
     <IntDir>$(SolutionDir)build\tmp-windows\$(PlatformName)-$(Configuration)\$(ProjectName)\</IntDir>
-    <FridaV8>Disabled</FridaV8>
+    <FridaV8>Enabled</FridaV8>
     <GLibGenmarshal>py -3 $(SolutionDir)build\toolchain-windows\bin\glib-genmarshal</GLibGenmarshal>
     <GLibMkenums>py -3 $(SolutionDir)build\toolchain-windows\bin\glib-mkenums</GLibMkenums>
     <ValaCompiler>$(SolutionDir)build\toolchain-windows\bin\valac-0.52.exe</ValaCompiler>
