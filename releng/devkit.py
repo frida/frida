@@ -344,7 +344,7 @@ def generate_library_unix(package, frida_root, host, flavor, output_dir, library
     return (extra_flags, thirdparty_symbol_mappings)
 
 def extract_public_thirdparty_symbol_mappings(mappings):
-    public_prefixes = ["g_", "glib_", "gobject_", "gio_", "gee_", "json_"]
+    public_prefixes = ["g_", "glib_", "gobject_", "gio_", "gee_", "json_", "cs_"]
     return [(original, renamed) for original, renamed in mappings if any([original.startswith(prefix) for prefix in public_prefixes])]
 
 def get_thirdparty_symbol_mappings(library, rc):
