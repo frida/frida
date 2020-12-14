@@ -303,7 +303,20 @@ openssl_host_env := \
 
 endif
 
-$(eval $(call make-base-package-rules,openssl,fs,$(host_os_arch)))
+.PHONY: openssl
+
+openssl: build/fs-$(host_os_arch)/manifest/openssl.pkg
+	. build/fs-env-$(host_os_arch).rc \
+		&& . $$CONFIG_SITE \
+		&& export CC CFLAGS \
+		&& export $(openssl_host_env) OPENSSL_LOCAL_CONFIG_DIR="$(abspath releng/openssl-config)" \
+		&& cd build/fs-tmp-$(host_os_arch)/openssl \
+		&& $(MAKE) build_libs \
+		&& $(MAKE) install_dev
+
+$(eval $(call make-clean-package-rules,openssl,fs,$(host_os_arch)))
+
+$(eval $(call make-symlinks-package-rule,openssl,fs,$(host_os_arch)))
 
 deps/.openssl-stamp:
 	$(call grab-and-prepare,openssl)

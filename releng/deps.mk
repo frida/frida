@@ -717,7 +717,18 @@ endef
 
 define make-base-package-rules
 
-.PHONY: $1 clean-$1 distclean-$1 symlinks-$1
+$(call make-build-incremental-package-rule,$1,$2,$3)
+
+$(call make-clean-package-rules,$1,$2,$3)
+
+$(call make-symlinks-package-rule,$1,$2,$3)
+
+endef
+
+
+define make-build-incremental-package-rule
+
+.PHONY: $1
 
 $1: build/$2-$3/manifest/$1.pkg
 	builddir=build/$2-tmp-$3/$1; \
@@ -729,6 +740,13 @@ $1: build/$2-$3/manifest/$1.pkg
 		. build/$2-env-$3.rc; \
 		$(MAKE) -C $$$$builddir $(MAKE_J) install; \
 	fi
+
+endef
+
+
+define make-clean-package-rules
+
+.PHONY: clean-$1 distclean-$1
 
 clean-$1:
 	@if [ -f build/$2-$3/manifest/$1.pkg ]; then \
@@ -745,6 +763,13 @@ clean-$1:
 distclean-$1: clean-$1
 	$(RM) deps/.$1-stamp
 	$(RM) -r deps/$1
+
+endef
+
+
+define make-symlinks-package-rule
+
+.PHONY: symlinks-$1
 
 symlinks-$1: build/$2-$3/manifest/$1.pkg
 	@sdkroot=build/sdk-$$(host_os_arch); \
