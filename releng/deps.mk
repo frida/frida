@@ -250,9 +250,9 @@ elfutils_deps = \
 elfutils_deps_for_build = \
 	$(NULL)
 
-libdwarf_version = 20201020
+libdwarf_version = 20201201
 libdwarf_url = https://www.prevanders.net/libdwarf-$(libdwarf_version).tar.gz
-libdwarf_hash = 1c5ce59e314c6fe74a1f1b4e2fa12caea9c24429309aa0ebdfa882f74f016eff
+libdwarf_hash = 62db1028dfd8fd877d01ae75873ac1fe311437012ef48a0ac4157189e1e9b2c9
 libdwarf_recipe = custom
 libdwarf_patches = \
 	$(NULL)
