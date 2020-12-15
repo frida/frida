@@ -1,6 +1,6 @@
-frida_toolchain_version = 20201208
-frida_sdk_version = 20201208
-frida_bootstrap_version = 20201202
+frida_toolchain_version = 20201214
+frida_sdk_version = 20201214
+frida_bootstrap_version = 20201208
 
 
 frida_base_url = https://github.com/frida
