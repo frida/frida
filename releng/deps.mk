@@ -384,6 +384,8 @@ libpsl_recipe = meson
 libpsl_patches = \
 	$(NULL)
 libpsl_options = \
+	-Druntime=no \
+	-Dbuiltin=no \
 	-Dtests=false \
 	$(NULL)
 libpsl_deps = \
