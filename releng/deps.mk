@@ -368,6 +368,7 @@ json_glib_patches = \
 	$(NULL)
 json_glib_options = \
 	-Dintrospection=disabled \
+	-Dgtk_doc=disabled \
 	-Dtests=false \
 	$(NULL)
 json_glib_deps = \
