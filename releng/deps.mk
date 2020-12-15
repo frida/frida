@@ -616,7 +616,7 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 			| cut -c$$(strip $$(shell echo $$(abspath build/$2-$$*)x | wc -c))- \
 			| sort \
 			> "$$$$prefix/manifest/$1.pkg" \
-	) >$$$$builddir/build.log 2>&1 \
+	) >$$$$builddir/build.log 2>&1 || (echo "failed - see $$$$builddir/build.log for more information"; exit 1) \
 
 endef
 
@@ -673,7 +673,7 @@ build/$2-tmp-%/$1/Makefile: build/$2-env-%.rc deps/$1/configure deps/.$1-stamp \
 		&& export PATH="$$(abspath build/$2-$(build_os_arch))/bin:$$$$PATH" \
 		&& cd $$(@D) \
 		&& ../../../deps/$1/configure $$($$(subst -,_,$1)_options) \
-	) >$$(@D)/build.log 2>&1
+	) >$$(@D)/build.log 2>&1 || (echo "failed - see $$(@D)/build.log for more information"; exit 1)
 
 endef
 
@@ -693,7 +693,7 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc build/$2-tmp-%/$1/Makefile
 	&& $(call print-status,$1,Generating manifest) \
 	&& (set -x; \
 		$$(call make-autotools-manifest-commands,$1,$2,$$*,) \
-	) >>$$$$builddir/build.log 2>&1
+	) >>$$$$builddir/build.log 2>&1 || (echo "failed - see $$$$builddir/build.log for more information"; exit 1)
 
 endef
 
