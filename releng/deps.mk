@@ -619,7 +619,7 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 			| cut -c$$(strip $$(shell echo $$(abspath build/$2-$$*)x | wc -c))- \
 			| sort \
 			> "$$$$prefix/manifest/$1.pkg" \
-	) >$$$$builddir/build.log 2>&1 || (echo "failed - see $$$$builddir/build.log for more information"; exit 1) \
+	) >>$$$$builddir/build.log 2>&1 || (echo "failed - see $$$$builddir/build.log for more information"; exit 1) \
 
 endef
 
