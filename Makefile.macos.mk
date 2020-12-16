@@ -224,6 +224,7 @@ build/tmp-android-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule
 			--cross-file build/frida-android-x86.txt \
 			--prefix $(FRIDA)/build/frida-android-x86 \
 			$(frida_core_flags) \
+			-Dagent_emulated_legacy=$(FRIDA)/build/tmp-android-arm/frida-core/lib/agent/frida-agent.so \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
@@ -304,7 +305,7 @@ build/frida-ios-arm64e/lib/pkgconfig/frida-core-1.0.pc: build/tmp-ios-arm64/frid
 	@rm -f build/tmp-ios-arm64e/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-ios-arm64e.rc && $(NINJA) -C build/tmp-ios-arm64e/frida-core install
 	@touch $@
-build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x86/frida-core/.frida-helper-and-agent-stamp
+build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x86/frida-core/.frida-helper-and-agent-stamp build/tmp-android-arm/frida-core/.frida-agent-stamp
 	@rm -f build/tmp-android-x86/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-meson-env-android-x86.rc && $(NINJA) -C build/tmp-android-x86/frida-core install
 	@touch $@
@@ -344,6 +345,9 @@ build/tmp-ios-%/frida-core/.frida-agent-stamp: build/tmp-ios-%/frida-core/.frida
 	@touch $@
 build/tmp-android-%/frida-core/.frida-helper-and-agent-stamp: build/tmp-android-%/frida-core/.frida-ninja-stamp
 	. build/frida-meson-env-android-$*.rc && $(NINJA) -C build/tmp-android-$*/frida-core src/frida-helper lib/agent/frida-agent.so
+	@touch $@
+build/tmp-android-%/frida-core/.frida-agent-stamp: build/tmp-android-%/frida-core/.frida-ninja-stamp
+	. build/frida-meson-env-android-$*.rc && $(NINJA) -C build/tmp-android-$*/frida-core lib/agent/frida-agent.so
 	@touch $@
 
 build/.core-macos-stamp-%: build/%/lib/pkgconfig/frida-core-1.0.pc
