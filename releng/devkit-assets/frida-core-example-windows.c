@@ -67,7 +67,7 @@ main (int argc,
   frida_unref (devices);
   devices = NULL;
 
-  session = frida_device_attach_sync (local_device, target_pid, NULL, &error);
+  session = frida_device_attach_sync (local_device, target_pid, FRIDA_REALM_NATIVE, NULL, &error);
   if (error == NULL)
   {
     FridaScript * script;
