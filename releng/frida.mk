@@ -32,6 +32,21 @@ build/frida_thin-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida
 	[ ! -d toolchain-$* ] && ln -s frida_thin-toolchain-$* toolchain-$*; \
 	true
 
+build/frida_gir-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida-version.h
+	@FRIDA_HOST=$* \
+		FRIDA_ACOPTFLAGS="$(FRIDA_ACOPTFLAGS_COMMON)" \
+		FRIDA_ACDBGFLAGS="$(FRIDA_ACDBGFLAGS_COMMON)" \
+		FRIDA_ASAN=$(FRIDA_ASAN) \
+		FRIDA_ENV_NAME=frida_gir \
+		./releng/setup-env.sh
+	@cd $(FRIDA)/build/; \
+	[ ! -e frida-env-$*.rc ] && ln -s frida_gir-env-$*.rc frida-env-$*.rc; \
+	[ ! -e frida-meson-env-$*.rc ] && ln -s frida_gir-meson-env-$*.rc frida-meson-env-$*.rc; \
+	[ ! -d frida-$* ] && ln -s frida_gir-$* frida-$*; \
+	[ ! -d sdk-$* ] && ln -s frida_gir-sdk-$* sdk-$*; \
+	[ ! -d toolchain-$* ] && ln -s frida_gir-toolchain-$* toolchain-$*; \
+	true
+
 build/frida-version.h: releng/generate-version-header.py .git/refs/heads/master
 	@$(PYTHON3) releng/generate-version-header.py > $@.tmp
 	@mv $@.tmp $@
