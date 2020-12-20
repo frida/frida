@@ -164,7 +164,7 @@ if __name__ == '__main__':
             if publish:
                 do([npm, "publish"])
             do_build_command([npm, "run", "prebuild", "--", "-t", "10.0.0", "-t", "12.0.0", "-t", "14.0.0"])
-            do_build_command([npm, "run", "prebuild", "--", "-t", "10.0.0", "-t", "11.0.0-beta.1", "-r", "electron"])
+            do_build_command([npm, "run", "prebuild", "--", "-t", "11.0.0", "-r", "electron"])
             packages = glob.glob(os.path.join(frida_node_dir, "prebuilds", "*.tar.gz"))
             for package_path in packages:
                 name = os.path.basename(package_path)
