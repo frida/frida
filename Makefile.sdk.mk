@@ -127,6 +127,8 @@ build/fs-%/manifest/elfutils.pkg: build/fs-env-%.rc build/fs-tmp-%/elfutils/Make
 		done \
 		&& install -d $$prefix/lib \
 		&& install -m 644 $$builddir/libelf/libelf.a $$prefix/lib \
+		&& install -d $$prefix/lib/pkgconfig \
+		&& install -m 644 $$builddir/config/libelf.pc $$prefix/lib/pkgconfig \
 	) >>$$builddir/build.log 2>&1
 	@$(call print-status,elfutils,Generating manifest)
 	@( \
