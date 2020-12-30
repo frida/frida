@@ -1,0 +1,285 @@
+From 99ffd5ade5b2bbb03650416a292da7a583672967 Mon Sep 17 00:00:00 2001
+From: Richard Levitte <levitte@openssl.org>
+Date: Sat, 29 Feb 2020 06:43:26 +0100
+Subject: [PATCH] Andoid cross compile: change ANDROID_NDK_HOME to
+ ANDROID_NDK_ROOT
+
+According to forum discussions with NDK developers, ANDROID_NDK_HOME
+is used for something else.
+
+Fixes #11205
+
+Reviewed-by: Matt Caswell <matt@openssl.org>
+(Merged from https://github.com/openssl/openssl/pull/11206)
+---
+ Configurations/15-android.conf |  6 +++---
+ NOTES.ANDROID                  | 16 ++++++++--------
+ 2 files changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/Configurations/15-android.conf b/Configurations/15-android.conf
+index b28689a4256..d8674978a5e 100644
+--- a/Configurations/15-android.conf
++++ b/Configurations/15-android.conf
+@@ -24,17 +24,17 @@
+ 
+             my $ndk_var;
+             my $ndk;
+-            foreach (qw(ANDROID_NDK_HOME ANDROID_NDK)) {
++            foreach (qw(ANDROID_NDK_ROOT ANDROID_NDK)) {
+                 $ndk_var = $_;
+                 $ndk = $ENV{$ndk_var};
+                 last if defined $ndk;
+             }
+-            die "\$ANDROID_NDK_HOME is not defined"  if (!$ndk);
++            die "\$ANDROID_NDK_ROOT is not defined"  if (!$ndk);
+             if (!-d "$ndk/platforms" && !-f "$ndk/AndroidVersion.txt") {
+                 # $ndk/platforms is traditional "all-inclusive" NDK, while
+                 # $ndk/AndroidVersion.txt is so-called standalone toolchain
+                 # tailored for specific target down to API level.
+-                die "\$ANDROID_NDK_HOME=$ndk is invalid";
++                die "\$ANDROID_NDK_ROOT=$ndk is invalid";
+             }
+             $ndk = canonpath($ndk);
+ 
+diff --git a/NOTES.ANDROID b/NOTES.ANDROID
+index f19ec71b836..57c1ee9d1b2 100644
+--- a/NOTES.ANDROID
++++ b/NOTES.ANDROID
+@@ -24,7 +24,7 @@
+  need to know the prefix to extend your PATH, in order to invoke
+  $(CROSS_COMPILE)clang [*gcc on NDK 19 and lower] and company. (Configure
+  will fail and give you a hint if you get it wrong.) Apart from PATH
+- adjustment you need to set ANDROID_NDK_HOME environment to point at the
++ adjustment you need to set ANDROID_NDK_ROOT environment to point at the
+  NDK directory. If you're using a side-by-side NDK the path will look
+  something like /some/where/android-sdk/ndk/<ver>, and for a standalone
+  NDK the path will be something like /some/where/android-ndk-<ver>.
+@@ -35,21 +35,21 @@
+  with N being the numerical value of the target platform version. For example,
+  to compile for Android 10 arm64 with a side-by-side NDK r20.0.5594570
+ 
+-	export ANDROID_NDK_HOME=/home/whoever/Android/android-sdk/ndk/20.0.5594570
+-	PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$ANDROID_NDK_HOME/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH
++	export ANDROID_NDK_ROOT=/home/whoever/Android/android-sdk/ndk/20.0.5594570
++	PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH
+ 	./Configure android-arm64 -D__ANDROID_API__=29
+ 	make
+ 
+  Older versions of the NDK have GCC under their common prebuilt tools directory, so the bin path
+  will be slightly different. EG: to compile for ICS on ARM with NDK 10d:
+ 
+-    export ANDROID_NDK_HOME=/some/where/android-ndk-10d
+-    PATH=$ANDROID_NDK_HOME/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86_64/bin:$PATH
++    export ANDROID_NDK_ROOT=/some/where/android-ndk-10d
++    PATH=$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86_64/bin:$PATH
+     ./Configure android-arm -D__ANDROID_API__=14
+     make
+ 
+  Caveat lector! Earlier OpenSSL versions relied on additional CROSS_SYSROOT
+- variable set to $ANDROID_NDK_HOME/platforms/android-<api>/arch-<arch> to
++ variable set to $ANDROID_NDK_ROOT/platforms/android-<api>/arch-<arch> to
+  appoint headers-n-libraries' location. It's still recognized in order
+  to facilitate migration from older projects. However, since API level
+  appears in CROSS_SYSROOT value, passing -D__ANDROID_API__=N can be in
+@@ -64,9 +64,9 @@
+ 
+  Another option is to create so called "standalone toolchain" tailored
+  for single specific platform including Android API level, and assign its
+- location to ANDROID_NDK_HOME. In such case you have to pass matching
++ location to ANDROID_NDK_ROOT. In such case you have to pass matching
+  target name to Configure and shouldn't use -D__ANDROID_API__=N. PATH
+- adjustment becomes simpler, $ANDROID_NDK_HOME/bin:$PATH suffices.
++ adjustment becomes simpler, $ANDROID_NDK_ROOT/bin:$PATH suffices.
+ 
+  Running tests (on Linux)
+  ------------------------
+From ca50d69cfe51f742ca052201fe4c5d851b28ae6c Mon Sep 17 00:00:00 2001
+From: Richard Levitte <levitte@openssl.org>
+Date: Tue, 3 Mar 2020 22:55:09 +0100
+Subject: [PATCH] Configurations: Fix "android" configuration target
+
+This target gave '-pie' as a C flag when it should be a linker flag.
+Additionally, we add '-fPIE' as C flag for binaries.
+
+Fixes #11237
+
+Reviewed-by: Matt Caswell <matt@openssl.org>
+(Merged from https://github.com/openssl/openssl/pull/11238)
+---
+ Configurations/15-android.conf | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/Configurations/15-android.conf b/Configurations/15-android.conf
+index d8674978a5e..d3b2ff6a1c4 100644
+--- a/Configurations/15-android.conf
++++ b/Configurations/15-android.conf
+@@ -168,7 +168,8 @@ my %targets = (
+         cppflags         => add(sub { android_ndk()->{cppflags} }),
+         cxxflags         => add(sub { android_ndk()->{cflags} }),
+         bn_ops           => sub { android_ndk()->{bn_ops} },
+-        bin_cflags       => "-pie",
++        bin_cflags       => "-fPIE",
++        bin_lflags       => "-pie",
+         enable           => [ ],
+     },
+     "android-arm" => {
+From 948fd7af627f42cf9ab6b7c3df34aa5ebad422ae Mon Sep 17 00:00:00 2001
+From: Fred Hornsey <fred@hornsey.us>
+Date: Tue, 17 Nov 2020 22:20:43 -0600
+Subject: [PATCH] Support for Android NDK r22-beta1
+
+I think builds using standalone toolchain are fine so I left them alone,
+but `Configure` will fail if using the NDK directly because the
+`platforms` and `sysroot` directories were removed.
+
+If `sysroot` is missing, omit the `--sysroot` and `-gcc-toolchain`
+arguments and use the triplet form clang command.
+
+Also since `platforms` was being used for the default API level, use
+`meta/platforms.json` instead if needed.
+
+Reviewed-by: Matt Caswell <matt@openssl.org>
+Reviewed-by: Paul Dale <paul.dale@oracle.com>
+Reviewed-by: Richard Levitte <levitte@openssl.org>
+(Merged from https://github.com/openssl/openssl/pull/13434)
+---
+ Configurations/15-android.conf | 82 +++++++++++++++++++++-------------
+ 1 file changed, 51 insertions(+), 31 deletions(-)
+
+diff --git a/Configurations/15-android.conf b/Configurations/15-android.conf
+index 77d6c8b47d6..f3075e4b794 100644
+--- a/Configurations/15-android.conf
++++ b/Configurations/15-android.conf
+@@ -30,17 +30,17 @@
+                 last if defined $ndk;
+             }
+             die "\$ANDROID_NDK_ROOT is not defined"  if (!$ndk);
+-            if (!-d "$ndk/platforms" && !-f "$ndk/AndroidVersion.txt") {
+-                # $ndk/platforms is traditional "all-inclusive" NDK, while
+-                # $ndk/AndroidVersion.txt is so-called standalone toolchain
+-                # tailored for specific target down to API level.
++            my $is_standalone_toolchain = -f "$ndk/AndroidVersion.txt";
++            my $ndk_src_props = "$ndk/source.properties";
++            my $is_ndk = -f $ndk_src_props;
++            if ($is_ndk == $is_standalone_toolchain) {
+                 die "\$ANDROID_NDK_ROOT=$ndk is invalid";
+             }
+             $ndk = canonpath($ndk);
+ 
+             my $ndkver = undef;
+ 
+-            if (open my $fh, "<$ndk/source.properties") {
++            if (open my $fh, "<$ndk_src_props") {
+                 local $_;
+                 while(<$fh>) {
+                     if (m|Pkg\.Revision\s*=\s*([0-9]+)|) {
+@@ -59,7 +59,7 @@
+             if ($sysroot = $ENV{CROSS_SYSROOT}) {
+                 $sysroot =~ m|/android-([0-9]+)/arch-(\w+)/?$|;
+                 ($api, $arch) = ($1, $2);
+-            } elsif (-f "$ndk/AndroidVersion.txt") {
++            } elsif ($is_standalone_toolchain) {
+                 $sysroot = "$ndk/sysroot";
+             } else {
+                 $api = "*";
+@@ -72,17 +72,31 @@
+                     }
+                 }
+ 
+-                # list available platforms (numerically)
+-                my @platforms = sort { $a =~ m/-([0-9]+)$/; my $aa = $1;
+-                                       $b =~ m/-([0-9]+)$/; $aa <=> $1;
+-                                     } glob("$ndk/platforms/android-$api");
+-                die "no $ndk/platforms/android-$api" if ($#platforms < 0);
++                if (-d "$ndk/platforms") {
++                    # list available platforms (numerically)
++                    my @platforms = sort { $a =~ m/-([0-9]+)$/; my $aa = $1;
++                                           $b =~ m/-([0-9]+)$/; $aa <=> $1;
++                                         } glob("$ndk/platforms/android-$api");
++                    die "no $ndk/platforms/android-$api" if ($#platforms < 0);
+ 
+-                $sysroot = "@platforms[$#platforms]/arch-$arch";
+-                $sysroot =~ m|/android-([0-9]+)/arch-$arch|;
+-                $api = $1;
++                    $sysroot = "@platforms[$#platforms]/arch-$arch";
++                    $sysroot =~ m|/android-([0-9]+)/arch-$arch|;
++                    $api = $1;
++                } elsif ($api eq "*") {
++                    # r22 Removed platforms dir, use this JSON file
++                    my $path = "$ndk/meta/platforms.json";
++                    open my $fh, $path or die "Could not open '$path' $!";
++                    while (<$fh>) {
++                        if (/"max": (\d+),/) {
++                            $api = $1;
++                            last;
++                        }
++                    }
++                    close $fh;
++                }
++                die "Could not get default API Level" if ($api eq "*");
+             }
+-            die "no sysroot=$sysroot"   if (!-d $sysroot);
++            die "no sysroot=$sysroot" if (length $sysroot && !-d $sysroot);
+ 
+             my $triarch = $triplet{$arch};
+             my $cflags;
+@@ -95,17 +109,21 @@
+                 my $arm = $ndkver > 16 ? "armv7a" : "armv5te";
+                 (my $tridefault = $triarch) =~ s/^arm-/$arm-/;
+                 (my $tritools   = $triarch) =~ s/(?:x|i6)86(_64)?-.*/x86$1/;
+-                $cflags .= " -target $tridefault "
+-                        .  "-gcc-toolchain \$($ndk_var)/toolchains"
+-                        .  "/$tritools-4.9/prebuilt/$host";
+-                $user{CC} = "clang" if ($user{CC} !~ m|clang|);
++                if (length $sysroot) {
++                    $cflags .= " -target $tridefault "
++                            .  "-gcc-toolchain \$($ndk_var)/toolchains"
++                            .  "/$tritools-4.9/prebuilt/$host";
++                    $user{CC} = "clang" if ($user{CC} !~ m|clang|);
++                } else {
++                    $user{CC} = "$tridefault$api-clang";
++                }
+                 $user{CROSS_COMPILE} = undef;
+                 if (which("llvm-ar") =~ m|^$ndk/.*/prebuilt/([^/]+)/|) {
+                     $user{AR} = "llvm-ar";
+                     $user{ARFLAGS} = [ "rs" ];
+                     $user{RANLIB} = ":";
+                 }
+-            } elsif (-f "$ndk/AndroidVersion.txt") {    #"standalone toolchain"
++            } elsif ($is_standalone_toolchain) {
+                 my $cc = $user{CC} // "clang";
+                 # One can probably argue that both clang and gcc should be
+                 # probed, but support for "standalone toolchain" was added
+@@ -127,19 +145,21 @@
+                 $user{CROSS_COMPILE} = "$triarch-";
+             }
+ 
+-            if (!-d "$sysroot/usr/include") {
+-                my $incroot = "$ndk/sysroot/usr/include";
+-                die "no $incroot"          if (!-d $incroot);
+-                die "no $incroot/$triarch" if (!-d "$incroot/$triarch");
+-                $incroot =~ s|^$ndk/||;
+-                $cppflags  = "-D__ANDROID_API__=$api";
+-                $cppflags .= " -isystem \$($ndk_var)/$incroot/$triarch";
+-                $cppflags .= " -isystem \$($ndk_var)/$incroot";
++            if (length $sysroot) {
++                if (!-d "$sysroot/usr/include") {
++                    my $incroot = "$ndk/sysroot/usr/include";
++                    die "no $incroot"          if (!-d $incroot);
++                    die "no $incroot/$triarch" if (!-d "$incroot/$triarch");
++                    $incroot =~ s|^$ndk/||;
++                    $cppflags  = "-D__ANDROID_API__=$api";
++                    $cppflags .= " -isystem \$($ndk_var)/$incroot/$triarch";
++                    $cppflags .= " -isystem \$($ndk_var)/$incroot";
++                }
++                $sysroot =~ s|^$ndk/||;
++                $sysroot = " --sysroot=\$($ndk_var)/$sysroot";
+             }
+-
+-            $sysroot =~ s|^$ndk/||;
+             $android_ndk = {
+-                cflags   => "$cflags --sysroot=\$($ndk_var)/$sysroot",
++                cflags   => $cflags . $sysroot,
+                 cppflags => $cppflags,
+                 bn_ops   => $arch =~ m/64$/ ? "SIXTY_FOUR_BIT_LONG"
+                                             : "BN_LLONG",

@@ -121,6 +121,10 @@ build/fs-%/manifest/elfutils.pkg: build/fs-env-%.rc build/fs-tmp-%/elfutils/Make
 	(set -x \
 		&& . $< \
 		&& $(MAKE) $(MAKE_J) -C $$builddir/libelf libelf.a \
+			elf_begin_no_Werror=1 \
+			elf_cntl_no_Werror=1 \
+			elf32_updatenull_no_Werror=1 \
+			elf64_updatenull_no_Werror=1 \
 		&& install -d $$prefix/include \
 		&& for header in $(libelf_headers); do \
 			install -m 644 deps/elfutils/libelf/$$header $$prefix/include; \
@@ -275,32 +279,21 @@ ifeq ($(host_os), android)
 
 ifeq ($(host_arch), x86)
 openssl_arch_args := android-x86 -D__ANDROID_API__=18
-ndk_abi := x86
-ndk_triplet := i686-linux-android
 endif
 ifeq ($(host_arch), x86_64)
 openssl_arch_args := android-x86_64 -D__ANDROID_API__=21
-ndk_abi := x86_64
-ndk_triplet := x86_64-linux-android
 endif
 ifeq ($(host_arch), arm)
-openssl_arch_args := android-arm -D__ANDROID_API__=18 -D__ARM_MAX_ARCH__=7 -fno-integrated-as
-ndk_abi := arm-linux-androideabi
-ndk_triplet := arm-linux-androideabi
+openssl_arch_args := android-arm -D__ANDROID_API__=18 -D__ARM_MAX_ARCH__=7
 endif
 ifeq ($(host_arch), arm64)
 openssl_arch_args := android-arm64 -D__ANDROID_API__=21
-ndk_abi := aarch64-linux-android
-ndk_triplet := aarch64-linux-android
 endif
 
 ndk_build_os_arch := $(shell uname -s | tr '[A-Z]' '[a-z]')-$(build_arch)
 ndk_llvm_prefix := $(ANDROID_NDK_ROOT)/toolchains/llvm/prebuilt/$(ndk_build_os_arch)
-ndk_gcc_prefix := $(ANDROID_NDK_ROOT)/toolchains/$(ndk_abi)-4.9/prebuilt/$(ndk_build_os_arch)
 openssl_host_env := \
-	CPP=clang CC=clang CXX=clang++ LD= LDFLAGS= AR=$(ndk_triplet)-ar RANLIB=$(ndk_triplet)-ranlib \
-	ANDROID_NDK=$(ANDROID_NDK_ROOT) \
-	PATH=$(ndk_llvm_prefix)/bin:$(ndk_gcc_prefix)/bin:$$PATH \
+	PATH=$(ndk_llvm_prefix)/bin:$$PATH \
 	$(NULL)
 
 endif

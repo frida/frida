@@ -490,6 +490,8 @@ openssl_url = https://www.openssl.org/source/openssl-$(openssl_version).tar.gz
 openssl_hash = e8be6a35fe41d10603c3cc635e93289ed00bf34b79671a3a4de64fcee00d5242
 openssl_recipe = custom
 openssl_patches = \
+	openssl-clang.patch \
+	openssl-android.patch \
 	openssl-armcap.patch \
 	$(NULL)
 openssl_options = \

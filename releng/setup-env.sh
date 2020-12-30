@@ -106,7 +106,7 @@ if [ -z "$FRIDA_HOST" ]; then
 fi
 
 if [ "$host_os" == "android" ]; then
-  ndk_required=21
+  ndk_required=22
   if [ -n "$ANDROID_NDK_ROOT" ]; then
     if [ -f "$ANDROID_NDK_ROOT/source.properties" ]; then
       ndk_installed_version=$(grep Pkg.Revision "$ANDROID_NDK_ROOT/source.properties" | awk '{ split($NF, v, "."); print v[1]; }')
@@ -720,11 +720,6 @@ case $host_os in
 
     meson_c_link_args="$base_linker_args"
     meson_cpp_link_args="$base_linker_args, $(flags_to_args "$libstdcxx_flags")"
-
-    if [ $android_api -lt 21 ]; then
-      # XXX: Meson's auto-detection fails as this is a Clang built-in.
-      meson_platform_properties+=("has_function_stpcpy = false")
-    fi
     ;;
   qnx)
     case $host_arch in
