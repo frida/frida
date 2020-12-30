@@ -360,7 +360,7 @@ libgee_deps = \
 libgee_deps_for_build = \
 	$(NULL)
 
-json_glib_version = 9dd3b3898a2c41a1f9af24da8bab22e61526d299
+json_glib_version = 7a147f05da8c55dfd0845a8b4c998f88d5214746
 json_glib_url = $(frida_base_url)/json-glib.git
 json_glib_hash = $(NULL)
 json_glib_recipe = meson
