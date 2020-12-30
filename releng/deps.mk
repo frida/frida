@@ -277,7 +277,7 @@ xz_deps = \
 xz_deps_for_build = \
 	$(NULL)
 
-sqlite_version = 9f21a054d5c24c2036e9d1b28c630ecda5ae24c3
+sqlite_version = b67ff8d8344c355ec322e1a838dd204416483be2
 sqlite_url = $(frida_base_url)/sqlite.git
 sqlite_hash = $(NULL)
 sqlite_recipe = meson
