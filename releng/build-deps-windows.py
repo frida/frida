@@ -133,7 +133,7 @@ def main():
     parser.add_argument("--bundle", help="only build one specific bundle",
                         default=None, choices=[name.lower() for name in Bundle.__members__])
     parser.add_argument("--v8", help="whether to include V8 in the SDK",
-                        default='disabled', choices=['enabled', 'disabled'])
+                        default='enabled', choices=['enabled', 'disabled'])
 
     arguments = parser.parse_args()
 
