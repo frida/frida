@@ -781,12 +781,15 @@ symlinks-$1: build/$2-$3/manifest/$1.pkg
 	@sdkroot=build/sdk-$$(host_os_arch); \
 	if [ -d $$$$sdkroot ]; then \
 		cd $$$$sdkroot; \
-		for old_entry in $$$$(cat manifest/$1.pkg); do \
-			$(RM) $$$$old_entry; \
-		done; \
+		if [ -f manifest/$1.pkg ]; then \
+			for old_entry in $$$$(cat manifest/$1.pkg); do \
+				$(RM) $$$$old_entry; \
+			done; \
+		fi; \
 		for entry in $$$$(cat ../$2-$3/manifest/$1.pkg); do \
 			echo "✓ $$$$entry"; \
 			$(RM) $$$$entry; \
+			mkdir -p $$$$(dirname $$$$entry); \
 			original_relpath=$$$$($(PYTHON3) -c "import os.path; import sys; \
 				print(os.path.relpath('../$2-$3/$$$$entry', os.path.dirname('$$$$entry')))"); \
 			ln -s $$$$original_relpath $$$$entry; \
