@@ -136,6 +136,20 @@ libffi_deps = \
 libffi_deps_for_build = \
 	$(NULL)
 
+selinux_version = 9c7ba053bb075cace088d268fda400f6bc4ab14c
+selinux_url = $(frida_base_url)/selinux.git
+selinux_hash = $(NULL)
+selinux_recipe = meson
+selinux_patches = \
+	$(NULL)
+selinux_options = \
+	-Dregex=disabled \
+	$(NULL)
+selinux_deps = \
+	$(NULL)
+selinux_deps_for_build = \
+	$(NULL)
+
 glib_version = 7cb5a33ba6e2f1b8ff52fb80bfb193b4b9d18380
 glib_url = $(frida_base_url)/glib.git
 glib_hash = $(NULL)

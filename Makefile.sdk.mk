@@ -30,6 +30,10 @@ ifeq ($(host_os), $(filter $(host_os), linux android qnx))
 packages += elfutils libdwarf libunwind
 endif
 
+ifeq ($(host_os), android)
+packages += selinux
+endif
+
 ifeq ($(host_os), $(filter $(host_os), macos ios linux android))
 packages += glib-networking
 endif
