@@ -753,13 +753,13 @@ def package(bundle_ids: List[Bundle], params: DependencyParameters):
             copy_files(BOOTSTRAP_TOOLCHAIN_DIR, toolchain_mixin_files, toolchain_tempdir)
             copy_files(prefixes_dir, toolchain_files, toolchain_tempdir, transform_toolchain_dest)
             fix_manifests(toolchain_tempdir)
-            (toolchain_tempdir / "VERSION.txt").write_text(params.toolchain_version + "\n", encoding='utf-8')
+            (toolchain_tempdir / "VERSION.txt").write_text(params.deps_version + "\n", encoding='utf-8')
 
         if Bundle.SDK in bundle_ids:
             sdk_tempdir = tempdir / "sdk-windows"
             copy_files(prefixes_dir, sdk_built_files, sdk_tempdir, transform_sdk_dest)
             fix_manifests(sdk_tempdir)
-            (sdk_tempdir / "VERSION.txt").write_text(params.sdk_version + "\n", encoding='utf-8')
+            (sdk_tempdir / "VERSION.txt").write_text(params.deps_version + "\n", encoding='utf-8')
 
         print("Compressing...")
         compression_switches = ["a", "-mx{}".format(COMPRESSION_LEVEL), "-sfx7zCon.sfx"]

@@ -104,7 +104,7 @@ ifeq ($(host_os), ios)
 	@cp $(shell xcrun --sdk macosx --show-sdk-path)/usr/include/mach/mach_vm.h \
 		$(@D)/package/include/frida_mach_vm.h
 endif
-	@echo "$(frida_sdk_version)" > $(@D)/package/VERSION.txt
+	@echo "$(frida_deps_version)" > $(@D)/package/VERSION.txt
 	@touch $@
 
 

@@ -1,5 +1,4 @@
-frida_toolchain_version = 20201214
-frida_sdk_version = 20201214
+frida_deps_version = 20201214
 frida_bootstrap_version = 20201208
 
 

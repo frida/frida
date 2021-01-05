@@ -45,8 +45,7 @@ class PackageSpec:
 
 @dataclass
 class DependencyParameters:
-    toolchain_version: str
-    sdk_version: str
+    deps_version: str
     bootstrap_version: str
     packages: Dict[str, PackageSpec]
 
@@ -87,7 +86,7 @@ def main():
 
 def sync(bundle: Bundle, os_arch: str, location: Path):
     params = read_dependency_parameters()
-    version = params.toolchain_version if bundle == Bundle.TOOLCHAIN else params.sdk_version
+    version = params.deps_version
 
     bundle_nick = bundle.name.lower() if bundle != Bundle.SDK else bundle.name
 
@@ -129,7 +128,7 @@ def sync(bundle: Bundle, os_arch: str, location: Path):
 
 def roll(bundle: Bundle, os_arch: str, activate: bool):
     params = read_dependency_parameters()
-    version = params.toolchain_version if bundle == Bundle.TOOLCHAIN else params.sdk_version
+    version = params.deps_version
 
     (public_url, filename, suffix) = compute_bundle_parameters(bundle, os_arch, version)
 
@@ -192,8 +191,7 @@ def roll(bundle: Bundle, os_arch: str, activate: bool):
 
 def wait(bundle: Bundle, os_arch: str):
     params = read_dependency_parameters()
-    version = params.toolchain_version if bundle == Bundle.TOOLCHAIN else params.sdk_version
-    (url, filename, suffix) = compute_bundle_parameters(bundle, os_arch, version)
+    (url, filename, suffix) = compute_bundle_parameters(bundle, os_arch, params.deps_version)
 
     request = urllib.request.Request(url)
     request.get_method = lambda: "HEAD"
@@ -243,8 +241,7 @@ def read_dependency_parameters(host_defines: Dict[str, str] = {}) -> DependencyP
                 parse_array_value(raw_params[name + "_options"], raw_params))
 
     return DependencyParameters(
-            raw_params["frida_toolchain_version"],
-            raw_params["frida_sdk_version"],
+            raw_params["frida_deps_version"],
             raw_params["frida_bootstrap_version"],
             packages)
 
