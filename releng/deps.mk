@@ -304,6 +304,28 @@ brotli_deps = \
 brotli_deps_for_build = \
 	$(NULL)
 
+minizip_version = 4501ae619720d6769302eb792ae9389d878201f8
+minizip_url = $(frida_base_url)/minizip.git
+minizip_hash = $(NULL)
+minizip_recipe = meson
+minizip_patches = \
+	$(NULL)
+minizip_options = \
+	-Dzlib=enabled \
+	-Dlzma=disabled \
+	$(NULL)
+minizip_deps = \
+	zlib \
+	$(NULL)
+minizip_deps_for_build = \
+	$(NULL)
+ifeq ($(host_os), $(filter $(host_os),macos ios android qnx))
+minizip_deps += libiconv
+endif
+ifeq ($(FRIDA_LIBC), uclibc)
+minizip_deps += libiconv
+endif
+
 sqlite_version = b67ff8d8344c355ec322e1a838dd204416483be2
 sqlite_url = $(frida_base_url)/sqlite.git
 sqlite_hash = $(NULL)

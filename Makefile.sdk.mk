@@ -10,6 +10,7 @@ packages = \
 	zlib \
 	xz \
 	brotli \
+	minizip \
 	sqlite \
 	libffi \
 	glib \
