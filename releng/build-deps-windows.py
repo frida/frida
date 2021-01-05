@@ -73,6 +73,7 @@ NINJA = BOOTSTRAP_TOOLCHAIN_DIR / "bin" / "ninja.exe"
 
 ALL_PACKAGES: List[Package] = [
     ("zlib", PackageRole.LIBRARY, []),
+    ("brotli", PackageRole.LIBRARY, []),
     ("libffi", PackageRole.LIBRARY, []),
     ("glib", PackageRole.LIBRARY, []),
     ("pkg-config", PackageRole.TOOL, []),
@@ -100,6 +101,7 @@ ALL_BUNDLES = {
     ],
     Bundle.SDK: [
         "zlib",
+        "brotli",
         "libffi",
         "glib",
         "sqlite",

@@ -9,6 +9,7 @@ SHELL = /bin/bash
 packages = \
 	zlib \
 	xz \
+	brotli \
 	sqlite \
 	libffi \
 	glib \
