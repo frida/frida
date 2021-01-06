@@ -178,6 +178,15 @@ def generate_library(package, frida_root, host, flavor, output_dir, library_file
         return generate_library_unix(package, frida_root, host, flavor, output_dir, library_filename)
 
 def generate_library_windows(package, frida_root, host, flavor, output_dir, library_filename):
+    zlib = [
+        sdk_lib_path("libz.a", frida_root, host),
+    ]
+    brotli = [
+        sdk_lib_path("libbrotlicommon.a", frida_root, host),
+        sdk_lib_path("libbrotlienc.a", frida_root, host),
+        sdk_lib_path("libbrotlidec.a", frida_root, host),
+    ]
+
     glib = [
         sdk_lib_path("libglib-2.0.a", frida_root, host),
     ]
@@ -188,9 +197,8 @@ def generate_library_windows(package, frida_root, host, flavor, output_dir, libr
     gmodule = glib + [
         sdk_lib_path("libgmodule-2.0.a", frida_root, host),
     ]
-    gio = glib + gobject + gmodule + [
+    gio = glib + gobject + gmodule + zlib + [
         sdk_lib_path("libgio-2.0.a", frida_root, host),
-        sdk_lib_path("libz.a", frida_root, host),
     ]
 
     tls_provider = [
@@ -209,7 +217,7 @@ def generate_library_windows(package, frida_root, host, flavor, output_dir, libr
         sdk_lib_path("libsqlite3.a", frida_root, host),
     ]
 
-    libsoup = [
+    libsoup = brotli + [
         sdk_lib_path("libsoup-2.4.a", frida_root, host),
         sdk_lib_path("libpsl.a", frida_root, host),
         sdk_lib_path("libxml2.a", frida_root, host),
