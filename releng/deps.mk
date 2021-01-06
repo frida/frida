@@ -464,6 +464,7 @@ libsoup_patches = \
 	$(NULL)
 libsoup_options = \
 	-Dgssapi=disabled \
+	-Dntlm=disabled \
 	-Dbrotli=enabled \
 	-Dtls_check=false \
 	-Dgnome=false \
