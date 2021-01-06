@@ -464,6 +464,7 @@ libsoup_patches = \
 	$(NULL)
 libsoup_options = \
 	-Dgssapi=disabled \
+	-Dbrotli=enabled \
 	-Dtls_check=false \
 	-Dgnome=false \
 	-Dintrospection=disabled \
@@ -476,6 +477,7 @@ libsoup_deps = \
 	sqlite \
 	libpsl \
 	libxml2 \
+	brotli \
 	$(NULL)
 libsoup_deps_for_build = \
 	$(NULL)
