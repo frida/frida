@@ -57,10 +57,12 @@ clean: clean-submodules
 	rm -f build/frida-version.h
 	rm -rf build/frida-*-*
 	rm -rf build/frida_thin-*-*
+	rm -rf build/frida_gir-*-*
 	rm -rf build/fs-*-*
 	rm -rf build/ft-*-*
 	rm -rf build/tmp-*-*
 	rm -rf build/tmp_thin-*-*
+	rm -rf build/tmp_gir-*-*
 	rm -rf build/fs-tmp-*-*
 	rm -rf build/ft-tmp-*-*
 
@@ -76,6 +78,7 @@ gum-linux-x86: build/frida-linux-x86/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build
 gum-linux-x86_64: build/frida-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/x86-64
 gum-linux-x86-thin: build/frida_thin-linux-x86/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/x86 without cross-arch support
 gum-linux-x86_64-thin: build/frida_thin-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/x86-64 without cross-arch support
+gum-linux-x86_64-gir: build/frida_gir-linux-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/x86-64 with shared GLib and GIR
 gum-linux-arm: build/frida_thin-linux-arm/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/arm
 gum-linux-armbe8: build/frida_thin-linux-armbe8/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/armbe8
 gum-linux-armhf: build/frida_thin-linux-armhf/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Linux/armhf
@@ -114,6 +117,7 @@ build/$1-%/lib/pkgconfig/frida-gum-1.0.pc: build/$1-env-%.rc build/.frida-gum-su
 endef
 $(eval $(call make-gum-rules,frida,tmp))
 $(eval $(call make-gum-rules,frida_thin,tmp_thin))
+$(eval $(call make-gum-rules,frida_gir,tmp_gir))
 
 check-gum-linux-x86: gum-linux-x86 ##@gum Run tests for Linux/x86
 	build/tmp-linux-x86/frida-gum/tests/gum-tests $(test_args)
@@ -463,7 +467,7 @@ check-tools-linux-arm64: build/tmp_thin-linux-arm64/frida-tools-$(PYTHON_NAME)/.
 	help \
 	distclean clean clean-submodules git-submodules git-submodule-stamps \
 	gum-linux-x86 gum-linux-x86_64 \
-		gum-linux-x86-thin gum-linux-x86_64-thin \
+		gum-linux-x86-thin gum-linux-x86_64-thin gum-linux-x86_64-gir \
 		gum-linux-arm gum-linux-armbe8 gum-linux-armhf gum-linux-arm64 \
 		gum-linux-mips gum-linux-mipsel \
 		gum-linux-mips64 gum-linux-mips64el \
