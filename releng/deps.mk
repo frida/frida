@@ -149,7 +149,7 @@ selinux_deps = \
 selinux_deps_for_build = \
 	$(NULL)
 
-glib_version = 75dc6f71f2a1970ea5bf4dc98f533ede2b843a15
+glib_version = f93dc0692f97ef9014fffddca99f26bd035cdf56
 glib_url = $(frida_base_url)/glib.git
 glib_hash = $(NULL)
 glib_recipe = meson
@@ -167,6 +167,9 @@ glib_options = \
 	-Dlibmount=disabled \
 	-Dinternal_pcre=true \
 	-Dtests=false \
+	-Dglib_debug=disabled \
+	-Dglib_assert=false \
+	-Dglib_checks=false \
 	$(NULL)
 ifeq ($(host_os), $(filter $(host_os),macos ios))
 # Use Apple's iconv by default to make our toolchain smaller.
