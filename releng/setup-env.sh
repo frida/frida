@@ -908,7 +908,7 @@ fi
 (
   echo "#!/bin/sh"
   echo "export PKG_CONFIG_PATH=\"$pkg_config_path\""
-  echo "exec \"$pkg_config\"$pkg_config_flags \"\$@\""
+  echo "exec \"$pkg_config\" $pkg_config_flags \"\$@\""
 ) > "$PKG_CONFIG"
 chmod 755 "$PKG_CONFIG"
 
