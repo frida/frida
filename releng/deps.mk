@@ -564,7 +564,7 @@ openssl_deps = \
 openssl_deps_for_build = \
 	$(NULL)
 
-v8_version = e73a3d4f4778a902223698addb8564a04fc28cb5
+v8_version = 17b1c094336ddaa820d4a600615eb27e16781261
 v8_url = $(frida_base_url)/v8.git
 v8_hash = $(NULL)
 v8_recipe = custom
