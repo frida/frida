@@ -19,7 +19,7 @@ fi
 if [ -n "$FRIDA_LIBC" ]; then
   frida_libc=$FRIDA_LIBC
 else
-  frida_libc=glibc
+  frida_libc=gnu
 fi
 host_clang_arch=$(echo -n $host_arch | sed 's,^x86$,i386,')
 host_os_arch=${host_os}-${host_arch}
@@ -328,13 +328,13 @@ case $host_os in
         ;;
       mips)
         host_arch_flags="-march=mips1"
-        host_toolprefix="mips-unknown-linux-$frida_libc-"
+        host_toolprefix="mips-linux-$frida_libc-"
 
         meson_host_cpu="mips1"
         ;;
       mipsel)
         host_arch_flags="-march=mips1"
-        host_toolprefix="mipsel-unknown-linux-$frida_libc-"
+        host_toolprefix="mipsel-linux-$frida_libc-"
 
         meson_host_cpu="mips1"
         ;;
