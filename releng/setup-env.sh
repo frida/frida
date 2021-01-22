@@ -898,7 +898,7 @@ pkg_config="$FRIDA_TOOLROOT/bin/pkg-config"
 pkg_config_flags="--static"
 pkg_config_path="$FRIDA_PREFIX_LIB/pkgconfig"
 if [ "$FRIDA_ENV_NAME" == 'frida_gir' ]; then
-	pkg_config_path="/usr/lib/pkgconfig"
+	pkg_config_path="$(pkg-config --variable pc_path pkg-config):$pkg_config_path"
 	pkg_config_flags=""
 fi
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
