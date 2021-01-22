@@ -267,7 +267,7 @@ ifeq ($(host_arch), arm64)
 openssl_arch_args := linux-aarch64
 endif
 ifeq ($(host_arch), $(filter $(host_arch), mips mipsel))
-openssl_arch_args := linux-mips32
+openssl_arch_args := linux-mips32 no-asm
 endif
 ifeq ($(host_arch), $(filter $(host_arch), mips64 mips64el))
 openssl_arch_args := linux-mips64
