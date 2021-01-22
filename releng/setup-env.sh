@@ -327,13 +327,13 @@ case $host_os in
         host_toolprefix="aarch64-linux-gnu-"
         ;;
       mips)
-        host_arch_flags="-march=mips1"
+        host_arch_flags="-march=mips1 -mfp32"
         host_toolprefix="mips-linux-$frida_libc-"
 
         meson_host_cpu="mips1"
         ;;
       mipsel)
-        host_arch_flags="-march=mips1"
+        host_arch_flags="-march=mips1 -mfp32"
         host_toolprefix="mipsel-linux-$frida_libc-"
 
         meson_host_cpu="mips1"
