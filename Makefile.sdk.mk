@@ -19,7 +19,6 @@ packages = \
 	libsoup \
 	capstone \
 	quickjs \
-	tinycc \
 	$(NULL)
 
 
@@ -47,6 +46,10 @@ ifeq ($(FRIDA_ASAN), no)
 packages += libcxx
 endif
 endif
+endif
+
+ifeq ($(host_arch), $(filter $(host_arch), x86 x86_64 arm armbe8 armeabi armhf arm64 arm64e))
+packages += tinycc
 endif
 
 
