@@ -81,6 +81,7 @@ build/fs-tmp-%/.package-stamp: $(foreach pkg, $(packages), build/fs-%/manifest/$
 	@$(RM) -r $(@D)/package
 	@mkdir -p $(@D)/package
 	@cd build/fs-$* \
+		&& [ -d lib/tcc ] && tcc=lib/tcc || tcc= \
 		&& [ -d lib/c++ ] && libcpp=lib/c++/*.a || libcpp= \
 		&& [ -d lib/gio/modules ] && gio_modules=lib/gio/modules/*.a || gio_modules= \
 		&& [ -d lib32 ] && lib32=lib32 || lib32= \
@@ -92,7 +93,7 @@ build/fs-tmp-%/.package-stamp: $(foreach pkg, $(packages), build/fs-%/manifest/$
 			lib/glib-2.0 \
 			lib/libffi* \
 			lib/pkgconfig \
-			lib/tcc \
+			$$tcc \
 			$$libcpp \
 			$$gio_modules \
 			$$lib32 \
