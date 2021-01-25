@@ -440,7 +440,6 @@ v8_platform_args := \
 	is_cfi=false \
 	use_sysroot=false \
 	use_gold=false
-v8_libs_private := -lrt
 endif
 ifeq ($(host_os), android)
 v8_os := android
@@ -453,7 +452,6 @@ v8_platform_args := \
 	android32_ndk_api_level=18 \
 	android64_ndk_api_level=21 \
 	clang_base_path="$(abspath $(ANDROID_NDK_ROOT)/toolchains/llvm/prebuilt/$(ndk_build_os_arch))"
-v8_libs_private := -llog -lm
 endif
 
 ifeq ($(host_os), $(filter $(host_os), linux android))
@@ -588,10 +586,10 @@ build/fs-%/manifest/v8.pkg: build/fs-tmp-%/v8/build.ninja
 		&& install -d $$prefix/lib \
 		&& install -m 644 $$builddir/obj/libv8_monolith.a $$prefix/lib/libv8-$(v8_api_version).a \
 		&& $(PYTHON3) releng/v8.py \
-			patch $$prefix/include/v8-$(v8_api_version)/v8/v8config.h \
 			-s $$srcdir \
 			-b $$builddir \
-			-G build/fs-$(build_os_arch)/bin/gn \
+			-g build/fs-$(build_os_arch)/bin/gn \
+			patch $$prefix/include/v8-$(v8_api_version)/v8/v8config.h \
 		&& install -d $$prefix/lib/pkgconfig \
 		&& ( \
 			echo "prefix=\$${frida_sdk_prefix}"; \
@@ -600,9 +598,13 @@ build/fs-%/manifest/v8.pkg: build/fs-tmp-%/v8/build.ninja
 			echo ""; \
 			echo "Name: V8"; \
 			echo "Description: V8 JavaScript Engine"; \
-			echo "Version: $$($(PYTHON3) releng/v8.py get version -s $$srcdir)"; \
+			echo "Version: $$($(PYTHON3) releng/v8.py -s $$srcdir get version)"; \
 			echo "Libs: -L\$${libdir} -lv8-$(v8_api_version)"; \
-			$(if $(v8_libs_private),echo "Libs.private: $(v8_libs_private)";,) \
+			echo "Libs.private: $$($(PYTHON3) releng/v8.py \
+				-s $$srcdir \
+				-b $$builddir \
+				-g build/fs-$(build_os_arch)/bin/gn \
+				get libs)"; \
 			echo "Cflags: -I\$${includedir} -I\$${includedir}/v8" \
 		) > $$prefix/lib/pkgconfig/v8-$(v8_api_version).pc \
 	) >>$$builddir/build.log 2>&1 \

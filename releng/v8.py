@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import json
 import os
 import shutil
 import subprocess
@@ -23,16 +24,16 @@ def detect_version(source_dir):
 def extract_version(define_name, lines):
     return [int(line.split(" ")[-1]) for line in lines if define_name in line][0]
 
+def query_defines(source_dir, build_dir, gn=None, env=None):
+    result = query_gn("//:v8_header_features", "defines", source_dir, build_dir, gn, env)
+    return result["//:v8_header_features"]["defines"]
+
+def query_libs(source_dir, build_dir, gn=None, env=None):
+    result = query_gn("//:v8_monolith", "libs", source_dir, build_dir, gn, env)
+    return result["//:v8_monolith"]["libs"]
+
 def patch_config_header(header_path, source_dir, build_dir, gn=None, env=None):
-    if gn is None:
-        gn = shutil.which("gn")
-        if gn is None:
-            raise ValueError("unable to find “gn”; is it on your PATH?")
-
-    gn = os.path.abspath(gn)
-
-    config_defines = subprocess.check_output([gn, "desc", os.path.relpath(build_dir, start=source_dir), ":v8_header_features", "defines"],
-            cwd=source_dir, env=env).decode('utf-8').rstrip().split("\n")
+    defines = query_defines(source_dir, build_dir, gn, env)
 
     with open(header_path, "rb") as f:
         code = f.read().decode('utf-8')
@@ -47,7 +48,7 @@ def patch_config_header(header_path, source_dir, build_dir, gn=None, env=None):
         bottom = bottom.split(section_delimiter, maxsplit=1)[1]
 
     lines = [section_heading]
-    lines += ["#define {} 1".format(d) for d in config_defines]
+    lines += ["#define {} 1".format(d) for d in defines]
     middle = newline.join(lines)
 
     code = section_delimiter.join([top, middle, bottom])
@@ -55,45 +56,79 @@ def patch_config_header(header_path, source_dir, build_dir, gn=None, env=None):
     with open(header_path, "wb") as f:
         f.write(code.encode('utf-8'))
 
+def query_gn(label_or_pattern, what, source_dir, build_dir, gn, env):
+    if gn is None:
+        gn = shutil.which("gn")
+        if gn is None:
+            raise ValueError("unable to find “gn”; is it on your PATH?")
+
+    args = [
+        os.path.abspath(gn),
+        "desc",
+        os.path.relpath(build_dir, start=source_dir),
+        label_or_pattern,
+        "--format=json",
+    ]
+    if what is not None:
+        args.append(what)
+
+    raw_result = subprocess.check_output(args, cwd=source_dir, env=env).decode('utf-8')
+
+    return json.loads(raw_result)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Introspect and manipulate V8 build artifacts.")
 
     def on_get(args):
-        try:
-            (version, api_version) = detect_version(args.source_dir)
-        except Exception as e:
-            parser.exit(1, str(e) + "\n")
+        prop = args.property_name
+        if prop in ("version", "api-version"):
+            try:
+                (version, api_version) = detect_version(args.source_dir)
+            except Exception as e:
+                parser.exit(1, str(e) + "\n")
 
-        if args.property_name == "version":
-            sys.stdout.write(version)
+            if prop == "version":
+                result = version
+            else:
+                result = api_version
+        elif prop == "libs":
+            libs = query_libs(args.source_dir, get_build_dir(args), args.gn)
+            result = " ".join(["-l" + lib for lib in libs])
         else:
-            sys.stdout.write(api_version)
+            raise ValueError("unexpected property")
+
+        sys.stdout.write(result)
 
     def on_patch(args):
         try:
-            patch_config_header(args.header_path, args.source_dir, args.build_dir, args.gn)
+            patch_config_header(args.header_path, args.source_dir, get_build_dir(args), args.gn)
         except Exception as e:
             parser.exit(1, str(e) + "\n")
+
+    def get_build_dir(args):
+        result = args.build_dir
+        if result is None:
+            parser.exit(1, "the following arguments are required: -b/--build-dir\n")
+        return result
 
     def on_missing_command(args):
         parser.print_help(file=sys.stderr)
         parser.exit(2)
 
+    parser.add_argument("-s", "--source-dir", metavar="path-to-source-dir", required=True)
+    parser.add_argument("-b", "--build-dir", metavar="path-to-build-dir", default=None)
+    parser.add_argument("-g", "--gn", metavar="path-to-gn", default=None)
     parser.set_defaults(func=on_missing_command)
 
     subparsers = parser.add_subparsers(help="sub-command help")
 
     get_command = subparsers.add_parser("get", help="get a property")
-    get_command.add_argument("property_name", metavar="property", choices=["version", "api-version"])
-    get_command.add_argument("-s", "--source-dir", type=str, metavar="path-to-source-dir", required=True)
+    get_command.add_argument("property_name", metavar="property", choices=["version", "api-version", "libs"])
     get_command.set_defaults(func=on_get)
 
     patch_command = subparsers.add_parser("patch", help="patch v8config.h to add build configuration defines")
     patch_command.add_argument("header_path", metavar="path-to-v8config-header")
-    patch_command.add_argument("-s", "--source-dir", metavar="path-to-source-dir", required=True)
-    patch_command.add_argument("-b", "--build-dir", metavar="path-to-build-dir", required=True)
-    patch_command.add_argument("-G", "--gn", metavar="path-to-gn", default=None)
     patch_command.set_defaults(func=on_patch)
 
     args = parser.parse_args()
