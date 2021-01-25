@@ -603,11 +603,12 @@ build/fs-%/manifest/v8.pkg: build/fs-tmp-%/v8/build.ninja
 			echo "Description: V8 JavaScript Engine"; \
 			echo "Version: $$($(PYTHON3) releng/v8.py -s $$srcdir get version)"; \
 			echo "Libs: -L\$${libdir} -lv8-$(v8_api_version)"; \
-			echo "Libs.private: $$($(PYTHON3) releng/v8.py \
+			libs=$$($(PYTHON3) releng/v8.py \
 				-s $$srcdir \
 				-b $$builddir \
 				-g build/fs-$(build_os_arch)/bin/gn \
-				get libs)"; \
+				get libs); \
+			[ -n "$$libs" ] && echo "Libs.private: $$libs"; \
 			echo "Cflags: -I\$${includedir} -I\$${includedir}/v8" \
 		) > $$prefix/lib/pkgconfig/v8-$(v8_api_version).pc \
 	) >>$$builddir/build.log 2>&1 \
