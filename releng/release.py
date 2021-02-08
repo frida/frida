@@ -503,6 +503,9 @@ if __name__ == '__main__':
             upload_file("frida-server-{version}-linux-x86", os.path.join(build_dir, "build", "frida-linux-x86", "bin", "frida-server"), upload)
             upload_file("frida-server-{version}-linux-x86_64", os.path.join(build_dir, "build", "frida-linux-x86_64", "bin", "frida-server"), upload)
 
+            upload_file("frida-inject-{version}-linux-x86", os.path.join(build_dir, "build", "frida-linux-x86", "bin", "frida-inject"), upload)
+            upload_file("frida-inject-{version}-linux-x86_64", os.path.join(build_dir, "build", "frida-linux-x86_64", "bin", "frida-inject"), upload)
+
             upload_file("frida-gadget-{version}-linux-x86.so", os.path.join(build_dir, "build", "frida-linux-x86", "lib", "frida-gadget.so"), upload)
             upload_file("frida-gadget-{version}-linux-x86_64.so", os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "frida-gadget.so"), upload)
 
@@ -527,6 +530,7 @@ if __name__ == '__main__':
             upload_devkits("linux-armhf", upload, flavor="_thin")
 
             upload_file("frida-server-{version}-linux-armhf", os.path.join(build_dir, "build", "frida_thin-linux-armhf", "bin", "frida-server"), upload)
+            upload_file("frida-inject-{version}-linux-armhf", os.path.join(build_dir, "build", "frida_thin-linux-armhf", "bin", "frida-inject"), upload)
             upload_file("frida-gadget-{version}-linux-armhf.so", os.path.join(build_dir, "build", "frida_thin-linux-armhf", "lib", "frida-gadget.so"), upload)
 
             upload_python_bindings_to_pypi("/usr/bin/python2.7",
@@ -541,6 +545,7 @@ if __name__ == '__main__':
             upload_devkits("linux-arm64", upload, flavor="_thin")
 
             upload_file("frida-server-{version}-linux-arm64", os.path.join(build_dir, "build", "frida_thin-linux-arm64", "bin", "frida-server"), upload)
+            upload_file("frida-inject-{version}-linux-arm64", os.path.join(build_dir, "build", "frida_thin-linux-arm64", "bin", "frida-inject"), upload)
             upload_file("frida-gadget-{version}-linux-arm64.so", os.path.join(build_dir, "build", "frida_thin-linux-arm64", "lib", "frida-gadget.so"), upload)
 
             upload_python_bindings_to_pypi("/usr/bin/python2.7",
