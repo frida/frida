@@ -356,22 +356,22 @@ build/.core-macos-stamp-%: build/%/lib/pkgconfig/frida-core-1.0.pc
 	@if [ -z "$$MACOS_CERTID" ]; then echo "MACOS_CERTID not set, see https://github.com/frida/frida#macos-and-ios"; exit 1; fi
 	. build/frida-meson-env-macos-$(build_arch).rc \
 		&& $$CODESIGN -f -s "$$MACOS_CERTID" -i "re.frida.Server" build/$*/bin/frida-server \
-		&& $$INSTALL_NAME_TOOL -id @executable_path/../Frameworks/FridaGadget.dylib build/$*/lib/frida-gadget.dylib \
-		&& $$CODESIGN -f -s "$$MACOS_CERTID" build/$*/lib/frida-gadget.dylib
+		&& $$INSTALL_NAME_TOOL -id @executable_path/../Frameworks/FridaGadget.dylib build/$*/lib/frida/frida-gadget.dylib \
+		&& $$CODESIGN -f -s "$$MACOS_CERTID" build/$*/lib/frida/frida-gadget.dylib
 	@touch $@
 build/.core-ios-stamp-%: build/%/lib/pkgconfig/frida-core-1.0.pc
 	@if [ -z "$$IOS_CERTID" ]; then echo "IOS_CERTID not set, see https://github.com/frida/frida#macos-and-ios"; exit 1; fi
 	. build/frida-meson-env-macos-$(build_arch).rc \
 		&& $$CODESIGN -f -s "$$IOS_CERTID" --entitlements frida-core/server/frida-server.xcent build/$*/bin/frida-server \
-		&& $$INSTALL_NAME_TOOL -id @executable_path/Frameworks/FridaGadget.dylib build/$*/lib/frida-gadget.dylib \
-		&& $$CODESIGN -f -s "$$IOS_CERTID" build/$*/lib/frida-gadget.dylib
+		&& $$INSTALL_NAME_TOOL -id @executable_path/Frameworks/FridaGadget.dylib build/$*/lib/frida/frida-gadget.dylib \
+		&& $$CODESIGN -f -s "$$IOS_CERTID" build/$*/lib/frida/frida-gadget.dylib
 	@touch $@
 
-build/frida-macos-universal/lib/frida-gadget.dylib: build/.core-macos-stamp-frida-macos-x86_64 build/.core-macos-stamp-frida-macos-arm64 build/.core-macos-stamp-frida-macos-arm64e
+build/frida-macos-universal/lib/frida/frida-gadget.dylib: build/.core-macos-stamp-frida-macos-x86_64 build/.core-macos-stamp-frida-macos-arm64 build/.core-macos-stamp-frida-macos-arm64e
 	@mkdir -p $(@D)
-	cp build/frida-macos-x86_64/lib/frida-gadget.dylib $(@D)/frida-gadget-x86_64.dylib
-	cp build/frida-macos-arm64/lib/frida-gadget.dylib $(@D)/frida-gadget-arm64.dylib
-	cp build/frida-macos-arm64e/lib/frida-gadget.dylib $(@D)/frida-gadget-arm64e.dylib
+	cp build/frida-macos-x86_64/lib/frida/frida-gadget.dylib $(@D)/frida-gadget-x86_64.dylib
+	cp build/frida-macos-arm64/lib/frida/frida-gadget.dylib $(@D)/frida-gadget-arm64.dylib
+	cp build/frida-macos-arm64e/lib/frida/frida-gadget.dylib $(@D)/frida-gadget-arm64e.dylib
 	. build/frida-meson-env-macos-$(build_arch).rc \
 		&& $$LIPO \
 			$(@D)/frida-gadget-x86_64.dylib \
@@ -382,11 +382,11 @@ build/frida-macos-universal/lib/frida-gadget.dylib: build/.core-macos-stamp-frid
 		&& $$CODESIGN -f -s "$$MACOS_CERTID" $@.tmp
 	rm $(@D)/frida-gadget-*.dylib
 	mv $@.tmp $@
-build/frida-ios-universal/lib/frida-gadget.dylib: build/.core-ios-stamp-frida-ios-x86_64 build/.core-ios-stamp-frida-ios-arm64 build/.core-ios-stamp-frida-ios-arm64e
+build/frida-ios-universal/lib/frida/frida-gadget.dylib: build/.core-ios-stamp-frida-ios-x86_64 build/.core-ios-stamp-frida-ios-arm64 build/.core-ios-stamp-frida-ios-arm64e
 	@mkdir -p $(@D)
-	cp build/frida-ios-x86_64/lib/frida-gadget.dylib $(@D)/frida-gadget-x86_64.dylib
-	cp build/frida-ios-arm64/lib/frida-gadget.dylib $(@D)/frida-gadget-arm64.dylib
-	cp build/frida-ios-arm64e/lib/frida-gadget.dylib $(@D)/frida-gadget-arm64e.dylib
+	cp build/frida-ios-x86_64/lib/frida/frida-gadget.dylib $(@D)/frida-gadget-x86_64.dylib
+	cp build/frida-ios-arm64/lib/frida/frida-gadget.dylib $(@D)/frida-gadget-arm64.dylib
+	cp build/frida-ios-arm64e/lib/frida/frida-gadget.dylib $(@D)/frida-gadget-arm64e.dylib
 	. build/frida-meson-env-ios-arm64e.rc \
 		&& $$LIPO \
 			$(@D)/frida-gadget-x86_64.dylib \
@@ -410,8 +410,8 @@ check-core-macos: build/frida-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc
 	build/tmp-macos-x86_64/frida-core/tests/frida-tests $(test_args)
 endif
 
-gadget-macos: build/frida-macos-universal/lib/frida-gadget.dylib ##@gadget Build for macOS
-gadget-ios: build/frida-ios-universal/lib/frida-gadget.dylib ##@gadget Build for iOS
+gadget-macos: build/frida-macos-universal/lib/frida/frida-gadget.dylib ##@gadget Build for macOS
+gadget-ios: build/frida-ios-universal/lib/frida/frida-gadget.dylib ##@gadget Build for iOS
 gadget-ios-thin: core-ios-thin ##@gadget Build for iOS without cross-arch support
 
 
