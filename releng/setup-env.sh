@@ -622,7 +622,16 @@ case $host_os in
     ;;
   android)
     android_build_os=$(echo ${build_os} | sed 's,^macos$,darwin,')
-    android_toolroot="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/${android_build_os}-${build_arch}"
+    case $build_os in
+      macos)
+        # NDK does not yet support Apple Silicon.
+        android_build_arch=x86_64
+        ;;
+      *)
+        android_build_arch=${build_arch}
+        ;;
+    esac
+    android_toolroot="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/${android_build_os}-${android_build_arch}"
 
     host_arch_flags=""
     host_cflags=""
