@@ -155,9 +155,9 @@ fi
 pushd $releng_path/../ > /dev/null
 FRIDA_ROOT=`pwd`
 popd > /dev/null
-FRIDA_BUILD="$FRIDA_ROOT/build"
+FRIDA_BUILD="${FRIDA_BUILD:-$FRIDA_ROOT/build}"
 FRIDA_RELENG="$FRIDA_ROOT/releng"
-FRIDA_PREFIX="$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}"
+FRIDA_PREFIX="${FRIDA_PREFIX:-$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}}"
 FRIDA_PREFIX_LIB="$FRIDA_PREFIX/lib"
 FRIDA_TOOLROOT="$FRIDA_BUILD/${frida_env_name_prefix}toolchain-${build_os_arch}"
 FRIDA_SDKROOT="$FRIDA_BUILD/${frida_env_name_prefix}sdk-${host_os_arch}"
@@ -858,10 +858,10 @@ CFLAGS="-fPIC $CFLAGS"
 CXXFLAGS="$CFLAGS${CXXFLAGS:+ $CXXFLAGS}"
 
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
-  version_include="-include $FRIDA_BUILD/frida-version.h"
+  version_include="-include $FRIDA_ROOT/build/frida-version.h"
   CPPFLAGS="$version_include $CPPFLAGS"
 
-  meson_version_include=", '-include', '$FRIDA_BUILD/frida-version.h'"
+  meson_version_include=", '-include', '$FRIDA_ROOT/build/frida-version.h'"
 else
   meson_version_include=""
 fi
@@ -921,8 +921,8 @@ fi
 ) > "$PKG_CONFIG"
 chmod 755 "$PKG_CONFIG"
 
-env_rc=build/${FRIDA_ENV_NAME:-frida}-env-${host_os_arch}.rc
-meson_env_rc=build/${FRIDA_ENV_NAME:-frida}-meson-env-${host_os_arch}.rc
+env_rc=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-env-${host_os_arch}.rc
+meson_env_rc=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-meson-env-${host_os_arch}.rc
 
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   env_path_sdk="$FRIDA_SDKROOT/bin:"
@@ -1040,15 +1040,21 @@ case $host_os in
     ;;
 esac
 
-build_env_rc=build/${FRIDA_ENV_NAME:-frida}-meson-env-${build_os_arch}.rc
+build_env_rc=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-meson-env-${build_os_arch}.rc
 if [ ! -f $build_env_rc ]; then
-  FRIDA_HOST=${build_os_arch} releng/setup-env.sh
+  FRIDA_HOST=${build_os_arch} \
+      FRIDA_BUILD="$FRIDA_BUILD" \
+      FRIDA_PREFIX="$FRIDA_PREFIX" \
+      FRIDA_ACOPTFLAGS="$FRIDA_ACOPTFLAGS" \
+      FRIDA_ACDBGFLAGS="$FRIDA_ACDBGFLAGS" \
+      FRIDA_ASAN=$FRIDA_ASAN \
+      releng/setup-env.sh
 fi
 egrep "^export (PKG_CONFIG|CC|CXX|OBJC|OBJCXX|CPPFLAGS|CFLAGS|CXXFLAGS|CC_LD|CXX_LD|OBJC_LD|OBJCXX_LD|LDFLAGS|AR)=" $build_env_rc \
   | sed -e "s,=,_FOR_BUILD=," \
   >> $meson_env_rc
 
-meson_cross_file=build/${FRIDA_ENV_NAME:-frida}-${host_os_arch}.txt
+meson_cross_file=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-${host_os_arch}.txt
 
 (
   echo "[constants]"
