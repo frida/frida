@@ -291,6 +291,13 @@ flags_to_args () {
 
 mkdir -p "$FRIDA_BUILD"
 
+xcrun="xcrun"
+if [ "$build_os_arch" == "macos-arm64" ]; then
+  if xcrun --show-sdk-path 2>&1 | grep -q "not a compatible arch"; then
+    xcrun="arch -x86_64 xcrun"
+  fi
+fi
+
 case $host_os in
   linux)
     host_arch_flags=""
@@ -433,11 +440,11 @@ case $host_os in
     if [ $host_arch = x86 ] && [ -n "$MACOS_X86_SDK_ROOT" ]; then
       macos_sdk_path="$MACOS_X86_SDK_ROOT"
     else
-      macos_sdk_path="$(xcrun --sdk $macos_sdk --show-sdk-path)"
+      macos_sdk_path="$($xcrun --sdk $macos_sdk --show-sdk-path)"
     fi
 
-    clang_cc="$(xcrun --sdk $macos_sdk -f clang)"
-    clang_cxx="$(xcrun --sdk $macos_sdk -f clang++)"
+    clang_cc="$($xcrun --sdk $macos_sdk -f clang)"
+    clang_cxx="$($xcrun --sdk $macos_sdk -f clang++)"
 
     cc_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-clang
     sed \
@@ -466,8 +473,8 @@ case $host_os in
 
     ar_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-ar
     sed \
-      -e "s,@ar@,$(xcrun --sdk $macos_sdk -f ar),g" \
-      -e "s,@libtool@,$(xcrun --sdk $macos_sdk -f libtool),g" \
+      -e "s,@ar@,$($xcrun --sdk $macos_sdk -f ar),g" \
+      -e "s,@libtool@,$($xcrun --sdk $macos_sdk -f libtool),g" \
       "$FRIDA_RELENG/ar-wrapper-xcode.sh.in" > "$ar_wrapper"
     chmod +x "$ar_wrapper"
 
@@ -476,19 +483,19 @@ case $host_os in
     CXX="$cxx_wrapper"
     OBJC="$cc_wrapper"
     OBJCXX="$cxx_wrapper"
-    LD="$(xcrun --sdk $macos_sdk -f ld)"
+    LD="$($xcrun --sdk $macos_sdk -f ld)"
 
     AR="$ar_wrapper"
     NM="$FRIDA_ROOT/releng/llvm-nm-macos-x86_64"
-    RANLIB="$(xcrun --sdk $macos_sdk -f ranlib)"
-    LIBTOOL="$(xcrun --sdk $macos_sdk -f libtool)"
-    STRIP="$(xcrun --sdk $macos_sdk -f strip)"
+    RANLIB="$($xcrun --sdk $macos_sdk -f ranlib)"
+    LIBTOOL="$($xcrun --sdk $macos_sdk -f libtool)"
+    STRIP="$($xcrun --sdk $macos_sdk -f strip)"
     STRIP_FLAGS="-Sx"
 
-    INSTALL_NAME_TOOL="$(xcrun --sdk $macos_sdk -f install_name_tool)"
-    OTOOL="$(xcrun --sdk $macos_sdk -f otool)"
-    CODESIGN="$(xcrun --sdk $macos_sdk -f codesign)"
-    LIPO="$(xcrun --sdk $macos_sdk -f lipo)"
+    INSTALL_NAME_TOOL="$($xcrun --sdk $macos_sdk -f install_name_tool)"
+    OTOOL="$($xcrun --sdk $macos_sdk -f otool)"
+    CODESIGN="$($xcrun --sdk $macos_sdk -f codesign)"
+    LIPO="$($xcrun --sdk $macos_sdk -f lipo)"
 
     CPPFLAGS="-mmacosx-version-min=$macos_minver"
     CXXFLAGS="-stdlib=libc++"
@@ -529,13 +536,13 @@ case $host_os in
         ;;
     esac
     if [ -z "$IOS_SDK_ROOT" ]; then
-      ios_sdk_path="$(xcrun --sdk $ios_sdk --show-sdk-path)"
+      ios_sdk_path="$($xcrun --sdk $ios_sdk --show-sdk-path)"
     else
       ios_sdk_path="$IOS_SDK_ROOT"
     fi
 
-    clang_cc="$(xcrun --sdk $ios_sdk -f clang)"
-    clang_cxx="$(xcrun --sdk $ios_sdk -f clang++)"
+    clang_cc="$($xcrun --sdk $ios_sdk -f clang)"
+    clang_cxx="$($xcrun --sdk $ios_sdk -f clang++)"
 
     case $host_clang_arch in
       arm)
@@ -573,8 +580,8 @@ case $host_os in
 
     ar_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-ar
     sed \
-      -e "s,@ar@,$(xcrun --sdk $ios_sdk -f ar),g" \
-      -e "s,@libtool@,$(xcrun --sdk $ios_sdk -f libtool),g" \
+      -e "s,@ar@,$($xcrun --sdk $ios_sdk -f ar),g" \
+      -e "s,@libtool@,$($xcrun --sdk $ios_sdk -f libtool),g" \
       "$FRIDA_RELENG/ar-wrapper-xcode.sh.in" > "$ar_wrapper"
     chmod +x "$ar_wrapper"
 
@@ -583,19 +590,19 @@ case $host_os in
     CXX="$cxx_wrapper"
     OBJC="$cc_wrapper"
     OBJCXX="$cxx_wrapper"
-    LD="$(xcrun --sdk $ios_sdk -f ld)"
+    LD="$($xcrun --sdk $ios_sdk -f ld)"
 
     AR="$ar_wrapper"
     NM="$FRIDA_ROOT/releng/llvm-nm-macos-x86_64"
-    RANLIB="$(xcrun --sdk $ios_sdk -f ranlib)"
-    LIBTOOL="$(xcrun --sdk $ios_sdk -f libtool)"
-    STRIP="$(xcrun --sdk $ios_sdk -f strip)"
+    RANLIB="$($xcrun --sdk $ios_sdk -f ranlib)"
+    LIBTOOL="$($xcrun --sdk $ios_sdk -f libtool)"
+    STRIP="$($xcrun --sdk $ios_sdk -f strip)"
     STRIP_FLAGS="-Sx"
 
-    INSTALL_NAME_TOOL="$(xcrun --sdk $ios_sdk -f install_name_tool)"
-    OTOOL="$(xcrun --sdk $ios_sdk -f otool)"
-    CODESIGN="$(xcrun --sdk $ios_sdk -f codesign)"
-    LIPO="$(xcrun --sdk $ios_sdk -f lipo)"
+    INSTALL_NAME_TOOL="$($xcrun --sdk $ios_sdk -f install_name_tool)"
+    OTOOL="$($xcrun --sdk $ios_sdk -f otool)"
+    CODESIGN="$($xcrun --sdk $ios_sdk -f codesign)"
+    LIPO="$($xcrun --sdk $ios_sdk -f lipo)"
 
     CPPFLAGS="-miphoneos-version-min=$ios_minver"
     CXXFLAGS="-stdlib=libc++"
