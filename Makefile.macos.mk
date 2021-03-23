@@ -316,13 +316,15 @@ build/frida-ios-universal/usr/bin/frida-server: \
 			-output $$agent \
 		&& $$INSTALL_NAME_TOOL -id FridaAgent $$agent \
 		&& $$CODESIGN -f -s "$$IOS_CERTID" $$agent \
-		&& for arch in arm64 arm64e arm64eoabi; do \
+		&& slices=() \
+		&& for arch in arm64 arm64eoabi arm64e; do \
 			if [ -f build/frida-ios-$$arch/usr/bin/frida-server ]; then \
 				cp build/frida-ios-$$arch/usr/bin/frida-server $@-$$arch || exit 1; \
 				$$CODESIGN -f -s "$$IOS_CERTID" --entitlements frida-core/server/frida-server.xcent $@-$$arch || exit 1; \
+				slices+=($@-$$arch); \
 			fi \
 		done \
-		&& ./releng/mkfatmacho.py $@.tmp $@-arm64 $@-arm64e* \
+		&& ./releng/mkfatmacho.py $@.tmp "$${slices[@]}" \
 		&& rm $@-* \
 		&& mv $@.tmp $@
 build/frida-ios-universal/usr/lib/frida/frida-gadget.dylib: \
