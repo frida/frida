@@ -1072,7 +1072,7 @@ build_env_rc=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-meson-env-${build_os_arch}.
 if [ ! -f $build_env_rc ]; then
   FRIDA_HOST=${build_os_arch} \
       FRIDA_BUILD="$FRIDA_BUILD" \
-      FRIDA_PREFIX="$FRIDA_PREFIX" \
+      FRIDA_PREFIX="" \
       FRIDA_ACOPTFLAGS="$FRIDA_ACOPTFLAGS" \
       FRIDA_ACDBGFLAGS="$FRIDA_ACDBGFLAGS" \
       FRIDA_ASAN=$FRIDA_ASAN \
