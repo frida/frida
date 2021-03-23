@@ -24,7 +24,14 @@ fi
 host_clang_arch=$(echo -n $host_arch | sed 's,^x86$,i386,')
 host_os_arch=${host_os}-${host_arch}
 
-meson_host_system=$(echo $host_os | sed 's,^macos$,darwin,' | sed 's,^ios$,darwin,')
+case $host_os in
+  macos|ios)
+    meson_host_system=darwin
+    ;;
+  *)
+    meson_host_system=$host_os
+    ;;
+esac
 case $host_arch in
   i?86)
     meson_host_cpu_family=x86
