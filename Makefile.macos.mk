@@ -55,6 +55,7 @@ clean: clean-submodules
 	rm -f build/*-pkg-config
 	rm -f build/*-stamp
 	rm -f build/*-strip
+	rm -f build/*.deb
 	rm -f build/*.rc
 	rm -f build/*.sh
 	rm -f build/*.site
