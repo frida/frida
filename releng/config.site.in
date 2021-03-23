@@ -83,7 +83,7 @@ case $frida_host_os_arch in
 
     frida_flags="$frida_flags -mthumb"
     ;;
-  macos-arm64|macos-arm64e|ios-arm64|ios-arm64e)
+  macos-arm64|macos-arm64e|ios-arm64|ios-arm64e|ios-arm64eoabi)
     host_alias="aarch64-apple-darwin"
     ;;
 esac

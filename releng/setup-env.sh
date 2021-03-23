@@ -21,7 +21,17 @@ if [ -n "$FRIDA_LIBC" ]; then
 else
   frida_libc=gnu
 fi
-host_clang_arch=$(echo -n $host_arch | sed 's,^x86$,i386,')
+case $host_arch in
+  x86)
+    host_clang_arch=i386
+    ;;
+  arm64eoabi)
+    host_clang_arch=arm64e
+    ;;
+  *)
+    host_clang_arch=$host_arch
+    ;;
+esac
 host_os_arch=${host_os}-${host_arch}
 
 case $host_os in
@@ -58,7 +68,7 @@ case $host_arch in
     meson_host_cpu=armv7hf
     meson_host_endian=little
     ;;
-  arm64|arm64e)
+  arm64|arm64e|arm64eoabi)
     meson_host_cpu_family=aarch64
     meson_host_cpu=aarch64
     meson_host_endian=little
@@ -297,6 +307,10 @@ flags_to_args () {
 }
 
 mkdir -p "$FRIDA_BUILD"
+
+if [ "$host_arch" == "arm64eoabi" ]; then
+  export DEVELOPER_DIR="/Applications/Xcode-11.7.app"
+fi
 
 xcrun="xcrun"
 if [ "$build_os_arch" == "macos-arm64" ]; then
