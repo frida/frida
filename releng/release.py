@@ -238,17 +238,8 @@ if __name__ == '__main__':
             with codecs.open(package_json_path, "wb", 'utf-8') as f:
                 f.write(package_json_original)
 
-    def upload_ios_deb(name, server, upload_to_github):
-        env = {
-            'FRIDA_VERSION': version,
-            'FRIDA_TOOLCHAIN': toolchain_dir
-        }
-        env.update(os.environ)
-
-        deb = os.path.join(build_dir, "{}_{}_iphoneos-arm.deb".format(name, version))
+    def upload_ios_deb(deb, upload_to_github):
         filename = os.path.basename(deb)
-
-        subprocess.call([os.path.join(frida_core_dir, "tools", "package-server.sh"), server, deb], env=env)
 
         subprocess.call([scp, deb, "frida@192.168.1.2:/home/frida/public_html/debs/"])
         subprocess.call([ssh, "frida@192.168.1.2", " && ".join([
@@ -272,8 +263,6 @@ if __name__ == '__main__':
 
         with open(deb, 'rb') as f:
             upload_to_github(filename, "vnd.debian.binary-package", f.read())
-
-        os.unlink(deb)
 
     def upload_ios_debug_symbols():
         unstripped_ios_binaries = [
@@ -557,18 +546,13 @@ if __name__ == '__main__':
         elif builder == 'ios':
             upload = get_github_uploader()
 
-            upload_devkits("ios-x86_64", upload)
             upload_devkits("ios-arm64", upload)
             upload_devkits("ios-arm64e", upload)
 
-            upload_file("frida-server-{version}-ios-arm64", os.path.join(build_dir, "build", "frida-ios-arm64", "bin", "frida-server"), upload)
-            upload_file("frida-server-{version}-ios-arm64e", os.path.join(build_dir, "build", "frida-ios-arm64e", "bin", "frida-server"), upload)
+            upload_file("frida-gadget-{version}-ios-universal.dylib", os.path.join(build_dir, "build", "frida-ios-universal", "usr", "lib", "frida", "frida-gadget.dylib"), upload)
+            upload_file("frida-gadget-{version}-ios-universal.dylib", os.path.join(build_dir, "build", "frida-ios-universal", "usr", "lib", "frida", "frida-gadget.dylib"), upload, compression='gz')
 
-            upload_file("frida-gadget-{version}-ios-universal.dylib", os.path.join(build_dir, "build", "frida-ios-universal", "lib", "frida", "frida-gadget.dylib"), upload)
-            upload_file("frida-gadget-{version}-ios-universal.dylib", os.path.join(build_dir, "build", "frida-ios-universal", "lib", "frida", "frida-gadget.dylib"), upload, compression='gz')
-
-            upload_ios_deb("frida", os.path.join(build_dir, "build", "frida-ios-arm64", "bin", "frida-server"), upload)
-            upload_ios_deb("frida64", os.path.join(build_dir, "build", "frida-ios-arm64e", "bin", "frida-server"), upload)
+            upload_ios_deb(os.path.join(build_dir, "frida_{}_iphoneos-arm.deb".format(version)), upload)
 
             upload_ios_debug_symbols()
         elif builder == 'android':
