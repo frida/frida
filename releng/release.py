@@ -266,8 +266,8 @@ if __name__ == '__main__':
 
     def upload_ios_debug_symbols():
         unstripped_ios_binaries = [
-            "build/tmp-ios-arm64/frida-core/server/frida-server",
-            "build/tmp-ios-arm64/frida-core/lib/agent/frida-agent.dylib",
+            "build/tmp-ios-arm64/frida-core/server/frida-server-raw",
+            "build/tmp-ios-arm64/frida-core/lib/agent/libfrida-agent-modulated.dylib",
         ]
 
         output_dir = tempfile.mkdtemp(prefix="frida-symbols")
@@ -495,8 +495,8 @@ if __name__ == '__main__':
             upload_file("frida-inject-{version}-linux-x86", os.path.join(build_dir, "build", "frida-linux-x86", "bin", "frida-inject"), upload)
             upload_file("frida-inject-{version}-linux-x86_64", os.path.join(build_dir, "build", "frida-linux-x86_64", "bin", "frida-inject"), upload)
 
-            upload_file("frida-gadget-{version}-linux-x86.so", os.path.join(build_dir, "build", "frida-linux-x86", "lib", "frida", "frida-gadget.so"), upload)
-            upload_file("frida-gadget-{version}-linux-x86_64.so", os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "frida", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-linux-x86.so", os.path.join(build_dir, "build", "frida-linux-x86", "lib", "frida", "32", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-linux-x86_64.so", os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "frida", "64", "frida-gadget.so"), upload)
 
             upload_python_bindings_to_pypi("/opt/python-32/cp27-cp27mu/bin/python2.7",
                 os.path.join(build_dir, "build", "frida-linux-x86", "lib", "python2.7", "site-packages", "_frida.so"),
@@ -520,7 +520,7 @@ if __name__ == '__main__':
 
             upload_file("frida-server-{version}-linux-armhf", os.path.join(build_dir, "build", "frida_thin-linux-armhf", "bin", "frida-server"), upload)
             upload_file("frida-inject-{version}-linux-armhf", os.path.join(build_dir, "build", "frida_thin-linux-armhf", "bin", "frida-inject"), upload)
-            upload_file("frida-gadget-{version}-linux-armhf.so", os.path.join(build_dir, "build", "frida_thin-linux-armhf", "lib", "frida", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-linux-armhf.so", os.path.join(build_dir, "build", "frida_thin-linux-armhf", "lib", "frida", "32", "frida-gadget.so"), upload)
 
             upload_python_bindings_to_pypi("/usr/bin/python2.7",
                 os.path.join(build_dir, "build", "frida_thin-linux-armhf", "lib", "python2.7", "site-packages", "_frida.so"))
@@ -535,7 +535,7 @@ if __name__ == '__main__':
 
             upload_file("frida-server-{version}-linux-arm64", os.path.join(build_dir, "build", "frida_thin-linux-arm64", "bin", "frida-server"), upload)
             upload_file("frida-inject-{version}-linux-arm64", os.path.join(build_dir, "build", "frida_thin-linux-arm64", "bin", "frida-inject"), upload)
-            upload_file("frida-gadget-{version}-linux-arm64.so", os.path.join(build_dir, "build", "frida_thin-linux-arm64", "lib", "frida", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-linux-arm64.so", os.path.join(build_dir, "build", "frida_thin-linux-arm64", "lib", "frida", "64", "frida-gadget.so"), upload)
 
             upload_python_bindings_to_pypi("/usr/bin/python2.7",
                 os.path.join(build_dir, "build", "frida_thin-linux-arm64", "lib", "python2.7", "site-packages", "_frida.so"))
@@ -552,7 +552,7 @@ if __name__ == '__main__':
             upload_file("frida-gadget-{version}-ios-universal.dylib", os.path.join(build_dir, "build", "frida-ios-universal", "usr", "lib", "frida", "frida-gadget.dylib"), upload)
             upload_file("frida-gadget-{version}-ios-universal.dylib", os.path.join(build_dir, "build", "frida-ios-universal", "usr", "lib", "frida", "frida-gadget.dylib"), upload, compression='gz')
 
-            upload_ios_deb(os.path.join(build_dir, "frida_{}_iphoneos-arm.deb".format(version)), upload)
+            upload_ios_deb(os.path.join(build_dir, "build", "frida_{}_iphoneos-arm.deb".format(version)), upload)
 
             upload_ios_debug_symbols()
         elif builder == 'android':
@@ -575,10 +575,10 @@ if __name__ == '__main__':
             upload_file("frida-inject-{version}-android-arm", os.path.join(build_dir, "build", "frida-android-arm", "bin", "frida-inject"), upload)
             upload_file("frida-inject-{version}-android-arm64", os.path.join(build_dir, "build", "frida-android-arm64", "bin", "frida-inject"), upload)
 
-            upload_file("frida-gadget-{version}-android-x86.so", os.path.join(build_dir, "build", "frida-android-x86", "lib", "frida", "frida-gadget.so"), upload)
-            upload_file("frida-gadget-{version}-android-x86_64.so", os.path.join(build_dir, "build", "frida-android-x86_64", "lib", "frida", "frida-gadget.so"), upload)
-            upload_file("frida-gadget-{version}-android-arm.so", os.path.join(build_dir, "build", "frida-android-arm", "lib", "frida", "frida-gadget.so"), upload)
-            upload_file("frida-gadget-{version}-android-arm64.so", os.path.join(build_dir, "build", "frida-android-arm64", "lib", "frida", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-android-x86.so", os.path.join(build_dir, "build", "frida-android-x86", "lib", "frida", "32", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-android-x86_64.so", os.path.join(build_dir, "build", "frida-android-x86_64", "lib", "frida", "64", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-android-arm.so", os.path.join(build_dir, "build", "frida-android-arm", "lib", "frida", "32", "frida-gadget.so"), upload)
+            upload_file("frida-gadget-{version}-android-arm64.so", os.path.join(build_dir, "build", "frida-android-arm64", "lib", "frida", "64", "frida-gadget.so"), upload)
 
             upload_python_bindings_to_pypi("/usr/local/bin/python3.8",
                 os.path.join(build_dir, "build", "frida-android-arm64", "lib", "python3.8", "site-packages", "_frida.so"),
