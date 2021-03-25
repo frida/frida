@@ -494,7 +494,8 @@ def compute_umbrella_header_path(frida_root, host, flavor, package, umbrella_hea
         else:
             raise Exception("Unhandled package")
     else:
-        return os.path.join(frida_root, "build", "frida" + flavor + "-" + host, "include", *umbrella_header)
+        prefix = ["usr"] if host.startswith("ios-") else []
+        return os.path.join(frida_root, "build", "frida" + flavor + "-" + host, *prefix, "include", *umbrella_header)
 
 def sdk_lib_path(name, frida_root, host):
     return os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "lib", name)
