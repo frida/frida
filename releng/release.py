@@ -445,6 +445,10 @@ if __name__ == '__main__':
 
             upload_directory("frida-qml-{version}-windows-x86",    os.path.join(prefix_x86, "lib", "qt5", "qml"), upload)
             upload_directory("frida-qml-{version}-windows-x86_64", os.path.join(prefix_x64, "lib", "qt5", "qml"), upload)
+        elif builder == 'macos-m1':
+            upload = get_github_uploader()
+
+            upload_node_bindings_to_npm("/usr/local/bin/node", upload, publish=False)
         elif builder == 'macos-modern':
             upload = get_github_uploader()
 
@@ -479,10 +483,6 @@ if __name__ == '__main__':
             upload = get_github_uploader()
 
             upload_directory("frida-qml-{version}-macos-x86_64", os.path.join(build_dir, "build", "frida-macos-x86_64", "lib", "qt5", "qml"), upload)
-        elif builder == 'macos-dtk':
-            upload = get_github_uploader()
-
-            upload_node_bindings_to_npm("/usr/local/bin/node", upload, publish=False)
         elif builder == 'manylinux-x86_64':
             upload = get_github_uploader()
 
