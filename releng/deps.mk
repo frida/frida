@@ -505,6 +505,7 @@ capstone_archs := $(shell echo $(host_arch) | sed $(sed_regex_option) \
 		-e 's,^x86_64$$,x86,' \
 		-e 's,^arm[^0-9].+,arm,' \
 		-e 's,^arm64e$$,arm64,' \
+		-e 's,^arm64eoabi$$,arm64,' \
 		-e 's,^mips.*,mips,' \
 		-e 's,^s390x$$,sysz,' \
 	)

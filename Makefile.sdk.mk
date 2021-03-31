@@ -48,7 +48,7 @@ endif
 endif
 endif
 
-ifeq ($(host_arch), $(filter $(host_arch), x86 x86_64 arm armbe8 armeabi armhf arm64 arm64e))
+ifeq ($(host_arch), $(filter $(host_arch), x86 x86_64 arm armbe8 armeabi armhf arm64 arm64e arm64eoabi))
 packages += tinycc
 endif
 
@@ -228,7 +228,7 @@ ifeq ($(host_os_arch), ios-arm64)
 openssl_arch_args := ios64-cross-arm64 enable-ec_nistp_64_gcc_128
 xcode_platform := iPhoneOS
 endif
-ifeq ($(host_os_arch), ios-arm64e)
+ifeq ($(host_os_arch), $(filter $(host_os_arch), ios-arm64e ios-arm64eoabi))
 openssl_arch_args := ios64-cross-arm64e enable-ec_nistp_64_gcc_128
 xcode_platform := iPhoneOS
 endif
@@ -395,7 +395,7 @@ endif
 ifeq ($(host_arch), arm64)
 v8_cpu := arm64
 endif
-ifeq ($(host_arch), arm64e)
+ifeq ($(host_arch), $(filter $(host_arch), arm64e arm64eoabi))
 v8_cpu := arm64
 v8_cpu_args := arm_version=83
 endif
@@ -433,7 +433,7 @@ v8_platform_args := \
 	$(NULL)
 endif
 ifeq ($(host_os), $(filter $(host_os), macos ios))
-ifeq ($(host_arch), $(filter $(host_arch), arm64 arm64e))
+ifeq ($(host_arch), $(filter $(host_arch), arm64 arm64e arm64eoabi))
 v8_platform_args += v8_enable_pointer_compression=false
 endif
 endif
