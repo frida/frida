@@ -549,6 +549,7 @@ openssl_patches = \
 	$(NULL)
 openssl_options = \
 	--openssldir=/etc/ssl \
+	no-dso \
 	no-engine \
 	no-tests \
 	no-comp \
