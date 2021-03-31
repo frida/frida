@@ -116,7 +116,7 @@ def list_our_patches(repo_path):
     return (PendingPatches(items), base)
 
 def list_upstream_changes(repo_path, since):
-    return list(reversed(list_recent_commits(repo_path, since + "..upstream/master")))[:-1]
+    return list(reversed(list_recent_commits(repo_path, since + "..upstream/master")))
 
 def list_recent_commits(repo_path, *args):
     result = subprocess.run(["git", "log", "--pretty=oneline", "--abbrev-commit", "--topo-order"] + list(args),
