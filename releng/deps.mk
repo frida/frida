@@ -539,12 +539,11 @@ tinycc_deps = \
 tinycc_deps_for_build = \
 	$(NULL)
 
-openssl_version = 1.1.1i
+openssl_version = 1.1.1k
 openssl_url = https://www.openssl.org/source/openssl-$(openssl_version).tar.gz
-openssl_hash = e8be6a35fe41d10603c3cc635e93289ed00bf34b79671a3a4de64fcee00d5242
+openssl_hash = 892a0875b9872acd04a9fde79b1f943075d5ea162415de3047c327df33fbaee5
 openssl_recipe = custom
 openssl_patches = \
-	openssl-clang.patch \
 	openssl-android.patch \
 	openssl-armcap.patch \
 	$(NULL)
