@@ -376,10 +376,9 @@ if __name__ == '__main__':
             if host.startswith("windows-"):
                 asset_filename = "{}-devkit-{}-{}.exe".format(kit, version, host)
                 asset_mimetype = "application/octet-stream"
-            else:
-                tarball_filename = "{}-devkit-{}-{}.tar".format(kit, version, host)
-                asset_filename = tarball_filename + ".xz"
-                asset_mimetype = "application/x-xz"
+            tarball_filename = "{}-devkit-{}-{}.tar".format(kit, version, host)
+            tarball_asset_filename = tarball_filename + ".xz"
+            tarball_asset_mimetype = "application/x-xz"
 
             output_dir = tempfile.mkdtemp(prefix="frida-release")
             try:
@@ -390,15 +389,18 @@ if __name__ == '__main__':
                     continue
                 if host.startswith("windows-"):
                     subprocess.check_call([szip, "a", "-sfx7zCon.sfx", "-r", asset_filename, "."], cwd=output_dir)
-                else:
-                    subprocess.check_call(["tar", "cf", tarball_filename] + filenames, cwd=output_dir)
-                    subprocess.check_call(["xz", "-T", "0", tarball_filename], cwd=output_dir)
+                subprocess.check_call(["tar", "cf", tarball_filename] + filenames, cwd=output_dir)
+                subprocess.check_call(["xz", "-T", "0", tarball_filename], cwd=output_dir)
                 with open(os.path.join(output_dir, asset_filename), 'rb') as f:
                     asset_data = f.read()
+                with open(os.path.join(output_dir, tarball_asset_filename), 'rb') as f:
+                    tarball_asset_data = f.read()
             finally:
                 shutil.rmtree(output_dir)
 
-            upload(asset_filename, asset_mimetype, asset_data)
+            if host.startswith("windows-"):
+                upload(asset_filename, asset_mimetype, asset_data)
+            upload(tarball_asset_filename, tarball_asset_mimetype, tarball_asset_data)
 
     def trigger_magisk_frida_ci():
         with open(os.path.expanduser("~/.frida-release-magisk-token"), "r") as f:
