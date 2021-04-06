@@ -397,6 +397,26 @@ glib_schannel_deps = \
 glib_schannel_deps_for_build = \
 	$(NULL)
 
+libnice_version = b9c02e4f7b3d797208acc435da2fa8d9d989d0d7
+libnice_url = $(frida_base_url)/libnice.git
+libnice_hash = $(NULL)
+libnice_recipe = meson
+libnice_patches = \
+	$(NULL)
+libnice_options = \
+	-Dgupnp=disabled \
+	-Dgstreamer=disabled \
+	-Dexamples=disabled \
+	-Dtests=disabled \
+	-Dintrospection=disabled \
+	$(NULL)
+libnice_deps = \
+	glib \
+	openssl \
+	$(NULL)
+libnice_deps_for_build = \
+	$(NULL)
+
 libgee_version = c7e96ac037610cc3d0e11dc964b7b1fca479fc2a
 libgee_url = $(frida_base_url)/libgee.git
 libgee_hash = $(NULL)
