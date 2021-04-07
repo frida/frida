@@ -366,7 +366,7 @@ build/fs-%/manifest/openssl.pkg: build/fs-env-%.rc build/fs-tmp-%/openssl/Config
 	) >>$$builddir/build.log 2>&1
 
 
-v8_env_setup := /bin/true
+v8_env_setup := true
 
 ifeq ($(FRIDA_ASAN), yes)
 v8_buildtype_args := \
