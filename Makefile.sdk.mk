@@ -678,15 +678,19 @@ build/fs-%/manifest/libcxx.pkg: build/fs-%/manifest/v8.pkg
 
 
 build/fs-env-%.rc:
-	@FRIDA_HOST=$* \
-		FRIDA_ACOPTFLAGS="$(FRIDA_ACOPTFLAGS_BOTTLE)" \
-		FRIDA_ACDBGFLAGS="$(FRIDA_ACDBGFLAGS_BOTTLE)" \
-		FRIDA_ASAN=$(FRIDA_ASAN) \
-		FRIDA_ENV_NAME=fs \
-		FRIDA_ENV_SDK=none \
-		FRIDA_TOOLCHAIN_VERSION=$(frida_bootstrap_version) \
-		XCODE11="$(XCODE11)" \
-		./releng/setup-env.sh
+	@for os_arch in $(build_os_arch) $*; do \
+		if [ ! -f build/fs-env-$$os_arch.rc ]; then \
+			FRIDA_HOST=$$os_arch \
+			FRIDA_ACOPTFLAGS="$(FRIDA_ACOPTFLAGS_BOTTLE)" \
+			FRIDA_ACDBGFLAGS="$(FRIDA_ACDBGFLAGS_BOTTLE)" \
+			FRIDA_ASAN=$(FRIDA_ASAN) \
+			FRIDA_ENV_NAME=fs \
+			FRIDA_ENV_SDK=none \
+			FRIDA_TOOLCHAIN_VERSION=$(frida_bootstrap_version) \
+			XCODE11="$(XCODE11)" \
+			./releng/setup-env.sh || exit 1; \
+		fi \
+	done
 
 releng/meson/meson.py:
 	git submodule init releng/meson

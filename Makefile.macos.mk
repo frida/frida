@@ -346,13 +346,17 @@ build/frida-ios-universal/usr/lib/frida/frida-gadget.dylib: \
 
 define make-ios-env-rule
 build/frida-meson-env-ios-$1.rc: releng/setup-env.sh releng/config.site.in build/frida-version.h
-	@FRIDA_HOST=ios-$1 \
-		FRIDA_PREFIX="$$(abspath build/frida-ios-$1/usr)" \
-		FRIDA_ACOPTFLAGS="$$(FRIDA_ACOPTFLAGS_COMMON)" \
-		FRIDA_ACDBGFLAGS="$$(FRIDA_ACDBGFLAGS_COMMON)" \
-		FRIDA_ASAN=$$(FRIDA_ASAN) \
-		XCODE11="$$(XCODE11)" \
-		./releng/setup-env.sh
+	@for os_arch in $$(build_os_arch) ios-$$*; do \
+		if [ ! -f build/frida-meson-env-$$$$os_arch.rc ]; then \
+			FRIDA_HOST=$$$$os_arch \
+			FRIDA_PREFIX="$$(abspath build/frida-ios-$1/usr)" \
+			FRIDA_ACOPTFLAGS="$$(FRIDA_ACOPTFLAGS_COMMON)" \
+			FRIDA_ACDBGFLAGS="$$(FRIDA_ACDBGFLAGS_COMMON)" \
+			FRIDA_ASAN=$$(FRIDA_ASAN) \
+			XCODE11="$$(XCODE11)" \
+			./releng/setup-env.sh || exit 1; \
+		fi \
+	done
 endef
 
 $(eval $(call make-ios-env-rule,x86_64))

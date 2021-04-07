@@ -1070,13 +1070,15 @@ esac
 
 build_env_rc=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-meson-env-${build_os_arch}.rc
 if [ ! -f $build_env_rc ]; then
-  FRIDA_HOST=${build_os_arch} \
-      FRIDA_BUILD="$FRIDA_BUILD" \
-      FRIDA_PREFIX="" \
-      FRIDA_ACOPTFLAGS="$FRIDA_ACOPTFLAGS" \
-      FRIDA_ACDBGFLAGS="$FRIDA_ACDBGFLAGS" \
-      FRIDA_ASAN=$FRIDA_ASAN \
-      releng/setup-env.sh
+  (
+    echo ""
+    echo "Need an environment for the build machine to be able to generate an environment for $host_os_arch."
+    echo "It can be generated like this:"
+    echo ""
+    echo "    FRIDA_HOST=$build_os_arch releng/setup-env.sh"
+    echo ""
+  ) > /dev/stderr
+  exit 1
 fi
 egrep "^export (PKG_CONFIG|CC|CXX|OBJC|OBJCXX|CPPFLAGS|CFLAGS|CXXFLAGS|CC_LD|CXX_LD|OBJC_LD|OBJCXX_LD|LDFLAGS|AR)=" $build_env_rc \
   | sed -e "s,=,_FOR_BUILD=," \
