@@ -351,6 +351,7 @@ build/frida-meson-env-ios-$1.rc: releng/setup-env.sh releng/config.site.in build
 		FRIDA_ACOPTFLAGS="$$(FRIDA_ACOPTFLAGS_COMMON)" \
 		FRIDA_ACDBGFLAGS="$$(FRIDA_ACDBGFLAGS_COMMON)" \
 		FRIDA_ASAN=$$(FRIDA_ASAN) \
+		XCODE11="$$(XCODE11)" \
 		./releng/setup-env.sh
 endef
 

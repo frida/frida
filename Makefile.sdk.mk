@@ -194,8 +194,6 @@ endif
 
 ifeq ($(host_os), $(filter $(host_os), macos ios))
 
-xcode_developer_dir := $(shell xcode-select -print-path)
-
 ifeq ($(host_os_arch), macos-x86)
 openssl_arch_args := macos-i386
 endif
@@ -233,11 +231,19 @@ openssl_arch_args := ios64-cross-arm64e enable-ec_nistp_64_gcc_128
 xcode_platform := iPhoneOS
 endif
 
+ifeq ($(host_os_arch), ios-arm64eoabi)
+xcode_developer_dir := $(XCODE11)/Contents/Developer
+xcode_sdk_version := 13.7
+else
+xcode_developer_dir := $(shell xcode-select -print-path)
+xcode_sdk_version := $(shell xcrun --sdk $(shell echo $(xcode_platform) | tr A-Z a-z) --show-sdk-version | cut -f1-2 -d'.')
+endif
+
 openssl_host_env := \
 	CPP=clang CC=clang CXX=clang++ LD= LDFLAGS= AR= RANLIB= \
 	CROSS_COMPILE="$(xcode_developer_dir)/Toolchains/XcodeDefault.xctoolchain/usr/bin/" \
 	CROSS_TOP="${xcode_developer_dir}/Platforms/$(xcode_platform).platform/Developer" \
-	CROSS_SDK=$(xcode_platform)$(shell xcrun --sdk $(shell echo $(xcode_platform) | tr A-Z a-z) --show-sdk-version | cut -f1-2 -d'.').sdk \
+	CROSS_SDK=$(xcode_platform)$(xcode_sdk_version).sdk \
 	IOS_MIN_SDK_VERSION=8.0 \
 	CONFIG_DISABLE_BITCODE=true \
 	$(NULL)
@@ -360,6 +366,8 @@ build/fs-%/manifest/openssl.pkg: build/fs-env-%.rc build/fs-tmp-%/openssl/Config
 	) >>$$builddir/build.log 2>&1
 
 
+v8_env_setup := /bin/true
+
 ifeq ($(FRIDA_ASAN), yes)
 v8_buildtype_args := \
 	is_asan=true \
@@ -431,6 +439,9 @@ v8_platform_args := \
 	mac_deployment_target="10.9" \
 	ios_deployment_target="8.0" \
 	$(NULL)
+endif
+ifeq ($(host_arch), arm64eoabi)
+v8_env_setup := export DEVELOPER_DIR="$(XCODE11)/Contents/Developer"
 endif
 ifeq ($(host_os), $(filter $(host_os), macos ios))
 ifeq ($(host_arch), $(filter $(host_arch), arm64 arm64e arm64eoabi))
@@ -558,6 +569,7 @@ build/fs-tmp-%/v8/build.ninja: deps/v8-checkout/v8 build/fs-$(build_os_arch)/man
 	@mkdir -p $(@D)
 	@(set -x \
 		&& cd deps/v8-checkout/v8 \
+		&& $(v8_env_setup) \
 		&& ../../../build/fs-$(build_os_arch)/bin/gn \
 			gen $(abspath $(@D)) \
 			--args='$(strip \
@@ -576,6 +588,7 @@ build/fs-%/manifest/v8.pkg: build/fs-tmp-%/v8/build.ninja
 	srcdir=deps/v8-checkout/v8; \
 	builddir=build/fs-tmp-$*/v8; \
 	(set -x \
+		&& $(v8_env_setup) \
 		&& $(NINJA) -C $$builddir v8_monolith \
 		&& install -d $$prefix/include/v8-$(v8_api_version)/v8 \
 		&& install -m 644 $$srcdir/include/*.h $$prefix/include/v8-$(v8_api_version)/v8/ \
@@ -672,6 +685,7 @@ build/fs-env-%.rc:
 		FRIDA_ENV_NAME=fs \
 		FRIDA_ENV_SDK=none \
 		FRIDA_TOOLCHAIN_VERSION=$(frida_bootstrap_version) \
+		XCODE11="$(XCODE11)" \
 		./releng/setup-env.sh
 
 releng/meson/meson.py:

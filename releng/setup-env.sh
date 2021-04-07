@@ -309,7 +309,7 @@ flags_to_args () {
 mkdir -p "$FRIDA_BUILD"
 
 if [ "$host_arch" == "arm64eoabi" ]; then
-  export DEVELOPER_DIR="/Applications/Xcode-11.7.app"
+  export DEVELOPER_DIR="$XCODE11/Contents/Developer"
 fi
 
 xcrun="xcrun"

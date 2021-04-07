@@ -16,6 +16,7 @@ build/frida-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida-vers
 		FRIDA_ACOPTFLAGS="$(FRIDA_ACOPTFLAGS_COMMON)" \
 		FRIDA_ACDBGFLAGS="$(FRIDA_ACDBGFLAGS_COMMON)" \
 		FRIDA_ASAN=$(FRIDA_ASAN) \
+		XCODE11="$(XCODE11)" \
 		./releng/setup-env.sh
 build/frida_thin-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida-version.h
 	@FRIDA_HOST=$* \
@@ -23,6 +24,7 @@ build/frida_thin-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida
 		FRIDA_ACDBGFLAGS="$(FRIDA_ACDBGFLAGS_COMMON)" \
 		FRIDA_ASAN=$(FRIDA_ASAN) \
 		FRIDA_ENV_NAME=frida_thin \
+		XCODE11="$(XCODE11)" \
 		./releng/setup-env.sh
 	@cd $(FRIDA)/build/; \
 	[ ! -e frida-env-$*.rc ] && ln -s frida_thin-env-$*.rc frida-env-$*.rc; \
@@ -38,6 +40,7 @@ build/frida_gir-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida-
 		FRIDA_ACDBGFLAGS="$(FRIDA_ACDBGFLAGS_COMMON)" \
 		FRIDA_ASAN=$(FRIDA_ASAN) \
 		FRIDA_ENV_NAME=frida_gir \
+		XCODE11="$(XCODE11)" \
 		./releng/setup-env.sh
 	@cd $(FRIDA)/build/; \
 	[ ! -e frida-env-$*.rc ] && ln -s frida_gir-env-$*.rc frida-env-$*.rc; \

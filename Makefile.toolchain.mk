@@ -152,6 +152,7 @@ build/ft-env-%.rc: build/ft-executable.symbols build/ft-executable.version
 		FRIDA_ENV_NAME=ft \
 		FRIDA_ENV_SDK=none \
 		FRIDA_TOOLCHAIN_VERSION=$(frida_bootstrap_version) \
+		XCODE11="$(XCODE11)" \
 		./releng/setup-env.sh
 
 build/ft-executable.symbols:
