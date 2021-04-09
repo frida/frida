@@ -346,7 +346,7 @@ build/frida-ios-universal/usr/lib/frida/frida-gadget.dylib: \
 
 define make-ios-env-rule
 build/frida-meson-env-ios-$1.rc: releng/setup-env.sh releng/config.site.in build/frida-version.h
-	@for os_arch in $$(build_os_arch) ios-$$*; do \
+	@for os_arch in $$(build_os_arch) ios-$1; do \
 		if [ ! -f build/frida-meson-env-$$$$os_arch.rc ]; then \
 			FRIDA_HOST=$$$$os_arch \
 			FRIDA_PREFIX="$$(abspath build/frida-ios-$1/usr)" \
