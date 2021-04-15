@@ -52,6 +52,28 @@ ifeq ($(host_arch), $(filter $(host_arch), x86 x86_64 arm armbe8 armeabi armhf a
 packages += tinycc
 endif
 
+ifeq ($(host_os_arch), ios-arm64eoabi)
+xcode_env_setup := export DEVELOPER_DIR="$(XCODE11)/Contents/Developer"
+xcode_run := arch -x86_64 xcrun
+else
+xcode_env_setup := true
+xcode_run := xcrun
+endif
+ifeq ($(host_os), macos)
+xcode_platform := MacOSX
+endif
+ifeq ($(host_os), ios)
+ifeq ($(host_arch), $(filter $(host_arch), x86 x86_64))
+xcode_platform := iPhoneSimulator
+else
+xcode_platform := iPhoneOS
+endif
+endif
+ifeq ($(host_os), $(filter $(host_os), macos ios))
+xcode_developer_dir := $(shell $(xcode_env_setup); xcode-select -print-path)
+xcode_sdk_version := $(shell $(xcode_env_setup); $(xcode_run) --sdk $(shell echo $(xcode_platform) | tr A-Z a-z) --show-sdk-version | cut -f1-2 -d'.')
+endif
+
 
 .PHONY: all clean distclean
 
@@ -105,7 +127,7 @@ build/fs-tmp-%/.package-stamp: $(foreach pkg, $(packages), build/fs-%/manifest/$
 			| tar -C $(abspath $(@D)/package) -xf -
 	@releng/pkgify.sh $(@D)/package $(abspath build/fs-$*) $(abspath releng)
 ifeq ($(host_os), ios)
-	@cp $(shell xcrun --sdk macosx --show-sdk-path)/usr/include/mach/mach_vm.h \
+	@cp $(shell $(xcode_env_setup); $(xcode_run) --sdk macosx --show-sdk-path)/usr/include/mach/mach_vm.h \
 		$(@D)/package/include/frida_mach_vm.h
 endif
 	@echo "$(frida_deps_version)" > $(@D)/package/VERSION.txt
@@ -206,37 +228,21 @@ endif
 ifeq ($(host_os_arch), macos-arm64e)
 openssl_arch_args := macos64-cross-arm64e enable-ec_nistp_64_gcc_128
 endif
-ifeq ($(host_os), macos)
-xcode_platform := MacOSX
-endif
 
 ifeq ($(host_os_arch), ios-x86)
 openssl_arch_args := ios-sim-cross-i386
-xcode_platform := iPhoneSimulator
 endif
 ifeq ($(host_os_arch), ios-x86_64)
 openssl_arch_args := ios-sim-cross-x86_64 enable-ec_nistp_64_gcc_128
-xcode_platform := iPhoneSimulator
 endif
 ifeq ($(host_os_arch), ios-arm)
 openssl_arch_args := ios-cross-armv7 -D__ARM_MAX_ARCH__=7
-xcode_platform := iPhoneOS
 endif
 ifeq ($(host_os_arch), ios-arm64)
 openssl_arch_args := ios64-cross-arm64 enable-ec_nistp_64_gcc_128
-xcode_platform := iPhoneOS
 endif
 ifeq ($(host_os_arch), $(filter $(host_os_arch), ios-arm64e ios-arm64eoabi))
 openssl_arch_args := ios64-cross-arm64e enable-ec_nistp_64_gcc_128
-xcode_platform := iPhoneOS
-endif
-
-ifeq ($(host_os_arch), ios-arm64eoabi)
-xcode_developer_dir := $(XCODE11)/Contents/Developer
-xcode_sdk_version := 13.7
-else
-xcode_developer_dir := $(shell xcode-select -print-path)
-xcode_sdk_version := $(shell xcrun --sdk $(shell echo $(xcode_platform) | tr A-Z a-z) --show-sdk-version | cut -f1-2 -d'.')
 endif
 
 openssl_host_env := \
@@ -366,8 +372,6 @@ build/fs-%/manifest/openssl.pkg: build/fs-env-%.rc build/fs-tmp-%/openssl/Config
 	) >>$$builddir/build.log 2>&1
 
 
-v8_env_setup := true
-
 ifeq ($(FRIDA_ASAN), yes)
 v8_buildtype_args := \
 	is_asan=true \
@@ -439,9 +443,6 @@ v8_platform_args := \
 	mac_deployment_target="10.9" \
 	ios_deployment_target="8.0" \
 	$(NULL)
-endif
-ifeq ($(host_arch), arm64eoabi)
-v8_env_setup := export DEVELOPER_DIR="$(XCODE11)/Contents/Developer"
 endif
 ifeq ($(host_os), $(filter $(host_os), macos ios))
 ifeq ($(host_arch), $(filter $(host_arch), arm64 arm64e arm64eoabi))
@@ -569,7 +570,7 @@ build/fs-tmp-%/v8/build.ninja: deps/v8-checkout/v8 build/fs-$(build_os_arch)/man
 	@mkdir -p $(@D)
 	@(set -x \
 		&& cd deps/v8-checkout/v8 \
-		&& $(v8_env_setup) \
+		&& $(xcode_env_setup) \
 		&& ../../../build/fs-$(build_os_arch)/bin/gn \
 			gen $(abspath $(@D)) \
 			--args='$(strip \
@@ -588,7 +589,7 @@ build/fs-%/manifest/v8.pkg: build/fs-tmp-%/v8/build.ninja
 	srcdir=deps/v8-checkout/v8; \
 	builddir=build/fs-tmp-$*/v8; \
 	(set -x \
-		&& $(v8_env_setup) \
+		&& $(xcode_env_setup) \
 		&& $(NINJA) -C $$builddir v8_monolith \
 		&& install -d $$prefix/include/v8-$(v8_api_version)/v8 \
 		&& install -m 644 $$srcdir/include/*.h $$prefix/include/v8-$(v8_api_version)/v8/ \
@@ -643,6 +644,7 @@ build/fs-%/manifest/libcxx.pkg: build/fs-%/manifest/v8.pkg
 	srcdir=deps/v8-checkout/v8; \
 	builddir=build/fs-tmp-$*/v8; \
 	(set -x \
+		&& $(xcode_env_setup) \
 		&& $(NINJA) -C $$builddir libc++ \
 		&& install -d $$prefix/include/c++/ \
 		&& cp -a $$srcdir/buildtools/third_party/libc++/trunk/include/* $$prefix/include/c++/ \
@@ -662,10 +664,10 @@ build/fs-%/manifest/libcxx.pkg: build/fs-%/manifest/v8.pkg
 			$$srcdir/buildtools/third_party/libc++/trunk/include/__config \
 			> $$prefix/include/c++/__config \
 		&& install -d $$prefix/lib/c++ \
-		&& $(shell xcrun -f libtool) -static -no_warning_for_no_symbols \
+		&& $$($(xcode_run) -f libtool) -static -no_warning_for_no_symbols \
 			-o $$prefix/lib/c++/libc++abi.a \
 			$$builddir/obj/buildtools/third_party/libc++abi/libc++abi/*.o \
-		&& $(shell xcrun -f libtool) -static -no_warning_for_no_symbols \
+		&& $$($(xcode_run) -f libtool) -static -no_warning_for_no_symbols \
 			-o $$prefix/lib/c++/libc++.a \
 			$$builddir/obj/buildtools/third_party/libc++/libc++/*.o \
 	) >$$builddir/libcxx-build.log 2>&1 \
