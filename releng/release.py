@@ -373,34 +373,45 @@ if __name__ == '__main__':
         ]
 
         for kit in kits:
-            if host.startswith("windows-"):
-                asset_filename = "{}-devkit-{}-{}.exe".format(kit, version, host)
-                asset_mimetype = "application/octet-stream"
-            tarball_filename = "{}-devkit-{}-{}.tar".format(kit, version, host)
+            name = "{}-devkit-{}-{}".format(kit, version, host)
+
+            tarball_filename = name + ".tar"
             tarball_asset_filename = tarball_filename + ".xz"
             tarball_asset_mimetype = "application/x-xz"
+
+            sfx_asset_filename = name + ".exe"
+            sfx_asset_mimetype = "application/octet-stream"
 
             output_dir = tempfile.mkdtemp(prefix="frida-release")
             try:
                 try:
                     filenames = generate_devkit(kit, host, flavor, output_dir)
                 except Exception as e:
-                    print("Skipping {}: {}".format(asset_filename, e))
+                    print("Skipping {}: {}".format(name, e))
                     continue
-                if host.startswith("windows-"):
-                    subprocess.check_call([szip, "a", "-sfx7zCon.sfx", "-r", asset_filename, "."], cwd=output_dir)
+
                 subprocess.check_call(["tar", "cf", tarball_filename] + filenames, cwd=output_dir)
                 subprocess.check_call(["xz", "-T", "0", tarball_filename], cwd=output_dir)
-                with open(os.path.join(output_dir, asset_filename), 'rb') as f:
-                    asset_data = f.read()
-                with open(os.path.join(output_dir, tarball_asset_filename), 'rb') as f:
+                tarball_asset_path = os.path.join(output_dir, tarball_asset_filename)
+                with open(tarball_asset_path, 'rb') as f:
                     tarball_asset_data = f.read()
+                os.unlink(tarball_asset_path)
+
+                if host.startswith("windows-"):
+                    subprocess.check_call([szip, "a", "-sfx7zCon.sfx", "-r", sfx_asset_filename, "."], cwd=output_dir)
+                    sfx_asset_path = os.path.join(output_dir, sfx_asset_filename)
+                    with open(sfx_asset_path, 'rb') as f:
+                        sfx_asset_data = f.read()
+                    os.unlink(sfx_asset_path)
+                else:
+                    sfx_asset_data = None
             finally:
                 shutil.rmtree(output_dir)
 
-            if host.startswith("windows-"):
-                upload(asset_filename, asset_mimetype, asset_data)
             upload(tarball_asset_filename, tarball_asset_mimetype, tarball_asset_data)
+
+            if sfx_asset_data is not None:
+                upload(sfx_asset_filename, sfx_asset_mimetype, sfx_asset_data)
 
     def trigger_magisk_frida_ci():
         with open(os.path.expanduser("~/.frida-release-magisk-token"), "r") as f:
