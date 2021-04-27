@@ -418,19 +418,19 @@ python-macos-apple_silicon: build/frida-macos-apple_silicon/lib/$(PYTHON_NAME)/s
 python-macos-intel: build/frida-macos-intel/lib/$(PYTHON_NAME)/site-packages/frida build/frida-macos-intel/lib/$(PYTHON_NAME)/site-packages/_frida.so
 
 define make-python-rule
-build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-stamp build/$1-%/lib/pkgconfig/frida-core-1.0.pc
+build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-stamp build/$1-%$(PYTHON_PREFIX)/lib/pkgconfig/frida-core-1.0.pc
 	. build/$1-meson-env-$$*.rc; \
 	builddir=$$(@D); \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
 		$$(MESON) \
 			--cross-file build/$1-$$*.txt \
-			--prefix $$(FRIDA)/build/$1-$$* \
+			--prefix $$(FRIDA)/build/$1-$$*$(PYTHON_PREFIX) \
 			-Dpython=$$(PYTHON) \
 			-Dpython_incdir=$$(PYTHON_INCDIR) \
 			frida-python $$$$builddir || exit 1; \
 	fi; \
 	$$(NINJA) -C $$$$builddir install || exit 1; \
-	$$$$STRIP $$$$STRIP_FLAGS build/$1-$$*/lib/$$(PYTHON_NAME)/site-packages/_frida.so
+	$$$$STRIP $$$$STRIP_FLAGS build/$1-$$*$(PYTHON_PREFIX)/lib/$$(PYTHON_NAME)/site-packages/_frida.so
 	@touch $$@
 endef
 $(eval $(call make-python-rule,frida,tmp))
