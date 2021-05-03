@@ -417,7 +417,7 @@ libnice_deps = \
 libnice_deps_for_build = \
 	$(NULL)
 
-libgee_version = c7e96ac037610cc3d0e11dc964b7b1fca479fc2a
+libgee_version = de4521fccb2e29af6cc194f358408ca1e4a1dafc
 libgee_url = $(frida_base_url)/libgee.git
 libgee_hash = $(NULL)
 libgee_recipe = meson
