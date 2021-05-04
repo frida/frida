@@ -544,8 +544,8 @@ deps/v8-checkout/.gclient: deps/.depot_tools-stamp
 	@$(call print-repo-banner,v8,$(v8_version),$(v8_url))
 	@mkdir -p $(@D)
 	@cd deps/v8-checkout \
-		&& PATH="$(abspath deps/depot_tools):$$PATH" \
-			gclient config --spec 'solutions = [ \
+		&& export PATH="$(abspath deps/depot_tools):$$PATH" DEPOT_TOOLS_UPDATE=0 \
+		&& gclient config --spec 'solutions = [ \
   { \
     "url": "$(v8_url)@$(v8_version)", \
     "managed": False, \
@@ -558,8 +558,8 @@ deps/v8-checkout/.gclient: deps/.depot_tools-stamp
 deps/v8-checkout/v8: deps/v8-checkout/.gclient
 	@$(call print-status,v8,Cloning into deps/v8-checkout)
 	@cd deps/v8-checkout \
-		&& PATH="$(abspath deps/depot_tools):$$PATH" \
-			gclient sync
+		&& export PATH="$(abspath deps/depot_tools):$$PATH" DEPOT_TOOLS_UPDATE=0 \
+		&& gclient sync
 	@touch $@
 
 build/fs-tmp-%/v8/build.ninja: deps/v8-checkout/v8 build/fs-$(build_os_arch)/manifest/gn.pkg \
