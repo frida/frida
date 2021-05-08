@@ -1,5 +1,5 @@
-frida_deps_version = 20210419
-frida_bootstrap_version = 20210407
+frida_deps_version = 20210504
+frida_bootstrap_version = 20210419
 
 
 frida_base_url = https://github.com/frida
@@ -149,7 +149,7 @@ selinux_deps = \
 selinux_deps_for_build = \
 	$(NULL)
 
-glib_version = d1325e4f3bd4787cc833e5bb42e8f59467a6a0c7
+glib_version = 1ab2505377b74449e31041fd5be1a41e1a1800a9
 glib_url = $(frida_base_url)/glib.git
 glib_hash = $(NULL)
 glib_recipe = meson
@@ -228,7 +228,7 @@ bison_deps = \
 bison_deps_for_build = \
 	$(NULL)
 
-vala_version = c2a3f42f71caae18dfad837a96a901531cce7938
+vala_version = 9582dcf8dc1f9078909ea5323e57b8bdb94d29ac
 vala_url = $(frida_base_url)/vala.git
 vala_hash = $(NULL)
 vala_recipe = meson
@@ -417,7 +417,7 @@ libnice_deps = \
 libnice_deps_for_build = \
 	$(NULL)
 
-libgee_version = c7e96ac037610cc3d0e11dc964b7b1fca479fc2a
+libgee_version = de4521fccb2e29af6cc194f358408ca1e4a1dafc
 libgee_url = $(frida_base_url)/libgee.git
 libgee_hash = $(NULL)
 libgee_recipe = meson
