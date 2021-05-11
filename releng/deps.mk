@@ -417,6 +417,20 @@ libnice_deps = \
 libnice_deps_for_build = \
 	$(NULL)
 
+usrsctp_version = acfce46e428cc084b4bd0164e1b019261a8dbeda
+usrsctp_url = https://github.com/sctplab/usrsctp.git
+usrsctp_hash = $(NULL)
+usrsctp_recipe = meson
+usrsctp_patches = \
+	$(NULL)
+usrsctp_options = \
+	-Dsctp_build_programs=false \
+	$(NULL)
+usrsctp_deps = \
+	$(NULL)
+usrsctp_deps_for_build = \
+	$(NULL)
+
 libgee_version = de4521fccb2e29af6cc194f358408ca1e4a1dafc
 libgee_url = $(frida_base_url)/libgee.git
 libgee_hash = $(NULL)

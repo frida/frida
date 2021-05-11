@@ -36,7 +36,7 @@ packages += selinux
 endif
 
 ifeq ($(host_os), $(filter $(host_os), macos ios linux android))
-packages += glib-networking libnice
+packages += glib-networking libnice usrsctp
 endif
 
 ifneq ($(FRIDA_V8), disabled)
