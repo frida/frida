@@ -424,6 +424,8 @@ usrsctp_recipe = meson
 usrsctp_patches = \
 	$(NULL)
 usrsctp_options = \
+	-Dsctp_inet=false \
+	-Dsctp_inet6=false \
 	-Dsctp_build_programs=false \
 	$(NULL)
 usrsctp_deps = \
