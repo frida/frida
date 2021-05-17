@@ -417,7 +417,7 @@ libnice_deps = \
 libnice_deps_for_build = \
 	$(NULL)
 
-usrsctp_version = acfce46e428cc084b4bd0164e1b019261a8dbeda
+usrsctp_version = e984d7f3c1b13d0b0582497b385c93f0e8d89fb3
 usrsctp_url = https://github.com/sctplab/usrsctp.git
 usrsctp_hash = $(NULL)
 usrsctp_recipe = meson
