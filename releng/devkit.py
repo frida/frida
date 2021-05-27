@@ -108,6 +108,8 @@ def generate_header(package, frida_root, host, kit, flavor, umbrella_header_path
     if kit == "frida-gumjs":
         inspector_server_header = os.path.join(os.path.dirname(umbrella_header_path), "guminspectorserver.h")
         ingest_header(inspector_server_header, header_files, processed_header_files, devkit_header_lines)
+        quickjs_header = os.path.join(frida_root, "build", "sdk-" + host, "include", "quickjs", "quickjs.h")
+        ingest_header(quickjs_header, header_files, processed_header_files, devkit_header_lines)
     if kit == "frida-core" and host.startswith("android-"):
         selinux_header = os.path.join(os.path.dirname(umbrella_header_path), "frida-selinux.h")
         ingest_header(selinux_header, header_files, processed_header_files, devkit_header_lines)
@@ -352,7 +354,7 @@ def generate_library_unix(package, frida_root, host, flavor, output_dir, library
     return (extra_flags, thirdparty_symbol_mappings)
 
 def extract_public_thirdparty_symbol_mappings(mappings):
-    public_prefixes = ["g_", "glib_", "gobject_", "gio_", "gee_", "json_", "cs_"]
+    public_prefixes = ["g_", "glib_", "gobject_", "gio_", "gee_", "json_", "cs_", "JS_", "__JS_"]
     return [(original, renamed) for original, renamed in mappings if any([original.startswith(prefix) for prefix in public_prefixes])]
 
 def get_thirdparty_symbol_mappings(library, rc):
