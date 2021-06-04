@@ -312,7 +312,7 @@ def grab_and_prepare_regular_tarball_package(name: str, spec: PackageSpec) -> So
             raise ValueError("{} extraction failed: {}".format(name, output))
 
         for entry in staging_dir.glob(name + "*/*"):
-            shutil.move(entry, source_dir)
+            shutil.move(str(entry), source_dir)
 
         shutil.rmtree(staging_dir)
     finally:
