@@ -3,6 +3,7 @@
 import argparse
 from dataclasses import dataclass
 from enum import Enum
+import hashlib
 import json
 import os
 from pathlib import Path, PurePath
@@ -80,7 +81,8 @@ ALL_PACKAGES: List[Package] = [
     ("pkg-config", PackageRole.TOOL, []),
     ("vala", PackageRole.TOOL, []),
     ("sqlite", PackageRole.LIBRARY, []),
-    ("glib-schannel", PackageRole.LIBRARY, []),
+    ("openssl", PackageRole.LIBRARY, []),
+    ("glib-networking", PackageRole.LIBRARY, []),
     ("libnice", PackageRole.LIBRARY, []),
     ("usrsctp", PackageRole.LIBRARY, []),
     ("libgee", PackageRole.LIBRARY, []),
@@ -109,7 +111,8 @@ ALL_BUNDLES = {
         "libffi",
         "glib",
         "sqlite",
-        "glib-schannel",
+        "openssl",
+        "glib-networking",
         "libnice",
         "usrsctp",
         "libgee",
@@ -170,6 +173,13 @@ def main():
 
         package(bundle_ids, params)
         packaging_ended_at = time.time()
+    except subprocess.CalledProcessError as e:
+        print(e, file=sys.stderr)
+        if e.stdout is not None:
+            print("\n=== stdout ===\n" + e.stdout, file=sys.stderr)
+        if e.stderr is not None:
+            print("\n=== stderr ===\n" + e.stderr, file=sys.stderr)
+        sys.exit(1)
     finally:
         ended_at = time.time()
 
@@ -210,20 +220,25 @@ def check_environment():
         print("ERROR: {}".format(e), file=sys.stderr)
         sys.exit(1)
 
-    for tool in ["7z", "git", "py"]:
+    for tool in ["7z", "git", "nasm", "patch", "py"]:
         if shutil.which(tool) is None:
-            print("ERROR: {} not found".format(tool), file=sys.stderr)
+            print("ERROR: {} not found on PATH".format(tool), file=sys.stderr)
             sys.exit(1)
 
 def grab_and_prepare(name: str, spec: PackageSpec, params: DependencyParameters) -> SourceState:
-    if spec.recipe != 'custom':
+    if spec.recipe == 'meson' or name == 'openssl':
         return grab_and_prepare_regular_package(name, spec)
 
     assert name == 'v8'
     return grab_and_prepare_v8_package(spec, params.get_package_spec("depot_tools"))
 
 def grab_and_prepare_regular_package(name: str, spec: PackageSpec) -> SourceState:
-    assert spec.hash == ""
+    if spec.hash == "":
+        return grab_and_prepare_regular_git_package(name, spec)
+    else:
+        return grab_and_prepare_regular_tarball_package(name, spec)
+
+def grab_and_prepare_regular_git_package(name: str, spec: PackageSpec) -> SourceState:
     assert spec.patches == []
 
     source_dir = DEPS_DIR / name
@@ -245,6 +260,85 @@ def grab_and_prepare_regular_package(name: str, spec: PackageSpec) -> SourceStat
         source_state = SourceState.PRISTINE
 
     return source_state
+
+def grab_and_prepare_regular_tarball_package(name: str, spec: PackageSpec) -> SourceState:
+    version_file = DEPS_DIR / (name + "-version.txt")
+    try:
+        current_version = version_file.read_text(encoding='utf-8').strip()
+        if current_version == spec.version:
+            return SourceState.PRISTINE
+    except:
+        pass
+
+    archive_path = None
+    sha256 = hashlib.sha256()
+    try:
+        print("> Downloading", spec.url)
+
+        with urllib.request.urlopen(spec.url) as response, tempfile.NamedTemporaryFile(delete=False) as archive:
+            archive_path = Path(archive.name)
+            while True:
+                chunk = response.read(65536)
+                if len(chunk) == 0:
+                    break
+                archive.write(chunk)
+                sha256.update(chunk)
+
+        digest = sha256.hexdigest()
+        if digest != spec.hash:
+            raise ValueError("{} tarball is corrupted; its hash is {}".format(name, digest))
+
+        print("> Extracting", spec.url)
+
+        source_dir = DEPS_DIR / name
+        if source_dir.exists():
+            shutil.rmtree(source_dir)
+
+        staging_dir = source_dir / "__staging__"
+        staging_dir.mkdir(parents=True)
+
+        uncompress = subprocess.Popen(["7z", "x", "-tgzip", "-so", archive_path],
+                                      stdout=subprocess.PIPE,
+                                      stderr=subprocess.DEVNULL)
+        extract = subprocess.Popen(["7z", "x", "-ttar", "-si"],
+                                   stdin=uncompress.stdout,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT,
+                                   encoding='utf-8',
+                                   cwd=staging_dir)
+        uncompress.stdout.close()
+        output = extract.communicate()[0]
+        if extract.returncode != 0:
+            raise ValueError("{} extraction failed: {}".format(name, output))
+
+        for entry in staging_dir.glob(name + "*/*"):
+            shutil.move(entry, source_dir)
+
+        shutil.rmtree(staging_dir)
+    finally:
+        if archive_path is not None:
+            try:
+                archive_path.unlink()
+            except:
+                pass
+
+    for patch_name in spec.patches:
+        print("> Applying", patch_name)
+        patch_path = Path(RELENG_DIR / "patches" / patch_name)
+        patch_data = patch_path.read_text(encoding='utf-8')
+        p = subprocess.Popen(["patch", "-p1"],
+                             stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT,
+                             encoding='utf-8',
+                             cwd=source_dir)
+        output = p.communicate(patch_data)[0]
+        if p.returncode != 0:
+            raise ValueError("unable to apply {}: {}".format(patch_name, output))
+
+    version_file.write_text(spec.version + "\n", encoding='utf-8')
+
+    return SourceState.MODIFIED
 
 def grab_and_prepare_v8_package(v8_spec: PackageSpec, depot_spec: PackageSpec) -> SourceState:
     assert v8_spec.hash == ""
@@ -315,18 +409,22 @@ def build_package(name: str, role: PackageRole, spec: PackageSpec, extra_options
                 if manifest_path.exists():
                     continue
 
+                print()
+                print("*** Building {} with arch={} runtime={} config={} spec={}".format(name, arch, config, runtime, spec))
+
                 if spec.recipe == 'meson':
                     build_using_meson(name, arch, config, runtime, spec, extra_options)
                 else:
-                    assert name == "v8"
-                    assert spec.recipe == 'custom'
-                    build_v8(arch, config, runtime, spec, extra_options)
+                    if name == "openssl":
+                        build_openssl(arch, config, runtime, spec, extra_options)
+                    else:
+                        assert name == "v8"
+                        assert spec.recipe == 'custom'
+                        build_v8(arch, config, runtime, spec, extra_options)
 
                 assert manifest_path.exists()
 
 def build_using_meson(name: str, arch: str, config: str, runtime: str, spec: PackageSpec, extra_options: List[str]):
-    print()
-    print("*** Building name={} arch={} runtime={} config={} spec={}".format(name, arch, config, runtime, spec))
     env_dir, shell_env = get_meson_params(arch, config, runtime)
 
     source_dir = DEPS_DIR / name
@@ -593,6 +691,127 @@ def detect_bootstrap_valac() -> str:
         compilers = (BOOTSTRAP_TOOLCHAIN_DIR / "bin").glob("valac*.exe")
         cached_bootstrap_valac = next(compilers).name
     return cached_bootstrap_valac
+
+
+def build_openssl(arch: str, config: str, runtime: str, spec: PackageSpec, extra_options: List[str]):
+    env_dir, shell_env = get_meson_params(arch, config, runtime)
+    shell_env = dict(shell_env)
+    del shell_env['CFLAGS']
+    del shell_env['CXXFLAGS']
+
+    source_dir = DEPS_DIR / "openssl"
+    build_dir = env_dir / "openssl"
+    prefix = get_prefix_path(arch, config, runtime)
+
+    if build_dir.exists():
+        shutil.rmtree(build_dir)
+    shutil.copytree(source_dir, build_dir)
+
+    runtime_flag = "/MD" if runtime == 'dynamic' else "/MT"
+    if config == "Debug":
+        runtime_flag += "d"
+
+    config_path = build_dir / "Configurations" / "10-main.conf"
+    config_data = config_path.read_text(encoding='utf-8')
+    flags_to_replace = [
+        "/MTd",
+        "/MT /Zl",
+        "/MT",
+        "/MDd",
+        "/MD",
+    ]
+    placeholder = "XXXX"
+    for flag in flags_to_replace:
+        config_data = config_data.replace(flag, placeholder)
+    config_data = config_data.replace(placeholder, runtime_flag)
+    config_data = config_data.replace("/Zi /Fdossl_static.pdb", "/Z7")
+    config_path.write_text(config_data, encoding='utf-8')
+
+    options = [
+        "--prefix=" + str(prefix),
+        "--release" if config == "Release" else "--debug",
+    ]
+    options += [option for option in spec.options if not option.startswith("--openssldir")]
+    options += extra_options
+
+    os_compiler = "VC-WIN64A" if arch == "x86_64" else "VC-WIN32"
+
+    perform("perl", "Configure", *options, os_compiler, cwd=build_dir, env=shell_env)
+
+    nmake = shutil.which("nmake", path=shell_env["PATH"])
+    perform(nmake, "depend", cwd=build_dir, env=shell_env)
+    perform(nmake, "build_libs", cwd=build_dir, env=shell_env)
+
+    manifest_lines = []
+
+    install_output = perform(nmake, "install_dev", cwd=build_dir, env=shell_env, capture_output=True, encoding='utf-8').stdout
+    copy_messages = [line for line in install_output.split("\n") if line.startswith("Copying: ")]
+    prefix_length = len(str(prefix)) + 1
+    for m in copy_messages:
+        entry = m[m.index(" to ") + 4:][prefix_length:]
+        manifest_lines.append(entry)
+
+    pkgconfig_dir = prefix / "lib" / "pkgconfig"
+    pkgconfig_dir.mkdir(parents=True, exist_ok=True)
+    (pkgconfig_dir / "openssl.pc").write_text("""\
+prefix={prefix}
+exec_prefix=${{prefix}}
+libdir=${{exec_prefix}}/lib
+includedir=${{prefix}}/include
+
+Name: OpenSSL
+Description: Secure Sockets Layer and cryptography libraries and tools
+Version: {version}
+Requires: libssl libcrypto""" \
+        .format(
+            prefix=prefix.as_posix(),
+            version=spec.version,
+        ),
+        encoding='utf-8')
+    (pkgconfig_dir / "libssl.pc").write_text("""\
+prefix={prefix}
+exec_prefix=${{prefix}}
+libdir=${{exec_prefix}}/lib
+includedir=${{prefix}}/include
+
+Name: OpenSSL-libssl
+Description: Secure Sockets Layer and cryptography libraries
+Version: {version}
+Requires.private: libcrypto
+Libs: -L${{libdir}} -lssl
+Cflags: -I${{includedir}}""" \
+        .format(
+            prefix=prefix.as_posix(),
+            version=spec.version,
+        ),
+        encoding='utf-8')
+    (pkgconfig_dir / "libcrypto.pc").write_text("""\
+prefix={prefix}
+exec_prefix=${{prefix}}
+libdir=${{exec_prefix}}/lib
+includedir=${{prefix}}/include
+enginesdir=${{libdir}}/engines-1.1
+
+Name: OpenSSL-libcrypto
+Description: OpenSSL cryptography library
+Version: {version}
+Libs: -L${{libdir}} -lcrypto
+Cflags: -I${{includedir}}""" \
+        .format(
+            prefix=prefix.as_posix(),
+            version=spec.version,
+        ),
+        encoding='utf-8')
+    manifest_lines += [
+        "lib/pkgconfig/openssl.pc",
+        "lib/pkgconfig/libssl.pc",
+        "lib/pkgconfig/libcrypto.pc",
+    ]
+
+    manifest_lines.sort()
+    manifest_path = get_manifest_path("openssl", arch, config, runtime)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text("\n".join(manifest_lines), encoding='utf-8')
 
 
 def build_v8(arch: str, config: str, runtime: str, spec: PackageSpec, extra_options: List[str]):
@@ -929,7 +1148,7 @@ def vscrt_from_configuration_and_runtime(config: str, runtime: str) -> str:
 
 def perform(*args, **kwargs):
     print(">", " ".join([str(arg) for arg in args]))
-    subprocess.run(args, check=True, **kwargs)
+    return subprocess.run(args, check=True, **kwargs)
 
 def query_git_head(repo_path: str) -> str:
     return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo_path, encoding='utf-8').strip()

@@ -583,6 +583,7 @@ openssl_recipe = custom
 openssl_patches = \
 	openssl-android.patch \
 	openssl-armcap.patch \
+	openssl-windows.patch \
 	$(NULL)
 openssl_options = \
 	--openssldir=/etc/ssl \
