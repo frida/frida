@@ -149,7 +149,7 @@ selinux_deps = \
 selinux_deps_for_build = \
 	$(NULL)
 
-glib_version = d9f1d1a5dc6fa9c10714475eb0a46d0ee4a8b06c
+glib_version = 6d618ec899bcbd88b6d05a199887305d80b64fcf
 glib_url = $(frida_base_url)/glib.git
 glib_hash = $(NULL)
 glib_recipe = meson
