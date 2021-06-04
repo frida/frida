@@ -406,6 +406,7 @@ libnice_patches = \
 libnice_options = \
 	-Dgupnp=disabled \
 	-Dgstreamer=disabled \
+	-Dcrypto-library=openssl \
 	-Dexamples=disabled \
 	-Dtests=disabled \
 	-Dintrospection=disabled \
