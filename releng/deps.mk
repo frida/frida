@@ -418,8 +418,8 @@ libnice_deps = \
 libnice_deps_for_build = \
 	$(NULL)
 
-usrsctp_version = e984d7f3c1b13d0b0582497b385c93f0e8d89fb3
-usrsctp_url = https://github.com/sctplab/usrsctp.git
+usrsctp_version = 2020cb9c6cc1c26a848cd352d46ea36b11cacbe0
+usrsctp_url = $(frida_base_url)/usrsctp.git
 usrsctp_hash = $(NULL)
 usrsctp_recipe = meson
 usrsctp_patches = \
