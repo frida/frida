@@ -202,7 +202,7 @@ def generate_library_windows(package, frida_root, host, flavor, output_dir, libr
     ]
 
     tls_provider = [
-        sdk_lib_path(os.path.join("gio", "modules", "libgioschannel.a"), frida_root, host),
+        sdk_lib_path(os.path.join("gio", "modules", "libgioopenssl.a"), frida_root, host),
     ]
 
     json_glib = glib + gobject + [
