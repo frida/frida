@@ -270,6 +270,13 @@ def grab_and_prepare_regular_tarball_package(name: str, spec: PackageSpec) -> So
     except:
         pass
 
+    source_dir = DEPS_DIR / name
+    if source_dir.exists():
+        shutil.rmtree(source_dir)
+        source_state = SourceState.MODIFIED
+    else:
+        source_state = SourceState.PRISTINE
+
     archive_path = None
     sha256 = hashlib.sha256()
     try:
@@ -289,10 +296,6 @@ def grab_and_prepare_regular_tarball_package(name: str, spec: PackageSpec) -> So
             raise ValueError("{} tarball is corrupted; its hash is {}".format(name, digest))
 
         print("> Extracting", spec.url)
-
-        source_dir = DEPS_DIR / name
-        if source_dir.exists():
-            shutil.rmtree(source_dir)
 
         staging_dir = source_dir / "__staging__"
         staging_dir.mkdir(parents=True)
@@ -338,7 +341,7 @@ def grab_and_prepare_regular_tarball_package(name: str, spec: PackageSpec) -> So
 
     version_file.write_text(spec.version + "\n", encoding='utf-8')
 
-    return SourceState.MODIFIED
+    return source_state
 
 def grab_and_prepare_v8_package(v8_spec: PackageSpec, depot_spec: PackageSpec) -> SourceState:
     assert v8_spec.hash == ""
