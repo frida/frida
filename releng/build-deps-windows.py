@@ -537,7 +537,7 @@ def generate_meson_env(arch: str, config: str, runtime: str) -> MesonEnv:
     m4_path = BOOTSTRAP_TOOLCHAIN_DIR / "bin" / "m4.exe"
     bison_pkgdatadir = BOOTSTRAP_TOOLCHAIN_DIR / "share" / "bison"
 
-    vala_flags = "--target-glib=" + detect_target_glib()
+    vala_flags = "--target-glib=2.56"
 
     exe_path = ";".join([str(path) for path in [
         prefix / "bin",
@@ -675,18 +675,6 @@ sys.exit(subprocess.call([r"{bison_path}"] + args))
     shell_env["VALAFLAGS"] = vala_flags
 
     return MesonEnv(env_dir, shell_env)
-
-def detect_target_glib() -> str:
-    global cached_target_glib
-    if cached_target_glib is None:
-        major, minor = re.search(r"  version : '(\d+)\.(\d+)\.(\d+)'",
-            (DEPS_DIR / "glib" / "meson.build").read_text(encoding='utf-8')).group(1, 2)
-        major = int(major)
-        minor = int(minor)
-        if minor % 2 != 0:
-            minor += 1
-        cached_target_glib = "{}.{}".format(major, minor)
-    return cached_target_glib
 
 def detect_bootstrap_valac() -> str:
     global cached_bootstrap_valac
