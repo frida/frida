@@ -201,8 +201,21 @@ def generate_library_windows(package, frida_root, host, flavor, output_dir, libr
         sdk_lib_path("libgio-2.0.a", frida_root, host),
     ]
 
-    tls_provider = [
+    openssl = [
+        sdk_lib_path("libssl.a", frida_root, host),
+        sdk_lib_path("libcrypto.a", frida_root, host),
+    ]
+
+    tls_provider = openssl + [
         sdk_lib_path(os.path.join("gio", "modules", "libgioopenssl.a"), frida_root, host),
+    ]
+
+    nice = [
+        sdk_lib_path("libnice.a", frida_root, host),
+    ]
+
+    usrsctp = [
+        sdk_lib_path("libusrsctp.a", frida_root, host),
     ]
 
     json_glib = glib + gobject + [
@@ -251,7 +264,7 @@ def generate_library_windows(package, frida_root, host, flavor, output_dir, libr
     gum_lib = internal_arch_lib_path("gum", frida_root, host)
     gum_deps = deduplicate(glib + gobject + gio + capstone)
     gumjs_deps = deduplicate([gum_lib] + gum_deps + quickjs + v8 + tls_provider + json_glib + tinycc + sqlite + libsoup)
-    frida_core_deps = deduplicate(glib + gobject + gio + tls_provider + json_glib + gmodule + gee + libsoup + capstone)
+    frida_core_deps = deduplicate(glib + gobject + gio + tls_provider + nice + openssl + usrsctp + json_glib + gmodule + gee + libsoup + capstone)
 
     if package == "frida-gum-1.0":
         package_lib_path = gum_lib
