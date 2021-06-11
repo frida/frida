@@ -1,6 +1,15 @@
 diff -Nur openssl-orig/Configurations/windows-makefile.tmpl openssl/Configurations/windows-makefile.tmpl
 --- openssl-orig/Configurations/windows-makefile.tmpl	2021-03-25 14:28:38.000000000 +0100
-+++ openssl/Configurations/windows-makefile.tmpl	2021-06-04 20:40:36.250952900 +0200
++++ openssl/Configurations/windows-makefile.tmpl	2021-06-12 01:27:57.673948400 +0200
+@@ -7,7 +7,7 @@
+  our $resext = $target{res_extension} || ".res";
+  our $depext = $target{dep_extension} || ".d";
+  our $exeext = $target{exe_extension} || ".exe";
+- our $libext = $target{lib_extension} || ".lib";
++ our $libext = $target{lib_extension} || ".a";
+  our $shlibext = $target{shared_extension} || ".dll";
+  our $shlibextimport = $target{shared_import_extension} || ".lib";
+  our $dsoext = $target{dso_extension} || ".dll";
 @@ -359,7 +359,7 @@
  
  libclean:
