@@ -604,15 +604,15 @@ if __name__ == '__main__':
                 upload)
 
             upload_directory("frida-qml-{version}-linux-x86_64", os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "qt5", "qml"), upload)
-        elif builder == 'ubuntu_20_10-x86_64':
+        elif builder == 'ubuntu_21_04-x86_64':
             upload = get_github_uploader()
 
-            upload_python_debs("ubuntu-groovy", "python3", "/usr/bin/python3.8",
-                os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python3.8", "site-packages", "_frida.so"),
+            upload_python_debs("ubuntu-hirsute", "python3", "/usr/bin/python3.9",
+                os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python3.9", "site-packages", "_frida.so"),
                 upload)
-        elif builder == 'fedora_33-x86_64':
+        elif builder == 'fedora_34-x86_64':
             upload = get_github_uploader()
 
-            upload_python_rpms("fc33", "python3", "/usr/bin/python3.9",
+            upload_python_rpms("fc34", "python3", "/usr/bin/python3.9",
                 os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python3.9", "site-packages", "_frida.so"),
                 upload)
