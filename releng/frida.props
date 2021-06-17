@@ -14,6 +14,12 @@
     <ValaFlags>--target-glib=2.56 --vapidir="$(SolutionDir)frida-core\vapi" --vapidir="$(SolutionDir)frida-gum\vapi" --vapidir="$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\share\vala\vapi"</ValaFlags>
     <XPDeprecationWarning>false</XPDeprecationWarning>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='Win32'">
+    <FridaCoreValaFlags>-D X86 $(FridaCoreValaFlags)</FridaCoreValaFlags>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='x64'">
+    <FridaCoreValaFlags>-D X86_64 $(FridaCoreValaFlags)</FridaCoreValaFlags>
+  </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <ForcedIncludeFiles>$(SolutionDir)build\tmp-windows\frida-version.h</ForcedIncludeFiles>
