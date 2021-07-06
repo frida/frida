@@ -103,8 +103,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-helper-backend-64", "
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-portal", "frida-core\frida-portal.vcxproj", "{C21A9593-4BE8-4BE5-A7E6-39A1612FA569}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-web-gateway", "frida-core\frida-web-gateway.vcxproj", "{4833DE5B-FDC7-4CD5-8F72-EAF2F964B813}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -361,14 +359,6 @@ Global
 		{C21A9593-4BE8-4BE5-A7E6-39A1612FA569}.Release|Win32.Build.0 = Release|Win32
 		{C21A9593-4BE8-4BE5-A7E6-39A1612FA569}.Release|x64.ActiveCfg = Release|x64
 		{C21A9593-4BE8-4BE5-A7E6-39A1612FA569}.Release|x64.Build.0 = Release|x64
-		{4833DE5B-FDC7-4CD5-8F72-EAF2F964B813}.Debug|Win32.ActiveCfg = Debug|Win32
-		{4833DE5B-FDC7-4CD5-8F72-EAF2F964B813}.Debug|Win32.Build.0 = Debug|Win32
-		{4833DE5B-FDC7-4CD5-8F72-EAF2F964B813}.Debug|x64.ActiveCfg = Debug|x64
-		{4833DE5B-FDC7-4CD5-8F72-EAF2F964B813}.Debug|x64.Build.0 = Debug|x64
-		{4833DE5B-FDC7-4CD5-8F72-EAF2F964B813}.Release|Win32.ActiveCfg = Release|Win32
-		{4833DE5B-FDC7-4CD5-8F72-EAF2F964B813}.Release|Win32.Build.0 = Release|Win32
-		{4833DE5B-FDC7-4CD5-8F72-EAF2F964B813}.Release|x64.ActiveCfg = Release|x64
-		{4833DE5B-FDC7-4CD5-8F72-EAF2F964B813}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
