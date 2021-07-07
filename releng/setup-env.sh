@@ -110,7 +110,7 @@ case $FRIDA_ASAN in
 esac
 
 if which curl &>/dev/null; then
-  download_command="curl -sS"
+  download_command="curl --progress-bar"
 elif which wget &>/dev/null; then
   download_command="wget -O - -q"
 else
