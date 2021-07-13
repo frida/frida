@@ -314,7 +314,7 @@ fi
 
 xcrun="xcrun"
 if [ "$build_os_arch" == "macos-arm64" ]; then
-  if xcrun --show-sdk-path 2>&1 | grep -q "not a compatible arch"; then
+  if xcrun --show-sdk-path 2>&1 | grep -q "compatible arch"; then
     xcrun="arch -x86_64 xcrun"
   fi
 fi
