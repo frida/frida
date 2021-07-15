@@ -580,6 +580,7 @@ build/fs-tmp-%/v8/build.ninja: deps/v8-checkout/v8 build/fs-$(build_os_arch)/man
 				$(v8_buildtype_args) \
 				$(v8_platform_args) \
 				$(v8_options) \
+				$(FRIDA_V8_EXTRA_ARGS) \
 			)' \
 	) >$(@D)/build.log 2>&1
 
