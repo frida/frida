@@ -592,6 +592,15 @@ if __name__ == '__main__':
 
             upload_file("frida-gadget-{version}-linux-armhf.so", os.path.join(build_dir, "build", "frida_thin-linux-armhf", "lib", "frida", "32", "frida-gadget.so"), upload)
             upload_file("frida-gadget-{version}-linux-arm64.so", os.path.join(build_dir, "build", "frida_thin-linux-arm64", "lib", "frida", "64", "frida-gadget.so"), upload)
+        elif builder == 'ubuntu_18_04-armhf':
+            upload = get_github_uploader()
+
+            upload_python_bindings_to_pypi("/usr/bin/python2.7",
+                os.path.join(build_dir, "build", "frida_thin-linux-armhf", "lib", "python2.7", "site-packages", "_frida.so"))
+            upload_python_bindings_to_pypi("/usr/bin/python3.6",
+                os.path.join(build_dir, "build", "frida_thin-linux-armhf", "lib", "python3.6", "site-packages", "_frida.so"))
+
+            upload_node_bindings_to_npm("/usr/bin/node", upload, publish=False)
         elif builder == 'ubuntu_18_04-arm64':
             upload = get_github_uploader()
 
