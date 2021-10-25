@@ -573,9 +573,6 @@ if __name__ == '__main__':
             upload_file("frida-gadget-{version}-android-arm64.so", os.path.join(build_dir, "build", "frida-android-arm64", "lib", "frida", "64", "frida-gadget.so"), upload)
 
             upload_python_bindings_to_pypi("/usr/local/bin/python3.8",
-                os.path.join(build_dir, "build", "frida-android-arm", "lib", "python3.8", "site-packages", "_frida.so"),
-                platform_name="android-armv7l")
-            upload_python_bindings_to_pypi("/usr/local/bin/python3.8",
                 os.path.join(build_dir, "build", "frida-android-arm64", "lib", "python3.8", "site-packages", "_frida.so"),
                 platform_name="android-aarch64")
         elif builder == 'ubuntu_18_04-x86_64':
