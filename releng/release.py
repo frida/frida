@@ -58,7 +58,7 @@ if __name__ == '__main__':
                 if lief is None:
                     raise RuntimeError("LIEF is required for preparing the frida-python extension for Android")
                 ext = lief.parse(extension)
-                ext.add_library("libpython3.9.so.1.0")
+                ext.add_library("libpython3.10.so.1.0")
                 ext.write(patched_extension)
                 extension = patched_extension
 
