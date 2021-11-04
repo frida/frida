@@ -383,7 +383,7 @@ glib_networking_deps = \
 glib_networking_deps_for_build = \
 	$(NULL)
 
-libnice_version = a79e99251cd44cd1c8296422bf7c8314ae1ceb75
+libnice_version = fc7f3c434047973ad2753171554f5c0e1b5f8180
 libnice_url = $(frida_base_url)/libnice.git
 libnice_hash = $(NULL)
 libnice_recipe = meson
