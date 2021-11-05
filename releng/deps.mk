@@ -44,13 +44,11 @@ m4_deps = \
 m4_deps_for_build = \
 	$(NULL)
 
-autoconf_version = 2.69
+autoconf_version = 2.71
 autoconf_url = https://$(gnu_mirror)/autoconf/autoconf-$(autoconf_version).tar.gz
-autoconf_hash = 954bd69b391edc12d6a4a51a2dd1476543da5c6bbf05a95b59dc0dd6fd4c2969
+autoconf_hash = 431075ad0bf529ef13cb41e9042c542381103e80015686222b8a9d4abef42a1c
 autoconf_recipe = autotools
 autoconf_patches = \
-	autoconf-uclibc.patch \
-	autoconf-doc-fix-texinfo-macro-usage.patch \
 	$(NULL)
 autoconf_options = \
 	$(NULL)
