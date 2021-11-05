@@ -302,7 +302,7 @@ brotli_deps = \
 brotli_deps_for_build = \
 	$(NULL)
 
-minizip_version = 4501ae619720d6769302eb792ae9389d878201f8
+minizip_version = 511451e53886faac39806fa4208e861ae2ef2fb1
 minizip_url = $(frida_base_url)/minizip.git
 minizip_hash = $(NULL)
 minizip_recipe = meson
