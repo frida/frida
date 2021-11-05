@@ -359,7 +359,7 @@ libunwind_deps = \
 libunwind_deps_for_build = \
 	$(NULL)
 
-glib_networking_version = 0ef1a69313d0143bb903c4de9f175f560123b93c
+glib_networking_version = d30156d5429410330bf3a574db5551cacb7e6acd
 glib_networking_url = $(frida_base_url)/glib-networking.git
 glib_networking_hash = $(NULL)
 glib_networking_recipe = meson
