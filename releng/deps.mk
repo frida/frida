@@ -289,7 +289,7 @@ xz_deps = \
 xz_deps_for_build = \
 	$(NULL)
 
-brotli_version = 753ac0f5855bcf8f980bd7c787ac56030b42db84
+brotli_version = 8abf3188d1ef4bb8a633f894fec731bdd510ee49
 brotli_url = $(frida_base_url)/brotli.git
 brotli_hash = $(NULL)
 brotli_recipe = meson
