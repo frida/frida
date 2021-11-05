@@ -181,7 +181,7 @@ glib_options += -Diconv=external
 glib_deps += libiconv
 endif
 
-pkg_config_version = b7fb5edc1f1a4fb17cd5cb94f4cf21912184da43
+pkg_config_version = 4696795673d1d3dec46b663df48f8cbf66461d14
 pkg_config_url = $(frida_base_url)/pkg-config.git
 pkg_config_hash = $(NULL)
 pkg_config_recipe = meson
