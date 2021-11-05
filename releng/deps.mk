@@ -400,7 +400,7 @@ libnice_deps = \
 libnice_deps_for_build = \
 	$(NULL)
 
-usrsctp_version = 2020cb9c6cc1c26a848cd352d46ea36b11cacbe0
+usrsctp_version = 16dab49d6f589fe1cbaa1031e88868e8a462a82e
 usrsctp_url = $(frida_base_url)/usrsctp.git
 usrsctp_hash = $(NULL)
 usrsctp_recipe = meson
