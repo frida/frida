@@ -12,6 +12,7 @@ def make_gnome_url(repo_name):
 upstreams = {
     "meson": "https://github.com/mesonbuild/meson.git",
     "zlib": "https://github.com/madler/zlib.git",
+    "brotli": "https://github.com/google/brotli.git",
     "libffi": "https://github.com/libffi/libffi.git",
     "glib": make_gnome_url("glib"),
     "glib-networking": make_gnome_url("glib-networking"),
