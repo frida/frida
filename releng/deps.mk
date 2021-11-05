@@ -31,13 +31,11 @@ libiconv_deps = \
 libiconv_deps_for_build = \
 	$(NULL)
 
-m4_version = 1.4.18
+m4_version = 1.4.19
 m4_url = https://$(gnu_mirror)/m4/m4-$(m4_version).tar.gz
-m4_hash = ab2633921a5cd38e48797bf5521ad259bdc4b979078034a3b790d7fec5493fab
+m4_hash = 3be4a26d825ffdfda52a56fc43246456989a3630093cced3fbddf4771ee58a70
 m4_recipe = autotools
 m4_patches = \
-	m4-vasnprintf-apple-fix.patch \
-	m4-ftbfs-fix.patch \
 	$(NULL)
 m4_options = \
 	$(NULL)
