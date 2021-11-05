@@ -16,6 +16,7 @@ upstreams = {
     "glib": make_gnome_url("glib"),
     "glib-networking": make_gnome_url("glib-networking"),
     "libnice": "https://gitlab.freedesktop.org/libnice/libnice.git",
+    "usrsctp": "https://github.com/sctplab/usrsctp.git",
     "libgee": make_gnome_url("libgee"),
     "json-glib": make_gnome_url("json-glib"),
     "libpsl": "https://github.com/rockdaboot/libpsl.git",
