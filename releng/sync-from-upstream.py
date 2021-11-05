@@ -22,7 +22,7 @@ upstreams = {
     "libxml2": make_gnome_url("libxml2"),
     "libsoup": make_gnome_url("libsoup"),
     "vala": make_gnome_url("vala"),
-    "pkg-config": "https://anongit.freedesktop.org/git/pkg-config.git",
+    "pkg-config": "https://gitlab.freedesktop.org/pkg-config/pkg-config.git",
     "quickjs": "https://github.com/bellard/quickjs.git",
     "gn": "https://gn.googlesource.com/gn",
     "v8": "https://chromium.googlesource.com/v8/v8",
