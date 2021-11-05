@@ -58,9 +58,9 @@ autoconf_deps = \
 autoconf_deps_for_build = \
 	$(NULL)
 
-automake_version = 1.16.2
+automake_version = 1.16.5
 automake_url = https://$(gnu_mirror)/automake/automake-$(automake_version).tar.gz
-automake_hash = b2f361094b410b4acbf4efba7337bdb786335ca09eb2518635a09fb7319ca5c1
+automake_hash = 07bd24ad08a64bc17250ce09ec56e921d6343903943e99ccf63bbf0705e34605
 automake_recipe = autotools
 automake_patches = \
 	$(NULL)
