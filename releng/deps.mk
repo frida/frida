@@ -416,7 +416,7 @@ usrsctp_deps = \
 usrsctp_deps_for_build = \
 	$(NULL)
 
-libgee_version = efe80dbdc63fb5aeb4d0f6999fa19621efb1865c
+libgee_version = dfc445712c2e597f0e58b58c055ad99d3a86c2a5
 libgee_url = $(frida_base_url)/libgee.git
 libgee_hash = $(NULL)
 libgee_recipe = meson
