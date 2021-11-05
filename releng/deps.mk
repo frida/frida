@@ -324,7 +324,7 @@ ifeq ($(FRIDA_LIBC), uclibc)
 minizip_deps += libiconv
 endif
 
-sqlite_version = b67ff8d8344c355ec322e1a838dd204416483be2
+sqlite_version = 85d71437565bc68959fcf2225cfd5f94b0c8451f
 sqlite_url = $(frida_base_url)/sqlite.git
 sqlite_hash = $(NULL)
 sqlite_recipe = meson
