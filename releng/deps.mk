@@ -210,9 +210,9 @@ flex_deps = \
 flex_deps_for_build = \
 	$(NULL)
 
-bison_version = 3.7.3
+bison_version = 3.8.2
 bison_url = https://$(gnu_mirror)/bison/bison-$(bison_version).tar.gz
-bison_hash = 104fe912f2212ab4e4a59df888a93b719a046ffc38d178e943f6c54b1f27b3c7
+bison_hash = 06c9e13bdf7eb24d4ceb6b59205a4f67c2c7e7213119644430fe82fbd14a0abb
 bison_recipe = autotools
 bison_patches = \
 	$(NULL)
