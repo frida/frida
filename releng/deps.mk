@@ -36,6 +36,7 @@ m4_url = https://$(gnu_mirror)/m4/m4-$(m4_version).tar.gz
 m4_hash = 3be4a26d825ffdfda52a56fc43246456989a3630093cced3fbddf4771ee58a70
 m4_recipe = autotools
 m4_patches = \
+	m4-macos-arm64e.patch \
 	$(NULL)
 m4_options = \
 	$(NULL)
