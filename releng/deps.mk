@@ -224,7 +224,7 @@ bison_deps = \
 bison_deps_for_build = \
 	$(NULL)
 
-vala_version = 5b1ad403892f75478d0d4f11e49392efa79a1748
+vala_version = 86e8471bfdde7e4b55aba0474517a4f12e3c1b1b
 vala_url = $(frida_base_url)/vala.git
 vala_hash = $(NULL)
 vala_recipe = meson
