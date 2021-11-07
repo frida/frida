@@ -568,6 +568,7 @@ openssl_patches = \
 	openssl-armcap.patch \
 	openssl-windows.patch \
 	openssl-macos-sdk-compatibility.patch \
+	openssl-android.patch \
 	$(NULL)
 openssl_options = \
 	--openssldir=/etc/ssl \
