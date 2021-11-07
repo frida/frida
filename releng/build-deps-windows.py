@@ -353,6 +353,7 @@ def grab_and_prepare_v8_package(v8_spec: PackageSpec, depot_spec: PackageSpec) -
     assert depot_spec.deps_for_build == []
     grab_and_prepare_regular_package("depot_tools", depot_spec)
     depot_dir = DEPS_DIR / "depot_tools"
+    perform("git", "checkout", "-q", "main", cwd=depot_dir)
     gclient = depot_dir / "gclient.bat"
     env = make_v8_env(depot_dir)
     metrics_cfg = depot_dir / "metrics.cfg"
