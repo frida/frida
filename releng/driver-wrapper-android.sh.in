@@ -6,6 +6,13 @@
 output_type=executable
 output_path=
 
+runtime=c
+case "$0" in
+  *++)
+    runtime=cxx
+    ;;
+esac
+
 argv=()
 while [[ $# > 0 ]]; do
   arg="$1"
@@ -34,11 +41,33 @@ while [[ $# > 0 ]]; do
   shift
 done
 
+base_argv=("-target" "@target@" "-no-canonical-prefixes")
+case $output_type in
+  code|object)
+    base_argv+=("--sysroot" "@toolroot@/sysroot")
+    if [[ $runtime = cxx ]]; then
+      base_argv+=("-nostdinc++")
+      base_argv+=("-I@ndkroot@/sources/cxx-stl/llvm-libc++/include")
+      base_argv+=("-I@ndkroot@/sources/cxx-stl/llvm-libc++abi/include")
+    fi
+    ;;
+  executable|shlib)
+    base_argv+=("-Wl,-rpath-link=@toolroot@/sysroot/usr/lib/@tooltriplet@/@api@")
+    if [[ $runtime = cxx ]]; then
+      base_argv+=("-nostdlib++")
+      for name in @cxxlibs@; do
+        base_argv+=("@ndkroot@/sources/cxx-stl/llvm-libc++/libs/@abi@/lib$name.a")
+      done
+    fi
+    base_argv+=("@toolroot@/lib64/clang/@clang_version@/lib/linux/@clang_arch@/libunwind.a")
+    base_argv+=("-lc")
+    ;;
+esac
 if [[ $output_type = executable ]]; then
-  argv+=("-Wl,-pie")
+  base_argv+=("-Wl,-pie")
 fi
 
-"@driver@" "${argv[@]}" || exit $?
+"@driver@" "${base_argv[@]}" "${argv[@]}" || exit $?
 
 case $output_type in
   executable|shlib)

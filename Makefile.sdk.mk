@@ -300,13 +300,13 @@ endif
 ifeq ($(host_os), android)
 
 ifeq ($(host_arch), x86)
-openssl_arch_args := android-x86 -D__ANDROID_API__=18
+openssl_arch_args := android-x86 -D__ANDROID_API__=19
 endif
 ifeq ($(host_arch), x86_64)
 openssl_arch_args := android-x86_64 -D__ANDROID_API__=21
 endif
 ifeq ($(host_arch), arm)
-openssl_arch_args := android-arm -D__ANDROID_API__=18 -D__ARM_MAX_ARCH__=7
+openssl_arch_args := android-arm -D__ANDROID_API__=19 -D__ARM_MAX_ARCH__=7
 endif
 ifeq ($(host_arch), arm64)
 openssl_arch_args := android-arm64 -D__ANDROID_API__=21
@@ -465,7 +465,7 @@ v8_platform_args := \
 	android_ndk_root="$(ANDROID_NDK_ROOT)" \
 	android_ndk_version="r21" \
 	android_ndk_major_version=21 \
-	android32_ndk_api_level=18 \
+	android32_ndk_api_level=19 \
 	android64_ndk_api_level=21 \
 	clang_base_path="$(abspath $(ANDROID_NDK_ROOT)/toolchains/llvm/prebuilt/$(ndk_build_os_arch))"
 endif
