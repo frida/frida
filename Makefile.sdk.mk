@@ -312,7 +312,12 @@ ifeq ($(host_arch), arm64)
 openssl_arch_args := android-arm64 -D__ANDROID_API__=21
 endif
 
+ifeq ($(build_os_arch), macos-arm64)
+# NDK does not yet support Apple Silicon.
+ndk_build_os_arch := darwin-x86_64
+else
 ndk_build_os_arch := $(shell uname -s | tr '[A-Z]' '[a-z]')-$(build_arch)
+endif
 ndk_llvm_prefix := $(ANDROID_NDK_ROOT)/toolchains/llvm/prebuilt/$(ndk_build_os_arch)
 openssl_host_env := \
 	PATH=$(ndk_llvm_prefix)/bin:$$PATH \
