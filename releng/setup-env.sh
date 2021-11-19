@@ -1149,6 +1149,9 @@ meson_cross_file=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-${host_os_arch}.txt
   if [ -n "$READELF" ]; then
     echo "readelf = '$READELF'"
   fi
+  if [ -n "$OBJCOPY" ]; then
+    echo "objcopy = '$OBJCOPY'"
+  fi
   if [ -n "$OBJDUMP" ]; then
     echo "objdump = '$OBJDUMP'"
   fi
