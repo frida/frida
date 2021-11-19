@@ -432,6 +432,7 @@ case $host_os in
     RANLIB="${RANLIB:-${host_toolprefix}ranlib}"
     STRIP="${STRIP:-${host_toolprefix}strip}"
     STRIP_FLAGS="--strip-all"
+    READELF="${READELF:-${host_toolprefix}readelf}"
     OBJCOPY="${OBJCOPY:-${host_toolprefix}objcopy}"
     OBJDUMP="${OBJDUMP:-${host_toolprefix}objdump}"
 
@@ -771,6 +772,7 @@ case $host_os in
     RANLIB="${android_toolroot}/bin/llvm-ranlib"
     STRIP="${android_toolroot}/bin/llvm-strip"
     STRIP_FLAGS="--strip-all"
+    READELF="${android_toolroot}/bin/llvm-readelf"
     OBJCOPY="${android_toolroot}/bin/llvm-objcopy"
     OBJDUMP="${android_toolroot}/bin/llvm-objdump"
 
@@ -836,6 +838,7 @@ case $host_os in
     RANLIB="$qnx_toolchain_prefix-ranlib"
     STRIP="$qnx_toolchain_prefix-strip"
     STRIP_FLAGS="--strip-all"
+    READELF="$qnx_toolchain_prefix-readelf"
     OBJCOPY="$qnx_toolchain_prefix-objcopy"
     OBJDUMP="$qnx_toolchain_prefix-objdump"
 
@@ -1011,6 +1014,10 @@ fi
   echo "export CONFIG_SITE=\"$CONFIG_SITE\""
 ) > $env_rc
 
+if [ -n "$READELF" ]; then
+  echo "export READELF=\"$READELF\"" >> $env_rc
+fi
+
 if [ -n "$OBJCOPY" ]; then
   echo "export OBJCOPY=\"$OBJCOPY\"" >> $env_rc
 fi
@@ -1139,6 +1146,9 @@ meson_cross_file=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-${host_os_arch}.txt
   echo "vala = '$VALAC'"
   echo "ar = '$AR'"
   echo "nm = '$NM'"
+  if [ -n "$READELF" ]; then
+    echo "readelf = '$READELF'"
+  fi
   if [ -n "$OBJDUMP" ]; then
     echo "objdump = '$OBJDUMP'"
   fi
