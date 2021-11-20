@@ -4,7 +4,7 @@
 # systems with Android-specific quirks.
 
 output_type=executable
-output_path=
+output_path=a.out
 
 runtime=c
 case "$0" in
