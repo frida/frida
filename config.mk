@@ -3,7 +3,9 @@ PREFIX ?= /usr
 
 FRIDA := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
+FRIDA_CONNECTIVITY ?= enabled
 FRIDA_V8 ?= enabled
+
 FRIDA_ASAN ?= no
 
 ifeq ($(FRIDA_ASAN), yes)
