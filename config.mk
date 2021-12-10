@@ -3,8 +3,10 @@ PREFIX ?= /usr
 
 FRIDA := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
-FRIDA_CONNECTIVITY ?= enabled
+# Features ordered from largest to smallest, in terms of binary footprint size
 FRIDA_V8 ?= enabled
+FRIDA_CONNECTIVITY ?= enabled
+FRIDA_DATABASE ?= enabled
 
 FRIDA_ASAN ?= no
 
