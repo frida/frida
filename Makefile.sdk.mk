@@ -151,19 +151,35 @@ build/fs-%/manifest/libdwarf.pkg: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Make
 	(set -x \
 		&& . $< \
 		&& $(MAKE) $(MAKE_J) -C $$builddir/libdwarf libdwarf.la \
-		&& install -d $$prefix/include \
+		&& install -d $$prefix/include/libdwarf \
 		&& for header in $(libdwarf_headers); do \
-			install -m 644 deps/libdwarf/libdwarf/$$header $$prefix/include; \
+			install -m 644 deps/libdwarf/libdwarf/$$header $$prefix/include/libdwarf; \
 		done \
 		&& install -d $$prefix/lib \
 		&& install -m 644 $$builddir/libdwarf/.libs/libdwarf.a $$prefix/lib \
+		&& install -d $$prefix/lib/pkgconfig \
+		&& ( \
+			echo "prefix=\$${frida_sdk_prefix}"; \
+			echo "exec_prefix=\$${prefix}"; \
+			echo "libdir=\$${exec_prefix}/lib"; \
+			echo "includedir=\$${prefix}/include"; \
+			echo "pkgincludedir=\$${prefix}/include/libdwarf"; \
+			echo ""; \
+			echo "Name: libdwarf"; \
+			echo "Description: DWARF debug symbols library"; \
+			echo "Version: $(libdwarf_version)"; \
+			echo "Requires.private: zlib"; \
+			echo "Libs: -L\$${libdir} -ldwarf"; \
+			echo "Cflags: -I\$${pkgincludedir}" \
+		) > $$prefix/lib/pkgconfig/libdwarf.pc \
 	) >>$$builddir/build.log 2>&1
 	@$(call print-status,libdwarf,Generating manifest)
 	@( \
 		for header in $(libdwarf_headers); do \
-			echo "include/$$header"; \
+			echo "include/libdwarf/$$header"; \
 		done; \
-		echo "lib/libdwarf.a" \
+		echo "lib/libdwarf.a"; \
+		echo "lib/pkgconfig/libdwarf.pc" \
 	) | sort > $@
 
 
