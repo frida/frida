@@ -1,0 +1,23 @@
+diff --git a/lib/eu-config.h b/lib/eu-config.h
+index c7d7cbb2..46b807ef 100644
+--- a/lib/eu-config.h
++++ b/lib/eu-config.h
+@@ -54,7 +54,7 @@
+ 
+ /* gettext helper macros.  */
+ #define N_(Str) Str
+-#define _(Str) dgettext ("elfutils", Str)
++#define _(Str) Str
+ 
+ /* Compiler-specific definitions.  */
+ #define strong_alias(name, aliasname) \
+diff --git a/lib/libintl.h b/lib/libintl.h
+new file mode 100644
+index 00000000..5efd469a
+--- /dev/null
++++ b/lib/libintl.h
+@@ -0,0 +1 @@
++/* Intentionally left blank. */
+-- 
+2.33.1
+

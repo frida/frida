@@ -241,23 +241,26 @@ vala_deps_for_build = \
 	bison \
 	$(NULL)
 
-elfutils_version = b503c358dde835d8a1ae3ebd4968755ff396f814
+elfutils_version = db862a11910a5d4c007c549c2b4ce4cad62f242b
 elfutils_url = git://sourceware.org/git/elfutils.git
 elfutils_hash = $(NULL)
-elfutils_recipe = custom
+elfutils_recipe = autotools
 elfutils_patches = \
-	elfutils-clang.patch \
-	elfutils-android.patch \
+	elfutils-disable-elfso.patch \
+	elfutils-disable-libdw.patch \
+	elfutils-disable-i18n.patch \
 	elfutils-glibc-compatibility.patch \
-	elfutils-musl.patch \
+	elfutils-android.patch \
 	$(NULL)
 elfutils_options = \
 	--enable-maintainer-mode \
+	--enable-install-elfh \
+	--disable-elfso \
+	--disable-libdw \
 	--disable-libdebuginfod \
 	--disable-debuginfod \
 	$(NULL)
 elfutils_deps = \
-	xz \
 	zlib \
 	$(NULL)
 elfutils_deps_for_build = \

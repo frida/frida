@@ -137,44 +137,6 @@ endif
 $(eval $(call make-package-rules,$(packages),fs))
 
 
-libelf_headers = \
-	libelf.h \
-	elf.h \
-	gelf.h \
-	nlist.h \
-	$(NULL)
-
-$(eval $(call make-autotools-package-rules-without-build-rule,elfutils,fs))
-
-build/fs-%/manifest/elfutils.pkg: build/fs-env-%.rc build/fs-tmp-%/elfutils/Makefile
-	@$(call print-status,elfutils,Building)
-	@prefix=build/fs-$*; \
-	builddir=build/fs-tmp-$*/elfutils; \
-	(set -x \
-		&& . $< \
-		&& $(MAKE) $(MAKE_J) -C $$builddir/libelf libelf.a \
-			elf_begin_no_Werror=1 \
-			elf_cntl_no_Werror=1 \
-			elf32_updatenull_no_Werror=1 \
-			elf64_updatenull_no_Werror=1 \
-		&& install -d $$prefix/include \
-		&& for header in $(libelf_headers); do \
-			install -m 644 deps/elfutils/libelf/$$header $$prefix/include; \
-		done \
-		&& install -d $$prefix/lib \
-		&& install -m 644 $$builddir/libelf/libelf.a $$prefix/lib \
-		&& install -d $$prefix/lib/pkgconfig \
-		&& install -m 644 $$builddir/config/libelf.pc $$prefix/lib/pkgconfig \
-	) >>$$builddir/build.log 2>&1
-	@$(call print-status,elfutils,Generating manifest)
-	@( \
-		for header in $(libelf_headers); do \
-			echo "include/$$header"; \
-		done; \
-		echo "lib/libelf.a" \
-	) | sort > $@
-
-
 libdwarf_headers = \
 	dwarf.h \
 	libdwarf.h \

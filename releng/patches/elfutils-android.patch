@@ -1,70 +1,142 @@
 diff --git a/configure.ac b/configure.ac
-index 6896dff3..ab397c35 100644
+index 8acb66f5..34013b70 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -533,7 +533,7 @@ if test "$libc_has_argp" = "false" ; then
- 	AC_CHECK_LIB([argp], [argp_parse], [have_argp="true"], [have_argp="false"])
+@@ -556,17 +556,18 @@ saved_LIBS="$LIBS"
+ AC_SEARCH_LIBS([argp_parse], [argp])
+ LIBS="$saved_LIBS"
+ case "$ac_cv_search_argp_parse" in
+-        no) AC_MSG_FAILURE([failed to find argp_parse]) ;;
++        no) AC_MSG_WARN([failed to find argp_parse]) ;;
+         -l*) argp_LDADD="$ac_cv_search_argp_parse" ;;
+         *) argp_LDADD= ;;
+ esac
+ AC_SUBST([argp_LDADD])
++AM_CONDITIONAL([HAVE_ARGP_PARSE], [test "x$ac_cv_search_argp_parse" != "xno"])
  
- 	if test "$have_argp" = "false"; then
--		AC_MSG_ERROR("no libargp found")
-+		AC_MSG_WARN("no libargp found")
- 	else
- 		argp_LDADD="-largp"
- 	fi
+ saved_LIBS="$LIBS"
+ AC_SEARCH_LIBS([fts_close], [fts])
+ LIBS="$saved_LIBS"
+ case "$ac_cv_search_fts_close" in
+-        no) AC_MSG_FAILURE([failed to find fts_close]) ;;
++        no) AC_MSG_WARN([failed to find fts_close]) ;;
+         -l*) fts_LIBS="$ac_cv_search_fts_close" ;;
+         *) fts_LIBS= ;;
+ esac
+@@ -576,7 +577,7 @@ saved_LIBS="$LIBS"
+ AC_SEARCH_LIBS([_obstack_free], [obstack])
+ LIBS="$saved_LIBS"
+ case "$ac_cv_search__obstack_free" in
+-        no) AC_MSG_FAILURE([failed to find _obstack_free]) ;;
++        no) AC_MSG_WARN([failed to find _obstack_free]) ;;
+         -l*) obstack_LIBS="$ac_cv_search__obstack_free" ;;
+         *) obstack_LIBS= ;;
+ esac
+diff --git a/lib/Makefile.am b/lib/Makefile.am
+index 42ddf5ae..b0a57826 100644
+--- a/lib/Makefile.am
++++ b/lib/Makefile.am
+@@ -35,7 +35,11 @@ noinst_LIBRARIES = libeu.a
+ 
+ libeu_a_SOURCES = xasprintf.c xstrdup.c xstrndup.c xmalloc.c next_prime.c \
+ 		  crc32.c crc32_file.c \
+-		  color.c error.c printversion.c
++		  error.c
++
++if HAVE_ARGP_PARSE
++libeu_a_SOURCES += color.c printversion.c
++endif
+ 
+ noinst_HEADERS = fixedsizehash.h libeu.h system.h dynamicsizehash.h list.h \
+ 		 eu-config.h color.h printversion.h bpf.h \
+diff --git a/lib/error.c b/lib/error.c
+index 5186fc15..874e3db3 100644
+--- a/lib/error.c
++++ b/lib/error.c
+@@ -28,7 +28,44 @@
+ 
+ #include <config.h>
+ 
+-#if !defined(HAVE_ERROR_H) && defined(HAVE_ERR_H)
++#if defined(__ANDROID__) && __ANDROID_API__ < 23
++#include <errno.h>
++#include <stdarg.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++
++unsigned int error_message_count = 0;
++
++void error(int status, int errnum, const char *format, ...) {
++  va_list argp;
++  int saved_errno = errno;
++
++  fflush (stdout);
++
++  va_start(argp, format);
++
++#pragma GCC diagnostic push
++#pragma GCC diagnostic ignored "-Wformat-nonliteral"
++  vfprintf (stderr, format, argp);
++#pragma GCC diagnostic pop
++  if (errnum)
++    fprintf (stderr, ": %s", strerror (errno));
++  fputc ('\n', stderr);
++
++  if (status)
++    exit (status);
++
++  va_end(argp);
++
++  fflush (stderr);
++
++  ++error_message_count;
++
++  errno = saved_errno;
++}
++
++#elif !defined(HAVE_ERROR_H) && defined(HAVE_ERR_H)
+ #include <errno.h>
+ #include <stdarg.h>
+ #include <stdio.h>
 diff --git a/lib/system.h b/lib/system.h
-index 292082bd..172456d2 100644
+index edbc8488..56b924ef 100644
 --- a/lib/system.h
 +++ b/lib/system.h
-@@ -33,6 +33,7 @@
- #include <error.h>
- #include <stddef.h>
- #include <stdint.h>
-+#include <string.h>
- #include <sys/param.h>
- #include <endian.h>
- #include <byteswap.h>
-diff --git a/libelf/elf_error.c b/libelf/elf_error.c
-index 5364e685..e596108d 100644
---- a/libelf/elf_error.c
-+++ b/libelf/elf_error.c
-@@ -32,7 +32,6 @@
- #endif
- 
- #include <assert.h>
--#include <libintl.h>
- #include <stdbool.h>
- #include <stdint.h>
+@@ -42,7 +42,10 @@
+ #include <stdarg.h>
  #include <stdlib.h>
+ 
+-#if defined(HAVE_ERROR_H)
++#if defined(__ANDROID__) && __ANDROID_API__ < 23
++extern int error_message_count;
++void error(int status, int errnum, const char *format, ...);
++#elif defined(HAVE_ERROR_H)
+ #include <error.h>
+ #elif defined(HAVE_ERR_H)
+ extern int error_message_count;
 diff --git a/libelf/elf_update.c b/libelf/elf_update.c
-index 9b8867ce..afb3aa82 100644
+index 9b8867ce..c653814b 100644
 --- a/libelf/elf_update.c
 +++ b/libelf/elf_update.c
-@@ -91,6 +91,7 @@ write_file (Elf *elf, int64_t size, int change_bo, size_t shnum)
- 	 fallback case might fail (with unexpected errnos) in some cases.
- 	 So we only report an error when the call fails and errno is
- 	 ENOSPC. Otherwise we ignore the error and treat it as just hint.  */
-+#if 0
-       if (elf->parent == NULL
+@@ -95,12 +95,17 @@ write_file (Elf *elf, int64_t size, int change_bo, size_t shnum)
  	  && (elf->maximum_size == ~((size_t) 0)
  	      || (size_t) size > elf->maximum_size))
-@@ -116,6 +117,7 @@ write_file (Elf *elf, int64_t size, int change_bo, size_t shnum)
- 	    }
- 
- 	}
+ 	{
++#if defined(__ANDROID__) && __ANDROID_API__ < 21
++	  /* Frida doesn't need this functionality so we won't bother
++	     porting it. */
++#else
+ 	  if (unlikely (posix_fallocate (elf->fildes, 0, size) != 0))
+ 	    if (errno == ENOSPC)
+ 	      {
+ 		__libelf_seterrno (ELF_E_WRITE_ERROR);
+ 		return -1;
+ 	      }
 +#endif
  
-       /* The file is mmaped.  */
-       if ((class == ELFCLASS32
-diff --git a/libelf/libelfP.h b/libelf/libelfP.h
-index b55d5c48..5f13d947 100644
---- a/libelf/libelfP.h
-+++ b/libelf/libelfP.h
-@@ -40,7 +40,7 @@
- #include <string.h>
- 
- /* gettext helper macros.  */
--#define _(Str) dgettext ("elfutils", Str)
-+#define _(Str) Str
- 
- 
- /* Helper Macros to write 32 bit and 64 bit functions.  */
+ 	  /* Extend the mmap address if needed.  */
+ 	  if (elf->cmd == ELF_C_RDWR_MMAP
+-- 
+2.33.1
+
