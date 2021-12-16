@@ -15,6 +15,7 @@ upstreams = {
     "brotli": "https://github.com/google/brotli.git",
     "minizip": "https://github.com/zlib-ng/minizip-ng.git",
     "libffi": "https://github.com/libffi/libffi.git",
+    "libunwind": "https://github.com/libunwind/libunwind.git",
     "glib": make_gnome_url("glib"),
     "glib-networking": make_gnome_url("glib-networking"),
     "libnice": "https://gitlab.freedesktop.org/libnice/libnice.git",
