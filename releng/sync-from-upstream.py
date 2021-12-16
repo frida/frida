@@ -33,7 +33,7 @@ upstreams = {
     "v8/build": "https://chromium.googlesource.com/chromium/src/build",
     "v8/buildtools": "https://chromium.googlesource.com/chromium/src/buildtools",
     "v8/third_party/zlib": "https://chromium.googlesource.com/chromium/src/third_party/zlib",
-    "capstone": "https://github.com/aquynh/capstone.git",
+    "capstone": "https://github.com/capstone-engine/capstone.git",
     "tinycc": "https://repo.or.cz/tinycc.git",
     "quickjs": "https://github.com/bellard/quickjs.git",
 }
