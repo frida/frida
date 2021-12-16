@@ -266,10 +266,10 @@ elfutils_deps = \
 elfutils_deps_for_build = \
 	$(NULL)
 
-libdwarf_version = 20201201
-libdwarf_url = https://www.prevanders.net/libdwarf-$(libdwarf_version).tar.gz
-libdwarf_hash = 62db1028dfd8fd877d01ae75873ac1fe311437012ef48a0ac4157189e1e9b2c9
-libdwarf_recipe = custom
+libdwarf_version = 0.3.1
+libdwarf_url = https://www.prevanders.net/libdwarf-$(libdwarf_version).tar.xz
+libdwarf_hash = f2592e56aa5d8f39869367edc80bfe6529c04a5223219f628b6249b5bdd5f721
+libdwarf_recipe = autotools
 libdwarf_patches = \
 	$(NULL)
 libdwarf_options = \

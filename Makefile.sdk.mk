@@ -137,36 +137,6 @@ endif
 $(eval $(call make-package-rules,$(packages),fs))
 
 
-libdwarf_headers = \
-	dwarf.h \
-	libdwarf.h \
-	$(NULL)
-
-$(eval $(call make-autotools-package-rules-without-build-rule,libdwarf,fs))
-
-build/fs-%/manifest/libdwarf.pkg: build/fs-env-%.rc build/fs-tmp-%/libdwarf/Makefile
-	@$(call print-status,libdwarf,Building)
-	@prefix=build/fs-$*; \
-	builddir=build/fs-tmp-$*/libdwarf; \
-	(set -x \
-		&& . $< \
-		&& $(MAKE) $(MAKE_J) -C $$builddir/libdwarf libdwarf.la \
-		&& install -d $$prefix/include \
-		&& for header in $(libdwarf_headers); do \
-			install -m 644 deps/libdwarf/libdwarf/$$header $$prefix/include; \
-		done \
-		&& install -d $$prefix/lib \
-		&& install -m 644 $$builddir/libdwarf/.libs/libdwarf.a $$prefix/lib \
-	) >>$$builddir/build.log 2>&1
-	@$(call print-status,libdwarf,Generating manifest)
-	@( \
-		for header in $(libdwarf_headers); do \
-			echo "include/$$header"; \
-		done; \
-		echo "lib/libdwarf.a" \
-	) | sort > $@
-
-
 ifeq ($(FRIDA_ASAN), yes)
 openssl_buildtype_args := \
 	enable-asan \
