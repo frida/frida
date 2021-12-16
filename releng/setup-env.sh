@@ -1129,13 +1129,13 @@ meson_cross_file=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-${host_os_arch}.txt
   echo "common_flags = $meson_common_flags"
   echo ""
   echo "[binaries]"
-  echo "c = '$meson_c'"
-  echo "cpp = '$meson_cpp'"
+  echo "c = ['$meson_c'${meson_version_include}]"
+  echo "cpp = ['$meson_cpp'${meson_version_include}]"
   if [ -n "$meson_objc" ]; then
-    echo "objc = '$meson_objc'"
+    echo "objc = ['$meson_objc'${meson_version_include}]"
   fi
   if [ -n "$meson_objcpp" ]; then
-    echo "objcpp = '$meson_objcpp'"
+    echo "objcpp = ['$meson_objcpp'${meson_version_include}]"
   fi
   if [ -n "$meson_linker_flavor" ]; then
     echo "c_ld = '$meson_linker_flavor'"
@@ -1168,13 +1168,13 @@ meson_cross_file=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-${host_os_arch}.txt
   echo "pkgconfig = '$PKG_CONFIG'"
   echo ""
   echo "[built-in options]"
-  echo "c_args = common_flags + [${meson_c_args}${meson_version_include}]"
-  echo "cpp_args = common_flags + [${meson_cpp_args}${meson_version_include}]"
+  echo "c_args = common_flags + [${meson_c_args}]"
+  echo "cpp_args = common_flags + [${meson_cpp_args}]"
   if [ -n "$meson_objc" ]; then
-    echo "objc_args = common_flags + [${meson_objc_args}${meson_version_include}]"
+    echo "objc_args = common_flags + [${meson_objc_args}]"
   fi
   if [ -n "$meson_objcpp" ]; then
-    echo "objcpp_args = common_flags + [${meson_objcpp_args}${meson_version_include}]"
+    echo "objcpp_args = common_flags + [${meson_objcpp_args}]"
   fi
   echo "c_link_args = common_flags + [$meson_c_link_args]"
   echo "cpp_link_args = common_flags + [$meson_cpp_link_args]"
