@@ -909,7 +909,7 @@ define grab-and-prepare-tarball
 		esac
 
 	@$(call print-status,$1,Extracting to deps/$1)
-	@tar -C deps/$1 -x -f deps/.$1-tarball -z --strip-components 1
+	@tar -C deps/$1 -x -f deps/.$1-tarball --strip-components 1
 
 	$(call apply-patches,$1)
 
