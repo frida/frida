@@ -80,7 +80,7 @@ REM. &gt; "$(IntDir)frida-version.stamp"
 </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating frida-version.h</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)frida-version.stamp</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir).git\refs\heads\master</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir).git\refs\heads\main</AdditionalInputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
 "$(ProjectDir)generate-version-header.py" "$(SolutionDir)build\tmp-windows\frida-version.h" || exit 1
@@ -88,7 +88,7 @@ REM. &gt; "$(IntDir)frida-version.stamp"
 </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating frida-version.h</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)frida-version.stamp</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir).git\refs\heads\master</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir).git\refs\heads\main</AdditionalInputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkObjects>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
 "$(ProjectDir)generate-version-header.py" "$(SolutionDir)build\tmp-windows\frida-version.h" || exit 1
@@ -96,7 +96,7 @@ REM. &gt; "$(IntDir)frida-version.stamp"
 </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating frida-version.h</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)frida-version.stamp</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir).git\refs\heads\master</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir).git\refs\heads\main</AdditionalInputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
 "$(ProjectDir)generate-version-header.py" "$(SolutionDir)build\tmp-windows\frida-version.h" || exit 1
@@ -104,7 +104,7 @@ REM. &gt; "$(IntDir)frida-version.stamp"
 </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating frida-version.h</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)frida-version.stamp</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir).git\refs\heads\master</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir).git\refs\heads\main</AdditionalInputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
     </CustomBuild>
   </ItemGroup>
