@@ -354,17 +354,17 @@ libunwind_name = libunwind
 libunwind_version = 0aefe38611ab8c3a5cc84ad77b1831e765f076e7
 libunwind_url = $(frida_base_url)/libunwind.git
 libunwind_hash = $(NULL)
-libunwind_recipe = autotools
+libunwind_recipe = meson
 libunwind_patches = \
 	$(NULL)
 libunwind_options = \
-	--disable-coredump \
-	--disable-ptrace \
-	--disable-setjmp \
-	--disable-debug \
-	--disable-msabi-support \
-	--enable-minidebuginfo \
-	--enable-zlibdebuginfo \
+	-Dgeneric_library=disabled \
+	-Dcoredump_library=disabled \
+	-Dptrace_library=disabled \
+	-Dsetjmp_library=disabled \
+	-Dmsabi_support=false \
+	-Dminidebuginfo=enabled \
+	-Dzlibdebuginfo=enabled \
 	$(NULL)
 libunwind_deps = \
 	zlib \
