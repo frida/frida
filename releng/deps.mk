@@ -326,7 +326,7 @@ brotli_deps_for_build = \
 
 minizip_name = minizip-ng
 minizip_version = 5f0e6cefd1cd5d7e3d5ec7a0fd34b74382275a52
-minizip_url = $(frida_base_url)/minizip.git
+minizip_url = $(frida_base_url)/minizip-ng.git
 minizip_hash = $(NULL)
 minizip_recipe = meson
 minizip_patches = \
