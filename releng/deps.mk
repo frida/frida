@@ -289,7 +289,7 @@ xz_name = XZ Utils
 xz_version = 5eae99056c1f73497afe2e2d1edada3ec72713d8
 xz_url = $(frida_base_url)/xz.git
 xz_hash = $(NULL)
-xz_recipe = autotools
+xz_recipe = meson
 xz_patches = \
 	$(NULL)
 xz_options = \
