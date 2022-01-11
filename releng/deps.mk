@@ -113,7 +113,7 @@ gettext_deps_for_build = \
 	$(NULL)
 
 zlib_name = zlib
-zlib_version = 91920caec2160ffd919fd48dc4e7a0f6c3fb36d2
+zlib_version = 64dd495da9b75ad61400a8de5b2a1bbb9fbbffbb
 zlib_url = $(frida_base_url)/zlib.git
 zlib_hash = $(NULL)
 zlib_recipe = meson
