@@ -33,6 +33,7 @@ class Bundle(Enum):
 
 @dataclass
 class PackageSpec:
+    name: str
     version: str
     url: str
     hash: str
@@ -231,6 +232,7 @@ def read_dependency_parameters(host_defines: Dict[str, str] = {}) -> DependencyP
     for key in [k for k in raw_params.keys() if k.endswith("_recipe")]:
         name = key[:-7]
         packages[name] = PackageSpec(
+                parse_string_value(raw_params[name + "_name"], raw_params),
                 parse_string_value(raw_params[name + "_version"], raw_params),
                 parse_string_value(raw_params[name + "_url"], raw_params),
                 parse_string_value(raw_params[name + "_hash"], raw_params),
