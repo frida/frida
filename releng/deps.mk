@@ -271,10 +271,10 @@ elfutils_deps_for_build = \
 	$(NULL)
 
 libdwarf_name = libdwarf
-libdwarf_version = 20201201
-libdwarf_url = https://www.prevanders.net/libdwarf-$(libdwarf_version).tar.gz
-libdwarf_hash = 62db1028dfd8fd877d01ae75873ac1fe311437012ef48a0ac4157189e1e9b2c9
-libdwarf_recipe = custom
+libdwarf_version = 349b48424535ce4494cf7ace4a9da89f489fcb8a
+libdwarf_url = $(frida_base_url)/libdwarf.git
+libdwarf_hash = $(NULL)
+libdwarf_recipe = meson
 libdwarf_patches = \
 	$(NULL)
 libdwarf_options = \
