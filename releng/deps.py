@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import argparse
+import base64
 from dataclasses import dataclass
 from enum import Enum
+import json
 import os
 from pathlib import Path
 import platform
@@ -76,6 +78,9 @@ def main():
     command.add_argument("bundle", help="bundle to wait for", choices=bundle_choices)
     command.add_argument("os_arch", help="OS/arch")
     command.set_defaults(func=lambda args: wait(Bundle[args.bundle.upper()], args.os_arch))
+
+    command = subparsers.add_parser("bump", help="bump dependency versions")
+    command.set_defaults(func=lambda args: bump())
 
     args = parser.parse_args()
     if 'func' in args:
@@ -206,6 +211,53 @@ def wait(bundle: Bundle, os_arch: str):
                 return
         print("Waiting for: {}  Elapsed: {}  Retrying in 5 minutes...".format(url, int(time.time() - started_at)), flush=True)
         time.sleep(5 * 60)
+
+
+def bump():
+    params = read_dependency_parameters()
+
+    auth_blob = base64.b64encode(":".join([
+                                              os.environ["GH_USERNAME"],
+                                              os.environ["GH_TOKEN"]
+                                          ]).encode('utf-8')).decode('utf-8')
+    auth_header = "Basic " + auth_blob
+
+    for identifier, pkg in params.packages.items():
+        if pkg.hash != "":
+            continue
+
+        url = pkg.url
+        if not url.startswith("https://github.com/frida/"):
+            continue
+
+        print(f"*** Checking {pkg.name}")
+
+        repo_name = url.split("/")[-1][:-4]
+        branch_name = "next" if repo_name == "capstone" else "main"
+
+        url = f"https://api.github.com/repos/frida/{repo_name}/commits/main"
+        request = urllib.request.Request(url)
+        request.add_header("Authorization", auth_header)
+        with urllib.request.urlopen(request) as r:
+            response = json.load(r)
+
+        latest = response['sha']
+        if pkg.version == latest:
+            print(f"\tup-to-date")
+        else:
+            print(f"\toutdated")
+            print(f"\t\tcurrent: {pkg.version}")
+            print(f"\t\t latest: {latest}")
+
+            deps_content = DEPS_MK_PATH.read_text(encoding='utf-8')
+            deps_content = re.sub(f"^{identifier}_version = (.+)$", f"{identifier}_version = {latest}",
+                                  deps_content, flags=re.MULTILINE)
+            DEPS_MK_PATH.write_bytes(deps_content.encode('utf-8'))
+
+            subprocess.run(["git", "add", "releng/deps.mk"], cwd=ROOT_DIR, check=True)
+            subprocess.run(["git", "commit", "-m" f"deps: Bump {pkg.name} to {latest[:7]}"], cwd=ROOT_DIR, check=True)
+
+        print("")
 
 
 def compute_bundle_parameters(bundle: Bundle, os_arch: str, version: str) -> Tuple[str, str, str]:
