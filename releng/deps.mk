@@ -478,7 +478,7 @@ json_glib_deps_for_build = \
 	$(NULL)
 
 libpsl_name = libpsl
-libpsl_version = a8abcd05a55f0bbf078f8cd20c81e7b0d4aebd66
+libpsl_version = dc7fce073dfb66f055ce91ebeff41f60b9db2ce4
 libpsl_url = $(frida_base_url)/libpsl.git
 libpsl_hash = $(NULL)
 libpsl_recipe = meson
