@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 releng_path=`dirname $0`
 

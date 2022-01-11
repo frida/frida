@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This wrapper script is necessary in order to avoid polluting the build
 # systems with Android-specific quirks.
