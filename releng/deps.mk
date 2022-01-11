@@ -256,24 +256,13 @@ vala_deps_for_build = \
 	$(NULL)
 
 elfutils_name = elfutils
-elfutils_version = db862a11910a5d4c007c549c2b4ce4cad62f242b
-elfutils_url = git://sourceware.org/git/elfutils.git
+elfutils_version = ea3ec44e6ee32533a04fb861ff938d8f0ab9d37f
+elfutils_url = $(frida_base_url)/elfutils.git
 elfutils_hash = $(NULL)
-elfutils_recipe = autotools
+elfutils_recipe = meson
 elfutils_patches = \
-	elfutils-disable-elfso.patch \
-	elfutils-disable-libdw.patch \
-	elfutils-disable-i18n.patch \
-	elfutils-glibc-compatibility.patch \
-	elfutils-android.patch \
 	$(NULL)
 elfutils_options = \
-	--enable-maintainer-mode \
-	--enable-install-elfh \
-	--disable-elfso \
-	--disable-libdw \
-	--disable-libdebuginfod \
-	--disable-debuginfod \
 	$(NULL)
 elfutils_deps = \
 	zlib \
