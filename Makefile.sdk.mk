@@ -108,7 +108,7 @@ build/fs-tmp-%/.package-stamp: $(foreach pkg, $(packages), build/fs-%/manifest/$
 		&& [ -d lib/gio/modules ] && gio_modules=lib/gio/modules/*.a || gio_modules= \
 		&& [ -d lib32 ] && lib32=lib32 || lib32= \
 		&& [ -d lib64 ] && lib64=lib64 || lib64= \
-		&& tar -c \
+		&& tar -cf - \
 			include \
 			lib/*.a \
 			lib/*.la \

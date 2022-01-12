@@ -55,7 +55,7 @@ build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages), bui
 	@$(RM) -r $(@D)/package
 	@mkdir -p $(@D)/package
 	@cd build/ft-$* \
-		&& tar -c \
+		&& tar -cf - \
 			--exclude bin/bison \
 			--exclude bin/flex \
 			--exclude bin/flex++ \
