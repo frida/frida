@@ -7,6 +7,8 @@ FOR_HOST ?= $(build_os_arch)
 frida_gum_flags := \
 	--default-library static \
 	$(FRIDA_MESONFLAGS_COMMON) \
+	-Dgumpp=enabled \
+	-Dgumjs=enabled \
 	-Dv8=$(FRIDA_V8) \
 	-Ddatabase=$(FRIDA_DATABASE) \
 	-Dfrida_objc_bridge=$(FRIDA_OBJC_BRIDGE) \
