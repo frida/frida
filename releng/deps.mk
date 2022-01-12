@@ -275,6 +275,7 @@ xz_recipe = meson
 xz_patches = \
 	$(NULL)
 xz_options = \
+	-Dcli=disabled \
 	$(NULL)
 xz_deps = \
 	$(NULL)
