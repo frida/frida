@@ -11,7 +11,6 @@ packages = \
 	autoconf \
 	automake \
 	libtool \
-	gettext \
 	zlib \
 	libffi \
 	glib \

@@ -94,24 +94,6 @@ libtool_deps = \
 libtool_deps_for_build = \
 	$(NULL)
 
-gettext_name = gettext
-gettext_version = 0.21
-gettext_url = https://$(gnu_mirror)/gettext/gettext-$(gettext_version).tar.gz
-gettext_hash = c77d0da3102aec9c07f43671e60611ebff89a996ef159497ce8e59d075786b12
-gettext_recipe = autotools
-gettext_patches = \
-	gettext-static-only.patch \
-	gettext-gnulib-glibc.patch \
-	$(NULL)
-gettext_options = \
-	--disable-curses \
-	$(NULL)
-gettext_deps = \
-	libtool \
-	$(NULL)
-gettext_deps_for_build = \
-	$(NULL)
-
 zlib_name = zlib
 zlib_version = 64dd495da9b75ad61400a8de5b2a1bbb9fbbffbb
 zlib_url = $(frida_base_url)/zlib.git
