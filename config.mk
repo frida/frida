@@ -4,7 +4,7 @@ PREFIX ?= /usr
 FRIDA := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 # Features ordered by binary footprint, from largest to smallest
-FRIDA_V8 ?= enabled
+FRIDA_V8 ?= auto
 FRIDA_CONNECTIVITY ?= enabled
 FRIDA_DATABASE ?= enabled
 FRIDA_JAVA_BRIDGE ?= auto
