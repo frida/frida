@@ -165,7 +165,7 @@ ifeq ($(host_os), $(filter $(host_os),macos ios))
 # Our SDK will pull in its own.
 glib_options += -Diconv=external
 endif
-ifeq ($(host_os), $(filter $(host_os),android qnx))
+ifeq ($(host_os), $(filter $(host_os),android freebsd qnx))
 glib_options += -Diconv=external
 glib_deps += libiconv
 endif
@@ -262,8 +262,10 @@ libdwarf_patches = \
 libdwarf_options = \
 	$(NULL)
 libdwarf_deps = \
-	elfutils \
 	$(NULL)
+ifneq ($(host_os), freebsd)
+libdwarf_deps += elfutils
+endif
 libdwarf_deps_for_build = \
 	$(NULL)
 
@@ -577,6 +579,7 @@ openssl_patches = \
 	openssl-windows.patch \
 	openssl-macos-sdk-compatibility.patch \
 	openssl-android.patch \
+	openssl-libdatadir.patch \
 	$(NULL)
 openssl_options = \
 	--openssldir=/etc/ssl \

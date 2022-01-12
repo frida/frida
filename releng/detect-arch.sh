@@ -12,6 +12,9 @@ else
     i?86)
       machine=x86
       ;;
+    amd64)
+      machine=x86_64
+      ;;
     armv*)
       machine=armhf
       ;;

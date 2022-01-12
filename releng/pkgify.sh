@@ -10,11 +10,14 @@ build_os=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,macos,')
 toolchain_prefix=$(dirname $(dirname $(which perl)))
 
 shopt -s expand_aliases
-if [ "$build_os" = "macos" ]; then
-  alias sed_inplace='sed -i ""'
-else
-  alias sed_inplace='sed -i'
-fi
+case $build_os in
+  macos|freebsd)
+    alias sed_inplace='sed -i ""'
+    ;;
+  *)
+    alias sed_inplace='sed -i'
+    ;;
+esac
 
 for file in $(find "$package" -type f); do
   if grep -q "$prefix" $file; then

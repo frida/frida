@@ -99,6 +99,7 @@ case $host_arch in
     meson_host_endian=little
     ;;
 esac
+meson_b_lundef=true
 
 case $FRIDA_ASAN in
   yes|no)
@@ -791,6 +792,42 @@ case $host_os in
     meson_c_link_args="$base_linker_args"
     meson_cpp_link_args="$base_linker_args"
     ;;
+  freebsd)
+    host_toolprefix="/usr/bin/"
+
+    CPP="${CPP:-${host_toolprefix}cpp}"
+    CC="${CC:-${host_toolprefix}clang}"
+    CXX="${CXX:-${host_toolprefix}clang++}"
+    LD="${LD:-${host_toolprefix}ld}"
+
+    AR="${AR:-${host_toolprefix}ar}"
+    NM="${NM:-${host_toolprefix}nm}"
+    RANLIB="${RANLIB:-${host_toolprefix}ranlib}"
+    STRIP="${STRIP:-${host_toolprefix}strip}"
+    STRIP_FLAGS="--strip-all"
+    READELF="${READELF:-${host_toolprefix}readelf}"
+    OBJCOPY="${OBJCOPY:-${host_toolprefix}objcopy}"
+
+    base_compiler_flags="-ffunction-sections -fdata-sections"
+    base_linker_flags="-Wl,--gc-sections"
+
+    CFLAGS="$base_compiler_flags"
+    LDFLAGS="$base_linker_flags"
+
+    base_compiler_args=$(flags_to_args "$base_compiler_flags")
+    base_linker_args=$(flags_to_args "$base_linker_flags")
+
+    meson_c="$CC"
+    meson_cpp="$CXX"
+
+    meson_c_args="$base_compiler_args"
+    meson_cpp_args="$base_compiler_args"
+
+    meson_c_link_args="$base_linker_args"
+    meson_cpp_link_args="$base_linker_args"
+
+    meson_b_lundef=false
+    ;;
   qnx)
     case $host_arch in
       x86)
@@ -965,16 +1002,25 @@ chmod 755 "$strip_wrapper"
 
 PKG_CONFIG=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-pkg-config
 
+case $host_os in
+  freebsd)
+    libdatadir=libdata
+    ;;
+  *)
+    libdatadir=lib
+    ;;
+esac
+
 pkg_config="$FRIDA_TOOLROOT/bin/pkg-config"
 pkg_config_flags="--static"
-pkg_config_path="$FRIDA_PREFIX_LIB/pkgconfig"
+pkg_config_path="$FRIDA_PREFIX/$libdatadir/pkgconfig"
 if [ "$FRIDA_ENV_NAME" == 'frida_gir' ]; then
   pkg_config_path="$(pkg-config --variable pc_path pkg-config):$pkg_config_path"
   pkg_config_flags=""
 fi
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   pkg_config_flags=" $pkg_config_flags --define-variable=frida_sdk_prefix=$FRIDA_SDKROOT"
-  pkg_config_path="$pkg_config_path:$FRIDA_SDKROOT/lib/pkgconfig"
+  pkg_config_path="$pkg_config_path:$FRIDA_SDKROOT/$libdatadir/pkgconfig"
 fi
 (
   echo "#!/bin/sh"
@@ -1184,6 +1230,7 @@ meson_cross_file=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-${host_os_arch}.txt
   if [ -n "$meson_objcpp" ]; then
     echo "objcpp_link_args = common_flags + [$meson_objcpp_link_args]"
   fi
+  echo "b_lundef = $meson_b_lundef"
   echo ""
   echo "[properties]"
   if [ $host_os != $build_os ]; then

@@ -165,7 +165,12 @@ build/ft-executable.symbols:
 build/ft-executable.version:
 	@mkdir -p $(@D)
 	@( \
-		echo "FRIDA_TOOLCHAIN_EXECUTABLE {"; \
+		echo "{"; \
+		echo "  global:"; \
+		echo "    # FreeBSD needs these two:"; \
+		echo "    __progname;"; \
+		echo "    environ;"; \
+		echo ""; \
 		echo "  local:"; \
 		echo "    *;"; \
 		echo "};" \

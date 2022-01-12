@@ -22,7 +22,7 @@ packages = \
 	$(NULL)
 
 
-ifeq ($(host_os), $(filter $(host_os), macos ios))
+ifeq ($(host_os), $(filter $(host_os), macos ios freebsd))
 # Pull in iconv so our payloads only depend on libSystem.
 glib_deps += libiconv
 endif
@@ -31,11 +31,15 @@ ifeq ($(host_os), $(filter $(host_os), linux android qnx))
 packages += elfutils libdwarf libunwind
 endif
 
+ifeq ($(host_os), freebsd)
+packages += libdwarf libunwind
+endif
+
 ifeq ($(host_os), android)
 packages += selinux
 endif
 
-ifeq ($(host_os), $(filter $(host_os), macos ios linux android))
+ifeq ($(host_os), $(filter $(host_os), macos ios linux android freebsd))
 packages += glib-networking libnice usrsctp
 endif
 
@@ -108,13 +112,14 @@ build/fs-tmp-%/.package-stamp: $(foreach pkg, $(packages), build/fs-%/manifest/$
 		&& [ -d lib/gio/modules ] && gio_modules=lib/gio/modules/*.a || gio_modules= \
 		&& [ -d lib32 ] && lib32=lib32 || lib32= \
 		&& [ -d lib64 ] && lib64=lib64 || lib64= \
+		&& [ -d libdata ] && libdatadir=libdata || libdatadir=lib \
 		&& tar -cf - \
 			include \
 			lib/*.a \
 			lib/*.la \
 			lib/glib-2.0 \
 			lib/libffi* \
-			lib/pkgconfig \
+			$$libdatadir/pkgconfig \
 			$$tcc \
 			$$libcpp \
 			$$gio_modules \
@@ -255,6 +260,12 @@ openssl_host_env := \
 	PATH=$(ndk_llvm_prefix)/bin:$$PATH \
 	$(NULL)
 
+endif
+
+ifeq ($(host_os), freebsd)
+openssl_arch_args := BSD-generic64 --libdatadir=libdata
+openssl_host_env := \
+	$(NULL)
 endif
 
 .PHONY: openssl
