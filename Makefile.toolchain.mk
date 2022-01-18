@@ -23,9 +23,9 @@ packages = \
 
 
 ifeq ($(host_os), $(filter $(host_os), macos ios))
-export_ldflags := -Wl,-exported_symbols_list,$(abspath build/ft-executable.symbols)
+export_ldflags := -Wl,-exported_symbols_list,$(shell pwd)/build/ft-executable.symbols
 else
-export_ldflags := -Wl,--version-script,$(abspath build/ft-executable.version)
+export_ldflags := -Wl,--version-script,$(shell pwd)/build/ft-executable.version
 endif
 
 frida_env_config := \
@@ -56,11 +56,11 @@ build/toolchain-$(host_os)-$(host_arch).tar.bz2: build/ft-tmp-$(host_os_arch)/.p
 	@$(call print-status,📦,Compressing)
 	@tar \
 		-C build/ft-tmp-$(host_os_arch)/package \
-		-cjf $(abspath $@.tmp) \
+		-cjf $(shell pwd)/$@.tmp \
 		.
 	@mv $@.tmp $@
 
-build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages), build/ft-%/manifest/$(pkg).pkg)
+build/ft-tmp-%/.package-stamp: build/ft-env-%.rc #$(foreach pkg, $(packages), build/ft-%/manifest/$(pkg).pkg)
 	@echo
 	@$(call print-status,📦,Assembling)
 	@$(RM) -r $(@D)/package
@@ -97,7 +97,7 @@ build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages), bui
 			--exclude share/vala/Makefile.vapigen \
 			--exclude "*.pyc" \
 			--exclude "*.pyo" \
-			. | tar -C $(abspath $(@D)/package) -xf -
+			. | tar -C $(shell pwd)/$(@D)/package -xf -
 	@cd $(@D)/package/bin \
 		&& for tool in aclocal automake; do \
 			rm $$tool-$(automake_api_version); \
@@ -113,7 +113,7 @@ build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages), bui
 			fi; \
 		done \
 		&& $$STRIP $(@D)/package/lib/vala-*/gen-introspect-*
-	@releng/pkgify.sh $(@D)/package $(abspath build/ft-$*) $(abspath releng)
+	@releng/pkgify.sh "$(@D)/package" "$(shell pwd)/build/ft-$*" "$(shell pwd)/releng"
 	@echo "$(frida_deps_version)" > $(@D)/package/VERSION.txt
 	@touch $@
 
@@ -175,7 +175,7 @@ build/ft-%/manifest/libtool.pkg: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefi
 	@builddir=build/ft-tmp-$*/libtool; \
 	(set -x \
 		&& . $< \
-		&& export PATH="$(abspath build/ft-$(build_os_arch))/bin:$$PATH" \
+		&& export PATH="$(shell pwd)/build/ft-$(build_os_arch)/bin:$$PATH" \
 		&& cd $$builddir \
 		&& $(MAKE) build-aux/ltmain.sh \
 		&& touch ../../../deps/libtool/doc/*.1 ../../../deps/libtool/doc/stamp-vti \

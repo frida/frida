@@ -697,13 +697,13 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 		$(foreach dep, $($(subst -,_,$1)_deps_for_build), build/$2-$(build_os_arch)/manifest/$(dep).pkg) \
 		releng/meson/meson.py
 	@$(call print-status,$1,Building)
-	@prefix=$$(abspath build/$2-$$*); \
+	@prefix=$$(shell pwd)/build/$2-$$*; \
 	builddir=build/$2-tmp-$$*/$1; \
 	$(RM) -r $$$$builddir; \
 	mkdir -p $$$$builddir; \
 	(set -x \
 		&& . build/$2-meson-env-$$*.rc \
-		&& export PATH="$$(abspath build/$2-$(build_os_arch))/bin:$$$$PATH" \
+		&& export PATH="$$(shell pwd)/build/$2-$(build_os_arch)/bin:$$$$PATH" \
 		&& $(call print-status,$1,Configuring) \
 		&& $(MESON) \
 			--cross-file build/$2-$$*.txt \
@@ -723,7 +723,7 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 		&& $(MESON) introspect --installed --indent \
 			| grep ": " \
 			| cut -f4 -d'"' \
-			| cut -c$$(strip $$(shell echo $$(abspath build/$2-$$*)x | wc -c))- \
+			| cut -c$$(strip $$(shell echo $$(shell pwd)/build/$2-$$*x | wc -c))- \
 			| sort \
 			> "$$$$prefix/manifest/$1.pkg" \
 	) >>$$$$builddir/build.log 2>&1 || (echo "failed - see $$$$builddir/build.log for more information"; exit 1) \
@@ -780,7 +780,7 @@ build/$2-tmp-%/$1/Makefile: build/$2-env-%.rc deps/$1/configure deps/.$1-stamp \
 	@mkdir -p $$(@D)
 	@(set -x \
 		&& . $$< \
-		&& export PATH="$$(abspath build/$2-$(build_os_arch))/bin:$$$$PATH" \
+		&& export PATH="$$(shell pwd)/build/$2-$(build_os_arch)/bin:$$$$PATH" \
 		&& cd $$(@D) \
 		&& ../../../deps/$1/configure $$($$(subst -,_,$1)_options) \
 	) >$$(@D)/build.log 2>&1 || (echo "failed - see $$(@D)/build.log for more information"; exit 1)
@@ -795,7 +795,7 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc build/$2-tmp-%/$1/Makefile
 	@builddir=build/$2-tmp-$$*/$1; \
 	(set -x \
 		&& . $$< \
-		&& export PATH="$$(abspath build/$2-$(build_os_arch))/bin:$$$$PATH" \
+		&& export PATH="$$(shell pwd)/build/$2-$(build_os_arch)/bin:$$$$PATH" \
 		&& cd "$$$$builddir" \
 		&& $(MAKE) $(MAKE_J) \
 		&& $(MAKE) $(MAKE_J) install \
@@ -810,15 +810,15 @@ endef
 
 define make-autotools-manifest-commands
 	( \
-		prefix=$(abspath build/$2-$3) \
+		prefix=$(shell pwd)/build/$2-$3 \
 		&& mkdir -p $$prefix/manifest \
 		&& cd build/$2-tmp-$3/$1 \
 		&& $(RM) -r __pkg__ \
 		&& mkdir __pkg__ \
-		&& $(MAKE) $(MAKE_J) $(if $4,$4,install) DESTDIR="$(abspath build/$2-tmp-$3/$1/__pkg__)" &>/dev/null \
+		&& $(MAKE) $(MAKE_J) $(if $4,$4,install) DESTDIR="$(shell pwd)/build/$2-tmp-$3/$1/__pkg__" &>/dev/null \
 		&& cd __pkg__ \
 		&& find . -type f \
-			| cut -c$(strip $(shell echo $(abspath build/$2-$3)xx | wc -c))- \
+			| cut -c$(strip $(shell echo $(shell pwd)/build/$2-$3xx | wc -c))- \
 			| sort \
 			> "$$prefix/manifest/$1.pkg" \
 		&& $(RM) -r __pkg__ \
@@ -843,7 +843,7 @@ define make-build-incremental-package-rule
 
 $1: build/$2-$3/manifest/$1.pkg
 	builddir=build/$2-tmp-$3/$1; \
-	export PATH="$$(abspath build/$2-$(build_os_arch))/bin:$$$$PATH"; \
+	export PATH="$$(shell pwd)/build/$2-$(build_os_arch)/bin:$$$$PATH"; \
 	if [ -f deps/$1/meson.build ]; then \
 		. build/$2-meson-env-$3.rc; \
 		$(MESON) -C $$$$builddir install; \

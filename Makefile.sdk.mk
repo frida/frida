@@ -97,7 +97,7 @@ build/sdk-$(host_os)-$(host_arch).tar.bz2: build/fs-tmp-$(host_os_arch)/.package
 	@$(call print-status,📦,Compressing)
 	@tar \
 		-C build/fs-tmp-$(host_os_arch)/package \
-		-cjf $(abspath $@.tmp) \
+		-cjf $(shell pwd)/$@.tmp \
 		.
 	@mv $@.tmp $@
 
@@ -129,8 +129,8 @@ build/fs-tmp-%/.package-stamp: $(foreach pkg, $(packages), build/fs-%/manifest/$
 			share/aclocal \
 			share/glib-2.0/schemas \
 			share/vala \
-			| tar -C $(abspath $(@D)/package) -xf -
-	@releng/pkgify.sh $(@D)/package $(abspath build/fs-$*) $(abspath releng)
+			| tar -C $(shell pwd)/$(@D)/package -xf -
+	@releng/pkgify.sh "$(@D)/package" "$(shell pwd)/build/fs-$*" "$(shell pwd)/releng"
 ifeq ($(host_os), ios)
 	@cp $(shell $(xcode_env_setup); $(xcode_run) --sdk macosx --show-sdk-path)/usr/include/mach/mach_vm.h \
 		$(@D)/package/include/frida_mach_vm.h
@@ -274,7 +274,7 @@ openssl: build/fs-$(host_os_arch)/manifest/openssl.pkg
 	. build/fs-env-$(host_os_arch).rc \
 		&& . $$CONFIG_SITE \
 		&& export CC CFLAGS \
-		&& export $(openssl_host_env) OPENSSL_LOCAL_CONFIG_DIR="$(abspath releng/openssl-config)" \
+		&& export $(openssl_host_env) OPENSSL_LOCAL_CONFIG_DIR="$(shell pwd)/releng/openssl-config" \
 		&& cd build/fs-tmp-$(host_os_arch)/openssl \
 		&& $(MAKE) build_libs \
 		&& $(MAKE) install_dev
@@ -303,7 +303,7 @@ build/fs-%/manifest/openssl.pkg: build/fs-env-%.rc build/fs-tmp-%/openssl/Config
 		&& . $< \
 		&& . $$CONFIG_SITE \
 		&& export CC CFLAGS \
-		&& export $(openssl_host_env) OPENSSL_LOCAL_CONFIG_DIR="$(abspath releng/openssl-config)" \
+		&& export $(openssl_host_env) OPENSSL_LOCAL_CONFIG_DIR="$(shell pwd)/releng/openssl-config" \
 		&& cd $$builddir \
 		&& perl Configure \
 			--prefix=$$frida_prefix \
@@ -452,7 +452,7 @@ build/fs-tmp-%/gn/build.ninja: build/fs-env-%.rc deps/.gn-stamp \
 	@(set -x \
 		&& . $< \
 		&& CC="$$CC" CXX="$$CXX" python deps/gn/build/gen.py \
-			--out-path $(abspath $(@D)) \
+			--out-path $(shell pwd)/$(@D) \
 			$(gn_options) \
 	) >$(@D)/build.log 2>&1
 
@@ -492,7 +492,7 @@ deps/v8-checkout/.gclient: deps/.depot_tools-stamp
 	@$(call print-repo-banner,v8,$(v8_version),$(v8_url))
 	@mkdir -p $(@D)
 	@cd deps/v8-checkout \
-		&& export PATH="$(abspath deps/depot_tools):$$PATH" DEPOT_TOOLS_UPDATE=0 \
+		&& export PATH="$(shell pwd)/deps/depot_tools:$$PATH" DEPOT_TOOLS_UPDATE=0 \
 		&& gclient config --spec 'solutions = [ \
   { \
     "url": "$(v8_url)@$(v8_version)", \
@@ -506,7 +506,7 @@ deps/v8-checkout/.gclient: deps/.depot_tools-stamp
 deps/v8-checkout/v8: deps/v8-checkout/.gclient
 	@$(call print-status,v8,Cloning into deps/v8-checkout)
 	@cd deps/v8-checkout \
-		&& export PATH="$(abspath deps/depot_tools):$$PATH" DEPOT_TOOLS_UPDATE=0 \
+		&& export PATH="$(shell pwd)/deps/depot_tools:$$PATH" DEPOT_TOOLS_UPDATE=0 \
 		&& gclient sync
 	@touch $@
 
@@ -520,7 +520,7 @@ build/fs-tmp-%/v8/build.ninja: deps/v8-checkout/v8 build/fs-$(build_os_arch)/man
 		&& cd deps/v8-checkout/v8 \
 		&& $(xcode_env_setup) \
 		&& ../../../build/fs-$(build_os_arch)/bin/gn \
-			gen $(abspath $(@D)) \
+			gen $(shell pwd)/$(@D) \
 			--args='$(strip \
 				target_os="$(v8_os)" \
 				target_cpu="$(v8_cpu)" \
