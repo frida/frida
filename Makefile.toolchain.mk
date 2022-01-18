@@ -76,6 +76,7 @@ build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages), bui
 	@$(RM) -r $(@D)/package
 	@mkdir -p $(@D)/package
 	@cd build/ft-$* \
+		&& [ -d libdata ] && libdatadir=libdata || libdatadir=lib \
 		&& tar -cf - \
 			--exclude bin/bison \
 			--exclude bin/flex \
@@ -94,9 +95,10 @@ build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages), bui
 			--exclude "lib/lib*" \
 			--exclude lib/glib-2.0 \
 			--exclude lib/gio \
-			--exclude lib/pkgconfig \
+			--exclude $$libdatadir/pkgconfig \
 			--exclude "lib/vala-*/*.a" \
 			--exclude share/bash-completion \
+			--exclude share/bison \
 			--exclude share/devhelp \
 			--exclude share/doc \
 			--exclude share/emacs \
@@ -122,7 +124,8 @@ build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages), bui
 				$$STRIP $$f || exit 1; \
 			fi; \
 		done \
-		&& $$STRIP $(@D)/package/lib/vala-*/gen-introspect-*
+		&& $$STRIP $(@D)/package/lib/vala-*/gen-introspect-* \
+		&& rm -rf $(@D)/package/libdata
 	@releng/pkgify.sh "$(@D)/package" "$(shell pwd)/build/ft-$*" "$(shell pwd)/releng"
 	@echo "$(frida_deps_version)" > $(@D)/package/VERSION.txt
 	@touch $@
