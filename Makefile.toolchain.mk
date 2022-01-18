@@ -7,6 +7,7 @@ SHELL := $(shell which bash)
 
 
 packages = \
+	ninja \
 	m4 \
 	autoconf \
 	automake \
@@ -118,6 +119,41 @@ build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages), bui
 
 
 $(eval $(call make-package-rules,$(packages),ft))
+
+
+$(eval $(call make-base-package-rules,ninja,ft,$(host_os_arch)))
+
+deps/.ninja-stamp:
+	$(call grab-and-prepare,ninja)
+	@touch $@
+
+build/ft-%/manifest/ninja.pkg: build/ft-env-%.rc deps/.ninja-stamp
+	@$(call print-status,ninja,Building)
+	@prefix=$(shell pwd)/build/ft-$*; \
+	builddir=build/ft-tmp-$*/ninja; \
+	$(RM) -r $$builddir; \
+	mkdir -p build/ft-tmp-$* \
+	&& cp -a deps/ninja $$builddir \
+	&& (set -x \
+		&& . $< \
+		&& cd $$builddir \
+		&& if $$CC --version | grep -q clang; then \
+			optflags="-Oz"; \
+		else \
+			optflags="-Os"; \
+		fi \
+		&& sed -e "s,-O2,$$optflags,g" configure.py > configure.py.new \
+		&& cat configure.py.new > configure.py \
+		&& rm configure.py.new \
+		&& $(PYTHON) ./configure.py \
+			--bootstrap \
+			--platform=$$(echo $* | cut -f1 -d"-") \
+		&& install -d $$prefix/bin \
+		&& install -m 755 ninja $$prefix/bin \
+	) >>$$builddir/build.log 2>&1 \
+	&& $(call print-status,ninja,Generating manifest) \
+	&& mkdir -p $(@D) \
+	&& echo "bin/ninja" > $@
 
 
 $(eval $(call make-base-package-rules,libtool,ft,$(host_os_arch)))

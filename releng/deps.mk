@@ -18,6 +18,20 @@ endif
 host_os_arch := $(host_os)-$(host_arch)
 
 
+ninja_name = Ninja
+ninja_version = v1.10.2
+ninja_url = https://github.com/ninja-build/ninja.git
+ninja_hash = $(NULL)
+ninja_recipe = custom
+ninja_patches = \
+	$(NULL)
+ninja_options = \
+	$(NULL)
+ninja_deps = \
+	$(NULL)
+ninja_deps_for_build = \
+	$(NULL)
+
 libiconv_name = libiconv
 libiconv_version = 1.16
 libiconv_url = https://$(gnu_mirror)/libiconv/libiconv-$(libiconv_version).tar.gz
@@ -700,7 +714,7 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 			$$($$(subst -,_,$1)_options) \
 			$$$$builddir \
 			deps/$1 \
-		&& $(NINJA) -C $$$$builddir install \
+		&& $(MESON) install -C $$$$builddir \
 	) >$$$$builddir/build.log 2>&1 \
 	&& $(call print-status,$1,Generating manifest) \
 	&& (set -x \
@@ -832,7 +846,7 @@ $1: build/$2-$3/manifest/$1.pkg
 	export PATH="$$(abspath build/$2-$(build_os_arch))/bin:$$$$PATH"; \
 	if [ -f deps/$1/meson.build ]; then \
 		. build/$2-meson-env-$3.rc; \
-		$(NINJA) -C $$$$builddir install; \
+		$(MESON) -C $$$$builddir install; \
 	else \
 		. build/$2-env-$3.rc; \
 		$(MAKE) -C $$$$builddir $(MAKE_J) install; \
