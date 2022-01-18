@@ -60,6 +60,14 @@ build/toolchain-$(host_os)-$(host_arch).tar.bz2: build/ft-tmp-$(host_os_arch)/.p
 		-C build/ft-tmp-$(host_os_arch)/package \
 		-cjf $(shell pwd)/$@.tmp \
 		.
+	@if [ $$host_os_arch = $$build_os_arch ]; then \
+		bootstrap_toolchain=_toolchain-$(host_os)-$(host_arch).tar.bz2; \
+			cd build \
+			&& if [ -e $$bootstrap_toolchain ]; then \
+				rm -f $$bootstrap_toolchain; \
+				ln -s toolchain-$(host_os)-$(host_arch).tar.bz2 $$bootstrap_toolchain; \
+			fi; \
+	fi
 	@mv $@.tmp $@
 
 build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages), build/ft-%/manifest/$(pkg).pkg)
