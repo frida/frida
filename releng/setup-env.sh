@@ -205,13 +205,24 @@ if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/VERSION.txt" 2>/dev/null;
 
   filename=toolchain-$build_os-$build_arch.tar.bz2
 
-  local_toolchain=$FRIDA_BUILD/$filename
+  local_toolchain=$FRIDA_BUILD/_$filename
   if [ -f $local_toolchain ]; then
     echo -e "Deploying local toolchain \\033[1m$(basename $local_toolchain)\\033[0m..."
     tar -C "$FRIDA_TOOLROOT" -xjf $local_toolchain || exit 1
   else
     echo -e "Downloading and deploying toolchain for \\033[1m$build_os_arch\\033[0m..."
-    $download_command "https://build.frida.re/deps/$toolchain_version/$filename" | tar -C "$FRIDA_TOOLROOT" -xjf - || exit 1
+    $download_command "https://build.frida.re/deps/$toolchain_version/$filename" | tar -C "$FRIDA_TOOLROOT" -xjf -
+    if [ $? -ne 0 ]; then
+      echo ""
+      echo "Bummer. It seems we don't have a prebuilt toolchain for your system."
+      echo ""
+      echo "Please go ahead and build it yourself:"
+      echo "$ make -f Makefile.toolchain.mk"
+      echo ""
+      echo "Afterwards just retry and the toolchain will get picked up automatically."
+      echo ""
+      exit 2
+    fi
   fi
 
   for template in $(find $FRIDA_TOOLROOT -name "*.frida.in"); do
@@ -262,7 +273,7 @@ if [ "$FRIDA_ENV_SDK" != 'none' ] && ! grep -Eq "^$sdk_version\$" "$FRIDA_SDKROO
       echo ""
       echo "Afterwards just retry and the SDK will get picked up automatically."
       echo ""
-      exit 1
+      exit 3
     fi
   fi
 

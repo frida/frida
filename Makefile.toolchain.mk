@@ -27,6 +27,16 @@ else
 export_ldflags := -Wl,--version-script,$(abspath build/ft-executable.version)
 endif
 
+frida_env_config := \
+	FRIDA_ACOPTFLAGS="$(FRIDA_ACOPTFLAGS_BOTTLE)" \
+	FRIDA_ACDBGFLAGS="$(FRIDA_ACDBGFLAGS_BOTTLE)" \
+	FRIDA_EXTRA_LDFLAGS="$(export_ldflags)" \
+	FRIDA_ASAN=$(FRIDA_ASAN) \
+	FRIDA_ENV_NAME=ft \
+	FRIDA_ENV_SDK=none \
+	FRIDA_TOOLCHAIN_VERSION=$(frida_bootstrap_version) \
+	XCODE11="$(XCODE11)"
+
 
 .PHONY: all clean distclean
 
@@ -145,16 +155,21 @@ build/ft-%/manifest/libtool.pkg: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefi
 build/ft-env-%.rc: build/ft-executable.symbols build/ft-executable.version
 	@for os_arch in $(build_os_arch) $*; do \
 		if [ ! -f build/ft-env-$$os_arch.rc ]; then \
-			FRIDA_HOST=$$os_arch \
-			FRIDA_ACOPTFLAGS="$(FRIDA_ACOPTFLAGS_BOTTLE)" \
-			FRIDA_ACDBGFLAGS="$(FRIDA_ACDBGFLAGS_BOTTLE)" \
-			FRIDA_EXTRA_LDFLAGS="$(export_ldflags)" \
-			FRIDA_ASAN=$(FRIDA_ASAN) \
-			FRIDA_ENV_NAME=ft \
-			FRIDA_ENV_SDK=none \
-			FRIDA_TOOLCHAIN_VERSION=$(frida_bootstrap_version) \
-			XCODE11="$(XCODE11)" \
-			./releng/setup-env.sh || exit 1; \
+			FRIDA_HOST=$$os_arch $(frida_env_config) ./releng/setup-env.sh; \
+			case $$? in \
+				0) \
+					;; \
+				2) \
+					if [ "$$os_arch" = "$(build_os_arch)" ]; then \
+						MAKE=$(MAKE) ./releng/bootstrap-toolchain.sh $$os_arch || exit 1; \
+						FRIDA_HOST=$$os_arch $(frida_env_config) ./releng/setup-env.sh || exit 1; \
+					else \
+						exit 1; \
+					fi \
+					;; \
+				*) \
+					exit 1; \
+			esac \
 		fi \
 	done
 
