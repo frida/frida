@@ -21,7 +21,7 @@ esac
 
 for file in $(find "$package" -type f); do
   if grep -q "$prefix" $file; then
-    if echo "$file" | grep -Eq "\\.pm$|aclocal.*|autoconf|autoheader|autom4te.*|automake.*|autopoint|autoreconf|autoscan|autoupdate|gdbus-codegen|/glib-2.0/codegen/|/gdb/auto-load/|ifnames|libtool|bin/vala-gen-introspect"; then
+    if echo "$file" | grep -Eq "\\.pm$|aclocal.*|autoconf|autoheader|autom4te.*|automake.*|autopoint|autoreconf|autoscan|autoupdate|glib-gettextize|gdbus-codegen|/glib-2.0/codegen/|/gdb/auto-load/|ifnames|libtool|bin/vala-gen-introspect"; then
       newname="$file.frida.in"
       mv "$file" "$newname"
       sed_inplace \
