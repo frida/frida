@@ -22,7 +22,7 @@ packages = \
 	$(NULL)
 
 
-ifeq ($(host_os), $(filter $(host_os), macos ios freebsd))
+ifeq ($(host_os), $(filter $(host_os), macos ios))
 # Pull in iconv so our payloads only depend on libSystem.
 glib_deps += libiconv
 endif
