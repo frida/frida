@@ -107,7 +107,7 @@ build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages), bui
 			--exclude share/info \
 			--exclude share/locale \
 			--exclude share/man \
-			--exclude share/vala/Makefile.vapigen \
+			--exclude share/vala \
 			--exclude "*.pyc" \
 			--exclude "*.pyo" \
 			. | tar -C $(shell pwd)/$(@D)/package -xf -
