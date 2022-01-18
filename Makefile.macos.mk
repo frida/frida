@@ -104,7 +104,7 @@ build/$1-%/lib/pkgconfig/frida-gum-1.0.pc: build/$1-env-%.rc build/.frida-gum-su
 			$$(frida_gum_flags) \
 			frida-gum $$$$builddir || exit 1; \
 	fi; \
-	$$(NINJA) -C $$$$builddir install || exit 1
+	$$(MESON) install -C $$$$builddir || exit 1
 	@touch -c $$@
 endef
 $(eval $(call make-gum-rules,frida,tmp))
@@ -244,47 +244,47 @@ build/tmp_thin-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stam
 
 build/frida-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-macos-x86_64/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-macos-x86_64/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-macos-x86_64.rc && $(NINJA) -C build/tmp-macos-x86_64/frida-core install
+	. build/frida-meson-env-macos-x86_64.rc && $(MESON) install -C build/tmp-macos-x86_64/frida-core
 	@touch $@
 build/frida-macos-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-macos-arm64/frida-core/.frida-helper-and-agent-stamp build/tmp-macos-arm64e/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-macos-arm64/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-macos-arm64.rc && $(NINJA) -C build/tmp-macos-arm64/frida-core install
+	. build/frida-meson-env-macos-arm64.rc && $(MESON) install -C build/tmp-macos-arm64/frida-core
 	@touch $@
 build/frida-macos-arm64e/lib/pkgconfig/frida-core-1.0.pc: build/tmp-macos-arm64/frida-core/.frida-helper-and-agent-stamp build/tmp-macos-arm64e/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-macos-arm64e/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-macos-arm64e.rc && $(NINJA) -C build/tmp-macos-arm64e/frida-core install
+	. build/frida-meson-env-macos-arm64e.rc && $(MESON) install -C build/tmp-macos-arm64e/frida-core
 	@touch $@
 build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x86/frida-core/.frida-helper-and-agent-stamp build/tmp-android-arm/frida-core/.frida-agent-stamp
 	@rm -f build/tmp-android-x86/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-android-x86.rc && $(NINJA) -C build/tmp-android-x86/frida-core install
+	. build/frida-meson-env-android-x86.rc && $(MESON) install -C build/tmp-android-x86/frida-core
 	@touch $@
 build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x86/frida-core/.frida-helper-and-agent-stamp build/tmp-android-x86_64/frida-core/.frida-helper-and-agent-stamp build/tmp-android-arm/frida-core/.frida-agent-stamp build/tmp-android-arm64/frida-core/.frida-agent-stamp
 	@rm -f build/tmp-android-x86_64/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-android-x86_64.rc && $(NINJA) -C build/tmp-android-x86_64/frida-core install
+	. build/frida-meson-env-android-x86_64.rc && $(MESON) install -C build/tmp-android-x86_64/frida-core
 	@touch $@
 build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-android-arm/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-android-arm.rc && $(NINJA) -C build/tmp-android-arm/frida-core install
+	. build/frida-meson-env-android-arm.rc && $(MESON) install -C build/tmp-android-arm/frida-core
 	@touch $@
 build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm/frida-core/.frida-helper-and-agent-stamp build/tmp-android-arm64/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-android-arm64/frida-core/src/frida-data-{helper,agent}*
-	. build/frida-meson-env-android-arm64.rc && $(NINJA) -C build/tmp-android-arm64/frida-core install
+	. build/frida-meson-env-android-arm64.rc && $(MESON) install -C build/tmp-android-arm64/frida-core
 	@touch $@
 build/frida_thin-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-%/frida-core/.frida-ninja-stamp
-	. build/frida_thin-meson-env-$*.rc && $(NINJA) -C build/tmp_thin-$*/frida-core install
+	. build/frida_thin-meson-env-$*.rc && $(MESON) install -C build/tmp_thin-$*/frida-core
 	@touch $@
 
 build/tmp-macos-%/frida-core/.frida-helper-and-agent-stamp: build/tmp-macos-%/frida-core/.frida-ninja-stamp
-	. build/frida-meson-env-macos-$*.rc && $(NINJA) -C build/tmp-macos-$*/frida-core src/frida-helper lib/agent/frida-agent.dylib
+	. build/frida-meson-env-macos-$*.rc && ninja -C build/tmp-macos-$*/frida-core src/frida-helper lib/agent/frida-agent.dylib
 	@touch $@
 build/tmp-macos-%/frida-core/.frida-agent-stamp: build/tmp-macos-%/frida-core/.frida-ninja-stamp
-	. build/frida-meson-env-macos-$*.rc && $(NINJA) -C build/tmp-macos-$*/frida-core lib/agent/frida-agent.dylib
+	. build/frida-meson-env-macos-$*.rc && ninja -C build/tmp-macos-$*/frida-core lib/agent/frida-agent.dylib
 	@touch $@
 build/tmp-android-%/frida-core/.frida-helper-and-agent-stamp: build/tmp-android-%/frida-core/.frida-ninja-stamp
-	. build/frida-meson-env-android-$*.rc && $(NINJA) -C build/tmp-android-$*/frida-core src/frida-helper lib/agent/frida-agent.so
+	. build/frida-meson-env-android-$*.rc && ninja -C build/tmp-android-$*/frida-core src/frida-helper lib/agent/frida-agent.so
 	@touch $@
 build/tmp-android-%/frida-core/.frida-agent-stamp: build/tmp-android-%/frida-core/.frida-ninja-stamp
-	. build/frida-meson-env-android-$*.rc && $(NINJA) -C build/tmp-android-$*/frida-core lib/agent/frida-agent.so
+	. build/frida-meson-env-android-$*.rc && ninja -C build/tmp-android-$*/frida-core lib/agent/frida-agent.so
 	@touch $@
 
 build/frida-macos-universal/lib/frida/frida-gadget.dylib: \
@@ -429,7 +429,7 @@ build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-sta
 			-Dpython_incdir=$$(PYTHON_INCDIR) \
 			frida-python $$$$builddir || exit 1; \
 	fi; \
-	$$(NINJA) -C $$$$builddir install || exit 1; \
+	$$(MESON) install -C $$$$builddir || exit 1; \
 	$$$$STRIP $$$$STRIP_FLAGS build/$1-$$*$(PYTHON_PREFIX)/lib/$$(PYTHON_NAME)/site-packages/_frida.so
 	@touch $$@
 endef
@@ -529,7 +529,7 @@ build/$2-%/frida-tools-$$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodul
 			-Dpython=$$(PYTHON) \
 			frida-tools $$$$builddir || exit 1; \
 	fi; \
-	$$(NINJA) -C $$$$builddir install || exit 1
+	$$(MESON) install -C $$$$builddir || exit 1
 	@touch $$@
 endef
 $(eval $(call make-tools-rule,frida,tmp))

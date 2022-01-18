@@ -88,7 +88,7 @@ build/frida-%/libdata/pkgconfig/frida-gum-1.0.pc: build/frida-env-%.rc build/.fr
 			$(frida_gum_flags) \
 			frida-gum $$builddir || exit 1; \
 	fi; \
-	$(NINJA) -C $$builddir install || exit 1
+	$(MESON) install -C $$builddir || exit 1
 	@touch -c $@
 
 check-gum: gum ##@gum Run tests
@@ -110,7 +110,7 @@ build/tmp-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp bui
 	@touch $@
 
 build/frida-%/libdata/pkgconfig/frida-core-1.0.pc: build/tmp-%/frida-core/.frida-ninja-stamp
-	. build/frida-meson-env-$*.rc && $(NINJA) -C build/tmp-$*/frida-core install
+	. build/frida-meson-env-$*.rc && $(MESON) install -C build/tmp-$*/frida-core
 	@touch $@
 
 check-core: core ##@core Run tests
@@ -129,7 +129,7 @@ build/tmp-%/frida-$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-sta
 			-Dpython=$(PYTHON) \
 			frida-python $$builddir || exit 1; \
 	fi; \
-	$(NINJA) -C $$builddir install || exit 1; \
+	$(MESON) install -C $$builddir || exit 1; \
 	$$STRIP $$STRIP_FLAGS build/frida-$*/lib/$(PYTHON_NAME)/site-packages/_frida.so
 	@touch $@
 
@@ -183,7 +183,7 @@ build/tmp-%/frida-tools-$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodul
 			-Dpython=$(PYTHON) \
 			frida-tools $$builddir || exit 1; \
 	fi; \
-	$(NINJA) -C $$builddir install || exit 1
+	$(MESON) install -C $$builddir || exit 1
 	@touch $@
 
 check-tools: build/tmp-freebsd-$(build_arch)/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Test CLI tools

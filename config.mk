@@ -44,6 +44,5 @@ NODE_BIN_DIR := $(shell dirname $(NODE) 2>/dev/null)
 NPM ?= $(NODE_BIN_DIR)/npm
 
 MESON ?= $(PYTHON3) $(FRIDA)/releng/meson/meson.py
-NINJA ?= $(FRIDA)/releng/ninja-$(build_os_arch)
 
 tests ?=

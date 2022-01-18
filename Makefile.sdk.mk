@@ -461,7 +461,8 @@ build/fs-%/manifest/gn.pkg: build/fs-tmp-%/gn/build.ninja
 	@prefix=build/fs-$*; \
 	builddir=build/fs-tmp-$*/gn; \
 	(set -x \
-		&& $(NINJA) -C $$builddir \
+		&& . build/fs-meson-env-$*.rc \
+		&& ninja -C $$builddir \
 		&& install -d $$prefix/bin \
 		&& install -m 755 $$builddir/gn $$prefix/bin \
 	) >>$$builddir/build.log 2>&1
@@ -538,8 +539,9 @@ build/fs-%/manifest/v8.pkg: build/fs-tmp-%/v8/build.ninja
 	srcdir=deps/v8-checkout/v8; \
 	builddir=build/fs-tmp-$*/v8; \
 	(set -x \
+		&& . build/fs-meson-env-$*.rc \
 		&& $(xcode_env_setup) \
-		&& $(NINJA) -C $$builddir v8_monolith \
+		&& ninja -C $$builddir v8_monolith \
 		&& install -d $$prefix/include/v8-$(v8_api_version)/v8 \
 		&& install -m 644 $$srcdir/include/*.h $$prefix/include/v8-$(v8_api_version)/v8/ \
 		&& install -d $$prefix/include/v8-$(v8_api_version)/v8/inspector \
@@ -593,8 +595,9 @@ build/fs-%/manifest/libcxx.pkg: build/fs-%/manifest/v8.pkg
 	srcdir=deps/v8-checkout/v8; \
 	builddir=build/fs-tmp-$*/v8; \
 	(set -x \
+		&& . build/fs-meson-env-$*.rc \
 		&& $(xcode_env_setup) \
-		&& $(NINJA) -C $$builddir libc++ \
+		&& ninja -C $$builddir libc++ \
 		&& install -d $$prefix/include/c++/ \
 		&& cp -a $$srcdir/buildtools/third_party/libc++/trunk/include/* $$prefix/include/c++/ \
 		&& rm $$prefix/include/c++/CMakeLists.txt $$prefix/include/c++/__config_site.in \
