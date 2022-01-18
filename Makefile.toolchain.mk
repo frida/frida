@@ -97,6 +97,7 @@ build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages), bui
 			--exclude lib/gio \
 			--exclude $$libdatadir/pkgconfig \
 			--exclude "lib/vala-*/*.a" \
+			--exclude share/aclocal/bison-i18n.m4 \
 			--exclude share/bash-completion \
 			--exclude share/bison \
 			--exclude share/devhelp \
