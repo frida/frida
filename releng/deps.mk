@@ -846,7 +846,7 @@ $1: build/$2-$3/manifest/$1.pkg
 	export PATH="$$(shell pwd)/build/$2-$(build_os_arch)/bin:$$$$PATH"; \
 	if [ -f deps/$1/meson.build ]; then \
 		. build/$2-meson-env-$3.rc; \
-		$(MESON) -C $$$$builddir install; \
+		$(MESON) install -C $$$$builddir; \
 	else \
 		. build/$2-env-$3.rc; \
 		$(MAKE) -C $$$$builddir $(MAKE_J) install; \
