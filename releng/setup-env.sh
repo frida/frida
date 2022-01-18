@@ -1003,7 +1003,7 @@ strip_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-strip
 (
   echo "#!/bin/sh"
   echo "for arg in \"\$@\"; do"
-  echo "  if echo \"\$arg\" | egrep -q '.a\$'; then"
+  echo "  if echo \"\$arg\" | egrep -q '\\.a\$'; then"
   echo "    exit 0"
   echo "  fi"
   echo "done"
