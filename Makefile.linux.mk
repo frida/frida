@@ -105,8 +105,7 @@ build/$1-%/lib/pkgconfig/frida-gum-1.0.pc: build/$1-env-%.rc build/.frida-gum-su
 	. build/$1-meson-env-$$*.rc; \
 	builddir=build/$2-$$*/frida-gum; \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
-		$$(MESON) \
-			--cross-file build/$1-$$*.txt \
+		$$(call meson-setup-for-env,$1,$$*) \
 			--prefix $$(FRIDA)/build/$1-$$* \
 			--libdir $$(FRIDA)/build/$1-$$*/lib \
 			$$(frida_gum_flags) \
@@ -156,8 +155,7 @@ build/tmp-linux-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-s
 	. build/frida-meson-env-linux-x86.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
-		$(MESON) \
-			--cross-file build/frida-linux-x86.txt \
+		$(call meson-setup,linux-x86) \
 			--prefix $(FRIDA)/build/frida-linux-x86 \
 			--libdir $(FRIDA)/build/frida-linux-x86/lib \
 			$(frida_core_flags) \
@@ -168,8 +166,7 @@ build/tmp-linux-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submodul
 	. build/frida-meson-env-linux-x86_64.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
-		$(MESON) \
-			--cross-file build/frida-linux-x86_64.txt \
+		$(call meson-setup,linux-x86_64) \
 			--prefix $(FRIDA)/build/frida-linux-x86_64 \
 			--libdir $(FRIDA)/build/frida-linux-x86_64/lib \
 			$(frida_core_flags) \
@@ -184,8 +181,7 @@ build/tmp-android-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule
 	. build/frida-meson-env-android-x86.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
-		$(MESON) \
-			--cross-file build/frida-android-x86.txt \
+		$(call meson-setup,android-x86) \
 			--prefix $(FRIDA)/build/frida-android-x86 \
 			--libdir $(FRIDA)/build/frida-android-x86/lib \
 			$(frida_core_flags) \
@@ -197,8 +193,7 @@ build/tmp-android-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submod
 	. build/frida-meson-env-android-x86_64.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
-		$(MESON) \
-			--cross-file build/frida-android-x86_64.txt \
+		$(call meson-setup,android-x86_64) \
 			--prefix $(FRIDA)/build/frida-android-x86_64 \
 			--libdir $(FRIDA)/build/frida-android-x86_64/lib \
 			$(frida_core_flags) \
@@ -215,8 +210,7 @@ build/tmp-android-arm/frida-core/.frida-ninja-stamp: build/.frida-core-submodule
 	. build/frida-meson-env-android-arm.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
-		$(MESON) \
-			--cross-file build/frida-android-arm.txt \
+		$(call meson-setup,android-arm) \
 			--prefix $(FRIDA)/build/frida-android-arm \
 			--libdir $(FRIDA)/build/frida-android-arm/lib \
 			$(frida_core_flags) \
@@ -227,8 +221,7 @@ build/tmp-android-arm64/frida-core/.frida-ninja-stamp: build/.frida-core-submodu
 	. build/frida-meson-env-android-arm64.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
-		$(MESON) \
-			--cross-file build/frida-android-arm64.txt \
+		$(call meson-setup,android-arm64) \
 			--prefix $(FRIDA)/build/frida-android-arm64 \
 			--libdir $(FRIDA)/build/frida-android-arm64/lib \
 			$(frida_core_flags) \
@@ -243,8 +236,7 @@ build/tmp_thin-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stam
 	. build/frida_thin-meson-env-$*.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
-		$(MESON) \
-			--cross-file build/frida_thin-$*.txt \
+		$(call meson-setup-thin,$*) \
 			--prefix $(FRIDA)/build/frida_thin-$* \
 			--libdir $(FRIDA)/build/frida_thin-$*/lib \
 			$(frida_core_flags) \
@@ -317,8 +309,7 @@ build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-sta
 	. build/$1-meson-env-$$*.rc; \
 	builddir=$$(@D); \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
-		$$(MESON) \
-			--cross-file build/$1-$$*.txt \
+		$$(call meson-setup-for-env,$1,$$*) \
 			--prefix $$(FRIDA)/build/$1-$$* \
 			--libdir $$(FRIDA)/build/$1-$$*/lib \
 			-Dpython=$$(PYTHON) \
@@ -424,8 +415,7 @@ build/$2-%/frida-tools-$$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodul
 	. build/$1-meson-env-$$*.rc; \
 	builddir=$$(@D); \
 	if [ ! -f $$$$builddir/build.ninja ]; then \
-		$$(MESON) \
-			--cross-file build/$1-$$*.txt \
+		$$(call meson-setup-for-env,$1,$$*) \
 			--prefix $$(FRIDA)/build/$1-$$* \
 			--libdir $$(FRIDA)/build/$1-$$*/lib \
 			-Dpython=$$(PYTHON) \

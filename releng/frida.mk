@@ -78,3 +78,19 @@ build/frida_gir-env-%.rc: releng/setup-env.sh releng/config.site.in build/frida-
 build/frida-version.h: releng/generate-version-header.py .git/refs/heads/main
 	@$(PYTHON3) releng/generate-version-header.py > $@.tmp
 	@mv $@.tmp $@
+
+define meson-setup
+	$(call meson-setup-for-env,frida,$1)
+endef
+
+define meson-setup-thin
+	$(call meson-setup-for-env,frida_thin,$1)
+endef
+
+define meson-setup-for-env
+	meson_args="--native-file build/$1-$(build_os_arch).txt"; \
+	if [[ $2 != $(build_os_arch) ]]; then \
+		meson_args="$$meson_args --cross-file build/$1-$2.txt"; \
+	fi; \
+	$(MESON) setup $$meson_args
+endef

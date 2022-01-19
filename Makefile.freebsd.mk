@@ -82,8 +82,7 @@ build/frida-%/libdata/pkgconfig/frida-gum-1.0.pc: build/frida-env-%.rc build/.fr
 	. build/frida-meson-env-$*.rc; \
 	builddir=build/tmp-$*/frida-gum; \
 	if [ ! -f $$builddir/build.ninja ]; then \
-		$(MESON) \
-			--cross-file build/frida-$*.txt \
+		$(call meson-setup,$*) \
 			--prefix $(FRIDA)/build/frida-$* \
 			$(frida_gum_flags) \
 			frida-gum $$builddir || exit 1; \
@@ -101,8 +100,7 @@ build/tmp-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp bui
 	. build/frida-meson-env-$*.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
-		$(MESON) \
-			--cross-file build/frida-$*.txt \
+		$(call meson-setup,$*) \
 			--prefix $(FRIDA)/build/frida-$* \
 			$(frida_core_flags) \
 			frida-core $$builddir || exit 1; \
@@ -123,8 +121,7 @@ build/tmp-%/frida-$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-sta
 	. build/frida-meson-env-$*.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
-		$(MESON) \
-			--cross-file build/frida-$*.txt \
+		$(call meson-setup,$*) \
 			--prefix $(FRIDA)/build/frida-$* \
 			-Dpython=$(PYTHON) \
 			frida-python $$builddir || exit 1; \
@@ -177,8 +174,7 @@ build/tmp-%/frida-tools-$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodul
 	. build/frida-meson-env-$*.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
-		$(MESON) \
-			--cross-file build/frida-$*.txt \
+		$(call meson-setup,$*) \
 			--prefix $(FRIDA)/build/frida-$* \
 			-Dpython=$(PYTHON) \
 			frida-tools $$builddir || exit 1; \
