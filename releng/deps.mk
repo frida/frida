@@ -656,7 +656,7 @@ gn_deps_for_build = \
 	$(NULL)
 
 depot_tools_name = depot_tools
-depot_tools_version = b674f8a27725216bd2201652636649d83064ca4a
+depot_tools_version = cb340f5b7bbdcaba0fad346b08db91538619a531
 depot_tools_url = https://chromium.googlesource.com/chromium/tools/depot_tools.git
 depot_tools_hash = $(NULL)
 depot_tools_recipe = custom
