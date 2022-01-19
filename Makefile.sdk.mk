@@ -434,6 +434,9 @@ ifeq ($(host_os), ios)
 v8_platform_args += ios_sdk_path="$(IOS_SDK_ROOT)"
 endif
 endif
+ifeq ($(host_os), freebsd)
+v8_os := freebsd
+endif
 
 depot_tools_config := \
 	DEPOT_TOOLS_UPDATE=0 \
@@ -564,7 +567,15 @@ build/fs-%/manifest/v8.pkg: build/fs-tmp-%/v8/build.ninja
 			-b $$builddir \
 			-g build/fs-$(build_os_arch)/bin/gn \
 			patch $$prefix/include/v8-$(v8_api_version)/v8/v8config.h \
-		&& install -d $$prefix/lib/pkgconfig \
+		&& case $* in \
+			freebsd-*) \
+				libdatadir=libdata; \
+				;; \
+			*) \
+				libdatadir=lib; \
+				;; \
+		esac \
+		&& install -d $$prefix/$$libdatadir/pkgconfig \
 		&& ( \
 			echo "prefix=\$${frida_sdk_prefix}"; \
 			echo "libdir=\$${prefix}/lib"; \
@@ -581,7 +592,7 @@ build/fs-%/manifest/v8.pkg: build/fs-tmp-%/v8/build.ninja
 				get libs); \
 			[ -n "$$libs" ] && echo "Libs.private: $$libs"; \
 			echo "Cflags: -I\$${includedir} -I\$${includedir}/v8" \
-		) > $$prefix/lib/pkgconfig/v8-$(v8_api_version).pc \
+		) > $$prefix/$$libdatadir/pkgconfig/v8-$(v8_api_version).pc \
 	) >>$$builddir/build.log 2>&1 \
 	&& $(call print-status,v8,Generating manifest) \
 	&& ( \
