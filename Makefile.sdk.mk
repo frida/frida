@@ -435,6 +435,11 @@ v8_platform_args += ios_sdk_path="$(IOS_SDK_ROOT)"
 endif
 endif
 
+depot_tools_config := \
+	DEPOT_TOOLS_UPDATE=0 \
+	VPYTHON_BYPASS="manually managed python not supported by chrome operations" \
+	$(NULL)
+
 # Google's prebuilt GN requires a newer glibc than our Debian Squeeze buildroot has.
 
 $(eval $(call make-base-package-rules,gn,fs,$(build_os_arch)))
@@ -493,7 +498,7 @@ deps/v8-checkout/.gclient: deps/.depot_tools-stamp
 	@$(call print-repo-banner,v8,$(v8_version),$(v8_url))
 	@mkdir -p $(@D)
 	@cd deps/v8-checkout \
-		&& export PATH="$(shell pwd)/deps/depot_tools:$$PATH" DEPOT_TOOLS_UPDATE=0 \
+		&& export PATH="$(shell pwd)/deps/depot_tools:$$PATH" $(depot_tools_config) \
 		&& gclient config --spec 'solutions = [ \
   { \
     "url": "$(v8_url)@$(v8_version)", \
@@ -507,7 +512,7 @@ deps/v8-checkout/.gclient: deps/.depot_tools-stamp
 deps/v8-checkout/v8: deps/v8-checkout/.gclient
 	@$(call print-status,v8,Cloning into deps/v8-checkout)
 	@cd deps/v8-checkout \
-		&& export PATH="$(shell pwd)/deps/depot_tools:$$PATH" DEPOT_TOOLS_UPDATE=0 \
+		&& export PATH="$(shell pwd)/deps/depot_tools:$$PATH" $(depot_tools_config) \
 		&& gclient sync
 	@touch $@
 

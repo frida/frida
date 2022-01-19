@@ -661,6 +661,7 @@ depot_tools_url = https://chromium.googlesource.com/chromium/tools/depot_tools.g
 depot_tools_hash = $(NULL)
 depot_tools_recipe = custom
 depot_tools_patches = \
+	depot_tools-os-support.patch \
 	$(NULL)
 depot_tools_options = \
 	$(NULL)
