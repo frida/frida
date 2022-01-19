@@ -642,7 +642,7 @@ v8_deps_for_build = \
 v8_api_version = 8.0
 
 gn_name = GN
-gn_version = 75194c124f158d7fabdc94048f1a3f850a5f0701
+gn_version = dd3501bfb77bafc41e7493c92e2684fa9709770b
 gn_url = $(frida_base_url)/gn.git
 gn_hash = $(NULL)
 gn_recipe = custom
