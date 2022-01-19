@@ -245,10 +245,10 @@ if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/VERSION.txt" 2>/dev/null;
   ) > "$vala_wrapper"
   chmod 755 "$vala_wrapper"
 
+  # TODO: Remove this kludge after our next toolchain bump.
   if [ ! -e "$FRIDA_TOOLROOT/bin/ninja" ]; then
     ln -s "$FRIDA_ROOT/releng/ninja-$build_os_arch" "$FRIDA_TOOLROOT/bin/ninja"
   fi
-  ln -s "$FRIDA_ROOT/releng/frida-resource-compiler-$build_os_arch" "$FRIDA_TOOLROOT/bin/frida-resource-compiler"
 else
   detect_vala_api_version
 fi
