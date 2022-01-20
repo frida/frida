@@ -520,7 +520,10 @@ build/frida-macos-$(build_cpu_flavor)/bin/frida: build/tmp-macos-$(build_arch)/f
 	for tool in $(frida_tools); do \
 		cp build/frida-macos-$(build_arch)/bin/$$tool build/frida-macos-$(build_cpu_flavor)/bin/; \
 	done
-build/frida-macos-$(build_cpu_flavor)/lib/$(PYTHON_NAME)/site-packages/frida_tools: build/tmp-macos-$(build_arch)/frida-tools-$(PYTHON_NAME)/.frida-stamp
+build/frida-macos-$(build_cpu_flavor)/lib/$(PYTHON_NAME)/site-packages/frida_tools: \
+		build/tmp-macos-$(build_arch)/frida-tools-$(PYTHON_NAME)/.frida-stamp \
+		build/frida-macos-$(build_cpu_flavor)/lib/$(PYTHON_NAME)/site-packages/frida \
+		build/frida-macos-$(build_cpu_flavor)/lib/$(PYTHON_NAME)/site-packages/_frida.so
 	rm -rf $@
 	mkdir -p $(@D)
 	cp -a build/frida-macos-$(build_arch)/lib/$(PYTHON_NAME)/site-packages/frida_tools $@
