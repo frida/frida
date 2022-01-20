@@ -44,7 +44,6 @@ distclean: clean-submodules
 	rm -rf deps/
 
 clean: clean-submodules
-	rm -f build/.*-gum-npm-stamp
 	rm -f build/*-clang*
 	rm -f build/*-pkg-config
 	rm -f build/*-stamp
@@ -96,12 +95,7 @@ gum-qnx-armeabi: build/frida_thin-qnx-armeabi/lib/pkgconfig/frida-gum-1.0.pc ##@
 
 
 define make-gum-rules
-build/.$1-gum-npm-stamp: build/$1-env-linux-$$(build_arch).rc
-	@$$(NPM) --version &>/dev/null || (echo -e "\033[31mOops. It appears Node.js is not installed.\nWe need it for processing JavaScript code at build-time.\nCheck PATH or set NODE to the absolute path of your Node.js binary.\033[0m"; exit 1;)
-	. build/$1-meson-env-linux-$$(build_arch).rc && cd frida-gum/bindings/gumjs && $(NPM) install
-	@touch $$@
-
-build/$1-%/lib/pkgconfig/frida-gum-1.0.pc: build/$1-env-%.rc build/.frida-gum-submodule-stamp build/.$1-gum-npm-stamp
+build/$1-%/lib/pkgconfig/frida-gum-1.0.pc: build/$1-env-%.rc build/.frida-gum-submodule-stamp
 	. build/$1-meson-env-$$*.rc; \
 	builddir=build/$2-$$*/frida-gum; \
 	if [ ! -f $$$$builddir/build.ninja ]; then \

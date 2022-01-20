@@ -109,50 +109,6 @@ REM. &gt; "$(IntDir)frida-version.stamp"
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="windows-node-modules.txt">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Installing Node.js modules needed for compiling the GumJS runtime</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)windows-node-modules.stamp;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Installing Node.js modules needed for compiling the GumJS runtime</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)windows-node-modules.stamp;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Installing Node.js modules needed for compiling the GumJS runtime</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)windows-node-modules.stamp;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Installing Node.js modules needed for compiling the GumJS runtime</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)windows-node-modules.stamp;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">call npm --version &gt;NUL 2&gt;NUL
-if errorlevel 1 (
-  echo Node.js not found on your PATH
-  exit 1
-)
-cd "$(ProjectDir)..\frida-gum\bindings\gumjs\"
-call npm install || exit 1
-echo &gt; "$(IntDir)windows-node-modules.stamp"</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call npm --version &gt;NUL 2&gt;NUL
-if errorlevel 1 (
-  echo Node.js not found on your PATH
-  exit 1
-)
-cd "$(ProjectDir)..\frida-gum\bindings\gumjs\"
-call npm install || exit 1
-echo &gt; "$(IntDir)windows-node-modules.stamp"</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">call npm --version &gt;NUL 2&gt;NUL
-if errorlevel 1 (
-  echo Node.js not found on your PATH
-  exit 1
-)
-cd "$(ProjectDir)..\frida-gum\bindings\gumjs\"
-call npm install || exit 1
-echo &gt; "$(IntDir)windows-node-modules.stamp"</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">call npm --version &gt;NUL 2&gt;NUL
-if errorlevel 1 (
-  echo Node.js not found on your PATH
-  exit 1
-)
-cd "$(ProjectDir)..\frida-gum\bindings\gumjs\"
-call npm install || exit 1
-echo &gt; "$(IntDir)windows-node-modules.stamp"</Command>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
     <CustomBuild Include="deps.py">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Checking prebuilt dependencies</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)deps.stamp;%(Outputs)</Outputs>

@@ -16,7 +16,6 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="generate-version-header.py" />
-    <CustomBuild Include="windows-node-modules.txt" />
     <CustomBuild Include="deps.py" />
   </ItemGroup>
 </Project>
