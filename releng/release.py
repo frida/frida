@@ -624,9 +624,9 @@ if __name__ == '__main__':
             upload_python_debs("ubuntu-hirsute", "python3", "/usr/bin/python3.9",
                 os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python3.9", "site-packages", "_frida.so"),
                 upload)
-        elif builder == 'fedora_34-x86_64':
+        elif builder == 'fedora_35-x86_64':
             upload = get_github_uploader()
 
-            upload_python_rpms("fc34", "python3", "/usr/bin/python3.9",
-                os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python3.9", "site-packages", "_frida.so"),
+            upload_python_rpms("fc35", "python3", "/usr/bin/python3.10",
+                os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python3.10", "site-packages", "_frida.so"),
                 upload)
