@@ -448,10 +448,10 @@ if __name__ == '__main__':
             upload_file("frida-gadget-{version}-windows-x86.dll",    os.path.join(prefix_x86, "bin", "frida-gadget.dll"), upload)
             upload_file("frida-gadget-{version}-windows-x86_64.dll", os.path.join(prefix_x64, "bin", "frida-gadget.dll"), upload)
 
-            upload_python_bindings_to_pypi(r"C:\Program Files (x86)\Python 2.7\python.exe", os.path.join(prefix_x86, "lib", "python2.7", "site-packages", "_frida.pyd"))
-            upload_python_bindings_to_pypi(r"C:\Program Files\Python 2.7\python.exe",       os.path.join(prefix_x64, "lib", "python2.7", "site-packages", "_frida.pyd"))
-            upload_python_bindings_to_pypi(r"C:\Program Files (x86)\Python 3.8\python.exe", os.path.join(prefix_x86, "lib", "python3.8", "site-packages", "_frida.pyd"))
-            upload_python_bindings_to_pypi(r"C:\Program Files\Python 3.8\python.exe",       os.path.join(prefix_x64, "lib", "python3.8", "site-packages", "_frida.pyd"), sdist=True)
+            upload_python_bindings_to_pypi(r"C:\Program Files (x86)\Python 2.7\python.exe",  os.path.join(prefix_x86, "lib", "python2.7", "site-packages", "_frida.pyd"))
+            upload_python_bindings_to_pypi(r"C:\Program Files\Python 2.7\python.exe",        os.path.join(prefix_x64, "lib", "python2.7", "site-packages", "_frida.pyd"))
+            upload_python_bindings_to_pypi(r"C:\Program Files (x86)\Python 3.10\python.exe", os.path.join(prefix_x86, "lib", "python3.10", "site-packages", "_frida.pyd"))
+            upload_python_bindings_to_pypi(r"C:\Program Files\Python 3.10\python.exe",       os.path.join(prefix_x64, "lib", "python3.10", "site-packages", "_frida.pyd"), sdist=True)
 
             upload_node_bindings_to_npm(r"C:\Program Files (x86)\nodejs\node.exe", upload, publish=False)
             upload_node_bindings_to_npm(r"C:\Program Files\nodejs\node.exe",       upload, publish=False)
