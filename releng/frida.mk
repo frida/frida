@@ -89,7 +89,7 @@ endef
 
 define meson-setup-for-env
 	meson_args="--native-file build/$1-$(build_os_arch).txt"; \
-	if [[ $2 != $(build_os_arch) ]]; then \
+	if [ $2 != $(build_os_arch) ]; then \
 		meson_args="$$meson_args --cross-file build/$1-$2.txt"; \
 	fi; \
 	$(MESON) setup $$meson_args
