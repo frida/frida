@@ -452,11 +452,16 @@ build/frida-macos-intel/lib/$(PYTHON_NAME)/site-packages/_frida.so: build/tmp-ma
 	cp build/frida-macos-x86_64/lib/$(PYTHON_NAME)/site-packages/_frida.so $@
 	@touch $@
 
-check-python-macos: check-python-macos-$(build_cpu_flavor) ##@python Test Python bindings for macOS
-check-python-macos-%: python-macos-%
-	export PYTHONPATH="$(shell pwd)/build/frida-macos-$*/lib/$(PYTHON_NAME)/site-packages" \
+define run-python-tests
+	export PYTHONPATH="$(shell pwd)/build/frida-macos-$1/lib/$(PYTHON_NAME)/site-packages" \
 		&& cd frida-python \
-		&& $(PYTHON) -m unittest discover
+		&& $2 $(PYTHON) -m unittest discover
+endef
+check-python-macos: check-python-macos-$(build_cpu_flavor) ##@python Test Python bindings for macOS
+check-python-macos-apple_silicon: python-macos-apple_silicon
+	$(call run-python-tests,apple_silicon,)
+check-python-macos-intel: python-macos-intel
+	$(call run-python-tests,intel,arch -x86_64)
 
 
 node-macos: build/frida-macos-$(build_arch)/lib/node_modules/frida ##@node Build Node.js bindings for macOS
