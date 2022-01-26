@@ -639,7 +639,7 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 	$(RM) -r $$$$builddir; \
 	mkdir -p $$$$builddir; \
 	(set -x \
-		&& . build/$2-meson-env-$$*.rc \
+		&& . build/$2-env-$$*.rc \
 		&& export PATH="$$(shell pwd)/build/$2-$(build_os_arch)/bin:$$$$PATH" \
 		&& $(call print-status,$1,Configuring) \
 		&& $(MESON) \
@@ -647,7 +647,7 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 			--prefix "$$$$prefix" \
 			--libdir "$$$$prefix/lib" \
 			--default-library static \
-			$$(FRIDA_MESONFLAGS_BOTTLE) \
+			$$(FRIDA_FLAGS_BOTTLE) \
 			$$($$(subst -,_,$1)_options) \
 			$$$$builddir \
 			deps/$1 \
@@ -702,7 +702,9 @@ build/$2-tmp-%/$1/Makefile: build/$2-env-%.rc deps/.$1-stamp \
 		&& . $$< \
 		&& export PATH="$$(shell pwd)/build/$2-$(build_os_arch)/bin:$$$$PATH" \
 		&& cd $$(@D) \
-		&& ../../../deps/$1/configure $$($$(subst -,_,$1)_options) \
+		&& ../../../deps/$1/configure \
+			--prefix=$$(shell pwd)/build/$2-$$* \
+			$$($$(subst -,_,$1)_options) \
 	) >$$(@D)/build.log 2>&1 || (echo "failed - see $$(@D)/build.log for more information"; exit 1)
 
 endef
@@ -765,7 +767,7 @@ $1: build/$2-$3/manifest/$1.pkg
 	builddir=build/$2-tmp-$3/$1; \
 	export PATH="$$(shell pwd)/build/$2-$(build_os_arch)/bin:$$$$PATH"; \
 	if [ -f deps/$1/meson.build ]; then \
-		. build/$2-meson-env-$3.rc; \
+		. build/$2-env-$3.rc; \
 		$(MESON) install -C $$$$builddir; \
 	else \
 		echo "Incremental compilation not supported for: $1"; \

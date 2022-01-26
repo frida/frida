@@ -978,14 +978,6 @@ else
   meson_version_include=""
 fi
 
-ACLOCAL_FLAGS="-I $FRIDA_PREFIX/share/aclocal"
-if [ "$FRIDA_ENV_SDK" != 'none' ]; then
-  ACLOCAL_FLAGS="$ACLOCAL_FLAGS -I $FRIDA_SDKROOT/share/aclocal"
-fi
-ACLOCAL_FLAGS="$ACLOCAL_FLAGS -I $FRIDA_TOOLROOT/share/aclocal"
-ACLOCAL="aclocal $ACLOCAL_FLAGS"
-CONFIG_SITE="$FRIDA_BUILD/${frida_env_name_prefix}config-${host_os_arch}.site"
-
 VALAC="$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-valac"
 vala_impl="$FRIDA_TOOLROOT/bin/valac-$vala_api_version"
 vala_flags="--vapidir=\"$FRIDA_PREFIX/share/vala/vapi\""
@@ -1043,7 +1035,6 @@ fi
 chmod 755 "$PKG_CONFIG"
 
 env_rc=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-env-${host_os_arch}.rc
-meson_env_rc=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-meson-env-${host_os_arch}.rc
 
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   env_path_sdk="$FRIDA_SDKROOT/bin:"
@@ -1056,35 +1047,17 @@ fi
   echo "export PKG_CONFIG=\"$PKG_CONFIG\""
   echo "export PKG_CONFIG_PATH=\"$pkg_config_path\""
   echo "export VALAC=\"$VALAC\""
-  echo "export CPP=\"$CPP\""
   echo "export CPPFLAGS=\"$CPPFLAGS\""
   echo "export CC=\"$CC\""
   echo "export CFLAGS=\"$CFLAGS\""
   echo "export CXX=\"$CXX\""
   echo "export CXXFLAGS=\"$CXXFLAGS\""
-  echo "export LD=\"$LD\""
   echo "export LDFLAGS=\"$LDFLAGS\""
   echo "export AR=\"$AR\""
   echo "export NM=\"$NM\""
-  echo "export RANLIB=\"$RANLIB\""
   echo "export STRIP=\"$strip_wrapper\""
-  echo "export ACLOCAL_FLAGS=\"$ACLOCAL_FLAGS\""
-  echo "export ACLOCAL=\"$ACLOCAL\""
-  echo "export CONFIG_SITE=\"$CONFIG_SITE\""
 ) > $env_rc
 
-if [ -n "$READELF" ]; then
-  echo "export READELF=\"$READELF\"" >> $env_rc
-fi
-
-if [ -n "$OBJCOPY" ]; then
-  echo "export OBJCOPY=\"$OBJCOPY\"" >> $env_rc
-fi
-
-if [ -n "$OBJDUMP" ]; then
-  echo "export OBJDUMP=\"$OBJDUMP\"" >> $env_rc
-fi
-
 case $host_os in
   macos|ios)
     (
@@ -1097,54 +1070,6 @@ case $host_os in
       echo "export OBJCFLAGS=\"$CFLAGS\""
       echo "export OBJCXXFLAGS=\"$CXXFLAGS\""
     ) >> $env_rc
-    ;;
-esac
-
-case $host_os in
-  macos)
-    (
-      echo "export MACOSX_DEPLOYMENT_TARGET=$macos_minver"
-    ) >> $env_rc
-    ;;
-esac
-
-sed \
-  -e "s,@frida_build_os_arch@,$build_os_arch,g" \
-  -e "s,@frida_host_os_arch@,$host_os_arch,g" \
-  -e "s,@frida_prefix@,$FRIDA_PREFIX,g" \
-  -e "s,@frida_optimization_flags@,$FRIDA_ACOPTFLAGS,g" \
-  -e "s,@frida_debug_flags@,$FRIDA_ACDBGFLAGS,g" \
-  -e "s,@frida_libc@,$frida_libc,g" \
-  "$FRIDA_RELENG/config.site.in" > "$CONFIG_SITE"
-
-(
-  echo "export PATH=\"${env_path_sdk}${FRIDA_TOOLROOT}/bin:\$PATH\""
-  echo "export PKG_CONFIG=\"$PKG_CONFIG\""
-  echo "export PKG_CONFIG_PATH=\"$pkg_config_path\""
-  echo "export VALAC=\"$VALAC\""
-  echo "export CPPFLAGS=\"$CPPFLAGS\""
-  echo "export CC=\"$CC\""
-  echo "export CFLAGS=\"$CFLAGS\""
-  echo "export CXX=\"$CXX\""
-  echo "export CXXFLAGS=\"$CXXFLAGS\""
-  echo "export LDFLAGS=\"$LDFLAGS\""
-  echo "export AR=\"$AR\""
-  echo "export NM=\"$NM\""
-  echo "export STRIP=\"$strip_wrapper\""
-) > $meson_env_rc
-
-case $host_os in
-  macos|ios)
-    (
-      echo "export INSTALL_NAME_TOOL=\"$INSTALL_NAME_TOOL\""
-      echo "export OTOOL=\"$OTOOL\""
-      echo "export CODESIGN=\"$CODESIGN\""
-      echo "export LIPO=\"$LIPO\""
-      echo "export OBJC=\"$OBJC\""
-      echo "export OBJCXX=\"$OBJCXX\""
-      echo "export OBJCFLAGS=\"$CFLAGS\""
-      echo "export OBJCXXFLAGS=\"$CXXFLAGS\""
-    ) >> $meson_env_rc
     ;;
 esac
 
@@ -1152,36 +1077,20 @@ if [ -n "$meson_linker_flavor" ]; then
   (
     echo "export CC_LD=$meson_linker_flavor"
     echo "export CXX_LD=$meson_linker_flavor"
-  ) >> $meson_env_rc
-  [ -n "$meson_objc" ] && echo "export OBJC_LD=$meson_linker_flavor" >> $meson_env_rc
-  [ -n "$meson_objcpp" ] && echo "export OBJCXX_LD=$meson_linker_flavor" >> $meson_env_rc
+  ) >> $env_rc
+  [ -n "$meson_objc" ] && echo "export OBJC_LD=$meson_linker_flavor" >> $env_rc
+  [ -n "$meson_objcpp" ] && echo "export OBJCXX_LD=$meson_linker_flavor" >> $env_rc
 fi
 
 case $host_os in
   macos)
     (
       echo "export MACOSX_DEPLOYMENT_TARGET=$macos_minver"
-    ) >> $meson_env_rc
+    ) >> $env_rc
     ;;
 esac
 
-build_env_rc=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-meson-env-${build_os_arch}.rc
-if [ ! -f $build_env_rc ]; then
-  (
-    echo ""
-    echo "Need an environment for the build machine to be able to generate an environment for $host_os_arch."
-    echo "It can be generated like this:"
-    echo ""
-    echo "    FRIDA_HOST=$build_os_arch releng/setup-env.sh"
-    echo ""
-  ) > /dev/stderr
-  exit 1
-fi
-egrep "^export (PKG_CONFIG|CC|CXX|OBJC|OBJCXX|CPPFLAGS|CFLAGS|CXXFLAGS|CC_LD|CXX_LD|OBJC_LD|OBJCXX_LD|LDFLAGS|AR)=" $build_env_rc \
-  | sed -e "s,=,_FOR_BUILD=," \
-  >> $meson_env_rc
-
-meson_cross_file=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-${host_os_arch}.txt
+meson_machine_file=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-${host_os_arch}.txt
 
 (
   echo "[constants]"
@@ -1262,4 +1171,4 @@ meson_cross_file=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-${host_os_arch}.txt
   echo "cpu_family = '$meson_host_cpu_family'"
   echo "cpu = '$meson_host_cpu'"
   echo "endian = '$meson_host_endian'"
-) > $meson_cross_file
+) > $meson_machine_file

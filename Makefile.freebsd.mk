@@ -73,7 +73,7 @@ gum: build/frida-freebsd-$(build_arch)/libdata/pkgconfig/frida-gum-1.0.pc ##@gum
 
 
 build/frida-%/libdata/pkgconfig/frida-gum-1.0.pc: build/frida-env-%.rc build/.frida-gum-submodule-stamp
-	. build/frida-meson-env-$*.rc; \
+	. build/frida-env-$*.rc; \
 	builddir=build/tmp-$*/frida-gum; \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		$(call meson-setup,$*) \
@@ -91,7 +91,7 @@ check-gum: gum ##@gum Run tests
 core: build/frida-freebsd-$(build_arch)/libdata/pkgconfig/frida-core-1.0.pc ##@core Build
 
 build/tmp-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-%/libdata/pkgconfig/frida-gum-1.0.pc
-	. build/frida-meson-env-$*.rc; \
+	. build/frida-env-$*.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		$(call meson-setup,$*) \
@@ -102,7 +102,7 @@ build/tmp-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp bui
 	@touch $@
 
 build/frida-%/libdata/pkgconfig/frida-core-1.0.pc: build/tmp-%/frida-core/.frida-ninja-stamp
-	. build/frida-meson-env-$*.rc && $(MESON) install -C build/tmp-$*/frida-core
+	. build/frida-env-$*.rc && $(MESON) install -C build/tmp-$*/frida-core
 	@touch $@
 
 check-core: core ##@core Run tests
@@ -112,7 +112,7 @@ check-core: core ##@core Run tests
 python: build/tmp-freebsd-$(build_arch)/frida-$(PYTHON_NAME)/.frida-stamp ##@python Build Python bindings
 
 build/tmp-%/frida-$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-stamp build/frida-%/libdata/pkgconfig/frida-core-1.0.pc
-	. build/frida-meson-env-$*.rc; \
+	. build/frida-env-$*.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		$(call meson-setup,$*) \
@@ -165,7 +165,7 @@ check-node: node ##@node Test Node.js bindings
 tools: build/tmp-freebsd-$(build_arch)/frida-tools-$(PYTHON_NAME)/.frida-stamp ##@tools Build CLI tools
 
 build/tmp-%/frida-tools-$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodule-stamp build/tmp-%/frida-$(PYTHON_NAME)/.frida-stamp
-	. build/frida-meson-env-$*.rc; \
+	. build/frida-env-$*.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
 		$(call meson-setup,$*) \

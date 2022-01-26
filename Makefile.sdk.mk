@@ -467,7 +467,7 @@ build/fs-%/manifest/gn.pkg: build/fs-tmp-%/gn/build.ninja
 	@prefix=build/fs-$*; \
 	builddir=build/fs-tmp-$*/gn; \
 	(set -x \
-		&& . build/fs-meson-env-$*.rc \
+		&& . build/fs-env-$*.rc \
 		&& ninja -C $$builddir \
 		&& install -d $$prefix/bin \
 		&& install -m 755 $$builddir/gn $$prefix/bin \
@@ -545,7 +545,7 @@ build/fs-%/manifest/v8.pkg: build/fs-tmp-%/v8/build.ninja
 	srcdir=deps/v8-checkout/v8; \
 	builddir=build/fs-tmp-$*/v8; \
 	(set -x \
-		&& . build/fs-meson-env-$*.rc \
+		&& . build/fs-env-$*.rc \
 		&& $(xcode_env_setup) \
 		&& ninja -C $$builddir v8_monolith \
 		&& install -d $$prefix/include/v8-$(v8_api_version)/v8 \
@@ -609,7 +609,7 @@ build/fs-%/manifest/libcxx.pkg: build/fs-%/manifest/v8.pkg
 	srcdir=deps/v8-checkout/v8; \
 	builddir=build/fs-tmp-$*/v8; \
 	(set -x \
-		&& . build/fs-meson-env-$*.rc \
+		&& . build/fs-env-$*.rc \
 		&& $(xcode_env_setup) \
 		&& ninja -C $$builddir libc++ \
 		&& install -d $$prefix/include/c++/ \
@@ -649,8 +649,6 @@ build/fs-env-%.rc:
 	@for os_arch in $(build_os_arch) $*; do \
 		if [ ! -f build/fs-env-$$os_arch.rc ]; then \
 			FRIDA_HOST=$$os_arch \
-			FRIDA_ACOPTFLAGS="$(FRIDA_ACOPTFLAGS_BOTTLE)" \
-			FRIDA_ACDBGFLAGS="$(FRIDA_ACDBGFLAGS_BOTTLE)" \
 			FRIDA_ASAN=$(FRIDA_ASAN) \
 			FRIDA_ENV_NAME=fs \
 			FRIDA_ENV_SDK=none \

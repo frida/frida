@@ -14,20 +14,14 @@ FRIDA_SWIFT_BRIDGE ?= auto
 FRIDA_ASAN ?= no
 
 ifeq ($(FRIDA_ASAN), yes)
-FRIDA_MESONFLAGS_COMMON := -Doptimization=1 -Db_sanitize=address
-FRIDA_MESONFLAGS_BOTTLE := -Doptimization=1 -Db_sanitize=address
-FRIDA_ACOPTFLAGS_COMMON ?= -O1
-FRIDA_ACOPTFLAGS_BOTTLE ?= -O1
+FRIDA_FLAGS_COMMON := -Doptimization=1 -Db_sanitize=address
+FRIDA_FLAGS_BOTTLE := -Doptimization=1 -Db_sanitize=address
 else
-FRIDA_MESONFLAGS_COMMON := -Doptimization=s -Db_ndebug=true --strip
-FRIDA_MESONFLAGS_BOTTLE := -Doptimization=s -Db_ndebug=true
-FRIDA_ACOPTFLAGS_COMMON ?= -Os
-FRIDA_ACOPTFLAGS_BOTTLE ?= -Os
+FRIDA_FLAGS_COMMON := -Doptimization=s -Db_ndebug=true --strip
+FRIDA_FLAGS_BOTTLE := -Doptimization=s -Db_ndebug=true
 endif
-FRIDA_ACDBGFLAGS_COMMON ?= -g3
-FRIDA_ACDBGFLAGS_BOTTLE ?= -g1
 
-FRIDA_MAPPER_FLAGS := -Dmapper=auto
+FRIDA_MAPPER := -Dmapper=auto
 
 XCODE11 ?= /Applications/Xcode-11.7.app
 

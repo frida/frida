@@ -25,8 +25,6 @@ export_ldflags := -Wl,--version-script,$(shell pwd)/build/ft-executable.version
 endif
 
 frida_env_config := \
-	FRIDA_ACOPTFLAGS="$(FRIDA_ACOPTFLAGS_BOTTLE)" \
-	FRIDA_ACDBGFLAGS="$(FRIDA_ACDBGFLAGS_BOTTLE)" \
 	FRIDA_EXTRA_LDFLAGS="$(export_ldflags)" \
 	FRIDA_ASAN=$(FRIDA_ASAN) \
 	FRIDA_ENV_NAME=ft \
