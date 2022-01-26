@@ -23,17 +23,7 @@ for file in $(find "$package" -type f); do
       newname="$file.frida.in"
       mv "$file" "$newname"
       sed_inplace \
-        -e "s,$prefix-,,g" \
         -e "s,$prefix,@FRIDA_TOOLROOT@,g" \
-        -e "s,$releng,@FRIDA_RELENG@,g" \
-        -e "s,/usr/bin/ld.gold,/usr/bin/ld,g" \
-        $newname || exit 1
-    elif echo "$file" | grep -Eq "\\.la$"; then
-      newname="$file.frida.in"
-      mv "$file" "$newname"
-      sed_inplace \
-        -e "s,$prefix-,,g" \
-        -e "s,$prefix,@FRIDA_SDKROOT@,g" \
         -e "s,$releng,@FRIDA_RELENG@,g" \
         $newname || exit 1
     elif echo "$file" | grep -Eq "\\.pc$"; then

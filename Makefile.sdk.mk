@@ -116,7 +116,6 @@ build/fs-tmp-%/.package-stamp: $(foreach pkg, $(packages), build/fs-%/manifest/$
 		&& tar -cf - \
 			include \
 			lib/*.a \
-			lib/*.la \
 			lib/glib-2.0 \
 			lib/libffi* \
 			$$libdatadir/pkgconfig \
@@ -126,7 +125,6 @@ build/fs-tmp-%/.package-stamp: $(foreach pkg, $(packages), build/fs-%/manifest/$
 			$$lib32 \
 			$$lib64 \
 			manifest \
-			share/aclocal \
 			share/glib-2.0/schemas \
 			share/vala \
 			| tar -C $(shell pwd)/$(@D)/package -xf -
