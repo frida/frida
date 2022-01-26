@@ -416,7 +416,7 @@ def build_package(name: str, role: PackageRole, spec: PackageSpec, extra_options
                     continue
 
                 print()
-                print("*** Building {} with arch={} runtime={} config={} spec={}".format(name, arch, config, runtime, spec))
+                print("*** Building {} with arch={} runtime={} config={} spec={}".format(spec.name, arch, config, runtime, spec))
 
                 if spec.recipe == 'meson':
                     build_using_meson(name, arch, config, runtime, spec, extra_options)
