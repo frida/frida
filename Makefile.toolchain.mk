@@ -8,6 +8,7 @@ SHELL := $(shell which bash)
 
 packages = \
 	ninja \
+	frida-elf-cleaner \
 	zlib \
 	libffi \
 	glib \

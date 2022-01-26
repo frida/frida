@@ -32,6 +32,20 @@ ninja_deps = \
 ninja_deps_for_build = \
 	$(NULL)
 
+frida_elf_cleaner_name = frida-elf-cleaner
+frida_elf_cleaner_version = 821c6319f5545f092d815233df73fc253ca4c603
+frida_elf_cleaner_url = $(frida_base_url)/frida-elf-cleaner.git
+frida_elf_cleaner_hash = $(NULL)
+frida_elf_cleaner_recipe = meson
+frida_elf_cleaner_patches = \
+	$(NULL)
+frida_elf_cleaner_options = \
+	$(NULL)
+frida_elf_cleaner_deps = \
+	$(NULL)
+frida_elf_cleaner_deps_for_build = \
+	$(NULL)
+
 libiconv_name = libiconv
 libiconv_version = 1.16
 libiconv_url = https://$(gnu_mirror)/libiconv/libiconv-$(libiconv_version).tar.gz

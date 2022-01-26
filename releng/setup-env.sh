@@ -737,7 +737,7 @@ case $host_os in
     fi
     host_toolprefix="$host_tooltriplet-"
 
-    elf_cleaner=${FRIDA_ROOT}/releng/frida-elf-cleaner-${build_os_arch}
+    elf_cleaner=$FRIDA_TOOLROOT/bin/frida-elf-cleaner
 
     cc_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-clang
     sed \
