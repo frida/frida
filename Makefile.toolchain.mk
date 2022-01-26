@@ -111,7 +111,7 @@ build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages), bui
 		&& for f in $(@D)/package/bin/*; do \
 			if [ -L $$f ]; then \
 				true; \
-			elif file -b --mime $$f | egrep -q "executable|binary"; then \
+			elif file -b --mime $$f | grep -Eq "executable|binary"; then \
 				$$STRIP $$f || exit 1; \
 			fi; \
 		done \
