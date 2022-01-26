@@ -8,10 +8,6 @@ SHELL := $(shell which bash)
 
 packages = \
 	ninja \
-	m4 \
-	autoconf \
-	automake \
-	libtool \
 	zlib \
 	libffi \
 	glib \
@@ -97,7 +93,7 @@ build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages), bui
 			--exclude lib/gio \
 			--exclude $$libdatadir/pkgconfig \
 			--exclude "lib/vala-*/*.a" \
-			--exclude share/aclocal/bison-i18n.m4 \
+			--exclude share/aclocal \
 			--exclude share/bash-completion \
 			--exclude share/bison \
 			--exclude share/devhelp \
@@ -111,12 +107,6 @@ build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages), bui
 			--exclude "*.pyc" \
 			--exclude "*.pyo" \
 			. | tar -C $(shell pwd)/$(@D)/package -xf -
-	@cd $(@D)/package/bin \
-		&& for tool in aclocal automake; do \
-			rm $$tool-$(automake_api_version); \
-			mv $$tool $$tool-$(automake_api_version); \
-			ln -s $$tool-$(automake_api_version) $$tool; \
-		done
 	@. $< \
 		&& for f in $(@D)/package/bin/*; do \
 			if [ -L $$f ]; then \
@@ -168,38 +158,6 @@ build/ft-%/manifest/ninja.pkg: build/ft-env-%.rc deps/.ninja-stamp
 	&& $(call print-status,ninja,Generating manifest) \
 	&& mkdir -p $(@D) \
 	&& echo "bin/ninja" > $@
-
-
-$(eval $(call make-base-package-rules,libtool,ft,$(host_os_arch)))
-
-deps/.libtool-stamp:
-	$(call grab-and-prepare,libtool)
-	@cd deps/libtool \
-		&& for name in aclocal.m4 config-h.in configure Makefile.in; do \
-			find . -name $$name -exec touch '{}' \;; \
-		done
-	@touch $@
-
-$(eval $(call make-autotools-autoreconf-rule,libtool,ft))
-
-$(eval $(call make-autotools-configure-rule,libtool,ft))
-
-build/ft-%/manifest/libtool.pkg: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
-	@$(call print-status,libtool,Building)
-	@builddir=build/ft-tmp-$*/libtool; \
-	(set -x \
-		&& . $< \
-		&& export PATH="$(shell pwd)/build/ft-$(build_os_arch)/bin:$$PATH" \
-		&& cd $$builddir \
-		&& $(MAKE) build-aux/ltmain.sh \
-		&& touch ../../../deps/libtool/doc/*.1 ../../../deps/libtool/doc/stamp-vti \
-		&& $(MAKE) $(MAKE_J) \
-		&& $(MAKE) $(MAKE_J) install \
-	) >>$$builddir/build.log 2>&1 \
-	&& $(call print-status,libtool,Generating manifest) \
-	&& (set -x; \
-		$(call make-autotools-manifest-commands,libtool,ft,$*,) \
-	) >>$$builddir/build.log 2>&1
 
 
 build/ft-env-%.rc: build/ft-executable.symbols build/ft-executable.version

@@ -46,68 +46,6 @@ libiconv_deps = \
 libiconv_deps_for_build = \
 	$(NULL)
 
-m4_name = M4
-m4_version = 1.4.19
-m4_url = https://$(gnu_mirror)/m4/m4-$(m4_version).tar.gz
-m4_hash = 3be4a26d825ffdfda52a56fc43246456989a3630093cced3fbddf4771ee58a70
-m4_recipe = autotools
-m4_patches = \
-	m4-macos-arm64e.patch \
-	$(NULL)
-m4_options = \
-	$(NULL)
-m4_deps = \
-	$(NULL)
-m4_deps_for_build = \
-	$(NULL)
-
-autoconf_name = Autoconf
-autoconf_version = 2.71
-autoconf_url = https://$(gnu_mirror)/autoconf/autoconf-$(autoconf_version).tar.gz
-autoconf_hash = 431075ad0bf529ef13cb41e9042c542381103e80015686222b8a9d4abef42a1c
-autoconf_recipe = autotools
-autoconf_patches = \
-	$(NULL)
-autoconf_options = \
-	$(NULL)
-autoconf_deps = \
-	m4 \
-	$(NULL)
-autoconf_deps_for_build = \
-	$(NULL)
-
-automake_name = Automake
-automake_version = 1.16.5
-automake_url = https://$(gnu_mirror)/automake/automake-$(automake_version).tar.gz
-automake_hash = 07bd24ad08a64bc17250ce09ec56e921d6343903943e99ccf63bbf0705e34605
-automake_recipe = autotools
-automake_patches = \
-	$(NULL)
-automake_options = \
-	$(NULL)
-automake_deps = \
-	autoconf \
-	$(NULL)
-automake_deps_for_build = \
-	$(NULL)
-automake_api_version = 1.16
-
-libtool_name = Libtool
-libtool_version = 2.4.6
-libtool_url = https://$(gnu_mirror)/libtool/libtool-$(libtool_version).tar.gz
-libtool_hash = e3bd4d5d3d025a36c21dd6af7ea818a2afcd4dfc1ea5a17b39d7854bcd0c06e3
-libtool_recipe = custom
-libtool_patches = \
-	libtool-fixes.patch \
-	$(NULL)
-libtool_options = \
-	$(NULL)
-libtool_deps = \
-	automake \
-	$(NULL)
-libtool_deps_for_build = \
-	$(NULL)
-
 zlib_name = zlib
 zlib_version = 64dd495da9b75ad61400a8de5b2a1bbb9fbbffbb
 zlib_url = $(frida_base_url)/zlib.git
@@ -214,7 +152,6 @@ flex_patches = \
 flex_options = \
 	$(NULL)
 flex_deps = \
-	m4 \
 	$(NULL)
 flex_deps_for_build = \
 	$(NULL)
@@ -229,7 +166,6 @@ bison_patches = \
 bison_options = \
 	$(NULL)
 bison_deps = \
-	m4 \
 	$(NULL)
 bison_deps_for_build = \
 	$(NULL)
