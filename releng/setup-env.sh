@@ -517,7 +517,7 @@ case $host_os in
     LD="$($xcrun --sdk $macos_sdk -f ld)"
 
     AR="$ar_wrapper"
-    NM="$FRIDA_ROOT/releng/llvm-nm-macos-x86_64"
+    NM="$($xcrun --sdk $macos_sdk -f llvm-nm)"
     RANLIB="$($xcrun --sdk $macos_sdk -f ranlib)"
     LIBTOOL="$($xcrun --sdk $macos_sdk -f libtool)"
     STRIP="$($xcrun --sdk $macos_sdk -f strip)"
@@ -624,7 +624,7 @@ case $host_os in
     LD="$($xcrun --sdk $ios_sdk -f ld)"
 
     AR="$ar_wrapper"
-    NM="$FRIDA_ROOT/releng/llvm-nm-macos-x86_64"
+    NM="$($xcrun --sdk $ios_sdk -f llvm-nm)"
     RANLIB="$($xcrun --sdk $ios_sdk -f ranlib)"
     LIBTOOL="$($xcrun --sdk $ios_sdk -f libtool)"
     STRIP="$($xcrun --sdk $ios_sdk -f strip)"
