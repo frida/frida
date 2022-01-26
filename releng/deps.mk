@@ -768,8 +768,7 @@ $1: build/$2-$3/manifest/$1.pkg
 		. build/$2-meson-env-$3.rc; \
 		$(MESON) install -C $$$$builddir; \
 	else \
-		. build/$2-env-$3.rc; \
-		$(MAKE) -C $$$$builddir $(MAKE_J) install; \
+		echo "Incremental compilation not supported for: $1"; \
 	fi
 
 endef
