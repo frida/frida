@@ -685,31 +685,14 @@ deps/.$1-stamp:
 	$$(call grab-and-prepare,$1)
 	@touch $$@
 
-$(call make-autotools-autoreconf-rule,$1,$2)
-
 $(call make-autotools-configure-rule,$1,$2)
-
-endef
-
-
-define make-autotools-autoreconf-rule
-
-deps/$1/configure: build/$2-env-$(build_os_arch).rc deps/.$1-stamp
-	@. $$< \
-		&& cd $$(@D) \
-		&& if [ ! -f configure ] || [ -f ../.$1-reconf-needed ]; then \
-			$(call print-status,$1,Generating build system); \
-			autoreconf -if &>/dev/null || exit 1; \
-			rm -f ../.$1-reconf-needed; \
-		fi
-	@touch $$@
 
 endef
 
 
 define make-autotools-configure-rule
 
-build/$2-tmp-%/$1/Makefile: build/$2-env-%.rc deps/$1/configure deps/.$1-stamp \
+build/$2-tmp-%/$1/Makefile: build/$2-env-%.rc deps/.$1-stamp \
 		$(foreach dep, $($(subst -,_,$1)_deps), build/$2-%/manifest/$(dep).pkg) \
 		$(foreach dep, $($(subst -,_,$1)_deps_for_build), build/$2-$(build_os_arch)/manifest/$(dep).pkg)
 	@$(call print-status,$1,Configuring)
@@ -904,10 +887,6 @@ define apply-patches
 			\
 			$(call print-status,$1,Applying $$patch); \
 			patch -p1 < $$file &>/dev/null || exit 1; \
-			\
-			if grep '+++' $$file | grep -Eq 'configure\.ac|Makefile\.am'; then \
-				touch ../.$1-reconf-needed; \
-			fi \
 		done
 endef
 
