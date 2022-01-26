@@ -179,7 +179,7 @@ ifeq ($(host_os), $(filter $(host_os),macos ios))
 # Our SDK will pull in its own.
 glib_options += -Diconv=external
 endif
-ifeq ($(host_os), $(filter $(host_os),android freebsd qnx))
+ifeq ($(host_os), $(filter $(host_os),android qnx))
 glib_options += -Diconv=external
 glib_deps += libiconv
 endif
