@@ -161,7 +161,7 @@ build/ft-%/manifest/ninja.pkg: build/ft-env-%.rc deps/.ninja-stamp
 		&& rm configure.py.new \
 		&& $(PYTHON) ./configure.py \
 			--bootstrap \
-			--platform=$$(echo $* | cut -f1 -d"-") \
+			--platform=$$(echo $* | cut -f1 -d"-" | sed -e 's,^macos$$,darwin,') \
 		&& install -d $$prefix/bin \
 		&& install -m 755 ninja $$prefix/bin \
 	) >>$$builddir/build.log 2>&1 \
