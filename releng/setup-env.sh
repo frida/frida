@@ -244,11 +244,6 @@ if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/VERSION.txt" 2>/dev/null;
     echo "exec \"$vala_impl\" --target-glib=2.56 \"\$@\" --vapidir=\"$FRIDA_TOOLROOT/share/vala-$vala_api_version/vapi\""
   ) > "$vala_wrapper"
   chmod 755 "$vala_wrapper"
-
-  # TODO: Remove this kludge after our next toolchain bump.
-  if [ ! -e "$FRIDA_TOOLROOT/bin/ninja" ]; then
-    ln -s "$FRIDA_ROOT/releng/ninja-$build_os_arch" "$FRIDA_TOOLROOT/bin/ninja"
-  fi
 else
   detect_vala_api_version
 fi
