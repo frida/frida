@@ -642,8 +642,11 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 		&& . build/$2-env-$$*.rc \
 		&& export PATH="$$(shell pwd)/build/$2-$(build_os_arch)/bin:$$$$PATH" \
 		&& $(call print-status,$1,Configuring) \
-		&& $(MESON) \
-			--cross-file build/$2-$$*.txt \
+		&& meson_args="--native-file build/$2-$(build_os_arch).txt" \
+		&& if [ $$* != $(build_os_arch) ]; then \
+			meson_args="$$$$meson_args --cross-file build/$2-$$*.txt"; \
+		fi \
+		&& $(MESON) setup $$$$meson_args \
 			--prefix "$$$$prefix" \
 			--libdir "$$$$prefix/lib" \
 			--default-library static \
