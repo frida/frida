@@ -6,17 +6,22 @@ MAKE_J ?= -j 8
 SHELL := $(shell which bash)
 
 
-packages = \
+packages_for_host = \
 	ninja \
 	frida-elf-cleaner \
 	zlib \
 	libffi \
 	glib \
 	pkg-config \
-	flex \
-	bison \
 	vala \
 	$(NULL)
+
+packages_for_build = \
+	flex \
+	bison \
+	$(NULL)
+
+packages = $(packages_for_host) $(packages_for_build)
 
 
 ifeq ($(host_os), $(filter $(host_os), macos ios))
@@ -45,9 +50,9 @@ all: build/toolchain-$(host_os)-$(host_arch).tar.bz2
 		echo ""; \
 	fi
 
-clean: $(foreach pkg, $(call expand-packages,$(packages)), clean-$(pkg))
+clean: $(foreach pkg, $(call expand-packages,$(packages_for_host)), clean-$(pkg))
 
-distclean: $(foreach pkg, $(call expand-packages,$(packages)), distclean-$(pkg))
+distclean: $(foreach pkg, $(call expand-packages,$(packages_for_host)), distclean-$(pkg))
 
 build/toolchain-$(host_os)-$(host_arch).tar.bz2: build/ft-tmp-$(host_os_arch)/.package-stamp
 	@$(call print-status,📦,Compressing)
@@ -65,7 +70,7 @@ build/toolchain-$(host_os)-$(host_arch).tar.bz2: build/ft-tmp-$(host_os_arch)/.p
 	fi
 	@mv $@.tmp $@
 
-build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages), build/ft-%/manifest/$(pkg).pkg)
+build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages_for_host), build/ft-%/manifest/$(pkg).pkg)
 	@echo
 	@$(call print-status,📦,Assembling)
 	@$(RM) -r $(@D)/package
