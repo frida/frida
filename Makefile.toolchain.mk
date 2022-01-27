@@ -127,9 +127,15 @@ deps/.ninja-stamp:
 	@touch $@
 
 build/ft-%/manifest/ninja.pkg: build/ft-env-%.rc deps/.ninja-stamp
-	@$(call print-status,ninja,Building)
+	@if [ $* != $(build_os_arch) ]; then \
+		$(MAKE) -f Makefile.toolchain.mk \
+			FRIDA_HOST=$(build_os_arch) \
+			build/ft-$(build_os_arch)/manifest/ninja.pkg || exit 1; \
+	fi
+	@$(call print-status,ninja,Building for $*)
 	@prefix=$(shell pwd)/build/ft-$*; \
 	builddir=build/ft-tmp-$*/ninja; \
+	native_ninja=$(shell pwd)/build/ft-$(build_os_arch)/bin/ninja; \
 	$(RM) -r $$builddir; \
 	mkdir -p build/ft-tmp-$* \
 	&& cp -a deps/ninja $$builddir \
@@ -144,9 +150,16 @@ build/ft-%/manifest/ninja.pkg: build/ft-env-%.rc deps/.ninja-stamp
 		&& sed -e "s,-O2,$$optflags,g" configure.py > configure.py.new \
 		&& cat configure.py.new > configure.py \
 		&& rm configure.py.new \
+		&& args="" \
+		&& if [ $* = $(build_os_arch) ]; then \
+			args="--bootstrap"; \
+		fi \
 		&& $(PYTHON) ./configure.py \
-			--bootstrap \
+			$$args \
 			--platform=$$(echo $* | cut -f1 -d"-" | sed -e 's,^macos$$,darwin,') \
+		&& if [ $* != $(build_os_arch) ]; then \
+			"$$native_ninja" || exit 1; \
+		fi \
 		&& install -d $$prefix/bin \
 		&& install -m 755 ninja $$prefix/bin \
 	) >>$$builddir/build.log 2>&1 \
