@@ -241,7 +241,8 @@ def grab_and_prepare_regular_package(name: str, spec: PackageSpec) -> SourceStat
         return grab_and_prepare_regular_tarball_package(name, spec)
 
 def grab_and_prepare_regular_git_package(name: str, spec: PackageSpec) -> SourceState:
-    assert spec.patches == []
+    # XXX: Don't need the patch for depot_tools on Windows, so we'll hold off on implementing this.
+    assert (spec.patches == []) or (name == "depot_tools")
 
     source_dir = DEPS_DIR / name
     if source_dir.exists():
