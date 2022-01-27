@@ -534,28 +534,13 @@ tinycc_deps_for_build = \
 	$(NULL)
 
 openssl_name = OpenSSL
-openssl_version = 1.1.1l
-openssl_url = https://www.openssl.org/source/openssl-$(openssl_version).tar.gz
-openssl_hash = 0b7a3e5e59c34827fe0c3a74b7ec8baef302b98fa80088d7f9153aa16fa76bd1
-openssl_recipe = custom
+openssl_version = 71e0682c0634d56d244200cc47653dfd0b1f1fbd
+openssl_url = $(frida_base_url)/openssl.git
+openssl_hash = $(NULL)
+openssl_recipe = meson
 openssl_patches = \
-	openssl-armcap.patch \
-	openssl-windows.patch \
-	openssl-macos-sdk-compatibility.patch \
-	openssl-android.patch \
-	openssl-libdatadir.patch \
 	$(NULL)
 openssl_options = \
-	--openssldir=/etc/ssl \
-	no-dso \
-	no-engine \
-	no-tests \
-	no-comp \
-	no-ssl3 \
-	no-zlib \
-	no-async \
-	no-shared \
-	enable-cms \
 	$(NULL)
 openssl_deps = \
 	$(NULL)

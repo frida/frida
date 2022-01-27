@@ -228,7 +228,7 @@ def check_environment():
             sys.exit(1)
 
 def grab_and_prepare(name: str, spec: PackageSpec, params: DependencyParameters) -> SourceState:
-    if spec.recipe == 'meson' or name == 'openssl':
+    if spec.recipe == 'meson':
         return grab_and_prepare_regular_package(name, spec)
 
     assert name == 'v8'
@@ -422,12 +422,9 @@ def build_package(name: str, role: PackageRole, spec: PackageSpec, extra_options
                 if spec.recipe == 'meson':
                     build_using_meson(name, arch, config, runtime, spec, extra_options)
                 else:
-                    if name == "openssl":
-                        build_openssl(arch, config, runtime, spec, extra_options)
-                    else:
-                        assert name == "v8"
-                        assert spec.recipe == 'custom'
-                        build_v8(arch, config, runtime, spec, extra_options)
+                    assert name == "v8"
+                    assert spec.recipe == 'custom'
+                    build_v8(arch, config, runtime, spec, extra_options)
 
                 assert manifest_path.exists()
 
@@ -686,127 +683,6 @@ def detect_bootstrap_valac() -> str:
         compilers = (BOOTSTRAP_TOOLCHAIN_DIR / "bin").glob("valac*.exe")
         cached_bootstrap_valac = next(compilers).name
     return cached_bootstrap_valac
-
-
-def build_openssl(arch: str, config: str, runtime: str, spec: PackageSpec, extra_options: List[str]):
-    env_dir, shell_env = get_meson_params(arch, config, runtime)
-    shell_env = dict(shell_env)
-    del shell_env['CFLAGS']
-    del shell_env['CXXFLAGS']
-
-    source_dir = DEPS_DIR / "openssl"
-    build_dir = env_dir / "openssl"
-    prefix = get_prefix_path(arch, config, runtime)
-
-    if build_dir.exists():
-        shutil.rmtree(build_dir)
-    shutil.copytree(source_dir, build_dir)
-
-    runtime_flag = "/MD" if runtime == 'dynamic' else "/MT"
-    if config == "Debug":
-        runtime_flag += "d"
-
-    config_path = build_dir / "Configurations" / "10-main.conf"
-    config_data = config_path.read_text(encoding='utf-8')
-    flags_to_replace = [
-        "/MTd",
-        "/MT /Zl",
-        "/MT",
-        "/MDd",
-        "/MD",
-    ]
-    placeholder = "XXXX"
-    for flag in flags_to_replace:
-        config_data = config_data.replace(flag, placeholder)
-    config_data = config_data.replace(placeholder, runtime_flag)
-    config_data = config_data.replace("/Zi /Fdossl_static.pdb", "/Z7")
-    config_path.write_text(config_data, encoding='utf-8')
-
-    options = [
-        "--prefix=" + str(prefix),
-        "--release" if config == "Release" else "--debug",
-    ]
-    options += [option for option in spec.options if not option.startswith("--openssldir")]
-    options += extra_options
-
-    os_compiler = "VC-WIN64A" if arch == "x86_64" else "VC-WIN32"
-
-    perform("perl", "Configure", *options, os_compiler, cwd=build_dir, env=shell_env)
-
-    nmake = shutil.which("nmake", path=shell_env["PATH"])
-    perform(nmake, "depend", cwd=build_dir, env=shell_env)
-    perform(nmake, "build_libs", cwd=build_dir, env=shell_env)
-
-    manifest_lines = []
-
-    install_output = perform(nmake, "install_dev", cwd=build_dir, env=shell_env, capture_output=True, encoding='utf-8').stdout
-    copy_messages = [line for line in install_output.split("\n") if line.startswith("Copying: ")]
-    prefix_length = len(str(prefix)) + 1
-    for m in copy_messages:
-        entry = m[m.index(" to ") + 4:][prefix_length:]
-        manifest_lines.append(entry)
-
-    pkgconfig_dir = prefix / "lib" / "pkgconfig"
-    pkgconfig_dir.mkdir(parents=True, exist_ok=True)
-    (pkgconfig_dir / "openssl.pc").write_text("""\
-prefix={prefix}
-exec_prefix=${{prefix}}
-libdir=${{exec_prefix}}/lib
-includedir=${{prefix}}/include
-
-Name: OpenSSL
-Description: Secure Sockets Layer and cryptography libraries and tools
-Version: {version}
-Requires: libssl libcrypto""" \
-        .format(
-            prefix=prefix.as_posix(),
-            version=spec.version,
-        ),
-        encoding='utf-8')
-    (pkgconfig_dir / "libssl.pc").write_text("""\
-prefix={prefix}
-exec_prefix=${{prefix}}
-libdir=${{exec_prefix}}/lib
-includedir=${{prefix}}/include
-
-Name: OpenSSL-libssl
-Description: Secure Sockets Layer and cryptography libraries
-Version: {version}
-Requires.private: libcrypto
-Libs: -L${{libdir}} -lssl
-Cflags: -I${{includedir}}""" \
-        .format(
-            prefix=prefix.as_posix(),
-            version=spec.version,
-        ),
-        encoding='utf-8')
-    (pkgconfig_dir / "libcrypto.pc").write_text("""\
-prefix={prefix}
-exec_prefix=${{prefix}}
-libdir=${{exec_prefix}}/lib
-includedir=${{prefix}}/include
-enginesdir=${{libdir}}/engines-1.1
-
-Name: OpenSSL-libcrypto
-Description: OpenSSL cryptography library
-Version: {version}
-Libs: -L${{libdir}} -lcrypto
-Cflags: -I${{includedir}}""" \
-        .format(
-            prefix=prefix.as_posix(),
-            version=spec.version,
-        ),
-        encoding='utf-8')
-    manifest_lines += [
-        "lib/pkgconfig/openssl.pc",
-        "lib/pkgconfig/libssl.pc",
-        "lib/pkgconfig/libcrypto.pc",
-    ]
-
-    manifest_lines.sort()
-    manifest_path = get_manifest_path("openssl", arch, config, runtime)
-    manifest_path.parent.mkdir(parents=True, exist_ok=True)
-    manifest_path.write_text("\n".join(manifest_lines), encoding='utf-8')
 
 
 def build_v8(arch: str, config: str, runtime: str, spec: PackageSpec, extra_options: List[str]):
