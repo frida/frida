@@ -1,5 +1,5 @@
 frida_deps_version = 20220127
-frida_bootstrap_version = 20211216
+frida_bootstrap_version = 20220127
 
 
 frida_base_url = https://github.com/frida
