@@ -857,7 +857,7 @@ define grab-and-prepare-tarball
 		&& name=$($(subst -,_,$1)_name) \
 		&& version=$($(subst -,_,$1)_version) \
 		&& expected_hash=$($(subst -,_,$1)_hash) \
-		&& $(call print-tarball-banner,$$name,$$version,$$url,$$expected_hash) \
+		&& $(call print-tarball-banner,"$$name",$$version,$$url,$$expected_hash) \
 		&& $(call print-status,$1,Downloading) \
 		&& if command -v curl >/dev/null; then \
 			curl -sSfLo deps/.$1-tarball $$url; \
@@ -890,7 +890,7 @@ define grab-and-prepare-repo
 	@url=$($(subst -,_,$1)_url) \
 		&& name=$($(subst -,_,$1)_name) \
 		&& version=$($(subst -,_,$1)_version) \
-		&& $(call print-repo-banner,$$name,$$version,$$url) \
+		&& $(call print-repo-banner,"$$name",$$version,$$url) \
 		&& $(call print-status,$1,Cloning into deps/$1) \
 		&& git clone -q --recurse-submodules $$url deps/$1 \
 		&& cd deps/$1 \
