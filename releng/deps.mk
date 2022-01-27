@@ -854,7 +854,7 @@ define grab-and-prepare-tarball
 	@mkdir -p deps/$1
 
 	@url=$($(subst -,_,$1)_url) \
-		&& name=$($(subst -,_,$1)_name) \
+		&& name="$($(subst -,_,$1)_name)" \
 		&& version=$($(subst -,_,$1)_version) \
 		&& expected_hash=$($(subst -,_,$1)_hash) \
 		&& $(call print-tarball-banner,"$$name",$$version,$$url,$$expected_hash) \
@@ -888,7 +888,7 @@ define grab-and-prepare-repo
 	@$(RM) -r deps/$1
 
 	@url=$($(subst -,_,$1)_url) \
-		&& name=$($(subst -,_,$1)_name) \
+		&& name="$($(subst -,_,$1)_name)" \
 		&& version=$($(subst -,_,$1)_version) \
 		&& $(call print-repo-banner,"$$name",$$version,$$url) \
 		&& $(call print-status,$1,Cloning into deps/$1) \
