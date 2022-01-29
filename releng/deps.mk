@@ -534,7 +534,7 @@ tinycc_deps_for_build = \
 	$(NULL)
 
 openssl_name = OpenSSL
-openssl_version = 71e0682c0634d56d244200cc47653dfd0b1f1fbd
+openssl_version = abf8d94be4ce5a7b782c95c764fed6acf3e60906
 openssl_url = $(frida_base_url)/openssl.git
 openssl_hash = $(NULL)
 openssl_recipe = meson
