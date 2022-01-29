@@ -927,23 +927,6 @@ if [ -n "$FRIDA_EXTRA_LDFLAGS" ]; then
   meson_cpp_link_args="$meson_cpp_link_args, $extra_link_args"
 fi
 
-# We need these legacy paths for dependencies that don't use pkg-config.
-legacy_includes="-I$FRIDA_PREFIX/include"
-legacy_libpaths="-L$FRIDA_PREFIX/lib"
-if [ "$FRIDA_ENV_SDK" != 'none' ]; then
-  legacy_includes="$legacy_includes -I$FRIDA_SDKROOT/include"
-  legacy_libpaths="$legacy_libpaths -L$FRIDA_SDKROOT/lib"
-fi
-CPPFLAGS="$CPPFLAGS $legacy_includes"
-LDFLAGS="$LDFLAGS $legacy_libpaths"
-
-meson_legacy_includes=$(flags_to_args "$legacy_includes")
-meson_legacy_libpaths=$(flags_to_args "$legacy_libpaths")
-meson_c_args="$meson_c_args, $meson_legacy_includes"
-meson_cpp_args="$meson_cpp_args, $meson_legacy_includes"
-meson_c_link_args="$meson_c_link_args, $meson_legacy_libpaths"
-meson_cpp_link_args="$meson_cpp_link_args, $meson_legacy_libpaths"
-
 if [ $enable_asan = yes ]; then
   sanitizer_flag="-fsanitize=address"
   meson_sanitizer_arg=$(flags_to_args "$sanitizer_flag")
