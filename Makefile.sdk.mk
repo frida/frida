@@ -226,6 +226,12 @@ v8_platform_args := \
 	use_gold=false
 endif
 ifeq ($(host_os), android)
+ifeq ($(build_os_arch), macos-arm64)
+# NDK does not yet support Apple Silicon.
+ndk_build_os_arch := darwin-x86_64
+else
+ndk_build_os_arch := $(shell uname -s | tr '[A-Z]' '[a-z]')-$(build_arch)
+endif
 v8_os := android
 v8_platform_args := \
 	use_xcode_clang=true \
