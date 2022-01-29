@@ -433,7 +433,7 @@ libpsl_deps_for_build = \
 	$(NULL)
 
 libxml2_name = libxml2
-libxml2_version = 238e22ed39fe103fbf685d8d969ddb81f6a95aa6
+libxml2_version = 10935fd8fd510307aa44b0b5ebee1f3f27299a29
 libxml2_url = $(frida_base_url)/libxml2.git
 libxml2_hash = $(NULL)
 libxml2_recipe = meson
