@@ -47,10 +47,10 @@ frida_elf_cleaner_deps_for_build = \
 	$(NULL)
 
 libiconv_name = libiconv
-libiconv_version = 1.16
-libiconv_url = https://$(gnu_mirror)/libiconv/libiconv-$(libiconv_version).tar.gz
-libiconv_hash = e6a1b1b589654277ee790cce3734f07876ac4ccfaecbee8afa0b649cf529cc04
-libiconv_recipe = autotools
+libiconv_version = 77f89b1088148696e2b9d84e98bfa21b4462335c
+libiconv_url = $(frida_base_url)/libiconv.git
+libiconv_hash = $(NULL)
+libiconv_recipe = meson
 libiconv_patches = \
 	$(NULL)
 libiconv_options = \
