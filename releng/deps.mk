@@ -47,7 +47,7 @@ frida_elf_cleaner_deps_for_build = \
 	$(NULL)
 
 libiconv_name = libiconv
-libiconv_version = 77f89b1088148696e2b9d84e98bfa21b4462335c
+libiconv_version = 78d655ecc65b773b8e6642ea4be89e6f51d2c518
 libiconv_url = $(frida_base_url)/libiconv.git
 libiconv_hash = $(NULL)
 libiconv_recipe = meson
