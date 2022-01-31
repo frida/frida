@@ -93,7 +93,7 @@ def generate_header(package, frida_root, host, kit, flavor, umbrella_header_path
     else:
         rc = env_rc(frida_root, host, flavor)
         header_dependencies = subprocess.check_output(
-            ["(. \"{rc}\" && $CPP $CFLAGS -M $($PKG_CONFIG --cflags {package}) \"{header}\")".format(rc=rc, package=package, header=umbrella_header_path)],
+            ["(. \"{rc}\" && $CC $CFLAGS -M $($PKG_CONFIG --cflags {package}) \"{header}\")".format(rc=rc, package=package, header=umbrella_header_path)],
             shell=True).decode('utf-8')
         header_lines = header_dependencies.strip().split("\n")[1:]
         header_files = [line.rstrip("\\").strip() for line in header_lines]
@@ -525,7 +525,7 @@ def internal_arch_lib_path(name, frida_root, host):
 
 def probe_env(rc, command):
     return subprocess.check_output([
-        "(. \"{rc}\" && PACKAGE_TARNAME=frida-devkit . $CONFIG_SITE && {command})".format(rc=rc, command=command)
+        "(. \"{rc}\" && {command})".format(rc=rc, command=command)
     ], shell=True).decode('utf-8').strip()
 
 def tweak_flags(cflags, ldflags):
