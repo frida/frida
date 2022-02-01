@@ -80,9 +80,14 @@ if __name__ == '__main__':
                 args.append("--plat-name=" + platform_name)
                 env['_PYTHON_HOST_PLATFORM'] = platform_name
 
-            args.append("upload")
+            system_has_twine_installed = system == 'Windows'
+            if not system_has_twine_installed:
+                args.append("upload")
 
             subprocess.call([interpreter, "setup.py"] + args, cwd=frida_python_dir, env=env)
+
+            if system_has_twine_installed:
+                subprocess.call(["twine", "upload", os.path.join("dist", "*")], cwd=frida_python_dir)
         finally:
             shutil.rmtree(work_dir)
 
