@@ -93,7 +93,7 @@ def generate_header(package, frida_root, host, kit, flavor, umbrella_header_path
     else:
         rc = env_rc(frida_root, host, flavor)
         header_dependencies = subprocess.check_output(
-            ["(. \"{rc}\" && $CC $CFLAGS -M $($PKG_CONFIG --cflags {package}) \"{header}\")".format(rc=rc, package=package, header=umbrella_header_path)],
+            ["(. \"{rc}\" && $CC $CFLAGS -E -M $($PKG_CONFIG --cflags {package}) \"{header}\")".format(rc=rc, package=package, header=umbrella_header_path)],
             shell=True).decode('utf-8')
         header_lines = header_dependencies.strip().split("\n")[1:]
         header_files = [line.rstrip("\\").strip() for line in header_lines]
