@@ -315,8 +315,8 @@ def generate_library_unix(package, frida_root, host, flavor, output_dir, library
         libcxx_libs = glob(os.path.join(v8_libdir, "c++", "*.a"))
         library_paths.extend(libcxx_libs)
 
-    ar_version = subprocess.Popen([ar, "--version"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8')
-    mri_supported = ar_version.startswith("GNU ar ")
+    ar_help = subprocess.Popen([ar, "--help"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8')
+    mri_supported = "-M [<mri-script]" in ar_help
 
     if mri_supported:
         mri = ["create " + output_path]
