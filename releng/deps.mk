@@ -300,7 +300,7 @@ sqlite_deps_for_build = \
 	$(NULL)
 
 libunwind_name = libunwind
-libunwind_version = 7ce337e50dd6dd8b0cd8eb711100b48d8769c2d4
+libunwind_version = 8bda1545a84bcc8867e23344d73f969c858e07c4
 libunwind_url = $(frida_base_url)/libunwind.git
 libunwind_hash = $(NULL)
 libunwind_recipe = meson
