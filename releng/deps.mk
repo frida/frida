@@ -449,7 +449,7 @@ libxml2_deps_for_build = \
 	$(NULL)
 
 libsoup_name = libsoup
-libsoup_version = 4c87b93edb3a4d811e55777025a48af4d03c538b
+libsoup_version = f8683845a91d165aaaefa7db5cf3afbf95f06a60
 libsoup_url = $(frida_base_url)/libsoup.git
 libsoup_hash = $(NULL)
 libsoup_recipe = meson
