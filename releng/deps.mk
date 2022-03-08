@@ -217,7 +217,7 @@ elfutils_deps_for_build = \
 	$(NULL)
 
 libdwarf_name = libdwarf
-libdwarf_version = e7013e4df7cfeaf331da196aaa2735fd2c90560d
+libdwarf_version = 0a5640598201d9a025c33055dde82d6597fcd650
 libdwarf_url = $(frida_base_url)/libdwarf.git
 libdwarf_hash = $(NULL)
 libdwarf_recipe = meson
