@@ -129,10 +129,6 @@ build/fs-tmp-%/.package-stamp: $(foreach pkg, $(packages), build/fs-%/manifest/$
 			share/vala \
 			| tar -C $(shell pwd)/$(@D)/package -xf -
 	@releng/pkgify.sh "$(@D)/package" "$(shell pwd)/build/fs-$*" "$(shell pwd)/releng"
-ifeq ($(host_os), ios)
-	@cp $(shell $(xcode_env_setup); $(xcode_run) --sdk macosx --show-sdk-path)/usr/include/mach/mach_vm.h \
-		$(@D)/package/include/frida_mach_vm.h
-endif
 	@echo "$(frida_deps_version)" > $(@D)/package/VERSION.txt
 	@touch $@
 
