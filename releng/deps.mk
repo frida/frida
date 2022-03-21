@@ -234,7 +234,7 @@ libdwarf_deps_for_build = \
 	$(NULL)
 
 xz_name = XZ Utils
-xz_version = deb5bb8cdb5d35bd4cbdfc69d4d7f497d1e6fb01
+xz_version = 83617aba90b2254c91a1ebf1da29240c267151c6
 xz_url = $(frida_base_url)/xz.git
 xz_hash = $(NULL)
 xz_recipe = meson
