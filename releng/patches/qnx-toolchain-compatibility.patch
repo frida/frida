@@ -1,0 +1,87 @@
+diff -Nur usr-orig/include/strings.h usr/include/strings.h
+--- usr-orig/include/strings.h	2009-05-04 22:47:03.000000000 +0400
++++ usr/include/strings.h	2022-03-23 16:56:05.989183610 +0300
+@@ -56,12 +56,6 @@
+ #else /* __cplusplus */
+ __BEGIN_DECLS
+ 
+-#undef bcmp
+-#undef bcopy
+-#undef bzero
+-#undef index
+-#undef rindex
+-
+ extern int  bcmp(const void *, const void *, size_t);
+ extern void bcopy(const void *, void *, size_t);
+ extern void bzero(void *, size_t);
+@@ -71,12 +65,6 @@
+ extern int  strcasecmp(const char *, const char *);
+ extern int  strncasecmp(const char *, const char *, size_t);
+ 
+-#define bcmp(s1,s2,n)	(_CSTD memcmp(s1,s2,n))
+-#define bcopy(s,d,n)	((void)_CSTD memmove(d,s,n))
+-#define bzero(d,n)		((void)_CSTD memset(d,0,n))
+-#define index(s,c)		(_CSTD strchr(s,c))
+-#define rindex(s,c)		(_CSTD strrchr(s,c))
+-
+ __END_DECLS
+ #endif /* __cplusplus */
+ 
+diff -Nur usr-orig/include/sys/target_nto.h usr/include/sys/target_nto.h
+--- usr-orig/include/sys/target_nto.h	2009-12-22 18:42:22.000000000 +0300
++++ usr/include/sys/target_nto.h	2022-03-23 16:54:24.062170409 +0300
+@@ -33,7 +33,11 @@
+ #endif
+ 
+ #ifndef _NULL
++#ifdef __cplusplus
+ #define _NULL		0
++#else
++#define _NULL		((void *) 0)
++#endif
+ #endif
+ 
+ #undef __ID_T
+diff -Nur usr-orig/include/netinet/tcp_var.h usr/include/netinet/tcp_var.h
+--- usr-orig/include/netinet/tcp_var.h	2009-04-29 16:33:45.000000000 +0400
++++ usr/include/netinet/tcp_var.h	2022-03-23 17:12:10.587745899 +0300
+@@ -602,7 +602,7 @@
+  * Compute the initial window for slow start.
+  */
+ #define	TCP_INITIAL_WINDOW(iw, segsz) \
+-	(((iw) == 0) ? (min(4 * (segsz), max(2 * (segsz), 4380))) : \
++	(((iw) == 0) ? (__min(4 * (segsz), __max(2 * (segsz), 4380))) : \
+ 	 ((segsz) * (iw)))
+ 
+ /*
+diff -Nur usr-orig/include/stdlib.h usr/include/stdlib.h
+--- usr-orig/include/stdlib.h	2009-12-02 22:14:31.000000000 +0300
++++ usr/include/stdlib.h	2022-03-23 17:11:40.764039090 +0300
+@@ -230,15 +230,9 @@
+ # if !defined(__max)
+ #  define __max(a,b) (((a) > (b)) ? (a) : (b))
+ # endif
+-# if !defined(max) && !defined(__cplusplus)
+-#  define max(a,b) (((a) > (b)) ? (a) : (b))
+-# endif
+ # if !defined(__min)
+ #  define __min(a,b) (((a) < (b)) ? (a) : (b))
+ # endif
+-# if !defined(min) && !defined(__cplusplus)
+-#  define min(a,b) (((a) < (b)) ? (a) : (b))
+-# endif
+ 
+ #endif
+ 
+diff -Nur usr-orig/include/sys/fs_qnx6.h usr/include/sys/fs_qnx6.h
+--- usr-orig/include/sys/fs_qnx6.h	2011-10-05 21:41:16.000000000 +0400
++++ usr/include/sys/fs_qnx6.h	2022-03-23 17:13:56.950699926 +0300
+@@ -107,7 +107,7 @@
+    12KiB..Block Size  Padding
+ */
+ #define QNX6FS_MIN_RSRV_SIZE    (QNX6FS_BOOT_RSRV + QNX6FS_SBLK_RSRV)
+-#define QNX6FS_OVERHEAD_SIZE(b) (QNX6FS_BOOT_RSRV + 2 * max(QNX6FS_SBLK_RSRV, (b)))
++#define QNX6FS_OVERHEAD_SIZE(b) (QNX6FS_BOOT_RSRV + 2 * __max(QNX6FS_SBLK_RSRV, (b)))
+ #define QNX6FS_DATA_START(b)    ((QNX6FS_BOOT_RSRV + QNX6FS_SBLK_RSRV)        \
+ 								+ ( ((b) <= QNX6FS_SBLK_RSRV) ? 0             \
+ 								  : abs((b) - QNX6FS_MIN_RSRV_SIZE)) )
