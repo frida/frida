@@ -202,7 +202,7 @@ vala_deps_for_build = \
 	$(NULL)
 
 elfutils_name = elfutils
-elfutils_version = ea3ec44e6ee32533a04fb861ff938d8f0ab9d37f
+elfutils_version = 1284bbc128473aea220337685985d465607fbac8
 elfutils_url = $(frida_base_url)/elfutils.git
 elfutils_hash = $(NULL)
 elfutils_recipe = meson
