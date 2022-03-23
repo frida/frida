@@ -520,7 +520,7 @@ quickjs_deps_for_build = \
 	$(NULL)
 
 tinycc_name = TinyCC
-tinycc_version = 4a87cff80321274ecb3fdbd54afc2cf0a4fca006
+tinycc_version = c3b596afb79a3f953696fcf5d503729dfebb0fcd
 tinycc_url = $(frida_base_url)/tinycc.git
 tinycc_hash = $(NULL)
 tinycc_recipe = meson
