@@ -14,6 +14,9 @@ packages = \
 	sqlite \
 	libffi \
 	glib \
+	glib-networking \
+	libnice \
+	usrsctp \
 	libgee \
 	json-glib \
 	libsoup \
@@ -37,10 +40,6 @@ endif
 
 ifeq ($(host_os), android)
 packages += selinux
-endif
-
-ifeq ($(host_os), $(filter $(host_os), macos ios linux android freebsd))
-packages += glib-networking libnice usrsctp
 endif
 
 ifneq ($(FRIDA_V8), disabled)
