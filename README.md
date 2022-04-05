@@ -27,6 +27,9 @@ few packages:
 
     pip3 install colorama prompt-toolkit pygments
 
+_You might get errors from the `read-elf` if your OS is not
+in English, since some of the tooling here uses regex with English words,
+changing the language to `en_US` helps with it._
 ### Linux
 
     make
