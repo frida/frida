@@ -170,7 +170,6 @@ def roll(bundle: Bundle, os_arch: str, activate: bool):
         subprocess.run([
                            "py", "-3", RELENG_DIR / "build-deps-windows.py",
                            "--bundle=" + bundle.name.lower(),
-                           "--v8=enabled",
                        ],
                        check=True)
     else:
@@ -179,7 +178,6 @@ def roll(bundle: Bundle, os_arch: str, activate: bool):
                            "-C", ROOT_DIR,
                            "-f", "Makefile.{}.mk".format(bundle.name.lower()),
                            "FRIDA_HOST=" + os_arch,
-                           "FRIDA_V8=enabled",
                        ],
                        check=True)
 
