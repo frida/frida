@@ -68,7 +68,7 @@ build/frida_gir-env-%.rc: releng/setup-env.sh build/frida-version.h
 	[ ! -d toolchain-$* ] && ln -s frida_gir-toolchain-$* toolchain-$*; \
 	true
 
-build/frida-version.h: releng/generate-version-header.py .git/refs/heads/main
+build/frida-version.h: releng/generate-version-header.py .git/HEAD
 	@$(PYTHON3) releng/generate-version-header.py > $@.tmp
 	@mv $@.tmp $@
 
