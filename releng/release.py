@@ -582,6 +582,14 @@ if __name__ == '__main__':
             upload_python_bindings_to_pypi("/usr/local/bin/python3.8",
                 os.path.join(build_dir, "build", "frida-android-arm64", "lib", "python3.8", "site-packages", "_frida.so"),
                 platform_name="android-aarch64")
+        elif builder == 'qnx':
+            upload = get_github_uploader()
+
+            upload_devkits("qnx-armeabi", upload)
+
+            upload_file("frida-server-{version}-qnx-armeabi", os.path.join(build_dir, "build", "frida_thin-qnx-armeabi", "bin", "frida-server"), upload)
+            upload_file("frida-inject-{version}-qnx-armeabi", os.path.join(build_dir, "build", "frida_thin-qnx-armeabi", "bin", "frida-inject"), upload)
+            upload_file("frida-gadget-{version}-qnx-armeabi.so", os.path.join(build_dir, "build", "frida_thin-qnx-armeabi", "lib", "frida", "32", "frida-gadget.so"), upload)
         elif builder == 'ubuntu_18_04-x86_64':
             upload = get_github_uploader()
 
