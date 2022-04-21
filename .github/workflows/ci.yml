@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  qnx:
+    runs-on: ubuntu-latest
+    container: fridadotre/qnx:latest
+    steps:
+      - name: Initialize credentials
+        run: |
+          (
+            echo "[default]"
+            echo "access_key = ${{ secrets.S3_ACCESS_KEY }}"
+            echo "secret_key = ${{ secrets.S3_SECRET_KEY }}"
+          ) > ~/.s3cfg
+          (
+            echo "defaults:"
+            echo "    domain: frida.re"
+            echo "    email: ${{ secrets.CF_EMAIL }}"
+            echo "    token: ${{ secrets.CF_TOKEN }}"
+          ) > ~/.cfcli.yml
+      - name: Checkout frida-gum
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: true
+      - name: Roll SDK
+        run: releng/deps.py roll sdk qnx-armeabi
+      - name: Build
+        run: make core-qnx-armeabi
+      - name: Test Gum
+        run: |
+          tar -C build/tmp_thin-qnx-armeabi/frida-gum/tests -cf /tmp/runner.tar gum-tests data/
+          /opt/sabrelite/run.sh /tmp/runner.tar /opt/frida/gum-tests
+      - name: Test Core
+        run: |
+          mkdir -p /tmp/pkg
+          cd build/tmp_thin-qnx-armeabi/frida-core
+          cp -a tests/frida-tests tests/labrats/ lib/agent/frida-agent.so /tmp/pkg
+          tar -C /tmp/pkg -cf /tmp/runner.tar .
+          /opt/sabrelite/run.sh /tmp/runner.tar /opt/frida/frida-tests
+      - name: Release
+        run: releng/release.py qnx
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
