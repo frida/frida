@@ -173,8 +173,12 @@ def roll(bundle: Bundle, os_arch: str, activate: bool):
                        ],
                        check=True)
     else:
+        if platform.system().endswith("BSD"):
+            gnu_make = "gmake"
+        else:
+            gnu_make = "make"
         subprocess.run([
-                           "make",
+                           gnu_make,
                            "-C", ROOT_DIR,
                            "-f", "Makefile.{}.mk".format(bundle.name.lower()),
                            "FRIDA_HOST=" + os_arch,
