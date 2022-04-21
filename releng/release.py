@@ -437,9 +437,9 @@ if __name__ == '__main__':
             print("Failed to trigger magisk-frida CI: {}".format(e))
 
     if int(nano) == 0:
-        if builder == 'windows':
-            upload = get_github_uploader()
+        upload = get_github_uploader()
 
+        if builder == 'windows':
             upload_devkits("windows-x86",    upload)
             upload_devkits("windows-x86_64", upload)
 
@@ -469,12 +469,8 @@ if __name__ == '__main__':
             upload_directory("frida-qml-{version}-windows-x86",    os.path.join(prefix_x86, "lib", "qt5", "qml"), upload)
             upload_directory("frida-qml-{version}-windows-x86_64", os.path.join(prefix_x64, "lib", "qt5", "qml"), upload)
         elif builder == 'macos-m1':
-            upload = get_github_uploader()
-
             upload_node_bindings_to_npm("/usr/local/bin/node", upload, publish=False)
         elif builder == 'macos-modern':
-            upload = get_github_uploader()
-
             upload_devkits("macos-arm64", upload)
             upload_devkits("macos-arm64e", upload)
             upload_devkits("macos-x86_64", upload)
@@ -506,12 +502,8 @@ if __name__ == '__main__':
             upload_node_bindings_to_npm("/usr/local/bin/node", upload, publish=True)
             upload_meta_modules_to_npm("/usr/local/bin/node")
         elif builder == 'macos-legacy':
-            upload = get_github_uploader()
-
             upload_directory("frida-qml-{version}-macos-x86_64", os.path.join(build_dir, "build", "frida-macos-x86_64", "lib", "qt5", "qml"), upload)
         elif builder == 'manylinux-x86_64':
-            upload = get_github_uploader()
-
             upload_devkits("linux-x86", upload)
             upload_devkits("linux-x86_64", upload)
 
@@ -543,8 +535,6 @@ if __name__ == '__main__':
             upload_node_bindings_to_npm("/opt/node-32/bin/node", upload, publish=False)
             upload_node_bindings_to_npm("/opt/node-64/bin/node", upload, publish=False)
         elif builder == 'ios':
-            upload = get_github_uploader()
-
             upload_devkits("ios-arm64", upload)
             upload_devkits("ios-arm64e", upload)
 
@@ -555,8 +545,6 @@ if __name__ == '__main__':
 
             upload_ios_debug_symbols()
         elif builder == 'android':
-            upload = get_github_uploader()
-
             upload_devkits("android-x86", upload)
             upload_devkits("android-x86_64", upload)
             upload_devkits("android-arm", upload)
@@ -583,16 +571,12 @@ if __name__ == '__main__':
                 os.path.join(build_dir, "build", "frida-android-arm64", "lib", "python3.8", "site-packages", "_frida.so"),
                 platform_name="android-aarch64")
         elif builder == 'qnx':
-            upload = get_github_uploader()
-
             upload_devkits("qnx-armeabi", upload)
 
             upload_file("frida-server-{version}-qnx-armeabi", os.path.join(build_dir, "build", "frida_thin-qnx-armeabi", "bin", "frida-server"), upload)
             upload_file("frida-inject-{version}-qnx-armeabi", os.path.join(build_dir, "build", "frida_thin-qnx-armeabi", "bin", "frida-inject"), upload)
             upload_file("frida-gadget-{version}-qnx-armeabi.so", os.path.join(build_dir, "build", "frida_thin-qnx-armeabi", "lib", "frida", "32", "frida-gadget.so"), upload)
         elif builder == 'ubuntu_18_04-x86_64':
-            upload = get_github_uploader()
-
             upload_devkits("linux-armhf", upload, flavor="_thin")
             upload_devkits("linux-arm64", upload, flavor="_thin")
 
@@ -608,8 +592,6 @@ if __name__ == '__main__':
             upload_file("frida-gadget-{version}-linux-armhf.so", os.path.join(build_dir, "build", "frida_thin-linux-armhf", "lib", "frida", "32", "frida-gadget.so"), upload)
             upload_file("frida-gadget-{version}-linux-arm64.so", os.path.join(build_dir, "build", "frida_thin-linux-arm64", "lib", "frida", "64", "frida-gadget.so"), upload)
         elif builder == 'ubuntu_18_04-armhf':
-            upload = get_github_uploader()
-
             upload_python_bindings_to_pypi("/usr/bin/python2.7",
                 os.path.join(build_dir, "build", "frida_thin-linux-armhf", "lib", "python2.7", "site-packages", "_frida.so"))
             upload_python_bindings_to_pypi("/usr/bin/python3.6",
@@ -617,8 +599,6 @@ if __name__ == '__main__':
 
             upload_node_bindings_to_npm("/usr/bin/node", upload, publish=False)
         elif builder == 'ubuntu_18_04-arm64':
-            upload = get_github_uploader()
-
             upload_python_bindings_to_pypi("/usr/bin/python2.7",
                 os.path.join(build_dir, "build", "frida_thin-linux-arm64", "lib", "python2.7", "site-packages", "_frida.so"))
             upload_python_bindings_to_pypi("/usr/bin/python3.6",
@@ -626,22 +606,16 @@ if __name__ == '__main__':
 
             upload_node_bindings_to_npm("/usr/bin/node", upload, publish=False)
         elif builder == 'ubuntu_20_04-x86_64':
-            upload = get_github_uploader()
-
             upload_python_debs("ubuntu-focal", "python3", "/usr/bin/python3.8",
                 os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python3.8", "site-packages", "_frida.so"),
                 upload)
 
             upload_directory("frida-qml-{version}-linux-x86_64", os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "qt5", "qml"), upload)
         elif builder == 'ubuntu_21_04-x86_64':
-            upload = get_github_uploader()
-
             upload_python_debs("ubuntu-hirsute", "python3", "/usr/bin/python3.9",
                 os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python3.9", "site-packages", "_frida.so"),
                 upload)
         elif builder == 'fedora_35-x86_64':
-            upload = get_github_uploader()
-
             upload_python_rpms("fc35", "python3", "/usr/bin/python3.10",
                 os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python3.10", "site-packages", "_frida.so"),
                 upload)
