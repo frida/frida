@@ -292,8 +292,10 @@ if __name__ == '__main__':
             shutil.rmtree(output_dir)
 
     def get_github_uploader():
-        with open(os.path.expanduser("~/.frida-release-github-token"), "r") as f:
-            token = f.read().strip()
+        token = os.environ.get("GITHUB_TOKEN", None)
+        if token is None:
+            with open(os.path.expanduser("~/.frida-release-github-token"), "r") as f:
+                token = f.read().strip()
 
         g = GitHub(token=token)
         def repo():
