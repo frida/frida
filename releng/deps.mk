@@ -197,9 +197,13 @@ vala_deps = \
 	glib \
 	$(NULL)
 vala_deps_for_build = \
+	$(NULL)
+ifneq ($(host_os), freebsd)
+vala_deps_for_build += \
 	flex \
 	bison \
 	$(NULL)
+endif
 
 elfutils_name = elfutils
 elfutils_version = 1284bbc128473aea220337685985d465607fbac8
