@@ -1,0 +1,62 @@
+task:
+  name: freebsd-x86_64
+  freebsd_instance:
+    image_family: freebsd-13-0
+  environment:
+    GITHUB_TOKEN: ENCRYPTED[affc51741bf633ccffe369e8c58c0896cff87afb4a640351ca8df9c64b9dc7d8a386bb65c5cf39132bb57f823184b258]
+    S3_ACCESS_KEY: ENCRYPTED[2f368bef589e43779394e459191eaad2fc4cc50dc36c6f03168a1e8e43897476e8bf596fd4dd0d988bcbab8fa8e171f8]
+    S3_SECRET_KEY: ENCRYPTED[45f352473433a1053622a662ce8d57bc7421bce5772c9c5caf4a0e54f63944bd420f71101e014876e038f0c66c134ac2]
+    CF_EMAIL: ENCRYPTED[a9f0dcd0ee83fa111c36f092f34b3d5660acafe0d07804d6b6a89bfa70a127ef8305f21089408959c51e23ecd2fd3622]
+    CF_TOKEN: ENCRYPTED[4f9f3f7c8603fd32978b825d65f34b06fce8e51bedb4303744c799d21fc38266173a6be5a7a46b5e616573d27c9f6e91]
+    TWINE_USERNAME: ENCRYPTED[216cb54746e1fa5d4cbf85736dc1830d4b3a0eaa99cf13fc5cf9e3b09feed5db23d44ab1e26b7023c72eeec7ca5749f6]
+    TWINE_PASSWORD: ENCRYPTED[df19e51426faf8b60a18e42c96541431438335612c18506c319cd775ffba984d9cf89b0faaedbde8d4eff94d4b94066c]
+    NPM_TOKEN: ENCRYPTED[e47a7de1c1fb59ab9c9fa09e7b0593b272441d28a70d06b6a0bedf13a969fdae8014af17982b3144214333181f70c22b]
+    PYTHON: /usr/local/bin/python3.8
+    PYTHON3: /usr/local/bin/python3.8
+  timeout_in: 2h
+  install_dependencies_script: |
+    pkg install -y \
+      bash \
+      bison \
+      git \
+      npm \
+      py38-pip \
+      py38-requests \
+      py38-s3cmd \
+      py38-setuptools \
+      py38-twine
+    pip install agithub
+    npm install -g cloudflare-cli
+  initialize_credentials_script: |
+    (
+      echo "[default]"
+      echo "access_key = $S3_ACCESS_KEY"
+      echo "secret_key = $S3_SECRET_KEY"
+    ) > ~/.s3cfg
+    (
+      echo "defaults:"
+      echo "    domain: frida.re"
+      echo "    email: $CF_EMAIL"
+      echo "    token: $CF_TOKEN"
+    ) > ~/.cfcli.yml
+    echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
+  clone_script: |
+    if [ -z "$CIRRUS_PR" ]; then
+      git clone --recurse-submodules --branch=$CIRRUS_BRANCH https://x-access-token:${CIRRUS_REPO_CLONE_TOKEN}@github.com/${CIRRUS_REPO_FULL_NAME}.git $CIRRUS_WORKING_DIR
+      git reset --hard $CIRRUS_CHANGE_IN_REPO
+    else
+      git clone --recurse-submodules https://x-access-token:${CIRRUS_REPO_CLONE_TOKEN}@github.com/${CIRRUS_REPO_FULL_NAME}.git $CIRRUS_WORKING_DIR
+      git fetch origin pull/$CIRRUS_PR/head:pull/$CIRRUS_PR
+      git reset --hard $CIRRUS_CHANGE_IN_REPO
+    fi
+  roll_toolchain_script: $PYTHON releng/deps.py roll toolchain freebsd-x86_64 --activate
+  roll_sdk_script: $PYTHON releng/deps.py roll sdk freebsd-x86_64
+  build_gum_script: make gum
+  test_gum_script: make check-gum
+  build_core_script: make core
+  test_core_script: make check-core
+  build_python_script: make python
+  test_python_script: make check-python
+  build_node_script: make node
+  test_node_script: make check-node
+  release_script: $PYTHON releng/release.py freebsd-x86_64
