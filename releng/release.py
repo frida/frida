@@ -8,6 +8,7 @@ if __name__ == '__main__':
     from distutils.spawn import find_executable
     import codecs
     import glob
+    import itertools
     import os
     import platform
     import re
@@ -80,7 +81,7 @@ if __name__ == '__main__':
                 args.append("--plat-name=" + platform_name)
                 env['_PYTHON_HOST_PLATFORM'] = platform_name
 
-            system_has_twine_installed = system == 'Windows'
+            system_has_twine_installed = system in ['Windows', 'FreeBSD']
             if not system_has_twine_installed:
                 args.append("upload")
 
@@ -193,8 +194,16 @@ if __name__ == '__main__':
             do_build_command([npm, "install"])
             if publish:
                 do([npm, "publish"])
-            do_build_command([npm, "run", "prebuild", "--", "-t", "10.0.0", "-t", "12.0.0", "-t", "14.0.0", "-t", "16.0.0", "-t", "17.0.1"])
-            do_build_command([npm, "run", "prebuild", "--", "-t", "18.0.0", "-r", "electron"])
+
+            if system == 'FreeBSD':
+                node_versions = ["14.0.0", "16.0.0", "17.0.1"]
+                electron_version = "16.0.0"
+            else:
+                node_versions = ["10.0.0", "12.0.0", "14.0.0", "16.0.0", "17.0.1"]
+                electron_version = "18.0.0"
+            do_build_command([npm, "run", "prebuild", "--"] + list(itertools.chain(*[["-t", version] for version in node_versions])))
+            do_build_command([npm, "run", "prebuild", "--", "-t", electron_version, "-r", "electron"])
+
             packages = glob.glob(os.path.join(frida_node_dir, "prebuilds", "*.tar.gz"))
             for package_path in packages:
                 name = os.path.basename(package_path)
@@ -570,6 +579,30 @@ if __name__ == '__main__':
             upload_python_bindings_to_pypi("/usr/local/bin/python3.8",
                 os.path.join(build_dir, "build", "frida-android-arm64", "lib", "python3.8", "site-packages", "_frida.so"),
                 platform_name="android-aarch64")
+        elif builder == 'freebsd-x86_64':
+            upload_devkits("freebsd-x86_64", upload)
+
+            upload_file("frida-server-{version}-freebsd-x86_64", os.path.join(build_dir, "build", "frida-freebsd-x86_64", "bin", "frida-server"), upload)
+            upload_file("frida-inject-{version}-freebsd-x86_64", os.path.join(build_dir, "build", "frida-freebsd-x86_64", "bin", "frida-inject"), upload)
+            upload_file("frida-gadget-{version}-freebsd-x86_64.so", os.path.join(build_dir, "build", "frida-freebsd-x86_64", "lib", "frida", "64", "frida-gadget.so"), upload)
+
+            upload_python_bindings_to_pypi("/usr/local/bin/python3.8",
+                os.path.join(build_dir, "build", "frida-freebsd-x86_64", "lib", "python3.8", "site-packages", "_frida.so"),
+                platform_name="freebsd-amd64")
+
+            upload_node_bindings_to_npm("/usr/local/bin/node", upload, publish=False)
+        elif builder == 'freebsd-arm64':
+            upload_devkits("freebsd-arm64", upload)
+
+            upload_file("frida-server-{version}-freebsd-arm64", os.path.join(build_dir, "build", "frida-freebsd-arm64", "bin", "frida-server"), upload)
+            upload_file("frida-inject-{version}-freebsd-arm64", os.path.join(build_dir, "build", "frida-freebsd-arm64", "bin", "frida-inject"), upload)
+            upload_file("frida-gadget-{version}-freebsd-arm64.so", os.path.join(build_dir, "build", "frida-freebsd-arm64", "lib", "frida", "64", "frida-gadget.so"), upload)
+
+            upload_python_bindings_to_pypi("/usr/local/bin/python3.8",
+                os.path.join(build_dir, "build", "frida-freebsd-arm64", "lib", "python3.8", "site-packages", "_frida.so"),
+                platform_name="freebsd-arm64")
+
+            upload_node_bindings_to_npm("/usr/local/bin/node", upload, publish=False)
         elif builder == 'qnx':
             upload_devkits("qnx-armeabi", upload)
 
