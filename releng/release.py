@@ -543,6 +543,13 @@ if __name__ == '__main__':
 
             upload_node_bindings_to_npm("/opt/node-32/bin/node", upload, publish=False)
             upload_node_bindings_to_npm("/opt/node-64/bin/node", upload, publish=False)
+        elif builder.startswith("linux-mips"):
+            upload_devkits(builder, upload)
+
+            upload_file("frida-server-{version}-" + builder, os.path.join(build_dir, "build", "frida_thin-" + builder, "bin", "frida-server"), upload)
+            upload_file("frida-inject-{version}-" + builder, os.path.join(build_dir, "build", "frida_thin-" + builder, "bin", "frida-inject"), upload)
+            flavor = "64" if builder.startswith("linux-mips64") else "32"
+            upload_file("frida-gadget-{version}-" + builder + ".so", os.path.join(build_dir, "build", "frida_thin-" + builder, "lib", "frida", flavor, "frida-gadget.so"), upload)
         elif builder == 'ios':
             upload_devkits("ios-arm64", upload)
             upload_devkits("ios-arm64e", upload)
