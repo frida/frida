@@ -84,9 +84,14 @@ case $host_arch in
     meson_host_endian=little
     ;;
   mips64)
-    meson_host_cpu_family=mips
-    meson_host_cpu=mips
+    meson_host_cpu_family=mips64
+    meson_host_cpu=mips64
     meson_host_endian=big
+    ;;
+  mips64el)
+    meson_host_cpu_family=mips64
+    meson_host_cpu=mips64
+    meson_host_endian=little
     ;;
   s390x)
     meson_host_cpu_family=s390x
