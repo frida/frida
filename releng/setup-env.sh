@@ -19,7 +19,20 @@ fi
 if [ -n "$FRIDA_LIBC" ]; then
   frida_libc=$FRIDA_LIBC
 else
-  frida_libc=gnu
+  case $host_arch in
+    arm|armbe8)
+      frida_libc=gnueabi
+      ;;
+    armhf)
+      frida_libc=gnueabihf
+      ;;
+    mips64*)
+      frida_libc=gnuabi64
+      ;;
+    *)
+      frida_libc=gnu
+      ;;
+  esac
 fi
 case $host_arch in
   x86)
@@ -349,24 +362,24 @@ case $host_os in
         ;;
       arm)
         host_arch_flags="-march=armv5t"
-        host_toolprefix="arm-linux-gnueabi-"
+        host_toolprefix="arm-linux-$frida_libc-"
 
         meson_host_cpu="armv5t"
         ;;
       armbe8)
         host_arch_flags="-march=armv6 -mbe8"
-        host_toolprefix="armeb-linux-gnueabi-"
+        host_toolprefix="armeb-linux-$frida_libc-"
         meson_host_cpu="armv6t"
         ;;
       armhf)
         host_arch_flags="-march=armv7-a"
-        host_toolprefix="arm-linux-gnueabihf-"
+        host_toolprefix="arm-linux-$frida_libc-"
 
         meson_host_cpu="armv7a"
         ;;
       arm64)
         host_arch_flags="-march=armv8-a"
-        host_toolprefix="aarch64-linux-gnu-"
+        host_toolprefix="aarch64-linux-$frida_libc-"
         ;;
       mips)
         host_arch_flags="-march=mips1 -mfp32"
@@ -394,7 +407,7 @@ case $host_os in
         ;;
       s390x)
         host_arch_flags="-march=z10 -m64"
-        host_toolprefix="s390x-linux-gnu-"
+        host_toolprefix="s390x-linux-$frida_libc-"
         ;;
     esac
 
