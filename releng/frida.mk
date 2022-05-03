@@ -7,6 +7,7 @@ FOR_HOST ?= $(build_os_arch)
 frida_gum_flags := \
 	--default-library static \
 	$(FRIDA_FLAGS_COMMON) \
+	-Djailbreak=$(FRIDA_JAILBREAK) \
 	-Dgumpp=enabled \
 	-Dgumjs=enabled \
 	-Dv8=$(FRIDA_V8) \

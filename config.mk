@@ -11,6 +11,9 @@ FRIDA_JAVA_BRIDGE ?= auto
 FRIDA_OBJC_BRIDGE ?= auto
 FRIDA_SWIFT_BRIDGE ?= auto
 
+# Include jailbreak-specific integrations
+FRIDA_JAILBREAK ?= auto
+
 FRIDA_ASAN ?= no
 
 ifeq ($(FRIDA_ASAN), yes)
