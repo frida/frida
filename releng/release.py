@@ -52,6 +52,8 @@ if __name__ == '__main__':
     tag_name = str(version)
 
     def upload_python_bindings_to_pypi(interpreter, extension, extra_env={}, sdist=False, platform_name=None):
+        subprocess.check_call(["git", "clean", "-xffd"], cwd=frida_python_dir)
+
         work_dir = tempfile.mkdtemp(prefix="frida-pypi")
         try:
             if platform_name is not None and platform_name.startswith("android-"):
