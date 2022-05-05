@@ -213,17 +213,6 @@ if __name__ == '__main__':
                 if "-node-v81-" in name:
                     continue
 
-                # For Node.js 12.x we need a workaround for https://github.com/lgeiger/node-abi/issues/90
-                new_name = name.replace("-node-v68-", "-node-v72-")
-                if new_name != name:
-                    new_package_path = os.path.join(os.path.dirname(package_path), new_name)
-                    try:
-                        os.rename(package_path, new_package_path)
-                    except FileExistsError:
-                        continue
-                    package_path = new_package_path
-                    name = new_name
-
                 with open(package_path, 'rb') as package_file:
                     upload_to_github(name, "application/gzip", package_file.read())
         reset()
