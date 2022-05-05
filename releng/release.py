@@ -201,7 +201,7 @@ if __name__ == '__main__':
                 node_versions = ["14.0.0", "16.0.0", "17.0.1"]
                 electron_version = "16.0.0"
             else:
-                node_versions = ["10.0.0", "12.0.0", "14.0.0", "16.0.0", "17.0.1"]
+                node_versions = ["10.0.0", "12.0.0", "14.0.0", "16.0.0", "18.0.0"]
                 electron_version = "18.0.0"
             do_build_command([npm, "run", "prebuild", "--"] + list(itertools.chain(*[["-t", version] for version in node_versions])))
             do_build_command([npm, "run", "prebuild", "--", "-t", electron_version, "-r", "electron"])
