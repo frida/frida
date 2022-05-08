@@ -4,6 +4,9 @@ include releng/system.mk
 
 FOR_HOST ?= $(build_os_arch)
 
+# Ensure Make uses bash, so it can execute brace expansions etc.
+SHELL := $(shell which bash)
+
 frida_gum_flags := \
 	--default-library static \
 	$(FRIDA_FLAGS_COMMON) \
