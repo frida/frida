@@ -18,6 +18,10 @@ endif
 host_os_arch := $(host_os)-$(host_arch)
 
 
+MAKE_J ?= -j 8
+SHELL := $(shell which bash)
+
+
 ninja_name = Ninja
 ninja_version = v1.10.2
 ninja_url = https://github.com/ninja-build/ninja.git

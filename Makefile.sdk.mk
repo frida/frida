@@ -2,9 +2,6 @@ include config.mk
 include releng/deps.mk
 
 
-MAKE_J ?= -j 8
-SHELL := $(shell which bash)
-
 ifeq ($(FRIDA_V8), auto)
 FRIDA_V8 := $(shell echo $(host_os_arch) | grep -Evq "^(linux-mips|qnx-|)" && echo "enabled" || echo "disabled")
 endif

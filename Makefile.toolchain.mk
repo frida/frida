@@ -2,10 +2,6 @@ include config.mk
 include releng/deps.mk
 
 
-MAKE_J ?= -j 8
-SHELL := $(shell which bash)
-
-
 packages_for_host = \
 	ninja \
 	frida-elf-cleaner \
