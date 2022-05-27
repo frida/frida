@@ -25,7 +25,7 @@ For running the Frida CLI tools, e.g. `frida`, `frida-ls-devices`, `frida-ps`,
 `frida-kill`, `frida-trace`, `frida-discover`, etc., you need Python plus a
 few packages:
 
-    pip3 install colorama prompt-toolkit pygments
+    pip install colorama prompt-toolkit pygments
 
 ### Linux
 
