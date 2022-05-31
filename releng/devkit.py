@@ -123,9 +123,9 @@ def generate_header(package, frida_root, host, kit, flavor, umbrella_header_path
         config = ""
 
     if platform.system() == 'Windows':
-        deps = ["dnsapi", "iphlpapi", "psapi", "winmm", "ws2_32"]
+        deps = ["dnsapi", "iphlpapi", "psapi", "shlwapi", "winmm", "ws2_32"]
         if package == "frida-core-1.0":
-            deps.extend(["advapi32", "crypt32", "gdi32", "kernel32", "ole32", "secur32", "shell32", "shlwapi", "user32"])
+            deps.extend(["advapi32", "crypt32", "gdi32", "kernel32", "ole32", "secur32", "shell32", "user32"])
         deps.sort()
 
         frida_pragmas = "#pragma comment(lib, \"{}\")".format(compute_library_filename(kit))
