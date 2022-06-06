@@ -2,7 +2,7 @@
 
 releng_path=`dirname $0`
 
-build_os=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,macos,')
+build_os=$($releng_path/detect-os.sh)
 build_arch=$($releng_path/detect-arch.sh)
 build_os_arch=${build_os}-${build_arch}
 

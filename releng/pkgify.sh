@@ -5,7 +5,7 @@ prefix=$2
 releng=$3
 [ -z "$package" -o -z "$prefix" -o -z "$releng" ] && exit 1
 
-build_os=$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$,macos,')
+build_os=$("$releng/detect-os.sh")
 
 shopt -s expand_aliases
 case $build_os in

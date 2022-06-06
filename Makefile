@@ -1,7 +1,7 @@
 modules = frida-gum frida-core frida-python frida-node frida-tools
 
 all $(MAKECMDGOALS):
-	@build_os=$$(uname -s | tr '[A-Z]' '[a-z]' | sed 's,^darwin$$,macos,'); \
+	@build_os=$$(releng/detect-os.sh); \
 	$(MAKE) -f Makefile.$$build_os.mk $(MAKECMDGOALS)
 
 git-submodules:
