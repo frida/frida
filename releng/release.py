@@ -202,10 +202,10 @@ if __name__ == '__main__':
                 electron_version = "16.0.0"
             elif system == 'Windows' and "(x86)" in node:
                 node_versions = ["10.0.0", "12.0.0", "14.0.0", "16.0.0"]
-                electron_version = "18.0.0"
+                electron_version = "19.0.0-alpha.1"
             else:
                 node_versions = ["10.0.0", "12.0.0", "14.0.0", "16.0.0", "18.0.0"]
-                electron_version = "18.0.0"
+                electron_version = "19.0.0-alpha.1"
             do_build_command([npm, "run", "prebuild", "--"] + list(itertools.chain(*[["-t", version] for version in node_versions])))
             do_build_command([npm, "run", "prebuild", "--", "-t", electron_version, "-r", "electron"])
 
