@@ -211,11 +211,15 @@ def synchronize(packages: List[Package], params: DependencyParameters):
 def check_environment():
     try:
         winenv.get_msvs_installation_dir()
-        winenv.get_winxp_sdk()
         winenv.get_win10_sdk()
     except winenv.MissingDependencyError as e:
         print("ERROR: {}".format(e), file=sys.stderr)
         sys.exit(1)
+
+    try:
+        winenv.get_winxp_sdk()
+    except winenv.MissingDependencyError as e:
+        print("WARNING: {} -- building modern binaries".format(e), file=sys.stderr)
 
     for tool in ["7z", "git", "nasm", "patch", "py"]:
         if shutil.which(tool) is None:
@@ -501,20 +505,42 @@ def generate_meson_env(arch: str, config: str, runtime: str) -> MesonEnv:
         build_msvc_platform = msvc_platform_from_arch(build_arch)
         msvc_dll_dirs.append(msvc_dir / "bin" / ("Host" + build_msvc_platform) / build_msvc_platform)
 
-    (winxp_sdk_dir, winxp_sdk_version) = winenv.get_winxp_sdk()
-    winxp_sdk_dir = Path(winxp_sdk_dir)
-    if arch == 'x86':
-        winxp_bin_dir = winxp_sdk_dir / "Bin"
-        winxp_lib_dir = winxp_sdk_dir / "Lib"
-    else:
-        winxp_bin_dir = winxp_sdk_dir / "Bin" / msvc_platform
-        winxp_lib_dir = winxp_sdk_dir / "Lib" / msvc_platform
+    (win10_sdk_dir, win10_sdk_version) = winenv.get_win10_sdk()
+    win10_sdk_dir = Path(win10_sdk_dir)
+
+    try:
+        (winxp_sdk_dir, winxp_sdk_version) = winenv.get_winxp_sdk()
+        winxp_sdk_dir = Path(winxp_sdk_dir)
+        if arch == 'x86':
+            target_sdk_bin_dir = winxp_sdk_dir / "Bin"
+            target_sdk_lib_dir = winxp_sdk_dir / "Lib"
+        else:
+            target_sdk_bin_dir = winxp_sdk_dir / "Bin" / msvc_platform
+            target_sdk_lib_dir = winxp_sdk_dir / "Lib" / msvc_platform
+        target_sdk_inc_dirs = [
+            winxp_sdk_dir / "Include",
+        ]
+        target_sdk_defines = [
+            "_USING_V110_SDK71_",
+        ]
+        target_sdk_cxxflags = [
+            # Relax C++11 compliance for XP compatibility.
+            "/Zc:threadSafeInit-",
+        ]
+    except winenv.MissingDependencyError as e:
+        target_sdk_bin_dir = win10_sdk_dir / "Bin" / win10_sdk_version / msvc_platform
+        target_sdk_lib_dir = win10_sdk_dir / "Lib" / win10_sdk_version / "um" / msvc_platform
+        target_sdk_inc_dirs = [
+            win10_sdk_dir / "Include" / win10_sdk_version / "um",
+            win10_sdk_dir / "Include" / win10_sdk_version / "shared",
+        ]
+        target_sdk_defines = []
+        target_sdk_cxxflags = []
 
     clflags = "/D" + " /D".join([
-      "_USING_V110_SDK71_",
       "_UNICODE",
       "UNICODE",
-    ])
+    ] + target_sdk_defines)
 
     platform_cflags = []
     if arch == 'x86':
@@ -522,13 +548,7 @@ def generate_meson_env(arch: str, config: str, runtime: str) -> MesonEnv:
 
     cflags = " ".join(platform_cflags)
 
-    cxxflags = " ".join(platform_cflags + [
-        # Relax C++11 compliance for XP compatibility.
-        "/Zc:threadSafeInit-",
-    ])
-
-    (win10_sdk_dir, win10_sdk_version) = winenv.get_win10_sdk()
-    win10_sdk_dir = Path(win10_sdk_dir)
+    cxxflags = " ".join(platform_cflags + target_sdk_cxxflags)
 
     m4_path = BOOTSTRAP_TOOLCHAIN_DIR / "bin" / "m4.exe"
     bison_pkgdatadir = BOOTSTRAP_TOOLCHAIN_DIR / "share" / "bison"
@@ -539,7 +559,7 @@ def generate_meson_env(arch: str, config: str, runtime: str) -> MesonEnv:
         prefix / "bin",
         env_dir,
         BOOTSTRAP_TOOLCHAIN_DIR / "bin",
-        winxp_bin_dir,
+        target_sdk_bin_dir,
         msvc_bin_dir,
     ] + msvc_dll_dirs])
 
@@ -548,15 +568,14 @@ def generate_meson_env(arch: str, config: str, runtime: str) -> MesonEnv:
         msvc_dir / "atlmfc" / "include",
         vc_dir / "Auxiliary" / "VS" / "include",
         win10_sdk_dir / "Include" / win10_sdk_version / "ucrt",
-        winxp_sdk_dir / "Include",
-    ]])
+    ] + target_sdk_inc_dirs])
 
     library_path = ";".join([str(path) for path in [
         msvc_dir / "lib" / msvc_platform,
         msvc_dir / "atlmfc" / "lib" / msvc_platform,
         vc_dir / "Auxiliary" / "VS" / "lib" / msvc_platform,
         win10_sdk_dir / "Lib" / win10_sdk_version / "ucrt" / msvc_platform,
-        winxp_lib_dir,
+        target_sdk_lib_dir,
     ]])
 
     env_path = env_dir / "env.bat"
@@ -586,7 +605,7 @@ set DEPOT_TOOLS_WIN_TOOLCHAIN=0
         ),
         encoding='utf-8')
 
-    rc_path = winxp_bin_dir / "rc.exe"
+    rc_path = target_sdk_bin_dir / "rc.exe"
     rc_wrapper_path = env_dir / "rc.bat"
     rc_wrapper_path.write_text("""@ECHO OFF
 SETLOCAL EnableExtensions
