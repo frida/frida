@@ -74,3 +74,7 @@ def get_win10_sdk():
         except Exception as e:
             raise MissingDependencyError("Windows 10 SDK is not installed")
     return cached_win10sdk
+
+
+class MissingDependencyError(Exception):
+    pass

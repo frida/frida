@@ -45,11 +45,6 @@ class MesonEnv:
     shell_env: ShellEnv
 
 
-
-class MissingDependencyError(Exception):
-    pass
-
-
 ARCHITECTURES = {
     PackageRole.TOOL: ['x86'],
     PackageRole.LIBRARY: ['x86_64', 'x86'],
@@ -218,7 +213,7 @@ def check_environment():
         winenv.get_msvs_installation_dir()
         winenv.get_winxp_sdk()
         winenv.get_win10_sdk()
-    except MissingDependencyError as e:
+    except winenv.MissingDependencyError as e:
         print("ERROR: {}".format(e), file=sys.stderr)
         sys.exit(1)
 
