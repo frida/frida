@@ -12,8 +12,6 @@
     <GLibMkenums>py -3 $(SolutionDir)build\toolchain-windows\bin\glib-mkenums</GLibMkenums>
     <ValaCompiler>$(SolutionDir)build\toolchain-windows\bin\valac-0.56.exe</ValaCompiler>
     <ValaFlags>--target-glib=2.56 --vapidir="$(SolutionDir)frida-core\vapi" --vapidir="$(SolutionDir)frida-gum\vapi" --vapidir="$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\share\vala\vapi"</ValaFlags>
-    <PlatformToolset>v141_xp</PlatformToolset>
-    <XPDeprecationWarning>false</XPDeprecationWarning>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Platform)'=='Win32'">
     <FridaCoreValaFlags>-D X86 $(FridaCoreValaFlags)</FridaCoreValaFlags>
