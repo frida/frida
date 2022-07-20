@@ -11,8 +11,8 @@ task:
     TWINE_USERNAME: ENCRYPTED[216cb54746e1fa5d4cbf85736dc1830d4b3a0eaa99cf13fc5cf9e3b09feed5db23d44ab1e26b7023c72eeec7ca5749f6]
     TWINE_PASSWORD: ENCRYPTED[df19e51426faf8b60a18e42c96541431438335612c18506c319cd775ffba984d9cf89b0faaedbde8d4eff94d4b94066c]
     NPM_TOKEN: ENCRYPTED[e47a7de1c1fb59ab9c9fa09e7b0593b272441d28a70d06b6a0bedf13a969fdae8014af17982b3144214333181f70c22b]
-    PYTHON: /usr/local/bin/python3.8
-    PYTHON3: /usr/local/bin/python3.8
+    PYTHON: /usr/local/bin/python3.9
+    PYTHON3: /usr/local/bin/python3.9
   timeout_in: 2h
   install_dependencies_script: |
     pkg install -y \
@@ -20,11 +20,11 @@ task:
       bison \
       git \
       npm \
-      py38-pip \
-      py38-requests \
-      py38-s3cmd \
-      py38-setuptools \
-      py38-twine
+      py39-pip \
+      py39-requests \
+      py39-s3cmd \
+      py39-setuptools \
+      py39-twine
     pip install agithub
     npm install -g cloudflare-cli
   initialize_credentials_script: |
