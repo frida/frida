@@ -587,8 +587,8 @@ if __name__ == '__main__':
             upload_file("frida-inject-{version}-freebsd-x86_64", os.path.join(build_dir, "build", "frida-freebsd-x86_64", "bin", "frida-inject"), upload)
             upload_file("frida-gadget-{version}-freebsd-x86_64.so", os.path.join(build_dir, "build", "frida-freebsd-x86_64", "lib", "frida", "64", "frida-gadget.so"), upload)
 
-            upload_python_bindings_to_pypi("/usr/local/bin/python3.8",
-                os.path.join(build_dir, "build", "frida-freebsd-x86_64", "lib", "python3.8", "site-packages", "_frida.so"),
+            upload_python_bindings_to_pypi("/usr/local/bin/python3.9",
+                os.path.join(build_dir, "build", "frida-freebsd-x86_64", "lib", "python3.9", "site-packages", "_frida.so"),
                 platform_name="freebsd-amd64")
 
             upload_node_bindings_to_npm("/usr/local/bin/node", upload, publish=False)
