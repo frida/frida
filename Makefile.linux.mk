@@ -245,6 +245,11 @@ build/tmp_thin-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stam
 	fi
 	@touch $@
 
+ifeq ($(FRIDA_AGENT_EMULATED), yes)
+legacy_emulated_agent_dep := build/tmp-android-arm/frida-core/.frida-agent-stamp
+modern_emulated_agent_dep := build/tmp-android-arm64/frida-core/.frida-agent-stamp
+endif
+
 build/frida-linux-x86/lib/pkgconfig/frida-core-1.0.pc: build/tmp-linux-x86/frida-core/.frida-helper-and-agent-stamp
 	@rm -f build/tmp-linux-x86/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-env-linux-x86.rc && $(MESON) install -C build/tmp-linux-x86/frida-core
@@ -253,11 +258,11 @@ build/frida-linux-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-linux-x86/fr
 	@rm -f build/tmp-linux-x86_64/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-env-linux-x86_64.rc && $(MESON) install -C build/tmp-linux-x86_64/frida-core
 	@touch $@
-build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x86/frida-core/.frida-helper-and-agent-stamp build/tmp-android-arm/frida-core/.frida-agent-stamp
+build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x86/frida-core/.frida-helper-and-agent-stamp $(legacy_emulated_agent_dep)
 	@rm -f build/tmp-android-x86/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-env-android-x86.rc && $(MESON) install -C build/tmp-android-x86/frida-core
 	@touch $@
-build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x86/frida-core/.frida-helper-and-agent-stamp build/tmp-android-x86_64/frida-core/.frida-helper-and-agent-stamp build/tmp-android-arm/frida-core/.frida-agent-stamp build/tmp-android-arm64/frida-core/.frida-agent-stamp
+build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-x86/frida-core/.frida-helper-and-agent-stamp build/tmp-android-x86_64/frida-core/.frida-helper-and-agent-stamp $(legacy_emulated_agent_dep) $(modern_emulated_agent_dep)
 	@rm -f build/tmp-android-x86_64/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-env-android-x86_64.rc && $(MESON) install -C build/tmp-android-x86_64/frida-core
 	@touch $@
