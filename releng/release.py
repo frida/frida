@@ -581,11 +581,11 @@ if __name__ == '__main__':
                 os.path.join(build_dir, "build", "frida-android-arm64", "lib", "python3.8", "site-packages", "_frida.so"),
                 platform_name="android-aarch64")
         elif builder == 'freebsd-x86_64':
-            upload_devkits("freebsd-x86_64", upload)
+            #upload_devkits("freebsd-x86_64", upload)
 
-            upload_file("frida-server-{version}-freebsd-x86_64", os.path.join(build_dir, "build", "frida-freebsd-x86_64", "bin", "frida-server"), upload)
-            upload_file("frida-inject-{version}-freebsd-x86_64", os.path.join(build_dir, "build", "frida-freebsd-x86_64", "bin", "frida-inject"), upload)
-            upload_file("frida-gadget-{version}-freebsd-x86_64.so", os.path.join(build_dir, "build", "frida-freebsd-x86_64", "lib", "frida", "64", "frida-gadget.so"), upload)
+            #upload_file("frida-server-{version}-freebsd-x86_64", os.path.join(build_dir, "build", "frida-freebsd-x86_64", "bin", "frida-server"), upload)
+            #upload_file("frida-inject-{version}-freebsd-x86_64", os.path.join(build_dir, "build", "frida-freebsd-x86_64", "bin", "frida-inject"), upload)
+            #upload_file("frida-gadget-{version}-freebsd-x86_64.so", os.path.join(build_dir, "build", "frida-freebsd-x86_64", "lib", "frida", "64", "frida-gadget.so"), upload)
 
             upload_python_bindings_to_pypi("/usr/local/bin/python3.9",
                 os.path.join(build_dir, "build", "frida-freebsd-x86_64", "lib", "python3.9", "site-packages", "_frida.so"),
