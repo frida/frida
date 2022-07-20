@@ -21,6 +21,7 @@ frida_gum_flags := \
 frida_core_flags := \
 	--default-library static \
 	$(FRIDA_FLAGS_COMMON) \
+	-Dv8=$(FRIDA_V8) \
 	-Dconnectivity=$(FRIDA_CONNECTIVITY) \
 	$(FRIDA_MAPPER)
 
