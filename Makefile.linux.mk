@@ -172,6 +172,9 @@ build/tmp-linux-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submodul
 	fi
 	@touch $@
 build/tmp-android-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-android-x86/lib/pkgconfig/frida-gum-1.0.pc
+	if [ "$(FRIDA_AGENT_EMULATED)" == "yes" ]; then \
+		agent_emulated_legacy=$(FRIDA)/build/tmp-android-arm/frida-core/lib/agent/frida-agent.so; \
+	fi; \
 	. build/frida-env-android-x86.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
@@ -179,11 +182,15 @@ build/tmp-android-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule
 			--prefix $(FRIDA)/build/frida-android-x86 \
 			--libdir $(FRIDA)/build/frida-android-x86/lib \
 			$(frida_core_flags) \
-			-Dagent_emulated_legacy=$(FRIDA)/build/tmp-android-arm/frida-core/lib/agent/frida-agent.so \
+			-Dagent_emulated_legacy=$$agent_emulated_legacy \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
 build/tmp-android-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-android-x86_64/lib/pkgconfig/frida-gum-1.0.pc
+	if [ "$(FRIDA_AGENT_EMULATED)" == "yes" ]; then \
+		agent_emulated_modern=$(FRIDA)/build/tmp-android-arm64/frida-core/lib/agent/frida-agent.so; \
+		agent_emulated_legacy=$(FRIDA)/build/tmp-android-arm/frida-core/lib/agent/frida-agent.so; \
+	fi; \
 	. build/frida-env-android-x86_64.rc; \
 	builddir=$(@D); \
 	if [ ! -f $$builddir/build.ninja ]; then \
@@ -195,8 +202,8 @@ build/tmp-android-x86_64/frida-core/.frida-ninja-stamp: build/.frida-core-submod
 			-Dhelper_legacy=$(FRIDA)/build/tmp-android-x86/frida-core/src/frida-helper \
 			-Dagent_modern=$(FRIDA)/build/tmp-android-x86_64/frida-core/lib/agent/frida-agent.so \
 			-Dagent_legacy=$(FRIDA)/build/tmp-android-x86/frida-core/lib/agent/frida-agent.so \
-			-Dagent_emulated_modern=$(FRIDA)/build/tmp-android-arm64/frida-core/lib/agent/frida-agent.so \
-			-Dagent_emulated_legacy=$(FRIDA)/build/tmp-android-arm/frida-core/lib/agent/frida-agent.so \
+			-Dagent_emulated_modern=$$agent_emulated_modern \
+			-Dagent_emulated_legacy=$$agent_emulated_legacy \
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
