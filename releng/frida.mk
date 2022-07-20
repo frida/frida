@@ -24,7 +24,22 @@ frida_core_flags := \
 	-Dconnectivity=$(FRIDA_CONNECTIVITY) \
 	$(FRIDA_MAPPER)
 
-frida_tools = frida frida-discover frida-kill frida-ls-devices frida-ps frida-trace
+frida_tools = \
+	frida \
+	frida-ls-devices \
+	frida-ps \
+	frida-kill \
+	frida-ls \
+	frida-rm \
+	frida-pull \
+	frida-push \
+	frida-discover \
+	frida-trace \
+	frida-join \
+	frida-create \
+	frida-compile \
+	frida-apk \
+	$(NULL)
 
 v8_api_version = 8.0
 
