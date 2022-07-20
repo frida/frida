@@ -19,6 +19,9 @@
   <PropertyGroup Condition="'$(Platform)'=='x64'">
     <FridaCoreValaFlags>-D X86_64 $(FridaCoreValaFlags)</FridaCoreValaFlags>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(FridaV8)'=='Enabled'">
+    <FridaCoreValaFlags>-D HAVE_V8 $(FridaCoreValaFlags)</FridaCoreValaFlags>
+  </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <ForcedIncludeFiles>$(SolutionDir)build\tmp-windows\frida-version.h</ForcedIncludeFiles>
