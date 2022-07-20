@@ -429,11 +429,12 @@ if __name__ == '__main__':
 
         try:
             r = requests.post(
-                url="https://gitlab.com/api/v4/projects/14857712/ref/master/trigger/pipeline",
-                params={
-                    "token": token,
+                url="https://api.github.com/repos/ViRb3/magisk-frida/dispatches",
+                headers={
+                    "Accept": "application/vnd.github.v3+json",
+                    "Authorization": "token " + token,
                 },
-                data={})
+                json={"event_type": "build"})
             r.raise_for_status()
             print("Triggered magisk-frida CI")
         except Exception as e:
