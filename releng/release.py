@@ -46,10 +46,9 @@ if __name__ == '__main__':
         ssh = "ssh"
         scp = "scp"
 
-    raw_version = subprocess.check_output(["git", "describe", "--tags", "--always", "--long"], cwd=build_dir).decode('utf-8').strip().replace("-", ".")
-    (major, minor, micro, nano, commit) = raw_version.split(".")
-    version = "%d.%d.%d" % (int(major), int(minor), int(micro))
-    tag_name = str(version)
+    version = "15.2.0.0"
+    (major, minor, micro, nano) = version.split(".")
+    tag_name = version
 
     def upload_python_bindings_to_pypi(interpreter, extension, extra_env={}, sdist=False, platform_name=None):
         subprocess.check_call(["git", "clean", "-xffd"], cwd=frida_python_dir)

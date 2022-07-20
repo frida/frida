@@ -1,4 +1,4 @@
-FRIDA_VERSION := $(shell git describe --tags --always --long | sed 's,-,.,g' | cut -f1-3 -d'.')
+FRIDA_VERSION := 15.2.0
 
 include releng/system.mk
 

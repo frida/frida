@@ -6,20 +6,8 @@ import sys
 
 
 def generate_version_header():
-    build_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    description = subprocess.Popen(["git", "describe", "--tags", "--always", "--long"], cwd=build_dir, stdout=subprocess.PIPE).communicate()[0]
-    version = description.strip().decode('utf-8').replace("-", ".")
-    tokens = version.split(".")
-    if len(tokens) > 1:
-        (major, minor, micro, nano, commit) = tokens
-        if nano == "0":
-            version = ".".join([major, minor, micro])
-    else:
-        version = "0.0.0.0.g" + tokens[0]
-        major = "0"
-        minor = "0"
-        micro = "0"
-        nano = "0"
+    version = "15.2.0.0"
+    (major, minor, micro, nano) = version.split(".")
 
     header = """\
 #ifndef __FRIDA_VERSION_H__
