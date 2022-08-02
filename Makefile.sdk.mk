@@ -281,7 +281,7 @@ build/fs-tmp-%/gn/build.ninja: build/fs-env-%.rc deps/.gn-stamp \
 	@mkdir -p $(@D)
 	@(set -x \
 		&& . $< \
-		&& CC="$$CC" CXX="$$CXX" python deps/gn/build/gen.py \
+		&& CC="$$CC" CXX="$$CXX" "$(PYTHON)" deps/gn/build/gen.py \
 			--out-path $(shell pwd)/$(@D) \
 			$(gn_options) \
 	) >$(@D)/build.log 2>&1
