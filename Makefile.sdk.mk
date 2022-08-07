@@ -417,6 +417,7 @@ build/fs-%/manifest/v8.pkg: build/fs-tmp-%/v8/build.ninja
 		) > $$prefix/$$libdatadir/pkgconfig/v8-$(v8_api_version).pc \
 	) >>$$builddir/build.log 2>&1 \
 	&& $(call print-status,v8,Generating manifest) \
+	&& mkdir -p $(@D) \
 	&& ( \
 		cd $$prefix; \
 		find include/v8-$(v8_api_version) -type f; \
