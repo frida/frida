@@ -30,7 +30,7 @@ def query_defines(source_dir, build_dir, gn=None, env=None):
 
 def query_libs(source_dir, build_dir, gn=None, env=None):
     result = query_gn("//:v8_monolith", "libs", source_dir, build_dir, gn, env)
-    return result["//:v8_monolith"]["libs"]
+    return result["//:v8_monolith"].get("libs", [])
 
 def patch_config_header(header_path, source_dir, build_dir, gn=None, env=None):
     defines = query_defines(source_dir, build_dir, gn, env)
