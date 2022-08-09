@@ -41,8 +41,6 @@ frida_tools = \
 	frida-apk \
 	$(NULL)
 
-v8_api_version = 8.0
-
 build/frida-env-%.rc: releng/setup-env.sh build/frida-version.h
 	@for os_arch in $(build_os_arch) $*; do \
 		if [ ! -f build/frida-env-$$os_arch.rc ]; then \
