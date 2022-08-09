@@ -556,61 +556,35 @@ openssl_deps_for_build = \
 	$(NULL)
 
 v8_name = V8
-v8_version = 5e81562f224b2657993fda62f3aa78c178719046
+v8_version = 017cf87edb2d3ccdec6f69ddb64d417fb12143f7
 v8_url = $(frida_base_url)/v8.git
 v8_hash = $(NULL)
-v8_recipe = custom
+v8_recipe = meson
 v8_patches = \
 	$(NULL)
 v8_options = \
-	use_thin_lto=false \
-	v8_monolithic=true \
-	v8_use_external_startup_data=false \
-	is_component_build=false \
-	v8_enable_debugging_features=false \
-	v8_enable_disassembler=false \
-	v8_enable_gdbjit=false \
-	v8_enable_i18n_support=false \
-	v8_untrusted_code_mitigations=false \
-	treat_warnings_as_errors=false \
-	fatal_linker_warnings=false \
-	use_glib=false \
-	use_goma=false \
-	v8_embedder_string="-frida" \
+	-Ddebug=false \
+	-Dembedder_string=-frida \
+	-Dpointer_compression=disabled \
+	-Dcppgc_caged_heap=disabled \
 	$(NULL)
 v8_deps = \
 	$(NULL)
 v8_deps_for_build = \
 	$(NULL)
-v8_api_version = 8.0
 
-gn_name = GN
-gn_version = dd3501bfb77bafc41e7493c92e2684fa9709770b
-gn_url = $(frida_base_url)/gn.git
-gn_hash = $(NULL)
-gn_recipe = custom
-gn_patches = \
+libcxx_name = libc++
+libcxx_version = 75237855cb511ed09ea48ee00f4bf6bbf8089551
+libcxx_url = $(frida_base_url)/libcxx.git
+libcxx_hash = $(NULL)
+libcxx_recipe = meson
+libcxx_patches = \
 	$(NULL)
-gn_options = \
+libcxx_options = \
 	$(NULL)
-gn_deps = \
+libcxx_deps = \
 	$(NULL)
-gn_deps_for_build = \
-	$(NULL)
-
-depot_tools_name = depot_tools
-depot_tools_version = cb340f5b7bbdcaba0fad346b08db91538619a531
-depot_tools_url = https://chromium.googlesource.com/chromium/tools/depot_tools.git
-depot_tools_hash = $(NULL)
-depot_tools_recipe = custom
-depot_tools_patches = \
-	depot_tools-os-support.patch \
-	$(NULL)
-depot_tools_options = \
-	$(NULL)
-depot_tools_deps = \
-	$(NULL)
-depot_tools_deps_for_build = \
+libcxx_deps_for_build = \
 	$(NULL)
 
 

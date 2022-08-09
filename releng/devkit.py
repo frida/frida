@@ -257,7 +257,7 @@ def generate_library_windows(package, frida_root, host, flavor, output_dir, libr
         if elem.tag == frida_v8_tag:
             if elem.text == "Enabled":
                 v8 += [
-                    sdk_lib_path("libv8-8.0.a", frida_root, host),
+                    sdk_lib_path("libv8-10.0.a", frida_root, host),
                 ]
             break
 
