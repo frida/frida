@@ -814,6 +814,9 @@ case $host_os in
 
     meson_c_args="$base_compiler_args"
     meson_cpp_args="$base_compiler_args"
+    if [ $android_api -lt 24 ]; then
+      meson_cpp_args="$meson_cpp_args, '-D_LIBCPP_HAS_NO_OFF_T_FUNCTIONS'"
+    fi
 
     meson_c_link_args="$base_linker_args"
     meson_cpp_link_args="$base_linker_args"
