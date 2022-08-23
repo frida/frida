@@ -574,7 +574,7 @@ v8_deps_for_build = \
 	$(NULL)
 
 libcxx_name = libc++
-libcxx_version = 75237855cb511ed09ea48ee00f4bf6bbf8089551
+libcxx_version = f66df8deb44bff5cc0a428aa7732cffe438d2691
 libcxx_url = $(frida_base_url)/libcxx.git
 libcxx_hash = $(NULL)
 libcxx_recipe = meson
