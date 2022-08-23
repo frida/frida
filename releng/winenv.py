@@ -12,8 +12,7 @@ BOOTSTRAP_TOOLCHAIN_DIR = os.path.join(ROOT_DIR, "build", "fts-toolchain-windows
 
 cached_msvs_dir = None
 cached_msvc_dir = None
-cached_winxpsdk = None
-cached_win10sdk = None
+cached_winsdk = None
 
 
 def get_msvs_installation_dir():
@@ -25,17 +24,14 @@ def get_msvs_installation_dir():
             toolchain_dir = BOOTSTRAP_TOOLCHAIN_DIR
         installations = json.loads(subprocess.check_output([
             os.path.join(toolchain_dir, "bin", "vswhere.exe"),
-            "-version", "16.0",
+            "-version", "17.0",
             "-format", "json",
             "-property", "installationPath"
         ]))
         if len(installations) == 0:
-            raise MissingDependencyError("Visual Studio 2019 is not installed")
+            raise MissingDependencyError("Visual Studio 2022 is not installed")
         cached_msvs_dir = installations[0]['installationPath'].rstrip("\\")
     return cached_msvs_dir
-
-def get_msvs_version():
-    return "2019"
 
 def get_msvc_tool_dir():
     global cached_msvc_dir
@@ -45,35 +41,20 @@ def get_msvc_tool_dir():
         cached_msvc_dir = os.path.join(msvs_dir, "VC", "Tools", "MSVC", version)
     return cached_msvc_dir
 
-def get_winxp_sdk():
-    global cached_winxpsdk
-    if cached_winxpsdk is None:
-        try:
-            key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Microsoft SDKs\Windows\v7.1A")
-            try:
-                (install_dir, _) = winreg.QueryValueEx(key, "InstallationFolder")
-                (version, _) = winreg.QueryValueEx(key, "ProductVersion")
-                cached_winxpsdk = (install_dir.rstrip("\\"), version)
-            finally:
-                winreg.CloseKey(key)
-        except Exception as e:
-            raise MissingDependencyError("Windows XP SDK is not installed")
-    return cached_winxpsdk
-
-def get_win10_sdk():
-    global cached_win10sdk
-    if cached_win10sdk is None:
+def get_windows_sdk():
+    global cached_winsdk
+    if cached_winsdk is None:
         try:
             key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows Kits\Installed Roots")
             try:
                 (install_dir, _) = winreg.QueryValueEx(key, "KitsRoot10")
                 version = os.path.basename(sorted(glob.glob(os.path.join(install_dir, "Include", "*.*.*")))[-1])
-                cached_win10sdk = (install_dir.rstrip("\\"), version)
+                cached_winsdk = (install_dir.rstrip("\\"), version)
             finally:
                 winreg.CloseKey(key)
         except Exception as e:
             raise MissingDependencyError("Windows 10 SDK is not installed")
-    return cached_win10sdk
+    return cached_winsdk
 
 
 class MissingDependencyError(Exception):

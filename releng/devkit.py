@@ -58,11 +58,11 @@ def generate_devkit(kit, host, flavor, output_dir):
 
 def generate_header(package, frida_root, host, kit, flavor, umbrella_header_path, thirdparty_symbol_mappings):
     if platform.system() == 'Windows':
-        (win10_sdk_dir, win10_sdk_version) = winenv.get_win10_sdk()
+        (win_sdk_dir, win_sdk_version) = winenv.get_windows_sdk()
 
         include_dirs = [
             os.path.join(winenv.get_msvc_tool_dir(), "include"),
-            os.path.join(win10_sdk_dir, "Include", win10_sdk_version, "ucrt"),
+            os.path.join(win_sdk_dir, "Include", win_sdk_version, "ucrt"),
             os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "lib", "glib-2.0", "include"),
             os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "include", "glib-2.0"),
             os.path.join(frida_root, "build", "sdk-windows", msvs_arch_config(host), "include", "json-glib-1.0"),
