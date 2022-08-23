@@ -1,5 +1,10 @@
 #!/bin/sh
 
+if [ -n "$FRIDA_BUILD_ARCH" ]; then
+  echo $FRIDA_BUILD_ARCH
+  exit 0
+fi
+
 if [ "$(uname -s)" = "Darwin" ]; then
   if [ "$(sysctl -nq hw.optional.arm64)" = "1" ]; then
     machine=arm64
