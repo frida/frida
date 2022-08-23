@@ -65,7 +65,7 @@ libiconv_deps_for_build = \
 	$(NULL)
 
 zlib_name = zlib
-zlib_version = 64dd495da9b75ad61400a8de5b2a1bbb9fbbffbb
+zlib_version = 066bd9e6a3438af5ee5637a1200d194befd25b8a
 zlib_url = $(frida_base_url)/zlib.git
 zlib_hash = $(NULL)
 zlib_recipe = meson
