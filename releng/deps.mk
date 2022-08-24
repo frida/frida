@@ -556,7 +556,7 @@ openssl_deps_for_build = \
 	$(NULL)
 
 v8_name = V8
-v8_version = de663443c46651bbb0948a70781b534be6671c4b
+v8_version = 6338f7bfb99e793a65f562431ea05e9c9d76cf2b
 v8_url = $(frida_base_url)/v8.git
 v8_hash = $(NULL)
 v8_recipe = meson
@@ -565,6 +565,7 @@ v8_patches = \
 v8_options = \
 	-Ddebug=false \
 	-Dembedder_string=-frida \
+	-Dsnapshot_compression=disabled \
 	-Dpointer_compression=disabled \
 	-Dcppgc_caged_heap=disabled \
 	$(NULL)
