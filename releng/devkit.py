@@ -91,7 +91,7 @@ def generate_header(package, frida_root, host, kit, flavor, umbrella_header_path
         frida_root_slashed = frida_root.replace("\\", "/")
         header_files = [header_file for header_file in header_files if bool(re.match('^' + frida_root_slashed, header_file, re.I))]
     else:
-        rc = env_rc(frida_root, host)
+        rc = env_rc(frida_root, host, flavor)
         header_dependencies = subprocess.check_output(
             ["(. \"{rc}\" && $CC $CFLAGS -E -M $($PKG_CONFIG --cflags {package}) \"{header}\")".format(rc=rc, package=package, header=umbrella_header_path)],
             shell=True).decode('utf-8')
@@ -298,7 +298,7 @@ def generate_library_unix(package, frida_root, host, flavor, output_dir, library
     except:
         pass
 
-    rc = env_rc(frida_root, host)
+    rc = env_rc(frida_root, host, flavor)
     ar = probe_env(rc, "echo $AR")
 
     library_flags = subprocess.check_output(
@@ -429,7 +429,7 @@ def generate_example(filename, package, frida_root, host, kit, flavor, extra_ldf
     if platform.system() == 'Windows':
         return example_code
     else:
-        rc = env_rc(frida_root, host)
+        rc = env_rc(frida_root, host, flavor)
 
         cc = probe_env(rc, "echo $CC")
         cflags = probe_env(rc, "echo $CFLAGS")
@@ -460,8 +460,8 @@ def generate_example(filename, package, frida_root, host, kit, flavor, extra_ldf
 def asset_path(name):
     return os.path.join(os.path.dirname(__file__), "devkit-assets", name)
 
-def env_rc(frida_root, host):
-    return os.path.join(frida_root, "build", "frida-env-{}.rc".format(host))
+def env_rc(frida_root, host, flavor):
+    return os.path.join(frida_root, "build", "frida{}-env-{}.rc".format(flavor, host))
 
 def msvs_cl_exe(host):
     return msvs_tool_path(host, "cl.exe")
