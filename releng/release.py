@@ -489,7 +489,7 @@ if __name__ == '__main__':
 
             upload_python_bindings_to_pypi("/usr/bin/python2.7",
                 os.path.join(build_dir, "build", "frida-macos-universal", "lib", "python2.7", "site-packages", "_frida.so"),
-                platform_name="macosx-11.0-fat64")
+                platform_name="macosx-11.0-universal2")
             upload_python_bindings_to_pypi("/usr/bin/python2.7",
                 os.path.join(build_dir, "build", "frida-macos-x86_64", "lib", "python2.7", "site-packages", "_frida.so"),
                 platform_name="macosx-10.9-x86_64")
