@@ -51,7 +51,7 @@ if __name__ == '__main__':
     version = "%d.%d.%d" % (int(major), int(minor), int(micro))
     tag_name = str(version)
 
-    def upload_python_bindings_to_pypi(interpreter, extension, extra_env={}, sdist=False, platform_name=None):
+    def upload_python_bindings_to_pypi(interpreter, extension, extra_env={}, platform_name=None):
         subprocess.check_call(["git", "clean", "-xffd"], cwd=frida_python_dir)
 
         work_dir = tempfile.mkdtemp(prefix="frida-pypi")
@@ -74,9 +74,6 @@ if __name__ == '__main__':
             env.update(extra_env)
 
             args = []
-
-            if sdist:
-                args.append("sdist")
 
             args.append("bdist_wheel")
             if platform_name is not None:
@@ -462,7 +459,7 @@ if __name__ == '__main__':
             upload_python_bindings_to_pypi(r"C:\Program Files (x86)\Python 2.7\python.exe",  os.path.join(prefix_x86, "lib", "python2.7", "site-packages", "_frida.pyd"))
             upload_python_bindings_to_pypi(r"C:\Program Files\Python 2.7\python.exe",        os.path.join(prefix_x64, "lib", "python2.7", "site-packages", "_frida.pyd"))
             upload_python_bindings_to_pypi(r"C:\Program Files (x86)\Python 3.10\python.exe", os.path.join(prefix_x86, "lib", "python3.10", "site-packages", "_frida.pyd"))
-            upload_python_bindings_to_pypi(r"C:\Program Files\Python 3.10\python.exe",       os.path.join(prefix_x64, "lib", "python3.10", "site-packages", "_frida.pyd"), sdist=True)
+            upload_python_bindings_to_pypi(r"C:\Program Files\Python 3.10\python.exe",       os.path.join(prefix_x64, "lib", "python3.10", "site-packages", "_frida.pyd"))
 
             upload_node_bindings_to_npm(r"C:\Program Files (x86)\nodejs\node.exe", upload, publish=False)
             upload_node_bindings_to_npm(r"C:\Program Files\nodejs\node.exe",       upload, publish=False)
