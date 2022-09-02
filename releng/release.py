@@ -78,7 +78,7 @@ if __name__ == '__main__':
             if sdist:
                 args.append("sdist")
 
-            args.append("bdist_egg")
+            args.append("bdist_wheel")
             if platform_name is not None:
                 args.append("--plat-name=" + platform_name)
                 env['_PYTHON_HOST_PLATFORM'] = platform_name
