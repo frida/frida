@@ -556,7 +556,7 @@ openssl_deps_for_build = \
 	$(NULL)
 
 v8_name = V8
-v8_version = 6338f7bfb99e793a65f562431ea05e9c9d76cf2b
+v8_version = 4c8d0641521d7a48a27baf13aa29b23dce237d5d
 v8_url = $(frida_base_url)/v8.git
 v8_hash = $(NULL)
 v8_recipe = meson
