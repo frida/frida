@@ -13,7 +13,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from typing import Callable, Dict, List, Tuple
+from typing import AbstractSet, Callable, Dict, List, Tuple
 import urllib.request
 
 from deps import read_dependency_parameters, Bundle, DependencyParameters, PackageSpec
@@ -26,6 +26,12 @@ class PackageRole(Enum):
 
 
 Package = Tuple[str, PackageRole, List[str]]
+
+
+@dataclass
+class HostSelector:
+    architectures: AbstractSet[str]
+    configurations: AbstractSet[str]
 
 
 class SourceState(Enum):
@@ -42,6 +48,9 @@ class MesonEnv:
     path: str
     shell_env: ShellEnv
 
+
+ALL_ARCHITECTURES = {'x86_64', 'x86'}
+ALL_CONFIGURATIONS = {'Release', 'Debug'}
 
 ARCHITECTURES = {
     PackageRole.TOOL: ['x86'],
@@ -138,6 +147,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--bundle", help="only build one specific bundle",
                         default=None, choices=[name.lower() for name in Bundle.__members__])
+    parser.add_argument("--host", help="only build for one specific host",
+                        default=None)
     parser.add_argument("--v8", help="whether to include V8 in the SDK",
                         default='enabled', choices=['enabled', 'disabled'])
 
@@ -147,6 +158,26 @@ def main():
         bundle_ids = [Bundle.TOOLCHAIN, Bundle.SDK]
     else:
         bundle_ids = [Bundle[arguments.bundle.upper()]]
+
+    host = arguments.host
+    if host is None:
+        host_selector = HostSelector(ALL_ARCHITECTURES, ALL_CONFIGURATIONS)
+    else:
+        tokens = host.split("-")
+        if len(tokens) not in [2, 3]:
+            parser.error("invalid host")
+        if len(tokens) == 2:
+            host += "-release"
+            tokens += ["release"]
+        os, arch, config = tokens
+        config = config.title()
+        if os != "windows":
+            parser.error(f"invalid os: {os}")
+        if arch not in ALL_ARCHITECTURES:
+            parser.error(f"invalid architecture: {arch}")
+        if config not in ALL_CONFIGURATIONS:
+            parser.error(f"invalid config: {config}")
+        host_selector = HostSelector({arch}, {config})
 
     selected = set([pkg_name for bundle_id in bundle_ids for pkg_name in ALL_BUNDLES[bundle_id]])
     packages = [pkg for pkg in ALL_PACKAGES if pkg[0] in selected]
@@ -163,10 +194,10 @@ def main():
         synchronize(packages, params)
         sync_ended_at = time.time()
 
-        build(packages, params)
+        build(packages, params, host_selector)
         build_ended_at = time.time()
 
-        package(bundle_ids, params)
+        package(bundle_ids, params, host)
         packaging_ended_at = time.time()
     except subprocess.CalledProcessError as e:
         print(e, file=sys.stderr)
@@ -347,17 +378,23 @@ def wipe_build_state():
             shutil.rmtree(path)
 
 
-def build(packages: List[Package], params: DependencyParameters):
+def build(packages: List[Package], params: DependencyParameters, host_selector: HostSelector):
     for name, role, extra_options in packages:
-        build_package(name, role, params.get_package_spec(name), extra_options)
+        build_package(name, role, params.get_package_spec(name), extra_options, host_selector)
 
-def build_package(name: str, role: PackageRole, spec: PackageSpec, extra_options: List[str]):
+def build_package(name: str, role: PackageRole, spec: PackageSpec, extra_options: List[str], host_selector: HostSelector):
     archs = ARCHITECTURES[role]
     configs = CONFIGURATIONS[role]
     runtimes = RUNTIMES[role]
 
     for arch in archs:
+        if arch not in host_selector.architectures:
+            continue
+
         for config in configs:
+            if config not in host_selector.configurations:
+                continue
+
             for runtime in runtimes:
                 manifest_path = get_manifest_path(name, arch, config, runtime)
                 if manifest_path.exists():
@@ -625,14 +662,17 @@ def detect_bootstrap_valac() -> str:
     return cached_bootstrap_valac
 
 
-def package(bundle_ids: List[Bundle], params: DependencyParameters):
+def package(bundle_ids: List[Bundle], params: DependencyParameters, host: str | None):
     with tempfile.TemporaryDirectory(prefix="frida-deps") as tempdir:
         tempdir = Path(tempdir)
 
         toolchain_filename = "toolchain-windows-x86.exe"
         toolchain_path = ROOT_DIR / "build" / toolchain_filename
 
-        sdk_filename = "sdk-windows-any.exe"
+        if host is None:
+            sdk_filename = "sdk-windows-any.exe"
+        else:
+            sdk_filename = f"sdk-{host}.exe"
         sdk_path = ROOT_DIR / "build" / sdk_filename
 
         print("About to assemble:")
@@ -666,7 +706,12 @@ def package(bundle_ids: List[Bundle], params: DependencyParameters):
 
         sdk_built_files = []
         if Bundle.SDK in bundle_ids:
-            for prefix in prefixes_dir.glob("*-static"):
+            if host is None:
+                prefix_pattern = "*-static"
+            else:
+                arch, config = host.split("-")[1:]
+                prefix_pattern = "-".join([arch, config, "static"])
+            for prefix in prefixes_dir.glob(prefix_pattern):
                 for root, dirs, files in os.walk(prefix):
                     relpath = PurePath(root).relative_to(prefixes_dir)
                     all_files = [relpath / f for f in files]

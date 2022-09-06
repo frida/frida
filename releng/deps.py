@@ -64,20 +64,20 @@ def main():
 
     command = subparsers.add_parser("sync", help="ensure prebuilt dependencies are up-to-date")
     command.add_argument("bundle", help="bundle to synchronize", choices=bundle_choices)
-    command.add_argument("os_arch", help="OS/arch")
+    command.add_argument("host", help="OS/arch")
     command.add_argument("location", help="filesystem location")
-    command.set_defaults(func=lambda args: sync(Bundle[args.bundle.upper()], args.os_arch, Path(args.location)))
+    command.set_defaults(func=lambda args: sync(Bundle[args.bundle.upper()], args.host, Path(args.location)))
 
     command = subparsers.add_parser("roll", help="build and upload prebuilt dependencies if needed")
     command.add_argument("bundle", help="bundle to roll", choices=bundle_choices)
-    command.add_argument("os_arch", help="OS/arch")
+    command.add_argument("host", help="OS/arch")
     command.add_argument("--activate", default=False, action='store_true')
-    command.set_defaults(func=lambda args: roll(Bundle[args.bundle.upper()], args.os_arch, args.activate))
+    command.set_defaults(func=lambda args: roll(Bundle[args.bundle.upper()], args.host, args.activate))
 
     command = subparsers.add_parser("wait", help="wait for prebuilt dependencies if needed")
     command.add_argument("bundle", help="bundle to wait for", choices=bundle_choices)
-    command.add_argument("os_arch", help="OS/arch")
-    command.set_defaults(func=lambda args: wait(Bundle[args.bundle.upper()], args.os_arch))
+    command.add_argument("host", help="OS/arch")
+    command.set_defaults(func=lambda args: wait(Bundle[args.bundle.upper()], args.host))
 
     command = subparsers.add_parser("bump", help="bump dependency versions")
     command.set_defaults(func=lambda args: bump())
@@ -90,7 +90,7 @@ def main():
         sys.exit(1)
 
 
-def sync(bundle: Bundle, os_arch: str, location: Path):
+def sync(bundle: Bundle, host: str, location: Path):
     params = read_dependency_parameters()
     version = params.deps_version
 
@@ -105,7 +105,7 @@ def sync(bundle: Bundle, os_arch: str, location: Path):
             pass
         shutil.rmtree(location)
 
-    (url, filename, suffix) = compute_bundle_parameters(bundle, os_arch, version)
+    (url, filename, suffix) = compute_bundle_parameters(bundle, host, version)
 
     local_bundle = location.parent / filename
     if local_bundle.exists():
@@ -132,11 +132,11 @@ def sync(bundle: Bundle, os_arch: str, location: Path):
             archive_path.unlink()
 
 
-def roll(bundle: Bundle, os_arch: str, activate: bool):
+def roll(bundle: Bundle, host: str, activate: bool):
     params = read_dependency_parameters()
     version = params.deps_version
 
-    (public_url, filename, suffix) = compute_bundle_parameters(bundle, os_arch, version)
+    (public_url, filename, suffix) = compute_bundle_parameters(bundle, host, version)
 
     # First do a quick check to avoid hitting S3 in most cases.
     request = urllib.request.Request(public_url)
@@ -166,10 +166,11 @@ def roll(bundle: Bundle, os_arch: str, activate: bool):
     if artifact.exists():
         artifact.unlink()
 
-    if os_arch.startswith("windows-"):
+    if host.startswith("windows-"):
         subprocess.run([
                            "py", "-3", RELENG_DIR / "build-deps-windows.py",
                            "--bundle=" + bundle.name.lower(),
+                           "--host=" + host,
                        ],
                        check=True)
     else:
@@ -181,7 +182,7 @@ def roll(bundle: Bundle, os_arch: str, activate: bool):
                            gnu_make,
                            "-C", ROOT_DIR,
                            "-f", "Makefile.{}.mk".format(bundle.name.lower()),
-                           "FRIDA_HOST=" + os_arch,
+                           "FRIDA_HOST=" + host,
                        ],
                        check=True)
 
@@ -197,9 +198,9 @@ def roll(bundle: Bundle, os_arch: str, activate: bool):
         DEPS_MK_PATH.write_bytes(deps_content.encode('utf-8'))
 
 
-def wait(bundle: Bundle, os_arch: str):
+def wait(bundle: Bundle, host: str):
     params = read_dependency_parameters()
-    (url, filename, suffix) = compute_bundle_parameters(bundle, os_arch, params.deps_version)
+    (url, filename, suffix) = compute_bundle_parameters(bundle, host, params.deps_version)
 
     request = urllib.request.Request(url)
     request.get_method = lambda: "HEAD"
@@ -262,9 +263,9 @@ def bump():
         print("")
 
 
-def compute_bundle_parameters(bundle: Bundle, os_arch: str, version: str) -> Tuple[str, str, str]:
-    suffix = ".exe" if os_arch.startswith("windows-") else ".tar.bz2"
-    filename = "{}-{}{}".format(bundle.name.lower(), os_arch, suffix)
+def compute_bundle_parameters(bundle: Bundle, host: str, version: str) -> Tuple[str, str, str]:
+    suffix = ".exe" if host.startswith("windows-") else ".tar.bz2"
+    filename = "{}-{}{}".format(bundle.name.lower(), host, suffix)
     url = BUNDLE_URL.format(version=version, filename=filename)
     return (url, filename, suffix)
 
