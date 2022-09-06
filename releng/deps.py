@@ -56,6 +56,10 @@ class DependencyParameters:
         return self.packages[name.replace("-", "_")]
 
 
+class CommandError(Exception):
+    pass
+
+
 def main():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
@@ -84,7 +88,11 @@ def main():
 
     args = parser.parse_args()
     if 'func' in args:
-        args.func(args)
+        try:
+            args.func(args)
+        except CommandError as e:
+            print(e, file=sys.stderr)
+            sys.exit(1)
     else:
         parser.print_usage(file=sys.stderr)
         sys.exit(1)
@@ -146,7 +154,7 @@ def roll(bundle: Bundle, host: str, activate: bool):
             return
     except urllib.request.HTTPError as e:
         if e.code != 404:
-            return
+            raise CommandError("network error") from e
 
     if platform.system() == 'Windows':
         s3cmd = [
