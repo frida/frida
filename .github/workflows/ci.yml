@@ -10,6 +10,7 @@ on:
 
 jobs:
   linux-mips:
+    if: ${{ false }}
     runs-on: ubuntu-18.04
     strategy:
       matrix:
@@ -65,6 +66,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
   freebsd-arm64:
+    if: ${{ false }}
     runs-on: [self-hosted, freebsd, arm64]
     steps:
       - name: Initialize credentials
@@ -114,6 +116,7 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
 
   qnx:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     container: fridadotre/qnx:latest
     steps:
