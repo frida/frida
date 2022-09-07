@@ -9,6 +9,48 @@ on:
       - main
 
 jobs:
+  windows-toolchain:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: true
+      - name: Set up environment
+        uses: ./.github/actions/setup-windows-env
+        with:
+           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+           cloudflare-email: ${{ secrets.CF_EMAIL }}
+           cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Roll toolchain
+        run: python releng\deps.py roll toolchain windows-x86
+
+  windows-sdk:
+    runs-on: windows-latest
+    needs: windows-toolchain
+    strategy:
+      matrix:
+        arch: [x86_64, x86]
+        config: [release, debug]
+      fail-fast: false
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: true
+      - name: Set up environment
+        uses: ./.github/actions/setup-windows-env
+        with:
+           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+           cloudflare-email: ${{ secrets.CF_EMAIL }}
+           cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Roll SDK
+        run: python releng\deps.py roll sdk windows-${{ matrix.arch }}-${{ matrix.config }} --activate
+
   linux-mips:
     runs-on: ubuntu-18.04
     strategy:
