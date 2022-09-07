@@ -245,7 +245,7 @@ def check_environment():
         print("ERROR: {}".format(e), file=sys.stderr)
         sys.exit(1)
 
-    for tool in ["7z", "git", "nasm", "py"]:
+    for tool in ["7z", "git", "nasm"]:
         if shutil.which(tool) is None:
             print("ERROR: {} not found on PATH".format(tool), file=sys.stderr)
             sys.exit(1)
@@ -429,7 +429,7 @@ def build_using_meson(name: str, arch: str, config: str, runtime: str, spec: Pac
         shutil.rmtree(build_dir)
 
     perform(
-        "py", "-3", MESON,
+        sys.executable, MESON,
         "setup",
         build_dir,
         "--prefix", prefix,
@@ -448,7 +448,7 @@ def build_using_meson(name: str, arch: str, config: str, runtime: str, spec: Pac
 
     manifest_lines = []
     install_locations = json.loads(subprocess.check_output([
-            "py", "-3", MESON,
+            sys.executable, MESON,
             "introspect",
             "--installed"
         ],
@@ -588,9 +588,9 @@ EXIT /B %_res%""".format(rc_path=rc_path, flags=clflags), encoding='utf-8')
     (env_dir / "meson.bat").write_text("""@ECHO OFF
 SETLOCAL EnableExtensions
 SET _res=0
-py -3 "{meson_path}" %* || SET _res=1
+"{python_interpreter}" "{meson_path}" %* || SET _res=1
 ENDLOCAL & SET _res=%_res%
-EXIT /B %_res%""".format(meson_path=MESON), encoding='utf-8')
+EXIT /B %_res%""".format(python_interpreter=sys.executable, meson_path=MESON), encoding='utf-8')
 
     pkgconfig_path = BOOTSTRAP_TOOLCHAIN_DIR / "bin" / "pkg-config.exe"
     pkgconfig_lib_dir = prefix / "lib" / "pkgconfig"
@@ -612,9 +612,9 @@ EXIT /B %_res%""".format(
     (env_dir / "flex.bat").write_text("""@ECHO OFF
 SETLOCAL EnableExtensions
 SET _res=0
-py -3 "{wrapper_path}" %* || SET _res=1
+"{python_interpreter}" "{wrapper_path}" %* || SET _res=1
 ENDLOCAL & SET _res=%_res%
-EXIT /B %_res%""".format(wrapper_path=flex_wrapper_path), encoding='utf-8')
+EXIT /B %_res%""".format(python_interpreter=sys.executable, wrapper_path=flex_wrapper_path), encoding='utf-8')
     flex_wrapper_path.write_text("""import subprocess
 import sys
 
@@ -627,9 +627,9 @@ sys.exit(subprocess.call([r"{flex_path}"] + args))
     (env_dir / "bison.bat").write_text("""@ECHO OFF
 SETLOCAL EnableExtensions
 SET _res=0
-py -3 "{wrapper_path}" %* || SET _res=1
+"{python_interpreter}" "{wrapper_path}" %* || SET _res=1
 ENDLOCAL & SET _res=%_res%
-EXIT /B %_res%""".format(wrapper_path=bison_wrapper_path), encoding='utf-8')
+EXIT /B %_res%""".format(python_interpreter=sys.executable, wrapper_path=bison_wrapper_path), encoding='utf-8')
     bison_wrapper_path.write_text("""\
 import os
 import subprocess
