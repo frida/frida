@@ -144,6 +144,9 @@ def roll(bundle: Bundle, host: str, activate: bool):
     params = read_dependency_parameters()
     version = params.deps_version
 
+    if activate and bundle == Bundle.SDK:
+        configure_bootstrap_version(version)
+
     (public_url, filename, suffix) = compute_bundle_parameters(bundle, host, version)
 
     # First do a quick check to avoid hitting S3 in most cases.
@@ -194,11 +197,8 @@ def roll(bundle: Bundle, host: str, activate: bool):
     # Use the shell for Windows compatibility, where npm generates a .bat script.
     subprocess.run("cfcli purge " + public_url, shell=True, check=True)
 
-    if activate:
-        deps_content = DEPS_MK_PATH.read_text(encoding='utf-8')
-        deps_content = re.sub("^frida_bootstrap_version = (.+)$", "frida_bootstrap_version = {}".format(version),
-                              deps_content, flags=re.MULTILINE)
-        DEPS_MK_PATH.write_bytes(deps_content.encode('utf-8'))
+    if activate and bundle == Bundle.TOOLCHAIN:
+        configure_bootstrap_version(version)
 
 
 def wait(bundle: Bundle, host: str):
@@ -304,6 +304,13 @@ def read_dependency_parameters(host_defines: Dict[str, str] = {}) -> DependencyP
             raw_params["frida_deps_version"],
             raw_params["frida_bootstrap_version"],
             packages)
+
+
+def configure_bootstrap_version(version):
+    deps_content = DEPS_MK_PATH.read_text(encoding='utf-8')
+    deps_content = re.sub("^frida_bootstrap_version = (.+)$", "frida_bootstrap_version = {}".format(version),
+                          deps_content, flags=re.MULTILINE)
+    DEPS_MK_PATH.write_bytes(deps_content.encode('utf-8'))
 
 
 def parse_string_value(v: str, raw_params: Dict[str, str]) -> str:
