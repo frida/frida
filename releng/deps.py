@@ -156,19 +156,14 @@ def roll(bundle: Bundle, host: str, activate: bool):
         if e.code != 404:
             raise CommandError("network error") from e
 
-    if platform.system() == 'Windows':
-        s3cmd = [
-            "py", "-3",
-            Path(sys.executable).parent / "Scripts" / "s3cmd"
-        ]
-    else:
-        s3cmd = ["s3cmd"]
-
     s3_url = "s3://build.frida.re/deps/{version}/{filename}".format(version=version, filename=filename)
 
     # We will most likely need to build, but let's check S3 to be certain.
-    if "404" not in subprocess.run(s3cmd + ["info", s3_url], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8').stdout:
+    r = subprocess.run(["aws", "s3", "ls", s3_url], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
+    if r.returncode == 0:
         return
+    if r.returncode != 1:
+        raise CommandError(f"unable to access S3: {r.stdout.strip()}")
 
     artifact = BUILD_DIR / filename
     if artifact.exists():
@@ -194,7 +189,7 @@ def roll(bundle: Bundle, host: str, activate: bool):
                        ],
                        check=True)
 
-    subprocess.run(s3cmd + ["put", artifact, s3_url], check=True)
+    subprocess.run(["aws", "s3", "cp", artifact, s3_url], check=True)
 
     # Use the shell for Windows compatibility, where npm generates a .bat script.
     subprocess.run("cfcli purge " + public_url, shell=True, check=True)
