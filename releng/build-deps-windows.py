@@ -270,12 +270,14 @@ def grab_and_prepare_git_package(name: str, spec: PackageSpec) -> SourceState:
         else:
             print()
             print("{name}: synchronizing".format(name=name))
+            sys.stdout.flush()
             perform("git", "fetch", "-q", cwd=source_dir)
             perform("git", "checkout", "-q", spec.version, cwd=source_dir)
             source_state = SourceState.MODIFIED
     else:
         print()
         print("{name}: cloning into deps\\{name}".format(name=name))
+        sys.stdout.flush()
         DEPS_DIR.mkdir(parents=True, exist_ok=True)
         perform("git", "clone", "-q", "--recurse-submodules", spec.url, name, cwd=DEPS_DIR)
         perform("git", "checkout", "-q", spec.version, cwd=source_dir)
@@ -303,6 +305,7 @@ def grab_and_prepare_tarball_package(name: str, spec: PackageSpec) -> SourceStat
     sha256 = hashlib.sha256()
     try:
         print("> Downloading", spec.url)
+        sys.stdout.flush()
 
         with urllib.request.urlopen(spec.url) as response, tempfile.NamedTemporaryFile(delete=False) as archive:
             archive_path = Path(archive.name)
@@ -318,6 +321,7 @@ def grab_and_prepare_tarball_package(name: str, spec: PackageSpec) -> SourceStat
             raise ValueError("{} tarball is corrupted; its hash is {}".format(name, digest))
 
         print("> Extracting", spec.url)
+        sys.stdout.flush()
 
         staging_dir = source_dir / "__staging__"
         staging_dir.mkdir(parents=True)
@@ -349,6 +353,7 @@ def grab_and_prepare_tarball_package(name: str, spec: PackageSpec) -> SourceStat
 
     for patch_name in spec.patches:
         print("> Applying", patch_name)
+        sys.stdout.flush()
         patch_path = Path(RELENG_DIR / "patches" / patch_name)
         patch_data = patch_path.read_text(encoding='utf-8')
         p = subprocess.Popen(["patch", "-p1"],
@@ -368,6 +373,7 @@ def grab_and_prepare_tarball_package(name: str, spec: PackageSpec) -> SourceStat
 
 def wipe_build_state():
     print("*** Wiping build state")
+    sys.stdout.flush()
     locations = [
         ("existing packages", get_prefix_root()),
         ("build directories", get_tmp_root()),
@@ -375,6 +381,7 @@ def wipe_build_state():
     for description, path in locations:
         if path.exists():
             print("Wiping", description)
+            sys.stdout.flush()
             shutil.rmtree(path)
 
 
@@ -402,6 +409,7 @@ def build_package(name: str, role: PackageRole, spec: PackageSpec, extra_options
 
                 print()
                 print("*** Building {} with arch={} runtime={} config={} spec={}".format(spec.name, arch, config, runtime, spec))
+                sys.stdout.flush()
 
                 assert spec.recipe == 'meson'
                 build_using_meson(name, arch, config, runtime, spec, extra_options)
@@ -683,6 +691,7 @@ def package(bundle_ids: List[Bundle], params: DependencyParameters, host: str | 
 
         print()
         print("Determining what to include...")
+        sys.stdout.flush()
 
         prefixes_dir = get_prefix_root()
 
@@ -721,6 +730,7 @@ def package(bundle_ids: List[Bundle], params: DependencyParameters, host: str | 
             sdk_built_files.sort()
 
         print("Copying files...")
+        sys.stdout.flush()
         if Bundle.TOOLCHAIN in bundle_ids:
             toolchain_tempdir = tempdir / "toolchain-windows"
             copy_files(BOOTSTRAP_TOOLCHAIN_DIR, toolchain_mixin_files, toolchain_tempdir)
@@ -735,6 +745,7 @@ def package(bundle_ids: List[Bundle], params: DependencyParameters, host: str | 
             (sdk_tempdir / "VERSION.txt").write_text(params.deps_version + "\n", encoding='utf-8')
 
         print("Compressing...")
+        sys.stdout.flush()
         compression_switches = ["a", "-mx{}".format(COMPRESSION_LEVEL), "-sfx7zCon.sfx"]
 
         if Bundle.TOOLCHAIN in bundle_ids:
@@ -746,6 +757,7 @@ def package(bundle_ids: List[Bundle], params: DependencyParameters, host: str | 
             perform("7z", *compression_switches, "-r", sdk_path, "sdk-windows", cwd=tempdir)
 
         print("All done.")
+        sys.stdout.flush()
 
 def fix_manifests(root: Path):
     for manifest_path in root.glob("**/manifest/*.pkg"):
@@ -797,7 +809,6 @@ def file_is_vala_toolchain_related(candidate: PurePath) -> bool:
 def is_vala_toolchain_vapi_directory(directory: PurePath) -> bool:
     parts = directory.parts[-3:]
     if len(parts) != 3:
-        print("D parts:", parts)
         return False
     return parts[0] == "share" and \
         parts[1].startswith("vala-") and \
@@ -841,6 +852,7 @@ def ensure_bootstrap_toolchain(bootstrap_version: str) -> SourceState:
         source_state = SourceState.PRISTINE
 
     print("Downloading bootstrap toolchain...")
+    sys.stdout.flush()
     with urllib.request.urlopen("https://build.frida.re/deps/{version}/toolchain-windows-x86.exe" \
             .format(version=bootstrap_version)) as response, \
             tempfile.NamedTemporaryFile(suffix=".exe", delete=False) as archive:
@@ -848,6 +860,7 @@ def ensure_bootstrap_toolchain(bootstrap_version: str) -> SourceState:
         toolchain_archive_path = archive.name
 
     print("Extracting bootstrap toolchain...")
+    sys.stdout.flush()
     try:
         tempdir = Path(tempfile.mkdtemp(prefix="frida-bootstrap-toolchain"))
         try:
@@ -858,7 +871,6 @@ def ensure_bootstrap_toolchain(bootstrap_version: str) -> SourceState:
                     "-y"
                 ])
             except subprocess.CalledProcessError as e:
-                print("Oops:", e.output.decode('utf-8'))
                 raise e
             shutil.move(tempdir / "toolchain-windows", BOOTSTRAP_TOOLCHAIN_DIR)
         finally:
@@ -898,6 +910,7 @@ def vscrt_from_configuration_and_runtime(config: str, runtime: str) -> str:
 
 def perform(*args, **kwargs):
     print(">", " ".join([str(arg) for arg in args]))
+    sys.stdout.flush()
     return subprocess.run(args, check=True, **kwargs)
 
 def query_git_head(repo_path: str) -> str:
