@@ -176,7 +176,7 @@ def roll(bundle: Bundle, host: str, activate: bool):
 
     if host.startswith("windows-"):
         subprocess.run([
-                           "py", "-3", RELENG_DIR / "build-deps-windows.py",
+                           sys.executable, RELENG_DIR / "build-deps-windows.py",
                            "--bundle=" + bundle.name.lower(),
                            "--host=" + host,
                        ],
