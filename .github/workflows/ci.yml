@@ -10,6 +10,7 @@ on:
 
 jobs:
   windows-toolchain:
+    if: ${{ false }}
     runs-on: windows-latest
     steps:
       - name: Checkout monorepo
@@ -28,6 +29,7 @@ jobs:
         run: python releng\deps.py roll toolchain windows-x86
 
   windows-sdk:
+    if: ${{ false }}
     runs-on: windows-latest
     needs: windows-toolchain
     strategy:
@@ -55,6 +57,10 @@ jobs:
     runs-on: ubuntu-latest
     container: fridadotre/manylinux-x86_64:latest
     steps:
+      - name: Test things
+        run: |
+          mount -t tmpfs none /__e
+          ln -s /opt/node-64 /__e/node16
       - name: Checkout monorepo
         uses: actions/checkout@v3
         with:
