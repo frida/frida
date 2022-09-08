@@ -486,13 +486,13 @@ def generate_meson_env(arch: str, config: str, runtime: str) -> MesonEnv:
     vc_dir = Path(winenv.get_msvs_installation_dir()) / "VC"
     vc_install_dir = str(vc_dir) + "\\"
 
-    msvc_platform = msvc_platform_from_arch(arch)
+    msvc_platform = winenv.msvc_platform_from_arch(arch)
     msvc_dir = Path(winenv.get_msvc_tool_dir())
-    msvc_bin_dir = msvc_dir / "bin" / ("Host" + msvc_platform_from_arch(build_arch)) / msvc_platform
+    msvc_bin_dir = msvc_dir / "bin" / ("Host" + winenv.msvc_platform_from_arch(build_arch)) / msvc_platform
 
     msvc_dll_dirs = []
     if arch != build_arch:
-        build_msvc_platform = msvc_platform_from_arch(build_arch)
+        build_msvc_platform = winenv.msvc_platform_from_arch(build_arch)
         msvc_dll_dirs.append(msvc_dir / "bin" / ("Host" + build_msvc_platform) / build_msvc_platform)
 
     (win_sdk_dir, win_sdk_version) = winenv.get_windows_sdk()
@@ -824,7 +824,7 @@ def transform_sdk_dest(srcfile: PurePath) -> PurePath:
 
     arch, config, runtime = rootdir.split("-")
     rootdir = "-".join([
-        msvs_platform_from_arch(arch),
+        winenv.msvs_platform_from_arch(arch),
         config.title()
     ])
 
@@ -894,12 +894,6 @@ def get_tmp_root() -> Path:
 
 def get_tmp_path(arch: str, config: str, runtime: str) -> Path:
     return get_tmp_root() / "{}-{}-{}".format(arch, config.lower(), runtime)
-
-def msvs_platform_from_arch(arch: str) -> str:
-    return 'x64' if arch == 'x86_64' else 'Win32'
-
-def msvc_platform_from_arch(arch: str) -> str:
-    return 'x64' if arch == 'x86_64' else 'x86'
 
 def vscrt_from_configuration_and_runtime(config: str, runtime: str) -> str:
     result = "md" if runtime == 'dynamic' else "mt"

@@ -56,6 +56,12 @@ def get_windows_sdk():
             raise MissingDependencyError("Windows 10 SDK is not installed")
     return cached_winsdk
 
+def msvs_platform_from_arch(arch: str) -> str:
+    return 'x64' if arch == 'x86_64' else 'Win32'
+
+def msvc_platform_from_arch(arch: str) -> str:
+    return 'x64' if arch == 'x86_64' else 'x86'
+
 
 class MissingDependencyError(Exception):
     pass
