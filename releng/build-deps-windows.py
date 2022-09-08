@@ -839,7 +839,7 @@ def ensure_bootstrap_toolchain(bootstrap_version: str) -> SourceState:
     else:
         source_state = SourceState.PRISTINE
 
-    print("Downloading bootstrap toolchain...", flush=True)
+    print(f"Downloading bootstrap toolchain {bootstrap_version}...", flush=True)
     with urllib.request.urlopen("https://build.frida.re/deps/{version}/toolchain-windows-x86.exe" \
             .format(version=bootstrap_version)) as response, \
             tempfile.NamedTemporaryFile(suffix=".exe", delete=False) as archive:
