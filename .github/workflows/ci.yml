@@ -10,6 +10,7 @@ on:
 
 jobs:
   windows-toolchain:
+    if: ${{ false }}
     runs-on: windows-latest
     steps:
       - name: Checkout monorepo
@@ -28,6 +29,7 @@ jobs:
         run: python releng\deps.py roll toolchain windows-x86
 
   windows-sdk:
+    if: ${{ false }}
     runs-on: windows-latest
     needs: windows-toolchain
     strategy:
@@ -52,6 +54,7 @@ jobs:
         run: python releng\deps.py roll sdk windows-${{ matrix.arch }}-${{ matrix.config }} --activate
 
   linux-toolchain-x86_64:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     container: fridadotre/manylinux-x86_64:latest
     steps:
@@ -80,6 +83,7 @@ jobs:
         run: releng/deps.py roll toolchain linux-x86_64
 
   linux-mips:
+    if: ${{ false }}
     runs-on: ubuntu-18.04
     strategy:
       matrix:
@@ -135,6 +139,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
   freebsd-arm64:
+    if: ${{ false }}
     runs-on: [self-hosted, freebsd, arm64]
     steps:
       - name: Initialize credentials
@@ -184,6 +189,7 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
 
   qnx:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     container: fridadotre/qnx:latest
     steps:
