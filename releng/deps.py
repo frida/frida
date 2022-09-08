@@ -15,6 +15,8 @@ import tempfile
 import time
 from typing import Dict, List, Tuple
 import urllib.request
+if platform.system() == 'Windows':
+    import winenv
 
 
 BUNDLE_URL = "https://build.frida.re/deps/{version}/{filename}"
@@ -70,18 +72,18 @@ def main():
     command.add_argument("bundle", help="bundle to synchronize", choices=bundle_choices)
     command.add_argument("host", help="OS/arch")
     command.add_argument("location", help="filesystem location")
-    command.set_defaults(func=lambda args: sync(Bundle[args.bundle.upper()], args.host, Path(args.location)))
+    command.set_defaults(func=lambda args: sync(Bundle[args.bundle.upper()], args.host.lower(), Path(args.location).resolve()))
 
     command = subparsers.add_parser("roll", help="build and upload prebuilt dependencies if needed")
     command.add_argument("bundle", help="bundle to roll", choices=bundle_choices)
     command.add_argument("host", help="OS/arch")
     command.add_argument("--activate", default=False, action='store_true')
-    command.set_defaults(func=lambda args: roll(Bundle[args.bundle.upper()], args.host, args.activate))
+    command.set_defaults(func=lambda args: roll(Bundle[args.bundle.upper()], args.host.lower(), args.activate))
 
     command = subparsers.add_parser("wait", help="wait for prebuilt dependencies if needed")
     command.add_argument("bundle", help="bundle to wait for", choices=bundle_choices)
     command.add_argument("host", help="OS/arch")
-    command.set_defaults(func=lambda args: wait(Bundle[args.bundle.upper()], args.host))
+    command.set_defaults(func=lambda args: wait(Bundle[args.bundle.upper()], args.host.lower()))
 
     command = subparsers.add_parser("bump", help="bump dependency versions")
     command.set_defaults(func=lambda args: bump())
@@ -104,6 +106,18 @@ def sync(bundle: Bundle, host: str, location: Path):
 
     bundle_nick = bundle.name.lower() if bundle != Bundle.SDK else bundle.name
 
+    # XXX: This is Windows-only for now, as we use setup-env.sh to do the heavy lifting on other platforms.
+    tokens = host.split("-")
+    if len(tokens) == 2:
+        tokens += ["release"]
+    host_os, host_arch, host_config = tokens
+    assert host_os == "windows"
+
+    if bundle == Bundle.SDK:
+        msvs_platform = winenv.msvs_platform_from_arch(host_arch)
+        subdir_name = f"{msvs_platform}-{host_config.title()}"
+        location = location / subdir_name
+
     if location.exists():
         try:
             cached_version = (location / "VERSION.txt").read_text(encoding='utf-8').strip()
@@ -121,20 +135,33 @@ def sync(bundle: Bundle, host: str, location: Path):
         archive_path = local_bundle
         archive_is_temporary = False
     else:
-        print("Downloading {}...".format(bundle_nick), flush=True)
+        if bundle == Bundle.SDK:
+            print(f"Downloading SDK {version} for {subdir_name}...", flush=True)
+        else:
+            print(f"Downloading {bundle_nick} {version}...", flush=True)
         with urllib.request.urlopen(url) as response, tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as archive:
             shutil.copyfileobj(response, archive)
             archive_path = Path(archive.name)
             archive_is_temporary = True
-        print("Extracting {}...".format(bundle_nick), flush=True)
+        print(f"Extracting {bundle_nick}...", flush=True)
 
     try:
-        # XXX: This is Windows-only for now, as we use setup-env.sh to do the heavy lifting on other platforms.
+        if bundle == Bundle.SDK:
+            target_dir = location / "tmp"
+        else:
+            target_dir = location.parent
+
         subprocess.run([
             archive_path,
-            "-o" + str(location.parent),
+            "-o" + str(target_dir),
             "-y"
-        ], check=True)
+        ], capture_output=True, check=True)
+
+        if bundle == Bundle.SDK:
+            shutil.move(target_dir / "sdk-windows" / "VERSION.txt", location / "VERSION.txt")
+            for file in (target_dir / "sdk-windows" / subdir_name).iterdir():
+                shutil.move(file, location)
+            shutil.rmtree(target_dir)
     finally:
         if archive_is_temporary:
             archive_path.unlink()

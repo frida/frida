@@ -120,19 +120,23 @@ REM. &gt; "$(IntDir)frida-version.stamp"
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)deps.stamp;%(Outputs)</Outputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)deps.mk;$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(ProjectDir)deps.py" sync toolchain windows-x86 "$(ProjectDir)..\build\toolchain-windows" || exit 1
-"$(ProjectDir)deps.py" sync sdk windows-any "$(ProjectDir)..\build\sdk-windows" || exit 1
+"$(ProjectDir)deps.py" sync sdk windows-x86_64-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
+"$(ProjectDir)deps.py" sync sdk windows-x86-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
 echo &gt; "$(IntDir)deps.stamp"
 </Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(ProjectDir)deps.py" sync toolchain windows-x86 "$(ProjectDir)..\build\toolchain-windows" || exit 1
-"$(ProjectDir)deps.py" sync sdk windows-any "$(ProjectDir)..\build\sdk-windows" || exit 1
+"$(ProjectDir)deps.py" sync sdk windows-x86_64-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
+"$(ProjectDir)deps.py" sync sdk windows-x86-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
 echo &gt; "$(IntDir)deps.stamp"
 </Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(ProjectDir)deps.py" sync toolchain windows-x86 "$(ProjectDir)..\build\toolchain-windows" || exit 1
-"$(ProjectDir)deps.py" sync sdk windows-any "$(ProjectDir)..\build\sdk-windows" || exit 1
+"$(ProjectDir)deps.py" sync sdk windows-x86_64-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
+"$(ProjectDir)deps.py" sync sdk windows-x86-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
 echo &gt; "$(IntDir)deps.stamp"
 </Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(ProjectDir)deps.py" sync toolchain windows-x86 "$(ProjectDir)..\build\toolchain-windows" || exit 1
-"$(ProjectDir)deps.py" sync sdk windows-any "$(ProjectDir)..\build\sdk-windows" || exit 1
+"$(ProjectDir)deps.py" sync sdk windows-x86_64-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
+"$(ProjectDir)deps.py" sync sdk windows-x86-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
 echo &gt; "$(IntDir)deps.stamp"
 </Command>
     </CustomBuild>
