@@ -269,15 +269,13 @@ def grab_and_prepare_git_package(name: str, spec: PackageSpec) -> SourceState:
             source_state = SourceState.PRISTINE
         else:
             print()
-            print("{name}: synchronizing".format(name=name))
-            sys.stdout.flush()
+            print("{name}: synchronizing".format(name=name), flush=True)
             perform("git", "fetch", "-q", cwd=source_dir)
             perform("git", "checkout", "-q", spec.version, cwd=source_dir)
             source_state = SourceState.MODIFIED
     else:
         print()
-        print("{name}: cloning into deps\\{name}".format(name=name))
-        sys.stdout.flush()
+        print("{name}: cloning into deps\\{name}".format(name=name), flush=True)
         DEPS_DIR.mkdir(parents=True, exist_ok=True)
         perform("git", "clone", "-q", "--recurse-submodules", spec.url, name, cwd=DEPS_DIR)
         perform("git", "checkout", "-q", spec.version, cwd=source_dir)
@@ -304,8 +302,7 @@ def grab_and_prepare_tarball_package(name: str, spec: PackageSpec) -> SourceStat
     archive_path = None
     sha256 = hashlib.sha256()
     try:
-        print("> Downloading", spec.url)
-        sys.stdout.flush()
+        print("> Downloading", spec.url, flush=True)
 
         with urllib.request.urlopen(spec.url) as response, tempfile.NamedTemporaryFile(delete=False) as archive:
             archive_path = Path(archive.name)
@@ -320,8 +317,7 @@ def grab_and_prepare_tarball_package(name: str, spec: PackageSpec) -> SourceStat
         if digest != spec.hash:
             raise ValueError("{} tarball is corrupted; its hash is {}".format(name, digest))
 
-        print("> Extracting", spec.url)
-        sys.stdout.flush()
+        print("> Extracting", spec.url, flush=True)
 
         staging_dir = source_dir / "__staging__"
         staging_dir.mkdir(parents=True)
@@ -352,8 +348,7 @@ def grab_and_prepare_tarball_package(name: str, spec: PackageSpec) -> SourceStat
                 pass
 
     for patch_name in spec.patches:
-        print("> Applying", patch_name)
-        sys.stdout.flush()
+        print("> Applying", patch_name, flush=True)
         patch_path = Path(RELENG_DIR / "patches" / patch_name)
         patch_data = patch_path.read_text(encoding='utf-8')
         p = subprocess.Popen(["patch", "-p1"],
@@ -372,16 +367,14 @@ def grab_and_prepare_tarball_package(name: str, spec: PackageSpec) -> SourceStat
 
 
 def wipe_build_state():
-    print("*** Wiping build state")
-    sys.stdout.flush()
+    print("*** Wiping build state", flush=True)
     locations = [
         ("existing packages", get_prefix_root()),
         ("build directories", get_tmp_root()),
     ]
     for description, path in locations:
         if path.exists():
-            print("Wiping", description)
-            sys.stdout.flush()
+            print("Wiping", description, flush=True)
             shutil.rmtree(path)
 
 
@@ -408,8 +401,7 @@ def build_package(name: str, role: PackageRole, spec: PackageSpec, extra_options
                     continue
 
                 print()
-                print("*** Building {} with arch={} runtime={} config={} spec={}".format(spec.name, arch, config, runtime, spec))
-                sys.stdout.flush()
+                print("*** Building {} with arch={} runtime={} config={} spec={}".format(spec.name, arch, config, runtime, spec), flush=True)
 
                 assert spec.recipe == 'meson'
                 build_using_meson(name, arch, config, runtime, spec, extra_options)
@@ -690,8 +682,7 @@ def package(bundle_ids: List[Bundle], params: DependencyParameters, host: str | 
             print("\t* " + sdk_filename)
 
         print()
-        print("Determining what to include...")
-        sys.stdout.flush()
+        print("Determining what to include...", flush=True)
 
         prefixes_dir = get_prefix_root()
 
@@ -729,8 +720,7 @@ def package(bundle_ids: List[Bundle], params: DependencyParameters, host: str | 
                         (prefix.parent / (prefix.name[:-7] + "-dynamic") / "lib").glob("**/*.a")]
             sdk_built_files.sort()
 
-        print("Copying files...")
-        sys.stdout.flush()
+        print("Copying files...", flush=True)
         if Bundle.TOOLCHAIN in bundle_ids:
             toolchain_tempdir = tempdir / "toolchain-windows"
             copy_files(BOOTSTRAP_TOOLCHAIN_DIR, toolchain_mixin_files, toolchain_tempdir)
@@ -744,8 +734,7 @@ def package(bundle_ids: List[Bundle], params: DependencyParameters, host: str | 
             fix_manifests(sdk_tempdir)
             (sdk_tempdir / "VERSION.txt").write_text(params.deps_version + "\n", encoding='utf-8')
 
-        print("Compressing...")
-        sys.stdout.flush()
+        print("Compressing...", flush=True)
         compression_switches = ["a", "-mx{}".format(COMPRESSION_LEVEL), "-sfx7zCon.sfx"]
 
         if Bundle.TOOLCHAIN in bundle_ids:
@@ -756,8 +745,7 @@ def package(bundle_ids: List[Bundle], params: DependencyParameters, host: str | 
             sdk_path.unlink(missing_ok=True)
             perform("7z", *compression_switches, "-r", sdk_path, "sdk-windows", cwd=tempdir)
 
-        print("All done.")
-        sys.stdout.flush()
+        print("All done.", flush=True)
 
 def fix_manifests(root: Path):
     for manifest_path in root.glob("**/manifest/*.pkg"):
@@ -851,16 +839,14 @@ def ensure_bootstrap_toolchain(bootstrap_version: str) -> SourceState:
     else:
         source_state = SourceState.PRISTINE
 
-    print("Downloading bootstrap toolchain...")
-    sys.stdout.flush()
+    print("Downloading bootstrap toolchain...", flush=True)
     with urllib.request.urlopen("https://build.frida.re/deps/{version}/toolchain-windows-x86.exe" \
             .format(version=bootstrap_version)) as response, \
             tempfile.NamedTemporaryFile(suffix=".exe", delete=False) as archive:
         shutil.copyfileobj(response, archive)
         toolchain_archive_path = archive.name
 
-    print("Extracting bootstrap toolchain...")
-    sys.stdout.flush()
+    print("Extracting bootstrap toolchain...", flush=True)
     try:
         tempdir = Path(tempfile.mkdtemp(prefix="frida-bootstrap-toolchain"))
         try:
@@ -903,8 +889,7 @@ def vscrt_from_configuration_and_runtime(config: str, runtime: str) -> str:
 
 
 def perform(*args, **kwargs):
-    print(">", " ".join([str(arg) for arg in args]))
-    sys.stdout.flush()
+    print(">", " ".join([str(arg) for arg in args]), flush=True)
     return subprocess.run(args, check=True, **kwargs)
 
 def query_git_head(repo_path: str) -> str:
