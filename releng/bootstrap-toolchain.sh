@@ -40,7 +40,6 @@ builddir="$FRIDA_BUILD/ft-tmp-$build_os_arch/bootstrap"
 rm -rf "$builddir"
 mkdir -p "$builddir"
 cd "$builddir"
-unset CPP CC CXX AS LD AR NM RANLIB STRIP READELF OBJCOPY OBJDUMP
 meson setup \
   --prefix / \
   --default-library static \
