@@ -47,6 +47,20 @@ case $host_arch in
 esac
 host_os_arch=${host_os}-${host_arch}
 
+read_toolchain_variable ()
+{
+  local var_name=$1
+  local fallback=$2
+
+  if [ $host_os_arch == $build_os_arch ]; then
+    local contextual_var_name=${var_name}_FOR_BUILD
+  else
+    local contextual_var_name=${var_name}
+  fi
+
+  echo ${!contextual_var_name:-$fallback}
+}
+
 case $host_os in
   macos|ios)
     meson_host_system=darwin
@@ -308,15 +322,15 @@ else
   have_static_libcxx=no
 fi
 
-LIBTOOL=""
-STRIP_FLAGS=""
+selected_libtool=""
+strip_flags=""
 
-OTOOL=""
+selected_otool=""
 
-CFLAGS=""
-CXXFLAGS=""
-CPPFLAGS=""
-LDFLAGS=""
+selected_cflags=""
+selected_cxxflags=""
+selected_cppflags=""
+selected_ldflags=""
 
 meson_common_flags="[]"
 meson_objc=""
@@ -411,7 +425,7 @@ case $host_os in
         ;;
     esac
 
-    CPP="${CPP:-${host_toolprefix}cpp}"
+    selected_cpp=$(read_toolchain_variable CPP ${host_toolprefix}cpp)
 
     libgcc_flags="-static-libgcc"
     libstdcxx_flags="-static-libstdc++"
@@ -429,42 +443,35 @@ case $host_os in
     cc_config_flags="$libgcc_flags"
     cxx_config_flags="$libgcc_flags $libstdcxx_flags"
 
-    LD="${LD:-${host_toolprefix}ld}"
-    if "$LD" --version | grep -q "GNU gold"; then
+    selected_ld=$(read_toolchain_variable LD ${host_toolprefix}ld)
+    if "$selected_ld" --version | grep -q "GNU gold"; then
       cc_config_flags="$cc_config_flags -fuse-ld=gold"
       cxx_config_flags="$cxx_config_flags -fuse-ld=gold"
       meson_linker_flavor=gold
       base_linker_flags="-Wl,--icf=all $base_linker_flags"
     fi
 
-    if [ -n "$CC" ]; then
-      eval cc=($CC)
-      CC="${cc[0]} $cc_config_flags"
-      meson_c="${cc[0]}"
-    else
-      CC="${host_toolprefix}gcc $cc_config_flags"
-      meson_c="${host_toolprefix}gcc"
-    fi
-    if [ -n "$CXX" ]; then
-      eval cxx=($CXX)
-      CXX="${cxx[0]} $cxx_config_flags"
-      meson_cpp="${cxx[0]}"
-    else
-      CXX="${host_toolprefix}g++ $cxx_config_flags"
-      meson_cpp="${host_toolprefix}g++"
-    fi
+    selected_cc=$(read_toolchain_variable CC ${host_toolprefix}gcc)
+    selected_cc="$selected_cc $cc_config_flags"
+    eval tokens=($selected_cc)
+    meson_c="${tokens[0]}"
 
-    AR="${AR:-${host_toolprefix}ar}"
-    NM="${NM:-${host_toolprefix}nm}"
-    RANLIB="${RANLIB:-${host_toolprefix}ranlib}"
-    STRIP="${STRIP:-${host_toolprefix}strip}"
-    STRIP_FLAGS="--strip-all"
-    READELF="${READELF:-${host_toolprefix}readelf}"
-    OBJCOPY="${OBJCOPY:-${host_toolprefix}objcopy}"
-    OBJDUMP="${OBJDUMP:-${host_toolprefix}objdump}"
+    selected_cxx=$(read_toolchain_variable CXX ${host_toolprefix}g++)
+    selected_cxx="$selected_cxx $cxx_config_flags"
+    eval tokens=($selected_cxx)
+    meson_cpp="${tokens[0]}"
 
-    CFLAGS="$base_compiler_flags"
-    LDFLAGS="$base_linker_flags"
+    selected_ar=$(read_toolchain_variable AR ${host_toolprefix}ar)
+    selected_nm=$(read_toolchain_variable NM ${host_toolprefix}nm)
+    selected_ranlib=$(read_toolchain_variable RANLIB ${host_toolprefix}ranlib)
+    selected_strip=$(read_toolchain_variable STRIP ${host_toolprefix}strip)
+    strip_flags="--strip-all"
+    selected_readelf=$(read_toolchain_variable READELF ${host_toolprefix}readelf)
+    selected_objcopy=$(read_toolchain_variable OBJCOPY ${host_toolprefix}objcopy)
+    selected_objdump=$(read_toolchain_variable OBJDUMP ${host_toolprefix}objdump)
+
+    selected_cflags="$base_compiler_flags"
+    selected_ldflags="$base_linker_flags"
 
     base_compiler_args=$(flags_to_args "$base_compiler_flags")
     base_linker_args=$(flags_to_args "$base_linker_flags")
@@ -527,28 +534,28 @@ case $host_os in
       "$FRIDA_RELENG/ar-wrapper-xcode.sh.in" > "$ar_wrapper"
     chmod +x "$ar_wrapper"
 
-    CPP="$cc_wrapper -E"
-    CC="$cc_wrapper"
-    CXX="$cxx_wrapper"
-    OBJC="$cc_wrapper"
-    OBJCXX="$cxx_wrapper"
-    LD="$($xcrun --sdk $macos_sdk -f ld)"
+    selected_cpp="$cc_wrapper -E"
+    selected_cc="$cc_wrapper"
+    selected_cxx="$cxx_wrapper"
+    selected_objc="$cc_wrapper"
+    selected_objcxx="$cxx_wrapper"
+    selected_ld="$($xcrun --sdk $macos_sdk -f ld)"
 
-    AR="$ar_wrapper"
-    NM="$($xcrun --sdk $macos_sdk -f llvm-nm)"
-    RANLIB="$($xcrun --sdk $macos_sdk -f ranlib)"
-    LIBTOOL="$($xcrun --sdk $macos_sdk -f libtool)"
-    STRIP="$($xcrun --sdk $macos_sdk -f strip)"
-    STRIP_FLAGS="-Sx"
+    selected_ar="$ar_wrapper"
+    selected_nm="$($xcrun --sdk $macos_sdk -f llvm-nm)"
+    selected_ranlib="$($xcrun --sdk $macos_sdk -f ranlib)"
+    selected_libtool="$($xcrun --sdk $macos_sdk -f libtool)"
+    selected_strip="$($xcrun --sdk $macos_sdk -f strip)"
+    strip_flags="-Sx"
 
-    INSTALL_NAME_TOOL="$($xcrun --sdk $macos_sdk -f install_name_tool)"
-    OTOOL="$($xcrun --sdk $macos_sdk -f otool)"
-    CODESIGN="$($xcrun --sdk $macos_sdk -f codesign)"
-    LIPO="$($xcrun --sdk $macos_sdk -f lipo)"
+    install_name_tool="$($xcrun --sdk $macos_sdk -f install_name_tool)"
+    selected_otool="$($xcrun --sdk $macos_sdk -f otool)"
+    selected_codesign="$($xcrun --sdk $macos_sdk -f codesign)"
+    selected_lipo="$($xcrun --sdk $macos_sdk -f lipo)"
 
-    CPPFLAGS="-mmacosx-version-min=$macos_minver"
-    CXXFLAGS="-stdlib=libc++"
-    LDFLAGS="-isysroot $macos_sdk_path -arch $host_clang_arch -Wl,-dead_strip"
+    selected_cppflags="-mmacosx-version-min=$macos_minver"
+    selected_cxxflags="-stdlib=libc++"
+    selected_ldflags="-isysroot $macos_sdk_path -arch $host_clang_arch -Wl,-dead_strip"
 
     base_toolchain_args="'-mmacosx-version-min=$macos_minver'"
     base_compiler_args="$base_toolchain_args"
@@ -558,10 +565,10 @@ case $host_os in
       base_linker_args="$base_linker_args, '-Wl,-w'"
     fi
 
-    meson_c="$CC"
-    meson_cpp="$CXX"
-    meson_objc="$CC"
-    meson_objcpp="$CXX"
+    meson_c="$selected_cc"
+    meson_cpp="$selected_cxx"
+    meson_objc="$selected_cc"
+    meson_objcpp="$selected_cxx"
 
     meson_c_args="$base_compiler_args"
     meson_cpp_args="$base_compiler_args, '-stdlib=libc++'"
@@ -634,37 +641,37 @@ case $host_os in
       "$FRIDA_RELENG/ar-wrapper-xcode.sh.in" > "$ar_wrapper"
     chmod +x "$ar_wrapper"
 
-    CPP="$cc_wrapper -E"
-    CC="$cc_wrapper"
-    CXX="$cxx_wrapper"
-    OBJC="$cc_wrapper"
-    OBJCXX="$cxx_wrapper"
-    LD="$($xcrun --sdk $ios_sdk -f ld)"
+    selected_cpp="$cc_wrapper -E"
+    selected_cc="$cc_wrapper"
+    selected_cxx="$cxx_wrapper"
+    selected_objc="$cc_wrapper"
+    selected_objcxx="$cxx_wrapper"
+    selected_ld="$($xcrun --sdk $ios_sdk -f ld)"
 
-    AR="$ar_wrapper"
-    NM="$($xcrun --sdk $ios_sdk -f llvm-nm)"
-    RANLIB="$($xcrun --sdk $ios_sdk -f ranlib)"
-    LIBTOOL="$($xcrun --sdk $ios_sdk -f libtool)"
-    STRIP="$($xcrun --sdk $ios_sdk -f strip)"
-    STRIP_FLAGS="-Sx"
+    selected_ar="$ar_wrapper"
+    selected_nm="$($xcrun --sdk $ios_sdk -f llvm-nm)"
+    selected_ranlib="$($xcrun --sdk $ios_sdk -f ranlib)"
+    selected_libtool="$($xcrun --sdk $ios_sdk -f libtool)"
+    selected_strip="$($xcrun --sdk $ios_sdk -f strip)"
+    strip_flags="-Sx"
 
-    INSTALL_NAME_TOOL="$($xcrun --sdk $ios_sdk -f install_name_tool)"
-    OTOOL="$($xcrun --sdk $ios_sdk -f otool)"
-    CODESIGN="$($xcrun --sdk $ios_sdk -f codesign)"
-    LIPO="$($xcrun --sdk $ios_sdk -f lipo)"
+    install_name_tool="$($xcrun --sdk $ios_sdk -f install_name_tool)"
+    selected_otool="$($xcrun --sdk $ios_sdk -f otool)"
+    selected_codesign="$($xcrun --sdk $ios_sdk -f codesign)"
+    selected_lipo="$($xcrun --sdk $ios_sdk -f lipo)"
 
-    CPPFLAGS="-miphoneos-version-min=$ios_minver"
-    CXXFLAGS="-stdlib=libc++"
-    LDFLAGS="-isysroot $ios_sdk_path -arch $ios_arch -Wl,-dead_strip"
+    selected_cppflags="-miphoneos-version-min=$ios_minver"
+    selected_cxxflags="-stdlib=libc++"
+    selected_ldflags="-isysroot $ios_sdk_path -arch $ios_arch -Wl,-dead_strip"
 
     base_toolchain_args="'-miphoneos-version-min=$ios_minver'"
     base_compiler_args="$base_toolchain_args"
     base_linker_args="$base_toolchain_args, '-Wl,-dead_strip'"
 
-    meson_c="$CC"
-    meson_cpp="$CXX"
-    meson_objc="$CC"
-    meson_objcpp="$CXX"
+    meson_c="$selected_cc"
+    meson_cpp="$selected_cxx"
+    meson_objc="$selected_cc"
+    meson_objcpp="$selected_cxx"
 
     meson_c_args="$base_compiler_args"
     meson_cpp_args="$base_compiler_args, '-stdlib=libc++'"
@@ -789,28 +796,28 @@ case $host_os in
       "$FRIDA_RELENG/driver-wrapper-android.sh.in" > "$cxx_wrapper"
     chmod +x "$cxx_wrapper"
 
-    CPP="$cc_wrapper -E"
-    CC="$cc_wrapper"
-    CXX="$cxx_wrapper"
-    LD="${android_toolroot}/bin/ld"
+    selected_cpp="$cc_wrapper -E"
+    selected_cc="$cc_wrapper"
+    selected_cxx="$cxx_wrapper"
+    selected_ld="${android_toolroot}/bin/ld"
 
-    AR="${android_toolroot}/bin/llvm-ar"
-    NM="${android_toolroot}/bin/llvm-nm"
-    RANLIB="${android_toolroot}/bin/llvm-ranlib"
-    STRIP="${android_toolroot}/bin/llvm-strip"
-    STRIP_FLAGS="--strip-all"
-    READELF="${android_toolroot}/bin/llvm-readelf"
-    OBJCOPY="${android_toolroot}/bin/llvm-objcopy"
-    OBJDUMP="${android_toolroot}/bin/llvm-objdump"
+    selected_ar="${android_toolroot}/bin/llvm-ar"
+    selected_nm="${android_toolroot}/bin/llvm-nm"
+    selected_ranlib="${android_toolroot}/bin/llvm-ranlib"
+    selected_strip="${android_toolroot}/bin/llvm-strip"
+    strip_flags="--strip-all"
+    selected_readelf="${android_toolroot}/bin/llvm-readelf"
+    selected_objcopy="${android_toolroot}/bin/llvm-objcopy"
+    selected_objdump="${android_toolroot}/bin/llvm-objdump"
 
-    CFLAGS="$base_compiler_flags"
-    LDFLAGS="$base_linker_flags"
+    selected_cflags="$base_compiler_flags"
+    selected_ldflags="$base_linker_flags"
 
     base_compiler_args=$(flags_to_args "$base_compiler_flags")
     base_linker_args=$(flags_to_args "$base_linker_flags")
 
-    meson_c="$CC"
-    meson_cpp="$CXX"
+    meson_c="$selected_cc"
+    meson_cpp="$selected_cxx"
 
     meson_c_args="$base_compiler_args"
     meson_cpp_args="$base_compiler_args"
@@ -824,30 +831,30 @@ case $host_os in
   freebsd)
     host_toolprefix="/usr/bin/"
 
-    CPP="${CPP:-${host_toolprefix}cpp}"
-    CC="${CC:-${host_toolprefix}clang}"
-    CXX="${CXX:-${host_toolprefix}clang++}"
-    LD="${LD:-${host_toolprefix}ld}"
+    selected_cpp=$(read_toolchain_variable CPP ${host_toolprefix}cpp)
+    selected_cc=$(read_toolchain_variable CC ${host_toolprefix}clang)
+    selected_cxx=$(read_toolchain_variable CXX ${host_toolprefix}clang++)
+    selected_ld=$(read_toolchain_variable LD ${host_toolprefix}ld)
 
-    AR="${AR:-${host_toolprefix}ar}"
-    NM="${NM:-${host_toolprefix}nm}"
-    RANLIB="${RANLIB:-${host_toolprefix}ranlib}"
-    STRIP="${STRIP:-${host_toolprefix}strip}"
-    STRIP_FLAGS="--strip-all"
-    READELF="${READELF:-${host_toolprefix}readelf}"
-    OBJCOPY="${OBJCOPY:-${host_toolprefix}objcopy}"
+    selected_ar=$(read_toolchain_variable AR ${host_toolprefix}ar)
+    selected_nm=$(read_toolchain_variable NM ${host_toolprefix}nm)
+    selected_ranlib=$(read_toolchain_variable RANLIB ${host_toolprefix}ranlib)
+    selected_strip=$(read_toolchain_variable STRIP ${host_toolprefix}strip)
+    strip_flags="--strip-all"
+    selected_readelf=$(read_toolchain_variable READELF ${host_toolprefix}readelf)
+    selected_objcopy=$(read_toolchain_variable OBJCOPY ${host_toolprefix}objcopy)
 
     base_compiler_flags="-ffunction-sections -fdata-sections"
     base_linker_flags="-Wl,--gc-sections"
 
-    CFLAGS="$base_compiler_flags"
-    LDFLAGS="$base_linker_flags"
+    selected_cflags="$base_compiler_flags"
+    selected_ldflags="$base_linker_flags"
 
     base_compiler_args=$(flags_to_args "$base_compiler_flags")
     base_linker_args=$(flags_to_args "$base_linker_flags")
 
-    meson_c="$CC"
-    meson_cpp="$CXX"
+    meson_c="$selected_cc"
+    meson_cpp="$selected_cxx"
 
     meson_c_args="$base_compiler_args"
     meson_cpp_args="$base_compiler_args"
@@ -894,22 +901,22 @@ case $host_os in
     PATH="$qnx_toolchain_dir:$PATH"
 
     toolchain_flags="--sysroot=$qnx_sysroot $host_arch_flags $qnx_preprocessor_flags"
-    CPP="$qnx_toolchain_prefix-cpp $toolchain_flags"
-    CC="$qnx_toolchain_prefix-gcc $toolchain_flags -static-libgcc"
-    CXX="$qnx_toolchain_prefix-g++ $toolchain_flags -static-libgcc -static-libstdc++"
-    LD="$qnx_toolchain_prefix-ld --sysroot=$qnx_sysroot"
+    selected_cpp="$qnx_toolchain_prefix-cpp $toolchain_flags"
+    selected_cc="$qnx_toolchain_prefix-gcc $toolchain_flags -static-libgcc"
+    selected_cxx="$qnx_toolchain_prefix-g++ $toolchain_flags -static-libgcc -static-libstdc++"
+    selected_ld="$qnx_toolchain_prefix-ld --sysroot=$qnx_sysroot"
 
-    AR="$qnx_toolchain_prefix-ar"
-    NM="$qnx_toolchain_prefix-nm"
-    RANLIB="$qnx_toolchain_prefix-ranlib"
-    STRIP="$qnx_toolchain_prefix-strip"
-    STRIP_FLAGS="--strip-all"
-    READELF="$qnx_toolchain_prefix-readelf"
-    OBJCOPY="$qnx_toolchain_prefix-objcopy"
-    OBJDUMP="$qnx_toolchain_prefix-objdump"
+    selected_ar="$qnx_toolchain_prefix-ar"
+    selected_nm="$qnx_toolchain_prefix-nm"
+    selected_ranlib="$qnx_toolchain_prefix-ranlib"
+    selected_strip="$qnx_toolchain_prefix-strip"
+    strip_flags="--strip-all"
+    selected_readelf="$qnx_toolchain_prefix-readelf"
+    selected_objcopy="$qnx_toolchain_prefix-objcopy"
+    selected_objdump="$qnx_toolchain_prefix-objdump"
 
-    CFLAGS="-ffunction-sections -fdata-sections"
-    LDFLAGS="-Wl,--gc-sections -L$(dirname $qnx_sysroot/lib/gcc/4.8.3/libstdc++.a)"
+    selected_cflags="-ffunction-sections -fdata-sections"
+    selected_ldflags="-Wl,--gc-sections -L$(dirname $qnx_sysroot/lib/gcc/4.8.3/libstdc++.a)"
 
     arch_args=$(flags_to_args "$host_arch_flags")
 
@@ -942,7 +949,7 @@ case $host_os_arch in
 esac
 
 if [ -n "$FRIDA_EXTRA_LDFLAGS" ]; then
-  LDFLAGS="$LDFLAGS $FRIDA_EXTRA_LDFLAGS"
+  selected_ldflags="$selected_ldflags $FRIDA_EXTRA_LDFLAGS"
   extra_link_args=$(flags_to_args "$FRIDA_EXTRA_LDFLAGS")
   meson_c_link_args="$meson_c_link_args, $extra_link_args"
   meson_cpp_link_args="$meson_cpp_link_args, $extra_link_args"
@@ -952,32 +959,32 @@ if [ $enable_asan = yes ]; then
   sanitizer_flag="-fsanitize=address"
   meson_sanitizer_arg=$(flags_to_args "$sanitizer_flag")
 
-  CC="$CC $sanitizer_flag"
-  CXX="$CXX $sanitizer_flag"
-  if [ -n "$OBJC" ]; then
-    OBJC="$OBJC $sanitizer_flag"
+  selected_cc="$selected_cc $sanitizer_flag"
+  selected_cxx="$selected_cxx $sanitizer_flag"
+  if [ -n "$selected_objc" ]; then
+    selected_objc="$selected_objc $sanitizer_flag"
   fi
-  if [ -n "$OBJCXX" ]; then
-    OBJCXX="$OBJCXX $sanitizer_flag"
+  if [ -n "$selected_objcxx" ]; then
+    selected_objcxx="$selected_objcxx $sanitizer_flag"
   fi
-  LD="$LD $sanitizer_flag"
+  selected_ld="$selected_ld $sanitizer_flag"
   meson_c_args="$meson_c_args, $meson_sanitizer_arg"
   meson_cpp_args="$meson_cpp_args, $meson_sanitizer_arg"
 fi
 
-CFLAGS="-fPIC $CFLAGS"
-CXXFLAGS="$CFLAGS${CXXFLAGS:+ $CXXFLAGS}"
+selected_cflags="-fPIC $selected_cflags"
+selected_cxxflags="$selected_cflags${selected_cxxflags:+ $selected_cxxflags}"
 
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   version_include="-include $FRIDA_ROOT/build/frida-version.h"
-  CPPFLAGS="$version_include $CPPFLAGS"
+  selected_cppflags="$version_include $selected_cppflags"
 
   meson_version_include=", '-include', '$FRIDA_ROOT/build/frida-version.h'"
 else
   meson_version_include=""
 fi
 
-VALAC="$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-valac"
+selected_valac="$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-valac"
 vala_impl="$FRIDA_TOOLROOT/bin/valac-$vala_api_version"
 vala_flags="--vapidir=\"$FRIDA_PREFIX/share/vala/vapi\""
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
@@ -986,8 +993,8 @@ fi
 (
   echo "#!/bin/sh"
   echo "exec \"$vala_impl\" $vala_flags \"\$@\""
-) > "$VALAC"
-chmod 755 "$VALAC"
+) > "$selected_valac"
+chmod 755 "$selected_valac"
 
 [ ! -d "$FRIDA_PREFIX/share/aclocal}" ] && mkdir -p "$FRIDA_PREFIX/share/aclocal"
 [ ! -d "$FRIDA_PREFIX/lib}" ] && mkdir -p "$FRIDA_PREFIX/lib"
@@ -1000,11 +1007,11 @@ strip_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-strip
   echo "    exit 0"
   echo "  fi"
   echo "done"
-  echo "exec \"$STRIP\" $STRIP_FLAGS \"\$@\""
+  echo "exec \"$selected_strip\" $strip_flags \"\$@\""
 ) > "$strip_wrapper"
 chmod 755 "$strip_wrapper"
 
-PKG_CONFIG=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-pkg-config
+pkg_config_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_os_arch}-pkg-config
 
 case $host_os in
   freebsd)
@@ -1030,8 +1037,8 @@ fi
   echo "#!/bin/sh"
   echo "export PKG_CONFIG_PATH=\"$pkg_config_path\""
   echo "exec \"$pkg_config\" $pkg_config_flags \"\$@\""
-) > "$PKG_CONFIG"
-chmod 755 "$PKG_CONFIG"
+) > "$pkg_config_wrapper"
+chmod 755 "$pkg_config_wrapper"
 
 env_rc=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-env-${host_os_arch}.rc
 
@@ -1049,31 +1056,31 @@ fi
 
 (
   echo "export PATH=\"${env_path_sdk}${FRIDA_TOOLROOT}/bin:\$PATH\""
-  echo "export PKG_CONFIG=\"$PKG_CONFIG\""
+  echo "export PKG_CONFIG=\"$pkg_config_wrapper\""
   echo "export PKG_CONFIG_PATH=\"$pkg_config_path\""
-  echo "export VALAC=\"$VALAC\""
-  echo "export CPPFLAGS=\"$CPPFLAGS\""
-  echo "export CC=\"$CC\""
-  echo "export CFLAGS=\"$CFLAGS\""
-  echo "export CXX=\"$CXX\""
-  echo "export CXXFLAGS=\"$CXXFLAGS\""
-  echo "export LDFLAGS=\"$LDFLAGS\""
-  echo "export AR=\"$AR\""
-  echo "export NM=\"$NM\""
+  echo "export VALAC=\"$selected_valac\""
+  echo "export CPPFLAGS=\"$selected_cppflags\""
+  echo "export CC=\"$selected_cc\""
+  echo "export CFLAGS=\"$selected_cflags\""
+  echo "export CXX=\"$selected_cxx\""
+  echo "export CXXFLAGS=\"$selected_cxxflags\""
+  echo "export LDFLAGS=\"$selected_ldflags\""
+  echo "export AR=\"$selected_ar\""
+  echo "export NM=\"$selected_nm\""
   echo "export STRIP=\"$strip_wrapper\""
 ) > $env_rc
 
 case $host_os in
   macos|ios)
     (
-      echo "export INSTALL_NAME_TOOL=\"$INSTALL_NAME_TOOL\""
-      echo "export OTOOL=\"$OTOOL\""
-      echo "export CODESIGN=\"$CODESIGN\""
-      echo "export LIPO=\"$LIPO\""
-      echo "export OBJC=\"$OBJC\""
-      echo "export OBJCXX=\"$OBJCXX\""
-      echo "export OBJCFLAGS=\"$CFLAGS\""
-      echo "export OBJCXXFLAGS=\"$CXXFLAGS\""
+      echo "export INSTALL_NAME_TOOL=\"$install_name_tool\""
+      echo "export OTOOL=\"$selected_otool\""
+      echo "export CODESIGN=\"$selected_codesign\""
+      echo "export LIPO=\"$selected_lipo\""
+      echo "export OBJC=\"$selected_objc\""
+      echo "export OBJCXX=\"$selected_objcxx\""
+      echo "export OBJCFLAGS=\"$selected_cflags\""
+      echo "export OBJCXXFLAGS=\"$selected_cxxflags\""
     ) >> $env_rc
     ;;
 esac
@@ -1116,29 +1123,29 @@ meson_machine_file=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-${host_os_arch}.txt
     [ -n "$meson_objc" ] && echo "objc_ld = '$meson_linker_flavor'"
     [ -n "$meson_objcpp" ] && echo "objcpp_ld = '$meson_linker_flavor'"
   fi
-  echo "vala = '$VALAC'"
-  echo "ar = '$AR'"
-  echo "nm = '$NM'"
-  if [ -n "$READELF" ]; then
-    echo "readelf = '$READELF'"
+  echo "vala = '$selected_valac'"
+  echo "ar = '$selected_ar'"
+  echo "nm = '$selected_nm'"
+  if [ -n "$selected_readelf" ]; then
+    echo "readelf = '$selected_readelf'"
   fi
-  if [ -n "$OBJCOPY" ]; then
-    echo "objcopy = '$OBJCOPY'"
+  if [ -n "$selected_objcopy" ]; then
+    echo "objcopy = '$selected_objcopy'"
   fi
-  if [ -n "$OBJDUMP" ]; then
-    echo "objdump = '$OBJDUMP'"
+  if [ -n "$selected_objdump" ]; then
+    echo "objdump = '$selected_objdump'"
   fi
-  if [ -n "$INSTALL_NAME_TOOL" ]; then
-    echo "install_name_tool = '$INSTALL_NAME_TOOL'"
+  if [ -n "$install_name_tool" ]; then
+    echo "install_name_tool = '$install_name_tool'"
   fi
-  if [ -n "$OTOOL" ]; then
-    echo "otool = '$OTOOL'"
+  if [ -n "$selected_otool" ]; then
+    echo "otool = '$selected_otool'"
   fi
-  if [ -n "$LIBTOOL" ]; then
-    echo "libtool = '$LIBTOOL'"
+  if [ -n "$selected_libtool" ]; then
+    echo "libtool = '$selected_libtool'"
   fi
   echo "strip = '$strip_wrapper'"
-  echo "pkgconfig = '$PKG_CONFIG'"
+  echo "pkgconfig = '$pkg_config_wrapper'"
   echo ""
   echo "[built-in options]"
   echo "c_args = common_flags + [${meson_c_args}]"
