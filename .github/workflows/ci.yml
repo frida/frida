@@ -55,7 +55,11 @@ jobs:
 
   linux-toolchain:
     runs-on: ubuntu-latest
-    container: ghcr.io/frida/x-tools-linux-x86_64:latest
+    strategy:
+      matrix:
+        arch: [x86_64, x86]
+      fail-fast: false
+    container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -67,7 +71,7 @@ jobs:
            cloudflare-email: ${{ secrets.CF_EMAIL }}
            cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Roll toolchain
-        run: releng/deps.py roll toolchain linux-x86_64
+        run: releng/deps.py roll toolchain linux-${{ matrix.arch }}
 
   linux-sdk:
     runs-on: ubuntu-latest
