@@ -425,8 +425,6 @@ case $host_os in
         ;;
     esac
 
-    selected_cpp=$(read_toolchain_variable CPP ${host_toolprefix}cpp)
-
     libgcc_flags="-static-libgcc"
     libstdcxx_flags="-static-libstdc++"
     base_compiler_flags="-ffunction-sections -fdata-sections"
@@ -534,7 +532,6 @@ case $host_os in
       "$FRIDA_RELENG/ar-wrapper-xcode.sh.in" > "$ar_wrapper"
     chmod +x "$ar_wrapper"
 
-    selected_cpp="$cc_wrapper -E"
     selected_cc="$cc_wrapper"
     selected_cxx="$cxx_wrapper"
     selected_objc="$cc_wrapper"
@@ -641,7 +638,6 @@ case $host_os in
       "$FRIDA_RELENG/ar-wrapper-xcode.sh.in" > "$ar_wrapper"
     chmod +x "$ar_wrapper"
 
-    selected_cpp="$cc_wrapper -E"
     selected_cc="$cc_wrapper"
     selected_cxx="$cxx_wrapper"
     selected_objc="$cc_wrapper"
@@ -796,7 +792,6 @@ case $host_os in
       "$FRIDA_RELENG/driver-wrapper-android.sh.in" > "$cxx_wrapper"
     chmod +x "$cxx_wrapper"
 
-    selected_cpp="$cc_wrapper -E"
     selected_cc="$cc_wrapper"
     selected_cxx="$cxx_wrapper"
     selected_ld="${android_toolroot}/bin/ld"
@@ -831,7 +826,6 @@ case $host_os in
   freebsd)
     host_toolprefix="/usr/bin/"
 
-    selected_cpp=$(read_toolchain_variable CPP ${host_toolprefix}cpp)
     selected_cc=$(read_toolchain_variable CC ${host_toolprefix}clang)
     selected_cxx=$(read_toolchain_variable CXX ${host_toolprefix}clang++)
     selected_ld=$(read_toolchain_variable LD ${host_toolprefix}ld)
@@ -901,7 +895,6 @@ case $host_os in
     PATH="$qnx_toolchain_dir:$PATH"
 
     toolchain_flags="--sysroot=$qnx_sysroot $host_arch_flags $qnx_preprocessor_flags"
-    selected_cpp="$qnx_toolchain_prefix-cpp $toolchain_flags"
     selected_cc="$qnx_toolchain_prefix-gcc $toolchain_flags -static-libgcc"
     selected_cxx="$qnx_toolchain_prefix-g++ $toolchain_flags -static-libgcc -static-libstdc++"
     selected_ld="$qnx_toolchain_prefix-ld --sysroot=$qnx_sysroot"
