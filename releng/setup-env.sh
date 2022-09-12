@@ -386,7 +386,7 @@ case $host_os in
         meson_host_cpu="armv6t"
         ;;
       armhf)
-        host_arch_flags="-march=armv7-a"
+        host_arch_flags="-march=armv7-a+fp"
         host_toolprefix="arm-linux-$frida_libc-"
 
         meson_host_cpu="armv7a"
