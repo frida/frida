@@ -572,6 +572,7 @@ v8_options = \
 v8_deps = \
 	$(NULL)
 v8_deps_for_build = \
+	zlib \
 	$(NULL)
 
 libcxx_name = libc++
