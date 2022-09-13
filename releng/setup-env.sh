@@ -686,6 +686,10 @@ case $host_os in
         # NDK does not yet support Apple Silicon.
         android_build_arch=x86_64
         ;;
+      linux)
+        # Linux NDK only supports x86_64.
+        android_build_arch=x86_64
+        ;;
       *)
         android_build_arch=${build_arch}
         ;;
