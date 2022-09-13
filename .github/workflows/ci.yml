@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+env:
+  ANDROID_NDK_VERSION: r25b
+
 jobs:
   toolchain-windows:
     runs-on: windows-latest
@@ -94,6 +97,101 @@ jobs:
         run: echo "FRIDA_QEMU_SYSROOT=/opt/x-tools/$XTOOLS_HOST/$XTOOLS_HOST/sysroot" >> $GITHUB_ENV
       - name: Roll SDK
         run: releng/deps.py roll sdk linux-${{ matrix.arch }} --activate
+
+  sdk-android-32:
+    runs-on: ubuntu-latest
+    needs: toolchain-linux
+    strategy:
+      matrix:
+        arch: [x86, arm]
+      fail-fast: false
+    container: ghcr.io/frida/x-tools-linux-x86:latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - name: Set up environment
+        uses: ./.github/actions/setup-linux-env
+        with:
+           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+           cloudflare-email: ${{ secrets.CF_EMAIL }}
+           cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Install dependencies soon to be added to Docker image
+        run: |
+          apt-get update
+          apt-get install -y gperf unzip
+      - name: Set up NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: ${{ env.ANDROID_NDK_VERSION }}
+          add-to-path: false
+      - name: Roll SDK
+        run: |
+          export \
+              CC_FOR_BUILD=$CC \
+              CXX_FOR_BUILD=$CXX \
+              AS_FOR_BUILD=$AS \
+              LD_FOR_BUILD=$LD \
+              AR_FOR_BUILD=$AR \
+              NM_FOR_BUILD=$NM \
+              RANLIB_FOR_BUILD=$RANLIB \
+              STRIP_FOR_BUILD=$STRIP \
+              READELF_FOR_BUILD=$READELF \
+              OBJCOPY_FOR_BUILD=$OBJCOPY \
+              OBJDUMP_FOR_BUILD=$OBJDUMP
+          unset CC CXX AS LD AR NM RANLIB STRIP READELF OBJCOPY OBJDUMP
+          releng/deps.py roll sdk android-${{ matrix.arch }} --activate
+        env:
+          ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+          FRIDA_BUILD_ARCH: x86
+
+  sdk-android-64:
+    runs-on: ubuntu-latest
+    needs: toolchain-linux
+    strategy:
+      matrix:
+        arch: [x86_64, arm64]
+      fail-fast: false
+    container: ghcr.io/frida/x-tools-linux-x86_64:latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - name: Set up environment
+        uses: ./.github/actions/setup-linux-env
+        with:
+           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+           cloudflare-email: ${{ secrets.CF_EMAIL }}
+           cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Install dependencies soon to be added to Docker image
+        run: |
+          apt-get update
+          apt-get install -y gperf unzip
+      - name: Set up NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: ${{ env.ANDROID_NDK_VERSION }}
+          add-to-path: false
+      - name: Roll SDK
+        run: |
+          export \
+              CC_FOR_BUILD=$CC \
+              CXX_FOR_BUILD=$CXX \
+              AS_FOR_BUILD=$AS \
+              LD_FOR_BUILD=$LD \
+              AR_FOR_BUILD=$AR \
+              NM_FOR_BUILD=$NM \
+              RANLIB_FOR_BUILD=$RANLIB \
+              STRIP_FOR_BUILD=$STRIP \
+              READELF_FOR_BUILD=$READELF \
+              OBJCOPY_FOR_BUILD=$OBJCOPY \
+              OBJDUMP_FOR_BUILD=$OBJDUMP
+          unset CC CXX AS LD AR NM RANLIB STRIP READELF OBJCOPY OBJDUMP
+          releng/deps.py roll sdk android-${{ matrix.arch }} --activate
+        env:
+          ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
 
   frida-freebsd-arm64:
     runs-on: [self-hosted, freebsd, arm64]
