@@ -156,7 +156,7 @@ if [ -z "$FRIDA_HOST" ]; then
 fi
 
 if [ "$host_os" == "android" ]; then
-  ndk_required=24
+  ndk_required=25
   if [ -n "$ANDROID_NDK_ROOT" ]; then
     if [ -f "$ANDROID_NDK_ROOT/source.properties" ]; then
       ndk_installed_version=$(grep Pkg.Revision "$ANDROID_NDK_ROOT/source.properties" | awk '{ split($NF, v, "."); print v[1]; }')
