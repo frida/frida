@@ -56,7 +56,7 @@ case $output_type in
     if [[ $runtime = cxx ]]; then
       base_argv+=("-nostdlib++")
       for name in @cxxlibs@; do
-        base_argv+=("@ndkroot@/sources/cxx-stl/llvm-libc++/libs/@abi@/lib$name.a")
+        base_argv+=("@toolroot@/sysroot/usr/lib/@tooltriplet@/lib$name.a")
       done
     fi
     base_argv+=("@toolroot@/lib64/clang/@clang_version@/lib/linux/@clang_arch@/libunwind.a")
