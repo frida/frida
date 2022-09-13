@@ -1139,6 +1139,23 @@ meson_machine_file=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-${host_os_arch}.txt
   fi
   echo "strip = '$strip_wrapper'"
   echo "pkgconfig = '$pkg_config_wrapper'"
+  if [ $host_os_arch != $build_os_arch ] && [ -n "$FRIDA_QEMU_SYSROOT" ]; then
+    case $host_arch in
+      arm|armeabi|armhf)
+        qemu=qemu-arm
+        ;;
+      armbe8)
+        qemu=qemu-armeb
+        ;;
+      arm64)
+        qemu=qemu-aarch64
+        ;;
+      *)
+        qemu=qemu-$host_arch
+        ;;
+    esac
+    echo "exe_wrapper = ['$qemu', '-L', '$FRIDA_QEMU_SYSROOT']"
+  fi
   echo ""
   echo "[built-in options]"
   echo "c_args = common_flags + [${meson_c_args}]"
