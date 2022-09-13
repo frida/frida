@@ -10,6 +10,7 @@ on:
 
 jobs:
   toolchain-windows:
+    if: false
     runs-on: windows-latest
     steps:
       - name: Checkout monorepo
@@ -28,6 +29,7 @@ jobs:
         run: python releng\deps.py roll toolchain windows-x86
 
   sdk-windows:
+    if: false
     runs-on: windows-latest
     needs: toolchain-windows
     strategy:
@@ -72,6 +74,7 @@ jobs:
         run: releng/deps.py roll toolchain linux-${{ matrix.arch }}
 
   sdk-linux:
+    if: false
     runs-on: ubuntu-latest
     needs: toolchain-linux
     strategy:
@@ -96,6 +99,7 @@ jobs:
         run: releng/deps.py roll sdk linux-${{ matrix.arch }} --activate
 
   frida-freebsd-arm64:
+    if: false
     runs-on: [self-hosted, freebsd, arm64]
     steps:
       - name: Initialize credentials
@@ -145,6 +149,7 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
 
   frida-qnx:
+    if: false
     runs-on: ubuntu-latest
     container: fridadotre/qnx:latest
     steps:
