@@ -28,6 +28,7 @@ ninja_url = https://github.com/ninja-build/ninja.git
 ninja_hash = $(NULL)
 ninja_recipe = custom
 ninja_patches = \
+	ninja-linux-arm-ppoll-fallback.patch \
 	$(NULL)
 ninja_options = \
 	$(NULL)
