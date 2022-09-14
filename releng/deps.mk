@@ -3,7 +3,6 @@ frida_bootstrap_version = 20220130
 
 
 frida_base_url = https://github.com/frida
-gnu_mirror = saimei.ftp.acc.umu.se/mirror/gnu.org/gnu
 
 
 include releng/system.mk
@@ -563,8 +562,7 @@ endef
 define make-package-rules
 
 $(foreach pkg, $(call expand-packages,$1), \
-	$(if $(findstring meson,$($(subst -,_,$(pkg))_recipe)), $(call make-meson-package-rules,$(pkg),$2), \
-	$(if $(findstring autotools,$($(subst -,_,$(pkg))_recipe)), $(call make-autotools-package-rules,$(pkg),$2),)))
+	$(if $(findstring meson,$($(subst -,_,$(pkg))_recipe)), $(call make-meson-package-rules,$(pkg),$2)))
 
 endef
 
@@ -616,86 +614,6 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 			> "$$$$prefix/manifest/$1.pkg" \
 	) >>$$$$builddir/build.log 2>&1 || (echo "failed - see $$$$builddir/build.log for more information"; exit 1) \
 
-endef
-
-
-define make-autotools-package-rules
-
-$(call make-autotools-package-rules-without-build-rule,$1,$2)
-
-$(call make-autotools-build-rule,$1,$2)
-
-endef
-
-
-define make-autotools-package-rules-without-build-rule
-
-$(call make-base-package-rules,$1,$2,$(host_os_arch))
-
-deps/.$1-stamp:
-	$$(call grab-and-prepare,$1)
-	@touch $$@
-
-$(call make-autotools-configure-rule,$1,$2)
-
-endef
-
-
-define make-autotools-configure-rule
-
-build/$2-tmp-%/$1/Makefile: build/$2-env-%.rc deps/.$1-stamp \
-		$(foreach dep, $($(subst -,_,$1)_deps), build/$2-%/manifest/$(dep).pkg) \
-		$(foreach dep, $($(subst -,_,$1)_deps_for_build), build/$2-$(build_os_arch)/manifest/$(dep).pkg)
-	@$(call print-status,$1,Configuring)
-	@$(RM) -r $$(@D)
-	@mkdir -p $$(@D)
-	@(set -x \
-		&& . $$< \
-		&& export PATH="$$(shell pwd)/build/$2-$(build_os_arch)/bin:$$$$PATH" \
-		&& cd $$(@D) \
-		&& ../../../deps/$1/configure \
-			--prefix=$$(shell pwd)/build/$2-$$* \
-			$$($$(subst -,_,$1)_options) \
-	) >$$(@D)/build.log 2>&1 || (echo "failed - see $$(@D)/build.log for more information"; exit 1)
-
-endef
-
-
-define make-autotools-build-rule
-
-build/$2-%/manifest/$1.pkg: build/$2-env-%.rc build/$2-tmp-%/$1/Makefile
-	@$(call print-status,$1,Building)
-	@builddir=build/$2-tmp-$$*/$1; \
-	(set -x \
-		&& . $$< \
-		&& export PATH="$$(shell pwd)/build/$2-$(build_os_arch)/bin:$$$$PATH" \
-		&& cd "$$$$builddir" \
-		&& $(MAKE) $(MAKE_J) \
-		&& $(MAKE) $(MAKE_J) install \
-	) >>$$$$builddir/build.log 2>&1 \
-	&& $(call print-status,$1,Generating manifest) \
-	&& (set -x; \
-		$$(call make-autotools-manifest-commands,$1,$2,$$*,) \
-	) >>$$$$builddir/build.log 2>&1 || (echo "failed - see $$$$builddir/build.log for more information"; exit 1)
-
-endef
-
-
-define make-autotools-manifest-commands
-	( \
-		prefix=$(shell pwd)/build/$2-$3 \
-		&& mkdir -p $$prefix/manifest \
-		&& cd build/$2-tmp-$3/$1 \
-		&& $(RM) -r __pkg__ \
-		&& mkdir __pkg__ \
-		&& $(MAKE) $(MAKE_J) $(if $4,$4,install) DESTDIR="$(shell pwd)/build/$2-tmp-$3/$1/__pkg__" &>/dev/null \
-		&& cd __pkg__ \
-		&& find . -type f \
-			| cut -c$(strip $(shell echo $(shell pwd)/build/$2-$3xx | wc -c))- \
-			| sort \
-			> "$$prefix/manifest/$1.pkg" \
-		&& $(RM) -r __pkg__ \
-	)
 endef
 
 
