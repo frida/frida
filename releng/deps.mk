@@ -160,35 +160,6 @@ pkg_config_deps = \
 pkg_config_deps_for_build = \
 	$(NULL)
 
-flex_name = Flex
-flex_version = 2.6.4
-flex_url = https://github.com/westes/flex/releases/download/v$(flex_version)/flex-$(flex_version).tar.gz
-flex_hash = e87aae032bf07c26f85ac0ed3250998c37621d95f8bd748b31f15b33c45ee995
-flex_recipe = autotools
-flex_patches = \
-	flex-modern-glibc.patch \
-	$(NULL)
-flex_options = \
-	$(NULL)
-flex_deps = \
-	$(NULL)
-flex_deps_for_build = \
-	$(NULL)
-
-bison_name = Bison
-bison_version = 3.8.2
-bison_url = https://$(gnu_mirror)/bison/bison-$(bison_version).tar.gz
-bison_hash = 06c9e13bdf7eb24d4ceb6b59205a4f67c2c7e7213119644430fe82fbd14a0abb
-bison_recipe = autotools
-bison_patches = \
-	$(NULL)
-bison_options = \
-	$(NULL)
-bison_deps = \
-	$(NULL)
-bison_deps_for_build = \
-	$(NULL)
-
 vala_name = Vala
 vala_version = d07b689485b3c79116a569696d36ad7c0e299c02
 vala_url = $(frida_base_url)/vala.git
@@ -203,12 +174,6 @@ vala_deps = \
 	$(NULL)
 vala_deps_for_build = \
 	$(NULL)
-ifneq ($(host_os), freebsd)
-vala_deps_for_build += \
-	flex \
-	bison \
-	$(NULL)
-endif
 
 elfutils_name = elfutils
 elfutils_version = 1284bbc128473aea220337685985d465607fbac8
