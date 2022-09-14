@@ -13,6 +13,7 @@ env:
 
 jobs:
   toolchain-windows:
+    if: false
     runs-on: windows-latest
     steps:
       - name: Checkout monorepo
@@ -31,6 +32,7 @@ jobs:
         run: python releng\deps.py roll toolchain windows-x86
 
   sdk-windows:
+    if: false
     runs-on: windows-latest
     needs: toolchain-windows
     strategy:
@@ -55,6 +57,7 @@ jobs:
         run: python releng\deps.py roll sdk windows-${{ matrix.arch }}-${{ matrix.config }} --activate
 
   toolchain-macos:
+    if: false
     runs-on: macos-latest
     strategy:
       matrix:
@@ -74,6 +77,7 @@ jobs:
         run: releng/deps.py roll toolchain macos-${{ matrix.arch }}
 
   sdk-macos:
+    if: false
     runs-on: macos-latest
     needs: toolchain-macos
     strategy:
@@ -94,6 +98,7 @@ jobs:
         run: releng/deps.py roll sdk macos-${{ matrix.arch }} --activate
 
   sdk-ios:
+    if: false
     runs-on: macos-11
     needs: toolchain-macos
     strategy:
@@ -116,6 +121,7 @@ jobs:
         run: releng/deps.py roll sdk ios-${{ matrix.arch }} --activate
 
   toolchain-linux:
+    if: false
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -136,6 +142,7 @@ jobs:
         run: releng/deps.py roll toolchain linux-${{ matrix.arch }}
 
   sdk-linux:
+    if: false
     runs-on: ubuntu-latest
     needs: toolchain-linux
     strategy:
@@ -161,7 +168,6 @@ jobs:
 
   sdk-android-32:
     runs-on: ubuntu-latest
-    needs: toolchain-linux
     strategy:
       matrix:
         arch: [x86, arm]
@@ -209,7 +215,6 @@ jobs:
 
   sdk-android-64:
     runs-on: ubuntu-latest
-    needs: toolchain-linux
     strategy:
       matrix:
         arch: [x86_64, arm64]
@@ -255,6 +260,7 @@ jobs:
           ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
 
   frida-freebsd-arm64:
+    if: false
     runs-on: [self-hosted, freebsd, arm64]
     steps:
       - name: Initialize credentials
@@ -305,6 +311,7 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
 
   frida-qnx:
+    if: false
     runs-on: ubuntu-latest
     needs: sdk-linux
     container: ghcr.io/frida/qnx-tools:latest

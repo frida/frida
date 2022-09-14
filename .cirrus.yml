@@ -1,4 +1,5 @@
 task:
+  only_if: false
   name: freebsd-x86_64
   freebsd_instance:
     image_family: freebsd-13-1
