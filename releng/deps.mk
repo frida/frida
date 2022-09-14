@@ -24,7 +24,6 @@ SHELL := $(shell which bash)
 ninja_name = Ninja
 ninja_version = v1.10.2
 ninja_url = https://github.com/ninja-build/ninja.git
-ninja_hash = $(NULL)
 ninja_recipe = custom
 ninja_patches = \
 	ninja-linux-arm-ppoll-fallback.patch \
@@ -39,7 +38,6 @@ ninja_deps_for_build = \
 frida_elf_cleaner_name = frida-elf-cleaner
 frida_elf_cleaner_version = 821c6319f5545f092d815233df73fc253ca4c603
 frida_elf_cleaner_url = $(frida_base_url)/frida-elf-cleaner.git
-frida_elf_cleaner_hash = $(NULL)
 frida_elf_cleaner_recipe = meson
 frida_elf_cleaner_patches = \
 	$(NULL)
@@ -53,7 +51,6 @@ frida_elf_cleaner_deps_for_build = \
 libiconv_name = libiconv
 libiconv_version = 78d655ecc65b773b8e6642ea4be89e6f51d2c518
 libiconv_url = $(frida_base_url)/libiconv.git
-libiconv_hash = $(NULL)
 libiconv_recipe = meson
 libiconv_patches = \
 	$(NULL)
@@ -67,7 +64,6 @@ libiconv_deps_for_build = \
 zlib_name = zlib
 zlib_version = 066bd9e6a3438af5ee5637a1200d194befd25b8a
 zlib_url = $(frida_base_url)/zlib.git
-zlib_hash = $(NULL)
 zlib_recipe = meson
 zlib_patches = \
 	$(NULL)
@@ -81,7 +77,6 @@ zlib_deps_for_build = \
 libffi_name = libffi
 libffi_version = 3178f21efbb3e2ea7c01974e13c8b9c166c7d7c8
 libffi_url = $(frida_base_url)/libffi.git
-libffi_hash = $(NULL)
 libffi_recipe = meson
 libffi_patches = \
 	$(NULL)
@@ -95,7 +90,6 @@ libffi_deps_for_build = \
 selinux_name = SELinux Userspace
 selinux_version = 9c7ba053bb075cace088d268fda400f6bc4ab14c
 selinux_url = $(frida_base_url)/selinux.git
-selinux_hash = $(NULL)
 selinux_recipe = meson
 selinux_patches = \
 	$(NULL)
@@ -110,7 +104,6 @@ selinux_deps_for_build = \
 glib_name = GLib
 glib_version = d777b428305503ded79c407204d4354cb1adec85
 glib_url = $(frida_base_url)/glib.git
-glib_hash = $(NULL)
 glib_recipe = meson
 glib_patches = \
 	$(NULL)
@@ -147,7 +140,6 @@ endif
 pkg_config_name = pkg-config
 pkg_config_version = 4696795673d1d3dec46b663df48f8cbf66461d14
 pkg_config_url = $(frida_base_url)/pkg-config.git
-pkg_config_hash = $(NULL)
 pkg_config_recipe = meson
 pkg_config_patches = \
 	$(NULL)
@@ -162,7 +154,6 @@ pkg_config_deps_for_build = \
 vala_name = Vala
 vala_version = d07b689485b3c79116a569696d36ad7c0e299c02
 vala_url = $(frida_base_url)/vala.git
-vala_hash = $(NULL)
 vala_recipe = meson
 vala_patches = \
 	$(NULL)
@@ -177,7 +168,6 @@ vala_deps_for_build = \
 elfutils_name = elfutils
 elfutils_version = 1284bbc128473aea220337685985d465607fbac8
 elfutils_url = $(frida_base_url)/elfutils.git
-elfutils_hash = $(NULL)
 elfutils_recipe = meson
 elfutils_patches = \
 	$(NULL)
@@ -192,7 +182,6 @@ elfutils_deps_for_build = \
 libdwarf_name = libdwarf
 libdwarf_version = 0a5640598201d9a025c33055dde82d6597fcd650
 libdwarf_url = $(frida_base_url)/libdwarf.git
-libdwarf_hash = $(NULL)
 libdwarf_recipe = meson
 libdwarf_patches = \
 	$(NULL)
@@ -209,7 +198,6 @@ libdwarf_deps_for_build = \
 xz_name = XZ Utils
 xz_version = d4bb4f6c690844cf34c19104f5d766f066334be7
 xz_url = $(frida_base_url)/xz.git
-xz_hash = $(NULL)
 xz_recipe = meson
 xz_patches = \
 	$(NULL)
@@ -224,7 +212,6 @@ xz_deps_for_build = \
 brotli_name = Brotli
 brotli_version = 8abf3188d1ef4bb8a633f894fec731bdd510ee49
 brotli_url = $(frida_base_url)/brotli.git
-brotli_hash = $(NULL)
 brotli_recipe = meson
 brotli_patches = \
 	$(NULL)
@@ -238,7 +225,6 @@ brotli_deps_for_build = \
 minizip_name = minizip-ng
 minizip_version = 535c1b9150e5e47b9a533b6f16787042da92ac63
 minizip_url = $(frida_base_url)/minizip-ng.git
-minizip_hash = $(NULL)
 minizip_recipe = meson
 minizip_patches = \
 	$(NULL)
@@ -261,7 +247,6 @@ endif
 sqlite_name = SQLite
 sqlite_version = 6b876d7c22f10488477d106dfe51f3fbd4ce2d20
 sqlite_url = $(frida_base_url)/sqlite.git
-sqlite_hash = $(NULL)
 sqlite_recipe = meson
 sqlite_patches = \
 	$(NULL)
@@ -275,7 +260,6 @@ sqlite_deps_for_build = \
 libunwind_name = libunwind
 libunwind_version = 12ac8fe53a2cb23501116a83ee59bd57da06bfe9
 libunwind_url = $(frida_base_url)/libunwind.git
-libunwind_hash = $(NULL)
 libunwind_recipe = meson
 libunwind_patches = \
 	$(NULL)
@@ -298,7 +282,6 @@ libunwind_deps_for_build = \
 glib_networking_name = glib-networking
 glib_networking_version = 05d01a444f1738b3cfe2d583f49fdba1357e3184
 glib_networking_url = $(frida_base_url)/glib-networking.git
-glib_networking_hash = $(NULL)
 glib_networking_recipe = meson
 glib_networking_patches = \
 	$(NULL)
@@ -319,7 +302,6 @@ glib_networking_deps_for_build = \
 libnice_name = libnice
 libnice_version = f9bf93471ab128821ceebf6bf3e4aa3e941af4b0
 libnice_url = $(frida_base_url)/libnice.git
-libnice_hash = $(NULL)
 libnice_recipe = meson
 libnice_patches = \
 	$(NULL)
@@ -341,7 +323,6 @@ libnice_deps_for_build = \
 usrsctp_name = usrsctp
 usrsctp_version = f2eb0c945560bde753549192fd13b62a59abe32d
 usrsctp_url = $(frida_base_url)/usrsctp.git
-usrsctp_hash = $(NULL)
 usrsctp_recipe = meson
 usrsctp_patches = \
 	$(NULL)
@@ -358,7 +339,6 @@ usrsctp_deps_for_build = \
 libgee_name = libgee
 libgee_version = 5b00fd64096b369a04fe04a7246e1927c3fedbd7
 libgee_url = $(frida_base_url)/libgee.git
-libgee_hash = $(NULL)
 libgee_recipe = meson
 libgee_patches = \
 	$(NULL)
@@ -373,7 +353,6 @@ libgee_deps_for_build = \
 json_glib_name = JSON-GLib
 json_glib_version = a8d3ac569bfaf509e2a20b55ee4fd6b89851b8b1
 json_glib_url = $(frida_base_url)/json-glib.git
-json_glib_hash = $(NULL)
 json_glib_recipe = meson
 json_glib_patches = \
 	$(NULL)
@@ -391,7 +370,6 @@ json_glib_deps_for_build = \
 libpsl_name = libpsl
 libpsl_version = dc7fce073dfb66f055ce91ebeff41f60b9db2ce4
 libpsl_url = $(frida_base_url)/libpsl.git
-libpsl_hash = $(NULL)
 libpsl_recipe = meson
 libpsl_patches = \
 	$(NULL)
@@ -408,7 +386,6 @@ libpsl_deps_for_build = \
 libxml2_name = libxml2
 libxml2_version = 769bc59b47daa8172bb57255ed9a4987937878d2
 libxml2_url = $(frida_base_url)/libxml2.git
-libxml2_hash = $(NULL)
 libxml2_recipe = meson
 libxml2_patches = \
 	$(NULL)
@@ -424,7 +401,6 @@ libxml2_deps_for_build = \
 libsoup_name = libsoup
 libsoup_version = f8683845a91d165aaaefa7db5cf3afbf95f06a60
 libsoup_url = $(frida_base_url)/libsoup.git
-libsoup_hash = $(NULL)
 libsoup_recipe = meson
 libsoup_patches = \
 	$(NULL)
@@ -452,7 +428,6 @@ libsoup_deps_for_build = \
 capstone_name = Capstone
 capstone_version = 6182ac33e0e5876bdf39f7e60416ce9fd73ce61a
 capstone_url = $(frida_base_url)/capstone.git
-capstone_hash = $(NULL)
 capstone_recipe = meson
 capstone_patches = \
 	$(NULL)
@@ -477,7 +452,6 @@ capstone_archs := $(shell echo $(host_arch) | sed $(sed_regex_option) \
 quickjs_name = QuickJS
 quickjs_version = f67fb619ecfd601de3385cadf17883624b1538a3
 quickjs_url = $(frida_base_url)/quickjs.git
-quickjs_hash = $(NULL)
 quickjs_recipe = meson
 quickjs_patches = \
 	$(NULL)
@@ -495,7 +469,6 @@ quickjs_deps_for_build = \
 tinycc_name = TinyCC
 tinycc_version = a438164dd4c453ae62c1224b4b7997507a388b3d
 tinycc_url = $(frida_base_url)/tinycc.git
-tinycc_hash = $(NULL)
 tinycc_recipe = meson
 tinycc_patches = \
 	$(NULL)
@@ -509,7 +482,6 @@ tinycc_deps_for_build = \
 openssl_name = OpenSSL
 openssl_version = bf78536ec5dc0f834f3bf61c11e12c8a70c52bd2
 openssl_url = $(frida_base_url)/openssl.git
-openssl_hash = $(NULL)
 openssl_recipe = meson
 openssl_patches = \
 	$(NULL)
@@ -523,7 +495,6 @@ openssl_deps_for_build = \
 v8_name = V8
 v8_version = 77f6d44c01daaf20d22131b6cae57415d7ee3287
 v8_url = $(frida_base_url)/v8.git
-v8_hash = $(NULL)
 v8_recipe = meson
 v8_patches = \
 	$(NULL)
@@ -542,7 +513,6 @@ v8_deps_for_build = \
 libcxx_name = libc++
 libcxx_version = 2cd34c97d4c79aa45178ebb02734feb7074b7d61
 libcxx_url = $(frida_base_url)/libcxx.git
-libcxx_hash = $(NULL)
 libcxx_recipe = meson
 libcxx_patches = \
 	$(NULL)
@@ -695,48 +665,6 @@ endef
 
 
 define grab-and-prepare
-	$(if $($(subst -,_,$1)_hash),
-		$(call grab-and-prepare-tarball,$1),
-		$(call grab-and-prepare-repo,$1))
-endef
-
-
-define grab-and-prepare-tarball
-	@$(RM) -r deps/$1
-	@mkdir -p deps/$1
-
-	@url=$($(subst -,_,$1)_url) \
-		&& name="$($(subst -,_,$1)_name)" \
-		&& version=$($(subst -,_,$1)_version) \
-		&& expected_hash=$($(subst -,_,$1)_hash) \
-		&& $(call print-tarball-banner,"$$name",$$version,$$url,$$expected_hash) \
-		&& $(call print-status,$1,Downloading) \
-		&& if command -v curl >/dev/null; then \
-			curl -sSfLo deps/.$1-tarball $$url; \
-		else \
-			wget -qO deps/.$1-tarball $$url; \
-		fi \
-		&& $(call print-status,$1,Verifying) \
-		&& actual_hash=$$(shasum -a 256 -b deps/.$1-tarball | awk '{ print $$1; }') \
-		&& case $$actual_hash in \
-			$$expected_hash) \
-				;; \
-			*) \
-				echo "$1 tarball is corrupted; its hash is: $$actual_hash"; \
-				exit 1; \
-				;; \
-		esac
-
-	@$(call print-status,$1,Extracting to deps/$1)
-	@tar -C deps/$1 -x -f deps/.$1-tarball --strip-components 1
-
-	$(call apply-patches,$1)
-
-	@rm deps/.$1-tarball
-endef
-
-
-define grab-and-prepare-repo
 	@$(RM) -r deps/$1
 
 	@url=$($(subst -,_,$1)_url) \
@@ -765,11 +693,6 @@ endef
 
 define print-status
 	echo -e "│ \\033[1m$1\\033[0m :: $2"
-endef
-
-
-define print-tarball-banner
-	echo -e "\n╭────\n│ 📦 \\033[1m$1\\033[0m $2\n├───────\n│ URL: $3\n│ SHA: $4\n├────────────"
 endef
 
 

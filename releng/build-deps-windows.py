@@ -3,7 +3,6 @@
 import argparse
 from dataclasses import dataclass
 from enum import Enum
-import hashlib
 import json
 import os
 from pathlib import Path, PurePath
@@ -252,15 +251,6 @@ def check_environment():
 
 def grab_and_prepare(name: str, spec: PackageSpec, params: DependencyParameters) -> SourceState:
     assert spec.recipe == 'meson'
-    return grab_and_prepare_package(name, spec)
-
-def grab_and_prepare_package(name: str, spec: PackageSpec) -> SourceState:
-    if spec.hash == "":
-        return grab_and_prepare_git_package(name, spec)
-    else:
-        return grab_and_prepare_tarball_package(name, spec)
-
-def grab_and_prepare_git_package(name: str, spec: PackageSpec) -> SourceState:
     assert spec.patches == []
 
     source_dir = DEPS_DIR / name
@@ -280,88 +270,6 @@ def grab_and_prepare_git_package(name: str, spec: PackageSpec) -> SourceState:
         perform("git", "clone", "-q", "--recurse-submodules", spec.url, name, cwd=DEPS_DIR)
         perform("git", "checkout", "-q", spec.version, cwd=source_dir)
         source_state = SourceState.PRISTINE
-
-    return source_state
-
-def grab_and_prepare_tarball_package(name: str, spec: PackageSpec) -> SourceState:
-    version_file = DEPS_DIR / (name + "-version.txt")
-    try:
-        current_version = version_file.read_text(encoding='utf-8').strip()
-        if current_version == spec.version:
-            return SourceState.PRISTINE
-    except:
-        pass
-
-    source_dir = DEPS_DIR / name
-    if source_dir.exists():
-        shutil.rmtree(source_dir)
-        source_state = SourceState.MODIFIED
-    else:
-        source_state = SourceState.PRISTINE
-
-    archive_path = None
-    sha256 = hashlib.sha256()
-    try:
-        print("> Downloading", spec.url, flush=True)
-
-        with urllib.request.urlopen(spec.url) as response, tempfile.NamedTemporaryFile(delete=False) as archive:
-            archive_path = Path(archive.name)
-            while True:
-                chunk = response.read(65536)
-                if len(chunk) == 0:
-                    break
-                archive.write(chunk)
-                sha256.update(chunk)
-
-        digest = sha256.hexdigest()
-        if digest != spec.hash:
-            raise ValueError("{} tarball is corrupted; its hash is {}".format(name, digest))
-
-        print("> Extracting", spec.url, flush=True)
-
-        staging_dir = source_dir / "__staging__"
-        staging_dir.mkdir(parents=True)
-
-        uncompress = subprocess.Popen(["7z", "x", "-tgzip", "-so", archive_path],
-                                      stdout=subprocess.PIPE,
-                                      stderr=subprocess.DEVNULL)
-        extract = subprocess.Popen(["7z", "x", "-ttar", "-si"],
-                                   stdin=uncompress.stdout,
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT,
-                                   encoding='utf-8',
-                                   cwd=staging_dir)
-        uncompress.stdout.close()
-        output = extract.communicate()[0]
-        if extract.returncode != 0:
-            raise ValueError("{} extraction failed: {}".format(name, output))
-
-        for entry in staging_dir.glob(name + "*/*"):
-            shutil.move(str(entry), source_dir)
-
-        shutil.rmtree(staging_dir)
-    finally:
-        if archive_path is not None:
-            try:
-                archive_path.unlink()
-            except:
-                pass
-
-    for patch_name in spec.patches:
-        print("> Applying", patch_name, flush=True)
-        patch_path = Path(RELENG_DIR / "patches" / patch_name)
-        patch_data = patch_path.read_text(encoding='utf-8')
-        p = subprocess.Popen(["patch", "-p1"],
-                             stdin=subprocess.PIPE,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT,
-                             encoding='utf-8',
-                             cwd=source_dir)
-        output = p.communicate(patch_data)[0]
-        if p.returncode != 0:
-            raise ValueError("unable to apply {}: {}".format(patch_name, output))
-
-    version_file.write_text(spec.version + "\n", encoding='utf-8')
 
     return source_state
 
