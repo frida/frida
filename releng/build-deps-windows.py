@@ -251,9 +251,6 @@ def check_environment():
 
 def grab_and_prepare(name: str, spec: PackageSpec, params: DependencyParameters) -> SourceState:
     assert spec.recipe == 'meson'
-    return grab_and_prepare_package(name, spec)
-
-def grab_and_prepare_package(name: str, spec: PackageSpec) -> SourceState:
     assert spec.patches == []
 
     source_dir = DEPS_DIR / name
