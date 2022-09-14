@@ -306,6 +306,7 @@ jobs:
 
   frida-qnx:
     runs-on: ubuntu-latest
+    needs: toolchain-linux
     container: ghcr.io/frida/qnx-tools:latest
     steps:
       - name: Check out repo
