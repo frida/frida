@@ -1,0 +1,54 @@
+name: Set up macOS environment
+description: Set up everything needed to build and release things on macOS
+inputs:
+  aws-access-key-id:
+    required: true
+    description: The aws-access-key-id used to authenticate with AWS
+  aws-secret-access-key:
+    required: true
+    description: The aws-secret-access-key used to authenticate with AWS
+  cloudflare-email:
+    required: true
+    description: The email used to authenticate with Cloudflare
+  cloudflare-token:
+    required: true
+    description: The token used to authenticate with Cloudflare
+runs:
+  using: composite
+  steps:
+    - name: Check out releng/meson
+      run: |
+        git submodule init -- releng/meson
+        git submodule update --depth 1 -- releng/meson
+      shell: bash
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+        aws-region: us-east-1
+    - name: Configure Cloudflare credentials
+      run: |
+        (
+          echo "defaults:"
+          echo "    domain: frida.re"
+          echo "    email: ${{ inputs.cloudflare-email }}"
+          echo "    token: ${{ inputs.cloudflare-token }}"
+        ) > ~/.cfcli.yml
+      shell: bash
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    - name: Install agithub
+      run: pip install agithub
+      shell: bash
+    - name: Install requests
+      run: pip install requests
+      shell: bash
+    - name: Install twine
+      run: pip install twine
+      shell: bash
+    - name: Install cloudflare-cli
+      run: npm install -g cloudflare-cli
+      shell: bash
