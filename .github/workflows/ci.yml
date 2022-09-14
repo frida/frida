@@ -119,7 +119,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: [x86, x86_64, arm64]
+        arch: [x86, x86_64, armhf, arm64]
       fail-fast: false
     container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
     steps:
