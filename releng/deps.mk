@@ -582,7 +582,18 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 			| cut -c$$(strip $$(shell echo $$(shell pwd)/build/$2-$$*x | wc -c))- \
 			| sort \
 			> "$$$$prefix/manifest/$1.pkg" \
-	) >>$$$$builddir/build.log 2>&1 || (echo "failed - see $$$$builddir/build.log for more information"; exit 1) \
+	) >>$$$$builddir/build.log 2>&1 || ( \
+		echo -en "\n\033[31;1m*** FAILED ***\033[0m"; \
+		for log in $$$$builddir/meson-logs/meson-log.txt $$$$builddir/build.log; do \
+			if [ -f $$$$log ]; then \
+				echo -e "\n\n\033[33;1m   / $$$$log\033[0m"; \
+				echo -e "  \033[33;1m|\033[0m"; \
+				echo -e "  \033[33;1mv\033[0m\n"; \
+				cat $$$$log; \
+			fi \
+		done; \
+		exit 1; \
+	)
 
 endef
 
