@@ -259,11 +259,12 @@ jobs:
     steps:
       - name: Initialize credentials
         run: |
+          mkdir ~/.aws
           (
             echo "[default]"
-            echo "access_key = ${{ secrets.S3_ACCESS_KEY }}"
-            echo "secret_key = ${{ secrets.S3_SECRET_KEY }}"
-          ) > ~/.s3cfg
+            echo "aws_access_key_id = ${{ secrets.S3_ACCESS_KEY }}"
+            echo "aws_secret_access_key = ${{ secrets.S3_SECRET_KEY }}"
+          ) > ~/.aws/credentials
           (
             echo "defaults:"
             echo "    domain: frida.re"
