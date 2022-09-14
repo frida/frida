@@ -2,7 +2,7 @@ include config.mk
 include releng/deps.mk
 
 
-packages_for_host = \
+packages = \
 	ninja \
 	frida-elf-cleaner \
 	zlib \
@@ -11,13 +11,6 @@ packages_for_host = \
 	pkg-config \
 	vala \
 	$(NULL)
-
-packages_for_build = \
-	flex \
-	bison \
-	$(NULL)
-
-packages = $(packages_for_host) $(packages_for_build)
 
 
 ifeq ($(host_os), $(filter $(host_os), macos ios))
@@ -46,9 +39,9 @@ all: build/toolchain-$(host_os)-$(host_arch).tar.bz2
 		echo ""; \
 	fi
 
-clean: $(foreach pkg, $(call expand-packages,$(packages_for_host)), clean-$(pkg))
+clean: $(foreach pkg, $(call expand-packages,$(packages)), clean-$(pkg))
 
-distclean: $(foreach pkg, $(call expand-packages,$(packages_for_host)), distclean-$(pkg))
+distclean: $(foreach pkg, $(call expand-packages,$(packages)), distclean-$(pkg))
 
 build/toolchain-$(host_os)-$(host_arch).tar.bz2: build/ft-tmp-$(host_os_arch)/.package-stamp
 	@$(call print-status,📦,Compressing)
@@ -66,7 +59,7 @@ build/toolchain-$(host_os)-$(host_arch).tar.bz2: build/ft-tmp-$(host_os_arch)/.p
 	fi
 	@mv $@.tmp $@
 
-build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages_for_host), build/ft-%/manifest/$(pkg).pkg)
+build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages), build/ft-%/manifest/$(pkg).pkg)
 	@echo
 	@$(call print-status,📦,Assembling)
 	@$(RM) -r $(@D)/package
@@ -74,16 +67,12 @@ build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages_for_h
 	@cd build/ft-$* \
 		&& [ -d libdata ] && libdatadir=libdata || libdatadir=lib \
 		&& tar -cf - \
-			--exclude bin/bison \
-			--exclude bin/flex \
-			--exclude bin/flex++ \
 			--exclude bin/gapplication \
 			--exclude bin/gdbus \
 			--exclude bin/gio \
 			--exclude bin/gobject-query \
 			--exclude bin/gsettings \
 			--exclude bin/iconv \
-			--exclude bin/yacc \
 			--exclude etc \
 			--exclude include \
 			--exclude "lib/lib*" \
@@ -92,7 +81,6 @@ build/ft-tmp-%/.package-stamp: build/ft-env-%.rc $(foreach pkg, $(packages_for_h
 			--exclude "lib/vala-*/*.a" \
 			--exclude share/aclocal \
 			--exclude share/bash-completion \
-			--exclude share/bison \
 			--exclude share/doc \
 			--exclude share/gdb \
 			--exclude share/gettext \
