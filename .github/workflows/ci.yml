@@ -13,6 +13,7 @@ env:
 
 jobs:
   toolchain-windows:
+    if: false
     runs-on: windows-latest
     steps:
       - name: Checkout monorepo
@@ -31,6 +32,7 @@ jobs:
         run: python releng\deps.py roll toolchain windows-x86
 
   sdk-windows:
+    if: false
     runs-on: windows-latest
     needs: toolchain-windows
     strategy:
@@ -55,6 +57,7 @@ jobs:
         run: python releng\deps.py roll sdk windows-${{ matrix.arch }}-${{ matrix.config }} --activate
 
   toolchain-linux:
+    if: false
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -75,6 +78,7 @@ jobs:
         run: releng/deps.py roll toolchain linux-${{ matrix.arch }}
 
   sdk-linux:
+    if: false
     runs-on: ubuntu-latest
     needs: toolchain-linux
     strategy:
@@ -99,6 +103,7 @@ jobs:
         run: releng/deps.py roll sdk linux-${{ matrix.arch }} --activate
 
   sdk-android-32:
+    if: false
     runs-on: ubuntu-latest
     needs: toolchain-linux
     strategy:
@@ -147,6 +152,7 @@ jobs:
           FRIDA_BUILD_ARCH: x86
 
   sdk-android-64:
+    if: false
     runs-on: ubuntu-latest
     needs: toolchain-linux
     strategy:
@@ -194,6 +200,7 @@ jobs:
           ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
 
   frida-freebsd-arm64:
+    if: false
     runs-on: [self-hosted, freebsd, arm64]
     steps:
       - name: Initialize credentials
