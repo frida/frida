@@ -40,7 +40,6 @@ class PackageSpec:
     name: str
     version: str
     url: str
-    hash: str
     recipe: str
     patches: List[str]
     deps: List[str]
@@ -256,9 +255,6 @@ def bump():
     auth_header = "Basic " + auth_blob
 
     for identifier, pkg in params.packages.items():
-        if pkg.hash != "":
-            continue
-
         url = pkg.url
         if not url.startswith("https://github.com/frida/"):
             continue
@@ -320,7 +316,6 @@ def read_dependency_parameters(host_defines: Dict[str, str] = {}) -> DependencyP
                 parse_string_value(raw_params[name + "_name"], raw_params),
                 parse_string_value(raw_params[name + "_version"], raw_params),
                 parse_string_value(raw_params[name + "_url"], raw_params),
-                parse_string_value(raw_params[name + "_hash"], raw_params),
                 parse_string_value(raw_params[name + "_recipe"], raw_params),
                 parse_array_value(raw_params[name + "_patches"], raw_params),
                 parse_array_value(raw_params[name + "_deps"], raw_params),
