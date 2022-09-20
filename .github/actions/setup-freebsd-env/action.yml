@@ -1,5 +1,5 @@
-name: Set up Linux environment
-description: Set up everything needed to build and release things on Linux
+name: Set up FreeBSD environment
+description: Set up everything needed to build and release things on FreeBSD
 inputs:
   aws-access-key-id:
     required: true

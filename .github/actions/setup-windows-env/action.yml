@@ -13,9 +13,22 @@ inputs:
   cloudflare-token:
     required: true
     description: The token used to authenticate with Cloudflare
+  architecture:
+    description: The target architecture
+    default: x64
 runs:
   using: composite
   steps:
+    - name: Configure git
+      run: |
+        git config --global user.name "Frida Developers"
+        git config --global user.email "oleavr@frida.re"
+      shell: pwsh
+    - name: Check out releng/meson
+      run: |
+        git submodule init -- releng/meson
+        git submodule update --depth 1 -- releng/meson
+      shell: pwsh
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -37,6 +50,12 @@ runs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
+        architecture: ${{ inputs.architecture }}
+    - name: Install Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+        architecture: ${{ inputs.architecture }}
     - name: Install agithub
       run: pip install agithub
       shell: pwsh
@@ -48,4 +67,9 @@ runs:
       shell: pwsh
     - name: Install cloudflare-cli
       run: npm install -g cloudflare-cli
+      shell: pwsh
+    - name: Set Frida environment variables
+      run: |
+        echo "FRIDA=$Env:GITHUB_WORKSPACE" >> $Env:GITHUB_ENV
+        python releng/frida_version.py >> $Env:GITHUB_ENV
       shell: pwsh
