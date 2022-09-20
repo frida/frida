@@ -456,8 +456,6 @@ if __name__ == '__main__':
             upload_file("frida-gadget-{version}-windows-x86.dll",    os.path.join(prefix_x86, "bin", "frida-gadget.dll"), upload)
             upload_file("frida-gadget-{version}-windows-x86_64.dll", os.path.join(prefix_x64, "bin", "frida-gadget.dll"), upload)
 
-            upload_python_bindings_to_pypi(r"C:\Program Files (x86)\Python 2.7\python.exe",  os.path.join(prefix_x86, "lib", "python2.7", "site-packages", "_frida.pyd"))
-            upload_python_bindings_to_pypi(r"C:\Program Files\Python 2.7\python.exe",        os.path.join(prefix_x64, "lib", "python2.7", "site-packages", "_frida.pyd"))
             upload_python_bindings_to_pypi(r"C:\Program Files (x86)\Python 3.10\python.exe", os.path.join(prefix_x86, "lib", "python3.10", "site-packages", "_frida.pyd"))
             upload_python_bindings_to_pypi(r"C:\Program Files\Python 3.10\python.exe",       os.path.join(prefix_x64, "lib", "python3.10", "site-packages", "_frida.pyd"))
 
@@ -487,12 +485,6 @@ if __name__ == '__main__':
 
             upload_directory("frida-swift-{version}-macos-universal", os.path.join(build_dir, "frida-swift", "build", "Release"), upload)
 
-            upload_python_bindings_to_pypi("/usr/bin/python2.7",
-                os.path.join(build_dir, "build", "frida-macos-universal", "lib", "python2.7", "site-packages", "_frida.so"),
-                platform_name="macosx-11.0-universal2")
-            upload_python_bindings_to_pypi("/usr/bin/python2.7",
-                os.path.join(build_dir, "build", "frida-macos-x86_64", "lib", "python2.7", "site-packages", "_frida.so"),
-                platform_name="macosx-10.9-x86_64")
             upload_python_bindings_to_pypi("/usr/local/bin/python3.8",
                 os.path.join(build_dir, "build", "frida-macos-apple_silicon", "lib", "python3.8", "site-packages", "_frida.so"),
                 platform_name="macosx-11.0-arm64")
@@ -520,15 +512,9 @@ if __name__ == '__main__':
             upload_file("frida-gadget-{version}-linux-x86.so", os.path.join(build_dir, "build", "frida-linux-x86", "lib", "frida", "32", "frida-gadget.so"), upload)
             upload_file("frida-gadget-{version}-linux-x86_64.so", os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "frida", "64", "frida-gadget.so"), upload)
 
-            upload_python_bindings_to_pypi("/opt/python-32/cp27-cp27mu/bin/python2.7",
-                os.path.join(build_dir, "build", "frida-linux-x86", "lib", "python2.7", "site-packages", "_frida.so"),
-                { 'LD_LIBRARY_PATH': "/opt/python27-32/lib" }, platform_name="linux-i686")
             upload_python_bindings_to_pypi("/opt/python-32/cp38-cp38/bin/python3.8",
                 os.path.join(build_dir, "build", "frida-linux-x86", "lib", "python3.8", "site-packages", "_frida.so"),
                 { 'LD_LIBRARY_PATH': "/opt/python36-32/lib" }, platform_name="linux-i686")
-            upload_python_bindings_to_pypi("/opt/python-64/cp27-cp27mu/bin/python2.7",
-                os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python2.7", "site-packages", "_frida.so"),
-                { 'LD_LIBRARY_PATH': "/opt/python27-64/lib" }, platform_name="linux-x86_64")
             upload_python_bindings_to_pypi("/opt/python-64/cp38-cp38/bin/python3.8",
                 os.path.join(build_dir, "build", "frida-linux-x86_64", "lib", "python3.8", "site-packages", "_frida.so"),
                 { 'LD_LIBRARY_PATH': "/opt/python36-64/lib" }, platform_name="linux-x86_64")
@@ -624,15 +610,11 @@ if __name__ == '__main__':
             upload_file("frida-gadget-{version}-linux-armhf.so", os.path.join(build_dir, "build", "frida_thin-linux-armhf", "lib", "frida", "32", "frida-gadget.so"), upload)
             upload_file("frida-gadget-{version}-linux-arm64.so", os.path.join(build_dir, "build", "frida_thin-linux-arm64", "lib", "frida", "64", "frida-gadget.so"), upload)
         elif builder == 'ubuntu_18_04-armhf':
-            upload_python_bindings_to_pypi("/usr/bin/python2.7",
-                os.path.join(build_dir, "build", "frida_thin-linux-armhf", "lib", "python2.7", "site-packages", "_frida.so"))
             upload_python_bindings_to_pypi("/usr/bin/python3.6",
                 os.path.join(build_dir, "build", "frida_thin-linux-armhf", "lib", "python3.6", "site-packages", "_frida.so"))
 
             upload_node_bindings_to_npm("/usr/bin/node", upload, publish=False)
         elif builder == 'ubuntu_18_04-arm64':
-            upload_python_bindings_to_pypi("/usr/bin/python2.7",
-                os.path.join(build_dir, "build", "frida_thin-linux-arm64", "lib", "python2.7", "site-packages", "_frida.so"))
             upload_python_bindings_to_pypi("/usr/bin/python3.6",
                 os.path.join(build_dir, "build", "frida_thin-linux-arm64", "lib", "python3.6", "site-packages", "_frida.so"))
 
