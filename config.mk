@@ -11,6 +11,8 @@ FRIDA_JAVA_BRIDGE ?= auto
 FRIDA_OBJC_BRIDGE ?= auto
 FRIDA_SWIFT_BRIDGE ?= auto
 
+FRIDA_AGENT_EMULATED ?= yes
+
 # Include jailbreak-specific integrations
 FRIDA_JAILBREAK ?= auto
 
