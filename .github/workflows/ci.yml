@@ -177,10 +177,6 @@ jobs:
            aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
            cloudflare-email: ${{ secrets.CF_EMAIL }}
            cloudflare-token: ${{ secrets.CF_TOKEN }}
-      - name: Install dependencies soon to be added to Docker image
-        run: |
-          apt-get update
-          apt-get install -y gperf unzip
       - name: Set up NDK
         id: setup-ndk
         uses: nttld/setup-ndk@v1
@@ -225,10 +221,6 @@ jobs:
            aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
            cloudflare-email: ${{ secrets.CF_EMAIL }}
            cloudflare-token: ${{ secrets.CF_TOKEN }}
-      - name: Install dependencies soon to be added to Docker image
-        run: |
-          apt-get update
-          apt-get install -y gperf unzip
       - name: Set up NDK
         id: setup-ndk
         uses: nttld/setup-ndk@v1
