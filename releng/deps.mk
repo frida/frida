@@ -1,4 +1,4 @@
-frida_deps_version = 20220914
+frida_deps_version = 20220924
 frida_bootstrap_version = 20220130
 
 
