@@ -343,9 +343,15 @@ build/frida-ios-universal/usr/lib/frida/frida-gadget.dylib: \
 
 define make-ios-env-rule
 build/frida-env-ios-$1.rc: releng/setup-env.sh build/frida-version.h
-	@for os_arch in $$(build_os_arch) ios-$1; do \
+	@if [ $1 != $$(build_os_arch) ]; then \
+		cross=yes; \
+	else \
+		cross=no; \
+	fi; \
+	for os_arch in $$(build_os_arch) ios-$1; do \
 		if [ ! -f build/frida-env-$$$$os_arch.rc ]; then \
 			FRIDA_HOST=$$$$os_arch \
+			FRIDA_CROSS=$$$$cross \
 			FRIDA_PREFIX="$$(abspath build/frida-ios-$1/usr)" \
 			FRIDA_ASAN=$$(FRIDA_ASAN) \
 			XCODE11="$$(XCODE11)" \

@@ -42,18 +42,30 @@ frida_tools = \
 	$(NULL)
 
 build/frida-env-%.rc: releng/setup-env.sh build/frida-version.h
-	@for os_arch in $(build_os_arch) $*; do \
+	@if [ $* != $(build_os_arch) ]; then \
+		cross=yes; \
+	else \
+		cross=no; \
+	fi; \
+	for os_arch in $(build_os_arch) $*; do \
 		if [ ! -f build/frida-env-$$os_arch.rc ]; then \
 			FRIDA_HOST=$$os_arch \
+			FRIDA_CROSS=$$cross \
 			FRIDA_ASAN=$(FRIDA_ASAN) \
 			XCODE11="$(XCODE11)" \
 			./releng/setup-env.sh || exit 1; \
 		fi \
 	done
 build/frida_thin-env-%.rc: releng/setup-env.sh build/frida-version.h
-	@for os_arch in $(build_os_arch) $*; do \
+	@if [ $* != $(build_os_arch) ]; then \
+		cross=yes; \
+	else \
+		cross=no; \
+	fi; \
+	for os_arch in $(build_os_arch) $*; do \
 		if [ ! -f build/frida_thin-env-$$os_arch.rc ]; then \
 			FRIDA_HOST=$$os_arch \
+			FRIDA_CROSS=$$cross \
 			FRIDA_ASAN=$(FRIDA_ASAN) \
 			FRIDA_ENV_NAME=frida_thin \
 			XCODE11="$(XCODE11)" \
@@ -67,9 +79,15 @@ build/frida_thin-env-%.rc: releng/setup-env.sh build/frida-version.h
 	[ ! -d toolchain-$* ] && ln -s frida_thin-toolchain-$* toolchain-$*; \
 	true
 build/frida_gir-env-%.rc: releng/setup-env.sh build/frida-version.h
-	@for os_arch in $(build_os_arch) $*; do \
+	@if [ $* != $(build_os_arch) ]; then \
+		cross=yes; \
+	else \
+		cross=no; \
+	fi; \
+	for os_arch in $(build_os_arch) $*; do \
 		if [ ! -f build/frida_gir-env-$$os_arch.rc ]; then \
 			FRIDA_HOST=$$os_arch \
+			FRIDA_CROSS=$$cross \
 			FRIDA_ASAN=$(FRIDA_ASAN) \
 			FRIDA_ENV_NAME=frida_gir \
 			XCODE11="$(XCODE11)" \

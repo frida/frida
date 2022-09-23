@@ -117,9 +117,15 @@ $(eval $(call make-package-rules,$(packages),fs))
 
 
 build/fs-env-%.rc:
-	@for os_arch in $(build_os_arch) $*; do \
+	@if [ $* != $(build_os_arch) ]; then \
+		cross=yes; \
+	else \
+		cross=no; \
+	fi; \
+	for os_arch in $(build_os_arch) $*; do \
 		if [ ! -f build/fs-env-$$os_arch.rc ]; then \
 			FRIDA_HOST=$$os_arch \
+			FRIDA_CROSS=$$cross \
 			FRIDA_ASAN=$(FRIDA_ASAN) \
 			FRIDA_ENV_NAME=fs \
 			FRIDA_ENV_SDK=none \

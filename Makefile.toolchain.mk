@@ -158,16 +158,21 @@ build/ft-%/manifest/ninja.pkg: build/ft-env-%.rc deps/.ninja-stamp
 
 
 build/ft-env-%.rc: build/ft-executable.symbols build/ft-executable.version
-	@for os_arch in $(build_os_arch) $*; do \
+	@if [ $* != $(build_os_arch) ]; then \
+		cross=yes; \
+	else \
+		cross=no; \
+	fi; \
+	for os_arch in $(build_os_arch) $*; do \
 		if [ ! -f build/ft-env-$$os_arch.rc ]; then \
-			FRIDA_HOST=$$os_arch $(frida_env_config) ./releng/setup-env.sh; \
+			FRIDA_HOST=$$os_arch FRIDA_CROSS=$$cross $(frida_env_config) ./releng/setup-env.sh; \
 			case $$? in \
 				0) \
 					;; \
 				2) \
 					if [ "$$os_arch" = "$(build_os_arch)" ]; then \
 						MAKE=$(MAKE) ./releng/bootstrap-toolchain.sh $$os_arch || exit 1; \
-						FRIDA_HOST=$$os_arch $(frida_env_config) ./releng/setup-env.sh || exit 1; \
+						FRIDA_HOST=$$os_arch FRIDA_CROSS=$$cross $(frida_env_config) ./releng/setup-env.sh || exit 1; \
 					else \
 						exit 1; \
 					fi \

@@ -52,7 +52,7 @@ read_toolchain_variable ()
   local var_name=$1
   local fallback=$2
 
-  if [ $host_os_arch == $build_os_arch ]; then
+  if [ $host_os_arch == $build_os_arch ] && [ "$FRIDA_CROSS" == yes ]; then
     local contextual_var_name=${var_name}_FOR_BUILD
   else
     local contextual_var_name=${var_name}
