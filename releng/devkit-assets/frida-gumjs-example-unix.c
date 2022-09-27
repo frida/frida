@@ -4,7 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 
-static void on_message (GumScript * script, const gchar * message, GBytes * data, gpointer user_data);
+static void on_message (const gchar * message, GBytes * data, gpointer user_data);
 
 int
 main (int argc,
@@ -31,7 +31,7 @@ main (int argc,
       "    console.log(`[*] close(${args[0].toInt32()})`);\n"
       "  }\n"
       "});",
-      cancellable, &error);
+      NULL, cancellable, &error);
   g_assert (error == NULL);
 
   gum_script_set_message_handler (script, on_message, NULL, NULL);
@@ -55,8 +55,7 @@ main (int argc,
 }
 
 static void
-on_message (GumScript * script,
-            const gchar * message,
+on_message (const gchar * message,
             GBytes * data,
             gpointer user_data)
 {
