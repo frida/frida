@@ -59,9 +59,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-server", "frida-core\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-clr", "frida-clr\frida-clr.vcxproj", "{48AFFAE0-8789-44A6-8756-BC9EA344500C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-python2", "frida-python\frida-python2.vcxproj", "{7409F45B-E10E-48AA-9E68-94C113995D4A}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-python3", "frida-python\frida-python3.vcxproj", "{7505F884-DD69-4F23-ADE6-1E0E049AB018}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-python", "frida-python\frida-python.vcxproj", "{7505F884-DD69-4F23-ADE6-1E0E049AB018}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frida-pipe-32", "frida-core\lib\pipe\frida-pipe-32.vcxproj", "{4C39C3CF-13E5-4346-B6AE-F73013105936}"
 EndProject
@@ -239,14 +237,6 @@ Global
 		{48AFFAE0-8789-44A6-8756-BC9EA344500C}.Release|Win32.Build.0 = Release|Win32
 		{48AFFAE0-8789-44A6-8756-BC9EA344500C}.Release|x64.ActiveCfg = Release|x64
 		{48AFFAE0-8789-44A6-8756-BC9EA344500C}.Release|x64.Build.0 = Release|x64
-		{7409F45B-E10E-48AA-9E68-94C113995D4A}.Debug|Win32.ActiveCfg = Debug|Win32
-		{7409F45B-E10E-48AA-9E68-94C113995D4A}.Debug|Win32.Build.0 = Debug|Win32
-		{7409F45B-E10E-48AA-9E68-94C113995D4A}.Debug|x64.ActiveCfg = Debug|x64
-		{7409F45B-E10E-48AA-9E68-94C113995D4A}.Debug|x64.Build.0 = Debug|x64
-		{7409F45B-E10E-48AA-9E68-94C113995D4A}.Release|Win32.ActiveCfg = Release|Win32
-		{7409F45B-E10E-48AA-9E68-94C113995D4A}.Release|Win32.Build.0 = Release|Win32
-		{7409F45B-E10E-48AA-9E68-94C113995D4A}.Release|x64.ActiveCfg = Release|x64
-		{7409F45B-E10E-48AA-9E68-94C113995D4A}.Release|x64.Build.0 = Release|x64
 		{7505F884-DD69-4F23-ADE6-1E0E049AB018}.Debug|Win32.ActiveCfg = Debug|Win32
 		{7505F884-DD69-4F23-ADE6-1E0E049AB018}.Debug|Win32.Build.0 = Debug|Win32
 		{7505F884-DD69-4F23-ADE6-1E0E049AB018}.Debug|x64.ActiveCfg = Debug|x64
