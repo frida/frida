@@ -1,25 +1,12 @@
 #!/usr/bin/env python3
 
-import os
-import subprocess
+import frida_version
+from pathlib import Path
 import sys
 
 
 def generate_version_header():
-    build_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    description = subprocess.Popen(["git", "describe", "--tags", "--always", "--long"], cwd=build_dir, stdout=subprocess.PIPE).communicate()[0]
-    version = description.strip().decode('utf-8').replace("-", ".")
-    tokens = version.split(".")
-    if len(tokens) > 1:
-        (major, minor, micro, nano, commit) = tokens
-        if nano == "0":
-            version = ".".join([major, minor, micro])
-    else:
-        version = "0.0.0.0.g" + tokens[0]
-        major = "0"
-        minor = "0"
-        micro = "0"
-        nano = "0"
+    v = frida_version.detect()
 
     header = """\
 #ifndef __FRIDA_VERSION_H__
@@ -32,22 +19,23 @@ def generate_version_header():
 #define FRIDA_MICRO_VERSION {micro}
 #define FRIDA_NANO_VERSION {nano}
 
-#endif\n""".format(version=version, major=major, minor=minor, micro=micro, nano=nano)
+#endif\n""".format(version=v.name, major=v.major, minor=v.minor, micro=v.micro, nano=v.nano)
 
     if len(sys.argv) == 1:
         sys.stdout.write(header)
         sys.stdout.flush()
     else:
-        output_filename = sys.argv[1]
-        try:
-            with open(output_filename, "rb") as f:
-                existing_header = f.read()
+        output_filename = Path(sys.argv[1])
+
+        if output_filename.exists():
+            try:
+                existing_header = output_filename.read_text(encoding="utf-8")
                 if header == existing_header:
                     return
-        except:
-            pass
-        with open(output_filename, "w") as f:
-            f.write(header)
+            except:
+                pass
+
+        output_filename.write_text(header, encoding="utf-8")
 
 
 if __name__ == '__main__':

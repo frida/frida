@@ -383,11 +383,11 @@ def generate_meson_env(arch: str, config: str, runtime: str) -> MesonEnv:
     env_dir = get_tmp_path(arch, config, runtime)
     env_dir.mkdir(parents=True, exist_ok=True)
 
-    vc_dir = Path(winenv.get_msvs_installation_dir()) / "VC"
+    vc_dir = winenv.get_msvs_installation_dir() / "VC"
     vc_install_dir = str(vc_dir) + "\\"
 
     msvc_platform = winenv.msvc_platform_from_arch(arch)
-    msvc_dir = Path(winenv.get_msvc_tool_dir())
+    msvc_dir = winenv.get_msvc_tool_dir()
     msvc_bin_dir = msvc_dir / "bin" / ("Host" + winenv.msvc_platform_from_arch(build_arch)) / msvc_platform
 
     msvc_dll_dirs = []
@@ -396,7 +396,6 @@ def generate_meson_env(arch: str, config: str, runtime: str) -> MesonEnv:
         msvc_dll_dirs.append(msvc_dir / "bin" / ("Host" + build_msvc_platform) / build_msvc_platform)
 
     (win_sdk_dir, win_sdk_version) = winenv.get_windows_sdk()
-    win_sdk_dir = Path(win_sdk_dir)
 
     target_sdk_bin_dir = win_sdk_dir / "Bin" / win_sdk_version / msvc_platform
     target_sdk_lib_dir = win_sdk_dir / "Lib" / win_sdk_version / "um" / msvc_platform
