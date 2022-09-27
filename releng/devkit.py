@@ -431,14 +431,20 @@ def generate_example(filename, package, frida_root, host, kit, flavor, extra_ldf
     else:
         rc = env_rc(frida_root, host, flavor)
 
-        cc = probe_env(rc, "echo $CC")
+        if host.split("-")[0] in ["macos", "ios", "android"]:
+            cc = "clang++" if kit == "frida-gumjs" else "clang"
+        else:
+            cc = "g++" if kit == "frida-gumjs" else "gcc"
         cflags = probe_env(rc, "echo $CFLAGS")
         ldflags = probe_env(rc, "echo $LDFLAGS")
 
         (cflags, ldflags) = tweak_flags(cflags, " ".join([" ".join(extra_ldflags), ldflags]))
 
+        if cc == "g++":
+            ldflags += " -static-libstdc++"
+
         params = {
-            "cc": "clang" if host.split("-")[0] in ["macos", "ios", "android"] else "gcc",
+            "cc": cc,
             "cflags": cflags,
             "ldflags": ldflags,
             "source_filename": filename,
