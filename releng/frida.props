@@ -8,8 +8,9 @@
     <FridaCoreDefines>G_LOG_DOMAIN=&quot;Frida&quot;;GLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_56;G_DISABLE_DEPRECATED;HAVE_WINDOWS=1;HAVE_I386=1;HAVE_GIOOPENSSL=1;HAVE_NICE=1;VALA_EXTERN=extern</FridaCoreDefines>
     <FridaCoreValaFlags>-D WINDOWS -D HAVE_GIOOPENSSL -D HAVE_NICE</FridaCoreValaFlags>
     <FridaV8>Enabled</FridaV8>
-    <GLibGenmarshal>py -3 $(SolutionDir)build\toolchain-windows\bin\glib-genmarshal</GLibGenmarshal>
-    <GLibMkenums>py -3 $(SolutionDir)build\toolchain-windows\bin\glib-mkenums</GLibMkenums>
+    <Python>python</Python>
+    <GLibGenmarshal>python $(SolutionDir)build\toolchain-windows\bin\glib-genmarshal</GLibGenmarshal>
+    <GLibMkenums>python $(SolutionDir)build\toolchain-windows\bin\glib-mkenums</GLibMkenums>
     <ValaCompiler>$(SolutionDir)build\toolchain-windows\bin\valac-0.56.exe</ValaCompiler>
     <ValaFlags>--target-glib=2.56 --vapidir="$(SolutionDir)frida-core\vapi" --vapidir="$(SolutionDir)frida-gum\vapi" --vapidir="$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\share\vala\vapi"</ValaFlags>
   </PropertyGroup>

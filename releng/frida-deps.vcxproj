@@ -71,37 +71,33 @@
   <ItemGroup>
     <CustomBuild Include="generate-version-header.py">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-"$(ProjectDir)generate-version-header.py" "$(SolutionDir)build\tmp-windows\frida-version.h" || exit 1
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Python) "$(ProjectDir)generate-version-header.py" "$(SolutionDir)build\tmp-windows\frida-version.h" || exit 1
 REM. &gt; "$(IntDir)frida-version.stamp"
 </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating frida-version.h</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)frida-version.stamp</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir).git\refs\heads\main</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir).git\HEAD</AdditionalInputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-"$(ProjectDir)generate-version-header.py" "$(SolutionDir)build\tmp-windows\frida-version.h" || exit 1
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Python) "$(ProjectDir)generate-version-header.py" "$(SolutionDir)build\tmp-windows\frida-version.h" || exit 1
 REM. &gt; "$(IntDir)frida-version.stamp"
 </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating frida-version.h</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)frida-version.stamp</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir).git\refs\heads\main</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir).git\HEAD</AdditionalInputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkObjects>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-"$(ProjectDir)generate-version-header.py" "$(SolutionDir)build\tmp-windows\frida-version.h" || exit 1
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Python) "$(ProjectDir)generate-version-header.py" "$(SolutionDir)build\tmp-windows\frida-version.h" || exit 1
 REM. &gt; "$(IntDir)frida-version.stamp"
 </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating frida-version.h</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)frida-version.stamp</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir).git\refs\heads\main</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir).git\HEAD</AdditionalInputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-"$(ProjectDir)generate-version-header.py" "$(SolutionDir)build\tmp-windows\frida-version.h" || exit 1
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Python) "$(ProjectDir)generate-version-header.py" "$(SolutionDir)build\tmp-windows\frida-version.h" || exit 1
 REM. &gt; "$(IntDir)frida-version.stamp"
 </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating frida-version.h</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)frida-version.stamp</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir).git\refs\heads\main</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir).git\HEAD</AdditionalInputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
     </CustomBuild>
   </ItemGroup>
@@ -109,34 +105,34 @@ REM. &gt; "$(IntDir)frida-version.stamp"
     <CustomBuild Include="deps.py">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Checking prebuilt dependencies</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)deps.stamp;%(Outputs)</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)deps.mk;$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)deps.mk;%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Checking prebuilt dependencies</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)deps.stamp;%(Outputs)</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)deps.mk;$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)deps.mk;%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Checking prebuilt dependencies</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)deps.stamp;%(Outputs)</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)deps.mk;$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)deps.mk;%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Checking prebuilt dependencies</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)deps.stamp;%(Outputs)</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)deps.mk;$(ProjectDir)wget.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(ProjectDir)deps.py" sync toolchain windows-x86 "$(ProjectDir)..\build\toolchain-windows" || exit 1
-"$(ProjectDir)deps.py" sync sdk windows-x86_64-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
-"$(ProjectDir)deps.py" sync sdk windows-x86-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)deps.mk;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Python) "$(ProjectDir)deps.py" sync toolchain windows-x86 "$(ProjectDir)..\build\toolchain-windows" || exit 1
+$(Python) "$(ProjectDir)deps.py" sync sdk windows-x86_64-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
+$(Python) "$(ProjectDir)deps.py" sync sdk windows-x86-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
 echo &gt; "$(IntDir)deps.stamp"
 </Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(ProjectDir)deps.py" sync toolchain windows-x86 "$(ProjectDir)..\build\toolchain-windows" || exit 1
-"$(ProjectDir)deps.py" sync sdk windows-x86_64-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
-"$(ProjectDir)deps.py" sync sdk windows-x86-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Python) "$(ProjectDir)deps.py" sync toolchain windows-x86 "$(ProjectDir)..\build\toolchain-windows" || exit 1
+$(Python) "$(ProjectDir)deps.py" sync sdk windows-x86_64-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
+$(Python) "$(ProjectDir)deps.py" sync sdk windows-x86-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
 echo &gt; "$(IntDir)deps.stamp"
 </Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(ProjectDir)deps.py" sync toolchain windows-x86 "$(ProjectDir)..\build\toolchain-windows" || exit 1
-"$(ProjectDir)deps.py" sync sdk windows-x86_64-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
-"$(ProjectDir)deps.py" sync sdk windows-x86-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Python) "$(ProjectDir)deps.py" sync toolchain windows-x86 "$(ProjectDir)..\build\toolchain-windows" || exit 1
+$(Python) "$(ProjectDir)deps.py" sync sdk windows-x86_64-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
+$(Python) "$(ProjectDir)deps.py" sync sdk windows-x86-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
 echo &gt; "$(IntDir)deps.stamp"
 </Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(ProjectDir)deps.py" sync toolchain windows-x86 "$(ProjectDir)..\build\toolchain-windows" || exit 1
-"$(ProjectDir)deps.py" sync sdk windows-x86_64-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
-"$(ProjectDir)deps.py" sync sdk windows-x86-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Python) "$(ProjectDir)deps.py" sync toolchain windows-x86 "$(ProjectDir)..\build\toolchain-windows" || exit 1
+$(Python) "$(ProjectDir)deps.py" sync sdk windows-x86_64-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
+$(Python) "$(ProjectDir)deps.py" sync sdk windows-x86-$(Configuration) "$(ProjectDir)..\build\sdk-windows" || exit 1
 echo &gt; "$(IntDir)deps.stamp"
 </Command>
     </CustomBuild>
