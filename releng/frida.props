@@ -9,6 +9,8 @@
     <FridaCoreValaFlags>-D WINDOWS -D HAVE_GIOOPENSSL -D HAVE_NICE</FridaCoreValaFlags>
     <FridaV8>Enabled</FridaV8>
     <Python>python</Python>
+    <PythonLocation Condition="'$(PythonLocation)'=='' AND '$(Platform)'=='x64'">$(ProgramFiles)\Python310</PythonLocation>
+    <PythonLocation Condition="'$(PythonLocation)'=='' AND '$(Platform)'=='Win32'">$(MSBuildProgramFiles32)\Python310</PythonLocation>
     <GLibGenmarshal>python $(SolutionDir)build\toolchain-windows\bin\glib-genmarshal</GLibGenmarshal>
     <GLibMkenums>python $(SolutionDir)build\toolchain-windows\bin\glib-mkenums</GLibMkenums>
     <ValaCompiler>$(SolutionDir)build\toolchain-windows\bin\valac-0.56.exe</ValaCompiler>
