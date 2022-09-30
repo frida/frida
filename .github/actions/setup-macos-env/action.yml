@@ -74,15 +74,6 @@ runs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
-    - name: Install agithub
-      run: pip install agithub
-      shell: bash
-    - name: Install requests
-      run: pip install requests
-      shell: bash
-    - name: Install twine
-      run: pip install twine
-      shell: bash
     - name: Install cloudflare-cli
       run: npm install -g cloudflare-cli
       shell: bash

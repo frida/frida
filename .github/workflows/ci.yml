@@ -16,7 +16,477 @@ env:
   ELECTRON_TARGETS_FREEBSD: '16.0.0'
 
 jobs:
+  #release:
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #    #- name: Check out repo
+  #    #  uses: actions/checkout@v3
+  #    #  with:
+  #    #    fetch-depth: 0
+  #    #    submodules: true
+  #    #- name: Set up environment
+  #    #  uses: ./.github/actions/setup-linux-env
+  #    #  with:
+  #    #    aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+  #    #    aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+  #    #    cloudflare-email: ${{ secrets.CF_EMAIL }}
+  #    #    cloudflare-token: ${{ secrets.CF_TOKEN }}
+  #    - name: Fake stuff
+  #      run: |
+  #        export FRIDA_VERSION=15.2.3-dev.111
+  #    - name: Download artifacts
+  #      uses: dawidd6/action-download-artifact@v2
+  #      with:
+  #        run_id: 3177702788
+  #    - name: Explore after
+  #      run: |
+  #        echo "vvv"
+  #        ls -l
+  #        echo "^^^"
+  #    #- name: Publish Python bindings
+  #    #  uses: pypa/gh-action-pypi-publish@release/v1.5
+  #    #  with:
+  #    #    password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+  #    #    repository_url: https://test.pypi.org/legacy/
+  #    #    packages_dir: frida-python/dist/
+
+  package-apple-universal:
+    if: false
+    runs-on: macos-latest
+    #needs: [frida-macos, frida-ios]
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - name: Set up environment
+        uses: ./.github/actions/setup-macos-env
+        with:
+          certificates-p12: ${{ secrets.APPLE_CERTIFICATES_P12 }}
+          certificates-password: ${{ secrets.APPLE_CERTIFICATES_PASSWORD }}
+          keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
+          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
+          cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Download frida-gadget-macos-x86_64.dylib
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: frida-gadget-macos-x86_64
+          path: macos-x86_64/
+          run_id: 3177702788
+      - name: Download frida-gadget-macos-arm64.dylib
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: frida-gadget-macos-arm64
+          path: macos-arm64/
+          run_id: 3177702788
+      - name: Download frida-gadget-macos-arm64e.dylib
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: frida-gadget-macos-arm64e
+          path: macos-arm64e/
+          run_id: 3177702788
+      - name: Create frida-gadget-macos-universal.dylib
+        run: |
+          lipo \
+              macos-x86_64/frida-gadget.dylib \
+              macos-arm64/frida-gadget.dylib \
+              macos-arm64e/frida-gadget.dylib \
+              -create -output frida-gadget-macos-universal.dylib
+          install_name_tool \
+              -id @executable_path/../Frameworks/FridaGadget.dylib \
+              frida-gadget-macos-universal.dylib
+          codesign -f -s "$MACOS_CERTID" frida-gadget-macos-universal.dylib
+      - name: Compress frida-gadget-macos-universal.dylib
+        run: xz -T 0 frida-gadget-macos-universal.dylib
+      - name: Upload frida-gadget-macos-universal.dylib.xz
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-assets
+          path: frida-gadget-macos-universal.dylib.xz
+      - name: Download frida-gadget-ios-x86_64.dylib
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: frida-gadget-ios-x86_64
+          path: ios-x86_64/
+          run_id: 3177702788
+      - name: Download frida-gadget-ios-arm64.dylib
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: frida-gadget-ios-arm64
+          path: ios-arm64/
+          run_id: 3177702788
+      - name: Download frida-gadget-ios-arm64e.dylib
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: frida-gadget-ios-arm64e
+          path: ios-arm64e/
+          run_id: 3177702788
+      - name: Create frida-gadget-ios-universal.dylib
+        run: |
+          lipo \
+              ios-x86_64/frida-gadget.dylib \
+              ios-arm64/frida-gadget.dylib \
+              ios-arm64e/frida-gadget.dylib \
+              -create -output frida-gadget-ios-universal.dylib
+          install_name_tool \
+              -id @executable_path/Frameworks/FridaGadget.dylib \
+              frida-gadget-ios-universal.dylib
+          codesign -f -s "$IOS_CERTID" frida-gadget-ios-universal.dylib
+      - name: Compress frida-gadget-ios-universal.dylib
+        run: |
+          gzip -k frida-gadget-ios-universal.dylib
+          xz -T 0 frida-gadget-ios-universal.dylib
+      - name: Upload frida-gadget-ios-universal.dylib.gz
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-assets
+          path: frida-gadget-ios-universal.dylib.gz
+      - name: Upload frida-gadget-ios-universal.dylib.xz
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-assets
+          path: frida-gadget-ios-universal.dylib.xz
+      - name: Download Swift bindings for macOS/x86_64
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: frida-swift-macos-x86_64
+          path: macos-x86_64/
+          run_id: 3177702788
+      - name: Download Swift bindings for macOS/arm64
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: frida-swift-macos-arm64
+          path: macos-arm64/
+          run_id: 3177702788
+      - name: Create universal Swift bindings Frida.framework for macOS
+        run: |
+          tar -C macos-x86_64 -xf macos-x86_64/frida-swift.tar
+          tar -C macos-arm64 -xf macos-arm64/frida-swift.tar
+          lipo \
+              macos-x86_64/Frida.framework/Frida \
+              macos-arm64/Frida.framework/Frida \
+              -create -output Frida.framework
+          cp -a macos-arm64/Frida.framework.dSYM .
+          rm Frida.framework.dSYM/Contents/Resources/DWARF/Frida
+          lipo \
+              macos-x86_64/Frida.framework.dSYM/Contents/Resources/DWARF/Frida \
+              macos-arm64/Frida.framework.dSYM/Contents/Resources/DWARF/Frida \
+              -create -output Frida.framework.dSYM/Contents/Resources/DWARF/Frida
+      - name: Package Frida.framework as frida-swift-macos-universal.tar.xz
+        run: |
+          tar \
+              -cJf frida-swift-macos-universal.tar.xz \
+              Frida.framework \
+              Frida.framework.dSYM
+        env:
+          XZ_OPT: "-T 0"
+      - name: Upload frida-swift-macos-universal.tar.xz
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-assets
+          path: frida-swift-macos-universal.tar.xz
+
+  package-windows:
+    if: false
+    runs-on: ubuntu-latest
+    #needs: frida-windows
+    strategy:
+      matrix:
+        arch: [x86, x86_64]
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - name: Package Gum devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-gum-devkit-windows-${{ matrix.arch }}
+      - name: Package GumJS devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-gumjs-devkit-windows-${{ matrix.arch }}
+      - name: Package Core devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-core-devkit-windows-${{ matrix.arch }}
+      - name: Package frida-server
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-server-windows-${{ matrix.arch }}
+      - name: Package frida-portal
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-portal-windows-${{ matrix.arch }}
+      - name: Package frida-gadget
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-gadget-windows-${{ matrix.arch }}
+      - name: Package .NET bindings
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-clr-windows-${{ matrix.arch }}
+      - name: Package QML bindings
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-qml-windows-${{ matrix.arch }}
+
+  package-windows-sfx:
+    if: false
+    runs-on: windows-latest
+    #needs: frida-windows
+    strategy:
+      matrix:
+        arch: [x86, x86_64]
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - name: Package Gum devkit
+        uses: ./.github/actions/package-artifact-files-as-sfx
+        with:
+          name: frida-gum-devkit-windows-${{ matrix.arch }}
+      - name: Package GumJS devkit
+        uses: ./.github/actions/package-artifact-files-as-sfx
+        with:
+          name: frida-gumjs-devkit-windows-${{ matrix.arch }}
+      - name: Package Core devkit
+        uses: ./.github/actions/package-artifact-files-as-sfx
+        with:
+          name: frida-core-devkit-windows-${{ matrix.arch }}
+
+  package-macos:
+    if: false
+    runs-on: ubuntu-latest
+    #needs: frida-macos
+    strategy:
+      matrix:
+        arch: [x86_64, arm64, arm64e]
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - name: Package Gum devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-gum-devkit-macos-${{ matrix.arch }}
+      - name: Package gum-graft
+        if: matrix.arch != 'arm64e'
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: gum-graft-macos-${{ matrix.arch }}
+      - name: Package GumJS devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-gumjs-devkit-macos-${{ matrix.arch }}
+      - name: Package Core devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-core-devkit-macos-${{ matrix.arch }}
+      - name: Package frida-server
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-server-macos-${{ matrix.arch }}
+      - name: Package frida-portal
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-portal-macos-${{ matrix.arch }}
+      - name: Package frida-inject
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-inject-macos-${{ matrix.arch }}
+      - name: Package QML bindings
+        if: matrix.arch == 'x86_64'
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-qml-macos-${{ matrix.arch }}
+
+  package-linux:
+    if: false
+    runs-on: ubuntu-latest
+    #needs: frida-linux
+    strategy:
+      matrix:
+        arch: [x86, x86_64, armhf, arm64, mips, mipsel, mips64, mips64el]
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - name: Package Gum devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-gum-devkit-linux-${{ matrix.arch }}
+      - name: Package GumJS devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-gumjs-devkit-linux-${{ matrix.arch }}
+      - name: Package Core devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-core-devkit-linux-${{ matrix.arch }}
+      - name: Package frida-server
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-server-linux-${{ matrix.arch }}
+      - name: Package frida-portal
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-portal-linux-${{ matrix.arch }}
+      - name: Package frida-gadget
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-gadget-linux-${{ matrix.arch }}
+      - name: Package frida-inject
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-inject-linux-${{ matrix.arch }}
+      - name: Package QML bindings
+        if: matrix.arch == 'x86_64'
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-qml-linux-${{ matrix.arch }}
+
+  package-ios:
+    if: false
+    runs-on: ubuntu-latest
+    #needs: frida-ios
+    strategy:
+      matrix:
+        arch: [x86_64, arm64, arm64e, arm64eoabi]
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - name: Package Gum devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-gum-devkit-ios-${{ matrix.arch }}
+      - name: Package GumJS devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-gumjs-devkit-ios-${{ matrix.arch }}
+      - name: Package Core devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-core-devkit-ios-${{ matrix.arch }}
+      - name: Package frida-portal
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-portal-ios-${{ matrix.arch }}
+
+  package-android:
+    if: false
+    runs-on: ubuntu-latest
+    #needs: frida-android
+    strategy:
+      matrix:
+        arch: [x86, x86_64, arm, arm64]
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - name: Package Gum devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-gum-devkit-android-${{ matrix.arch }}
+      - name: Package GumJS devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-gumjs-devkit-android-${{ matrix.arch }}
+      - name: Package Core devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-core-devkit-android-${{ matrix.arch }}
+      - name: Package frida-server
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-server-android-${{ matrix.arch }}
+      - name: Package frida-portal
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-portal-android-${{ matrix.arch }}
+      - name: Package frida-gadget
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-gadget-android-${{ matrix.arch }}
+      - name: Package frida-inject
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-inject-android-${{ matrix.arch }}
+
+  package-freebsd:
+    if: false
+    runs-on: ubuntu-latest
+    #needs: frida-freebsd
+    strategy:
+      matrix:
+        arch: [arm64]
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - name: Package Gum devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-gum-devkit-freebsd-${{ matrix.arch }}
+      - name: Package GumJS devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-gumjs-devkit-freebsd-${{ matrix.arch }}
+      - name: Package Core devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-core-devkit-freebsd-${{ matrix.arch }}
+      - name: Package frida-server
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-server-freebsd-${{ matrix.arch }}
+      - name: Package frida-portal
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-portal-freebsd-${{ matrix.arch }}
+      - name: Package frida-gadget
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-gadget-freebsd-${{ matrix.arch }}
+      - name: Package frida-inject
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-inject-freebsd-${{ matrix.arch }}
+
+  package-qnx:
+    if: false
+    runs-on: ubuntu-latest
+    #needs: frida-qnx
+    strategy:
+      matrix:
+        arch: [armeabi]
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - name: Package Gum devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-gum-devkit-qnx-${{ matrix.arch }}
+      - name: Package GumJS devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-gumjs-devkit-qnx-${{ matrix.arch }}
+      - name: Package Core devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-core-devkit-qnx-${{ matrix.arch }}
+      - name: Package frida-server
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-server-qnx-${{ matrix.arch }}
+      - name: Package frida-portal
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-portal-qnx-${{ matrix.arch }}
+      - name: Package frida-gadget
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-gadget-qnx-${{ matrix.arch }}
+      - name: Package frida-inject
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-inject-qnx-${{ matrix.arch }}
+
   frida-windows:
+    if: false
     runs-on: windows-latest
     needs: sdk-windows
     strategy:
@@ -144,9 +614,9 @@ jobs:
         with:
           name: frida-node-windows-${{ matrix.arch }}
           path: frida-node/prebuilds/*
-      - name: Build frida-clr
+      - name: Build .NET bindings
         run: devenv frida.sln /Build $Env:FRIDA_SLN_CONFIG /Project frida-clr
-      - name: Upload frida-clr
+      - name: Upload .NET bindings
         uses: actions/upload-artifact@v3
         with:
           name: frida-clr-windows-${{ matrix.arch }}
@@ -165,6 +635,7 @@ jobs:
           path: build/frida-windows/${{ env.FRIDA_VS_HOST }}/lib/qt5/qml/
 
   frida-macos:
+    if: false
     runs-on: macos-12
     needs: sdk-macos
     strategy:
@@ -243,18 +714,28 @@ jobs:
         with:
           name: frida-gadget-macos-${{ matrix.arch }}
           path: build/frida-macos-${{ matrix.arch }}/lib/frida/frida-gadget.dylib
-      - name: Build frida-swift
+      - name: Build Swift bindings
         if: matrix.arch != 'arm64e'
         run: |
           cp build/devkits/core/* frida-swift/CFrida/
           cd frida-swift
           xcodebuild -arch ${{ matrix.arch }} -configuration Release
-      - name: Upload frida-swift
+      - name: Package Swift bindings
+        if: matrix.arch != 'arm64e'
+        run: |
+          tar \
+              -C frida-swift/build/Release \
+              -cf frida-swift.tar \
+              Frida.framework \
+              Frida.framework.dSYM
+        env:
+          XZ_OPT: "-T 0"
+      - name: Upload Swift bindings
         if: matrix.arch != 'arm64e'
         uses: actions/upload-artifact@v3
         with:
           name: frida-swift-macos-${{ matrix.arch }}
-          path: frida-swift/build/Release
+          path: frida-swift.tar
       - name: Build Python bindings
         run: |
           make build/tmp-macos-${{ matrix.arch }}/frida-python3.10/.frida-stamp PYTHON=python3.10
@@ -321,6 +802,7 @@ jobs:
           path: build/frida-macos-${{ matrix.arch }}/lib/qt5/qml/
 
   frida-linux:
+    if: false
     runs-on: ubuntu-latest
     needs: sdk-linux
     strategy:
@@ -392,11 +874,18 @@ jobs:
         with:
           name: frida-inject-linux-${{ matrix.arch }}
           path: build/frida-linux-${{ matrix.arch }}/bin/frida-inject
-      - name: Upload frida-gadget
+      - name: Upload 32-bit frida-gadget
+        if: ${{ !contains(matrix.arch, '64') }}
         uses: actions/upload-artifact@v3
         with:
           name: frida-gadget-linux-${{ matrix.arch }}
-          path: build/frida-linux-${{ matrix.arch }}/lib/frida/*/frida-gadget.so
+          path: build/frida-linux-${{ matrix.arch }}/lib/frida/32/frida-gadget.so
+      - name: Upload 64-bit frida-gadget
+        if: ${{ contains(matrix.arch, '64') }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: frida-gadget-linux-${{ matrix.arch }}
+          path: build/frida-linux-${{ matrix.arch }}/lib/frida/64/frida-gadget.so
       - name: Build Python bindings
         run: |
           make build/tmp_thin-linux-${{ matrix.arch }}/frida-python3.10/.frida-stamp \
@@ -476,6 +965,7 @@ jobs:
           path: build/frida-linux-${{ matrix.arch }}/lib/qt5/qml/
 
   frida-ios:
+    if: false
     runs-on: macos-11
     needs: sdk-ios
     strategy:
@@ -552,6 +1042,7 @@ jobs:
           path: build/frida-ios-${{ matrix.arch }}/usr/lib/frida/frida-gadget.dylib
 
   frida-android:
+    if: false
     runs-on: ubuntu-latest
     needs: [sdk-linux, sdk-android-32, sdk-android-64]
     strategy:
@@ -623,13 +1114,21 @@ jobs:
         with:
           name: frida-inject-android-${{ matrix.arch }}
           path: build/frida-android-${{ matrix.arch }}/bin/frida-inject
-      - name: Upload frida-gadget
+      - name: Upload 32-bit frida-gadget
+        if: ${{ !contains(matrix.arch, '64') }}
         uses: actions/upload-artifact@v3
         with:
           name: frida-gadget-android-${{ matrix.arch }}
-          path: build/frida-android-${{ matrix.arch }}/lib/frida/*/frida-gadget.so
+          path: build/frida-android-${{ matrix.arch }}/lib/frida/32/frida-gadget.so
+      - name: Upload 64-bit frida-gadget
+        if: ${{ contains(matrix.arch, '64') }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: frida-gadget-android-${{ matrix.arch }}
+          path: build/frida-android-${{ matrix.arch }}/lib/frida/64/frida-gadget.so
 
-  frida-freebsd-arm64:
+  frida-freebsd:
+    if: false
     runs-on: [self-hosted, freebsd, arm64]
     steps:
       - name: Check out repo
@@ -694,7 +1193,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: frida-gadget-freebsd-arm64
-          path: build/frida-freebsd-arm64/lib/frida/*/frida-gadget.so
+          path: build/frida-freebsd-arm64/lib/frida/64/frida-gadget.so
       - name: Test Core
         run: make check-core
       - name: Build Python bindings
@@ -727,6 +1226,7 @@ jobs:
           path: frida-node/prebuilds/*
 
   frida-qnx:
+    if: false
     runs-on: ubuntu-latest
     needs: sdk-linux
     container: ghcr.io/frida/qnx-tools:latest
@@ -793,7 +1293,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: frida-gadget-qnx-armeabi
-          path: build/frida_thin-qnx-armeabi/lib/frida/*/frida-gadget.so
+          path: build/frida_thin-qnx-armeabi/lib/frida/32/frida-gadget.so
       - name: Test Core
         run: |
           mkdir -p /tmp/pkg
@@ -804,6 +1304,7 @@ jobs:
         continue-on-error: true
 
   toolchain-windows:
+    if: false
     runs-on: windows-latest
     steps:
       - name: Check out repo
@@ -819,6 +1320,7 @@ jobs:
         run: python releng\deps.py roll toolchain windows-x86
 
   sdk-windows:
+    if: false
     runs-on: windows-latest
     needs: toolchain-windows
     strategy:
@@ -840,6 +1342,7 @@ jobs:
         run: python releng\deps.py roll sdk windows-${{ matrix.arch }}-${{ matrix.config }} --activate
 
   toolchain-macos:
+    if: false
     runs-on: macos-latest
     strategy:
       matrix:
@@ -862,6 +1365,7 @@ jobs:
         run: releng/deps.py roll toolchain macos-${{ matrix.arch }}
 
   sdk-macos:
+    if: false
     runs-on: macos-latest
     needs: toolchain-macos
     strategy:
@@ -885,6 +1389,7 @@ jobs:
         run: releng/deps.py roll sdk macos-${{ matrix.arch }} --activate
 
   sdk-ios:
+    if: false
     runs-on: macos-11
     needs: toolchain-macos
     strategy:
@@ -909,6 +1414,7 @@ jobs:
         run: releng/deps.py roll sdk ios-${{ matrix.arch }} --activate
 
   toolchain-linux:
+    if: false
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -929,6 +1435,7 @@ jobs:
         run: releng/deps.py roll toolchain linux-${{ matrix.arch }}
 
   sdk-linux:
+    if: false
     runs-on: ubuntu-latest
     needs: toolchain-linux
     strategy:
@@ -953,6 +1460,7 @@ jobs:
         run: releng/deps.py roll sdk linux-${{ matrix.arch }} --activate
 
   sdk-android-32:
+    if: false
     runs-on: ubuntu-latest
     needs: toolchain-linux
     strategy:
@@ -997,6 +1505,7 @@ jobs:
           FRIDA_BUILD_ARCH: x86
 
   sdk-android-64:
+    if: false
     runs-on: ubuntu-latest
     needs: toolchain-linux
     strategy:

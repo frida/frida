@@ -56,15 +56,6 @@ runs:
       with:
         node-version: 18
         architecture: ${{ inputs.architecture }}
-    - name: Install agithub
-      run: pip install agithub
-      shell: pwsh
-    - name: Install requests
-      run: pip install requests
-      shell: pwsh
-    - name: Install twine
-      run: pip install twine
-      shell: pwsh
     - name: Install cloudflare-cli
       run: npm install -g cloudflare-cli
       shell: pwsh
