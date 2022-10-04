@@ -64,6 +64,16 @@ jobs:
           mkdir -p ios-repo/debs
           cp release-assets/frida_*_iphoneos-*.deb ios-repo/debs/
           cd ios-repo
+          (
+            echo "Origin: Frida"
+            echo "Label: Frida"
+            echo "Suite: stable"
+            echo "Version: 1.0"
+            echo "Codename: ios"
+            echo "Architectures: iphoneos-arm"
+            echo "Components: main"
+            echo "Description: Official Frida Repo"
+          ) > Release
           reprepro \
               -Vb . \
               --confdir $GITHUB_WORKSPACE/ios-repo-config \
