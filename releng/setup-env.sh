@@ -1040,7 +1040,13 @@ chmod 755 "$pkg_config_wrapper"
 env_rc=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-env-${host_os_arch}.rc
 
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
-  env_path_sdk="$FRIDA_SDKROOT/bin/${build_os_arch}:"
+  env_path_sdk="$FRIDA_SDKROOT/bin/${build_os_arch}"
+  case ${build_os_arch} in
+    macos-arm64*)
+      env_path_sdk="$env_path_sdk:$FRIDA_SDKROOT/bin/macos-x86_64"
+      ;;
+  esac
+  env_path_sdk="$env_path_sdk:"
 else
   env_path_sdk=""
 fi
