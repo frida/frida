@@ -50,7 +50,7 @@ jobs:
           ls release-assets/
       - name: Publish iOS .deb
         run: |
-          mkdir ~/.reprepro
+          mkdir ios-repo-config
           (
             echo "Origin: Cydia/Frida"
             echo "Label: frida"
@@ -60,13 +60,13 @@ jobs:
             echo "Architectures: iphoneos-arm"
             echo "Components: main"
             echo "Description: Frida for iOS"
-          ) > ~/.reprepro/distributions
+          ) > ios-repo-config/distributions
           mkdir -p ios-repo/debs
           cp release-assets/frida_*_iphoneos-*.deb ios-repo/debs/
           cd ios-repo
           reprepro \
               -Vb . \
-              --confdir ~/.reprepo \
+              --confdir ../ios-repo-config \
               --ignore=forbiddenchar \
               includedeb \
               stable \
