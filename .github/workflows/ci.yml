@@ -40,10 +40,15 @@ jobs:
       - name: Create iOS .deb
         run: |
           mkdir release-assets
-          frida-core/tools/package-server.sh \
+          frida-core/tools/package-server-ios.sh \
               ios-assets \
               release-assets/frida_${FRIDA_VERSION}_iphoneos-arm.deb
           ls release-assets/
+      - name: Upload iOS .deb (temporarily, for debugging)
+        uses: actions/upload-artifact@v3
+        with:
+          name: frida-server-ios-deb
+          path: release-assets/*.deb
       #- name: Publish Python bindings
       #  uses: pypa/gh-action-pypi-publish@release/v1.5
       #  with:
