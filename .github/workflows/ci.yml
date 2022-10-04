@@ -691,6 +691,7 @@ jobs:
           path: build/frida-windows/${{ env.FRIDA_VS_HOST }}/lib/qt5/qml/
 
   frida-macos:
+    if: false
     needs: sdk-macos
     strategy:
       matrix:
@@ -1399,6 +1400,7 @@ jobs:
         run: python releng\deps.py roll sdk windows-${{ matrix.arch }}-${{ matrix.config }} --activate
 
   toolchain-macos:
+    if: false
     strategy:
       matrix:
         arch: [x86_64, arm64]
@@ -1423,10 +1425,11 @@ jobs:
         uses: ./.github/actions/teardown-macos-env
 
   sdk-macos:
-    needs: toolchain-macos
+    #needs: toolchain-macos
     strategy:
       matrix:
-        arch: [x86_64, arm64, arm64e]
+        #arch: [x86_64, arm64, arm64e]
+        arch: [arm64, arm64e]
       fail-fast: false
     runs-on: ${{ matrix.arch == 'x86_64' && 'macos-latest' || 'macos-12-arm64' }}
     steps:
