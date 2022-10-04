@@ -51,7 +51,6 @@ jobs:
   #    #    packages_dir: frida-python/dist/
 
   package-apple-universal:
-    if: false
     runs-on: macos-latest
     #needs: [frida-macos, frida-ios]
     steps:
@@ -67,25 +66,88 @@ jobs:
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
-      - name: Download frida-gadget-macos-x86_64.dylib
+      - name: Download frida-server for iOS/arm64
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: frida-server-ios-arm64
+          path: ios-arm64/
+          run_id: 3177702788
+      - name: Download frida-server for iOS/arm64e
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: frida-server-ios-arm64e
+          path: ios-arm64e/
+          run_id: 3177702788
+      - name: Download frida-server for iOS/arm64eoabi
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: frida-server-ios-arm64eoabi
+          path: ios-arm64eoabi/
+          run_id: 3177702788
+      - name: Create universal frida-server for iOS
+        run: |
+          ./releng/mkfatmacho.py \
+              frida-server-ios-universal \
+              ios-arm64/frida-server \
+              ios-arm64eoabi/frida-server \
+              ios-arm64e/frida-server
+      - name: Download frida-agent for iOS/arm64
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: frida-agent-ios-arm64
+          path: ios-arm64/
+          run_id: 3177702788
+      - name: Download frida-agent for iOS/arm64e
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: frida-agent-ios-arm64e
+          path: ios-arm64e/
+          run_id: 3177702788
+      - name: Create universal frida-agent for iOS
+        run: |
+          lipo \
+              ios-arm64/frida-agent.dylib \
+              ios-arm64e/frida-agent.dylib \
+              -create -output frida-agent-ios-universal.dylib
+          install_name_tool \
+              -id FridaAgent \
+              frida-agent-ios-universal.dylib
+          codesign \
+              -f -s "$IOS_CERTID" \
+              frida-agent-ios-universal.dylib
+      - name: Assemble iOS assets
+        run: |
+          mkdir -p \
+              ios-assets/usr/bin/ \
+              ios-assets/usr/lib/frida/
+          mv frida-server-ios-universal \
+              ios-assets/usr/bin/frida-server
+          mv frida-agent-ios-universal.dylib \
+              ios-assets/usr/lib/frida/frida-agent.dylib
+      - name: Upload iOS assets
+        uses: actions/upload-artifact@v3
+        with:
+          name: ios-assets
+          path: ios-assets/*
+      - name: Download frida-gadget for macOS/x86_64
         uses: dawidd6/action-download-artifact@v2
         with:
           name: frida-gadget-macos-x86_64
           path: macos-x86_64/
           run_id: 3177702788
-      - name: Download frida-gadget-macos-arm64.dylib
+      - name: Download frida-gadget for macOS/arm64
         uses: dawidd6/action-download-artifact@v2
         with:
           name: frida-gadget-macos-arm64
           path: macos-arm64/
           run_id: 3177702788
-      - name: Download frida-gadget-macos-arm64e.dylib
+      - name: Download frida-gadget for macOS/arm64e
         uses: dawidd6/action-download-artifact@v2
         with:
           name: frida-gadget-macos-arm64e
           path: macos-arm64e/
           run_id: 3177702788
-      - name: Create frida-gadget-macos-universal.dylib
+      - name: Create universal frida-gadget for macOS
         run: |
           lipo \
               macos-x86_64/frida-gadget.dylib \
@@ -95,33 +157,35 @@ jobs:
           install_name_tool \
               -id @executable_path/../Frameworks/FridaGadget.dylib \
               frida-gadget-macos-universal.dylib
-          codesign -f -s "$MACOS_CERTID" frida-gadget-macos-universal.dylib
-      - name: Compress frida-gadget-macos-universal.dylib
+          codesign \
+              -f -s "$MACOS_CERTID" \
+              frida-gadget-macos-universal.dylib
+      - name: Compress universal frida-gadget for macOS
         run: xz -T 0 frida-gadget-macos-universal.dylib
-      - name: Upload frida-gadget-macos-universal.dylib.xz
+      - name: Upload universal frida-gadget for macOS
         uses: actions/upload-artifact@v3
         with:
           name: release-assets
           path: frida-gadget-macos-universal.dylib.xz
-      - name: Download frida-gadget-ios-x86_64.dylib
+      - name: Download frida-gadget for iOS/x86_64
         uses: dawidd6/action-download-artifact@v2
         with:
           name: frida-gadget-ios-x86_64
           path: ios-x86_64/
           run_id: 3177702788
-      - name: Download frida-gadget-ios-arm64.dylib
+      - name: Download frida-gadget for iOS/arm64
         uses: dawidd6/action-download-artifact@v2
         with:
           name: frida-gadget-ios-arm64
           path: ios-arm64/
           run_id: 3177702788
-      - name: Download frida-gadget-ios-arm64e.dylib
+      - name: Download frida-gadget for iOS/arm64e
         uses: dawidd6/action-download-artifact@v2
         with:
           name: frida-gadget-ios-arm64e
           path: ios-arm64e/
           run_id: 3177702788
-      - name: Create frida-gadget-ios-universal.dylib
+      - name: Create universal frida-gadget for iOS
         run: |
           lipo \
               ios-x86_64/frida-gadget.dylib \
@@ -131,60 +195,62 @@ jobs:
           install_name_tool \
               -id @executable_path/Frameworks/FridaGadget.dylib \
               frida-gadget-ios-universal.dylib
-          codesign -f -s "$IOS_CERTID" frida-gadget-ios-universal.dylib
-      - name: Compress frida-gadget-ios-universal.dylib
+          codesign \
+              -f -s "$IOS_CERTID" \
+              frida-gadget-ios-universal.dylib
+      - name: Compress universal frida-gadget for iOS
         run: |
           gzip -k frida-gadget-ios-universal.dylib
           xz -T 0 frida-gadget-ios-universal.dylib
-      - name: Upload frida-gadget-ios-universal.dylib.gz
+      - name: Upload universal frida-gadget for iOS (gz)
         uses: actions/upload-artifact@v3
         with:
           name: release-assets
           path: frida-gadget-ios-universal.dylib.gz
-      - name: Upload frida-gadget-ios-universal.dylib.xz
+      - name: Upload universal frida-gadget for iOS (xz)
         uses: actions/upload-artifact@v3
         with:
           name: release-assets
           path: frida-gadget-ios-universal.dylib.xz
-      - name: Download Swift bindings for macOS/x86_64
-        uses: dawidd6/action-download-artifact@v2
-        with:
-          name: frida-swift-macos-x86_64
-          path: macos-x86_64/
-          run_id: 3177702788
-      - name: Download Swift bindings for macOS/arm64
-        uses: dawidd6/action-download-artifact@v2
-        with:
-          name: frida-swift-macos-arm64
-          path: macos-arm64/
-          run_id: 3177702788
-      - name: Create universal Swift bindings Frida.framework for macOS
-        run: |
-          tar -C macos-x86_64 -xf macos-x86_64/frida-swift.tar
-          tar -C macos-arm64 -xf macos-arm64/frida-swift.tar
-          lipo \
-              macos-x86_64/Frida.framework/Frida \
-              macos-arm64/Frida.framework/Frida \
-              -create -output Frida.framework
-          cp -a macos-arm64/Frida.framework.dSYM .
-          rm Frida.framework.dSYM/Contents/Resources/DWARF/Frida
-          lipo \
-              macos-x86_64/Frida.framework.dSYM/Contents/Resources/DWARF/Frida \
-              macos-arm64/Frida.framework.dSYM/Contents/Resources/DWARF/Frida \
-              -create -output Frida.framework.dSYM/Contents/Resources/DWARF/Frida
-      - name: Package Frida.framework as frida-swift-macos-universal.tar.xz
-        run: |
-          tar \
-              -cJf frida-swift-macos-universal.tar.xz \
-              Frida.framework \
-              Frida.framework.dSYM
-        env:
-          XZ_OPT: "-T 0"
-      - name: Upload frida-swift-macos-universal.tar.xz
-        uses: actions/upload-artifact@v3
-        with:
-          name: release-assets
-          path: frida-swift-macos-universal.tar.xz
+      #- name: Download Swift bindings for macOS/x86_64
+      #  uses: dawidd6/action-download-artifact@v2
+      #  with:
+      #    name: frida-swift-macos-x86_64
+      #    path: macos-x86_64/
+      #    run_id: 3177702788
+      #- name: Download Swift bindings for macOS/arm64
+      #  uses: dawidd6/action-download-artifact@v2
+      #  with:
+      #    name: frida-swift-macos-arm64
+      #    path: macos-arm64/
+      #    run_id: 3177702788
+      #- name: Create universal Swift bindings for macOS
+      #  run: |
+      #    tar -C macos-x86_64 -xf macos-x86_64/frida-swift.tar
+      #    tar -C macos-arm64 -xf macos-arm64/frida-swift.tar
+      #    lipo \
+      #        macos-x86_64/Frida.framework/Frida \
+      #        macos-arm64/Frida.framework/Frida \
+      #        -create -output Frida.framework
+      #    cp -a macos-arm64/Frida.framework.dSYM .
+      #    rm Frida.framework.dSYM/Contents/Resources/DWARF/Frida
+      #    lipo \
+      #        macos-x86_64/Frida.framework.dSYM/Contents/Resources/DWARF/Frida \
+      #        macos-arm64/Frida.framework.dSYM/Contents/Resources/DWARF/Frida \
+      #        -create -output Frida.framework.dSYM/Contents/Resources/DWARF/Frida
+      #- name: Package universal Swift bindings for macOS
+      #  run: |
+      #    tar \
+      #        -cJf frida-swift-macos-universal.tar.xz \
+      #        Frida.framework \
+      #        Frida.framework.dSYM
+      #  env:
+      #    XZ_OPT: "-T 0"
+      #- name: Upload universal Swift bindings for macOS
+      #  uses: actions/upload-artifact@v3
+      #  with:
+      #    name: release-assets
+      #    path: frida-swift-macos-universal.tar.xz
 
   package-windows:
     if: false
@@ -635,6 +701,7 @@ jobs:
           path: build/frida-windows/${{ env.FRIDA_VS_HOST }}/lib/qt5/qml/
 
   frida-macos:
+    if: false
     runs-on: macos-12
     #needs: sdk-macos
     strategy:
@@ -658,62 +725,62 @@ jobs:
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
-      #- name: Install Qt
-      #  if: matrix.arch == 'x86_64'
-      #  uses: jurplel/install-qt-action@v3
-      #  with:
-      #    cache: true
-      #    setup-python: false
-      #- name: Build Gum libraries and tools
-      #  run: make build/frida-macos-${{ matrix.arch }}/lib/pkgconfig/frida-gum-1.0.pc
-      #- name: Build Gum devkit
-      #  run: releng/devkit.py frida-gum macos-${{ matrix.arch }} build/devkits/gum
-      #- name: Upload Gum devkit
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: frida-gum-devkit-macos-${{ matrix.arch }}
-      #    path: build/devkits/gum/
-      #- name: Upload gum-graft
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: gum-graft-macos-${{ matrix.arch }}
-      #    path: build/frida-macos-${{ matrix.arch }}/bin/gum-graft
-      #- name: Build GumJS devkit
-      #  run: releng/devkit.py frida-gumjs macos-${{ matrix.arch }} build/devkits/gumjs
-      #- name: Upload GumJS devkit
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: frida-gumjs-devkit-macos-${{ matrix.arch }}
-      #    path: build/devkits/gumjs/
+      - name: Install Qt
+        if: matrix.arch == 'x86_64'
+        uses: jurplel/install-qt-action@v3
+        with:
+          cache: true
+          setup-python: false
+      - name: Build Gum libraries and tools
+        run: make build/frida-macos-${{ matrix.arch }}/lib/pkgconfig/frida-gum-1.0.pc
+      - name: Build Gum devkit
+        run: releng/devkit.py frida-gum macos-${{ matrix.arch }} build/devkits/gum
+      - name: Upload Gum devkit
+        uses: actions/upload-artifact@v3
+        with:
+          name: frida-gum-devkit-macos-${{ matrix.arch }}
+          path: build/devkits/gum/
+      - name: Upload gum-graft
+        uses: actions/upload-artifact@v3
+        with:
+          name: gum-graft-macos-${{ matrix.arch }}
+          path: build/frida-macos-${{ matrix.arch }}/bin/gum-graft
+      - name: Build GumJS devkit
+        run: releng/devkit.py frida-gumjs macos-${{ matrix.arch }} build/devkits/gumjs
+      - name: Upload GumJS devkit
+        uses: actions/upload-artifact@v3
+        with:
+          name: frida-gumjs-devkit-macos-${{ matrix.arch }}
+          path: build/devkits/gumjs/
       - name: Build Core libraries and tools
         run: make build/frida-macos-${{ matrix.arch }}/lib/pkgconfig/frida-core-1.0.pc
       - name: Build Core devkit
         run: releng/devkit.py frida-core macos-${{ matrix.arch }} build/devkits/core
-      #- name: Upload Core devkit
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: frida-core-devkit-macos-${{ matrix.arch }}
-      #    path: build/devkits/core/
-      #- name: Upload frida-server
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: frida-server-macos-${{ matrix.arch }}
-      #    path: build/frida-macos-${{ matrix.arch }}/bin/frida-server
-      #- name: Upload frida-portal
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: frida-portal-macos-${{ matrix.arch }}
-      #    path: build/frida-macos-${{ matrix.arch }}/bin/frida-portal
-      #- name: Upload frida-inject
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: frida-inject-macos-${{ matrix.arch }}
-      #    path: build/frida-macos-${{ matrix.arch }}/bin/frida-inject
-      #- name: Upload frida-gadget
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: frida-gadget-macos-${{ matrix.arch }}
-      #    path: build/frida-macos-${{ matrix.arch }}/lib/frida/frida-gadget.dylib
+      - name: Upload Core devkit
+        uses: actions/upload-artifact@v3
+        with:
+          name: frida-core-devkit-macos-${{ matrix.arch }}
+          path: build/devkits/core/
+      - name: Upload frida-server
+        uses: actions/upload-artifact@v3
+        with:
+          name: frida-server-macos-${{ matrix.arch }}
+          path: build/frida-macos-${{ matrix.arch }}/bin/frida-server
+      - name: Upload frida-portal
+        uses: actions/upload-artifact@v3
+        with:
+          name: frida-portal-macos-${{ matrix.arch }}
+          path: build/frida-macos-${{ matrix.arch }}/bin/frida-portal
+      - name: Upload frida-inject
+        uses: actions/upload-artifact@v3
+        with:
+          name: frida-inject-macos-${{ matrix.arch }}
+          path: build/frida-macos-${{ matrix.arch }}/bin/frida-inject
+      - name: Upload frida-gadget
+        uses: actions/upload-artifact@v3
+        with:
+          name: frida-gadget-macos-${{ matrix.arch }}
+          path: build/frida-macos-${{ matrix.arch }}/lib/frida/frida-gadget.dylib
       - name: Build Swift bindings
         if: matrix.arch != 'arm64e'
         run: |
@@ -728,78 +795,76 @@ jobs:
               -cf frida-swift.tar \
               Frida.framework \
               Frida.framework.dSYM
-        env:
-          XZ_OPT: "-T 0"
       - name: Upload Swift bindings
         if: matrix.arch != 'arm64e'
         uses: actions/upload-artifact@v3
         with:
           name: frida-swift-macos-${{ matrix.arch }}
           path: frida-swift.tar
-      #- name: Build Python bindings
-      #  run: |
-      #    make build/tmp-macos-${{ matrix.arch }}/frida-python3.10/.frida-stamp PYTHON=python3.10
-      #    export FRIDA_EXTENSION=$PWD/build/frida-macos-${{ matrix.arch }}/lib/python3.10/site-packages/_frida.so
-      #    case ${{ matrix.arch }} in
-      #      x86_64)
-      #        platform=macosx-10.9-x86_64
-      #        ;;
-      #      arm64*)
-      #        platform=macosx-11.0-arm64
-      #        ;;
-      #    esac
-      #    export _PYTHON_HOST_PLATFORM=$platform
-      #    cd frida-python
-      #    pip wheel -w ../build/wheels --no-deps .
-      #- name: Upload Python bindings
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: frida-python-macos-${{ matrix.arch }}
-      #    path: build/wheels/frida-*.whl
-      #- name: Build Node.js bindings
-      #  if: matrix.arch != 'arm64e'
-      #  run: |
-      #    . build/frida-env-macos-${{ matrix.arch }}.rc
-      #    case ${{ matrix.arch }} in
-      #      x86_64)
-      #        gyp_arch=x64
-      #        ;;
-      #      *)
-      #        gyp_arch=${{ matrix.arch }}
-      #        ;;
-      #    esac
-      #    export npm_config_arch=$gyp_arch
-      #    export npm_config_jobs=max
-      #    export prebuild_arch=$gyp_arch
-      #    cd frida-node
-      #    npm version $FRIDA_VERSION
-      #    npm install
-      #    for target in ${{ env.NODE_TARGETS_DEFAULT }}; do
-      #      npm run prebuild -- -r node -t $target
-      #    done
-      #    for target in ${{ env.ELECTRON_TARGETS_DEFAULT }}; do
-      #      npm run prebuild -- -r electron -t $target
-      #    done
-      #- name: Upload Node.js bindings
-      #  if: matrix.arch != 'arm64e'
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: frida-node-macos-${{ matrix.arch }}
-      #    path: frida-node/prebuilds/*
-      #- name: Build QML bindings
-      #  if: matrix.arch == 'x86_64'
-      #  run: |
-      #    cd build/tmp-macos-${{ matrix.arch }}
-      #    mkdir frida-qml
-      #    cd frida-qml
-      #    qmake QMAKE_TARGET.arch=${{ matrix.arch }} ../../../frida-qml
-      #    make -j$(nproc) install
-      #- name: Upload QML bindings
-      #  if: matrix.arch == 'x86_64'
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: frida-qml-macos-${{ matrix.arch }}
-      #    path: build/frida-macos-${{ matrix.arch }}/lib/qt5/qml/
+      - name: Build Python bindings
+        run: |
+          make build/tmp-macos-${{ matrix.arch }}/frida-python3.10/.frida-stamp PYTHON=python3.10
+          export FRIDA_EXTENSION=$PWD/build/frida-macos-${{ matrix.arch }}/lib/python3.10/site-packages/_frida.so
+          case ${{ matrix.arch }} in
+            x86_64)
+              platform=macosx-10.9-x86_64
+              ;;
+            arm64*)
+              platform=macosx-11.0-arm64
+              ;;
+          esac
+          export _PYTHON_HOST_PLATFORM=$platform
+          cd frida-python
+          pip wheel -w ../build/wheels --no-deps .
+      - name: Upload Python bindings
+        uses: actions/upload-artifact@v3
+        with:
+          name: frida-python-macos-${{ matrix.arch }}
+          path: build/wheels/frida-*.whl
+      - name: Build Node.js bindings
+        if: matrix.arch != 'arm64e'
+        run: |
+          . build/frida-env-macos-${{ matrix.arch }}.rc
+          case ${{ matrix.arch }} in
+            x86_64)
+              gyp_arch=x64
+              ;;
+            *)
+              gyp_arch=${{ matrix.arch }}
+              ;;
+          esac
+          export npm_config_arch=$gyp_arch
+          export npm_config_jobs=max
+          export prebuild_arch=$gyp_arch
+          cd frida-node
+          npm version $FRIDA_VERSION
+          npm install
+          for target in ${{ env.NODE_TARGETS_DEFAULT }}; do
+            npm run prebuild -- -r node -t $target
+          done
+          for target in ${{ env.ELECTRON_TARGETS_DEFAULT }}; do
+            npm run prebuild -- -r electron -t $target
+          done
+      - name: Upload Node.js bindings
+        if: matrix.arch != 'arm64e'
+        uses: actions/upload-artifact@v3
+        with:
+          name: frida-node-macos-${{ matrix.arch }}
+          path: frida-node/prebuilds/*
+      - name: Build QML bindings
+        if: matrix.arch == 'x86_64'
+        run: |
+          cd build/tmp-macos-${{ matrix.arch }}
+          mkdir frida-qml
+          cd frida-qml
+          qmake QMAKE_TARGET.arch=${{ matrix.arch }} ../../../frida-qml
+          make -j$(nproc) install
+      - name: Upload QML bindings
+        if: matrix.arch == 'x86_64'
+        uses: actions/upload-artifact@v3
+        with:
+          name: frida-qml-macos-${{ matrix.arch }}
+          path: build/frida-macos-${{ matrix.arch }}/lib/qt5/qml/
 
   frida-linux:
     if: false
