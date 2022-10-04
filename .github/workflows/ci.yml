@@ -52,7 +52,7 @@ jobs:
 
   package-apple-universal:
     runs-on: macos-latest
-    #needs: [frida-macos, frida-ios]
+    needs: [frida-macos, frida-ios]
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -67,23 +67,20 @@ jobs:
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Download frida-server for iOS/arm64
-        uses: dawidd6/action-download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: frida-server-ios-arm64
           path: ios-arm64/
-          run_id: 3177702788
       - name: Download frida-server for iOS/arm64e
-        uses: dawidd6/action-download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: frida-server-ios-arm64e
           path: ios-arm64e/
-          run_id: 3177702788
       - name: Download frida-server for iOS/arm64eoabi
-        uses: dawidd6/action-download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: frida-server-ios-arm64eoabi
           path: ios-arm64eoabi/
-          run_id: 3177702788
       - name: Create universal frida-server for iOS
         run: |
           ./releng/mkfatmacho.py \
@@ -92,17 +89,15 @@ jobs:
               ios-arm64eoabi/frida-server \
               ios-arm64e/frida-server
       - name: Download frida-agent for iOS/arm64
-        uses: dawidd6/action-download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: frida-agent-ios-arm64
           path: ios-arm64/
-          run_id: 3177702788
       - name: Download frida-agent for iOS/arm64e
-        uses: dawidd6/action-download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: frida-agent-ios-arm64e
           path: ios-arm64e/
-          run_id: 3177702788
       - name: Create universal frida-agent for iOS
         run: |
           lipo \
@@ -130,23 +125,20 @@ jobs:
           name: ios-assets
           path: ios-assets/*
       - name: Download frida-gadget for macOS/x86_64
-        uses: dawidd6/action-download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: frida-gadget-macos-x86_64
           path: macos-x86_64/
-          run_id: 3177702788
       - name: Download frida-gadget for macOS/arm64
-        uses: dawidd6/action-download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: frida-gadget-macos-arm64
           path: macos-arm64/
-          run_id: 3177702788
       - name: Download frida-gadget for macOS/arm64e
-        uses: dawidd6/action-download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: frida-gadget-macos-arm64e
           path: macos-arm64e/
-          run_id: 3177702788
       - name: Create universal frida-gadget for macOS
         run: |
           lipo \
@@ -168,23 +160,20 @@ jobs:
           name: release-assets
           path: frida-gadget-macos-universal.dylib.xz
       - name: Download frida-gadget for iOS/x86_64
-        uses: dawidd6/action-download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: frida-gadget-ios-x86_64
           path: ios-x86_64/
-          run_id: 3177702788
       - name: Download frida-gadget for iOS/arm64
-        uses: dawidd6/action-download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: frida-gadget-ios-arm64
           path: ios-arm64/
-          run_id: 3177702788
       - name: Download frida-gadget for iOS/arm64e
-        uses: dawidd6/action-download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: frida-gadget-ios-arm64e
           path: ios-arm64e/
-          run_id: 3177702788
       - name: Create universal frida-gadget for iOS
         run: |
           lipo \
@@ -212,50 +201,47 @@ jobs:
         with:
           name: release-assets
           path: frida-gadget-ios-universal.dylib.xz
-      #- name: Download Swift bindings for macOS/x86_64
-      #  uses: dawidd6/action-download-artifact@v2
-      #  with:
-      #    name: frida-swift-macos-x86_64
-      #    path: macos-x86_64/
-      #    run_id: 3177702788
-      #- name: Download Swift bindings for macOS/arm64
-      #  uses: dawidd6/action-download-artifact@v2
-      #  with:
-      #    name: frida-swift-macos-arm64
-      #    path: macos-arm64/
-      #    run_id: 3177702788
-      #- name: Create universal Swift bindings for macOS
-      #  run: |
-      #    tar -C macos-x86_64 -xf macos-x86_64/frida-swift.tar
-      #    tar -C macos-arm64 -xf macos-arm64/frida-swift.tar
-      #    lipo \
-      #        macos-x86_64/Frida.framework/Frida \
-      #        macos-arm64/Frida.framework/Frida \
-      #        -create -output Frida.framework
-      #    cp -a macos-arm64/Frida.framework.dSYM .
-      #    rm Frida.framework.dSYM/Contents/Resources/DWARF/Frida
-      #    lipo \
-      #        macos-x86_64/Frida.framework.dSYM/Contents/Resources/DWARF/Frida \
-      #        macos-arm64/Frida.framework.dSYM/Contents/Resources/DWARF/Frida \
-      #        -create -output Frida.framework.dSYM/Contents/Resources/DWARF/Frida
-      #- name: Package universal Swift bindings for macOS
-      #  run: |
-      #    tar \
-      #        -cJf frida-swift-macos-universal.tar.xz \
-      #        Frida.framework \
-      #        Frida.framework.dSYM
-      #  env:
-      #    XZ_OPT: "-T 0"
-      #- name: Upload universal Swift bindings for macOS
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: release-assets
-      #    path: frida-swift-macos-universal.tar.xz
+      - name: Download Swift bindings for macOS/x86_64
+        uses: actions/download-artifact@v3
+        with:
+          name: frida-swift-macos-x86_64
+          path: macos-x86_64/
+      - name: Download Swift bindings for macOS/arm64
+        uses: actions/download-artifact@v3
+        with:
+          name: frida-swift-macos-arm64
+          path: macos-arm64/
+      - name: Create universal Swift bindings for macOS
+        run: |
+          tar -C macos-x86_64 -xf macos-x86_64/frida-swift.tar
+          tar -C macos-arm64 -xf macos-arm64/frida-swift.tar
+          lipo \
+              macos-x86_64/Frida.framework/Frida \
+              macos-arm64/Frida.framework/Frida \
+              -create -output Frida.framework
+          cp -a macos-arm64/Frida.framework.dSYM .
+          rm Frida.framework.dSYM/Contents/Resources/DWARF/Frida
+          lipo \
+              macos-x86_64/Frida.framework.dSYM/Contents/Resources/DWARF/Frida \
+              macos-arm64/Frida.framework.dSYM/Contents/Resources/DWARF/Frida \
+              -create -output Frida.framework.dSYM/Contents/Resources/DWARF/Frida
+      - name: Package universal Swift bindings for macOS
+        run: |
+          tar \
+              -cJf frida-swift-macos-universal.tar.xz \
+              Frida.framework \
+              Frida.framework.dSYM
+        env:
+          XZ_OPT: "-T 0"
+      - name: Upload universal Swift bindings for macOS
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-assets
+          path: frida-swift-macos-universal.tar.xz
 
   package-windows:
-    if: false
     runs-on: ubuntu-latest
-    #needs: frida-windows
+    needs: frida-windows
     strategy:
       matrix:
         arch: [x86, x86_64]
@@ -296,9 +282,8 @@ jobs:
           name: frida-qml-windows-${{ matrix.arch }}
 
   package-windows-sfx:
-    if: false
     runs-on: windows-latest
-    #needs: frida-windows
+    needs: frida-windows
     strategy:
       matrix:
         arch: [x86, x86_64]
@@ -319,9 +304,8 @@ jobs:
           name: frida-core-devkit-windows-${{ matrix.arch }}
 
   package-macos:
-    if: false
     runs-on: ubuntu-latest
-    #needs: frida-macos
+    needs: frida-macos
     strategy:
       matrix:
         arch: [x86_64, arm64, arm64e]
@@ -364,9 +348,8 @@ jobs:
           name: frida-qml-macos-${{ matrix.arch }}
 
   package-linux:
-    if: false
     runs-on: ubuntu-latest
-    #needs: frida-linux
+    needs: frida-linux
     strategy:
       matrix:
         arch: [x86, x86_64, armhf, arm64, mips, mipsel, mips64, mips64el]
@@ -408,9 +391,8 @@ jobs:
           name: frida-qml-linux-${{ matrix.arch }}
 
   package-ios:
-    if: false
     runs-on: ubuntu-latest
-    #needs: frida-ios
+    needs: frida-ios
     strategy:
       matrix:
         arch: [x86_64, arm64, arm64e, arm64eoabi]
@@ -435,9 +417,8 @@ jobs:
           name: frida-portal-ios-${{ matrix.arch }}
 
   package-android:
-    if: false
     runs-on: ubuntu-latest
-    #needs: frida-android
+    needs: frida-android
     strategy:
       matrix:
         arch: [x86, x86_64, arm, arm64]
@@ -474,9 +455,8 @@ jobs:
           name: frida-inject-android-${{ matrix.arch }}
 
   package-freebsd:
-    if: false
     runs-on: ubuntu-latest
-    #needs: frida-freebsd
+    needs: frida-freebsd
     strategy:
       matrix:
         arch: [arm64]
@@ -513,9 +493,8 @@ jobs:
           name: frida-inject-freebsd-${{ matrix.arch }}
 
   package-qnx:
-    if: false
     runs-on: ubuntu-latest
-    #needs: frida-qnx
+    needs: frida-qnx
     strategy:
       matrix:
         arch: [armeabi]
@@ -552,7 +531,6 @@ jobs:
           name: frida-inject-qnx-${{ matrix.arch }}
 
   frida-windows:
-    if: false
     runs-on: windows-latest
     needs: sdk-windows
     strategy:
@@ -701,13 +679,11 @@ jobs:
           path: build/frida-windows/${{ env.FRIDA_VS_HOST }}/lib/qt5/qml/
 
   frida-macos:
-    if: false
     runs-on: macos-12
-    #needs: sdk-macos
+    needs: sdk-macos
     strategy:
       matrix:
-        arch: [x86_64]
-        #arch: [x86_64, arm64, arm64e]
+        arch: [x86_64, arm64, arm64e]
       fail-fast: false
     steps:
       - name: Check out repo
@@ -867,7 +843,6 @@ jobs:
           path: build/frida-macos-${{ matrix.arch }}/lib/qt5/qml/
 
   frida-linux:
-    if: false
     runs-on: ubuntu-latest
     needs: sdk-linux
     strategy:
@@ -1030,7 +1005,6 @@ jobs:
           path: build/frida-linux-${{ matrix.arch }}/lib/qt5/qml/
 
   frida-ios:
-    if: false
     runs-on: macos-11
     needs: sdk-ios
     strategy:
@@ -1107,7 +1081,6 @@ jobs:
           path: build/frida-ios-${{ matrix.arch }}/usr/lib/frida/frida-gadget.dylib
 
   frida-android:
-    if: false
     runs-on: ubuntu-latest
     needs: [sdk-linux, sdk-android-32, sdk-android-64]
     strategy:
@@ -1193,7 +1166,6 @@ jobs:
           path: build/frida-android-${{ matrix.arch }}/lib/frida/64/frida-gadget.so
 
   frida-freebsd:
-    if: false
     runs-on: [self-hosted, freebsd, arm64]
     steps:
       - name: Check out repo
@@ -1291,7 +1263,6 @@ jobs:
           path: frida-node/prebuilds/*
 
   frida-qnx:
-    if: false
     runs-on: ubuntu-latest
     needs: sdk-linux
     container: ghcr.io/frida/qnx-tools:latest
@@ -1369,7 +1340,6 @@ jobs:
         continue-on-error: true
 
   toolchain-windows:
-    if: false
     runs-on: windows-latest
     steps:
       - name: Check out repo
@@ -1385,7 +1355,6 @@ jobs:
         run: python releng\deps.py roll toolchain windows-x86
 
   sdk-windows:
-    if: false
     runs-on: windows-latest
     needs: toolchain-windows
     strategy:
@@ -1407,7 +1376,6 @@ jobs:
         run: python releng\deps.py roll sdk windows-${{ matrix.arch }}-${{ matrix.config }} --activate
 
   toolchain-macos:
-    if: false
     runs-on: macos-latest
     strategy:
       matrix:
@@ -1430,7 +1398,6 @@ jobs:
         run: releng/deps.py roll toolchain macos-${{ matrix.arch }}
 
   sdk-macos:
-    if: false
     runs-on: macos-latest
     needs: toolchain-macos
     strategy:
@@ -1454,7 +1421,6 @@ jobs:
         run: releng/deps.py roll sdk macos-${{ matrix.arch }} --activate
 
   sdk-ios:
-    if: false
     runs-on: macos-11
     needs: toolchain-macos
     strategy:
@@ -1479,7 +1445,6 @@ jobs:
         run: releng/deps.py roll sdk ios-${{ matrix.arch }} --activate
 
   toolchain-linux:
-    if: false
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -1500,7 +1465,6 @@ jobs:
         run: releng/deps.py roll toolchain linux-${{ matrix.arch }}
 
   sdk-linux:
-    if: false
     runs-on: ubuntu-latest
     needs: toolchain-linux
     strategy:
@@ -1525,7 +1489,6 @@ jobs:
         run: releng/deps.py roll sdk linux-${{ matrix.arch }} --activate
 
   sdk-android-32:
-    if: false
     runs-on: ubuntu-latest
     needs: toolchain-linux
     strategy:
@@ -1570,7 +1533,6 @@ jobs:
           FRIDA_BUILD_ARCH: x86
 
   sdk-android-64:
-    if: false
     runs-on: ubuntu-latest
     needs: toolchain-linux
     strategy:

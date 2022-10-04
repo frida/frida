@@ -8,11 +8,10 @@ runs:
   using: composite
   steps:
     - name: Download
-      uses: dawidd6/action-download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: ${{ inputs.name }}
         path: ${{ inputs.name }}
-        run_id: 3177702788
     - name: Compress
       run: tar -C ${{ inputs.name }} -cJf ${{ inputs.name }}.tar.xz .
       env:
