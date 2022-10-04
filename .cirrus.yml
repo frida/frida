@@ -26,6 +26,10 @@ task:
     mkdir ~/.aws
     (
       echo "[default]"
+      echo "region = us-east-1"
+    ) > ~/.aws/config
+    (
+      echo "[default]"
       echo "aws_access_key_id = $S3_ACCESS_KEY"
       echo "aws_secret_access_key = $S3_SECRET_KEY"
     ) > ~/.aws/credentials

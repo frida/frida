@@ -55,12 +55,27 @@ runs:
         git submodule init -- releng/meson
         git submodule update --depth 1 -- releng/meson
       shell: bash
-    - name: Configure AWS credentials
+    - name: Configure AWS credentials (x64)
+      if: runner.arch == 'X64'
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ inputs.aws-access-key-id }}
         aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
         aws-region: us-east-1
+    - name: Configure AWS credentials (arm64)
+      if: runner.arch == 'ARM64'
+      run: |
+        mkdir ~/.aws
+        (
+          echo "[default]"
+          echo "region = us-east-1"
+        ) > ~/.aws/config
+        (
+          echo "[default]"
+          echo "aws_access_key_id = ${{ inputs.aws-access-key-id }}"
+          echo "aws_secret_access_key = ${{ inputs.aws-secret-access-key }}"
+        ) > ~/.aws/credentials
+      shell: bash
     - name: Configure Cloudflare credentials
       run: |
         (
@@ -71,10 +86,12 @@ runs:
         ) > ~/.cfcli.yml
       shell: bash
     - name: Install Python
+      if: runner.arch == 'X64'
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
     - name: Install cloudflare-cli
+      if: runner.arch == 'X64'
       run: npm install -g cloudflare-cli
       shell: bash
     - name: Set Frida environment variables
