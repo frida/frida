@@ -66,7 +66,7 @@ jobs:
           cd ios-repo
           reprepro \
               -Vb . \
-              --confdir ../ios-repo-config \
+              --confdir $GITHUB_WORKSPACE/ios-repo-config \
               --ignore=forbiddenchar \
               includedeb \
               stable \
@@ -76,8 +76,12 @@ jobs:
           gunzip -k Packages.gz
           deployment=/dev
           aws s3 sync --delete pool/ s3://build.frida.re${deployment}/pool/
-          aws s3 cp Release Packages Packages.gz s3://build.frida.re${deployment}/
-          aws s3 cp Packages Packages.gz s3://build.frida.re${deployment}/./
+          for file in Release Packages Packages.gz; do
+            aws s3 cp $file s3://build.frida.re${deployment}/
+          done
+          for file in Packages Packages.gz; do
+            aws s3 cp $file s3://build.frida.re${deployment}/./
+          done
       #- name: Publish Python bindings
       #  uses: pypa/gh-action-pypi-publish@release/v1.5
       #  with:
