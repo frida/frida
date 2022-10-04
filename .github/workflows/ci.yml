@@ -244,11 +244,11 @@ jobs:
 
   package-windows:
     if: false
-    runs-on: ubuntu-latest
     needs: frida-windows
     strategy:
       matrix:
         arch: [x86, x86_64]
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -287,11 +287,11 @@ jobs:
 
   package-windows-sfx:
     if: false
-    runs-on: windows-latest
     needs: frida-windows
     strategy:
       matrix:
         arch: [x86, x86_64]
+    runs-on: windows-latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -310,11 +310,11 @@ jobs:
 
   package-macos:
     if: false
-    runs-on: ubuntu-latest
     needs: frida-macos
     strategy:
       matrix:
         arch: [x86_64, arm64, arm64e]
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -355,11 +355,11 @@ jobs:
 
   package-linux:
     if: false
-    runs-on: ubuntu-latest
     needs: frida-linux
     strategy:
       matrix:
         arch: [x86, x86_64, armhf, arm64, mips, mipsel, mips64, mips64el]
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -399,11 +399,11 @@ jobs:
 
   package-ios:
     if: false
-    runs-on: ubuntu-latest
     needs: frida-ios
     strategy:
       matrix:
         arch: [x86_64, arm64, arm64e, arm64eoabi]
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -426,11 +426,11 @@ jobs:
 
   package-android:
     if: false
-    runs-on: ubuntu-latest
     needs: frida-android
     strategy:
       matrix:
         arch: [x86, x86_64, arm, arm64]
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -465,11 +465,11 @@ jobs:
 
   package-freebsd:
     if: false
-    runs-on: ubuntu-latest
     needs: frida-freebsd
     strategy:
       matrix:
         arch: [arm64]
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -504,11 +504,11 @@ jobs:
 
   package-qnx:
     if: false
-    runs-on: ubuntu-latest
     needs: frida-qnx
     strategy:
       matrix:
         arch: [armeabi]
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -543,12 +543,12 @@ jobs:
 
   frida-windows:
     if: false
-    runs-on: windows-latest
     needs: sdk-windows
     strategy:
       matrix:
         arch: [x86, x86_64]
       fail-fast: false
+    runs-on: windows-latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -692,12 +692,12 @@ jobs:
 
   frida-macos:
     if: false
-    runs-on: macos-12
     needs: sdk-macos
     strategy:
       matrix:
         arch: [x86_64, arm64, arm64e]
       fail-fast: false
+    runs-on: macos-12
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -859,12 +859,12 @@ jobs:
 
   frida-linux:
     if: false
-    runs-on: ubuntu-latest
     needs: sdk-linux
     strategy:
       matrix:
         arch: [x86, x86_64, armhf, arm64, mips, mipsel, mips64, mips64el]
       fail-fast: false
+    runs-on: ubuntu-latest
     container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
     steps:
       - name: Check out repo
@@ -1022,12 +1022,12 @@ jobs:
 
   frida-ios:
     if: false
-    runs-on: macos-11
     needs: sdk-ios
     strategy:
       matrix:
         arch: [x86_64, arm64, arm64e, arm64eoabi]
       fail-fast: false
+    runs-on: macos-11
     env:
       XCODE11: /Applications/Xcode_11.7.app
     steps:
@@ -1101,12 +1101,12 @@ jobs:
 
   frida-android:
     if: false
-    runs-on: ubuntu-latest
     needs: [sdk-linux, sdk-android-32, sdk-android-64]
     strategy:
       matrix:
         arch: [x86, x86_64, arm, arm64]
       fail-fast: false
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -1379,13 +1379,13 @@ jobs:
 
   sdk-windows:
     if: false
-    runs-on: windows-latest
     needs: toolchain-windows
     strategy:
       matrix:
         arch: [x86, x86_64]
         config: [release, debug]
       fail-fast: false
+    runs-on: windows-latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -1401,11 +1401,11 @@ jobs:
 
   toolchain-macos:
     if: false
-    runs-on: macos-latest
     strategy:
       matrix:
         arch: [x86_64, arm64]
       fail-fast: false
+    runs-on: macos-latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -1426,12 +1426,12 @@ jobs:
 
   sdk-macos:
     if: false
-    runs-on: macos-latest
     needs: toolchain-macos
     strategy:
       matrix:
         arch: [x86_64, arm64, arm64e]
       fail-fast: false
+    runs-on: macos-latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -1452,12 +1452,12 @@ jobs:
 
   sdk-ios:
     if: false
-    runs-on: macos-11
     needs: toolchain-macos
     strategy:
       matrix:
         arch: [x86_64, arm64, arm64e, arm64eoabi]
       fail-fast: false
+    runs-on: macos-11
     env:
       XCODE11: /Applications/Xcode_11.7.app
     steps:
@@ -1479,11 +1479,11 @@ jobs:
 
   toolchain-linux:
     if: false
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         arch: [x86, x86_64, armhf, arm64]
       fail-fast: false
+    runs-on: ubuntu-latest
     container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
     steps:
       - name: Check out repo
@@ -1500,12 +1500,12 @@ jobs:
 
   sdk-linux:
     if: false
-    runs-on: ubuntu-latest
     needs: toolchain-linux
     strategy:
       matrix:
         arch: [x86, x86_64, armhf, arm64, mips, mipsel, mips64, mips64el]
       fail-fast: false
+    runs-on: ubuntu-latest
     container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
     steps:
       - name: Check out repo
@@ -1525,12 +1525,12 @@ jobs:
 
   sdk-android-32:
     if: false
-    runs-on: ubuntu-latest
     needs: toolchain-linux
     strategy:
       matrix:
         arch: [x86, arm]
       fail-fast: false
+    runs-on: ubuntu-latest
     container: ghcr.io/frida/x-tools-linux-x86:latest
     steps:
       - name: Check out repo
@@ -1570,12 +1570,12 @@ jobs:
 
   sdk-android-64:
     if: false
-    runs-on: ubuntu-latest
     needs: toolchain-linux
     strategy:
       matrix:
         arch: [x86_64, arm64]
       fail-fast: false
+    runs-on: ubuntu-latest
     container: ghcr.io/frida/x-tools-linux-x86_64:latest
     steps:
       - name: Check out repo
