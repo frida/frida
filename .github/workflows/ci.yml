@@ -19,6 +19,8 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      - name: Sanity-check
+        run: reprepro --version
       - name: Check out repo
         uses: actions/checkout@v3
         with:
@@ -44,11 +46,36 @@ jobs:
               ios-assets \
               release-assets/frida_${FRIDA_VERSION}_iphoneos-arm.deb
           ls release-assets/
-      - name: Upload iOS .deb (temporarily, for debugging)
-        uses: actions/upload-artifact@v3
-        with:
-          name: frida-server-ios-deb
-          path: release-assets/*.deb
+      - name: Publish iOS .deb
+        run: |
+          mkdir ~/.reprepro
+          (
+            echo "Origin: Cydia/Frida"
+            echo "Label: frida"
+            echo "Suite: stable"
+            echo "Version: 1.0"
+            echo "Codename: stable"
+            echo "Architectures: iphoneos-arm"
+            echo "Components: main"
+            echo "Description: Frida for iOS"
+          ) > ~/.reprepro/distributions
+          mkdir -p ios-repo/debs
+          cp release-assets/frida_*_iphoneos-*.deb ios-repo/debs/
+          cd ios-repo
+          reprepro \
+              -Vb . \
+              --confdir ~/.reprepo \
+              --ignore=forbiddenchar \
+              includedeb \
+              stable \
+              debs/frida_${FRIDA_VERSION}_iphoneos-arm.deb
+          cp dists/stable/main/binary-iphoneos-arm/Packages.gz .
+          rm -f Packages
+          gunzip -k Packages.gz
+          deployment=/dev
+          aws s3 sync --delete pool/ s3://build.frida.re${deployment}/pool/
+          aws s3 cp Release Packages Packages.gz s3://build.frida.re${deployment}/
+          aws s3 cp Packages Packages.gz s3://build.frida.re${deployment}/./
       #- name: Publish Python bindings
       #  uses: pypa/gh-action-pypi-publish@release/v1.5
       #  with:
@@ -120,8 +147,8 @@ jobs:
       - name: Assemble iOS assets
         run: |
           mkdir -p \
-              ios-assets/usr/bin/ \
-              ios-assets/usr/lib/frida/
+              ios-assets/usr/bin \
+              ios-assets/usr/lib/frida
           mv frida-server-ios-universal \
               ios-assets/usr/bin/frida-server
           mv frida-agent-ios-universal.dylib \
