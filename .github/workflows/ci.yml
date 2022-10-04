@@ -19,8 +19,6 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - name: Sanity-check
-        run: reprepro --version
       - name: Check out repo
         uses: actions/checkout@v3
         with:
@@ -33,6 +31,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Install packages
+        run: |
+          apt-get update
+          apt-get install -y reprepro
       - name: Download iOS assets
         uses: dawidd6/action-download-artifact@v2
         with:
