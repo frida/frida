@@ -696,7 +696,7 @@ jobs:
       matrix:
         arch: [x86_64, arm64, arm64e]
       fail-fast: false
-    runs-on: ${{ matrix.arch == 'x86_64' && 'macos-12' || (['macOS', 'arm64']) }}
+    runs-on: ${{ matrix.arch == 'x86_64' && 'macos-12' || 'macos-12-arm64' }}
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -1428,7 +1428,7 @@ jobs:
       matrix:
         arch: [x86_64, arm64, arm64e]
       fail-fast: false
-    runs-on: ${{ matrix.arch == 'x86_64' && 'macos-latest' || ['macOS', 'arm64'] }}
+    runs-on: ${{ matrix.arch == 'x86_64' && 'macos-latest' || 'macos-12-arm64' }}
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
