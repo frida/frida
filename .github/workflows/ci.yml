@@ -16,39 +16,40 @@ env:
   ELECTRON_TARGETS_FREEBSD: '16.0.0'
 
 jobs:
-  #release:
-  #  runs-on: ubuntu-latest
-  #  steps:
-  #    #- name: Check out repo
-  #    #  uses: actions/checkout@v3
-  #    #  with:
-  #    #    fetch-depth: 0
-  #    #    submodules: true
-  #    #- name: Set up environment
-  #    #  uses: ./.github/actions/setup-linux-env
-  #    #  with:
-  #    #    aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
-  #    #    aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
-  #    #    cloudflare-email: ${{ secrets.CF_EMAIL }}
-  #    #    cloudflare-token: ${{ secrets.CF_TOKEN }}
-  #    - name: Fake stuff
-  #      run: |
-  #        export FRIDA_VERSION=15.2.3-dev.111
-  #    - name: Download artifacts
-  #      uses: dawidd6/action-download-artifact@v2
-  #      with:
-  #        run_id: 3177702788
-  #    - name: Explore after
-  #      run: |
-  #        echo "vvv"
-  #        ls -l
-  #        echo "^^^"
-  #    #- name: Publish Python bindings
-  #    #  uses: pypa/gh-action-pypi-publish@release/v1.5
-  #    #  with:
-  #    #    password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-  #    #    repository_url: https://test.pypi.org/legacy/
-  #    #    packages_dir: frida-python/dist/
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: true
+      - name: Set up environment
+        uses: ./.github/actions/setup-linux-env
+        with:
+          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
+          cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Download iOS assets
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: ios-assets
+          path: ios-assets/
+          run_id: 3182942497
+      - name: Create iOS .deb
+        run: |
+          mkdir release-assets
+          frida-core/tools/package-server.sh \
+              ios-assets \
+              release-assets/frida_${FRIDA_VERSION}_iphoneos-arm.deb
+          ls release-assets/
+      #- name: Publish Python bindings
+      #  uses: pypa/gh-action-pypi-publish@release/v1.5
+      #  with:
+      #    password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+      #    repository_url: https://test.pypi.org/legacy/
+      #    packages_dir: frida-python/dist/
 
   package-apple-universal:
     if: false
