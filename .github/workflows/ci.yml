@@ -635,12 +635,12 @@ jobs:
           path: build/frida-windows/${{ env.FRIDA_VS_HOST }}/lib/qt5/qml/
 
   frida-macos:
-    if: false
     runs-on: macos-12
-    needs: sdk-macos
+    #needs: sdk-macos
     strategy:
       matrix:
-        arch: [x86_64, arm64, arm64e]
+        arch: [x86_64]
+        #arch: [x86_64, arm64, arm64e]
       fail-fast: false
     steps:
       - name: Check out repo
@@ -658,62 +658,62 @@ jobs:
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
-      - name: Install Qt
-        if: matrix.arch == 'x86_64'
-        uses: jurplel/install-qt-action@v3
-        with:
-          cache: true
-          setup-python: false
-      - name: Build Gum libraries and tools
-        run: make build/frida-macos-${{ matrix.arch }}/lib/pkgconfig/frida-gum-1.0.pc
-      - name: Build Gum devkit
-        run: releng/devkit.py frida-gum macos-${{ matrix.arch }} build/devkits/gum
-      - name: Upload Gum devkit
-        uses: actions/upload-artifact@v3
-        with:
-          name: frida-gum-devkit-macos-${{ matrix.arch }}
-          path: build/devkits/gum/
-      - name: Upload gum-graft
-        uses: actions/upload-artifact@v3
-        with:
-          name: gum-graft-macos-${{ matrix.arch }}
-          path: build/frida-macos-${{ matrix.arch }}/bin/gum-graft
-      - name: Build GumJS devkit
-        run: releng/devkit.py frida-gumjs macos-${{ matrix.arch }} build/devkits/gumjs
-      - name: Upload GumJS devkit
-        uses: actions/upload-artifact@v3
-        with:
-          name: frida-gumjs-devkit-macos-${{ matrix.arch }}
-          path: build/devkits/gumjs/
+      #- name: Install Qt
+      #  if: matrix.arch == 'x86_64'
+      #  uses: jurplel/install-qt-action@v3
+      #  with:
+      #    cache: true
+      #    setup-python: false
+      #- name: Build Gum libraries and tools
+      #  run: make build/frida-macos-${{ matrix.arch }}/lib/pkgconfig/frida-gum-1.0.pc
+      #- name: Build Gum devkit
+      #  run: releng/devkit.py frida-gum macos-${{ matrix.arch }} build/devkits/gum
+      #- name: Upload Gum devkit
+      #  uses: actions/upload-artifact@v3
+      #  with:
+      #    name: frida-gum-devkit-macos-${{ matrix.arch }}
+      #    path: build/devkits/gum/
+      #- name: Upload gum-graft
+      #  uses: actions/upload-artifact@v3
+      #  with:
+      #    name: gum-graft-macos-${{ matrix.arch }}
+      #    path: build/frida-macos-${{ matrix.arch }}/bin/gum-graft
+      #- name: Build GumJS devkit
+      #  run: releng/devkit.py frida-gumjs macos-${{ matrix.arch }} build/devkits/gumjs
+      #- name: Upload GumJS devkit
+      #  uses: actions/upload-artifact@v3
+      #  with:
+      #    name: frida-gumjs-devkit-macos-${{ matrix.arch }}
+      #    path: build/devkits/gumjs/
       - name: Build Core libraries and tools
         run: make build/frida-macos-${{ matrix.arch }}/lib/pkgconfig/frida-core-1.0.pc
       - name: Build Core devkit
         run: releng/devkit.py frida-core macos-${{ matrix.arch }} build/devkits/core
-      - name: Upload Core devkit
-        uses: actions/upload-artifact@v3
-        with:
-          name: frida-core-devkit-macos-${{ matrix.arch }}
-          path: build/devkits/core/
-      - name: Upload frida-server
-        uses: actions/upload-artifact@v3
-        with:
-          name: frida-server-macos-${{ matrix.arch }}
-          path: build/frida-macos-${{ matrix.arch }}/bin/frida-server
-      - name: Upload frida-portal
-        uses: actions/upload-artifact@v3
-        with:
-          name: frida-portal-macos-${{ matrix.arch }}
-          path: build/frida-macos-${{ matrix.arch }}/bin/frida-portal
-      - name: Upload frida-inject
-        uses: actions/upload-artifact@v3
-        with:
-          name: frida-inject-macos-${{ matrix.arch }}
-          path: build/frida-macos-${{ matrix.arch }}/bin/frida-inject
-      - name: Upload frida-gadget
-        uses: actions/upload-artifact@v3
-        with:
-          name: frida-gadget-macos-${{ matrix.arch }}
-          path: build/frida-macos-${{ matrix.arch }}/lib/frida/frida-gadget.dylib
+      #- name: Upload Core devkit
+      #  uses: actions/upload-artifact@v3
+      #  with:
+      #    name: frida-core-devkit-macos-${{ matrix.arch }}
+      #    path: build/devkits/core/
+      #- name: Upload frida-server
+      #  uses: actions/upload-artifact@v3
+      #  with:
+      #    name: frida-server-macos-${{ matrix.arch }}
+      #    path: build/frida-macos-${{ matrix.arch }}/bin/frida-server
+      #- name: Upload frida-portal
+      #  uses: actions/upload-artifact@v3
+      #  with:
+      #    name: frida-portal-macos-${{ matrix.arch }}
+      #    path: build/frida-macos-${{ matrix.arch }}/bin/frida-portal
+      #- name: Upload frida-inject
+      #  uses: actions/upload-artifact@v3
+      #  with:
+      #    name: frida-inject-macos-${{ matrix.arch }}
+      #    path: build/frida-macos-${{ matrix.arch }}/bin/frida-inject
+      #- name: Upload frida-gadget
+      #  uses: actions/upload-artifact@v3
+      #  with:
+      #    name: frida-gadget-macos-${{ matrix.arch }}
+      #    path: build/frida-macos-${{ matrix.arch }}/lib/frida/frida-gadget.dylib
       - name: Build Swift bindings
         if: matrix.arch != 'arm64e'
         run: |
@@ -736,70 +736,70 @@ jobs:
         with:
           name: frida-swift-macos-${{ matrix.arch }}
           path: frida-swift.tar
-      - name: Build Python bindings
-        run: |
-          make build/tmp-macos-${{ matrix.arch }}/frida-python3.10/.frida-stamp PYTHON=python3.10
-          export FRIDA_EXTENSION=$PWD/build/frida-macos-${{ matrix.arch }}/lib/python3.10/site-packages/_frida.so
-          case ${{ matrix.arch }} in
-            x86_64)
-              platform=macosx-10.9-x86_64
-              ;;
-            arm64*)
-              platform=macosx-11.0-arm64
-              ;;
-          esac
-          export _PYTHON_HOST_PLATFORM=$platform
-          cd frida-python
-          pip wheel -w ../build/wheels --no-deps .
-      - name: Upload Python bindings
-        uses: actions/upload-artifact@v3
-        with:
-          name: frida-python-macos-${{ matrix.arch }}
-          path: build/wheels/frida-*.whl
-      - name: Build Node.js bindings
-        if: matrix.arch != 'arm64e'
-        run: |
-          . build/frida-env-macos-${{ matrix.arch }}.rc
-          case ${{ matrix.arch }} in
-            x86_64)
-              gyp_arch=x64
-              ;;
-            *)
-              gyp_arch=${{ matrix.arch }}
-              ;;
-          esac
-          export npm_config_arch=$gyp_arch
-          export npm_config_jobs=max
-          export prebuild_arch=$gyp_arch
-          cd frida-node
-          npm version $FRIDA_VERSION
-          npm install
-          for target in ${{ env.NODE_TARGETS_DEFAULT }}; do
-            npm run prebuild -- -r node -t $target
-          done
-          for target in ${{ env.ELECTRON_TARGETS_DEFAULT }}; do
-            npm run prebuild -- -r electron -t $target
-          done
-      - name: Upload Node.js bindings
-        if: matrix.arch != 'arm64e'
-        uses: actions/upload-artifact@v3
-        with:
-          name: frida-node-macos-${{ matrix.arch }}
-          path: frida-node/prebuilds/*
-      - name: Build QML bindings
-        if: matrix.arch == 'x86_64'
-        run: |
-          cd build/tmp-macos-${{ matrix.arch }}
-          mkdir frida-qml
-          cd frida-qml
-          qmake QMAKE_TARGET.arch=${{ matrix.arch }} ../../../frida-qml
-          make -j$(nproc) install
-      - name: Upload QML bindings
-        if: matrix.arch == 'x86_64'
-        uses: actions/upload-artifact@v3
-        with:
-          name: frida-qml-macos-${{ matrix.arch }}
-          path: build/frida-macos-${{ matrix.arch }}/lib/qt5/qml/
+      #- name: Build Python bindings
+      #  run: |
+      #    make build/tmp-macos-${{ matrix.arch }}/frida-python3.10/.frida-stamp PYTHON=python3.10
+      #    export FRIDA_EXTENSION=$PWD/build/frida-macos-${{ matrix.arch }}/lib/python3.10/site-packages/_frida.so
+      #    case ${{ matrix.arch }} in
+      #      x86_64)
+      #        platform=macosx-10.9-x86_64
+      #        ;;
+      #      arm64*)
+      #        platform=macosx-11.0-arm64
+      #        ;;
+      #    esac
+      #    export _PYTHON_HOST_PLATFORM=$platform
+      #    cd frida-python
+      #    pip wheel -w ../build/wheels --no-deps .
+      #- name: Upload Python bindings
+      #  uses: actions/upload-artifact@v3
+      #  with:
+      #    name: frida-python-macos-${{ matrix.arch }}
+      #    path: build/wheels/frida-*.whl
+      #- name: Build Node.js bindings
+      #  if: matrix.arch != 'arm64e'
+      #  run: |
+      #    . build/frida-env-macos-${{ matrix.arch }}.rc
+      #    case ${{ matrix.arch }} in
+      #      x86_64)
+      #        gyp_arch=x64
+      #        ;;
+      #      *)
+      #        gyp_arch=${{ matrix.arch }}
+      #        ;;
+      #    esac
+      #    export npm_config_arch=$gyp_arch
+      #    export npm_config_jobs=max
+      #    export prebuild_arch=$gyp_arch
+      #    cd frida-node
+      #    npm version $FRIDA_VERSION
+      #    npm install
+      #    for target in ${{ env.NODE_TARGETS_DEFAULT }}; do
+      #      npm run prebuild -- -r node -t $target
+      #    done
+      #    for target in ${{ env.ELECTRON_TARGETS_DEFAULT }}; do
+      #      npm run prebuild -- -r electron -t $target
+      #    done
+      #- name: Upload Node.js bindings
+      #  if: matrix.arch != 'arm64e'
+      #  uses: actions/upload-artifact@v3
+      #  with:
+      #    name: frida-node-macos-${{ matrix.arch }}
+      #    path: frida-node/prebuilds/*
+      #- name: Build QML bindings
+      #  if: matrix.arch == 'x86_64'
+      #  run: |
+      #    cd build/tmp-macos-${{ matrix.arch }}
+      #    mkdir frida-qml
+      #    cd frida-qml
+      #    qmake QMAKE_TARGET.arch=${{ matrix.arch }} ../../../frida-qml
+      #    make -j$(nproc) install
+      #- name: Upload QML bindings
+      #  if: matrix.arch == 'x86_64'
+      #  uses: actions/upload-artifact@v3
+      #  with:
+      #    name: frida-qml-macos-${{ matrix.arch }}
+      #    path: build/frida-macos-${{ matrix.arch }}/lib/qt5/qml/
 
   frida-linux:
     if: false
