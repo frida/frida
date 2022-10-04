@@ -23,7 +23,7 @@ task:
       py39-setuptools
     npm install -g cloudflare-cli
   initialize_credentials_script: |
-    mkdir ~/.aws
+    mkdir -p ~/.aws
     (
       echo "[default]"
       echo "region = us-east-1"

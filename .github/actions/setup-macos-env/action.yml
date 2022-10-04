@@ -65,7 +65,7 @@ runs:
     - name: Configure AWS credentials (arm64)
       if: runner.arch == 'ARM64'
       run: |
-        mkdir ~/.aws
+        mkdir -p ~/.aws
         (
           echo "[default]"
           echo "region = us-east-1"
