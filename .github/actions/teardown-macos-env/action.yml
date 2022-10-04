@@ -1,0 +1,9 @@
+name: Tear down macOS environment
+description: Tear down a previously set up environment
+runs:
+  using: composite
+  steps:
+    - name: Clean up keychain
+      if: ${{ always() }}
+      run: security delete-keychain $RUNNER_TEMP/frida-signing.keychain-db
+      shell: bash

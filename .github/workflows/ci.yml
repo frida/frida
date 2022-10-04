@@ -239,6 +239,8 @@ jobs:
         with:
           name: release-assets
           path: frida-swift-macos-universal.tar.xz
+      - name: Tear down environment
+        uses: ./.github/actions/teardown-macos-env
 
   package-windows:
     if: false
@@ -852,6 +854,8 @@ jobs:
         with:
           name: frida-qml-macos-${{ matrix.arch }}
           path: build/frida-macos-${{ matrix.arch }}/lib/qt5/qml/
+      - name: Tear down environment
+        uses: ./.github/actions/teardown-macos-env
 
   frida-linux:
     if: false
@@ -1092,6 +1096,8 @@ jobs:
         with:
           name: frida-gadget-ios-${{ matrix.arch }}
           path: build/frida-ios-${{ matrix.arch }}/usr/lib/frida/frida-gadget.dylib
+      - name: Tear down environment
+        uses: ./.github/actions/teardown-macos-env
 
   frida-android:
     if: false
@@ -1415,6 +1421,8 @@ jobs:
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Roll toolchain
         run: releng/deps.py roll toolchain macos-${{ matrix.arch }}
+      - name: Tear down environment
+        uses: ./.github/actions/teardown-macos-env
 
   sdk-macos:
     if: false
@@ -1439,6 +1447,8 @@ jobs:
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Roll SDK
         run: releng/deps.py roll sdk macos-${{ matrix.arch }} --activate
+      - name: Tear down environment
+        uses: ./.github/actions/teardown-macos-env
 
   sdk-ios:
     if: false
@@ -1464,6 +1474,8 @@ jobs:
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Roll SDK
         run: releng/deps.py roll sdk ios-${{ matrix.arch }} --activate
+      - name: Tear down environment
+        uses: ./.github/actions/teardown-macos-env
 
   toolchain-linux:
     if: false
