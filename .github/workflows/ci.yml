@@ -51,6 +51,7 @@ jobs:
   #    #    packages_dir: frida-python/dist/
 
   package-apple-universal:
+    if: false
     runs-on: macos-latest
     needs: [frida-macos, frida-ios]
     steps:
@@ -240,6 +241,7 @@ jobs:
           path: frida-swift-macos-universal.tar.xz
 
   package-windows:
+    if: false
     runs-on: ubuntu-latest
     needs: frida-windows
     strategy:
@@ -282,6 +284,7 @@ jobs:
           name: frida-qml-windows-${{ matrix.arch }}
 
   package-windows-sfx:
+    if: false
     runs-on: windows-latest
     needs: frida-windows
     strategy:
@@ -304,6 +307,7 @@ jobs:
           name: frida-core-devkit-windows-${{ matrix.arch }}
 
   package-macos:
+    if: false
     runs-on: ubuntu-latest
     needs: frida-macos
     strategy:
@@ -348,6 +352,7 @@ jobs:
           name: frida-qml-macos-${{ matrix.arch }}
 
   package-linux:
+    if: false
     runs-on: ubuntu-latest
     needs: frida-linux
     strategy:
@@ -391,6 +396,7 @@ jobs:
           name: frida-qml-linux-${{ matrix.arch }}
 
   package-ios:
+    if: false
     runs-on: ubuntu-latest
     needs: frida-ios
     strategy:
@@ -417,6 +423,7 @@ jobs:
           name: frida-portal-ios-${{ matrix.arch }}
 
   package-android:
+    if: false
     runs-on: ubuntu-latest
     needs: frida-android
     strategy:
@@ -455,6 +462,7 @@ jobs:
           name: frida-inject-android-${{ matrix.arch }}
 
   package-freebsd:
+    if: false
     runs-on: ubuntu-latest
     needs: frida-freebsd
     strategy:
@@ -493,6 +501,7 @@ jobs:
           name: frida-inject-freebsd-${{ matrix.arch }}
 
   package-qnx:
+    if: false
     runs-on: ubuntu-latest
     needs: frida-qnx
     strategy:
@@ -531,6 +540,7 @@ jobs:
           name: frida-inject-qnx-${{ matrix.arch }}
 
   frida-windows:
+    if: false
     runs-on: windows-latest
     needs: sdk-windows
     strategy:
@@ -679,6 +689,7 @@ jobs:
           path: build/frida-windows/${{ env.FRIDA_VS_HOST }}/lib/qt5/qml/
 
   frida-macos:
+    if: false
     runs-on: macos-12
     needs: sdk-macos
     strategy:
@@ -843,6 +854,7 @@ jobs:
           path: build/frida-macos-${{ matrix.arch }}/lib/qt5/qml/
 
   frida-linux:
+    if: false
     runs-on: ubuntu-latest
     needs: sdk-linux
     strategy:
@@ -1005,6 +1017,7 @@ jobs:
           path: build/frida-linux-${{ matrix.arch }}/lib/qt5/qml/
 
   frida-ios:
+    if: false
     runs-on: macos-11
     needs: sdk-ios
     strategy:
@@ -1081,6 +1094,7 @@ jobs:
           path: build/frida-ios-${{ matrix.arch }}/usr/lib/frida/frida-gadget.dylib
 
   frida-android:
+    if: false
     runs-on: ubuntu-latest
     needs: [sdk-linux, sdk-android-32, sdk-android-64]
     strategy:
@@ -1166,6 +1180,7 @@ jobs:
           path: build/frida-android-${{ matrix.arch }}/lib/frida/64/frida-gadget.so
 
   frida-freebsd:
+    if: false
     runs-on: [self-hosted, freebsd, arm64]
     steps:
       - name: Check out repo
@@ -1263,6 +1278,7 @@ jobs:
           path: frida-node/prebuilds/*
 
   frida-qnx:
+    if: false
     runs-on: ubuntu-latest
     needs: sdk-linux
     container: ghcr.io/frida/qnx-tools:latest
@@ -1340,6 +1356,7 @@ jobs:
         continue-on-error: true
 
   toolchain-windows:
+    if: false
     runs-on: windows-latest
     steps:
       - name: Check out repo
@@ -1355,6 +1372,7 @@ jobs:
         run: python releng\deps.py roll toolchain windows-x86
 
   sdk-windows:
+    if: false
     runs-on: windows-latest
     needs: toolchain-windows
     strategy:
@@ -1376,6 +1394,7 @@ jobs:
         run: python releng\deps.py roll sdk windows-${{ matrix.arch }}-${{ matrix.config }} --activate
 
   toolchain-macos:
+    if: false
     runs-on: macos-latest
     strategy:
       matrix:
@@ -1398,6 +1417,7 @@ jobs:
         run: releng/deps.py roll toolchain macos-${{ matrix.arch }}
 
   sdk-macos:
+    if: false
     runs-on: macos-latest
     needs: toolchain-macos
     strategy:
@@ -1421,6 +1441,7 @@ jobs:
         run: releng/deps.py roll sdk macos-${{ matrix.arch }} --activate
 
   sdk-ios:
+    if: false
     runs-on: macos-11
     needs: toolchain-macos
     strategy:
@@ -1445,6 +1466,7 @@ jobs:
         run: releng/deps.py roll sdk ios-${{ matrix.arch }} --activate
 
   toolchain-linux:
+    if: false
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -1465,6 +1487,7 @@ jobs:
         run: releng/deps.py roll toolchain linux-${{ matrix.arch }}
 
   sdk-linux:
+    if: false
     runs-on: ubuntu-latest
     needs: toolchain-linux
     strategy:
@@ -1489,6 +1512,7 @@ jobs:
         run: releng/deps.py roll sdk linux-${{ matrix.arch }} --activate
 
   sdk-android-32:
+    if: false
     runs-on: ubuntu-latest
     needs: toolchain-linux
     strategy:
@@ -1533,6 +1557,7 @@ jobs:
           FRIDA_BUILD_ARCH: x86
 
   sdk-android-64:
+    if: false
     runs-on: ubuntu-latest
     needs: toolchain-linux
     strategy:
