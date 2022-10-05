@@ -17,7 +17,14 @@ env:
 
 jobs:
   publish-dev:
+    if: ${{ !(github.event_name == 'push' && startsWith(github.ref, 'refs/tags')) }}
     runs-on: ubuntu-latest
+    needs:
+      - frida-windows
+      - frida-macos
+      - frida-linux
+      - frida-freebsd
+      - assemble-ios-assets
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -49,10 +56,9 @@ jobs:
         with:
           site: development
 
-  package-apple-universal:
-    if: false
+  assemble-ios-assets:
     runs-on: macos-latest
-    needs: [frida-macos, frida-ios]
+    needs: frida-ios
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -124,6 +130,26 @@ jobs:
         with:
           name: ios-assets
           path: ios-assets/*
+      - name: Tear down environment
+        uses: ./.github/actions/teardown-macos-env
+
+  package-apple-universal:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    runs-on: macos-latest
+    needs: [frida-macos, frida-ios]
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - name: Set up environment
+        uses: ./.github/actions/setup-macos-env
+        with:
+          certificates-p12: ${{ secrets.APPLE_CERTIFICATES_P12 }}
+          certificates-password: ${{ secrets.APPLE_CERTIFICATES_PASSWORD }}
+          keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
+          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
+          cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Download frida-gadget for macOS/x86_64
         uses: actions/download-artifact@v3
         with:
@@ -242,7 +268,7 @@ jobs:
         uses: ./.github/actions/teardown-macos-env
 
   package-windows:
-    if: false
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
     needs: frida-windows
     strategy:
       matrix:
@@ -285,7 +311,7 @@ jobs:
           name: frida-qml-windows-${{ matrix.arch }}
 
   package-windows-sfx:
-    if: false
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
     needs: frida-windows
     strategy:
       matrix:
@@ -308,7 +334,7 @@ jobs:
           name: frida-core-devkit-windows-${{ matrix.arch }}
 
   package-macos:
-    if: false
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
     needs: frida-macos
     strategy:
       matrix:
@@ -353,7 +379,7 @@ jobs:
           name: frida-qml-macos-${{ matrix.arch }}
 
   package-linux:
-    if: false
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
     needs: frida-linux
     strategy:
       matrix:
@@ -397,7 +423,7 @@ jobs:
           name: frida-qml-linux-${{ matrix.arch }}
 
   package-ios:
-    if: false
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
     needs: frida-ios
     strategy:
       matrix:
@@ -424,7 +450,7 @@ jobs:
           name: frida-portal-ios-${{ matrix.arch }}
 
   package-android:
-    if: false
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
     needs: frida-android
     strategy:
       matrix:
@@ -463,7 +489,7 @@ jobs:
           name: frida-inject-android-${{ matrix.arch }}
 
   package-freebsd:
-    if: false
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
     needs: frida-freebsd
     strategy:
       matrix:
@@ -502,7 +528,7 @@ jobs:
           name: frida-inject-freebsd-${{ matrix.arch }}
 
   package-qnx:
-    if: false
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
     needs: frida-qnx
     strategy:
       matrix:
@@ -541,7 +567,6 @@ jobs:
           name: frida-inject-qnx-${{ matrix.arch }}
 
   frida-windows:
-    if: false
     needs: sdk-windows
     strategy:
       matrix:
@@ -690,7 +715,6 @@ jobs:
           path: build/frida-windows/${{ env.FRIDA_VS_HOST }}/lib/qt5/qml/
 
   frida-macos:
-    if: false
     needs: sdk-macos
     strategy:
       matrix:
@@ -857,7 +881,6 @@ jobs:
         uses: ./.github/actions/teardown-macos-env
 
   frida-linux:
-    if: false
     needs: sdk-linux
     strategy:
       matrix:
@@ -1020,7 +1043,6 @@ jobs:
           path: build/frida-linux-${{ matrix.arch }}/lib/qt5/qml/
 
   frida-ios:
-    if: false
     needs: sdk-ios
     strategy:
       matrix:
@@ -1099,7 +1121,6 @@ jobs:
         uses: ./.github/actions/teardown-macos-env
 
   frida-android:
-    if: false
     needs: [sdk-linux, sdk-android-32, sdk-android-64]
     strategy:
       matrix:
@@ -1185,7 +1206,6 @@ jobs:
           path: build/frida-android-${{ matrix.arch }}/lib/frida/64/frida-gadget.so
 
   frida-freebsd:
-    if: false
     runs-on: [freebsd, arm64]
     steps:
       - name: Check out repo
@@ -1283,7 +1303,6 @@ jobs:
           path: frida-node/prebuilds/*
 
   frida-qnx:
-    if: false
     runs-on: ubuntu-latest
     needs: sdk-linux
     container: ghcr.io/frida/qnx-tools:latest
@@ -1361,7 +1380,6 @@ jobs:
         continue-on-error: true
 
   toolchain-windows:
-    if: false
     runs-on: windows-latest
     steps:
       - name: Check out repo
@@ -1377,7 +1395,6 @@ jobs:
         run: python releng\deps.py roll toolchain windows-x86
 
   sdk-windows:
-    if: false
     needs: toolchain-windows
     strategy:
       matrix:
@@ -1399,7 +1416,6 @@ jobs:
         run: python releng\deps.py roll sdk windows-${{ matrix.arch }}-${{ matrix.config }} --activate
 
   toolchain-macos:
-    if: false
     strategy:
       matrix:
         arch: [x86_64, arm64]
@@ -1424,7 +1440,6 @@ jobs:
         uses: ./.github/actions/teardown-macos-env
 
   sdk-macos:
-    if: false
     needs: toolchain-macos
     strategy:
       matrix:
@@ -1450,7 +1465,6 @@ jobs:
         uses: ./.github/actions/teardown-macos-env
 
   sdk-ios:
-    if: false
     needs: toolchain-macos
     strategy:
       matrix:
@@ -1477,7 +1491,6 @@ jobs:
         uses: ./.github/actions/teardown-macos-env
 
   toolchain-linux:
-    if: false
     strategy:
       matrix:
         arch: [x86, x86_64, armhf, arm64]
@@ -1498,7 +1511,6 @@ jobs:
         run: releng/deps.py roll toolchain linux-${{ matrix.arch }}
 
   sdk-linux:
-    if: false
     needs: toolchain-linux
     strategy:
       matrix:
@@ -1523,7 +1535,6 @@ jobs:
         run: releng/deps.py roll sdk linux-${{ matrix.arch }} --activate
 
   sdk-android-32:
-    if: false
     needs: toolchain-linux
     strategy:
       matrix:
@@ -1568,7 +1579,6 @@ jobs:
           FRIDA_BUILD_ARCH: x86
 
   sdk-android-64:
-    if: false
     needs: toolchain-linux
     strategy:
       matrix:
