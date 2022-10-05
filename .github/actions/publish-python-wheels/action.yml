@@ -4,12 +4,110 @@ inputs:
   site:
     required: true
     path: Where to publish; set to either “production” or “development”
+  pypi-token:
+    required: true
+    description: The token used to authenticate with pypi.org
+  testpypi-token:
+    required: true
+    description: The token used to authenticate with test.pypi.org
 runs:
   using: composite
   steps:
-    - name: Download wheel for x
+    - name: Download Python wheel for Windows/x86
       uses: dawidd6/action-download-artifact@v2
       with:
-        name: x
-        path: x/
+        name: frida-python-windows-x86
+        path: build/wheels/
         run_id: 3182942497
+    - name: Download Python wheel for Windows/x86_64
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        name: frida-python-windows-x86_64
+        path: build/wheels/
+        run_id: 3182942497
+    - name: Download Python wheel for macOS/x86_64
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        name: frida-python-macos-x86_64
+        path: build/wheels/
+        run_id: 3182942497
+    - name: Download Python wheel for macOS/arm64
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        name: frida-python-macos-arm64
+        path: build/wheels/
+        run_id: 3182942497
+    - name: Download Python wheel for macOS/arm64e
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        name: frida-python-macos-arm64e
+        path: build/wheels/
+        run_id: 3182942497
+    - name: Download Python wheel for Linux/x86
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        name: frida-python-linux-x86
+        path: build/wheels/
+        run_id: 3182942497
+    - name: Download Python wheel for Linux/x86_64
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        name: frida-python-linux-x86_64
+        path: build/wheels/
+        run_id: 3182942497
+    - name: Download Python wheel for Linux/armhf
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        name: frida-python-linux-armhf
+        path: build/wheels/
+        run_id: 3182942497
+    - name: Download Python wheel for Linux/arm64
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        name: frida-python-linux-arm64
+        path: build/wheels/
+        run_id: 3182942497
+    - name: Download Python wheel for Linux/mips
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        name: frida-python-linux-mips
+        path: build/wheels/
+        run_id: 3182942497
+    - name: Download Python wheel for Linux/mipsel
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        name: frida-python-linux-mipsel
+        path: build/wheels/
+        run_id: 3182942497
+    - name: Download Python wheel for Linux/mips64
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        name: frida-python-linux-mips64
+        path: build/wheels/
+        run_id: 3182942497
+    - name: Download Python wheel for Linux/mips64el
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        name: frida-python-linux-mips64el
+        path: build/wheels/
+        run_id: 3182942497
+    - name: Download Python wheel for FreeBSD/arm64
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        name: frida-python-freebsd-arm64
+        path: build/wheels/
+        run_id: 3182942497
+    - name: Publish Python wheels to pypi.org
+      if: inputs.site == 'production'
+      uses: pypa/gh-action-pypi-publish@release/v1.5
+      with:
+        password: ${{ inputs.pypi-token }}
+        repository_url: https://pypi.org/legacy/
+        packages_dir: build/wheels/
+    - name: Publish Python wheels to test.pypi.org
+      if: inputs.site == 'development'
+      uses: pypa/gh-action-pypi-publish@release/v1.5
+      with:
+        password: ${{ inputs.testpypi-token }}
+        repository_url: https://test.pypi.org/legacy/
+        packages_dir: build/wheels/

@@ -36,18 +36,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y reprepro
           sudo npm install -g cloudflare-cli
+      - name: Publish Python wheels
+        uses: ./.github/actions/publish-python-wheels
+        with:
+          site: development
+          pypi-token: ${{ secrets.PYPI_API_TOKEN }}
+          testpypi-token: ${{ secrets.TEST_PYPI_API_TOKEN }}
       - name: Package iOS assets
         uses: ./.github/actions/package-ios-assets
       - name: Publish iOS .debs
         uses: ./.github/actions/publish-ios-debs
         with:
           site: development
-      #- name: Publish Python bindings
-      #  uses: pypa/gh-action-pypi-publish@release/v1.5
-      #  with:
-      #    password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-      #    repository_url: https://test.pypi.org/legacy/
-      #    packages_dir: frida-python/dist/
 
   package-apple-universal:
     if: false
