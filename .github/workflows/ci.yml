@@ -36,10 +36,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y reprepro
           sudo npm install -g cloudflare-cli
+      - name: Package iOS assets
+        uses: ./.github/actions/package-ios-assets
       - name: Publish iOS .debs
         uses: ./.github/actions/publish-ios-debs
         with:
-          repo: development
+          site: development
       #- name: Publish Python bindings
       #  uses: pypa/gh-action-pypi-publish@release/v1.5
       #  with:

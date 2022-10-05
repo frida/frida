@@ -1,0 +1,15 @@
+name: Publish Python wheels
+description: Downloads Python wheel artifacts and uploads them to PyPI
+inputs:
+  site:
+    required: true
+    path: Where to publish; set to either “production” or “development”
+runs:
+  using: composite
+  steps:
+    - name: Download wheel for x
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        name: x
+        path: x/
+        run_id: 3182942497

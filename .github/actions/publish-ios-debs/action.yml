@@ -1,27 +1,16 @@
 name: Publish iOS packages
-description: Downloads iOS assets, followed by packaging and publishing them
+description: Publishes already packaged iOS debs
 inputs:
-  repo:
+  site:
     required: true
-    path: Repository to publish to; set to either “production” or “development”
+    path: Where to publish; set to either “production” or “development”
 runs:
   using: composite
   steps:
-    - name: Download iOS assets
-      uses: dawidd6/action-download-artifact@v2
-      with:
-        name: ios-assets
-        path: ios-assets/
-        run_id: 3182942497
-    - name: Create frida-server iOS .deb
-      run: |
-        mkdir release-assets
-        frida-core/tools/package-server-ios.sh \
-            ios-assets \
-            release-assets/frida_${FRIDA_VERSION}_iphoneos-arm.deb
-      shell: bash
     - name: Create iOS repo metadata
       run: |
+        cd build
+        rm -rf ios-repo-config
         mkdir ios-repo-config
         (
           echo "Origin: Cydia/Frida"
@@ -33,8 +22,8 @@ runs:
           echo "Components: main"
           echo "Description: Frida for iOS"
         ) > ios-repo-config/distributions
+        rm -rf ios-repo
         mkdir -p ios-repo/debs
-        cp release-assets/frida_*_iphoneos-*.deb ios-repo/debs/
         cd ios-repo
         (
           echo "Origin: Frida"
@@ -46,21 +35,23 @@ runs:
           echo "Components: main"
           echo "Description: Official Frida Repo"
         ) > Release
-        reprepro \
-            -Vb . \
-            --confdir $GITHUB_WORKSPACE/ios-repo-config \
-            --ignore=forbiddenchar \
-            includedeb \
-            stable \
-            debs/frida_${FRIDA_VERSION}_iphoneos-arm.deb
+        for file in frida_${FRIDA_VERSION}_iphoneos-arm.deb; do
+          cp $GITHUB_WORKSPACE/build/release-assets/$file debs/
+          reprepro \
+              -Vb . \
+              --confdir $GITHUB_WORKSPACE/build/ios-repo-config \
+              --ignore=forbiddenchar \
+              includedeb \
+              stable \
+              debs/$file
+        done
         cp dists/stable/main/binary-iphoneos-arm/Packages.gz .
-        rm -f Packages
         gunzip -k Packages.gz
       shell: bash
     - name: Upload iOS package and repo metadata
       run: |
-        cd ios-repo
-        case ${{ inputs.repo }} in
+        cd build/ios-repo
+        case ${{ inputs.site }} in
           production)
             prefix=
             ;;
