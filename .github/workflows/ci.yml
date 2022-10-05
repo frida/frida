@@ -16,8 +16,139 @@ env:
   ELECTRON_TARGETS_FREEBSD: '16.0.0'
 
 jobs:
+  publish-prod:
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    needs:
+      - package-windows
+      - package-windows-sfx
+      - package-macos
+      - package-linux
+      - package-ios
+      - package-android
+      - package-freebsd
+      - package-qnx
+      - package-apple-universal
+      - assemble-ios-assets
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: true
+      - name: Set up environment
+        uses: ./.github/actions/setup-linux-env
+        with:
+          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
+          cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y reprepro
+          sudo npm install -g cloudflare-cli
+      - name: Download release assets
+        uses: actions/download-artifact@v3
+        with:
+          name: release-assets
+          path: build/release-assets/
+      - name: Download Node.js and Electron prebuilds for Windows/x86
+        uses: actions/download-artifact@v3
+        with:
+          name: frida-node-windows-x86
+          path: build/release-assets/
+      - name: Download Node.js and Electron prebuilds for Windows/x86_64
+        uses: actions/download-artifact@v3
+        with:
+          name: frida-node-windows-x86_64
+          path: build/release-assets/
+      - name: Download Node.js and Electron prebuilds for macOS/x86_64
+        uses: actions/download-artifact@v3
+        with:
+          name: frida-node-macos-x86_64
+          path: build/release-assets/
+      - name: Download Node.js and Electron prebuilds for macOS/arm64
+        uses: actions/download-artifact@v3
+        with:
+          name: frida-node-macos-arm64
+          path: build/release-assets/
+      - name: Download Node.js and Electron prebuilds for Linux/x86
+        uses: actions/download-artifact@v3
+        with:
+          name: frida-node-linux-x86
+          path: build/release-assets/
+      - name: Download Node.js and Electron prebuilds for Linux/x86_64
+        uses: actions/download-artifact@v3
+        with:
+          name: frida-node-linux-x86_64
+          path: build/release-assets/
+      - name: Download Node.js and Electron prebuilds for Linux/armhf
+        uses: actions/download-artifact@v3
+        with:
+          name: frida-node-linux-armhf
+          path: build/release-assets/
+      - name: Download Node.js and Electron prebuilds for Linux/arm64
+        uses: actions/download-artifact@v3
+        with:
+          name: frida-node-linux-arm64
+          path: build/release-assets/
+      - name: Download Node.js and Electron prebuilds for FreeBSD/arm64
+        uses: actions/download-artifact@v3
+        with:
+          name: frida-node-freebsd-arm64
+          path: build/release-assets/
+      - name: Package iOS assets
+        uses: ./.github/actions/package-ios-assets
+      - name: Publish release to GitHub
+        uses: softprops/action-gh-release@v1
+        with:
+          name: "Frida ${{ env.FRIDA_VERSION }}"
+          body: "See https://frida.re/news/ for details."
+          files: build/release-assets/*
+      - name: Publish Python wheels to PyPI
+        uses: ./.github/actions/publish-python-wheels
+        with:
+          site: production
+          pypi-token: ${{ secrets.PYPI_API_TOKEN }}
+          testpypi-token: ${{ secrets.TEST_PYPI_API_TOKEN }}
+      - name: Publish iOS .debs
+        uses: ./.github/actions/publish-ios-debs
+        with:
+          site: production
+      - name: Publish Node.js bindings to npm
+        run: |
+          cd frida-node
+          npm version $FRIDA_VERSION
+          sed -i -e '/"install": /d' package.json
+          npm install
+          git checkout package.json
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish frida-gadget-ios to npm
+        run: |
+          cd releng/modules/frida-gadget-ios
+          npm version $FRIDA_VERSION
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Trigger magisk-frida CI
+        run: |
+          curl \
+              -X POST \
+              -H "Accept: application/vnd.github.v3+json" \
+              -H "Authorization: token ${{ secrets.MAGISK_FRIDA_TOKEN }}" \
+              https://api.github.com/repos/ViRb3/magisk-frida/dispatches \
+              -d '{"event_type":"build"}'
+
   publish-dev:
-    if: ${{ !(github.event_name == 'push' && startsWith(github.ref, 'refs/tags')) }}
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     needs:
       - frida-windows
@@ -43,14 +174,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y reprepro
           sudo npm install -g cloudflare-cli
+      - name: Package iOS assets
+        uses: ./.github/actions/package-ios-assets
       - name: Publish Python wheels
         uses: ./.github/actions/publish-python-wheels
         with:
           site: development
           pypi-token: ${{ secrets.PYPI_API_TOKEN }}
           testpypi-token: ${{ secrets.TEST_PYPI_API_TOKEN }}
-      - name: Package iOS assets
-        uses: ./.github/actions/package-ios-assets
       - name: Publish iOS .debs
         uses: ./.github/actions/publish-ios-debs
         with:
@@ -134,7 +265,7 @@ jobs:
         uses: ./.github/actions/teardown-macos-env
 
   package-apple-universal:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: macos-latest
     needs: [frida-macos, frida-ios]
     steps:
@@ -268,7 +399,7 @@ jobs:
         uses: ./.github/actions/teardown-macos-env
 
   package-windows:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    if: startsWith(github.ref, 'refs/tags/')
     needs: frida-windows
     strategy:
       matrix:
@@ -311,7 +442,7 @@ jobs:
           name: frida-qml-windows-${{ matrix.arch }}
 
   package-windows-sfx:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    if: startsWith(github.ref, 'refs/tags/')
     needs: frida-windows
     strategy:
       matrix:
@@ -334,7 +465,7 @@ jobs:
           name: frida-core-devkit-windows-${{ matrix.arch }}
 
   package-macos:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    if: startsWith(github.ref, 'refs/tags/')
     needs: frida-macos
     strategy:
       matrix:
@@ -379,7 +510,7 @@ jobs:
           name: frida-qml-macos-${{ matrix.arch }}
 
   package-linux:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    if: startsWith(github.ref, 'refs/tags/')
     needs: frida-linux
     strategy:
       matrix:
@@ -423,7 +554,7 @@ jobs:
           name: frida-qml-linux-${{ matrix.arch }}
 
   package-ios:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    if: startsWith(github.ref, 'refs/tags/')
     needs: frida-ios
     strategy:
       matrix:
@@ -450,7 +581,7 @@ jobs:
           name: frida-portal-ios-${{ matrix.arch }}
 
   package-android:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    if: startsWith(github.ref, 'refs/tags/')
     needs: frida-android
     strategy:
       matrix:
@@ -489,7 +620,7 @@ jobs:
           name: frida-inject-android-${{ matrix.arch }}
 
   package-freebsd:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    if: startsWith(github.ref, 'refs/tags/')
     needs: frida-freebsd
     strategy:
       matrix:
@@ -528,7 +659,7 @@ jobs:
           name: frida-inject-freebsd-${{ matrix.arch }}
 
   package-qnx:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    if: startsWith(github.ref, 'refs/tags/')
     needs: frida-qnx
     strategy:
       matrix:
