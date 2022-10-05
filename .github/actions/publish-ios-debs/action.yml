@@ -77,4 +77,10 @@ runs:
         for file in Packages Packages.gz; do
           aws s3 cp $file s3://build.frida.re${prefix}/./
         done
+        urls_to_invalidate=()
+        for path in /Release /Packages /Packages.gz /./Packages /./Packages.gz; do
+          urls_to_invalidate+=("https://build.frida.re${prefix}${path}")
+        done
+        echo "Invalidating ${urls_to_invalidate[@]}"
+        cfcli purge ${urls_to_invalidate[@]}
       shell: bash
