@@ -82,6 +82,5 @@ runs:
         for file in Release Packages Packages.gz ./Packages ./Packages.gz; do
           urls_to_invalidate+=("https://build.frida.re${prefix}/${file}")
         done
-        echo "Invalidating ${urls_to_invalidate[@]}"
         cfcli purge ${urls_to_invalidate[@]}
       shell: bash

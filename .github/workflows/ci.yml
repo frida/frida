@@ -31,10 +31,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
-      - name: Install packages
+      - name: Install tools
         run: |
           sudo apt-get update
           sudo apt-get install -y reprepro
+          sudo npm install -g cloudflare-cli
       - name: Publish iOS .debs
         uses: ./.github/actions/publish-ios-debs
         with:
