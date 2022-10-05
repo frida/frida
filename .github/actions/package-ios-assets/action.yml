@@ -4,11 +4,10 @@ runs:
   using: composite
   steps:
     - name: Download iOS assets
-      uses: dawidd6/action-download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: ios-assets
         path: build/ios-assets/
-        run_id: 3182942497
     - name: Create frida-server iOS .deb
       run: |
         mkdir -p build/release-assets

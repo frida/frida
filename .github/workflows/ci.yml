@@ -16,7 +16,7 @@ env:
   ELECTRON_TARGETS_FREEBSD: '16.0.0'
 
 jobs:
-  release:
+  publish-dev:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
