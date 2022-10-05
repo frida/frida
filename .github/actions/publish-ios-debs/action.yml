@@ -59,6 +59,7 @@ runs:
       shell: bash
     - name: Upload iOS package and repo metadata
       run: |
+        cd ios-repo
         case ${{ inputs.repo }} in
           production)
             prefix=
@@ -78,8 +79,8 @@ runs:
           aws s3 cp $file s3://build.frida.re${prefix}/./
         done
         urls_to_invalidate=()
-        for path in /Release /Packages /Packages.gz /./Packages /./Packages.gz; do
-          urls_to_invalidate+=("https://build.frida.re${prefix}${path}")
+        for file in Release Packages Packages.gz ./Packages ./Packages.gz; do
+          urls_to_invalidate+=("https://build.frida.re${prefix}/${file}")
         done
         echo "Invalidating ${urls_to_invalidate[@]}"
         cfcli purge ${urls_to_invalidate[@]}
