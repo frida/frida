@@ -35,63 +35,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y reprepro
-      - name: Download iOS assets
-        uses: dawidd6/action-download-artifact@v2
+      - name: Publish iOS .debs
+        uses: ./.github/actions/publish-ios-debs
         with:
-          name: ios-assets
-          path: ios-assets/
-          run_id: 3182942497
-      - name: Create iOS .deb
-        run: |
-          mkdir release-assets
-          frida-core/tools/package-server-ios.sh \
-              ios-assets \
-              release-assets/frida_${FRIDA_VERSION}_iphoneos-arm.deb
-          ls release-assets/
-      - name: Publish iOS .deb
-        run: |
-          mkdir ios-repo-config
-          (
-            echo "Origin: Cydia/Frida"
-            echo "Label: frida"
-            echo "Suite: stable"
-            echo "Version: 1.0"
-            echo "Codename: stable"
-            echo "Architectures: iphoneos-arm"
-            echo "Components: main"
-            echo "Description: Frida for iOS"
-          ) > ios-repo-config/distributions
-          mkdir -p ios-repo/debs
-          cp release-assets/frida_*_iphoneos-*.deb ios-repo/debs/
-          cd ios-repo
-          (
-            echo "Origin: Frida"
-            echo "Label: Frida"
-            echo "Suite: stable"
-            echo "Version: 1.0"
-            echo "Codename: ios"
-            echo "Architectures: iphoneos-arm"
-            echo "Components: main"
-            echo "Description: Official Frida Repo"
-          ) > Release
-          reprepro \
-              -Vb . \
-              --confdir $GITHUB_WORKSPACE/ios-repo-config \
-              --ignore=forbiddenchar \
-              includedeb \
-              stable \
-              debs/frida_${FRIDA_VERSION}_iphoneos-arm.deb
-          cp dists/stable/main/binary-iphoneos-arm/Packages.gz .
-          rm -f Packages
-          gunzip -k Packages.gz
-          deployment=/dev
-          aws s3 sync --delete pool/ s3://build.frida.re${deployment}/pool/
-          for file in Release Packages Packages.gz; do
-            aws s3 cp $file s3://build.frida.re${deployment}/
-          done
-          for file in Packages Packages.gz; do
-            aws s3 cp $file s3://build.frida.re${deployment}/./
-          done
+          repo: development
       #- name: Publish Python bindings
       #  uses: pypa/gh-action-pypi-publish@release/v1.5
       #  with:
