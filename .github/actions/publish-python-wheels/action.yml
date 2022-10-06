@@ -28,10 +28,10 @@ runs:
       with:
         name: frida-python-macos-x86_64
         path: build/wheels/
-    - name: Download Python wheel for macOS/arm64e
+    - name: Download Python wheel for macOS/arm64
       uses: actions/download-artifact@v3
       with:
-        name: frida-python-macos-arm64e
+        name: frida-python-macos-arm64
         path: build/wheels/
     - name: Download Python wheel for Linux/x86
       uses: actions/download-artifact@v3
