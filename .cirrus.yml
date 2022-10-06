@@ -35,6 +35,7 @@ task:
     (
       echo "FRIDA=$CIRRUS_WORKING_DIR"
       echo "FRIDA_VERSION=$(releng/frida_version.py)"
+      echo "npm_config_jobs=max"
     ) >> $CIRRUS_ENV
     mkdir -p ~/.aws
     (
@@ -86,7 +87,6 @@ task:
     path: "build/wheels/frida-*.whl"
   test_python_script: make check-python
   build_node_script: |
-    export npm_config_jobs=max
     cd frida-node
     npm version $FRIDA_VERSION
     npm install
@@ -100,6 +100,6 @@ task:
     path: "frida-node/prebuilds/*"
   test_node_script: |
     cd frida-node
-    git clean -xffd
-    npm install
+    rm -rf build prebuilds
+    npm run node-gyp -- rebuild
     npm run test
