@@ -1115,7 +1115,7 @@ jobs:
               py_arch=${{ matrix.arch }}
               ;;
           esac
-          export _PYTHON_HOST_PLATFORM=manylinux1-$py_arch
+          export _PYTHON_HOST_PLATFORM=manylinux-2.5-$py_arch
           cd frida-python
           pip wheel -w ../build/wheels --no-deps .
       - name: Upload Python bindings

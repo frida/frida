@@ -53,31 +53,6 @@ runs:
       with:
         name: frida-python-linux-arm64
         path: build/wheels/
-    - name: Download Python wheel for Linux/mips
-      uses: actions/download-artifact@v3
-      with:
-        name: frida-python-linux-mips
-        path: build/wheels/
-    - name: Download Python wheel for Linux/mipsel
-      uses: actions/download-artifact@v3
-      with:
-        name: frida-python-linux-mipsel
-        path: build/wheels/
-    - name: Download Python wheel for Linux/mips64
-      uses: actions/download-artifact@v3
-      with:
-        name: frida-python-linux-mips64
-        path: build/wheels/
-    - name: Download Python wheel for Linux/mips64el
-      uses: actions/download-artifact@v3
-      with:
-        name: frida-python-linux-mips64el
-        path: build/wheels/
-    - name: Download Python wheel for FreeBSD/arm64
-      uses: actions/download-artifact@v3
-      with:
-        name: frida-python-freebsd-arm64
-        path: build/wheels/
     - name: Publish Python wheels to pypi.org
       if: inputs.site == 'production'
       uses: pypa/gh-action-pypi-publish@release/v1.5
