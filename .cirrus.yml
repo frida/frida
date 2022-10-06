@@ -25,12 +25,12 @@ task:
   clone_script: |
     if [ -z "$CIRRUS_PR" ]; then
       git clone --recurse-submodules --branch=$CIRRUS_BRANCH https://x-access-token:${CIRRUS_REPO_CLONE_TOKEN}@github.com/${CIRRUS_REPO_FULL_NAME}.git $CIRRUS_WORKING_DIR
-      git reset --hard $CIRRUS_CHANGE_IN_REPO
     else
       git clone --recurse-submodules https://x-access-token:${CIRRUS_REPO_CLONE_TOKEN}@github.com/${CIRRUS_REPO_FULL_NAME}.git $CIRRUS_WORKING_DIR
       git fetch origin pull/$CIRRUS_PR/head:pull/$CIRRUS_PR
-      git reset --hard $CIRRUS_CHANGE_IN_REPO
     fi
+    git reset --hard $CIRRUS_CHANGE_IN_REPO
+    git submodule update
   setup_environment_script: |
     (
       echo "FRIDA=$CIRRUS_WORKING_DIR"
