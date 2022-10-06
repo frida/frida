@@ -128,6 +128,15 @@ def generate_header(package, frida_root, host, kit, flavor, umbrella_header_path
     if kit == "frida-gumjs":
         inspector_server_header = umbrella_header_path.parent / "guminspectorserver.h"
         ingest_header(inspector_server_header, header_files, processed_header_files, devkit_header_lines)
+    if kit == "frida-core" and platform.system() != "Windows":
+        gio_unix_cflags = subprocess.run(
+            [f". \"{rc}\" && $PKG_CONFIG --cflags gio-unix-2.0"],
+            shell=True,
+            capture_output=True,
+            encoding="utf-8",
+            check=True).stdout.split(" ")
+        gio_unix_incdir = Path([flag[2:] for flag in gio_unix_cflags if flag.endswith("/gio-unix-2.0")][0])
+        ingest_header(gio_unix_incdir / "gio" / "gunixsocketaddress.h", header_files, processed_header_files, devkit_header_lines)
     if kit == "frida-core" and host.startswith("android-"):
         selinux_header = umbrella_header_path.parent / "frida-selinux.h"
         ingest_header(selinux_header, header_files, processed_header_files, devkit_header_lines)
