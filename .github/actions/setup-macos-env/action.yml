@@ -50,6 +50,9 @@ runs:
         git config --global user.name "Frida Developers"
         git config --global user.email "oleavr@frida.re"
       shell: bash
+    - name: Clean submodules
+      run: git submodule foreach "git clean -ffdx && git reset --hard HEAD"
+      shell: bash
     - name: Check out releng/meson
       run: |
         git submodule init -- releng/meson
