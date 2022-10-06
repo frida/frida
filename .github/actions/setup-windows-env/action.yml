@@ -62,5 +62,5 @@ runs:
     - name: Set Frida environment variables
       run: |
         echo "FRIDA=$Env:GITHUB_WORKSPACE" >> $Env:GITHUB_ENV
-        python releng/frida_version.py >> $Env:GITHUB_ENV
+        echo "FRIDA_VERSION=$(python releng/frida_version.py)" >> $Env:GITHUB_ENV
       shell: pwsh

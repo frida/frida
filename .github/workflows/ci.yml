@@ -3,10 +3,10 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - _main
   pull_request:
     branches:
-      - main
+      - _main
 
 env:
   ANDROID_NDK_VERSION: r25b

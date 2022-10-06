@@ -1,16 +1,16 @@
 task:
-  only_if: false
   name: freebsd-x86_64
   freebsd_instance:
     image_family: freebsd-13-1
   environment:
-    GITHUB_TOKEN: ENCRYPTED[affc51741bf633ccffe369e8c58c0896cff87afb4a640351ca8df9c64b9dc7d8a386bb65c5cf39132bb57f823184b258]
     S3_ACCESS_KEY: ENCRYPTED[2f368bef589e43779394e459191eaad2fc4cc50dc36c6f03168a1e8e43897476e8bf596fd4dd0d988bcbab8fa8e171f8]
     S3_SECRET_KEY: ENCRYPTED[45f352473433a1053622a662ce8d57bc7421bce5772c9c5caf4a0e54f63944bd420f71101e014876e038f0c66c134ac2]
     CF_EMAIL: ENCRYPTED[a9f0dcd0ee83fa111c36f092f34b3d5660acafe0d07804d6b6a89bfa70a127ef8305f21089408959c51e23ecd2fd3622]
     CF_TOKEN: ENCRYPTED[4f9f3f7c8603fd32978b825d65f34b06fce8e51bedb4303744c799d21fc38266173a6be5a7a46b5e616573d27c9f6e91]
     PYTHON: /usr/local/bin/python3.9
     PYTHON3: /usr/local/bin/python3.9
+    NODE_TARGETS_FREEBSD: '14.0.0 16.0.0 17.0.1'
+    ELECTRON_TARGETS_FREEBSD: '16.0.0'
   timeout_in: 2h
   install_dependencies_script: |
     pkg install -y \
@@ -22,7 +22,20 @@ task:
       py39-pip \
       py39-setuptools
     npm install -g cloudflare-cli
-  initialize_credentials_script: |
+  clone_script: |
+    if [ -z "$CIRRUS_PR" ]; then
+      git clone --recurse-submodules --branch=$CIRRUS_BRANCH https://x-access-token:${CIRRUS_REPO_CLONE_TOKEN}@github.com/${CIRRUS_REPO_FULL_NAME}.git $CIRRUS_WORKING_DIR
+      git reset --hard $CIRRUS_CHANGE_IN_REPO
+    else
+      git clone --recurse-submodules https://x-access-token:${CIRRUS_REPO_CLONE_TOKEN}@github.com/${CIRRUS_REPO_FULL_NAME}.git $CIRRUS_WORKING_DIR
+      git fetch origin pull/$CIRRUS_PR/head:pull/$CIRRUS_PR
+      git reset --hard $CIRRUS_CHANGE_IN_REPO
+    fi
+  setup_environment_script: |
+    (
+      echo "FRIDA=$CIRRUS_WORKING_DIR"
+      echo "FRIDA_VERSION=$(releng/frida_version.py)"
+    ) >> $CIRRUS_ENV
     mkdir -p ~/.aws
     (
       echo "[default]"
@@ -39,23 +52,50 @@ task:
       echo "    email: $CF_EMAIL"
       echo "    token: $CF_TOKEN"
     ) > ~/.cfcli.yml
-    echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
-  clone_script: |
-    if [ -z "$CIRRUS_PR" ]; then
-      git clone --recurse-submodules --branch=$CIRRUS_BRANCH https://x-access-token:${CIRRUS_REPO_CLONE_TOKEN}@github.com/${CIRRUS_REPO_FULL_NAME}.git $CIRRUS_WORKING_DIR
-      git reset --hard $CIRRUS_CHANGE_IN_REPO
-    else
-      git clone --recurse-submodules https://x-access-token:${CIRRUS_REPO_CLONE_TOKEN}@github.com/${CIRRUS_REPO_FULL_NAME}.git $CIRRUS_WORKING_DIR
-      git fetch origin pull/$CIRRUS_PR/head:pull/$CIRRUS_PR
-      git reset --hard $CIRRUS_CHANGE_IN_REPO
-    fi
   roll_toolchain_script: $PYTHON releng/deps.py roll toolchain freebsd-x86_64 --activate
   roll_sdk_script: $PYTHON releng/deps.py roll sdk freebsd-x86_64
-  build_gum_script: make gum
+  build_gum_script: |
+    make gum
+    releng/devkit.py -t frida-gum freebsd-x86_64 build/devkits/gum
+    releng/devkit.py -t frida-gumjs freebsd-x86_64 build/devkits/gumjs
+  gum_devkit_artifacts:
+    path: "build/devkits/gum/*"
+  gumjs_devkit_artifacts:
+    path: "build/devkits/gumjs/*"
   test_gum_script: make check-gum
-  build_core_script: make core
+  build_core_script: |
+    make core
+    releng/devkit.py -t frida-core freebsd-x86_64 build/devkits/core
+  core_devkit_artifacts:
+    path: "build/devkits/core/*"
+  server_artifacts:
+    path: "build/frida-freebsd-x86_64/bin/frida-server"
+  portal_artifacts:
+    path: "build/frida-freebsd-x86_64/bin/frida-portal"
+  inject_artifacts:
+    path: "build/frida-freebsd-x86_64/bin/frida-inject"
+  gadget_artifacts:
+    path: "build/frida-freebsd-x86_64/lib/frida/64/frida-gadget.so"
   test_core_script: make check-core || true
-  build_python_script: make python
+  build_python_script: |
+    make python
+    export FRIDA_EXTENSION=$PWD/build/frida-freebsd-x86_64/lib/python3.9/site-packages/_frida.so
+    cd frida-python
+    pip wheel -w ../build/wheels --no-deps .
+  python_artifacts:
+    path: "build/wheels/frida-*.whl"
   test_python_script: make check-python
-  build_node_script: make node
+  build_node_script: |
+    export npm_config_jobs=max
+    cd frida-node
+    npm version $FRIDA_VERSION
+    npm install
+    for target in $NODE_TARGETS_FREEBSD; do
+      npm run prebuild -- -r node -t $target
+    done
+    for target in $ELECTRON_TARGETS_FREEBSD; do
+      npm run prebuild -- -r electron -t $target
+    done
+  node_artifacts:
+    path: "frida-node/prebuilds/*"
   test_node_script: make check-node

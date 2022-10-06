@@ -98,6 +98,6 @@ runs:
       run: |
         (
           echo "FRIDA=$GITHUB_WORKSPACE"
-          releng/frida_version.py
+          echo "FRIDA_VERSION=$(releng/frida_version.py)"
         ) >> $GITHUB_ENV
       shell: bash
