@@ -111,8 +111,8 @@ jobs:
           name: "Frida ${{ env.FRIDA_VERSION }}"
           body: "See https://frida.re/news/ for details."
           files: build/release-assets/*
-      - name: Publish Python wheels to PyPI
-        uses: ./.github/actions/publish-python-wheels
+      - name: Publish Python bindings to PyPI
+        uses: ./.github/actions/publish-python-bindings
         with:
           site: production
           pypi-token: ${{ secrets.PYPI_API_TOKEN }}
@@ -176,8 +176,8 @@ jobs:
           sudo npm install -g cloudflare-cli
       - name: Package iOS assets
         uses: ./.github/actions/package-ios-assets
-      - name: Publish Python wheels
-        uses: ./.github/actions/publish-python-wheels
+      - name: Publish Python bindings to TestPyPI
+        uses: ./.github/actions/publish-python-bindings
         with:
           site: development
           pypi-token: ${{ secrets.PYPI_API_TOKEN }}
