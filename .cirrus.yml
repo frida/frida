@@ -98,4 +98,8 @@ task:
     done
   node_artifacts:
     path: "frida-node/prebuilds/*"
-  test_node_script: make check-node
+  test_node_script: |
+    cd frida-node
+    git clean -xffd
+    npm install
+    npm run test
