@@ -112,7 +112,7 @@ def generate_header(package, frida_root, host, kit, flavor, umbrella_header_path
     else:
         rc = env_rc(frida_root, host, flavor)
         header_dependencies = subprocess.run(
-            [f"(. \"{rc}\" && $CC $CFLAGS -E -M $($PKG_CONFIG --cflags {package}) \"{umbrella_header_path}\")"],
+            [f". \"{rc}\" && $CC $CFLAGS -E -M $($PKG_CONFIG --cflags {package}) \"{umbrella_header_path}\""],
             shell=True,
             capture_output=True,
             encoding="utf-8",
@@ -322,7 +322,7 @@ def generate_library_unix(package, frida_root, host, flavor, output_dir, library
     rc = env_rc(frida_root, host, flavor)
     ar = probe_env(rc, "echo $AR")
 
-    library_flags = subprocess.run([f"(. \"{rc}\" && $PKG_CONFIG --static --libs {package})"],
+    library_flags = subprocess.run([f". \"{rc}\" && $PKG_CONFIG --static --libs {package}"],
                                    shell=True,
                                    capture_output=True,
                                    encoding="utf-8",
@@ -591,7 +591,7 @@ def internal_arch_lib_path(name, frida_root, host):
 
 
 def probe_env(rc, command):
-    return subprocess.run([ f"(. \"{rc}\" && {command})" ],
+    return subprocess.run([f". \"{rc}\" && {command}"],
                           shell=True,
                           capture_output=True,
                           encoding="utf-8",
