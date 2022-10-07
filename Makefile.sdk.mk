@@ -26,7 +26,7 @@ packages = \
 	$(NULL)
 
 
-ifeq ($(host_os), $(filter $(host_os), macos ios))
+ifeq ($(host_os), $(filter $(host_os), macos ios tvos))
 # Pull in iconv so our payloads only depend on libSystem.
 glib_deps += libiconv
 endif
@@ -45,7 +45,7 @@ endif
 
 ifneq ($(FRIDA_V8), disabled)
 packages += v8
-ifeq ($(host_os), $(filter $(host_os), macos ios))
+ifeq ($(host_os), $(filter $(host_os), macos ios tvos))
 ifeq ($(FRIDA_ASAN), no)
 packages += libcxx
 endif
