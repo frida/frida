@@ -101,5 +101,5 @@ task:
   test_node_script: |
     cd frida-node
     rm -rf build prebuilds
-    npm run node-gyp -- rebuild
+    node_modules/.bin/node-gyp rebuild
     npm run test
