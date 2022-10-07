@@ -339,7 +339,8 @@ meson_linker_flavor=""
 
 meson_platform_properties=()
 
-flags_to_args () {
+flags_to_args ()
+{
   if [ -n "$1" ]; then
     echo "'$(echo "$1" | sed "s/ /', '/g")'"
   else
