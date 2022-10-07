@@ -1,0 +1,73 @@
+name: Publish Python bindings
+description: Publishes Python source distribution and wheels to PyPI
+inputs:
+  site:
+    required: true
+    path: Where to publish; set to either “production” or “development”
+  pypi-token:
+    required: true
+    description: The token used to authenticate with pypi.org
+  testpypi-token:
+    required: true
+    description: The token used to authenticate with test.pypi.org
+runs:
+  using: composite
+  steps:
+    - name: Create source distribution
+      run: |
+        cd frida-python
+        python setup.py sdist --dist-dir ../build/python-packages
+      shell: bash
+    - name: Download wheel for Windows/x86
+      uses: actions/download-artifact@v3
+      with:
+        name: frida-python-windows-x86
+        path: build/python-packages/
+    - name: Download wheel for Windows/x86_64
+      uses: actions/download-artifact@v3
+      with:
+        name: frida-python-windows-x86_64
+        path: build/python-packages/
+    - name: Download wheel for macOS/x86_64
+      uses: actions/download-artifact@v3
+      with:
+        name: frida-python-macos-x86_64
+        path: build/python-packages/
+    - name: Download wheel for macOS/arm64
+      uses: actions/download-artifact@v3
+      with:
+        name: frida-python-macos-arm64
+        path: build/python-packages/
+    - name: Download wheel for Linux/x86
+      uses: actions/download-artifact@v3
+      with:
+        name: frida-python-linux-x86
+        path: build/python-packages/
+    - name: Download wheel for Linux/x86_64
+      uses: actions/download-artifact@v3
+      with:
+        name: frida-python-linux-x86_64
+        path: build/python-packages/
+    - name: Download wheel for Linux/armhf
+      uses: actions/download-artifact@v3
+      with:
+        name: frida-python-linux-armhf
+        path: build/python-packages/
+    - name: Download wheel for Linux/arm64
+      uses: actions/download-artifact@v3
+      with:
+        name: frida-python-linux-arm64
+        path: build/python-packages/
+    - name: Publish to pypi.org
+      if: inputs.site == 'production'
+      uses: pypa/gh-action-pypi-publish@release/v1.5
+      with:
+        password: ${{ inputs.pypi-token }}
+        packages_dir: build/python-packages/
+    - name: Publish to test.pypi.org
+      if: inputs.site == 'development'
+      uses: pypa/gh-action-pypi-publish@release/v1.5
+      with:
+        password: ${{ inputs.testpypi-token }}
+        repository_url: https://test.pypi.org/legacy/
+        packages_dir: build/python-packages/

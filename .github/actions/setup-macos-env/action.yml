@@ -1,6 +1,15 @@
 name: Set up macOS environment
 description: Set up everything needed to build and release things on macOS
 inputs:
+  certificates-p12:
+    required: true
+    description: The certificates to use for codesigning, as a base64-encoded .p12
+  certificates-password:
+    required: true
+    description: The password for the .p12
+  keychain-password:
+    required: true
+    description: The keychain password to use
   aws-access-key-id:
     required: true
     description: The aws-access-key-id used to authenticate with AWS
@@ -16,17 +25,60 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Install the Apple certificates
+      env:
+        CERTIFICATES_P12: ${{ inputs.certificates-p12 }}
+        CERTIFICATES_PASSWORD: ${{ inputs.certificates-password }}
+        KEYCHAIN_PASSWORD: ${{ inputs.keychain-password }}
+      run: |
+        CERTIFICATE_PATH=$RUNNER_TEMP/apple-certificates.p12
+        KEYCHAIN_PATH=$RUNNER_TEMP/frida-signing.keychain-db
+        echo -n "$CERTIFICATES_P12" | base64 --decode --output $CERTIFICATE_PATH
+        security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+        security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+        security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+        security import $CERTIFICATE_PATH -P "$CERTIFICATES_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+        security list-keychain -d user -s $KEYCHAIN_PATH
+        rm $CERTIFICATE_PATH
+        (
+          echo MACOS_CERTID=$(security find-identity -v -p codesigning | grep "Developer ID Application: " | awk '{ print $2 }')
+          echo IOS_CERTID=$(security find-identity -v -p codesigning | grep "Apple Development: " | awk '{ print $2 }')
+        ) >> $GITHUB_ENV
+      shell: bash
+    - name: Configure git
+      run: |
+        git config --global user.name "Frida Developers"
+        git config --global user.email "oleavr@frida.re"
+      shell: bash
+    - name: Clean submodules
+      run: git submodule foreach "git clean -ffdx && git reset --hard HEAD"
+      shell: bash
     - name: Check out releng/meson
       run: |
         git submodule init -- releng/meson
         git submodule update --depth 1 -- releng/meson
       shell: bash
-    - name: Configure AWS credentials
+    - name: Configure AWS credentials (x64)
+      if: runner.arch == 'X64'
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ inputs.aws-access-key-id }}
         aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
         aws-region: us-east-1
+    - name: Configure AWS credentials (arm64)
+      if: runner.arch == 'ARM64'
+      run: |
+        mkdir -p ~/.aws
+        (
+          echo "[default]"
+          echo "region = us-east-1"
+        ) > ~/.aws/config
+        (
+          echo "[default]"
+          echo "aws_access_key_id = ${{ inputs.aws-access-key-id }}"
+          echo "aws_secret_access_key = ${{ inputs.aws-secret-access-key }}"
+        ) > ~/.aws/credentials
+      shell: bash
     - name: Configure Cloudflare credentials
       run: |
         (
@@ -37,18 +89,18 @@ runs:
         ) > ~/.cfcli.yml
       shell: bash
     - name: Install Python
+      if: runner.arch == 'X64'
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
-    - name: Install agithub
-      run: pip install agithub
-      shell: bash
-    - name: Install requests
-      run: pip install requests
-      shell: bash
-    - name: Install twine
-      run: pip install twine
-      shell: bash
     - name: Install cloudflare-cli
+      if: runner.arch == 'X64'
       run: npm install -g cloudflare-cli
+      shell: bash
+    - name: Set Frida environment variables
+      run: |
+        (
+          echo "FRIDA=$GITHUB_WORKSPACE"
+          echo "FRIDA_VERSION=$(releng/frida_version.py)"
+        ) >> $GITHUB_ENV
       shell: bash

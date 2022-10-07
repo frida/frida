@@ -1,0 +1,36 @@
+name: Package single-file artifact
+description: Downloads an artifact and uploads a compressed version of its file
+inputs:
+  name:
+    required: true
+    description: Artifact name
+runs:
+  using: composite
+  steps:
+    - name: Download
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ inputs.name }}
+    - name: Compress
+      run: |
+        readarray -t files < <(ls -1 ${{ inputs.name }})
+        n=${#files[@]}
+        if [ $n -ne 1 ]; then
+          echo "Artifact may only contain a single file" > /dev/stderr
+          exit 1
+        fi
+        file=${files[0]}
+        if echo $file | grep -q '\.'; then
+          extension=".$(echo $file | cut -d'.' -f2-).xz"
+        else
+          extension=".xz"
+        fi
+        xz -c -T 0 ${{ inputs.name }}/$file > ${{ inputs.name }}/${{ inputs.name }}$extension
+        rm ${{ inputs.name }}/$file
+      shell: bash
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: release-assets
+        path: ${{ inputs.name }}/*

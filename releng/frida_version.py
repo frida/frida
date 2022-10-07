@@ -51,4 +51,4 @@ def detect() -> FridaVersion:
 
 
 if __name__ == "__main__":
-    print(f"FRIDA_VERSION={detect().name}")
+    print(detect().name)

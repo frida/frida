@@ -17,7 +17,13 @@ runs:
   using: composite
   steps:
     - name: Configure git
-      run: git config --global --add safe.directory $GITHUB_WORKSPACE
+      run: |
+        git config --global user.name "Frida Developers"
+        git config --global user.email "oleavr@frida.re"
+        git config --global --add safe.directory $GITHUB_WORKSPACE
+      shell: bash
+    - name: Clean submodules
+      run: git submodule foreach "git clean -ffdx && git reset --hard HEAD"
       shell: bash
     - name: Check out releng/meson
       run: |
@@ -38,4 +44,11 @@ runs:
           echo "    email: ${{ inputs.cloudflare-email }}"
           echo "    token: ${{ inputs.cloudflare-token }}"
         ) > ~/.cfcli.yml
+      shell: bash
+    - name: Set Frida environment variables
+      run: |
+        (
+          echo "FRIDA=$GITHUB_WORKSPACE"
+          echo "FRIDA_VERSION=$(releng/frida_version.py)"
+        ) >> $GITHUB_ENV
       shell: bash

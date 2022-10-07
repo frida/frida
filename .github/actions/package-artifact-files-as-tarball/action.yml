@@ -1,0 +1,24 @@
+name: Package artifact files as tarball
+description: Downloads a specific artifact and uploads a packaged version of it
+inputs:
+  name:
+    required: true
+    description: Artifact name
+runs:
+  using: composite
+  steps:
+    - name: Download
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ inputs.name }}
+    - name: Compress
+      run: tar -C ${{ inputs.name }} -cJf ${{ inputs.name }}.tar.xz .
+      env:
+        XZ_OPT: "-T 0"
+      shell: bash
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: release-assets
+        path: ${{ inputs.name }}.tar.xz
