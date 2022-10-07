@@ -21,7 +21,7 @@ fi
 host_os_arch=$host_os-$host_arch
 
 case $host_os in
-  macos|ios)
+  macos|ios|tvos)
     host_system=darwin
     ;;
   *)
@@ -442,7 +442,7 @@ case $host_os in
     fi
 
     ;;
-  macos|ios)
+  macos|ios|tvos)
     if [ "$host_arch" == "arm64eoabi" ]; then
       export DEVELOPER_DIR="$XCODE11/Contents/Developer"
     fi
@@ -493,6 +493,29 @@ case $host_os in
           apple_sdk_path="$($xcrun --sdk $apple_sdk --show-sdk-path)"
         else
           apple_sdk_path="$IOS_SDK_ROOT"
+        fi
+
+        ;;
+      tvos)
+        apple_os_minver="13.0"
+
+        case "$host_variant" in
+          "")
+            apple_sdk="appletvos"
+            ;;
+          simulator)
+            apple_sdk="appletvsimulator"
+            ;;
+          *)
+            echo "Unsupported tvOS variant: $host_variant" > /dev/stderr
+            exit 1
+            ;;
+        esac
+
+        if [ -z "$TVOS_SDK_ROOT" ]; then
+          apple_sdk_path="$($xcrun --sdk $apple_sdk --show-sdk-path)"
+        else
+          apple_sdk_path="$TVOS_SDK_ROOT"
         fi
 
         ;;

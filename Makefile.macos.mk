@@ -123,6 +123,7 @@ build/frida-ios-%/usr/lib/pkgconfig/frida-core-1.0.pc: build/.frida-core-submodu
 
 gum-macos: build/frida-macos-$(build_arch)/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for macOS
 gum-ios: build/frida-ios-arm64/usr/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for iOS
+gum-tvos: build/frida_thin-tvos-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for tvOS
 gum-android-x86: build/frida-android-x86/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/x86
 gum-android-x86_64: build/frida-android-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/x86-64
 gum-android-arm: build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/arm
@@ -159,6 +160,7 @@ endif
 
 core-macos: build/frida-macos-$(build_arch)/lib/pkgconfig/frida-core-1.0.pc ##@core Build for macOS
 core-ios: build/frida-ios-arm64/usr/lib/pkgconfig/frida-core-1.0.pc ##@core Build for iOS
+core-tvos: build/frida_thin-tvos-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for tvOS
 core-android-x86: build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/x86
 core-android-x86_64: build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/x86-64
 core-android-arm: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/arm
@@ -427,13 +429,13 @@ check-tools-macos: tools-macos ##@tools Test CLI tools for macOS
 .PHONY: \
 	distclean clean clean-submodules git-submodules git-submodule-stamps \
 	gum-macos \
-		gum-ios \
+		gum-ios gum-tvos \
 		gum-android-x86 gum-android-x86_64 \
 		gum-android-arm gum-android-arm64 \
 		check-gum-macos \
 		frida-gum-update-submodule-stamp \
 	core-macos \
-		core-ios \
+		core-ios core-tvos \
 		core-android-x86 core-android-x86_64 \
 		core-android-arm core-android-arm64 \
 		check-core-macos \
