@@ -59,23 +59,23 @@ task:
     make gum
     $PYTHON releng/devkit.py frida-gum freebsd-x86_64 build/devkits/gum
     $PYTHON releng/devkit.py frida-gumjs freebsd-x86_64 build/devkits/gumjs
-  gum_devkit_artifacts:
+  frida_gum_devkit_freebsd_x86_64_artifacts:
     path: "build/devkits/gum/*"
-  gumjs_devkit_artifacts:
+  frida_gumjs_devkit_freebsd_x86_64_artifacts:
     path: "build/devkits/gumjs/*"
   test_gum_script: make check-gum
   build_core_script: |
     make core
     $PYTHON releng/devkit.py frida-core freebsd-x86_64 build/devkits/core
-  core_devkit_artifacts:
+  frida_core_devkit_freebsd_x86_64_artifacts:
     path: "build/devkits/core/*"
-  server_artifacts:
+  frida_server_freebsd_x86_64_artifacts:
     path: "build/frida-freebsd-x86_64/bin/frida-server"
-  portal_artifacts:
+  frida_portal_freebsd_x86_64_artifacts:
     path: "build/frida-freebsd-x86_64/bin/frida-portal"
-  inject_artifacts:
+  frida_inject_freebsd_x86_64_artifacts:
     path: "build/frida-freebsd-x86_64/bin/frida-inject"
-  gadget_artifacts:
+  frida_gadget_freebsd_x86_64_artifacts:
     path: "build/frida-freebsd-x86_64/lib/frida/64/frida-gadget.so"
   test_core_script: make check-core || true
   build_python_script: |
@@ -83,7 +83,7 @@ task:
     export FRIDA_EXTENSION=$PWD/build/frida-freebsd-x86_64/lib/python3.9/site-packages/_frida.so
     cd frida-python
     pip wheel -w ../build/wheels --no-deps .
-  python_artifacts:
+  frida_python_freebsd_x86_64_artifacts:
     path: "build/wheels/frida-*.whl"
   test_python_script: make check-python
   build_node_script: |
@@ -96,7 +96,7 @@ task:
     for target in $ELECTRON_TARGETS_FREEBSD; do
       npm run prebuild -- -r electron -t $target
     done
-  node_artifacts:
+  frida_node_freebsd_x86_64_artifacts:
     path: "frida-node/prebuilds/*"
   test_node_script: |
     cd frida-node

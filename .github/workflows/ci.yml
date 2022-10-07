@@ -105,6 +105,10 @@ jobs:
           path: build/release-assets/
       - name: Package iOS assets
         uses: ./.github/actions/package-ios-assets
+      - name: Package Cirrus CI artifacts
+        run: releng/package-cirrus-ci-artifacts.sh ${{ github.sha }}
+      - name: Rename release assets
+        run: releng/rename-release-assets.sh
       - name: Publish release to GitHub
         uses: softprops/action-gh-release@v1
         with:
