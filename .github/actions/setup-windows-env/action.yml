@@ -24,8 +24,12 @@ runs:
         git config --global user.name "Frida Developers"
         git config --global user.email "oleavr@frida.re"
       shell: pwsh
-    - name: Clean submodules
-      run: git submodule foreach "git clean -ffdx && git reset --hard HEAD"
+    - name: Clean repos
+      run: |
+        git fetch origin --prune --prune-tags
+        git submodule foreach "git clean -ffdx"
+        git submodule foreach "git reset --hard HEAD"
+        git submodule foreach "git fetch origin --prune --prune-tags"
       shell: pwsh
     - name: Check out releng/meson
       run: |
