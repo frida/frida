@@ -123,9 +123,9 @@ jobs:
         run: |
           cd frida-node
           npm version $FRIDA_VERSION
-          sed -i -e '/"install": /d' package.json
+          mkdir prebuilds
+          cp ../build/release-assets/frida-*-node-*-linux-x64.tar.gz prebuilds/
           npm install
-          git checkout package.json
           npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
