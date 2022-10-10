@@ -1,6 +1,16 @@
 name: CI
 
-on: push
+on:
+  push:
+    branches:
+      - 'main'
+      - 'Integration/**'
+  pull_request:
+    types:
+      - opened
+    branches:
+      - 'main'
+      - 'Integration/**'
 
 env:
   ANDROID_NDK_VERSION: r25b
@@ -11,17 +21,6 @@ env:
 
 jobs:
   frida-macos-test:
-    on:
-      push:
-        branches:
-          - 'main'
-          - 'Integration/**'
-      pull_request:
-        types:
-          - opened
-        branches:
-          - 'main'
-          - 'Integration/**'
     needs: toolchain-macos
     strategy:
       matrix:
