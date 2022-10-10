@@ -4,13 +4,13 @@ on:
   push:
     branches:
       - 'main'
-      - 'Integration test execution for core and gum'
+      - 'CI-Integration-Tests'
   pull_request:
     types:
       - opened
     branches:
       - 'main'
-      - 'Integration test execution for core and gum'
+      - 'CI-Integration-Tests'
 
 env:
   ANDROID_NDK_VERSION: r25b
