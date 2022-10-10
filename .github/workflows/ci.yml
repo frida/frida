@@ -10,6 +10,47 @@ env:
   ELECTRON_TARGETS_FREEBSD: '16.0.0'
 
 jobs:
+  frida-macos-test:
+    on:
+      push:
+      pull_request:
+        branches:
+          - main
+    needs: toolchain-macos
+    strategy:
+      matrix:
+        arch: [ x86_64 ]
+      fail-fast: false
+    runs-on: ${{ matrix.arch == 'x86_64' && 'macos-12' }}
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: true
+      - name: Set up environment
+        uses: ./.github/actions/setup-macos-env
+        with:
+          certificates-p12: ${{ secrets.APPLE_CERTIFICATES_P12 }}
+          certificates-password: ${{ secrets.APPLE_CERTIFICATES_PASSWORD }}
+          keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
+          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
+          cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Build Gum libraries and tools
+        run: make build/frida-macos-${{ matrix.arch }}/lib/pkgconfig/frida-gum-1.0.pc
+      - name: Tests Gum libraries and tools
+        run: | 
+          make build/frida-macos-${{ matrix.arch }}/lib/pkgconfig/frida-gum-1.0.pc
+          ./build/tmp-macos-${{ matrix.arch }}/frida-gum/tests/gum-tests
+      - name: Build Core libraries and tools
+        run: make build/frida-macos-${{ matrix.arch }}/lib/pkgconfig/frida-core-1.0.pc
+      - name: Tests Core libraries and tools
+        run: | 
+          make build/frida-macos-${{ matrix.arch }}/lib/pkgconfig/frida-core-1.0.pc 
+          ./build/tmp-macos-${{ matrix.arch }}/frida-core/tests/frida-tests
+
   publish-prod:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
