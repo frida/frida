@@ -13,9 +13,15 @@ jobs:
   frida-macos-test:
     on:
       push:
-      pull_request:
         branches:
-          - main
+          - 'main'
+          - 'Integration/**'
+      pull_request:
+        types:
+          - opened
+        branches:
+          - 'main'
+          - 'Integration/**'
     needs: toolchain-macos
     strategy:
       matrix:
