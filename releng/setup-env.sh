@@ -1068,8 +1068,21 @@ fi
   echo "export LDFLAGS=\"$selected_ldflags\""
   echo "export AR=\"$selected_ar\""
   echo "export NM=\"$selected_nm\""
+  echo "export RANLIB=\"$selected_ranlib\""
   echo "export STRIP=\"$strip_wrapper\""
 ) > $env_rc
+
+if [ -n "$selected_readelf" ]; then
+  echo "export READELF=\"$selected_readelf\"" >> $env_rc
+fi
+
+if [ -n "$selected_objcopy" ]; then
+  echo "export OBJCOPY=\"$selected_objcopy\"" >> $env_rc
+fi
+
+if [ -n "$selected_objdump" ]; then
+  echo "export OBJDUMP=\"$selected_objdump\"" >> $env_rc
+fi
 
 case $host_os in
   macos|ios)
