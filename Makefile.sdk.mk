@@ -84,15 +84,17 @@ build/fs-tmp-%/.package-stamp: $(foreach pkg, $(packages), build/fs-%/manifest/$
 	@$(call print-status,📦,Assembling)
 	@$(RM) -r $(@D)/package
 	@mkdir -p $(@D)/package
-	@cd build/fs-$* \
-		&& [ -d bin/$(build_os_arch) ] && programs=bin/$(build_os_arch) || programs= \
-		&& [ -d lib/tcc ] && tcc=lib/tcc || tcc= \
-		&& [ -d lib/c++ ] && libcpp=lib/c++/*.a || libcpp= \
-		&& [ -d lib/gio/modules ] && gio_modules=lib/gio/modules/*.a || gio_modules= \
-		&& [ -d lib32 ] && lib32=lib32 || lib32= \
-		&& [ -d lib64 ] && lib64=lib64 || lib64= \
-		&& [ -d libdata ] && libdatadir=libdata || libdatadir=lib \
-		&& tar -cf - \
+	@cd build/fs-$*; \
+		programs=""; \
+		[ -d bin/$(host_os_arch) ] && programs=bin/$(host_os_arch); \
+		[ -d bin/$(build_os_arch) ] && programs=bin/$(build_os_arch); \
+		[ -d lib/tcc ] && tcc=lib/tcc || tcc=""; \
+		[ -d lib/c++ ] && libcpp=lib/c++/*.a || libcpp=""; \
+		[ -d lib/gio/modules ] && gio_modules=lib/gio/modules/*.a || gio_modules=""; \
+		[ -d lib32 ] && lib32=lib32 || lib32=""; \
+		[ -d lib64 ] && lib64=lib64 || lib64=""; \
+		[ -d libdata ] && libdatadir=libdata || libdatadir=lib; \
+		tar -cf - \
 			$$programs \
 			include \
 			lib/*.a \
