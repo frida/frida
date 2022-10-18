@@ -412,6 +412,7 @@ libsoup_options = \
 	-Dgnome=false \
 	-Dintrospection=disabled \
 	-Dvapi=disabled \
+	-Dexamples=disabled \
 	-Dtests=false \
 	-Dsysprof=disabled \
 	$(NULL)
