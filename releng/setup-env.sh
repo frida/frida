@@ -1127,6 +1127,7 @@ meson_machine_file=${FRIDA_BUILD}/${FRIDA_ENV_NAME:-frida}-${host_os_arch}.txt
   echo "vala = '$selected_valac'"
   echo "ar = '$selected_ar'"
   echo "nm = '$selected_nm'"
+  echo "ranlib = '$selected_ranlib'"
   if [ -n "$selected_readelf" ]; then
     echo "readelf = '$selected_readelf'"
   fi
