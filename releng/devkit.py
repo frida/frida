@@ -214,9 +214,8 @@ def generate_library_windows(package, frida_root, host, flavor, output_dir, libr
     zlib = [
         sdk_lib_path("libz.a", frida_root, host),
     ]
-    brotli = [
+    libbrotlidec = [
         sdk_lib_path("libbrotlicommon.a", frida_root, host),
-        sdk_lib_path("libbrotlienc.a", frida_root, host),
         sdk_lib_path("libbrotlidec.a", frida_root, host),
     ]
 
@@ -263,7 +262,7 @@ def generate_library_windows(package, frida_root, host, flavor, output_dir, libr
         sdk_lib_path("libsqlite3.a", frida_root, host),
     ]
 
-    libsoup = brotli + [
+    libsoup = libbrotlidec + [
         sdk_lib_path("libsoup-2.4.a", frida_root, host),
         sdk_lib_path("libpsl.a", frida_root, host),
         sdk_lib_path("libxml2.a", frida_root, host),
@@ -295,23 +294,43 @@ def generate_library_windows(package, frida_root, host, flavor, output_dir, libr
             break
 
     gum_lib = internal_arch_lib_path("gum", frida_root, host)
-    gum_deps = deduplicate(glib + gobject + gio + capstone)
-    gumjs_deps = deduplicate([gum_lib] + gum_deps + quickjs + v8 + tls_provider + json_glib + tinycc + sqlite + libsoup)
-    frida_core_deps = deduplicate(glib + gobject + gio + tls_provider + nice + openssl + usrsctp + json_glib + gmodule + gee + libsoup + capstone)
+    gum_deps = deduplicate(glib + gobject + capstone)
+    gum = [gum_lib] + gum_deps
+
+    gumjs_lib = internal_arch_lib_path("gumjs", frida_root, host)
+    gumjs_deps = deduplicate(gum + quickjs + v8 + gio + tls_provider + json_glib + tinycc + sqlite)
+    gumjs = [gumjs_lib] + gumjs_deps
+
+    gumjs_inspector_lib = internal_noarch_lib_path("gumjs-inspector", frida_root, host)
+    gumjs_inspector_deps = deduplicate(gum + json_glib + libsoup)
+    gumjs_inspector = [gumjs_inspector_lib] + gumjs_inspector_deps
+
+    frida_core_lib = internal_noarch_lib_path("frida-core", frida_root, host)
+    frida_core_deps = deduplicate(glib
+                                  + gobject
+                                  + gio
+                                  + tls_provider
+                                  + nice
+                                  + openssl
+                                  + usrsctp
+                                  + json_glib
+                                  + gmodule
+                                  + gee
+                                  + libsoup
+                                  + gum
+                                  + gumjs_inspector
+                                  + libbrotlidec
+                                  + capstone)
+    frida_core = [frida_core_lib] + frida_core_deps
 
     if package == "frida-gum-1.0":
-        package_lib_path = gum_lib
-        package_lib_deps = gum_deps
+        input_libs = gum
     elif package == "frida-gumjs-1.0":
-        package_lib_path = internal_arch_lib_path("gumjs", frida_root, host)
-        package_lib_deps = gumjs_deps
+        input_libs = gumjs
     elif package == "frida-core-1.0":
-        package_lib_path = internal_noarch_lib_path("frida-core", frida_root, host)
-        package_lib_deps = frida_core_deps
+        input_libs = frida_core
     else:
         raise Exception("Unhandled package")
-
-    input_libs = [package_lib_path] + package_lib_deps
 
     subprocess.run([msvs_lib_exe(host), "/nologo", "/out:" + str(output_dir / library_filename)] + input_libs,
                    cwd=msvs_runtime_path(host),
