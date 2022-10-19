@@ -62,7 +62,7 @@ libiconv_deps_for_build = \
 	$(NULL)
 
 zlib_name = zlib
-zlib_version = 066bd9e6a3438af5ee5637a1200d194befd25b8a
+zlib_version = a912d314d0812518d4bbd715a981e6c9484b550d
 zlib_url = $(frida_base_url)/zlib.git
 zlib_recipe = meson
 zlib_patches = \
