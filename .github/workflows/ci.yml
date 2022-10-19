@@ -1030,6 +1030,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Configure qemu-user
+        if: ${{ !startsWith(matrix.arch, 'x86') }}
+        run: echo "FRIDA_QEMU_SYSROOT=/opt/x-tools/$XTOOLS_HOST/$XTOOLS_HOST/sysroot" >> $GITHUB_ENV
       - name: Install packages needed for installing Qt
         if: matrix.arch == 'x86_64'
         run: |
