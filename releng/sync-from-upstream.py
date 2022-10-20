@@ -31,9 +31,6 @@ upstreams = {
     "quickjs": "https://github.com/bellard/quickjs.git",
     "gn": "https://gn.googlesource.com/gn",
     "v8": "https://chromium.googlesource.com/v8/v8",
-    "v8/build": "https://chromium.googlesource.com/chromium/src/build",
-    "v8/buildtools": "https://chromium.googlesource.com/chromium/src/buildtools",
-    "v8/third_party/zlib": "https://chromium.googlesource.com/chromium/src/third_party/zlib",
     "capstone": "https://github.com/capstone-engine/capstone.git",
     "tinycc": "https://repo.or.cz/tinycc.git",
     "quickjs": "https://github.com/bellard/quickjs.git",
@@ -42,10 +39,6 @@ upstreams = {
 
 def sync(repo_path):
     repo_name = os.path.basename(repo_path)
-    if repo_name in ("build", "buildtools") and os.path.basename(os.path.dirname(repo_path)) == "v8":
-        repo_name = "v8/" + repo_name
-    elif repo_name == "zlib" and os.path.basename(os.path.dirname(repo_path)) == "third_party":
-        repo_name = "v8/third_party/zlib"
 
     patches_path = os.path.join(str(Path.home()), ".frida-sync-" + re.sub(r"[^\w\d]", "-", repo_path.lower()).lstrip("-"))
     if os.path.exists(patches_path):
