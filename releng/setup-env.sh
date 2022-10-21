@@ -1067,7 +1067,12 @@ if [ "$FRIDA_ENV_SDK" != 'none' ]; then
     linux-x86_64)
       candidates+=("$FRIDA_SDKROOT/bin/linux-x86")
       ;;
-    macos-arm64*)
+    macos-arm64)
+      candidates+=("$FRIDA_SDKROOT/bin/macos-arm64e")
+      candidates+=("$FRIDA_SDKROOT/bin/macos-x86_64")
+      ;;
+    macos-arm64e)
+      candidates+=("$FRIDA_SDKROOT/bin/macos-arm64")
       candidates+=("$FRIDA_SDKROOT/bin/macos-x86_64")
       ;;
   esac
