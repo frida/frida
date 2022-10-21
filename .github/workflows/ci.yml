@@ -1116,8 +1116,30 @@ jobs:
               py_arch=${{ matrix.arch }}
               ;;
           esac
-          export _PYTHON_HOST_PLATFORM=manylinux-2.5-$py_arch
+          case ${{ matrix.arch }} in
+            x86*)
+              py_platform=manylinux_2_5_${py_arch}.manylinux1_${py_arch}
+              ;;
+            arm*|ppc*|s390x)
+              py_platform=manylinux_2_17_${py_arch}.manylinux2014_${py_arch}
+              ;;
+            *)
+              py_platform=manylinux_2_5_${py_arch}
+              ;;
+          esac
+          bdist_wheel_py=/usr/lib/python3/dist-packages/wheel/bdist_wheel.py
+          sed "s/plat_name = plat_name\\.lower()\\.replace('-', '_')\\.replace('.', '_')/plat_name = plat_name.lower().replace('-', '_')/" \
+              $bdist_wheel_py > $bdist_wheel_py.patched
+          if cmp -s $bdist_wheel_py $bdist_wheel_py.patched; then
+            rm -f $bdist_wheel_py.patched
+            echo 'Unable to patch bdist_wheel.py' > /dev/stderr
+            exit 1
+          else
+            mv $bdist_wheel_py.patched $bdist_wheel_py
+          fi
           cd frida-python
+          export _PYTHON_HOST_PLATFORM=linux-$py_arch
+          echo "plat_name = $py_platform" >> setup.cfg
           pip wheel -w ../build/wheels --no-deps .
       - name: Upload Python bindings
         uses: actions/upload-artifact@v3
