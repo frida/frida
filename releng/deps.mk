@@ -504,6 +504,7 @@ v8_options = \
 	-Dembedder_string=-frida \
 	-Dsnapshot_compression=disabled \
 	-Dpointer_compression=disabled \
+	-Dshared_ro_heap=disabled \
 	-Dcppgc_caged_heap=disabled \
 	$(NULL)
 v8_deps = \
