@@ -2,7 +2,7 @@ FRIDA_VERSION := $(shell git describe --tags --always --long | sed 's,-,.,g' | c
 
 include releng/system.mk
 
-FOR_HOST ?= $(build_os_arch)
+FOR_HOST ?= $(build_machine)
 SHELL := $(shell which bash)
 
 frida_gum_flags := \
@@ -42,14 +42,14 @@ frida_tools = \
 	$(NULL)
 
 build/frida-env-%.rc: releng/setup-env.sh build/frida-version.h
-	@if [ $* != $(build_os_arch) ]; then \
+	@if [ $* != $(build_machine) ]; then \
 		cross=yes; \
 	else \
 		cross=no; \
 	fi; \
-	for os_arch in $(build_os_arch) $*; do \
-		if [ ! -f build/frida-env-$$os_arch.rc ]; then \
-			FRIDA_HOST=$$os_arch \
+	for machine in $(build_machine) $*; do \
+		if [ ! -f build/frida-env-$$machine.rc ]; then \
+			FRIDA_HOST=$$machine \
 			FRIDA_CROSS=$$cross \
 			FRIDA_ASAN=$(FRIDA_ASAN) \
 			XCODE11="$(XCODE11)" \
@@ -57,14 +57,14 @@ build/frida-env-%.rc: releng/setup-env.sh build/frida-version.h
 		fi \
 	done
 build/frida_thin-env-%.rc: releng/setup-env.sh build/frida-version.h
-	@if [ $* != $(build_os_arch) ]; then \
+	@if [ $* != $(build_machine) ]; then \
 		cross=yes; \
 	else \
 		cross=no; \
 	fi; \
-	for os_arch in $(build_os_arch) $*; do \
-		if [ ! -f build/frida_thin-env-$$os_arch.rc ]; then \
-			FRIDA_HOST=$$os_arch \
+	for machine in $(build_machine) $*; do \
+		if [ ! -f build/frida_thin-env-$$machine.rc ]; then \
+			FRIDA_HOST=$$machine \
 			FRIDA_CROSS=$$cross \
 			FRIDA_ASAN=$(FRIDA_ASAN) \
 			FRIDA_ENV_NAME=frida_thin \
@@ -79,14 +79,14 @@ build/frida_thin-env-%.rc: releng/setup-env.sh build/frida-version.h
 	[ ! -d toolchain-$* ] && ln -s frida_thin-toolchain-$* toolchain-$*; \
 	true
 build/frida_gir-env-%.rc: releng/setup-env.sh build/frida-version.h
-	@if [ $* != $(build_os_arch) ]; then \
+	@if [ $* != $(build_machine) ]; then \
 		cross=yes; \
 	else \
 		cross=no; \
 	fi; \
-	for os_arch in $(build_os_arch) $*; do \
-		if [ ! -f build/frida_gir-env-$$os_arch.rc ]; then \
-			FRIDA_HOST=$$os_arch \
+	for machine in $(build_machine) $*; do \
+		if [ ! -f build/frida_gir-env-$$machine.rc ]; then \
+			FRIDA_HOST=$$machine \
 			FRIDA_CROSS=$$cross \
 			FRIDA_ASAN=$(FRIDA_ASAN) \
 			FRIDA_ENV_NAME=frida_gir \
@@ -114,8 +114,8 @@ define meson-setup-thin
 endef
 
 define meson-setup-for-env
-	meson_args="--native-file build/$1-$(build_os_arch).txt"; \
-	if [ $2 != $(build_os_arch) ]; then \
+	meson_args="--native-file build/$1-$(build_machine).txt"; \
+	if [ $2 != $(build_machine) ]; then \
 		meson_args="$$meson_args --cross-file build/$1-$2.txt"; \
 	fi; \
 	$(MESON) setup $$meson_args

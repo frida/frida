@@ -23,7 +23,7 @@ FRIDA_FLAGS_COMMON := -Doptimization=1 -Db_sanitize=address
 FRIDA_FLAGS_BOTTLE := -Doptimization=1 -Db_sanitize=address
 else
 FRIDA_FLAGS_COMMON := -Doptimization=s -Db_ndebug=true --strip
-FRIDA_FLAGS_BOTTLE := -Doptimization=s -Db_ndebug=true
+FRIDA_FLAGS_BOTTLE := -Doptimization=s -Db_ndebug=true --strip
 endif
 
 FRIDA_MAPPER := -Dmapper=auto

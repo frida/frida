@@ -47,10 +47,7 @@ clean: clean-submodules
 	rm -f build/*-clang*
 	rm -f build/*-pkg-config
 	rm -f build/*-stamp
-	rm -f build/*-strip
 	rm -f build/*.rc
-	rm -f build/*.sh
-	rm -f build/*.site
 	rm -f build/*.tar.bz2
 	rm -f build/*.txt
 	rm -f build/frida-version.h
@@ -117,11 +114,11 @@ build/tmp-%/frida-$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-sta
 	if [ ! -f $$builddir/build.ninja ]; then \
 		$(call meson-setup,$*) \
 			--prefix $(FRIDA)/build/frida-$* \
+			$(FRIDA_FLAGS_COMMON) \
 			-Dpython=$(PYTHON) \
 			frida-python $$builddir || exit 1; \
 	fi; \
-	$(MESON) install -C $$builddir || exit 1; \
-	$$STRIP $$STRIP_FLAGS build/frida-$*/lib/$(PYTHON_NAME)/site-packages/_frida.so
+	$(MESON) install -C $$builddir || exit 1
 	@touch $@
 
 check-python: build/tmp-freebsd-$(build_arch)/frida-$(PYTHON_NAME)/.frida-stamp ##@python Test Python bindings
@@ -170,6 +167,7 @@ build/tmp-%/frida-tools-$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodul
 	if [ ! -f $$builddir/build.ninja ]; then \
 		$(call meson-setup,$*) \
 			--prefix $(FRIDA)/build/frida-$* \
+			$(FRIDA_FLAGS_COMMON) \
 			-Dpython=$(PYTHON) \
 			frida-tools $$builddir || exit 1; \
 	fi; \

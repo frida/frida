@@ -3,7 +3,7 @@
 set -e
 
 [ -z "$1" ] && exit 1
-build_os_arch=$1
+build_machine=$1
 
 releng_path=`dirname $0`
 cd $releng_path/../
@@ -35,7 +35,7 @@ fi
 "$MAKE" -f Makefile.toolchain.mk deps/.vala-stamp
 
 srcdir="$FRIDA_ROOT/deps/vala"
-builddir="$FRIDA_BUILD/ft-tmp-$build_os_arch/bootstrap"
+builddir="$FRIDA_BUILD/ft-tmp-$build_machine/bootstrap"
 
 rm -rf "$builddir"
 mkdir -p "$builddir"
@@ -53,4 +53,4 @@ cd "$builddir/dist"
 ln -s "$(which ninja)" bin/ninja
 ln -s "$(which pkg-config)" bin/pkg-config
 mkdir -p share/aclocal
-tar -cjf "$FRIDA_BUILD/_toolchain-$build_os_arch.tar.bz2" .
+tar -cjf "$FRIDA_BUILD/_toolchain-$build_machine.tar.bz2" .

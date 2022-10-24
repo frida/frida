@@ -3,9 +3,11 @@
 import argparse
 from collections import OrderedDict
 from glob import glob
+import machine_file
 from pathlib import Path
 import platform
 import re
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -15,6 +17,8 @@ if platform.system() == "Windows":
     from xml.etree import ElementTree
     from xml.etree.ElementTree import QName
 
+
+FRIDA_ROOT = Path(__file__).resolve().parent.parent
 
 INCLUDE_PATTERN = re.compile("#include\s+[<\"](.*?)[>\"]")
 
@@ -41,6 +45,11 @@ def main():
         flavor = "_thin"
     else:
         flavor = ""
+        fat_machine_file = query_machine_file_path(host, flavor)
+        if fat_machine_file is not None \
+                and not fat_machine_file.exists() \
+                and query_machine_file_path(host, "_thin").exists():
+            flavor = "_thin"
 
     outdir.mkdir(parents=True, exist_ok=True)
 
@@ -50,21 +59,38 @@ def main():
 def generate_devkit(kit, host, flavor, output_dir):
     package, umbrella_header = DEVKITS[kit]
 
-    frida_root = Path(__file__).resolve().parent.parent
+    meson_config = load_meson_config(host, flavor)
 
     library_filename = compute_library_filename(kit)
-    (extra_ldflags, thirdparty_symbol_mappings) = generate_library(package, frida_root, host, flavor, output_dir, library_filename)
+    (extra_ldflags, thirdparty_symbol_mappings) = generate_library(package,
+                                                                   host,
+                                                                   flavor,
+                                                                   meson_config,
+                                                                   output_dir,
+                                                                   library_filename)
 
-    umbrella_header_path = compute_umbrella_header_path(frida_root, host, flavor, package, umbrella_header)
+    umbrella_header_path = compute_umbrella_header_path(host, flavor, package, umbrella_header)
 
     header_file = output_dir / f"{kit}.h"
     if not umbrella_header_path.exists():
         raise Exception(f"Header not found: {umbrella_header_path}")
-    header_source = generate_header(package, frida_root, host, kit, flavor, umbrella_header_path, thirdparty_symbol_mappings)
+    header_source = generate_header(package,
+                                    host,
+                                    kit,
+                                    flavor,
+                                    meson_config,
+                                    umbrella_header_path,
+                                    thirdparty_symbol_mappings)
     header_file.write_text(header_source, encoding="utf-8")
 
     example_file = output_dir / f"{kit}-example.c"
-    example_source = generate_example(example_file, package, frida_root, host, kit, flavor, extra_ldflags)
+    example_source = generate_example(example_file,
+                                      package,
+                                      host,
+                                      kit,
+                                      flavor,
+                                      meson_config,
+                                      extra_ldflags)
     example_file.write_text(example_source, encoding="utf-8")
 
     extra_files = []
@@ -77,20 +103,20 @@ def generate_devkit(kit, host, flavor, output_dir):
     return [header_file.name, library_filename, example_file.name] + extra_files
 
 
-def generate_header(package, frida_root, host, kit, flavor, umbrella_header_path, thirdparty_symbol_mappings):
+def generate_header(package, host, kit, flavor, meson_config, umbrella_header_path, thirdparty_symbol_mappings):
     if platform.system() == "Windows":
         (win_sdk_dir, win_sdk_version) = winenv.get_windows_sdk()
 
         include_dirs = [
             winenv.get_msvc_tool_dir() / "include",
             win_sdk_dir / "Include" / win_sdk_version / "ucrt",
-            frida_root / "build" / "sdk-windows" / msvs_arch_config(host) / "lib" / "glib-2.0" / "include",
-            frida_root / "build" / "sdk-windows" / msvs_arch_config(host) / "include" / "glib-2.0",
-            frida_root / "build" / "sdk-windows" / msvs_arch_config(host) / "include" / "json-glib-1.0",
-            frida_root / "build" / "sdk-windows" / msvs_arch_config(host) / "include" / "capstone",
-            internal_include_path("gum", frida_root, host),
-            frida_root / "frida-gum",
-            frida_root / "frida-gum" / "bindings",
+            FRIDA_ROOT / "build" / "sdk-windows" / msvs_arch_config(host) / "lib" / "glib-2.0" / "include",
+            FRIDA_ROOT / "build" / "sdk-windows" / msvs_arch_config(host) / "include" / "glib-2.0",
+            FRIDA_ROOT / "build" / "sdk-windows" / msvs_arch_config(host) / "include" / "json-glib-1.0",
+            FRIDA_ROOT / "build" / "sdk-windows" / msvs_arch_config(host) / "include" / "capstone",
+            internal_include_path("gum", host),
+            FRIDA_ROOT / "frida-gum",
+            FRIDA_ROOT / "frida-gum" / "bindings",
         ]
         includes = ["/I" + str(include_dir) for include_dir in include_dirs]
 
@@ -107,19 +133,18 @@ def generate_header(package, frida_root, host, kit, flavor, umbrella_header_path
         header_refs = [line[line.index("\"") + 1:line.rindex("\"")].replace("\\\\", "/") for line in lines if line.startswith(mapping_prefix)]
 
         header_files = deduplicate(header_refs)
-        frida_root_slashed = frida_root.as_posix()
+        frida_root_slashed = FRIDA_ROOT.as_posix()
         header_files = [Path(h) for h in header_files if bool(re.match("^" + frida_root_slashed, h, re.I))]
     else:
-        rc = env_rc(frida_root, host, flavor)
+        pkg_cflags = query_pkgconfig_cflags(package, meson_config)
         header_dependencies = subprocess.run(
-            [f". \"{rc}\" && $CC $CFLAGS -E -M $($PKG_CONFIG --cflags {package}) \"{umbrella_header_path}\""],
-            shell=True,
+            meson_config["c"] + meson_config["c_args"] + pkg_cflags + ["-E", "-M", umbrella_header_path],
             capture_output=True,
             encoding="utf-8",
             check=True).stdout
         header_lines = header_dependencies.strip().split("\n")[1:]
         header_files = [Path(line.rstrip("\\").strip()) for line in header_lines]
-        header_files = [h for h in header_files if h.is_relative_to(frida_root)]
+        header_files = [h for h in header_files if h.is_relative_to(FRIDA_ROOT)]
 
     devkit_header_lines = []
     umbrella_header = header_files[0]
@@ -129,12 +154,7 @@ def generate_header(package, frida_root, host, kit, flavor, umbrella_header_path
         inspector_server_header = umbrella_header_path.parent / "guminspectorserver.h"
         ingest_header(inspector_server_header, header_files, processed_header_files, devkit_header_lines)
     if kit == "frida-core" and platform.system() != "Windows":
-        gio_unix_cflags = subprocess.run(
-            [f". \"{rc}\" && $PKG_CONFIG --cflags gio-unix-2.0"],
-            shell=True,
-            capture_output=True,
-            encoding="utf-8",
-            check=True).stdout.split(" ")
+        gio_unix_cflags = query_pkgconfig_cflags("gio-unix-2.0", meson_config)
         gio_unix_incdir = Path([flag[2:] for flag in gio_unix_cflags if flag.endswith("/gio-unix-2.0")][0])
         ingest_header(gio_unix_incdir / "gio" / "gunixsocketaddress.h", header_files, processed_header_files, devkit_header_lines)
     if kit == "frida-core" and host.startswith("android-"):
@@ -203,109 +223,109 @@ def ingest_header(header, all_header_files, processed_header_files, result):
                 result.append(line)
 
 
-def generate_library(package, frida_root, host, flavor, output_dir, library_filename):
+def generate_library(package, host, flavor, meson_config, output_dir, library_filename):
     if platform.system() == "Windows":
-        return generate_library_windows(package, frida_root, host, flavor, output_dir, library_filename)
+        return generate_library_windows(package, host, flavor, output_dir, library_filename)
     else:
-        return generate_library_unix(package, frida_root, host, flavor, output_dir, library_filename)
+        return generate_library_unix(package, host, flavor, meson_config, output_dir, library_filename)
 
 
-def generate_library_windows(package, frida_root, host, flavor, output_dir, library_filename):
+def generate_library_windows(package, host, flavor, output_dir, library_filename):
     zlib = [
-        sdk_lib_path("libz.a", frida_root, host),
+        sdk_lib_path("libz.a", host),
     ]
     libbrotlidec = [
-        sdk_lib_path("libbrotlicommon.a", frida_root, host),
-        sdk_lib_path("libbrotlidec.a", frida_root, host),
+        sdk_lib_path("libbrotlicommon.a", host),
+        sdk_lib_path("libbrotlidec.a", host),
     ]
 
     glib = [
-        sdk_lib_path("libglib-2.0.a", frida_root, host),
+        sdk_lib_path("libglib-2.0.a", host),
     ]
     gobject = glib + [
-        sdk_lib_path("libgobject-2.0.a", frida_root, host),
-        sdk_lib_path("libffi.a", frida_root, host),
+        sdk_lib_path("libgobject-2.0.a", host),
+        sdk_lib_path("libffi.a", host),
     ]
     gmodule = glib + [
-        sdk_lib_path("libgmodule-2.0.a", frida_root, host),
+        sdk_lib_path("libgmodule-2.0.a", host),
     ]
     gio = glib + gobject + gmodule + zlib + [
-        sdk_lib_path("libgio-2.0.a", frida_root, host),
+        sdk_lib_path("libgio-2.0.a", host),
     ]
 
     openssl = [
-        sdk_lib_path("libssl.a", frida_root, host),
-        sdk_lib_path("libcrypto.a", frida_root, host),
+        sdk_lib_path("libssl.a", host),
+        sdk_lib_path("libcrypto.a", host),
     ]
 
     tls_provider = openssl + [
-        sdk_lib_path(Path("gio") / "modules" / "libgioopenssl.a", frida_root, host),
+        sdk_lib_path(Path("gio") / "modules" / "libgioopenssl.a", host),
     ]
 
     nice = [
-        sdk_lib_path("libnice.a", frida_root, host),
+        sdk_lib_path("libnice.a", host),
     ]
 
     usrsctp = [
-        sdk_lib_path("libusrsctp.a", frida_root, host),
+        sdk_lib_path("libusrsctp.a", host),
     ]
 
     json_glib = glib + gobject + [
-        sdk_lib_path("libjson-glib-1.0.a", frida_root, host),
+        sdk_lib_path("libjson-glib-1.0.a", host),
     ]
 
     gee = glib + gobject + [
-        sdk_lib_path("libgee-0.8.a", frida_root, host),
+        sdk_lib_path("libgee-0.8.a", host),
     ]
 
     sqlite = [
-        sdk_lib_path("libsqlite3.a", frida_root, host),
+        sdk_lib_path("libsqlite3.a", host),
     ]
 
     libsoup = libbrotlidec + [
-        sdk_lib_path("libsoup-2.4.a", frida_root, host),
-        sdk_lib_path("libpsl.a", frida_root, host),
-        sdk_lib_path("libxml2.a", frida_root, host),
+        sdk_lib_path("libsoup-2.4.a", host),
+        sdk_lib_path("libpsl.a", host),
+        sdk_lib_path("libxml2.a", host),
     ]
 
     capstone = [
-        sdk_lib_path("libcapstone.a", frida_root, host)
+        sdk_lib_path("libcapstone.a", host)
     ]
 
     quickjs = [
-        sdk_lib_path("libquickjs.a", frida_root, host)
+        sdk_lib_path("libquickjs.a", host)
     ]
 
     tinycc = [
-        sdk_lib_path("libtcc.a", frida_root, host)
+        sdk_lib_path("libtcc.a", host)
     ]
 
     v8 = []
 
-    build_props = ElementTree.parse(frida_root / "releng" / "frida.props")
+    build_props = ElementTree.parse(FRIDA_ROOT / "releng" / "frida.props")
     frida_v8_tag = str(QName("http://schemas.microsoft.com/developer/msbuild/2003", "FridaV8"))
 
     for elem in build_props.iter():
         if elem.tag == frida_v8_tag:
             if elem.text == "Enabled":
                 v8 += [
-                    sdk_lib_path("libv8-10.0.a", frida_root, host),
+                    sdk_lib_path("libv8-10.0.a", host),
                 ]
             break
 
-    gum_lib = internal_arch_lib_path("gum", frida_root, host)
+    gum_lib = internal_arch_lib_path("gum", host)
     gum_deps = deduplicate(glib + gobject + capstone)
     gum = [gum_lib] + gum_deps
 
-    gumjs_lib = internal_arch_lib_path("gumjs", frida_root, host)
+    gumjs_lib = internal_arch_lib_path("gumjs", host)
     gumjs_deps = deduplicate(gum + quickjs + v8 + gio + tls_provider + json_glib + tinycc + sqlite)
     gumjs = [gumjs_lib] + gumjs_deps
 
-    gumjs_inspector_lib = internal_noarch_lib_path("gumjs-inspector", frida_root, host)
+    gumjs_inspector_lib = internal_noarch_lib_path("gumjs-inspector", host)
     gumjs_inspector_deps = deduplicate(gum + json_glib + libsoup)
     gumjs_inspector = [gumjs_inspector_lib] + gumjs_inspector_deps
 
-    frida_core_lib = internal_noarch_lib_path("frida-core", frida_root, host)
+    frida_core_lib = internal_noarch_lib_path("frida-core", host)
     frida_core_deps = deduplicate(glib
                                   + gobject
                                   + gio
@@ -343,15 +363,11 @@ def generate_library_windows(package, frida_root, host, flavor, output_dir, libr
     return (extra_flags, thirdparty_symbol_mappings)
 
 
-def generate_library_unix(package, frida_root, host, flavor, output_dir, library_filename):
+def generate_library_unix(package, host, flavor, meson_config, output_dir, library_filename):
     output_path = output_dir / library_filename
     output_path.unlink(missing_ok=True)
 
-    rc = env_rc(frida_root, host, flavor)
-    ar = probe_env(rc, "echo $AR")
-
-    library_flags = subprocess.run([f". \"{rc}\" && $PKG_CONFIG --static --libs {package}"],
-                                   shell=True,
+    library_flags = subprocess.run(meson_config["pkgconfig"] + ["--static", "--libs", package],
                                    capture_output=True,
                                    encoding="utf-8",
                                    check=True).stdout.strip().split(" ")
@@ -366,7 +382,8 @@ def generate_library_unix(package, frida_root, host, flavor, output_dir, library
         libcxx_libs = [Path(p) for p in glob(str(v8_libdir / "c++" / "*.a"))]
         library_paths.extend(libcxx_libs)
 
-    ar_help = subprocess.run([ar, "--help"],
+    ar = meson_config["ar"]
+    ar_help = subprocess.run(ar + ["--help"],
                              stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT,
                              encoding="utf-8").stdout
@@ -376,10 +393,10 @@ def generate_library_unix(package, frida_root, host, flavor, output_dir, library
         mri = ["create " + str(output_path)]
         mri += [f"addlib {path}" for path in library_paths]
         mri += ["save", "end"]
-        ar = subprocess.run([ar, "-M"],
-                            input="\n".join(mri),
-                            encoding="utf-8",
-                            check=True)
+        subprocess.run(ar + ["-M"],
+                       input="\n".join(mri),
+                       encoding="utf-8",
+                       check=True)
     elif host.startswith("macos-") or host.startswith("ios-"):
         subprocess.run(["xcrun", "libtool", "-static", "-o", output_path] + library_paths,
                        capture_output=True,
@@ -391,7 +408,7 @@ def generate_library_unix(package, frida_root, host, flavor, output_dir, library
         for library_path in library_paths:
             scratch_dir = Path(tempfile.mkdtemp(prefix="devkit"))
 
-            subprocess.run([ar, "x", library_path],
+            subprocess.run(ar + ["x", library_path],
                            cwd=scratch_dir,
                            capture_output=True,
                            check=True)
@@ -404,22 +421,22 @@ def generate_library_unix(package, frida_root, host, flavor, output_dir, library
 
             shutil.rmtree(scratch_dir)
 
-        subprocess.run([ar, "rcs", output_path] + list(object_names),
+        subprocess.run(ar + ["rcs", output_path] + list(object_names),
                        cwd=combined_dir,
                        capture_output=True,
                        check=True)
 
         shutil.rmtree(combined_dir)
 
-    objcopy = probe_env(rc, "echo $OBJCOPY")
-    if len(objcopy) > 0:
-        thirdparty_symbol_mappings = get_thirdparty_symbol_mappings(output_path, rc)
+    objcopy = meson_config.get("objcopy", None)
+    if objcopy is not None:
+        thirdparty_symbol_mappings = get_thirdparty_symbol_mappings(output_path, meson_config)
 
         renames = "\n".join([f"{original} {renamed}" for original, renamed in thirdparty_symbol_mappings]) + "\n"
         with tempfile.NamedTemporaryFile() as renames_file:
             renames_file.write(renames.encode("utf-8"))
             renames_file.flush()
-            subprocess.run([objcopy, "--redefine-syms=" + renames_file.name, output_path],
+            subprocess.run(objcopy + ["--redefine-syms=" + renames_file.name, output_path],
                            check=True)
     else:
         thirdparty_symbol_mappings = []
@@ -432,12 +449,12 @@ def extract_public_thirdparty_symbol_mappings(mappings):
     return [(original, renamed) for original, renamed in mappings if any([original.startswith(prefix) for prefix in public_prefixes])]
 
 
-def get_thirdparty_symbol_mappings(library, rc):
-    return [(name, "_frida_" + name) for name in get_thirdparty_symbol_names(library, rc)]
+def get_thirdparty_symbol_mappings(library, meson_config):
+    return [(name, "_frida_" + name) for name in get_thirdparty_symbol_names(library, meson_config)]
 
 
-def get_thirdparty_symbol_names(library, rc):
-    visible_names = list(set([name for kind, name in get_symbols(library, rc) if kind in ("T", "D", "B", "R", "C")]))
+def get_thirdparty_symbol_names(library, meson_config):
+    visible_names = list(set([name for kind, name in get_symbols(library, meson_config) if kind in ("T", "D", "B", "R", "C")]))
     visible_names.sort()
 
     frida_prefixes = ["frida", "_frida", "gum", "_gum"]
@@ -446,12 +463,10 @@ def get_thirdparty_symbol_names(library, rc):
     return thirdparty_names
 
 
-def get_symbols(library, rc):
+def get_symbols(library, meson_config):
     result = []
 
-    nm = probe_env(rc, "echo $NM")
-
-    for line in subprocess.run([nm, library],
+    for line in subprocess.run(meson_config["nm"] + [library],
                                capture_output=True,
                                encoding="utf-8",
                                check=True).stdout.split("\n"):
@@ -493,7 +508,7 @@ def resolve_library_paths(names, dirs):
     return (deduplicate(paths), flags)
 
 
-def generate_example(source_file, package, frida_root, host, kit, flavor, extra_ldflags):
+def generate_example(source_file, package, host, kit, flavor, meson_config, extra_ldflags):
     os_flavor = "windows" if platform.system() == "Windows" else "unix"
 
     example_code = asset_path(f"{kit}-example-{os_flavor}.c").read_text(encoding="utf-8")
@@ -501,24 +516,22 @@ def generate_example(source_file, package, frida_root, host, kit, flavor, extra_
     if platform.system() == "Windows":
         return example_code
     else:
-        rc = env_rc(frida_root, host, flavor)
-
         if host.split("-")[0] in ["macos", "ios", "android"]:
             cc = "clang++" if kit == "frida-gumjs" else "clang"
         else:
             cc = "g++" if kit == "frida-gumjs" else "gcc"
-        cflags = probe_env(rc, "echo $CFLAGS")
-        ldflags = probe_env(rc, "echo $LDFLAGS")
+        cflags = meson_config["common_flags"] + meson_config["c_args"]
+        ldflags = meson_config["c_link_args"]
 
-        (cflags, ldflags) = tweak_flags(cflags, " ".join([" ".join(extra_ldflags), ldflags]))
+        (cflags, ldflags) = tweak_flags(cflags, extra_ldflags + ldflags)
 
         if cc == "g++":
-            ldflags += " -static-libstdc++"
+            ldflags.append("-static-libstdc++")
 
         params = {
             "cc": cc,
-            "cflags": cflags,
-            "ldflags": ldflags,
+            "cflags": shlex.join(cflags),
+            "ldflags": shlex.join(ldflags),
             "source_filename": source_file.name,
             "program_filename": source_file.stem,
             "library_name": kit
@@ -540,8 +553,27 @@ def asset_path(name):
     return Path(__file__).parent / "devkit-assets" / name
 
 
-def env_rc(frida_root, host, flavor):
-    return frida_root / "build" / f"frida{flavor}-env-{host}.rc"
+def load_meson_config(host, flavor):
+    path = query_machine_file_path(host, flavor)
+    if path is None:
+        return None
+
+    return machine_file.load(path)
+
+
+def query_machine_file_path(host, flavor):
+    if platform.system() == "Windows":
+        return None
+
+    return FRIDA_ROOT / "build" / f"frida{flavor}-{host}.txt"
+
+
+def query_pkgconfig_cflags(package, meson_config):
+    raw_flags = subprocess.run(meson_config["pkgconfig"] + ["--cflags", package],
+                               capture_output=True,
+                               encoding="utf-8",
+                               check=True).stdout
+    return shlex.split(raw_flags)
 
 
 def msvs_cl_exe(host):
@@ -584,53 +616,45 @@ def compute_library_filename(kit):
         return f"lib{kit}.a"
 
 
-def compute_umbrella_header_path(frida_root, host, flavor, package, umbrella_header):
+def compute_umbrella_header_path(host, flavor, package, umbrella_header):
     if platform.system() == "Windows":
         if package == "frida-gum-1.0":
-            return frida_root / "frida-gum" / "gum" / "gum.h"
+            return FRIDA_ROOT / "frida-gum" / "gum" / "gum.h"
         elif package == "frida-gumjs-1.0":
-            return frida_root / "frida-gum" / "bindings" / "gumjs" / umbrella_header.name
+            return FRIDA_ROOT / "frida-gum" / "bindings" / "gumjs" / umbrella_header.name
         elif package == "frida-core-1.0":
-            return frida_root / "build" / "tmp-windows" / msvs_arch_config(host) / "frida-core" / "api" / "frida-core.h"
+            return FRIDA_ROOT / "build" / "tmp-windows" / msvs_arch_config(host) / "frida-core" / "api" / "frida-core.h"
         else:
             raise Exception("Unhandled package")
     else:
-        p = frida_root / "build" / ("frida" + flavor + "-" + host)
+        p = FRIDA_ROOT / "build" / ("frida" + flavor + "-" + host)
         if host.startswith("ios-"):
             p = p / "usr"
         return p / "include" / umbrella_header
 
 
-def sdk_lib_path(name, frida_root, host):
-    return frida_root / "build" / "sdk-windows" / msvs_arch_config(host) / "lib" / name
+def sdk_lib_path(name, host):
+    return FRIDA_ROOT / "build" / "sdk-windows" / msvs_arch_config(host) / "lib" / name
 
 
-def internal_include_path(name, frida_root, host):
-    return frida_root / "build" / "tmp-windows" / msvs_arch_config(host) / (name + msvs_arch_suffix(host))
+def internal_include_path(name, host):
+    return FRIDA_ROOT / "build" / "tmp-windows" / msvs_arch_config(host) / (name + msvs_arch_suffix(host))
 
 
-def internal_noarch_lib_path(name, frida_root, host):
-    return frida_root / "build" / "tmp-windows" / msvs_arch_config(host) / name / f"{name}.lib"
+def internal_noarch_lib_path(name, host):
+    return FRIDA_ROOT / "build" / "tmp-windows" / msvs_arch_config(host) / name / f"{name}.lib"
 
 
-def internal_arch_lib_path(name, frida_root, host):
+def internal_arch_lib_path(name, host):
     lib_name = name + msvs_arch_suffix(host)
-    return frida_root / "build" / "tmp-windows" / msvs_arch_config(host) / lib_name / f"{lib_name}.lib"
-
-
-def probe_env(rc, command):
-    return subprocess.run([f". \"{rc}\" && {command}"],
-                          shell=True,
-                          capture_output=True,
-                          encoding="utf-8",
-                          check=True).stdout.strip()
+    return FRIDA_ROOT / "build" / "tmp-windows" / msvs_arch_config(host) / lib_name / f"{lib_name}.lib"
 
 
 def tweak_flags(cflags, ldflags):
     tweaked_cflags = []
     tweaked_ldflags = []
 
-    pending_cflags = cflags.split(" ")
+    pending_cflags = cflags[:]
     while len(pending_cflags) > 0:
         flag = pending_cflags.pop(0)
         if flag == "-include":
@@ -641,7 +665,7 @@ def tweak_flags(cflags, ldflags):
     tweaked_cflags = deduplicate(tweaked_cflags)
     existing_cflags = set(tweaked_cflags)
 
-    pending_ldflags = ldflags.split(" ")
+    pending_ldflags = ldflags[:]
     seen_libs = set()
     seen_flags = set()
     while len(pending_ldflags) > 0:
@@ -693,7 +717,7 @@ def tweak_flags(cflags, ldflags):
         if flag is not None and flag not in existing_cflags:
             tweaked_ldflags.append(flag)
 
-    return (" ".join(tweaked_cflags), " ".join(tweaked_ldflags))
+    return (tweaked_cflags, tweaked_ldflags)
 
 
 def deduplicate(items):

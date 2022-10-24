@@ -314,11 +314,6 @@ jobs:
         with:
           name: release-assets
           path: frida-gadget-macos-universal.dylib.xz
-      - name: Download frida-gadget for iOS/x86_64
-        uses: actions/download-artifact@v3
-        with:
-          name: frida-gadget-ios-x86_64
-          path: ios-x86_64/
       - name: Download frida-gadget for iOS/arm64
         uses: actions/download-artifact@v3
         with:
@@ -332,7 +327,6 @@ jobs:
       - name: Create universal frida-gadget for iOS
         run: |
           lipo \
-              ios-x86_64/frida-gadget.dylib \
               ios-arm64/frida-gadget.dylib \
               ios-arm64e/frida-gadget.dylib \
               -create -output frida-gadget-ios-universal.dylib
@@ -356,6 +350,35 @@ jobs:
         with:
           name: release-assets
           path: frida-gadget-ios-universal.dylib.xz
+      - name: Download frida-gadget for iOS/x86_64-simulator
+        uses: actions/download-artifact@v3
+        with:
+          name: frida-gadget-ios-x86_64-simulator
+          path: ios-x86_64-simulator/
+      - name: Download frida-gadget for iOS/arm64-simulator
+        uses: actions/download-artifact@v3
+        with:
+          name: frida-gadget-ios-arm64-simulator
+          path: ios-arm64-simulator/
+      - name: Create universal frida-gadget for iOS Simulator
+        run: |
+          lipo \
+              ios-x86_64-simulator/frida-gadget.dylib \
+              ios-arm64-simulator/frida-gadget.dylib \
+              -create -output frida-gadget-ios-simulator-universal.dylib
+          install_name_tool \
+              -id @executable_path/Frameworks/FridaGadget.dylib \
+              frida-gadget-ios-simulator-universal.dylib
+          codesign \
+              -f -s "$IOS_CERTID" \
+              frida-gadget-ios-simulator-universal.dylib
+      - name: Compress universal frida-gadget for iOS Simulator
+        run: xz -T 0 frida-gadget-ios-simulator-universal.dylib
+      - name: Upload universal frida-gadget for iOS Simulator
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-assets
+          path: frida-gadget-ios-simulator-universal.dylib.xz
       - name: Download Swift bindings for macOS/x86_64
         uses: actions/download-artifact@v3
         with:
@@ -1200,7 +1223,7 @@ jobs:
     needs: sdk-ios
     strategy:
       matrix:
-        arch: [x86_64, arm64, arm64e, arm64eoabi]
+        arch: [arm64, arm64e, arm64eoabi, x86_64-simulator, arm64-simulator]
       fail-fast: false
     runs-on: macos-11
     env:
@@ -1622,7 +1645,7 @@ jobs:
     needs: toolchain-macos
     strategy:
       matrix:
-        arch: [x86_64, arm64, arm64e, arm64eoabi]
+        arch: [arm64, arm64e, arm64eoabi, x86_64-simulator, arm64-simulator]
       fail-fast: false
     runs-on: macos-11
     env:

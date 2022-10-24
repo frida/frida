@@ -10,9 +10,13 @@ include releng/system.mk
 ifdef FRIDA_HOST
 host_os := $(shell echo $(FRIDA_HOST) | cut -f1 -d"-")
 host_arch := $(shell echo $(FRIDA_HOST) | cut -f2 -d"-")
+host_variant := $(shell echo $(FRIDA_HOST) | cut -f3 -d"-")
+host_machine := $(FRIDA_HOST)
 else
 host_os := $(build_os)
 host_arch := $(build_arch)
+host_variant :=
+host_machine := $(host_os)-$(host_arch)
 endif
 host_os_arch := $(host_os)-$(host_arch)
 
@@ -542,7 +546,7 @@ endef
 
 define make-meson-package-rules
 
-$(call make-base-package-rules,$1,$2,$(host_os_arch))
+$(call make-base-package-rules,$1,$2,$(host_machine))
 
 deps/.$1-stamp:
 	$$(call grab-and-prepare,$1)
@@ -550,7 +554,7 @@ deps/.$1-stamp:
 
 build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 		$(foreach dep, $($(subst -,_,$1)_deps), build/$2-%/manifest/$(dep).pkg) \
-		$(foreach dep, $($(subst -,_,$1)_deps_for_build), build/$2-$(build_os_arch)/manifest/$(dep).pkg) \
+		$(foreach dep, $($(subst -,_,$1)_deps_for_build), build/$2-$(build_machine)/manifest/$(dep).pkg) \
 		releng/meson/meson.py
 	@$(call print-status,$1,Building)
 	@prefix=$$(shell pwd)/build/$2-$$*; \
@@ -559,10 +563,10 @@ build/$2-%/manifest/$1.pkg: build/$2-env-%.rc deps/.$1-stamp \
 	mkdir -p $$$$builddir; \
 	(set -x \
 		&& . build/$2-env-$$*.rc \
-		&& export PATH="$$(shell pwd)/build/$2-$(build_os_arch)/bin:$$$$PATH" \
+		&& export PATH="$$(shell pwd)/build/$2-$(build_machine)/bin:$$$$PATH" \
 		&& $(call print-status,$1,Configuring) \
-		&& meson_args="--native-file build/$2-$(build_os_arch).txt" \
-		&& if [ $$* != $(build_os_arch) ]; then \
+		&& meson_args="--native-file build/$2-$(build_machine).txt" \
+		&& if [ $$* != $(build_machine) ]; then \
 			meson_args="$$$$meson_args --cross-file build/$2-$$*.txt"; \
 		fi \
 		&& $(MESON) setup $$$$meson_args \
@@ -618,7 +622,7 @@ define make-build-incremental-package-rule
 
 $1: build/$2-$3/manifest/$1.pkg
 	builddir=build/$2-tmp-$3/$1; \
-	export PATH="$$(shell pwd)/build/$2-$(build_os_arch)/bin:$$$$PATH"; \
+	export PATH="$$(shell pwd)/build/$2-$(build_machine)/bin:$$$$PATH"; \
 	if [ -f deps/$1/meson.build ]; then \
 		. build/$2-env-$3.rc; \
 		$(MESON) install -C $$$$builddir; \
@@ -657,7 +661,7 @@ define make-symlinks-package-rule
 .PHONY: symlinks-$1
 
 symlinks-$1: build/$2-$3/manifest/$1.pkg
-	@sdkroot=build/sdk-$$(host_os_arch); \
+	@sdkroot=build/sdk-$$(host_machine); \
 	if [ -d $$$$sdkroot ]; then \
 		cd $$$$sdkroot; \
 		if [ -f manifest/$1.pkg ]; then \

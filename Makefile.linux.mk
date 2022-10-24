@@ -47,10 +47,7 @@ clean: clean-submodules
 	rm -f build/*-clang*
 	rm -f build/*-pkg-config
 	rm -f build/*-stamp
-	rm -f build/*-strip
 	rm -f build/*.rc
-	rm -f build/*.sh
-	rm -f build/*.site
 	rm -f build/*.tar.bz2
 	rm -f build/*.txt
 	rm -f build/frida-version.h
@@ -318,12 +315,12 @@ build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-sta
 		$$(call meson-setup-for-env,$1,$$*) \
 			--prefix $$(FRIDA)/build/$1-$$* \
 			--libdir $$(FRIDA)/build/$1-$$*/lib \
+			$$(FRIDA_FLAGS_COMMON) \
 			-Dpython=$$(PYTHON) \
 			-Dpython_incdir=$$(PYTHON_INCDIR) \
 			frida-python $$$$builddir || exit 1; \
 	fi; \
-	$$(MESON) install -C $$$$builddir || exit 1; \
-	$$$$STRIP $$$$STRIP_FLAGS build/$1-$$*/lib/$$(PYTHON_NAME)/site-packages/_frida.so
+	$$(MESON) install -C $$$$builddir || exit 1
 	@touch $$@
 endef
 $(eval $(call make-python-rule,frida,tmp))
@@ -424,6 +421,7 @@ build/$2-%/frida-tools-$$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodul
 		$$(call meson-setup-for-env,$1,$$*) \
 			--prefix $$(FRIDA)/build/$1-$$* \
 			--libdir $$(FRIDA)/build/$1-$$*/lib \
+			$$(FRIDA_FLAGS_COMMON) \
 			-Dpython=$$(PYTHON) \
 			frida-tools $$$$builddir || exit 1; \
 	fi; \
