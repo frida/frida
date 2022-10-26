@@ -82,6 +82,7 @@ gum-macos: gum-macos-$(build_cpu_flavor) ##@gum Build for macOS
 gum-macos-apple_silicon: build/frida-macos-arm64/lib/pkgconfig/frida-gum-1.0.pc build/frida-macos-arm64e/lib/pkgconfig/frida-gum-1.0.pc
 gum-macos-intel: build/frida-macos-x86_64/lib/pkgconfig/frida-gum-1.0.pc
 gum-ios: build/frida-ios-arm64/usr/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for iOS
+gum-watchos: build/frida_thin-watchos-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for watchOS
 gum-tvos: build/frida_thin-tvos-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for tvOS
 gum-android-x86: build/frida-android-x86/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/x86
 gum-android-x86_64: build/frida-android-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/x86-64
@@ -121,6 +122,7 @@ core-macos: core-macos-$(build_cpu_flavor) ##@core Build for macOS
 core-macos-apple_silicon: build/frida-macos-arm64/lib/pkgconfig/frida-core-1.0.pc build/frida-macos-arm64e/lib/pkgconfig/frida-core-1.0.pc
 core-macos-intel: build/frida-macos-x86_64/lib/pkgconfig/frida-core-1.0.pc
 core-ios: build/frida-ios-universal/usr/bin/frida-server ##@core Build for iOS
+core-watchos: build/frida_thin-watchos-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for watchOS
 core-tvos: build/frida_thin-tvos-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for tvOS
 core-android-x86: build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/x86
 core-android-x86_64: build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/x86-64
@@ -562,14 +564,14 @@ check-tools-macos: tools-macos ##@tools Test CLI tools for macOS
 	distclean clean clean-submodules git-submodules git-submodule-stamps \
 	gum-macos \
 		gum-macos-apple_silicon gum-macos-intel \
-		gum-ios gum-tvos \
+		gum-ios gum-watchos gum-tvos \
 		gum-android-x86 gum-android-x86_64 \
 		gum-android-arm gum-android-arm64 \
 		check-gum-macos \
 		frida-gum-update-submodule-stamp \
 	core-macos \
 		core-macos-apple_silicon core-macos-intel \
-		core-ios core-tvos \
+		core-ios core-watchos core-tvos \
 		core-android-x86 core-android-x86_64 \
 		core-android-arm core-android-arm64 \
 		check-core-macos \
