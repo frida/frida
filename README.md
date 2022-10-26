@@ -31,7 +31,7 @@ few packages:
 
     make
 
-### macOS and iOS/tvOS
+### Apple OSes
 
 First make a trusted code-signing certificate. You can use the guide at
 https://sourceware.org/gdb/wiki/PermissionsDarwin in the sections
@@ -39,11 +39,12 @@ https://sourceware.org/gdb/wiki/PermissionsDarwin in the sections
 for code signing”. You can use the name `frida-cert` instead of `gdb-cert`
 if you'd like.
 
-Next export the name of the created certificate to the environment variables
-`MACOS_CERTID`, `IOS_CERTID` and `TVOS_CERTID`, and run `make`:
+Next export the name of the created certificate to relevant environment
+variables, and run `make`:
 
     export MACOS_CERTID=frida-cert
     export IOS_CERTID=frida-cert
+    export WATCHOS_CERTID=frida-cert
     export TVOS_CERTID=frida-cert
     make
 

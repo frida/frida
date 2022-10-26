@@ -127,7 +127,7 @@ glib_options = \
 	-Dglib_checks=false \
 	--force-fallback-for=pcre \
 	$(NULL)
-ifeq ($(host_os), $(filter $(host_os),macos ios tvos))
+ifeq ($(host_os), $(filter $(host_os),macos ios watchos tvos))
 # Use Apple's iconv by default to make our toolchain smaller.
 # Our SDK will pull in its own.
 glib_options += -Diconv=external
@@ -241,7 +241,7 @@ minizip_deps = \
 	$(NULL)
 minizip_deps_for_build = \
 	$(NULL)
-ifeq ($(host_os), $(filter $(host_os),macos ios tvos android qnx))
+ifeq ($(host_os), $(filter $(host_os),macos ios watchos tvos android qnx))
 minizip_deps += libiconv
 endif
 ifeq ($(FRIDA_LIBC), uclibc)

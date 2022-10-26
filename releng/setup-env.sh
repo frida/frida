@@ -21,7 +21,7 @@ fi
 host_os_arch=$host_os-$host_arch
 
 case $host_os in
-  macos|ios|tvos)
+  macos|ios|watchos|tvos)
     host_system=darwin
     ;;
   *)
@@ -256,7 +256,7 @@ if [ "$FRIDA_ENV_SDK" != 'none' ] && ! grep -Eq "^$sdk_version\$" "$FRIDA_SDKROO
   done
 fi
 
-if [ -f "$FRIDA_SDKROOT/lib/c++/libc++.a" ]; then
+if [ -f "$FRIDA_SDKROOT/lib/c++/libc++.a" ] && [ $host_os != watchos ]; then
   have_static_libcxx=yes
 else
   have_static_libcxx=no
@@ -442,7 +442,7 @@ case $host_os in
     fi
 
     ;;
-  macos|ios|tvos)
+  macos|ios|watchos|tvos)
     if [ "$host_arch" == "arm64eoabi" ]; then
       export DEVELOPER_DIR="$XCODE11/Contents/Developer"
     fi
@@ -493,6 +493,29 @@ case $host_os in
           apple_sdk_path="$($xcrun --sdk $apple_sdk --show-sdk-path)"
         else
           apple_sdk_path="$IOS_SDK_ROOT"
+        fi
+
+        ;;
+      watchos)
+        apple_os_minver="9.0"
+
+        case "$host_variant" in
+          "")
+            apple_sdk="watchos"
+            ;;
+          simulator)
+            apple_sdk="watchsimulator"
+            ;;
+          *)
+            echo "Unsupported watchOS variant: $host_variant" > /dev/stderr
+            exit 1
+            ;;
+        esac
+
+        if [ -z "$WATCHOS_SDK_ROOT" ]; then
+          apple_sdk_path="$($xcrun --sdk $apple_sdk --show-sdk-path)"
+        else
+          apple_sdk_path="$WATCHOS_SDK_ROOT"
         fi
 
         ;;
