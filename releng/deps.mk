@@ -491,6 +491,7 @@ openssl_recipe = meson
 openssl_patches = \
 	$(NULL)
 openssl_options = \
+	-Dcli=disabled \
 	$(NULL)
 openssl_deps = \
 	$(NULL)
