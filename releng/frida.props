@@ -13,7 +13,7 @@
     <PythonLocation Condition="'$(PythonLocation)'=='' AND '$(Platform)'=='Win32'">$(MSBuildProgramFiles32)\Python310</PythonLocation>
     <GLibGenmarshal>python $(SolutionDir)build\toolchain-windows\bin\glib-genmarshal</GLibGenmarshal>
     <GLibMkenums>python $(SolutionDir)build\toolchain-windows\bin\glib-mkenums</GLibMkenums>
-    <ValaCompiler>$(SolutionDir)build\toolchain-windows\bin\valac-0.56.exe</ValaCompiler>
+    <ValaCompiler>$(SolutionDir)build\toolchain-windows\bin\valac-0.58.exe</ValaCompiler>
     <ValaFlags>--target-glib=2.56 --vapidir="$(SolutionDir)frida-core\vapi" --vapidir="$(SolutionDir)frida-gum\vapi" --vapidir="$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\share\vala\vapi"</ValaFlags>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Platform)'=='Win32'">
