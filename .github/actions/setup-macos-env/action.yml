@@ -41,8 +41,12 @@ runs:
         security list-keychain -d user -s $KEYCHAIN_PATH
         rm $CERTIFICATE_PATH
         (
-          echo MACOS_CERTID=$(security find-identity -v -p codesigning | grep "Developer ID Application: " | awk '{ print $2 }')
-          echo IOS_CERTID=$(security find-identity -v -p codesigning | grep "Apple Development: " | awk '{ print $2 }')
+          MACOS_CERTID=$(security find-identity -v -p codesigning | grep "Developer ID Application: " | awk '{ print $2 }')
+          IOS_CERTID=$(security find-identity -v -p codesigning | grep "Apple Development: " | awk '{ print $2 }')
+          echo MACOS_CERTID=$MACOS_CERTID
+          echo IOS_CERTID=$IOS_CERTID
+          echo WATCHOS_CERTID=$IOS_CERTID
+          echo TVOS_CERTID=$IOS_CERTID
         ) >> $GITHUB_ENV
       shell: bash
     - name: Configure git
