@@ -108,18 +108,20 @@ selinux_deps_for_build = \
 	$(NULL)
 
 glib_name = GLib
-glib_version = d777b428305503ded79c407204d4354cb1adec85
+glib_version = 531183c332f874ea2d792c4c250d4599c07e60c0
 glib_url = $(frida_base_url)/glib.git
 glib_recipe = meson
 glib_patches = \
 	$(NULL)
 glib_deps = \
-	zlib \
+	pcre2 \
 	libffi \
+	zlib \
 	$(NULL)
 glib_deps_for_build = \
 	$(NULL)
 glib_options = \
+	-Dcocoa=disabled \
 	-Dselinux=disabled \
 	-Dxattr=false \
 	-Dlibmount=disabled \

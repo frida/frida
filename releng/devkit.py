@@ -153,10 +153,6 @@ def generate_header(package, host, kit, flavor, meson_config, umbrella_header_pa
     if kit == "frida-gumjs":
         inspector_server_header = umbrella_header_path.parent / "guminspectorserver.h"
         ingest_header(inspector_server_header, header_files, processed_header_files, devkit_header_lines)
-    if kit == "frida-core" and platform.system() != "Windows":
-        gio_unix_cflags = query_pkgconfig_cflags("gio-unix-2.0", meson_config)
-        gio_unix_incdir = Path([flag[2:] for flag in gio_unix_cflags if flag.endswith("/gio-unix-2.0")][0])
-        ingest_header(gio_unix_incdir / "gio" / "gunixsocketaddress.h", header_files, processed_header_files, devkit_header_lines)
     if kit == "frida-core" and host.startswith("android-"):
         selinux_header = umbrella_header_path.parent / "frida-selinux.h"
         ingest_header(selinux_header, header_files, processed_header_files, devkit_header_lines)
@@ -231,6 +227,12 @@ def generate_library(package, host, flavor, meson_config, output_dir, library_fi
 
 
 def generate_library_windows(package, host, flavor, output_dir, library_filename):
+    pcre2 = [
+        sdk_lib_path("libpcre2-8.a", host),
+    ]
+    libffi = [
+        sdk_lib_path("libffi.a", host),
+    ]
     zlib = [
         sdk_lib_path("libz.a", host),
     ]
@@ -239,12 +241,11 @@ def generate_library_windows(package, host, flavor, output_dir, library_filename
         sdk_lib_path("libbrotlidec.a", host),
     ]
 
-    glib = [
+    glib = pcre2 + [
         sdk_lib_path("libglib-2.0.a", host),
     ]
-    gobject = glib + [
+    gobject = glib + libffi + [
         sdk_lib_path("libgobject-2.0.a", host),
-        sdk_lib_path("libffi.a", host),
     ]
     gmodule = glib + [
         sdk_lib_path("libgmodule-2.0.a", host),
