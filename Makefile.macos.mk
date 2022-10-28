@@ -408,7 +408,7 @@ gadget-ios: build/frida-ios-universal/usr/lib/frida/frida-gadget.dylib ##@gadget
 
 deb-ios: build/frida-ios-universal/usr/bin/frida-server
 	export FRIDA_VERSION=$$(grep 'FRIDA_VERSION "' build/frida-version.h | awk '{ print $$3; }' | cut -f2 -d'"'); \
-	frida-core/tools/package-server.sh build/frida-ios-universal build/frida_$${FRIDA_VERSION}_iphoneos-arm.deb
+	frida-core/tools/package-server-ios.sh build/frida-ios-universal build/frida_$${FRIDA_VERSION}_iphoneos-arm.deb
 
 
 python-macos: python-macos-$(build_cpu_flavor) ##@python Build Python bindings for macOS
