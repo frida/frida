@@ -360,12 +360,14 @@ usrsctp_deps_for_build = \
 	$(NULL)
 
 libgee_name = libgee
-libgee_version = 5b00fd64096b369a04fe04a7246e1927c3fedbd7
+libgee_version = b1db8f4e0ff72583e5f10205a6512befffa7b541
 libgee_url = $(frida_base_url)/libgee.git
 libgee_recipe = meson
 libgee_patches = \
 	$(NULL)
 libgee_options = \
+	-Ddisable-internal-asserts=true \
+	-Ddisable-introspection=true \
 	$(NULL)
 libgee_deps = \
 	glib \
