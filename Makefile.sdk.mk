@@ -14,6 +14,7 @@ packages = \
 	minizip \
 	sqlite \
 	libffi \
+	pcre2 \
 	glib \
 	glib-networking \
 	libnice \

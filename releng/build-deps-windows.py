@@ -79,6 +79,7 @@ ALL_PACKAGES: List[Package] = [
     ("brotli", PackageRole.LIBRARY, []),
     ("minizip", PackageRole.LIBRARY, []),
     ("libffi", PackageRole.LIBRARY, []),
+    ("pcre2", PackageRole.LIBRARY, []),
     ("glib", PackageRole.LIBRARY, []),
     ("pkg-config", PackageRole.TOOL, []),
     ("vala", PackageRole.TOOL, []),
@@ -102,6 +103,7 @@ ALL_BUNDLES = {
     Bundle.TOOLCHAIN: [
         "zlib",
         "libffi",
+        "pcre2",
         "glib",
         "pkg-config",
         "vala",
@@ -112,6 +114,7 @@ ALL_BUNDLES = {
         "brotli",
         "minizip",
         "libffi",
+        "pcre2",
         "glib",
         "sqlite",
         "openssl",

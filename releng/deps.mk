@@ -93,6 +93,21 @@ libffi_deps = \
 libffi_deps_for_build = \
 	$(NULL)
 
+pcre2_name = PCRE2
+pcre2_version = b47486922fdc3486499b310dc9cf903449700474
+pcre2_url = $(frida_base_url)/pcre2.git
+pcre2_recipe = meson
+pcre2_patches = \
+	$(NULL)
+pcre2_options = \
+	-Dgrep=false \
+	-Dtest=false \
+	$(NULL)
+pcre2_deps = \
+	$(NULL)
+pcre2_deps_for_build = \
+	$(NULL)
+
 selinux_name = SELinux Userspace
 selinux_version = 9c7ba053bb075cace088d268fda400f6bc4ab14c
 selinux_url = $(frida_base_url)/selinux.git
