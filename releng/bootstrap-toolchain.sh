@@ -43,7 +43,6 @@ cd "$builddir"
 meson setup \
   --prefix / \
   --default-library static \
-  --strip \
   . \
   "$srcdir"
 meson compile
