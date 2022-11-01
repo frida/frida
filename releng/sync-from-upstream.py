@@ -12,6 +12,7 @@ def make_gnome_url(repo_name):
 upstreams = {
     "meson": "https://github.com/mesonbuild/meson.git",
     "termux-elf-cleaner": "https://github.com/termux/termux-elf-cleaner.git",
+    "libiconv": "https://git.savannah.gnu.org/git/libiconv.git",
     "zlib": "https://github.com/madler/zlib.git",
     "brotli": "https://github.com/google/brotli.git",
     "minizip": "https://github.com/zlib-ng/minizip-ng.git",
