@@ -26,7 +26,7 @@ SHELL := $(shell which bash)
 
 
 ninja_name = Ninja
-ninja_version = v1.10.2
+ninja_version = v1.11.1
 ninja_url = https://github.com/ninja-build/ninja.git
 ninja_recipe = custom
 ninja_patches = \
