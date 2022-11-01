@@ -53,7 +53,7 @@ termux_elf_cleaner_deps_for_build = \
 	$(NULL)
 
 libiconv_name = libiconv
-libiconv_version = 78d655ecc65b773b8e6642ea4be89e6f51d2c518
+libiconv_version = 9732614f0ee778d58acccd802ffe907a1b0a3e7a
 libiconv_url = $(frida_base_url)/libiconv.git
 libiconv_recipe = meson
 libiconv_patches = \
