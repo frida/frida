@@ -39,17 +39,17 @@ ninja_deps = \
 ninja_deps_for_build = \
 	$(NULL)
 
-frida_elf_cleaner_name = frida-elf-cleaner
-frida_elf_cleaner_version = 821c6319f5545f092d815233df73fc253ca4c603
-frida_elf_cleaner_url = $(frida_base_url)/frida-elf-cleaner.git
-frida_elf_cleaner_recipe = meson
-frida_elf_cleaner_patches = \
+termux_elf_cleaner_name = termux-elf-cleaner
+termux_elf_cleaner_version = c30d16bc119dae547c51c16e1cab37b08e240f6a
+termux_elf_cleaner_url = $(frida_base_url)/termux-elf-cleaner.git
+termux_elf_cleaner_recipe = meson
+termux_elf_cleaner_patches = \
 	$(NULL)
-frida_elf_cleaner_options = \
+termux_elf_cleaner_options = \
 	$(NULL)
-frida_elf_cleaner_deps = \
+termux_elf_cleaner_deps = \
 	$(NULL)
-frida_elf_cleaner_deps_for_build = \
+termux_elf_cleaner_deps_for_build = \
 	$(NULL)
 
 libiconv_name = libiconv

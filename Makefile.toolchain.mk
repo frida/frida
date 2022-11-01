@@ -4,7 +4,7 @@ include releng/deps.mk
 
 packages = \
 	ninja \
-	frida-elf-cleaner \
+	termux-elf-cleaner \
 	zlib \
 	libffi \
 	glib \

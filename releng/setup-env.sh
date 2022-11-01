@@ -651,7 +651,7 @@ case $host_os in
       host_tooltriplet="$host_compiler_triplet"
     fi
 
-    elf_cleaner=$FRIDA_TOOLROOT/bin/frida-elf-cleaner
+    elf_cleaner=$FRIDA_TOOLROOT/bin/termux-elf-cleaner
 
     cc_wrapper=$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_machine}-clang
     sed \

@@ -71,7 +71,7 @@ fi
 
 case $output_type in
   executable|shlib)
-    "@elf_cleaner@" "$output_path" || exit $?
+    "@elf_cleaner@" --api-level @api@ --quiet "$output_path" || exit $?
     ;;
 esac
 
