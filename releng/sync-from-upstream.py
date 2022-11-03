@@ -28,6 +28,7 @@ upstreams = {
     "libxml2": make_gnome_url("libxml2"),
     "libsoup": make_gnome_url("libsoup"),
     "vala": make_gnome_url("vala"),
+    "xz": "https://git.tukaani.org/xz.git",
     "pkg-config": "https://gitlab.freedesktop.org/pkg-config/pkg-config.git",
     "quickjs": "https://github.com/bellard/quickjs.git",
     "gn": "https://gn.googlesource.com/gn",
