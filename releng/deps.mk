@@ -424,6 +424,19 @@ libxml2_deps = \
 libxml2_deps_for_build = \
 	$(NULL)
 
+nghttp2_name = nghttp2
+nghttp2_version = 91a1324cc5bcedbf7cd9a51a61427b362ee08109
+nghttp2_url = $(frida_base_url)/nghttp2.git
+nghttp2_recipe = meson
+nghttp2_patches = \
+	$(NULL)
+nghttp2_options = \
+	$(NULL)
+nghttp2_deps = \
+	$(NULL)
+nghttp2_deps_for_build = \
+	$(NULL)
+
 libsoup_name = libsoup
 libsoup_version = 72e27e0dbcce1e448d31cbc06b0b17d42a277b85
 libsoup_url = $(frida_base_url)/libsoup.git
@@ -448,6 +461,7 @@ libsoup_deps = \
 	libpsl \
 	libxml2 \
 	brotli \
+	nghttp2 \
 	$(NULL)
 libsoup_deps_for_build = \
 	$(NULL)
