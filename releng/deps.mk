@@ -233,7 +233,7 @@ xz_deps_for_build = \
 	$(NULL)
 
 brotli_name = Brotli
-brotli_version = 8abf3188d1ef4bb8a633f894fec731bdd510ee49
+brotli_version = 9f51b6b95599466f46678381492834cdbde018f7
 brotli_url = $(frida_base_url)/brotli.git
 brotli_recipe = meson
 brotli_patches = \
