@@ -393,14 +393,14 @@ json_glib_deps_for_build = \
 	$(NULL)
 
 libpsl_name = libpsl
-libpsl_version = dc7fce073dfb66f055ce91ebeff41f60b9db2ce4
+libpsl_version = 579d32b7daf5a0ab1d1fef2d7e15066f52d8d026
 libpsl_url = $(frida_base_url)/libpsl.git
 libpsl_recipe = meson
 libpsl_patches = \
 	$(NULL)
 libpsl_options = \
 	-Druntime=no \
-	-Dbuiltin=no \
+	-Dbuiltin=false \
 	-Dtests=false \
 	$(NULL)
 libpsl_deps = \
