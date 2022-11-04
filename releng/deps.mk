@@ -303,7 +303,7 @@ libunwind_deps_for_build = \
 	$(NULL)
 
 glib_networking_name = glib-networking
-glib_networking_version = 05d01a444f1738b3cfe2d583f49fdba1357e3184
+glib_networking_version = 65774565534e4430e631452af39acb279f4ce911
 glib_networking_url = $(frida_base_url)/glib-networking.git
 glib_networking_recipe = meson
 glib_networking_patches = \
@@ -313,7 +313,6 @@ glib_networking_options = \
 	-Dopenssl=enabled \
 	-Dlibproxy=disabled \
 	-Dgnome_proxy=disabled \
-	-Dstatic_modules=true \
 	$(NULL)
 glib_networking_deps = \
 	glib \
