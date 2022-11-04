@@ -375,7 +375,7 @@ libgee_deps_for_build = \
 	$(NULL)
 
 json_glib_name = JSON-GLib
-json_glib_version = a8d3ac569bfaf509e2a20b55ee4fd6b89851b8b1
+json_glib_version = 2b6b009cf138ac1cbc020e750d415c181a6947fe
 json_glib_url = $(frida_base_url)/json-glib.git
 json_glib_recipe = meson
 json_glib_patches = \
@@ -384,6 +384,7 @@ json_glib_options = \
 	-Dintrospection=disabled \
 	-Dgtk_doc=disabled \
 	-Dtests=false \
+	-Dnls=disabled \
 	$(NULL)
 json_glib_deps = \
 	glib \
