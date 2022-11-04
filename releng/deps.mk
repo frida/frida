@@ -268,7 +268,7 @@ minizip_deps += libiconv
 endif
 
 sqlite_name = SQLite
-sqlite_version = 6b876d7c22f10488477d106dfe51f3fbd4ce2d20
+sqlite_version = 87e0535610825f01a033948ba24bbe82db108470
 sqlite_url = $(frida_base_url)/sqlite.git
 sqlite_recipe = meson
 sqlite_patches = \
