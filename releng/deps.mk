@@ -438,7 +438,7 @@ nghttp2_deps_for_build = \
 	$(NULL)
 
 libsoup_name = libsoup
-libsoup_version = 72e27e0dbcce1e448d31cbc06b0b17d42a277b85
+libsoup_version = c708c48810fa43f009d66a517269b6be4c81786f
 libsoup_url = $(frida_base_url)/libsoup.git
 libsoup_recipe = meson
 libsoup_patches = \
@@ -448,20 +448,19 @@ libsoup_options = \
 	-Dntlm=disabled \
 	-Dbrotli=enabled \
 	-Dtls_check=false \
-	-Dgnome=false \
 	-Dintrospection=disabled \
 	-Dvapi=disabled \
+	-Ddocs=disabled \
 	-Dexamples=disabled \
 	-Dtests=false \
 	-Dsysprof=disabled \
 	$(NULL)
 libsoup_deps = \
 	glib \
+	nghttp2 \
 	sqlite \
 	libpsl \
-	libxml2 \
 	brotli \
-	nghttp2 \
 	$(NULL)
 libsoup_deps_for_build = \
 	$(NULL)

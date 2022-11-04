@@ -279,14 +279,20 @@ def generate_library_windows(package, host, flavor, output_dir, library_filename
         sdk_lib_path("libgee-0.8.a", host),
     ]
 
+    nghttp2 = [
+        sdk_lib_path("libnghttp2.a", host),
+    ]
+
     sqlite = [
         sdk_lib_path("libsqlite3.a", host),
     ]
 
-    libsoup = libbrotlidec + [
-        sdk_lib_path("libsoup-2.4.a", host),
+    libpsl = [
         sdk_lib_path("libpsl.a", host),
-        sdk_lib_path("libxml2.a", host),
+    ]
+
+    libsoup = nghttp2 + sqlite + libbrotlidec + libpsl + [
+        sdk_lib_path("libsoup-3.0.a", host),
     ]
 
     capstone = [
