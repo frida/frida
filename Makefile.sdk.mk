@@ -21,6 +21,7 @@ packages = \
 	usrsctp \
 	libgee \
 	json-glib \
+	libxml2 \
 	libsoup \
 	capstone \
 	quickjs \

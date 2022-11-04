@@ -409,16 +409,17 @@ libpsl_deps_for_build = \
 	$(NULL)
 
 libxml2_name = libxml2
-libxml2_version = 35b8e0616b9f820c488eabd402e9d4097454997f
+libxml2_version = f09ad5551829b7f2df3666759e701644a0ea8558
 libxml2_url = $(frida_base_url)/libxml2.git
 libxml2_recipe = meson
 libxml2_patches = \
 	$(NULL)
 libxml2_options = \
+	-Dhttp=disabled \
+	-Dlzma=disabled \
+	-Dzlib=disabled \
 	$(NULL)
 libxml2_deps = \
-	zlib \
-	xz \
 	$(NULL)
 libxml2_deps_for_build = \
 	$(NULL)
