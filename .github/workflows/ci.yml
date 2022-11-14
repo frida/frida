@@ -645,7 +645,7 @@ jobs:
     needs: frida-ios
     strategy:
       matrix:
-        arch: [x86_64, arm64, arm64e, arm64eoabi]
+        arch: [arm64, arm64e, arm64eoabi, x86_64-simulator, arm64-simulator]
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
@@ -663,6 +663,7 @@ jobs:
         with:
           name: frida-core-devkit-ios-${{ matrix.arch }}
       - name: Package frida-portal
+        if: ${{ !endsWith(matrix.arch, '-simulator') }}
         uses: ./.github/actions/package-artifact-file
         with:
           name: frida-portal-ios-${{ matrix.arch }}
@@ -1382,21 +1383,25 @@ jobs:
           name: frida-core-devkit-ios-${{ matrix.arch }}
           path: build/devkits/core/
       - name: Upload frida-server
+        if: ${{ !endsWith(matrix.arch, '-simulator') }}
         uses: actions/upload-artifact@v3
         with:
           name: frida-server-ios-${{ matrix.arch }}
           path: build/frida-ios-${{ matrix.arch }}/usr/bin/frida-server
       - name: Upload frida-portal
+        if: ${{ !endsWith(matrix.arch, '-simulator') }}
         uses: actions/upload-artifact@v3
         with:
           name: frida-portal-ios-${{ matrix.arch }}
           path: build/frida-ios-${{ matrix.arch }}/usr/bin/frida-portal
       - name: Upload frida-inject
+        if: ${{ !endsWith(matrix.arch, '-simulator') }}
         uses: actions/upload-artifact@v3
         with:
           name: frida-inject-ios-${{ matrix.arch }}
           path: build/frida-ios-${{ matrix.arch }}/usr/bin/frida-inject
       - name: Upload frida-agent
+        if: ${{ !endsWith(matrix.arch, '-simulator') }}
         uses: actions/upload-artifact@v3
         with:
           name: frida-agent-ios-${{ matrix.arch }}
