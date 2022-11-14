@@ -1018,6 +1018,7 @@ jobs:
           name: frida-gum-devkit-macos-${{ matrix.arch }}
           path: build/devkits/gum/
       - name: Upload gum-graft
+        if: matrix.arch != 'arm64e'
         uses: actions/upload-artifact@v3
         with:
           name: gum-graft-macos-${{ matrix.arch }}
