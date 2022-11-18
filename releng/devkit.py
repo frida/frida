@@ -54,10 +54,10 @@ def main():
 
     outdir.mkdir(parents=True, exist_ok=True)
 
+    generate_devkit(kit, host, flavor, outdir)
+
     if arguments.gir:
         generate_gir(kit, host, outdir)
-
-    generate_devkit(kit, host, flavor, outdir)
 
 def generate_gir(kit, host, output_dir):
     if kit != "frida-core" \
