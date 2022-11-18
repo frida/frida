@@ -35,6 +35,7 @@ def main():
     parser.add_argument("host")
     parser.add_argument("outdir")
     parser.add_argument("-t", "--thin", help="build without cross-arch support", action="store_true")
+    parser.add_argument("-g", "--gir", help="copy gir file", action="store_true", default=True)
 
     arguments = parser.parse_args()
 
@@ -53,8 +54,18 @@ def main():
 
     outdir.mkdir(parents=True, exist_ok=True)
 
+    if arguments.gir:
+        generate_gir(kit, host, outdir)
+
     generate_devkit(kit, host, flavor, outdir)
 
+def generate_gir(kit, host, output_dir):
+    if kit != "frida-core" \
+        or host == "windows":
+        return
+
+    gir_path = FRIDA_ROOT / "build" / f"tmp-{host}" / kit / "src" / "Frida-1.0.gir"
+    shutil.copy(str(gir_path), output_dir)
 
 def generate_devkit(kit, host, flavor, output_dir):
     package, umbrella_header = DEVKITS[kit]
