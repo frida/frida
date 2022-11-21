@@ -59,13 +59,25 @@ def main():
     if arguments.gir:
         generate_gir(kit, host, outdir)
 
-def generate_gir(kit, host, output_dir):
-    if kit != "frida-core" \
-        or host == "windows":
+def generate_gir(kit, host_arch, output_dir):
+    if kit != "frida-core":
         return
 
-    gir_path = FRIDA_ROOT / "build" / f"tmp-{host}" / kit / "src" / "Frida-1.0.gir"
-    shutil.copy(str(gir_path), output_dir)
+    win_platforms = {
+        "x86_64": "x64-Release",
+        "x86": "Win32-Release",
+    }
+
+    host_arch_splitted = host_arch.split("-")
+    host, h_arch = host_arch_splitted[0], host_arch_splitted[1]
+
+    gir_path = ""
+    if host == "windows":
+        gir_path = str(FRIDA_ROOT / "build" / f"tmp-{host}" / win_platforms[h_arch] / "frida-core" / "Frida-1.0.gir")
+    else:
+        gir_path = str(FRIDA_ROOT / "build" / f"tmp-{host_arch}" / "frida-core" / "src" / "Frida-1.0.gir")
+
+    shutil.copy(gir_path, output_dir)
 
 def generate_devkit(kit, host, flavor, output_dir):
     package, umbrella_header = DEVKITS[kit]
