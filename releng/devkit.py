@@ -35,7 +35,6 @@ def main():
     parser.add_argument("host")
     parser.add_argument("outdir")
     parser.add_argument("-t", "--thin", help="build without cross-arch support", action="store_true")
-    parser.add_argument("-g", "--gir", help="copy gir file", action="store_true", default=True)
 
     arguments = parser.parse_args()
 
@@ -56,28 +55,6 @@ def main():
 
     generate_devkit(kit, host, flavor, outdir)
 
-    if arguments.gir:
-        generate_gir(kit, host, outdir)
-
-def generate_gir(kit, host_arch, output_dir):
-    if kit != "frida-core":
-        return
-
-    win_platforms = {
-        "x86_64": "x64-Release",
-        "x86": "Win32-Release",
-    }
-
-    host_arch_splitted = host_arch.split("-")
-    host, h_arch = host_arch_splitted[0], host_arch_splitted[1]
-
-    gir_path = ""
-    if host == "windows":
-        gir_path = str(FRIDA_ROOT / "build" / f"tmp-{host}" / win_platforms[h_arch] / "frida-core" / "Frida-1.0.gir")
-    else:
-        gir_path = str(FRIDA_ROOT / "build" / f"tmp-{host_arch}" / "frida-core" / "src" / "Frida-1.0.gir")
-
-    shutil.copy(gir_path, output_dir)
 
 def generate_devkit(kit, host, flavor, output_dir):
     package, umbrella_header = DEVKITS[kit]
@@ -118,12 +95,30 @@ def generate_devkit(kit, host, flavor, output_dir):
 
     extra_files = []
 
+    extra_files += generate_gir(host, kit, flavor, output_dir)
+
     if platform.system() == "Windows":
         for msvs_asset in glob(str(asset_path(f"{kit}-*.sln"))) + glob(str(asset_path(f"{kit}-*.vcxproj*"))):
             shutil.copy(msvs_asset, output_dir)
             extra_files.append(Path(msvs_asset).name)
 
     return [header_file.name, library_filename, example_file.name] + extra_files
+
+
+def generate_gir(host, kit, flavor, output_dir):
+    if kit != "frida-core":
+        return []
+
+    if host.startswith("windows-"):
+        gir_path = FRIDA_ROOT / "build" / f"tmp{flavor}-windows" / msvs_arch_config(host) / "frida-core" / "Frida-1.0.gir"
+    else:
+        gir_path = FRIDA_ROOT / "build" / f"tmp{flavor}-{host}" / "frida-core" / "src" / "Frida-1.0.gir"
+
+    gir_name = "frida-core.gir"
+
+    shutil.copy(str(gir_path), str(output_dir / gir_name))
+
+    return [gir_name]
 
 
 def generate_header(package, host, kit, flavor, meson_config, umbrella_header_path, thirdparty_symbol_mappings):
