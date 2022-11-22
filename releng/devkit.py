@@ -95,12 +95,30 @@ def generate_devkit(kit, host, flavor, output_dir):
 
     extra_files = []
 
+    extra_files += generate_gir(host, kit, flavor, output_dir)
+
     if platform.system() == "Windows":
         for msvs_asset in glob(str(asset_path(f"{kit}-*.sln"))) + glob(str(asset_path(f"{kit}-*.vcxproj*"))):
             shutil.copy(msvs_asset, output_dir)
             extra_files.append(Path(msvs_asset).name)
 
     return [header_file.name, library_filename, example_file.name] + extra_files
+
+
+def generate_gir(host, kit, flavor, output_dir):
+    if kit != "frida-core":
+        return []
+
+    if host.startswith("windows-"):
+        gir_path = FRIDA_ROOT / "build" / f"tmp{flavor}-windows" / msvs_arch_config(host) / "frida-core" / "Frida-1.0.gir"
+    else:
+        gir_path = FRIDA_ROOT / "build" / f"tmp{flavor}-{host}" / "frida-core" / "src" / "Frida-1.0.gir"
+
+    gir_name = "frida-core.gir"
+
+    shutil.copy(str(gir_path), str(output_dir / gir_name))
+
+    return [gir_name]
 
 
 def generate_header(package, host, kit, flavor, meson_config, umbrella_header_path, thirdparty_symbol_mappings):
