@@ -1102,6 +1102,7 @@ jobs:
       - name: Build Node.js bindings
         if: matrix.arch != 'arm64e'
         run: |
+          rm -rf $TMPDIR/prebuild
           . build/frida-env-macos-${{ matrix.arch }}.rc
           case ${{ matrix.arch }} in
             x86_64)
