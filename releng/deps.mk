@@ -438,7 +438,7 @@ nghttp2_deps_for_build = \
 	$(NULL)
 
 libsoup_name = libsoup
-libsoup_version = c708c48810fa43f009d66a517269b6be4c81786f
+libsoup_version = 071bebc4a85357d11c8d4b9265dc8f723216a684
 libsoup_url = $(frida_base_url)/libsoup.git
 libsoup_recipe = meson
 libsoup_patches = \
