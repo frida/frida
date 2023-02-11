@@ -20,7 +20,7 @@ task:
       npm \
       py39-pip \
       py39-setuptools
-    pip install awscli
+    pip install awscli typing-extensions
     npm install -g cloudflare-cli
   clone_script: |
     if [ -z "$CIRRUS_PR" ]; then
