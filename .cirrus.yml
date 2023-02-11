@@ -14,13 +14,13 @@ task:
   timeout_in: 2h
   install_dependencies_script: |
     pkg install -y \
-      awscli \
       bash \
       bison \
       git \
       npm \
       py39-pip \
       py39-setuptools
+    pip install awscli
     npm install -g cloudflare-cli
   clone_script: |
     if [ -z "$CIRRUS_PR" ]; then
