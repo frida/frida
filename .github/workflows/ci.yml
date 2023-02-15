@@ -601,7 +601,7 @@ jobs:
     needs: frida-linux
     strategy:
       matrix:
-        arch: [x86, x86_64, armhf, arm64, mips, mipsel, mips64, mips64el]
+        arch: [x86, x86_64, x86_64-musl, armhf, arm64, arm64-musl, mips, mipsel, mips64, mips64el]
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
@@ -1151,7 +1151,7 @@ jobs:
     needs: sdk-linux
     strategy:
       matrix:
-        arch: [x86, x86_64, armhf, arm64, mips, mipsel, mips64, mips64el]
+        arch: [x86, x86_64, x86_64-musl, armhf, arm64, arm64-musl, mips, mipsel, mips64, mips64el]
       fail-fast: false
     runs-on: ubuntu-latest
     container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
@@ -1240,7 +1240,8 @@ jobs:
               PYTHON_NAME=python3.10 \
               PYTHON_INCDIR=/opt/x-tools/$XTOOLS_HOST/$XTOOLS_HOST/sysroot/usr/include/python3.10
           export FRIDA_EXTENSION=$PWD/build/frida_thin-linux-${{ matrix.arch }}/lib/python3.10/site-packages/_frida.so
-          case ${{ matrix.arch }} in
+          frida_arch=$(echo "${{ matrix.arch }}" | cut -f1 -d"-")
+          case $frida_arch in
             x86)
               py_arch=i686
               ;;
@@ -1251,10 +1252,13 @@ jobs:
               py_arch=aarch64
               ;;
             *)
-              py_arch=${{ matrix.arch }}
+              py_arch=$frida_arch
               ;;
           esac
           case ${{ matrix.arch }} in
+            *-musl)
+              py_platform=musllinux_1_1_${py_arch}
+              ;;
             x86*)
               py_platform=manylinux_2_5_${py_arch}.manylinux1_${py_arch}
               ;;
@@ -1285,9 +1289,10 @@ jobs:
           name: frida-python-linux-${{ matrix.arch }}
           path: build/wheels/frida-*.whl
       - name: Build Node.js bindings
-        if: ${{ !startsWith(matrix.arch, 'mips') }}
+        if: ${{ !(startsWith(matrix.arch, 'mips') || endsWith(matrix.arch, '-musl')) }}
         run: |
-          case ${{ matrix.arch }} in
+          frida_arch=$(echo "${{ matrix.arch }}" | cut -f1 -d"-")
+          case $frida_arch in
             x86)
               gyp_arch=ia32
               ;;
@@ -1298,7 +1303,7 @@ jobs:
               gyp_arch=arm
               ;;
             *)
-              gyp_arch=${{ matrix.arch }}
+              gyp_arch=$frida_arch
               ;;
           esac
           export npm_config_arch=$gyp_arch
@@ -1314,7 +1319,7 @@ jobs:
             npm run prebuild -- -r electron -t $target
           done
       - name: Upload Node.js bindings
-        if: ${{ !startsWith(matrix.arch, 'mips') }}
+        if: ${{ !(startsWith(matrix.arch, 'mips') || endsWith(matrix.arch, '-musl')) }}
         uses: actions/upload-artifact@v3
         with:
           name: frida-node-linux-${{ matrix.arch }}
@@ -1949,7 +1954,7 @@ jobs:
   toolchain-linux:
     strategy:
       matrix:
-        arch: [x86, x86_64, armhf, arm64]
+        arch: [x86, x86_64, x86_64-musl, armhf, arm64, arm64-musl]
       fail-fast: false
     runs-on: ubuntu-latest
     container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
@@ -1970,7 +1975,7 @@ jobs:
     needs: toolchain-linux
     strategy:
       matrix:
-        arch: [x86, x86_64, armhf, arm64, mips, mipsel, mips64, mips64el]
+        arch: [x86, x86_64, x86_64-musl, armhf, arm64, arm64-musl, mips, mipsel, mips64, mips64el]
       fail-fast: false
     runs-on: ubuntu-latest
     container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
