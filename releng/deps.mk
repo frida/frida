@@ -155,7 +155,7 @@ ifeq ($(host_os), $(filter $(host_os),android qnx))
 glib_options += -Diconv=external
 glib_deps += libiconv
 endif
-ifeq ($(FRIDA_LIBC), uclibc)
+ifeq ($(host_variant), uclibc)
 glib_options += -Diconv=external
 glib_deps += libiconv
 endif
@@ -263,7 +263,7 @@ minizip_deps_for_build = \
 ifeq ($(host_os), $(filter $(host_os),macos ios watchos tvos android qnx))
 minizip_deps += libiconv
 endif
-ifeq ($(FRIDA_LIBC), uclibc)
+ifeq ($(host_variant), uclibc)
 minizip_deps += libiconv
 endif
 
