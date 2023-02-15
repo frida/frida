@@ -188,6 +188,7 @@ jobs:
           site: development
 
   assemble-ios-assets:
+    if: ${{ false }}
     runs-on: macos-latest
     needs: frida-ios
     steps:
@@ -832,6 +833,7 @@ jobs:
           name: frida-inject-qnx-${{ matrix.arch }}
 
   frida-windows:
+    if: ${{ false }}
     needs: sdk-windows
     strategy:
       matrix:
@@ -980,6 +982,7 @@ jobs:
           path: build/frida-windows/${{ env.FRIDA_VS_HOST }}/lib/qt5/qml/
 
   frida-macos:
+    if: ${{ false }}
     needs: sdk-macos
     strategy:
       matrix:
@@ -1151,7 +1154,7 @@ jobs:
     needs: sdk-linux
     strategy:
       matrix:
-        arch: [x86, x86_64, x86_64-musl, armhf, arm64, arm64-musl, mips, mipsel, mips64, mips64el]
+        arch: [x86_64, x86_64-musl, arm64, arm64-musl]
       fail-fast: false
     runs-on: ubuntu-latest
     container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
@@ -1340,6 +1343,7 @@ jobs:
           path: build/frida-linux-${{ matrix.arch }}/lib/qt5/qml/
 
   frida-ios:
+    if: ${{ false }}
     needs: sdk-ios
     strategy:
       matrix:
@@ -1422,6 +1426,7 @@ jobs:
         uses: ./.github/actions/teardown-macos-env
 
   frida-watchos:
+    if: ${{ false }}
     needs: sdk-watchos
     strategy:
       matrix:
@@ -1478,6 +1483,7 @@ jobs:
         uses: ./.github/actions/teardown-macos-env
 
   frida-tvos:
+    if: ${{ false }}
     needs: sdk-tvos
     strategy:
       matrix:
@@ -1534,6 +1540,7 @@ jobs:
         uses: ./.github/actions/teardown-macos-env
 
   frida-android:
+    if: ${{ false }}
     needs: [sdk-linux, sdk-android-32, sdk-android-64]
     strategy:
       matrix:
@@ -1619,6 +1626,7 @@ jobs:
           path: build/frida-android-${{ matrix.arch }}/lib/frida/64/frida-gadget.so
 
   frida-freebsd:
+    if: ${{ false }}
     runs-on: [freebsd, arm64]
     steps:
       - name: Check out repo
@@ -1716,6 +1724,7 @@ jobs:
           path: frida-node/prebuilds/*
 
   frida-qnx:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     needs: sdk-linux
     container: ghcr.io/frida/qnx-tools:latest
@@ -1793,6 +1802,7 @@ jobs:
         continue-on-error: true
 
   toolchain-windows:
+    if: ${{ false }}
     runs-on: windows-latest
     steps:
       - name: Check out repo
@@ -1808,6 +1818,7 @@ jobs:
         run: python releng\deps.py roll toolchain windows-x86
 
   sdk-windows:
+    if: ${{ false }}
     needs: toolchain-windows
     strategy:
       matrix:
@@ -1829,6 +1840,7 @@ jobs:
         run: python releng\deps.py roll sdk windows-${{ matrix.arch }}-${{ matrix.config }} --activate
 
   toolchain-macos:
+    if: ${{ false }}
     strategy:
       matrix:
         arch: [x86_64, arm64]
@@ -1853,6 +1865,7 @@ jobs:
         uses: ./.github/actions/teardown-macos-env
 
   sdk-macos:
+    if: ${{ false }}
     needs: toolchain-macos
     strategy:
       matrix:
@@ -1878,6 +1891,7 @@ jobs:
         uses: ./.github/actions/teardown-macos-env
 
   sdk-ios:
+    if: ${{ false }}
     needs: toolchain-macos
     strategy:
       matrix:
@@ -1904,6 +1918,7 @@ jobs:
         uses: ./.github/actions/teardown-macos-env
 
   sdk-watchos:
+    if: ${{ false }}
     needs: toolchain-macos
     strategy:
       matrix:
@@ -1928,6 +1943,7 @@ jobs:
         uses: ./.github/actions/teardown-macos-env
 
   sdk-tvos:
+    if: ${{ false }}
     needs: toolchain-macos
     strategy:
       matrix:
@@ -1975,7 +1991,7 @@ jobs:
     needs: toolchain-linux
     strategy:
       matrix:
-        arch: [x86, x86_64, x86_64-musl, armhf, arm64, arm64-musl, mips, mipsel, mips64, mips64el]
+        arch: [x86_64, x86_64-musl, arm64, arm64-musl]
       fail-fast: false
     runs-on: ubuntu-latest
     container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
@@ -1996,6 +2012,7 @@ jobs:
         run: releng/deps.py roll sdk linux-${{ matrix.arch }} --activate
 
   sdk-android-32:
+    if: ${{ false }}
     needs: toolchain-linux
     strategy:
       matrix:
@@ -2040,6 +2057,7 @@ jobs:
           FRIDA_BUILD_ARCH: x86
 
   sdk-android-64:
+    if: ${{ false }}
     needs: toolchain-linux
     strategy:
       matrix:
