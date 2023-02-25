@@ -7,12 +7,12 @@ import json
 import os
 from pathlib import Path
 import platform
+import tempfile
+import time
 import re
 import shutil
 import subprocess
 import sys
-import tempfile
-import time
 from typing import Dict, List, Tuple
 import urllib.request
 if platform.system() == 'Windows':
