@@ -109,7 +109,7 @@ pcre2_deps_for_build = \
 	$(NULL)
 
 selinux_name = SELinux Userspace
-selinux_version = 9c7ba053bb075cace088d268fda400f6bc4ab14c
+selinux_version = 7d03ec4cd2e08e3bb0c2390a6e68beb3978e2816
 selinux_url = $(frida_base_url)/selinux.git
 selinux_recipe = meson
 selinux_patches = \
