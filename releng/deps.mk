@@ -79,7 +79,7 @@ zlib_deps_for_build = \
 	$(NULL)
 
 libffi_name = libffi
-libffi_version = 763cf41612c4a9ed98d764a5237acdb9f5337f2d
+libffi_version = 938b07aa8280bcc4f92f08a0fdbb4ad81024bde0
 libffi_url = $(frida_base_url)/libffi.git
 libffi_recipe = meson
 libffi_patches = \
