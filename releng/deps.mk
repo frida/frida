@@ -426,7 +426,7 @@ libxml2_deps_for_build = \
 	$(NULL)
 
 nghttp2_name = nghttp2
-nghttp2_version = 91a1324cc5bcedbf7cd9a51a61427b362ee08109
+nghttp2_version = ae13d24ea59c30e36ca53d1b22c4e664588d0445
 nghttp2_url = $(frida_base_url)/nghttp2.git
 nghttp2_recipe = meson
 nghttp2_patches = \
