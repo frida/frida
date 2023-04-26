@@ -491,7 +491,7 @@ capstone_archs := $(shell echo $(host_arch) | sed $(sed_regex_option) \
 	)
 
 quickjs_name = QuickJS
-quickjs_version = 65cfe08db6fd51367d02e3d5123896699cc8cf1f
+quickjs_version = c81f05c9859cea5f83a80057416a0c7affe9b876
 quickjs_url = $(frida_base_url)/quickjs.git
 quickjs_recipe = meson
 quickjs_patches = \
