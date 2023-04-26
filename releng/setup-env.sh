@@ -1049,7 +1049,10 @@ array_to_args raw_cxx_link_flags "${cxx_link_flags[@]}"
   fi
   echo ""
   echo "[properties]"
-  if [ $host_machine != $build_machine ]; then
+  if [ "$FRIDA_CAN_RUN_HOST_BINARIES" == yes ]; then
+    echo "needs_exe_wrapper = false"
+    echo ""
+  elif [ $host_machine != $build_machine ]; then
     echo "needs_exe_wrapper = true"
     echo ""
   fi
