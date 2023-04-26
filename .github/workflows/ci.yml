@@ -1168,6 +1168,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Set FRIDA_CAN_RUN_HOST_BINARIES
+        if: ${{ matrix.arch == 'x86' }}
+        run: echo "FRIDA_CAN_RUN_HOST_BINARIES=yes" >> $GITHUB_ENV
       - name: Configure qemu-user
         if: ${{ !startsWith(matrix.arch, 'x86') }}
         run: echo "FRIDA_QEMU_SYSROOT=/opt/x-tools/$XTOOLS_HOST/$XTOOLS_HOST/sysroot" >> $GITHUB_ENV
@@ -1989,6 +1992,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Set FRIDA_CAN_RUN_HOST_BINARIES
+        if: ${{ matrix.arch == 'x86' }}
+        run: echo "FRIDA_CAN_RUN_HOST_BINARIES=yes" >> $GITHUB_ENV
       - name: Configure qemu-user
         if: ${{ !startsWith(matrix.arch, 'x86') }}
         run: echo "FRIDA_QEMU_SYSROOT=/opt/x-tools/$XTOOLS_HOST/$XTOOLS_HOST/sysroot" >> $GITHUB_ENV
