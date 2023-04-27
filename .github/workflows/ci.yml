@@ -26,6 +26,7 @@ jobs:
       - package-qnx
       - package-apple-universal
       - assemble-ios-assets
+      - assemble-tvos-assets
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -101,6 +102,8 @@ jobs:
           path: build/release-assets/
       - name: Package iOS assets
         uses: ./.github/actions/package-ios-assets
+      - name: Package tvOS assets
+        uses: ./.github/actions/package-tvos-assets
       - name: Package Cirrus CI artifacts
         run: releng/package-cirrus-ci-artifacts.sh ${{ github.sha }}
       - name: Rename release assets
@@ -117,8 +120,8 @@ jobs:
           site: production
           pypi-token: ${{ secrets.PYPI_API_TOKEN }}
           testpypi-token: ${{ secrets.TEST_PYPI_API_TOKEN }}
-      - name: Publish iOS .debs
-        uses: ./.github/actions/publish-ios-debs
+      - name: Publish .deb packages
+        uses: ./.github/actions/publish-debs
         with:
           site: production
       - name: Publish Node.js bindings to npm
@@ -156,6 +159,7 @@ jobs:
       - frida-linux
       - frida-freebsd
       - assemble-ios-assets
+      - assemble-tvos-assets
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -176,14 +180,16 @@ jobs:
           sudo npm install -g cloudflare-cli
       - name: Package iOS assets
         uses: ./.github/actions/package-ios-assets
+      - name: Package tvOS assets
+        uses: ./.github/actions/package-tvos-assets
       - name: Publish Python bindings to TestPyPI
         uses: ./.github/actions/publish-python-bindings
         with:
           site: development
           pypi-token: ${{ secrets.PYPI_API_TOKEN }}
           testpypi-token: ${{ secrets.TEST_PYPI_API_TOKEN }}
-      - name: Publish iOS .debs
-        uses: ./.github/actions/publish-ios-debs
+      - name: Publish .deb packages
+        uses: ./.github/actions/publish-debs
         with:
           site: development
 
@@ -266,6 +272,62 @@ jobs:
         with:
           name: ios-assets
           path: ios-assets/*
+      - name: Tear down environment
+        uses: ./.github/actions/teardown-macos-env
+
+  assemble-tvos-assets:
+    runs-on: macos-latest
+    needs: frida-tvos
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - name: Set up environment
+        uses: ./.github/actions/setup-macos-env
+        with:
+          certificates-p12: ${{ secrets.APPLE_CERTIFICATES_P12 }}
+          certificates-password: ${{ secrets.APPLE_CERTIFICATES_PASSWORD }}
+          keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
+          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
+          cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Download frida-server for tvOS/arm64
+        uses: actions/download-artifact@v3
+        with:
+          name: frida-server-tvos-arm64
+          path: tvos-arm64/
+      - name: Prepare frida-server for tvOS/arm64
+        run: |
+          codesign \
+              -f -s "-" --preserve-metadata=entitlements \
+              tvos-arm64/frida-server
+      - name: Download frida-agent for tvOS/arm64
+        uses: actions/download-artifact@v3
+        with:
+          name: frida-agent-tvos-arm64
+          path: tvos-arm64/
+      - name: Prepare frida-agent for tvOS/arm64
+        run: |
+          install_name_tool \
+              -id FridaAgent \
+              tvos-arm64/frida-agent.dylib
+          codesign \
+              -f -s "-" \
+              tvos-arm64/frida-agent.dylib
+      - name: Assemble tvOS assets
+        run: |
+          mkdir -p \
+              tvos-assets/usr/bin \
+              tvos-assets/usr/lib/frida
+          mv tvos-arm64/frida-server \
+              tvos-assets/usr/bin/frida-server
+          mv tvos-arm64/frida-agent.dylib \
+              tvos-assets/usr/lib/frida/frida-agent.dylib
+      - name: Upload tvOS assets
+        uses: actions/upload-artifact@v3
+        with:
+          name: tvos-assets
+          path: tvos-assets/*
       - name: Tear down environment
         uses: ./.github/actions/teardown-macos-env
 
@@ -1496,6 +1558,30 @@ jobs:
         with:
           name: frida-core-devkit-tvos-${{ matrix.arch }}
           path: build/devkits/core/
+      - name: Upload frida-server
+        if: ${{ !endsWith(matrix.arch, '-simulator') }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: frida-server-tvos-${{ matrix.arch }}
+          path: build/frida_thin-tvos-${{ matrix.arch }}/usr/bin/frida-server
+      - name: Upload frida-portal
+        if: ${{ !endsWith(matrix.arch, '-simulator') }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: frida-portal-tvos-${{ matrix.arch }}
+          path: build/frida_thin-tvos-${{ matrix.arch }}/usr/bin/frida-portal
+      - name: Upload frida-inject
+        if: ${{ !endsWith(matrix.arch, '-simulator') }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: frida-inject-tvos-${{ matrix.arch }}
+          path: build/frida_thin-tvos-${{ matrix.arch }}/usr/bin/frida-inject
+      - name: Upload frida-agent
+        if: ${{ !endsWith(matrix.arch, '-simulator') }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: frida-agent-tvos-${{ matrix.arch }}
+          path: build/frida_thin-tvos-${{ matrix.arch }}/usr/lib/frida/frida-agent.dylib
       - name: Upload frida-gadget
         uses: actions/upload-artifact@v3
         with:

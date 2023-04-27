@@ -1,0 +1,19 @@
+name: Package tvOS assets
+description: Downloads tvOS assets and packages them
+runs:
+  using: composite
+  steps:
+    - name: Download tvOS assets
+      uses: actions/download-artifact@v3
+      with:
+        name: tvos-assets
+        path: build/tvos-assets/
+    - name: Create frida-server tvOS .deb
+      run: |
+        cd build
+        mkdir -p release-assets
+        ../frida-core/tools/package-server-fruity.sh \
+            appletvos-arm64 \
+            tvos-assets \
+            release-assets/frida_${FRIDA_VERSION}_appletvos-arm64.deb
+      shell: bash
