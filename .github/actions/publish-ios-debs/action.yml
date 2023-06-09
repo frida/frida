@@ -66,11 +66,11 @@ runs:
         for file in Release Packages Packages.gz; do
           aws s3 cp $file s3://build.frida.re${prefix}/
         done
-        for file in Packages Packages.gz; do
+        for file in Release Packages Packages.gz; do
           aws s3 cp $file s3://build.frida.re${prefix}/./
         done
         urls_to_invalidate=()
-        for file in Release Packages Packages.gz ./Packages ./Packages.gz; do
+        for file in Release Packages Packages.gz ./Release ./Packages ./Packages.gz; do
           urls_to_invalidate+=("https://build.frida.re${prefix}/${file}")
         done
         cfcli purge ${urls_to_invalidate[@]}
