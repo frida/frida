@@ -136,7 +136,6 @@ ALL_BUNDLES = {
 }
 
 HOST_DEFINES = {
-    "capstone_archs": "x86",
 }
 
 

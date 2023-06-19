@@ -473,7 +473,8 @@ capstone_recipe = meson
 capstone_patches = \
 	$(NULL)
 capstone_options = \
-	-Darchs=$(capstone_archs) \
+	-Darchs=all \
+	-Duse_arch_registration=true \
 	-Dx86_att_disable=true \
 	-Dcli=disabled \
 	$(NULL)
@@ -481,14 +482,6 @@ capstone_deps = \
 	$(NULL)
 capstone_deps_for_build = \
 	$(NULL)
-capstone_archs := $(shell echo $(host_arch) | sed $(sed_regex_option) \
-		-e 's,^x86_64$$,x86,' \
-		-e 's,^arm[^0-9].+,arm,' \
-		-e 's,^arm64e$$,arm64,' \
-		-e 's,^arm64eoabi$$,arm64,' \
-		-e 's,^mips.*,mips,' \
-		-e 's,^s390x$$,sysz,' \
-	)
 
 quickjs_name = QuickJS
 quickjs_version = c81f05c9859cea5f83a80057416a0c7affe9b876
