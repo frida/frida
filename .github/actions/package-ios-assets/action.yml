@@ -12,7 +12,8 @@ runs:
       run: |
         mkdir -p build/release-assets
         cd build
-        ../frida-core/tools/package-server-ios.sh \
+        ../frida-core/tools/package-server-fruity.sh \
+            iphoneos-arm \
             ios-assets \
             release-assets/frida_${FRIDA_VERSION}_iphoneos-arm.deb
       shell: bash
