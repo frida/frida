@@ -365,7 +365,8 @@ def generate_library_windows(package, host, flavor, output_dir, library_filename
                                   + gum
                                   + gumjs_inspector
                                   + libbrotlidec
-                                  + capstone)
+                                  + capstone
+                                  + quickjs)
     frida_core = [frida_core_lib] + frida_core_deps
 
     if package == "frida-gum-1.0":
