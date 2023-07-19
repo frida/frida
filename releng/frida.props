@@ -4,8 +4,8 @@
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <OutDir>$(SolutionDir)build\frida-windows\$(PlatformName)-$(Configuration)\bin\</OutDir>
     <IntDir>$(SolutionDir)build\tmp-windows\$(PlatformName)-$(Configuration)\$(ProjectName)\</IntDir>
-    <FridaGumDefines>G_LOG_DOMAIN=&quot;Frida&quot;;GLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_56;G_DISABLE_DEPRECATED;HAVE_WINDOWS=1;HAVE_I386=1;HAVE_GIOOPENSSL=1;HAVE_GUMPP=1;HAVE_GUMJS=1;HAVE_FRIDA_GLIB=1;HAVE_FRIDA_LIBFFI=1;HAVE_QUICKJS=1;HAVE_TINYCC=1;HAVE_SQLITE=1;HAVE_OBJC_BRIDGE=1;HAVE_SWIFT_BRIDGE=1;HAVE_JAVA_BRIDGE=1</FridaGumDefines>
-    <FridaCoreDefines>G_LOG_DOMAIN=&quot;Frida&quot;;GLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_56;G_DISABLE_DEPRECATED;HAVE_WINDOWS=1;HAVE_I386=1;HAVE_GIOOPENSSL=1;HAVE_NICE=1;VALA_EXTERN=extern</FridaCoreDefines>
+    <FridaGumDefines>G_LOG_DOMAIN=&quot;Frida&quot;;GLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_74;G_DISABLE_DEPRECATED;HAVE_WINDOWS=1;HAVE_I386=1;HAVE_GIOOPENSSL=1;HAVE_GUMPP=1;HAVE_GUMJS=1;HAVE_FRIDA_GLIB=1;HAVE_FRIDA_LIBFFI=1;HAVE_QUICKJS=1;HAVE_TINYCC=1;HAVE_SQLITE=1;HAVE_OBJC_BRIDGE=1;HAVE_SWIFT_BRIDGE=1;HAVE_JAVA_BRIDGE=1</FridaGumDefines>
+    <FridaCoreDefines>G_LOG_DOMAIN=&quot;Frida&quot;;GLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_74;G_DISABLE_DEPRECATED;HAVE_WINDOWS=1;HAVE_I386=1;HAVE_GIOOPENSSL=1;HAVE_NICE=1;VALA_EXTERN=extern</FridaCoreDefines>
     <FridaCoreValaFlags>-D WINDOWS -D HAVE_GIOOPENSSL -D HAVE_NICE</FridaCoreValaFlags>
     <FridaV8>Enabled</FridaV8>
     <Python>python</Python>
@@ -14,7 +14,7 @@
     <GLibGenmarshal>python $(SolutionDir)build\toolchain-windows\bin\glib-genmarshal</GLibGenmarshal>
     <GLibMkenums>python $(SolutionDir)build\toolchain-windows\bin\glib-mkenums</GLibMkenums>
     <ValaCompiler>$(SolutionDir)build\toolchain-windows\bin\valac-0.58.exe</ValaCompiler>
-    <ValaFlags>--target-glib=2.56 --vapidir="$(SolutionDir)frida-core\vapi" --vapidir="$(SolutionDir)frida-gum\vapi" --vapidir="$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\share\vala\vapi"</ValaFlags>
+    <ValaFlags>--target-glib=2.74 --vapidir="$(SolutionDir)frida-core\vapi" --vapidir="$(SolutionDir)frida-gum\vapi" --vapidir="$(SolutionDir)build\sdk-windows\$(Platform)-$(Configuration)\share\vala\vapi"</ValaFlags>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Platform)'=='Win32'">
     <FridaCoreValaFlags>-D X86 $(FridaCoreValaFlags)</FridaCoreValaFlags>

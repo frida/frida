@@ -428,7 +428,7 @@ def generate_meson_env(arch: str, config: str, runtime: str) -> MesonEnv:
     m4_path = BOOTSTRAP_TOOLCHAIN_DIR / "bin" / "m4.exe"
     bison_pkgdatadir = BOOTSTRAP_TOOLCHAIN_DIR / "share" / "bison"
 
-    vala_flags = "--target-glib=2.56"
+    vala_flags = "--target-glib=2.74"
 
     exe_path = ";".join([str(path) for path in [
         prefix / "bin",
