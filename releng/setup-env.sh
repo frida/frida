@@ -836,7 +836,7 @@ if [ -n "$FRIDA_EXTRA_LDFLAGS" ]; then
 fi
 
 vala_api_version=$(ls -1 "$FRIDA_TOOLROOT/share" | grep "vala-" | cut -f2 -d"-")
-valac=("$FRIDA_TOOLROOT/bin/valac-$vala_api_version" "--target-glib=2.56")
+valac=("$FRIDA_TOOLROOT/bin/valac-$vala_api_version")
 valac+=("--vapidir=$FRIDA_PREFIX/share/vala/vapi")
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   valac+=("--vapidir=$FRIDA_SDKROOT/share/vala/vapi")
