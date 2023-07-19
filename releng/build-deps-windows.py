@@ -428,8 +428,6 @@ def generate_meson_env(arch: str, config: str, runtime: str) -> MesonEnv:
     m4_path = BOOTSTRAP_TOOLCHAIN_DIR / "bin" / "m4.exe"
     bison_pkgdatadir = BOOTSTRAP_TOOLCHAIN_DIR / "share" / "bison"
 
-    vala_flags = "--target-glib=2.74"
-
     exe_path = ";".join([str(path) for path in [
         prefix / "bin",
         env_dir,
@@ -464,7 +462,6 @@ set CXXFLAGS={cxxflags}
 set VCINSTALLDIR={vc_install_dir}
 set Platform={platform}
 set VALA={valac}
-set VALAFLAGS={vala_flags}
 """.format(
             exe_path=exe_path,
             include_path=include_path,
@@ -475,7 +472,6 @@ set VALAFLAGS={vala_flags}
             vc_install_dir=vc_install_dir,
             platform=msvc_platform,
             valac=detect_bootstrap_valac(),
-            vala_flags=vala_flags,
         ),
         encoding='utf-8')
 
@@ -561,7 +557,6 @@ sys.exit(subprocess.call([r"{bison_path}"] + args))
     shell_env["VCINSTALLDIR"] = vc_install_dir
     shell_env["Platform"] = msvc_platform
     shell_env["VALAC"] = detect_bootstrap_valac()
-    shell_env["VALAFLAGS"] = vala_flags
 
     return MesonEnv(env_dir, shell_env)
 
