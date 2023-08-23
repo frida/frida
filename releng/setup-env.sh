@@ -621,6 +621,12 @@ case $host_os in
       # Suppress linker warning about x86 being a deprecated architecture.
       linker_flags+=("-Wl,-w")
     fi
+    bindir=$(dirname "$($xcrun --sdk $apple_sdk -f clang)")
+    if [ -f "$bindir/ld-classic" ]; then
+      # New linker links with libresolv even if we're not using any symbols from it,
+      # at least as of Xcode 15.0 beta 7.
+      linker_flags+=("-Wl,-ld_classic")
+    fi
 
     if [ $have_static_libcxx = yes ] && [ $enable_asan = no ]; then
       cxx_like_flags+=("-nostdinc++" "-isystem$FRIDA_SDKROOT/include/c++")
