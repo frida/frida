@@ -12,8 +12,10 @@ runs:
       run: |
         mkdir -p build/release-assets
         cd build
-        ../frida-core/tools/package-server-fruity.sh \
-            iphoneos-arm \
-            ios-assets \
-            release-assets/frida_${FRIDA_VERSION}_iphoneos-arm.deb
+        for arch in arm arm64; do
+          ../frida-core/tools/package-server-fruity.sh \
+              iphoneos-$arch \
+              ios-assets \
+              release-assets/frida_${FRIDA_VERSION}_iphoneos-$arch.deb
+        done
       shell: bash

@@ -18,7 +18,7 @@ runs:
           echo "Suite: stable"
           echo "Version: 1.0"
           echo "Codename: stable"
-          echo "Architectures: iphoneos-arm"
+          echo "Architectures: iphoneos-arm iphoneos-arm64"
           echo "Components: main"
           echo "Description: Frida for iOS"
         ) > ios-repo-config/distributions
@@ -31,11 +31,12 @@ runs:
           echo "Suite: stable"
           echo "Version: 1.0"
           echo "Codename: ios"
-          echo "Architectures: iphoneos-arm"
+          echo "Architectures: iphoneos-arm iphoneos-arm64"
           echo "Components: main"
           echo "Description: Official Frida Repo"
         ) > Release
-        for file in frida_${FRIDA_VERSION}_iphoneos-arm.deb; do
+        for arch in arm arm64; do
+          file=frida_${FRIDA_VERSION}_iphoneos-$arch.deb
           cp $GITHUB_WORKSPACE/build/release-assets/$file debs/
           reprepro \
               -Vb . \
