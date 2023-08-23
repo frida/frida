@@ -220,6 +220,11 @@ jobs:
           path: ios-arm64eoabi/
       - name: Create universal frida-server for iOS
         run: |
+          for arch in arm64 arm64eoabi arm64e; do
+            codesign \
+                -f -s "-" --preserve-metadata=entitlements \
+                ios-$arch/frida-server
+          done
           ./releng/mkfatmacho.py \
               frida-server-ios-universal \
               ios-arm64/frida-server \
@@ -245,7 +250,7 @@ jobs:
               -id FridaAgent \
               frida-agent-ios-universal.dylib
           codesign \
-              -f -s "$IOS_CERTID" \
+              -f -s "-" \
               frida-agent-ios-universal.dylib
       - name: Assemble iOS assets
         run: |
