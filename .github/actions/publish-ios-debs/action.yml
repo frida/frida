@@ -46,8 +46,12 @@ runs:
               stable \
               debs/$file
         done
-        cp dists/stable/main/binary-iphoneos-arm/Packages.gz .
-        gunzip -k Packages.gz
+        (
+          for arch in arm arm64; do
+            zcat < dists/stable/main/binary-iphoneos-$arch/Packages.gz
+          done
+        ) > Packages
+        gzip -9k Packages
       shell: bash
     - name: Upload iOS package and repo metadata
       run: |
