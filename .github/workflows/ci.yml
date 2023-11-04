@@ -450,43 +450,6 @@ jobs:
         with:
           name: release-assets
           path: frida-gadget-tvos-arm64-simulator.dylib.xz
-      - name: Download Swift bindings for macOS/x86_64
-        uses: actions/download-artifact@v3
-        with:
-          name: frida-swift-macos-x86_64
-          path: macos-x86_64/
-      - name: Download Swift bindings for macOS/arm64
-        uses: actions/download-artifact@v3
-        with:
-          name: frida-swift-macos-arm64
-          path: macos-arm64/
-      - name: Create universal Swift bindings for macOS
-        run: |
-          tar -C macos-x86_64 -xf macos-x86_64/frida-swift.tar
-          tar -C macos-arm64 -xf macos-arm64/frida-swift.tar
-          lipo \
-              macos-x86_64/Frida.framework/Frida \
-              macos-arm64/Frida.framework/Frida \
-              -create -output Frida.framework
-          cp -a macos-arm64/Frida.framework.dSYM .
-          rm Frida.framework.dSYM/Contents/Resources/DWARF/Frida
-          lipo \
-              macos-x86_64/Frida.framework.dSYM/Contents/Resources/DWARF/Frida \
-              macos-arm64/Frida.framework.dSYM/Contents/Resources/DWARF/Frida \
-              -create -output Frida.framework.dSYM/Contents/Resources/DWARF/Frida
-      - name: Package universal Swift bindings for macOS
-        run: |
-          tar \
-              -cJf frida-swift-macos-universal.tar.xz \
-              Frida.framework \
-              Frida.framework.dSYM
-        env:
-          XZ_OPT: "-T 0"
-      - name: Upload universal Swift bindings for macOS
-        uses: actions/upload-artifact@v3
-        with:
-          name: release-assets
-          path: frida-swift-macos-universal.tar.xz
       - name: Tear down environment
         uses: ./.github/actions/teardown-macos-env
 
