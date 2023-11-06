@@ -17,6 +17,7 @@ packages = \
 	pcre2 \
 	glib \
 	glib-networking \
+	ngtcp2 \
 	libnice \
 	usrsctp \
 	libgee \

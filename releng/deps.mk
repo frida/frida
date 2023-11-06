@@ -425,6 +425,20 @@ libxml2_deps = \
 libxml2_deps_for_build = \
 	$(NULL)
 
+ngtcp2_name = ngtcp2
+ngtcp2_version = 21a9ba1667985ad60e9acafc07af493555deaf53
+ngtcp2_url = $(frida_base_url)/ngtcp2.git
+ngtcp2_recipe = meson
+ngtcp2_patches = \
+	$(NULL)
+ngtcp2_options = \
+	$(NULL)
+ngtcp2_deps = \
+	openssl \
+	$(NULL)
+ngtcp2_deps_for_build = \
+	$(NULL)
+
 nghttp2_name = nghttp2
 nghttp2_version = ae13d24ea59c30e36ca53d1b22c4e664588d0445
 nghttp2_url = $(frida_base_url)/nghttp2.git

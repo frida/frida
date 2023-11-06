@@ -92,6 +92,7 @@ ALL_PACKAGES: List[Package] = [
     ("json-glib", PackageRole.LIBRARY, []),
     ("libpsl", PackageRole.LIBRARY, []),
     ("libxml2", PackageRole.LIBRARY, []),
+    ("ngtcp2", PackageRole.LIBRARY, []),
     ("nghttp2", PackageRole.LIBRARY, []),
     ("libsoup", PackageRole.LIBRARY, []),
     ("capstone", PackageRole.LIBRARY, []),

@@ -297,6 +297,10 @@ def generate_library_windows(package, host, flavor, output_dir, library_filename
         sdk_lib_path("libgee-0.8.a", host),
     ]
 
+    ngtcp2 = [
+        sdk_lib_path("libngtcp2.a", host),
+    ]
+
     nghttp2 = [
         sdk_lib_path("libnghttp2.a", host),
     ]
@@ -355,6 +359,7 @@ def generate_library_windows(package, host, flavor, output_dir, library_filename
                                   + gobject
                                   + gio
                                   + tls_provider
+                                  + ngtcp2
                                   + nice
                                   + openssl
                                   + usrsctp
