@@ -536,6 +536,9 @@ openssl_patches = \
 openssl_options = \
 	-Dcli=disabled \
 	$(NULL)
+ifeq ($(host_variant), mingw32)
+openssl_options += -Dasm=disabled
+endif
 openssl_deps = \
 	$(NULL)
 openssl_deps_for_build = \

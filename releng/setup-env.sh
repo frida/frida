@@ -335,6 +335,32 @@ read_toolchain_variable ()
 mkdir -p "$FRIDA_BUILD"
 
 case $host_os in
+  windows)
+    case $host_cpu_family in
+      x86)
+        toolprefix="i686-w64-mingw32-"
+        ;;
+      *)
+        toolprefix="$host_cpu_family-w64-mingw32-"
+        ;;
+    esac
+
+    read_toolchain_variable cc CC ${toolprefix}gcc
+    read_toolchain_variable cxx CXX ${toolprefix}g++
+
+    read_toolchain_variable ar AR ${toolprefix}ar
+    read_toolchain_variable nm NM ${toolprefix}nm
+    read_toolchain_variable ranlib RANLIB ${toolprefix}ranlib
+    read_toolchain_variable strip STRIP ${toolprefix}strip
+    strip+=("--strip-all")
+
+    read_toolchain_variable readelf READELF ${toolprefix}readelf
+    read_toolchain_variable objcopy OBJCOPY ${toolprefix}objcopy
+
+    c_like_flags+=("-DWINVER=0x0501" "-D_WIN32_WINNT=0x0501" "-ffunction-sections" "-fdata-sections")
+    linker_flags+=("-lssp" "-Wl,--gc-sections")
+
+    ;;
   linux)
     if [ -n "$host_variant" ]; then
       frida_libc=$host_variant
