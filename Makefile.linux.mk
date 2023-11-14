@@ -89,6 +89,8 @@ gum-android-arm: build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc ##@gum B
 gum-android-arm64: build/frida-android-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/arm64
 gum-qnx-arm: build/frida_thin-qnx-arm/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for QNX/arm
 gum-qnx-armeabi: build/frida_thin-qnx-armeabi/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for QNX/armeabi
+gum-windows-x86: build/frida-windows-x86-mingw32/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Windows/x86
+gum-windows-x86_64: build/frida-windows-x86_64-mingw32/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Windows/x86_64
 
 
 define make-gum-rules
@@ -141,6 +143,8 @@ core-android-arm: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc ##@cor
 core-android-arm64: build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/arm64
 core-qnx-arm: build/frida_thin-qnx-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for QNX/arm
 core-qnx-armeabi: build/frida_thin-qnx-armeabi/lib/pkgconfig/frida-core-1.0.pc ##@core Build for QNX/armeabi
+core-windows-x86: build/frida-windows-x86-mingw32/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Windows/x86
+core-windows-x86_64: build/frida-windows-x86_64-mingw32/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Windows/x86_64
 
 build/tmp-linux-x86/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-linux-x86/lib/pkgconfig/frida-gum-1.0.pc
 	. build/frida-env-linux-x86.rc; \
@@ -230,6 +234,36 @@ build/tmp-android-arm64/frida-core/.frida-ninja-stamp: build/.frida-core-submodu
 			frida-core $$builddir || exit 1; \
 	fi
 	@touch $@
+build/tmp-windows-x86-mingw32/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-windows-x86-mingw32/lib/pkgconfig/frida-gum-1.0.pc
+	. build/frida-env-windows-x86-mingw32.rc; \
+	builddir=$(@D); \
+	if [ ! -f $$builddir/build.ninja ]; then \
+		$(call meson-setup,windows-x86-mingw32) \
+			--prefix $(FRIDA)/build/frida-windows-x86-mingw32 \
+			--libdir $(FRIDA)/build/frida-windows-x86-mingw32/lib \
+			$(frida_core_flags) \
+			-Dagent_dbghelp_prefix=$(FRIDA)/frida-gum/ext/dbghelp \
+			-Dagent_symsrv_prefix=$(FRIDA)/frida-gum/ext/symsrv \
+			frida-core $$builddir || exit 1; \
+	fi
+	@touch $@
+build/tmp-windows-x86_64-mingw32/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida-windows-x86_64-mingw32/lib/pkgconfig/frida-gum-1.0.pc
+	. build/frida-env-windows-x86_64-mingw32.rc; \
+	builddir=$(@D); \
+	if [ ! -f $$builddir/build.ninja ]; then \
+		$(call meson-setup,windows-x86_64-mingw32) \
+			--prefix $(FRIDA)/build/frida-windows-x86_64-mingw32 \
+			--libdir $(FRIDA)/build/frida-windows-x86_64-mingw32/lib \
+			$(frida_core_flags) \
+			-Dhelper_modern=$(FRIDA)/build/tmp-windows-x86_64-mingw32/frida-core/src/frida-helper.exe \
+			-Dhelper_legacy=$(FRIDA)/build/tmp-windows-x86-mingw32/frida-core/src/frida-helper.exe \
+			-Dagent_modern=$(FRIDA)/build/tmp-windows-x86_64-mingw32/frida-core/lib/agent/frida-agent.dll \
+			-Dagent_legacy=$(FRIDA)/build/tmp-windows-x86-mingw32/frida-core/lib/agent/frida-agent.dll \
+			-Dagent_dbghelp_prefix=$(FRIDA)/frida-gum/ext/dbghelp \
+			-Dagent_symsrv_prefix=$(FRIDA)/frida-gum/ext/symsrv \
+			frida-core $$builddir || exit 1; \
+	fi
+	@touch $@
 build/tmp_thin-%/frida-core/.frida-ninja-stamp: build/.frida-core-submodule-stamp build/frida_thin-%/lib/pkgconfig/frida-gum-1.0.pc
 	. build/frida_thin-env-$*.rc; \
 	builddir=$(@D); \
@@ -275,10 +309,21 @@ build/frida-android-arm64/lib/pkgconfig/frida-core-1.0.pc: build/tmp-android-arm
 	@rm -f build/tmp-android-arm64/frida-core/src/frida-data-{helper,agent}*
 	. build/frida-env-android-arm64.rc && $(MESON) install -C build/tmp-android-arm64/frida-core
 	@touch $@
+build/frida-windows-x86-mingw32/lib/pkgconfig/frida-core-1.0.pc: build/tmp-windows-x86-mingw32/frida-core/.frida-helper-and-agent-stamp
+	@rm -f build/tmp-windows-x86-mingw32/frida-core/src/frida-data-{helper,agent}*
+	. build/frida-env-windows-x86-mingw32.rc && $(MESON) install -C build/tmp-windows-x86-mingw32/frida-core
+	@touch $@
+build/frida-windows-x86_64-mingw32/lib/pkgconfig/frida-core-1.0.pc: build/tmp-windows-x86-mingw32/frida-core/.frida-helper-and-agent-stamp build/tmp-windows-x86_64-mingw32/frida-core/.frida-helper-and-agent-stamp
+	@rm -f build/tmp-windows-x86_64-mingw32/frida-core/src/frida-data-{helper,agent}*
+	. build/frida-env-windows-x86_64-mingw32.rc && $(MESON) install -C build/tmp-windows-x86_64-mingw32/frida-core
+	@touch $@
 build/frida_thin-%/lib/pkgconfig/frida-core-1.0.pc: build/tmp_thin-%/frida-core/.frida-ninja-stamp
 	. build/frida_thin-env-$*.rc && $(MESON) install -C build/tmp_thin-$*/frida-core
 	@touch $@
 
+build/tmp-windows-%/frida-core/.frida-helper-and-agent-stamp: build/tmp-windows-%/frida-core/.frida-ninja-stamp
+	. build/frida-env-windows-$*.rc && ninja -C build/tmp-windows-$*/frida-core src/frida-helper.exe lib/agent/frida-agent.dll
+	@touch $@
 build/tmp-%/frida-core/.frida-helper-and-agent-stamp: build/tmp-%/frida-core/.frida-ninja-stamp
 	. build/frida-env-$*.rc && ninja -C build/tmp-$*/frida-core src/frida-helper lib/agent/frida-agent.so
 	@touch $@
@@ -468,6 +513,7 @@ check-tools-linux-arm64: build/tmp_thin-linux-arm64/frida-tools-$(PYTHON_NAME)/.
 		gum-android-x86 gum-android-x86_64 \
 		gum-android-arm gum-android-arm64 \
 		gum-qnx-arm gum-qnx-armeabi \
+		gum-windows-x86 gum-windows-x86_64 \
 		check-gum-linux-x86 check-gum-linux-x86_64 \
 		check-gum-linux-x86-thin check-gum-linux-x86_64-thin \
 		check-gum-linux-armhf check-gum-linux-arm64 \
@@ -480,6 +526,7 @@ check-tools-linux-arm64: build/tmp_thin-linux-arm64/frida-tools-$(PYTHON_NAME)/.
 		core-android-x86 core-android-x86_64 \
 		core-android-arm core-android-arm64 \
 		core-qnx-arm core-qnx-armeabi \
+		core-windows-x86 core-windows-x86_64 \
 		check-core-linux-x86 check-core-linux-x86_64 \
 		check-core-linux-x86-thin check-core-linux-x86_64-thin \
 		check-core-linux-armhf check-core-linux-arm64 \
