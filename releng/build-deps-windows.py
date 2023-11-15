@@ -127,6 +127,7 @@ ALL_BUNDLES = {
         "json-glib",
         "libpsl",
         "libxml2",
+        "ngtcp2",
         "nghttp2",
         "libsoup",
         "capstone",
