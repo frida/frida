@@ -358,7 +358,9 @@ case $host_os in
     read_toolchain_variable objcopy OBJCOPY ${toolprefix}objcopy
 
     c_like_flags+=("-DWINVER=0x0501" "-D_WIN32_WINNT=0x0501" "-ffunction-sections" "-fdata-sections")
-    linker_flags+=("-lssp" "-Wl,--gc-sections")
+    linker_flags+=("-lssp" "-static-libgcc" "-Wl,--gc-sections")
+
+    cxx_link_flags+=("-static-libstdc++")
 
     ;;
   linux)
