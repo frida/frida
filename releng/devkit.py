@@ -285,6 +285,10 @@ def generate_library_windows(package, host, flavor, output_dir, library_filename
         sdk_lib_path("libnice.a", host),
     ]
 
+    lwip = [
+        sdk_lib_path("liblwip.a", host),
+    ]
+
     usrsctp = [
         sdk_lib_path("libusrsctp.a", host),
     ]
@@ -360,6 +364,7 @@ def generate_library_windows(package, host, flavor, output_dir, library_filename
                                   + gio
                                   + tls_provider
                                   + ngtcp2
+                                  + lwip
                                   + nice
                                   + openssl
                                   + usrsctp

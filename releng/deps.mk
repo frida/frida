@@ -343,6 +343,29 @@ libnice_deps = \
 libnice_deps_for_build = \
 	$(NULL)
 
+lwip_name = lwip
+lwip_version = 0c1b36894deeece78eee522278c93483e92d5936
+lwip_url = $(frida_base_url)/lwip.git
+lwip_recipe = meson
+lwip_patches = \
+	$(NULL)
+lwip_options = \
+	-Dlwip_debug=disabled \
+	-Dipv4=disabled \
+	-Dipv6=enabled \
+	-Ddns=disabled \
+	-Darp=disabled \
+	-Dethernet=disabled \
+	-Dtcp_mss=1360 \
+	-Dtcp_snd_buf=65535 \
+	-Dtcp_wnd=65535 \
+	$(NULL)
+lwip_deps = \
+	glib \
+	$(NULL)
+lwip_deps_for_build = \
+	$(NULL)
+
 usrsctp_name = usrsctp
 usrsctp_version = 42627714785294aef2bb31851bdeef5db15f5802
 usrsctp_url = $(frida_base_url)/usrsctp.git

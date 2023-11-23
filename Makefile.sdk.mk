@@ -19,6 +19,7 @@ packages = \
 	glib-networking \
 	ngtcp2 \
 	libnice \
+	lwip \
 	usrsctp \
 	libgee \
 	json-glib \
