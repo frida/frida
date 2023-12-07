@@ -303,6 +303,7 @@ def generate_library_windows(package, host, flavor, output_dir, library_filename
 
     ngtcp2 = [
         sdk_lib_path("libngtcp2.a", host),
+        sdk_lib_path("libngtcp2_crypto_quictls.a", host),
     ]
 
     nghttp2 = [
