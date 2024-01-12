@@ -9,7 +9,7 @@ task:
     CF_TOKEN: ENCRYPTED[4f9f3f7c8603fd32978b825d65f34b06fce8e51bedb4303744c799d21fc38266173a6be5a7a46b5e616573d27c9f6e91]
     PYTHON: /usr/local/bin/python3.9
     PYTHON3: /usr/local/bin/python3.9
-    NODE_TARGETS_FREEBSD: '14.0.0 16.0.0 17.0.1'
+    NODE_TARGETS_FREEBSD: '20.0.0'
     ELECTRON_TARGETS_FREEBSD: '16.0.0'
   timeout_in: 2h
   install_dependencies_script: |
