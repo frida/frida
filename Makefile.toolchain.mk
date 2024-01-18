@@ -124,7 +124,7 @@ build/ft-%/manifest/ninja.pkg: build/ft-env-%.rc deps/.ninja-stamp
 		&& ./releng/machine_file.py to-env ./build/ft-$*.txt --flavor=cpp > $$builddir/frida-env.rc \
 		&& . $$builddir/frida-env.rc \
 		&& cd $$builddir \
-		&& if $$CC --version | grep -q clang; then \
+		&& if $$CXX --version | grep -q clang; then \
 			optflags="-Oz"; \
 		else \
 			optflags="-Os"; \
