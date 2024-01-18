@@ -504,7 +504,7 @@ libsoup_deps_for_build = \
 	$(NULL)
 
 capstone_name = Capstone
-capstone_version = 6ee04f102cbfb6f63c5401a4f346fff87448f97e
+capstone_version = e98746112da0a40b2ccd0340db0d20cca5f97950
 capstone_url = $(frida_base_url)/capstone.git
 capstone_recipe = meson
 capstone_patches = \
