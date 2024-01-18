@@ -30,12 +30,11 @@ upstreams = {
     "vala": make_gnome_url("vala"),
     "xz": "https://git.tukaani.org/xz.git",
     "pkg-config": "https://gitlab.freedesktop.org/pkg-config/pkg-config.git",
-    "quickjs": "https://github.com/bellard/quickjs.git",
+    "quickjs": ("https://github.com/bellard/quickjs.git", "master"),
     "gn": "https://gn.googlesource.com/gn",
     "v8": "https://chromium.googlesource.com/v8/v8",
-    "capstone": "https://github.com/capstone-engine/capstone.git",
+    "capstone": ("https://github.com/capstone-engine/capstone.git", "v5"),
     "tinycc": "https://repo.or.cz/tinycc.git",
-    "quickjs": "https://github.com/bellard/quickjs.git",
 }
 
 
@@ -48,9 +47,15 @@ def sync(repo_path):
 
         print("Applying {} pending patches".format(patches.count))
     else:
-        upstream_url = upstreams.get(repo_name, None)
-        if upstream_url is None:
+        entry = upstreams.get(repo_name, None)
+        if entry is None:
             raise UnknownUpstreamError("Unknown upstream: {}".format(repo_name))
+        if isinstance(entry, tuple):
+            upstream_url, upstream_branch = entry
+        else:
+            upstream_url = entry
+            upstream_branch = "main"
+        upstream_target = "upstream/" + upstream_branch
 
         print("Synchronizing with {}".format(upstream_url))
 
@@ -66,7 +71,7 @@ def sync(repo_path):
         patches, base = list_our_patches(repo_path)
         print("We have {} patches on top of upstream".format(patches.count))
 
-        new_entries = list_upstream_changes(repo_path, base)
+        new_entries = list_upstream_changes(repo_path, upstream_target, base)
         if len(new_entries) == 0:
             print("Already up-to-date")
             return
@@ -74,8 +79,8 @@ def sync(repo_path):
         print("Upstream has {} new commits".format(len(new_entries)))
 
         print("Merging...")
-        subprocess.run(["git", "merge", "-s", "ours", "upstream/main"], cwd=repo_path, capture_output=True, check=True)
-        subprocess.run(["git", "checkout", "--detach", "upstream/main"], cwd=repo_path, capture_output=True, check=True)
+        subprocess.run(["git", "merge", "-s", "ours", upstream_target], cwd=repo_path, capture_output=True, check=True)
+        subprocess.run(["git", "checkout", "--detach", upstream_target], cwd=repo_path, capture_output=True, check=True)
         subprocess.run(["git", "reset", "--soft", "main"], cwd=repo_path, capture_output=True, check=True)
         subprocess.run(["git", "checkout", "main"], cwd=repo_path, capture_output=True, check=True)
         subprocess.run(["git", "commit", "--amend", "-C", "HEAD"], cwd=repo_path, capture_output=True, check=True)
@@ -115,8 +120,8 @@ def list_our_patches(repo_path):
     items.reverse()
     return (PendingPatches(items), base)
 
-def list_upstream_changes(repo_path, since):
-    return list(reversed(list_recent_commits(repo_path, since + "..upstream/main")))
+def list_upstream_changes(repo_path, upstream_target, since):
+    return list(reversed(list_recent_commits(repo_path, since + ".." + upstream_target)))
 
 def list_recent_commits(repo_path, *args):
     result = subprocess.run(["git", "log", "--pretty=oneline", "--abbrev-commit", "--topo-order"] + list(args),
