@@ -10,8 +10,8 @@ runs:
         path: build/ios-assets/
     - name: Create frida-server iOS .deb
       run: |
-        mkdir -p build/release-assets
         cd build
+        mkdir -p release-assets
         for arch in arm arm64; do
           ../frida-core/tools/package-server-fruity.sh \
               iphoneos-$arch \
