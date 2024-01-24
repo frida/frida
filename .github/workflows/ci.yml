@@ -1224,6 +1224,13 @@ jobs:
         with:
           name: frida-gum-devkit-linux-${{ matrix.arch }}
           path: build/devkits/gum/
+      - name: Build Gum RPM
+        run: rpmbuild -ba --define "_version $FRIDA_VERSION" --define "_arch ${{ matrix.arch }}" --build-in-place releng/rpms/frida-gum.spec
+      - name: Upload Gum RPM
+        uses: actions/upload-artifact@v3
+        with:
+          name: frida-gum-rpm-${{ matrix.arch }}
+          path: ~/rpmbuild/RPMS/${{ matrix.arch }}/frida-gum-*.rpm
       - name: Build GumJS devkit
         run: releng/devkit.py -t frida-gumjs linux-${{ matrix.arch }} build/devkits/gumjs
       - name: Upload GumJS devkit
@@ -1233,6 +1240,13 @@ jobs:
           path: build/devkits/gumjs/
       - name: Build Core libraries and tools
         run: make build/frida_thin-linux-${{ matrix.arch }}/lib/pkgconfig/frida-core-1.0.pc
+      - name: Build Core RPM
+        run: rpmbuild -ba --define "_version $FRIDA_VERSION" --define "_arch ${{ matrix.arch }}" --build-in-place releng/rpms/frida-core.spec
+      - name: Upload Core RPM
+        uses: actions/upload-artifact@v3
+        with:
+          name: frida-core-rpm-${{ matrix.arch }}
+          path: ~/rpmbuild/RPMS/${{ matrix.arch }}/frida-core-*.rpm
       - name: Build Core devkit
         run: releng/devkit.py -t frida-core linux-${{ matrix.arch }} build/devkits/core
       - name: Upload Core devkit
@@ -1321,6 +1335,13 @@ jobs:
         with:
           name: frida-python-linux-${{ matrix.arch }}
           path: build/wheels/frida-*.whl
+      - name: Build Python bindings RPM
+        run: rpmbuild -ba --define "_version $FRIDA_VERSION" --define "_arch ${{ matrix.arch }}" --define "__python 3.10" --build-in-place releng/rpms/frida-python.spec
+      - name: Upload Python bindings RPM
+        uses: actions/upload-artifact@v3
+        with:
+          name: frida-python-rpm-${{ matrix.arch }}
+          path: ~/rpmbuild/RPMS/${{ matrix.arch }}/frida-python-*.rpm
       - name: Build Node.js bindings
         if: ${{ !(startsWith(matrix.arch, 'mips') || endsWith(matrix.arch, '-musl')) }}
         run: |

@@ -56,3 +56,6 @@ runs:
           echo "FRIDA_VERSION=$(releng/frida_version.py)"
         ) >> $GITHUB_ENV
       shell: bash
+    - name: Install rpm
+      run: apt install rpm
+      shell: bash
