@@ -69,62 +69,67 @@ clean-submodules:
 	cd frida-tools && git clean -xfd
 
 
-define make-ios-env-rule
-build/frida-env-ios-$1.rc: releng/setup-env.sh build/frida-version.h
-	@if [ $1 != $$(build_machine) ]; then \
+define make-usr-rules
+
+build/frida-env-$1-$2.rc: releng/setup-env.sh build/frida-version.h
+	@if [ $1-$2 != $$(build_machine) ]; then \
 		cross=yes; \
 	else \
 		cross=no; \
 	fi; \
-	for machine in $$(build_machine) ios-$1; do \
+	for machine in $$(build_machine) $1-$2; do \
 		if [ ! -f build/frida-env-$$$$machine.rc ]; then \
 			FRIDA_HOST=$$$$machine \
 			FRIDA_CROSS=$$$$cross \
-			FRIDA_PREFIX="$$(abspath build/frida-ios-$1/usr)" \
+			FRIDA_PREFIX="$$(abspath build/frida-$1-$2/usr)" \
 			FRIDA_ASAN=$$(FRIDA_ASAN) \
 			XCODE11="$$(XCODE11)" \
 			./releng/setup-env.sh || exit 1; \
 		fi \
 	done
+
+build/frida-$1-%/usr/lib/pkgconfig/frida-gum-1.0.pc: build/frida-env-$1-%.rc build/.frida-gum-submodule-stamp
+	. build/frida-env-$1-$$*.rc; \
+	builddir=build/tmp-$1-$$*/frida-gum; \
+	if [ ! -f $$$$builddir/build.ninja ]; then \
+		$$(call meson-setup,$1-$$*) \
+			--prefix /usr \
+			$$(frida_gum_flags) \
+			frida-gum $$$$builddir || exit 1; \
+	fi \
+		&& $$(MESON) compile -C $$$$builddir \
+		&& DESTDIR="$$(abspath build/frida-$1-$$*)" $$(MESON) install -C $$$$builddir
+	@touch $$@
+
+build/frida-$1-%/usr/lib/pkgconfig/frida-core-1.0.pc: build/.frida-core-submodule-stamp build/frida-$1-%/usr/lib/pkgconfig/frida-gum-1.0.pc
+	. build/frida-env-$1-$$*.rc; \
+	builddir=build/tmp-$1-$$*/frida-core; \
+	if [ ! -f $$$$builddir/build.ninja ]; then \
+		$$(call meson-setup,$1-$$*) \
+			--prefix /usr \
+			$$(frida_core_flags) \
+			-Dassets=installed \
+			frida-core $$$$builddir || exit 1; \
+	fi \
+		&& $$(MESON) compile -C $$$$builddir \
+		&& DESTDIR="$$(abspath build/frida-$1-$$*)" $$(MESON) install -C $$$$builddir
+	@touch $$@
+
 endef
 
-$(eval $(call make-ios-env-rule,arm64))
-$(eval $(call make-ios-env-rule,arm64e))
-$(eval $(call make-ios-env-rule,arm64eoabi))
-$(eval $(call make-ios-env-rule,x86_64-simulator))
-$(eval $(call make-ios-env-rule,arm64-simulator))
-
-build/frida-ios-%/usr/lib/pkgconfig/frida-gum-1.0.pc: build/frida-env-ios-%.rc build/.frida-gum-submodule-stamp
-	. build/frida-env-ios-$*.rc; \
-	builddir=build/tmp-ios-$*/frida-gum; \
-	if [ ! -f $$builddir/build.ninja ]; then \
-		$(call meson-setup,ios-$*) \
-			--prefix /usr \
-			$(frida_gum_flags) \
-			frida-gum $$builddir || exit 1; \
-	fi \
-		&& $(MESON) compile -C $$builddir \
-		&& DESTDIR="$(abspath build/frida-ios-$*)" $(MESON) install -C $$builddir
-	@touch $@
-build/frida-ios-%/usr/lib/pkgconfig/frida-core-1.0.pc: build/.frida-core-submodule-stamp build/frida-ios-%/usr/lib/pkgconfig/frida-gum-1.0.pc
-	. build/frida-env-ios-$*.rc; \
-	builddir=build/tmp-ios-$*/frida-core; \
-	if [ ! -f $$builddir/build.ninja ]; then \
-		$(call meson-setup,ios-$*) \
-			--prefix /usr \
-			$(frida_core_flags) \
-			-Dassets=installed \
-			frida-core $$builddir || exit 1; \
-	fi \
-		&& $(MESON) compile -C $$builddir \
-		&& DESTDIR="$(abspath build/frida-ios-$*)" $(MESON) install -C $$builddir
-	@touch $@
+$(eval $(call make-usr-rules,ios,arm64))
+$(eval $(call make-usr-rules,ios,arm64e))
+$(eval $(call make-usr-rules,ios,arm64eoabi))
+$(eval $(call make-usr-rules,ios,x86_64-simulator))
+$(eval $(call make-usr-rules,ios,arm64-simulator))
+$(eval $(call make-usr-rules,tvos,arm64))
+$(eval $(call make-usr-rules,tvos,arm64-simulator))
 
 
 gum-macos: build/frida-macos-$(build_arch)/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for macOS
 gum-ios: build/frida-ios-arm64/usr/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for iOS
 gum-watchos: build/frida_thin-watchos-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for watchOS
-gum-tvos: build/frida_thin-tvos-arm64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for tvOS
+gum-tvos: build/frida-tvos-arm64/usr/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for tvOS
 gum-android-x86: build/frida-android-x86/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/x86
 gum-android-x86_64: build/frida-android-x86_64/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/x86-64
 gum-android-arm: build/frida-android-arm/lib/pkgconfig/frida-gum-1.0.pc ##@gum Build for Android/arm
@@ -162,7 +167,7 @@ endif
 core-macos: build/frida-macos-$(build_arch)/lib/pkgconfig/frida-core-1.0.pc ##@core Build for macOS
 core-ios: build/frida-ios-arm64/usr/lib/pkgconfig/frida-core-1.0.pc ##@core Build for iOS
 core-watchos: build/frida_thin-watchos-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for watchOS
-core-tvos: build/frida_thin-tvos-arm64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for tvOS
+core-tvos: build/frida-tvos-arm64/usr/lib/pkgconfig/frida-core-1.0.pc ##@core Build for tvOS
 core-android-x86: build/frida-android-x86/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/x86
 core-android-x86_64: build/frida-android-x86_64/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/x86-64
 core-android-arm: build/frida-android-arm/lib/pkgconfig/frida-core-1.0.pc ##@core Build for Android/arm
