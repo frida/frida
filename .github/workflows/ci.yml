@@ -1534,7 +1534,7 @@ jobs:
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Build Gum libraries and tools
-        run: make build/frida_thin-tvos-${{ matrix.arch }}/lib/pkgconfig/frida-gum-1.0.pc
+        run: make build/frida-tvos-${{ matrix.arch }}/usr/lib/pkgconfig/frida-gum-1.0.pc
       - name: Build Gum devkit
         run: releng/devkit.py -t frida-gum tvos-${{ matrix.arch }} build/devkits/gum
       - name: Upload Gum devkit
@@ -1550,7 +1550,7 @@ jobs:
           name: frida-gumjs-devkit-tvos-${{ matrix.arch }}
           path: build/devkits/gumjs/
       - name: Build Core libraries and tools
-        run: make build/frida_thin-tvos-${{ matrix.arch }}/lib/pkgconfig/frida-core-1.0.pc
+        run: make build/frida-tvos-${{ matrix.arch }}/usr/lib/pkgconfig/frida-core-1.0.pc
       - name: Build Core devkit
         run: releng/devkit.py -t frida-core tvos-${{ matrix.arch }} build/devkits/core
       - name: Upload Core devkit
@@ -1563,30 +1563,30 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: frida-server-tvos-${{ matrix.arch }}
-          path: build/frida_thin-tvos-${{ matrix.arch }}/usr/bin/frida-server
+          path: build/frida-tvos-${{ matrix.arch }}/usr/bin/frida-server
       - name: Upload frida-portal
         if: ${{ !endsWith(matrix.arch, '-simulator') }}
         uses: actions/upload-artifact@v3
         with:
           name: frida-portal-tvos-${{ matrix.arch }}
-          path: build/frida_thin-tvos-${{ matrix.arch }}/usr/bin/frida-portal
+          path: build/frida-tvos-${{ matrix.arch }}/usr/bin/frida-portal
       - name: Upload frida-inject
         if: ${{ !endsWith(matrix.arch, '-simulator') }}
         uses: actions/upload-artifact@v3
         with:
           name: frida-inject-tvos-${{ matrix.arch }}
-          path: build/frida_thin-tvos-${{ matrix.arch }}/usr/bin/frida-inject
+          path: build/frida-tvos-${{ matrix.arch }}/usr/bin/frida-inject
       - name: Upload frida-agent
         if: ${{ !endsWith(matrix.arch, '-simulator') }}
         uses: actions/upload-artifact@v3
         with:
           name: frida-agent-tvos-${{ matrix.arch }}
-          path: build/frida_thin-tvos-${{ matrix.arch }}/usr/lib/frida/frida-agent.dylib
+          path: build/frida-tvos-${{ matrix.arch }}/usr/lib/frida/frida-agent.dylib
       - name: Upload frida-gadget
         uses: actions/upload-artifact@v3
         with:
           name: frida-gadget-tvos-${{ matrix.arch }}
-          path: build/frida_thin-tvos-${{ matrix.arch }}/lib/frida/frida-gadget.dylib
+          path: build/frida-tvos-${{ matrix.arch }}/usr/lib/frida/frida-gadget.dylib
       - name: Tear down environment
         uses: ./.github/actions/teardown-macos-env
 
