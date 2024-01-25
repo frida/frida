@@ -19,12 +19,12 @@
 [submodule "frida-qml"]
 	path = frida-qml
 	url = https://github.com/frida/frida-qml.git
-[submodule "releng/meson"]
-	path = releng/meson
-	url = https://github.com/frida/meson.git
 [submodule "frida-tools"]
 	path = frida-tools
 	url = https://github.com/frida/frida-tools.git
 [submodule "frida-go"]
 	path = frida-go
 	url = https://github.com/frida/frida-go
+[submodule "releng"]
+	path = releng
+	url = https://github.com/frida/releng.git
