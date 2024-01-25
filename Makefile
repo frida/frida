@@ -6,7 +6,6 @@ all $(MAKECMDGOALS):
 
 git-submodules:
 	@if [ ! -f frida-core/meson.build ]; then \
-		git submodule init; \
 		git submodule update --init --recursive; \
 	fi
 -include git-submodules

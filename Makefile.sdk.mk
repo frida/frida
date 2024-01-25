@@ -142,8 +142,7 @@ build/fs-env-%.rc:
 	done
 
 releng/meson/meson.py:
-	git submodule init releng/meson
-	git submodule update releng/meson
+	git submodule update --init --recursive releng
 	@touch $@
 
 

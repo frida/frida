@@ -31,10 +31,8 @@ runs:
         git submodule foreach "git reset --hard HEAD"
         git submodule foreach "git fetch origin --prune --prune-tags"
       shell: pwsh
-    - name: Check out releng/meson
-      run: |
-        git submodule init -- releng/meson
-        git submodule update --depth 1 -- releng/meson
+    - name: Check out releng
+      run: git submodule update --init --recursive --depth 1 releng
       shell: pwsh
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
