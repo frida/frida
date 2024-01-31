@@ -57,8 +57,8 @@ task:
   roll_sdk_script: $PYTHON releng/deps.py roll sdk freebsd-x86_64
   build_gum_script: |
     make gum
-    $PYTHON releng/devkit.py frida-gum freebsd-x86_64 build/devkits/gum
-    $PYTHON releng/devkit.py frida-gumjs freebsd-x86_64 build/devkits/gumjs
+    $PYTHON releng/mkdevkit.py frida-gum freebsd-x86_64 build/devkits/gum
+    $PYTHON releng/mkdevkit.py frida-gumjs freebsd-x86_64 build/devkits/gumjs
   frida_gum_devkit_freebsd_x86_64_artifacts:
     path: "build/devkits/gum/*"
   frida_gumjs_devkit_freebsd_x86_64_artifacts:
@@ -66,7 +66,7 @@ task:
   test_gum_script: make check-gum
   build_core_script: |
     make core
-    $PYTHON releng/devkit.py frida-core freebsd-x86_64 build/devkits/core
+    $PYTHON releng/mkdevkit.py frida-core freebsd-x86_64 build/devkits/core
   frida_core_devkit_freebsd_x86_64_artifacts:
     path: "build/devkits/core/*"
   frida_server_freebsd_x86_64_artifacts:

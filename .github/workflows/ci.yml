@@ -915,7 +915,7 @@ jobs:
       - name: Build Gum library
         run: devenv frida.sln /Build $Env:FRIDA_SLN_CONFIG /Project gum-${Env:FRIDA_CPU_MODE}
       - name: Build Gum devkit
-        run: python releng/devkit.py frida-gum windows-${{ matrix.arch }} build/devkits/gum
+        run: python releng/mkdevkit.py frida-gum windows-${{ matrix.arch }} build/devkits/gum
       - name: Upload Gum devkit
         uses: actions/upload-artifact@v3
         with:
@@ -924,7 +924,7 @@ jobs:
       - name: Build GumJS library
         run: devenv frida.sln /Build $Env:FRIDA_SLN_CONFIG /Project gumjs-${Env:FRIDA_CPU_MODE}
       - name: Build GumJS devkit
-        run: python releng/devkit.py frida-gumjs windows-${{ matrix.arch }} build/devkits/gumjs
+        run: python releng/mkdevkit.py frida-gumjs windows-${{ matrix.arch }} build/devkits/gumjs
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v3
         with:
@@ -933,7 +933,7 @@ jobs:
       - name: Build Core library
         run: devenv frida.sln /Build $Env:FRIDA_SLN_CONFIG /Project frida-core
       - name: Build Core devkit
-        run: python releng/devkit.py frida-core windows-${{ matrix.arch }} build/devkits/core
+        run: python releng/mkdevkit.py frida-core windows-${{ matrix.arch }} build/devkits/core
       - name: Upload Core devkit
         uses: actions/upload-artifact@v3
         with:
@@ -1041,7 +1041,7 @@ jobs:
       - name: Build Gum libraries and tools
         run: make build/frida-macos-${{ matrix.arch }}/lib/pkgconfig/frida-gum-1.0.pc
       - name: Build Gum devkit
-        run: releng/devkit.py frida-gum macos-${{ matrix.arch }} build/devkits/gum
+        run: releng/mkdevkit.py frida-gum macos-${{ matrix.arch }} build/devkits/gum
       - name: Upload Gum devkit
         uses: actions/upload-artifact@v3
         with:
@@ -1054,7 +1054,7 @@ jobs:
           name: gum-graft-macos-${{ matrix.arch }}
           path: build/frida-macos-${{ matrix.arch }}/bin/gum-graft
       - name: Build GumJS devkit
-        run: releng/devkit.py frida-gumjs macos-${{ matrix.arch }} build/devkits/gumjs
+        run: releng/mkdevkit.py frida-gumjs macos-${{ matrix.arch }} build/devkits/gumjs
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v3
         with:
@@ -1063,7 +1063,7 @@ jobs:
       - name: Build Core libraries and tools
         run: make build/frida-macos-${{ matrix.arch }}/lib/pkgconfig/frida-core-1.0.pc
       - name: Build Core devkit
-        run: releng/devkit.py frida-core macos-${{ matrix.arch }} build/devkits/core
+        run: releng/mkdevkit.py frida-core macos-${{ matrix.arch }} build/devkits/core
       - name: Upload Core devkit
         uses: actions/upload-artifact@v3
         with:
@@ -1218,14 +1218,14 @@ jobs:
       - name: Build Gum libraries and tools
         run: make build/frida_thin-linux-${{ matrix.arch }}/lib/pkgconfig/frida-gum-1.0.pc
       - name: Build Gum devkit
-        run: releng/devkit.py -t frida-gum linux-${{ matrix.arch }} build/devkits/gum
+        run: releng/mkdevkit.py -t frida-gum linux-${{ matrix.arch }} build/devkits/gum
       - name: Upload Gum devkit
         uses: actions/upload-artifact@v3
         with:
           name: frida-gum-devkit-linux-${{ matrix.arch }}
           path: build/devkits/gum/
       - name: Build GumJS devkit
-        run: releng/devkit.py -t frida-gumjs linux-${{ matrix.arch }} build/devkits/gumjs
+        run: releng/mkdevkit.py -t frida-gumjs linux-${{ matrix.arch }} build/devkits/gumjs
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v3
         with:
@@ -1234,7 +1234,7 @@ jobs:
       - name: Build Core libraries and tools
         run: make build/frida_thin-linux-${{ matrix.arch }}/lib/pkgconfig/frida-core-1.0.pc
       - name: Build Core devkit
-        run: releng/devkit.py -t frida-core linux-${{ matrix.arch }} build/devkits/core
+        run: releng/mkdevkit.py -t frida-core linux-${{ matrix.arch }} build/devkits/core
       - name: Upload Core devkit
         uses: actions/upload-artifact@v3
         with:
@@ -1400,14 +1400,14 @@ jobs:
       - name: Build Gum libraries and tools
         run: make build/frida-ios-${{ matrix.arch }}/usr/lib/pkgconfig/frida-gum-1.0.pc
       - name: Build Gum devkit
-        run: releng/devkit.py frida-gum ios-${{ matrix.arch }} build/devkits/gum
+        run: releng/mkdevkit.py frida-gum ios-${{ matrix.arch }} build/devkits/gum
       - name: Upload Gum devkit
         uses: actions/upload-artifact@v3
         with:
           name: frida-gum-devkit-ios-${{ matrix.arch }}
           path: build/devkits/gum/
       - name: Build GumJS devkit
-        run: releng/devkit.py frida-gumjs ios-${{ matrix.arch }} build/devkits/gumjs
+        run: releng/mkdevkit.py frida-gumjs ios-${{ matrix.arch }} build/devkits/gumjs
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v3
         with:
@@ -1416,7 +1416,7 @@ jobs:
       - name: Build Core libraries and tools
         run: make build/frida-ios-${{ matrix.arch }}/usr/lib/pkgconfig/frida-core-1.0.pc
       - name: Build Core devkit
-        run: releng/devkit.py frida-core ios-${{ matrix.arch }} build/devkits/core
+        run: releng/mkdevkit.py frida-core ios-${{ matrix.arch }} build/devkits/core
       - name: Upload Core devkit
         uses: actions/upload-artifact@v3
         with:
@@ -1480,14 +1480,14 @@ jobs:
       - name: Build Gum libraries and tools
         run: make build/frida_thin-watchos-${{ matrix.arch }}/lib/pkgconfig/frida-gum-1.0.pc
       - name: Build Gum devkit
-        run: releng/devkit.py -t frida-gum watchos-${{ matrix.arch }} build/devkits/gum
+        run: releng/mkdevkit.py -t frida-gum watchos-${{ matrix.arch }} build/devkits/gum
       - name: Upload Gum devkit
         uses: actions/upload-artifact@v3
         with:
           name: frida-gum-devkit-watchos-${{ matrix.arch }}
           path: build/devkits/gum/
       - name: Build GumJS devkit
-        run: releng/devkit.py -t frida-gumjs watchos-${{ matrix.arch }} build/devkits/gumjs
+        run: releng/mkdevkit.py -t frida-gumjs watchos-${{ matrix.arch }} build/devkits/gumjs
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v3
         with:
@@ -1496,7 +1496,7 @@ jobs:
       - name: Build Core libraries and tools
         run: make build/frida_thin-watchos-${{ matrix.arch }}/lib/pkgconfig/frida-core-1.0.pc
       - name: Build Core devkit
-        run: releng/devkit.py -t frida-core watchos-${{ matrix.arch }} build/devkits/core
+        run: releng/mkdevkit.py -t frida-core watchos-${{ matrix.arch }} build/devkits/core
       - name: Upload Core devkit
         uses: actions/upload-artifact@v3
         with:
@@ -1536,14 +1536,14 @@ jobs:
       - name: Build Gum libraries and tools
         run: make build/frida-tvos-${{ matrix.arch }}/usr/lib/pkgconfig/frida-gum-1.0.pc
       - name: Build Gum devkit
-        run: releng/devkit.py -t frida-gum tvos-${{ matrix.arch }} build/devkits/gum
+        run: releng/mkdevkit.py -t frida-gum tvos-${{ matrix.arch }} build/devkits/gum
       - name: Upload Gum devkit
         uses: actions/upload-artifact@v3
         with:
           name: frida-gum-devkit-tvos-${{ matrix.arch }}
           path: build/devkits/gum/
       - name: Build GumJS devkit
-        run: releng/devkit.py -t frida-gumjs tvos-${{ matrix.arch }} build/devkits/gumjs
+        run: releng/mkdevkit.py -t frida-gumjs tvos-${{ matrix.arch }} build/devkits/gumjs
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v3
         with:
@@ -1552,7 +1552,7 @@ jobs:
       - name: Build Core libraries and tools
         run: make build/frida-tvos-${{ matrix.arch }}/usr/lib/pkgconfig/frida-core-1.0.pc
       - name: Build Core devkit
-        run: releng/devkit.py -t frida-core tvos-${{ matrix.arch }} build/devkits/core
+        run: releng/mkdevkit.py -t frida-core tvos-${{ matrix.arch }} build/devkits/core
       - name: Upload Core devkit
         uses: actions/upload-artifact@v3
         with:
@@ -1625,14 +1625,14 @@ jobs:
       - name: Build Gum libraries and tools
         run: make build/frida-android-${{ matrix.arch }}/lib/pkgconfig/frida-gum-1.0.pc
       - name: Build Gum devkit
-        run: releng/devkit.py frida-gum android-${{ matrix.arch }} build/devkits/gum
+        run: releng/mkdevkit.py frida-gum android-${{ matrix.arch }} build/devkits/gum
       - name: Upload Gum devkit
         uses: actions/upload-artifact@v3
         with:
           name: frida-gum-devkit-android-${{ matrix.arch }}
           path: build/devkits/gum/
       - name: Build GumJS devkit
-        run: releng/devkit.py frida-gumjs android-${{ matrix.arch }} build/devkits/gumjs
+        run: releng/mkdevkit.py frida-gumjs android-${{ matrix.arch }} build/devkits/gumjs
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v3
         with:
@@ -1641,7 +1641,7 @@ jobs:
       - name: Build Core libraries and tools
         run: make build/frida-android-${{ matrix.arch }}/lib/pkgconfig/frida-core-1.0.pc
       - name: Build Core devkit
-        run: releng/devkit.py frida-core android-${{ matrix.arch }} build/devkits/core
+        run: releng/mkdevkit.py frida-core android-${{ matrix.arch }} build/devkits/core
       - name: Upload Core devkit
         uses: actions/upload-artifact@v3
         with:
@@ -1697,14 +1697,14 @@ jobs:
       - name: Build Gum libraries and tools
         run: make gum
       - name: Build Gum devkit
-        run: releng/devkit.py frida-gum freebsd-arm64 build/devkits/gum
+        run: releng/mkdevkit.py frida-gum freebsd-arm64 build/devkits/gum
       - name: Upload Gum devkit
         uses: actions/upload-artifact@v3
         with:
           name: frida-gum-devkit-freebsd-arm64
           path: build/devkits/gum/
       - name: Build GumJS devkit
-        run: releng/devkit.py frida-gumjs freebsd-arm64 build/devkits/gumjs
+        run: releng/mkdevkit.py frida-gumjs freebsd-arm64 build/devkits/gumjs
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v3
         with:
@@ -1715,7 +1715,7 @@ jobs:
       - name: Build Core libraries and tools
         run: make core
       - name: Build Core devkit
-        run: releng/devkit.py frida-core freebsd-arm64 build/devkits/core
+        run: releng/mkdevkit.py frida-core freebsd-arm64 build/devkits/core
       - name: Upload Core devkit
         uses: actions/upload-artifact@v3
         with:
@@ -1794,14 +1794,14 @@ jobs:
       - name: Build Gum libraries and tools
         run: make gum-qnx-armeabi
       - name: Build Gum devkit
-        run: releng/devkit.py -t frida-gum qnx-armeabi build/devkits/gum
+        run: releng/mkdevkit.py -t frida-gum qnx-armeabi build/devkits/gum
       - name: Upload Gum devkit
         uses: actions/upload-artifact@v3
         with:
           name: frida-gum-devkit-qnx-armeabi
           path: build/devkits/gum/
       - name: Build GumJS devkit
-        run: releng/devkit.py -t frida-gumjs qnx-armeabi build/devkits/gumjs
+        run: releng/mkdevkit.py -t frida-gumjs qnx-armeabi build/devkits/gumjs
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v3
         with:
@@ -1814,7 +1814,7 @@ jobs:
       - name: Build Core libraries and tools
         run: make core-qnx-armeabi
       - name: Build Core devkit
-        run: releng/devkit.py -t frida-core qnx-armeabi build/devkits/core
+        run: releng/mkdevkit.py -t frida-core qnx-armeabi build/devkits/core
       - name: Upload Core devkit
         uses: actions/upload-artifact@v3
         with:
