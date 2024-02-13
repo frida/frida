@@ -52,7 +52,7 @@ runs:
     - name: Install NASM
       uses: ilammy/setup-nasm@v1
     - name: Install Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
         architecture: ${{ inputs.architecture }}
