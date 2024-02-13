@@ -8,7 +8,7 @@ runs:
   using: composite
   steps:
     - name: Download
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ${{ inputs.name }}
         path: ${{ inputs.name }}

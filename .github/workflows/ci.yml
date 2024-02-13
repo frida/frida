@@ -51,52 +51,52 @@ jobs:
           sudo apt-get install -y reprepro
           sudo npm install -g cloudflare-cli
       - name: Download release assets
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: release-assets
           path: build/release-assets/
       - name: Download Node.js and Electron prebuilds for Windows/x86
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-node-windows-x86
           path: build/release-assets/
       - name: Download Node.js and Electron prebuilds for Windows/x86_64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-node-windows-x86_64
           path: build/release-assets/
       - name: Download Node.js and Electron prebuilds for macOS/x86_64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-node-macos-x86_64
           path: build/release-assets/
       - name: Download Node.js and Electron prebuilds for macOS/arm64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-node-macos-arm64
           path: build/release-assets/
       - name: Download Node.js and Electron prebuilds for Linux/x86
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-node-linux-x86
           path: build/release-assets/
       - name: Download Node.js and Electron prebuilds for Linux/x86_64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-node-linux-x86_64
           path: build/release-assets/
       - name: Download Node.js and Electron prebuilds for Linux/armhf
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-node-linux-armhf
           path: build/release-assets/
       - name: Download Node.js and Electron prebuilds for Linux/arm64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-node-linux-arm64
           path: build/release-assets/
       - name: Download Node.js and Electron prebuilds for FreeBSD/arm64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-node-freebsd-arm64
           path: build/release-assets/
@@ -210,17 +210,17 @@ jobs:
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Download frida-server for iOS/arm64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-server-ios-arm64
           path: ios-arm64/
       - name: Download frida-server for iOS/arm64e
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-server-ios-arm64e
           path: ios-arm64e/
       - name: Download frida-server for iOS/arm64eoabi
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-server-ios-arm64eoabi
           path: ios-arm64eoabi/
@@ -237,12 +237,12 @@ jobs:
               ios-arm64eoabi/frida-server \
               ios-arm64e/frida-server
       - name: Download frida-agent for iOS/arm64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-agent-ios-arm64
           path: ios-arm64/
       - name: Download frida-agent for iOS/arm64e
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-agent-ios-arm64e
           path: ios-arm64e/
@@ -292,7 +292,7 @@ jobs:
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Download frida-server for tvOS/arm64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-server-tvos-arm64
           path: tvos-arm64/
@@ -302,7 +302,7 @@ jobs:
               -f -s "-" --preserve-metadata=entitlements \
               tvos-arm64/frida-server
       - name: Download frida-agent for tvOS/arm64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-agent-tvos-arm64
           path: tvos-arm64/
@@ -349,17 +349,17 @@ jobs:
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Download frida-gadget for macOS/x86_64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-gadget-macos-x86_64
           path: macos-x86_64/
       - name: Download frida-gadget for macOS/arm64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-gadget-macos-arm64
           path: macos-arm64/
       - name: Download frida-gadget for macOS/arm64e
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-gadget-macos-arm64e
           path: macos-arm64e/
@@ -384,12 +384,12 @@ jobs:
           name: release-assets
           path: frida-gadget-macos-universal.dylib.xz
       - name: Download frida-gadget for iOS/arm64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-gadget-ios-arm64
           path: ios-arm64/
       - name: Download frida-gadget for iOS/arm64e
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-gadget-ios-arm64e
           path: ios-arm64e/
@@ -420,12 +420,12 @@ jobs:
           name: release-assets
           path: frida-gadget-ios-universal.dylib.xz
       - name: Download frida-gadget for iOS/x86_64-simulator
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-gadget-ios-x86_64-simulator
           path: ios-x86_64-simulator/
       - name: Download frida-gadget for iOS/arm64-simulator
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-gadget-ios-arm64-simulator
           path: ios-arm64-simulator/
@@ -449,12 +449,12 @@ jobs:
           name: release-assets
           path: frida-gadget-ios-simulator-universal.dylib.xz
       - name: Download frida-gadget for watchOS/arm64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-gadget-watchos-arm64
           path: watchos-arm64/
       - name: Download frida-gadget for watchOS/arm64-simulator
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-gadget-watchos-arm64-simulator
           path: watchos-arm64-simulator/
@@ -481,12 +481,12 @@ jobs:
           name: release-assets
           path: frida-gadget-watchos-arm64-simulator.dylib.xz
       - name: Download frida-gadget for tvOS/arm64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-gadget-tvos-arm64
           path: tvos-arm64/
       - name: Download frida-gadget for tvOS/arm64-simulator
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frida-gadget-tvos-arm64-simulator
           path: tvos-arm64-simulator/

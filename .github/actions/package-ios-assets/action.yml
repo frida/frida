@@ -4,7 +4,7 @@ runs:
   using: composite
   steps:
     - name: Download iOS assets
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ios-assets
         path: build/ios-assets/

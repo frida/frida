@@ -4,7 +4,7 @@ runs:
   using: composite
   steps:
     - name: Download tvOS assets
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: tvos-assets
         path: build/tvos-assets/

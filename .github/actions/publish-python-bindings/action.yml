@@ -19,42 +19,42 @@ runs:
         python setup.py sdist --dist-dir ../build/python-packages
       shell: bash
     - name: Download wheel for Windows/x86
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: frida-python-windows-x86
         path: build/python-packages/
     - name: Download wheel for Windows/x86_64
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: frida-python-windows-x86_64
         path: build/python-packages/
     - name: Download wheel for macOS/x86_64
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: frida-python-macos-x86_64
         path: build/python-packages/
     - name: Download wheel for macOS/arm64
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: frida-python-macos-arm64
         path: build/python-packages/
     - name: Download wheel for Linux/x86
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: frida-python-linux-x86
         path: build/python-packages/
     - name: Download wheel for Linux/x86_64
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: frida-python-linux-x86_64
         path: build/python-packages/
     - name: Download wheel for Linux/armhf
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: frida-python-linux-armhf
         path: build/python-packages/
     - name: Download wheel for Linux/arm64
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: frida-python-linux-arm64
         path: build/python-packages/
