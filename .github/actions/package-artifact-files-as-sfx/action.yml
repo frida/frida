@@ -18,7 +18,7 @@ runs:
         7z a -sfx -r ..\${{ inputs.name }}.exe .
       shell: pwsh
     - name: Upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: release-assets
         path: ${{ inputs.name }}.exe

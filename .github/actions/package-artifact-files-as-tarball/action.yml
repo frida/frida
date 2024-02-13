@@ -18,7 +18,7 @@ runs:
         XZ_OPT: "-T 0"
       shell: bash
     - name: Upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: release-assets
         path: ${{ inputs.name }}.tar.xz
