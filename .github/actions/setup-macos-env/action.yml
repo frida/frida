@@ -66,7 +66,7 @@ runs:
       shell: bash
     - name: Configure AWS credentials (x64)
       if: runner.arch == 'X64'
-      uses: aws-actions/configure-aws-credentials@v1
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ inputs.aws-access-key-id }}
         aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
