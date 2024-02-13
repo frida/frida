@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: true
+          submodules: recursive
       - name: Set up environment
         uses: ./.github/actions/setup-linux-env
         with:
@@ -165,7 +165,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: true
+          submodules: recursive
       - name: Set up environment
         uses: ./.github/actions/setup-linux-env
         with:
@@ -873,7 +873,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: true
+          submodules: recursive
       - name: Set up Windows environment
         uses: ./.github/actions/setup-windows-env
         with:
@@ -1021,7 +1021,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: true
+          submodules: recursive
       - name: Set up environment
         uses: ./.github/actions/setup-macos-env
         with:
@@ -1190,7 +1190,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: true
+          submodules: recursive
       - name: Set up environment
         uses: ./.github/actions/setup-linux-env
         with:
@@ -1386,7 +1386,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: true
+          submodules: recursive
       - name: Set up environment
         uses: ./.github/actions/setup-macos-env
         with:
@@ -1466,7 +1466,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: true
+          submodules: recursive
       - name: Set up environment
         uses: ./.github/actions/setup-macos-env
         with:
@@ -1522,7 +1522,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: true
+          submodules: recursive
       - name: Set up environment
         uses: ./.github/actions/setup-macos-env
         with:
@@ -1602,7 +1602,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: true
+          submodules: recursive
       - name: Set up environment
         uses: ./.github/actions/setup-linux-env
         with:
@@ -1682,7 +1682,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: true
+          submodules: recursive
       - name: Set up environment
         uses: ./.github/actions/setup-freebsd-env
         with:
@@ -1781,7 +1781,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: true
+          submodules: recursive
       - name: Set up environment
         uses: ./.github/actions/setup-linux-env
         with:
