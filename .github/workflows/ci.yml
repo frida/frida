@@ -1547,14 +1547,14 @@ jobs:
       - name: Build Gum libraries and tools
         run: make build/frida-tvos-${{ matrix.arch }}/usr/lib/pkgconfig/frida-gum-1.0.pc
       - name: Build Gum devkit
-        run: releng/mkdevkit.py -t frida-gum tvos-${{ matrix.arch }} build/devkits/gum
+        run: releng/mkdevkit.py frida-gum tvos-${{ matrix.arch }} build/devkits/gum
       - name: Upload Gum devkit
         uses: actions/upload-artifact@v4
         with:
           name: frida-gum-devkit-tvos-${{ matrix.arch }}
           path: build/devkits/gum/
       - name: Build GumJS devkit
-        run: releng/mkdevkit.py -t frida-gumjs tvos-${{ matrix.arch }} build/devkits/gumjs
+        run: releng/mkdevkit.py frida-gumjs tvos-${{ matrix.arch }} build/devkits/gumjs
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v4
         with:
@@ -1563,7 +1563,7 @@ jobs:
       - name: Build Core libraries and tools
         run: make build/frida-tvos-${{ matrix.arch }}/usr/lib/pkgconfig/frida-core-1.0.pc
       - name: Build Core devkit
-        run: releng/mkdevkit.py -t frida-core tvos-${{ matrix.arch }} build/devkits/core
+        run: releng/mkdevkit.py frida-core tvos-${{ matrix.arch }} build/devkits/core
       - name: Upload Core devkit
         uses: actions/upload-artifact@v4
         with:
