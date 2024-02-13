@@ -883,7 +883,7 @@ jobs:
           cloudflare-token: ${{ secrets.CF_TOKEN }}
           architecture: ${{ matrix.arch == 'x86_64' && 'x64' || 'x86' }}
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@a7683763fa44598d9faf6157a27632def618ad42
         with:
           arch: ${{ matrix.arch == 'x86_64' && 'win64_msvc2019_64' || 'win32_msvc2019' }}
           cache: true
@@ -1034,7 +1034,7 @@ jobs:
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Install Qt
         if: matrix.arch == 'x86_64'
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@a7683763fa44598d9faf6157a27632def618ad42
         with:
           cache: true
           setup-python: false
@@ -1211,7 +1211,7 @@ jobs:
           apt-get install -y sudo
       - name: Install Qt
         if: matrix.arch == 'x86_64'
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@a7683763fa44598d9faf6157a27632def618ad42
         with:
           cache: true
           setup-python: false
