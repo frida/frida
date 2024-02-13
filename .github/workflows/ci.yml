@@ -1293,36 +1293,15 @@ jobs:
               py_platform=musllinux_1_1_${py_arch}
               ;;
             x86*)
-              py_platform=manylinux_2_5_${py_arch}.manylinux1_${py_arch}
+              py_platform=manylinux_2_5_${py_arch}
               ;;
             arm*|ppc*|s390x)
-              py_platform=manylinux_2_17_${py_arch}.manylinux2014_${py_arch}
+              py_platform=manylinux_2_17_${py_arch}
               ;;
             *)
               py_platform=manylinux_2_5_${py_arch}
               ;;
           esac
-          base64 -d << EOF | patch --directory=/usr/lib/python3/dist-packages/wheel/ -p1
-            ZGlmZiAtTnVyIHdoZWVsLW9sZC9iZGlzdF93aGVlbC5weSB3aGVlbC9iZGlzdF93aGVlbC5weQot
-            LS0gd2hlZWwtb2xkL2JkaXN0X3doZWVsLnB5CTIwMjEtMTItMjIgMTI6MjE6NTUuMDAwMDAwMDAw
-            ICswMDAwCisrKyB3aGVlbC9iZGlzdF93aGVlbC5weQkyMDI0LTAyLTEzIDE0OjU5OjAwLjE5OTgz
-            Mzc3NyArMDAwMApAQCAtMjYyLDcgKzI2Miw3IEBACiAgICAgICAgICAgICBpZiBwbGF0X25hbWUg
-            aW4gKCdsaW51eC14ODZfNjQnLCAnbGludXhfeDg2XzY0JykgYW5kIHN5cy5tYXhzaXplID09IDIx
-            NDc0ODM2NDc6CiAgICAgICAgICAgICAgICAgcGxhdF9uYW1lID0gJ2xpbnV4X2k2ODYnCiAKLSAg
-            ICAgICAgcGxhdF9uYW1lID0gcGxhdF9uYW1lLmxvd2VyKCkucmVwbGFjZSgnLScsICdfJykucmVw
-            bGFjZSgnLicsICdfJykKKyAgICAgICAgcGxhdF9uYW1lID0gcGxhdF9uYW1lLmxvd2VyKCkucmVw
-            bGFjZSgnLScsICdfJykKIAogICAgICAgICBpZiBzZWxmLnJvb3RfaXNfcHVyZToKICAgICAgICAg
-            ICAgIGlmIHNlbGYudW5pdmVyc2FsOgpkaWZmIC1OdXIgd2hlZWwtb2xkL3doZWVsZmlsZS5weSB3
-            aGVlbC93aGVlbGZpbGUucHkKLS0tIHdoZWVsLW9sZC93aGVlbGZpbGUucHkJMjAyMy0wMS0yMyAx
-            MDoyOTo0Ny4wMDAwMDAwMDAgKzAwMDAKKysrIHdoZWVsL3doZWVsZmlsZS5weQkyMDI0LTAyLTEz
-            IDE0OjU4OjE2LjIzMTgzODMxMSArMDAwMApAQCAtMjgsNyArMjgsNyBAQAogIyBpbnZhbGlkIHdo
-            ZWVsIGZpbGVuYW1lcyB3aWxsIG1hdGNoKS4gU2VwYXJhdGUgcmVnZXggZm9yIC5kaXN0LWluZm8/
-            CiBXSEVFTF9JTkZPX1JFID0gcmUuY29tcGlsZSgKICAgICByIiIiXig/UDxuYW1ldmVyPig/UDxu
-            YW1lPlteLV0rPyktKD9QPHZlcj5bXi1dKz8pKSgtKD9QPGJ1aWxkPlxkW14tXSopKT8KLSAgICAg
-            LSg/UDxweXZlcj5bXi1dKz8pLSg/UDxhYmk+W14tXSs/KS0oP1A8cGxhdD5bXi5dKz8pXC53aGwk
-            IiIiLAorICAgICAtKD9QPHB5dmVyPlteLV0rPyktKD9QPGFiaT5bXi1dKz8pLSg/UDxwbGF0Pihb
-            Xi5dKz8pKFwuW14uXSs/KT8pXC53aGwkIiIiLAogICAgIHJlLlZFUkJPU0UpCiAKIAo=
-          EOF
           cd frida-python
           export _PYTHON_HOST_PLATFORM=linux-$py_arch
           echo "plat_name = $py_platform" >> setup.cfg
