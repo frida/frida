@@ -29,7 +29,7 @@ jobs:
       - assemble-tvos-assets
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: true
@@ -162,7 +162,7 @@ jobs:
       - assemble-tvos-assets
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: true
@@ -198,7 +198,7 @@ jobs:
     needs: frida-ios
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup-macos-env
         with:
@@ -280,7 +280,7 @@ jobs:
     needs: frida-tvos
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup-macos-env
         with:
@@ -337,7 +337,7 @@ jobs:
     needs: [frida-macos, frida-ios, frida-watchos, frida-tvos]
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup-macos-env
         with:
@@ -524,7 +524,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
@@ -567,7 +567,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-sfx
         with:
@@ -590,7 +590,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
@@ -635,7 +635,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
@@ -679,7 +679,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
@@ -707,7 +707,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
@@ -730,7 +730,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
@@ -753,7 +753,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
@@ -792,7 +792,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
@@ -831,7 +831,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
@@ -870,7 +870,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: true
@@ -1018,7 +1018,7 @@ jobs:
     runs-on: ${{ matrix.arch == 'x86_64' && 'macos-12' || 'macos-12-arm64' }}
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: true
@@ -1187,7 +1187,7 @@ jobs:
     container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: true
@@ -1383,7 +1383,7 @@ jobs:
       XCODE11: /Applications/Xcode_11.7.app
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: true
@@ -1463,7 +1463,7 @@ jobs:
     runs-on: macos-12
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: true
@@ -1519,7 +1519,7 @@ jobs:
     runs-on: macos-12
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: true
@@ -1599,7 +1599,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: true
@@ -1679,7 +1679,7 @@ jobs:
     runs-on: [freebsd, arm64]
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: true
@@ -1778,7 +1778,7 @@ jobs:
     container: ghcr.io/frida/qnx-tools:latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: true
@@ -1853,7 +1853,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup-windows-env
         with:
@@ -1874,7 +1874,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup-windows-env
         with:
@@ -1893,7 +1893,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup-macos-env
         with:
@@ -1918,7 +1918,7 @@ jobs:
     runs-on: ${{ matrix.arch == 'x86_64' && 'macos-latest' || 'macos-12-arm64' }}
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup-macos-env
         with:
@@ -1945,7 +1945,7 @@ jobs:
       XCODE11: /Applications/Xcode_11.7.app
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup-macos-env
         with:
@@ -1969,7 +1969,7 @@ jobs:
     runs-on: macos-12
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup-macos-env
         with:
@@ -1993,7 +1993,7 @@ jobs:
     runs-on: macos-12
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup-macos-env
         with:
@@ -2017,7 +2017,7 @@ jobs:
     container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup-linux-env
         with:
@@ -2038,7 +2038,7 @@ jobs:
     container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup-linux-env
         with:
@@ -2065,7 +2065,7 @@ jobs:
     container: ghcr.io/frida/x-tools-linux-x86:latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup-linux-env
         with:
@@ -2109,7 +2109,7 @@ jobs:
     container: ghcr.io/frida/x-tools-linux-x86_64:latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup-linux-env
         with:
