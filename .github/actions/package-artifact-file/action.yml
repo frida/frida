@@ -32,5 +32,5 @@ runs:
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: release-assets
+        name: release-asset-${{ inputs.name }}
         path: ${{ inputs.name }}/*

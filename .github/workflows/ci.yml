@@ -53,7 +53,8 @@ jobs:
       - name: Download release assets
         uses: actions/download-artifact@v4
         with:
-          name: release-assets
+          pattern: release-asset-*
+          merge-multiple: true
           path: build/release-assets/
       - name: Download Node.js and Electron prebuilds for Windows/x86
         uses: actions/download-artifact@v4
@@ -381,7 +382,7 @@ jobs:
       - name: Upload universal frida-gadget for macOS
         uses: actions/upload-artifact@v4
         with:
-          name: release-assets
+          name: release-asset-frida-gadget-macos-universal
           path: frida-gadget-macos-universal.dylib.xz
       - name: Download frida-gadget for iOS/arm64
         uses: actions/download-artifact@v4
@@ -412,12 +413,12 @@ jobs:
       - name: Upload universal frida-gadget for iOS (gz)
         uses: actions/upload-artifact@v4
         with:
-          name: release-assets
+          name: release-asset-frida-gadget-ios-universal-gz
           path: frida-gadget-ios-universal.dylib.gz
       - name: Upload universal frida-gadget for iOS (xz)
         uses: actions/upload-artifact@v4
         with:
-          name: release-assets
+          name: release-asset-frida-gadget-ios-universal-xz
           path: frida-gadget-ios-universal.dylib.xz
       - name: Download frida-gadget for iOS/x86_64-simulator
         uses: actions/download-artifact@v4
@@ -446,7 +447,7 @@ jobs:
       - name: Upload universal frida-gadget for iOS Simulator
         uses: actions/upload-artifact@v4
         with:
-          name: release-assets
+          name: release-asset-frida-gadget-ios-simulator-universal
           path: frida-gadget-ios-simulator-universal.dylib.xz
       - name: Download frida-gadget for watchOS/arm64
         uses: actions/download-artifact@v4
@@ -473,12 +474,12 @@ jobs:
       - name: Upload frida-gadget for watchOS/arm64
         uses: actions/upload-artifact@v4
         with:
-          name: release-assets
+          name: release-asset-frida-gadget-watchos-arm64
           path: frida-gadget-watchos-arm64.dylib.xz
       - name: Upload frida-gadget for watchOS/arm64-simulator
         uses: actions/upload-artifact@v4
         with:
-          name: release-assets
+          name: release-asset-frida-gadget-watchos-arm64-simulator
           path: frida-gadget-watchos-arm64-simulator.dylib.xz
       - name: Download frida-gadget for tvOS/arm64
         uses: actions/download-artifact@v4
@@ -505,12 +506,12 @@ jobs:
       - name: Upload frida-gadget for tvOS/arm64
         uses: actions/upload-artifact@v4
         with:
-          name: release-assets
+          name: release-asset-frida-gadget-tvos-arm64
           path: frida-gadget-tvos-arm64.dylib.xz
       - name: Upload frida-gadget for tvOS/arm64-simulator
         uses: actions/upload-artifact@v4
         with:
-          name: release-assets
+          name: release-asset-frida-gadget-tvos-arm64-simulator
           path: frida-gadget-tvos-arm64-simulator.dylib.xz
       - name: Tear down environment
         uses: ./.github/actions/teardown-macos-env
