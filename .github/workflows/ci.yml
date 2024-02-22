@@ -1364,7 +1364,7 @@ jobs:
           path: build/frida-linux-${{ matrix.arch }}/lib/qt5/qml/
 
   frida-ios:
-    needs: sdk-ios
+    needs: [sdk-macos, sdk-ios]
     strategy:
       matrix:
         arch: [arm64, arm64e, arm64eoabi, x86_64-simulator, arm64-simulator]
@@ -1446,7 +1446,7 @@ jobs:
         uses: ./.github/actions/teardown-macos-env
 
   frida-watchos:
-    needs: sdk-watchos
+    needs: [sdk-macos, sdk-watchos]
     strategy:
       matrix:
         arch: [arm64, arm64-simulator]
@@ -1502,7 +1502,7 @@ jobs:
         uses: ./.github/actions/teardown-macos-env
 
   frida-tvos:
-    needs: sdk-tvos
+    needs: [sdk-macos, sdk-tvos]
     strategy:
       matrix:
         arch: [arm64, arm64-simulator]
