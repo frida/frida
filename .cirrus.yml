@@ -91,10 +91,10 @@ task:
     npm version $FRIDA_VERSION
     npm install
     for target in $NODE_TARGETS_FREEBSD; do
-      npm run prebuild -- -r node -t $target
+      npx prebuild -r node -t $target --strip
     done
     for target in $ELECTRON_TARGETS_FREEBSD; do
-      npm run prebuild -- -r electron -t $target
+      npx prebuild -r electron -t $target --strip
     done
   frida_node_freebsd_x86_64_artifacts:
     path: "frida-node/prebuilds/*"

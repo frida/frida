@@ -983,8 +983,8 @@ jobs:
           if ('${{ matrix.arch }}' -eq 'x86') {
             $nodeTargets = $nodeTargets | where { [int]($_.Split('.')[0]) -le 16 }
           }
-          npm run prebuild -- -r node $($nodeTargets | % {'-t', $_})
-          npm run prebuild -- -r electron $($electronTargets | % {'-t', $_})
+          npx prebuild -r node $($nodeTargets | % {'-t', $_}) --strip
+          npx prebuild -r electron $($electronTargets | % {'-t', $_}) --strip
       - name: Upload Node.js bindings
         uses: actions/upload-artifact@v4
         with:
@@ -1150,10 +1150,10 @@ jobs:
           npm version $FRIDA_VERSION
           npm install
           for target in ${{ env.NODE_TARGETS_DEFAULT }}; do
-            npm run prebuild -- -r node -t $target
+            npx prebuild -r node -t $target --strip
           done
           for target in ${{ env.ELECTRON_TARGETS_DEFAULT }}; do
-            npm run prebuild -- -r electron -t $target
+            npx prebuild -r electron -t $target --strip
           done
       - name: Upload Node.js bindings
         if: matrix.arch != 'arm64e'
@@ -1337,10 +1337,10 @@ jobs:
           npm version $FRIDA_VERSION
           npm install
           for target in ${{ env.NODE_TARGETS_DEFAULT }}; do
-            npm run prebuild -- -r node -t $target
+            npx prebuild -r node -t $target --strip
           done
           for target in ${{ env.ELECTRON_TARGETS_DEFAULT }}; do
-            npm run prebuild -- -r electron -t $target
+            npx prebuild -r electron -t $target --strip
           done
       - name: Upload Node.js bindings
         if: ${{ !(startsWith(matrix.arch, 'mips') || endsWith(matrix.arch, '-musl')) }}
@@ -1752,10 +1752,10 @@ jobs:
           npm version $FRIDA_VERSION
           npm install
           for target in ${{ env.NODE_TARGETS_FREEBSD }}; do
-            npm run prebuild -- -r node -t $target
+            npx prebuild -r node -t $target --strip
           done
           for target in ${{ env.ELECTRON_TARGETS_FREEBSD }}; do
-            npm run prebuild -- -r electron -t $target
+            npx prebuild -r electron -t $target --strip
           done
       - name: Upload Node.js bindings
         uses: actions/upload-artifact@v4
