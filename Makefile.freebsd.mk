@@ -115,7 +115,6 @@ build/tmp-%/frida-$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-sta
 		$(call meson-setup,$*) \
 			--prefix $(FRIDA)/build/frida-$* \
 			$(FRIDA_FLAGS_COMMON) \
-			-Dpython=$(PYTHON) \
 			frida-python $$builddir || exit 1; \
 	fi; \
 	$(MESON) install -C $$builddir || exit 1
@@ -168,7 +167,6 @@ build/tmp-%/frida-tools-$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodul
 		$(call meson-setup,$*) \
 			--prefix $(FRIDA)/build/frida-$* \
 			$(FRIDA_FLAGS_COMMON) \
-			-Dpython=$(PYTHON) \
 			frida-tools $$builddir || exit 1; \
 	fi; \
 	$(MESON) install -C $$builddir || exit 1

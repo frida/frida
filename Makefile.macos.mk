@@ -355,7 +355,6 @@ build/$2-%/frida-$$(PYTHON_NAME)/.frida-stamp: build/.frida-python-submodule-sta
 		$$(call meson-setup-for-env,$1,$$*) \
 			--prefix $$(FRIDA)/build/$1-$$*$(PYTHON_PREFIX) \
 			$$(FRIDA_FLAGS_COMMON) \
-			-Dpython=$$(PYTHON) \
 			-Dpython_incdir=$$(PYTHON_INCDIR) \
 			frida-python $$$$builddir || exit 1; \
 	fi; \
@@ -418,7 +417,6 @@ build/$2-%/frida-tools-$$(PYTHON_NAME)/.frida-stamp: build/.frida-tools-submodul
 	if [ ! -f $$$$builddir/build.ninja ]; then \
 		$$(call meson-setup-for-env,$1,$$*) \
 			--prefix $$(FRIDA)/build/$1-$$* \
-			-Dpython=$$(PYTHON) \
 			frida-tools $$$$builddir || exit 1; \
 	fi; \
 	$$(MESON) install -C $$$$builddir || exit 1
