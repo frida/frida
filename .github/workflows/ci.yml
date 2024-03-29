@@ -1271,8 +1271,7 @@ jobs:
       - name: Build Python bindings
         run: |
           make build/tmp_thin-linux-${{ matrix.arch }}/frida-python3.10/.frida-stamp \
-              PYTHON_NAME=python3.10 \
-              PYTHON_INCDIR=/opt/x-tools/$XTOOLS_HOST/$XTOOLS_HOST/sysroot/usr/include/python3.10
+              PYTHON_NAME=python3.10
           export FRIDA_EXTENSION=$PWD/build/frida_thin-linux-${{ matrix.arch }}/lib/python3.10/site-packages/_frida.so
           frida_arch=$(echo "${{ matrix.arch }}" | cut -f1 -d"-")
           case $frida_arch in

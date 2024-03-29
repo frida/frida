@@ -34,7 +34,6 @@ PYTHON ?= $(shell which python3)
 PYTHON_VERSION := $(shell $(PYTHON) -c 'import sys; v = sys.version_info; print("{0}.{1}".format(v[0], v[1]))')
 PYTHON_NAME ?= python$(PYTHON_VERSION)
 PYTHON_PREFIX ?=
-PYTHON_INCDIR ?=
 
 PYTHON3 ?= python3
 
