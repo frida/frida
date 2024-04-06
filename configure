@@ -1,0 +1,18 @@
+#!/bin/sh
+
+[ -z "$PYTHON" ] && PYTHON=$(which python3 >/dev/null && echo python3 || echo python)
+
+cd $(dirname $0)
+
+srcroot=$(pwd)
+
+if [ ! -f releng/meson/meson.py ]; then
+  git submodule update --init --recursive --depth 1 || exit $?
+fi
+
+cd - >/dev/null
+
+exec "$PYTHON" \
+    -c "import sys; sys.path.insert(0, sys.argv[1]); from releng.meson_configure import main; main()" \
+    "$srcroot" \
+    "$@"
