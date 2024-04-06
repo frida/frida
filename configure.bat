@@ -12,7 +12,7 @@ goto :eof
 call :set_real_dp0
 
 if not exist "%dp0%\releng\meson\meson.py" (
-  pushd "%dp0%" & git submodule update --init --recursive --depth 1 & popd
+  pushd "%dp0%" & git submodule update --init --recursive --depth 1 "%dp0%\releng" & popd
   if %errorlevel% neq 0 exit /b %errorlevel%
 )
 
