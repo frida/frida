@@ -1,0 +1,65 @@
+option('frida_tools',
+  type: 'feature',
+  value: 'auto',
+  description: 'Build CLI tools, like frida, frida-trace, etc.',
+)
+
+option('graft_tool',
+  type: 'feature',
+  value: 'auto',
+  description: 'Build gum-graft tool',
+)
+
+option('gadget',
+  type: 'feature',
+  value: 'auto',
+  description: 'Build frida-gadget',
+)
+
+option('server',
+  type: 'feature',
+  value: 'auto',
+  description: 'Build frida-server',
+)
+
+option('portal',
+  type: 'feature',
+  value: 'disabled',
+  description: 'Build frida-portal',
+)
+
+option('inject',
+  type: 'feature',
+  value: 'auto',
+  description: 'Build frida-inject',
+)
+
+option('frida_clr',
+  type: 'feature',
+  value: 'disabled',
+  description: 'Build .NET bindings',
+)
+
+option('frida_node',
+  type: 'feature',
+  value: 'disabled',
+  description: 'Build Node.js bindings',
+)
+
+option('frida_python',
+  type: 'feature',
+  value: 'auto',
+  description: 'Build Python bindings',
+)
+
+option('frida_swift',
+  type: 'feature',
+  value: 'disabled',
+  description: 'Build Swift bindings',
+)
+
+option('frida_qml',
+  type: 'feature',
+  value: 'disabled',
+  description: 'Build QML bindings',
+)
