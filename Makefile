@@ -8,8 +8,9 @@ all $(MAKECMDGOALS):
 		$(MAKECMDGOALS)
 
 git-submodules:
-	@if [ ! -f releng/meson/meson.py ]; then \
-		git submodule update --init --recursive --depth 1 releng; \
+	@set -e; if [ ! -f releng/meson/meson.py ]; then \
+		git submodule update --init --depth 1 subprojects/frida-core subprojects/frida-gum; \
+		git submodule update --init --depth 1 --recursive releng; \
 	fi
 -include git-submodules
 

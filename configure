@@ -7,7 +7,8 @@ cd $(dirname $0)
 srcroot=$(pwd)
 
 if [ ! -f releng/meson/meson.py ]; then
-  git submodule update --init --recursive --depth 1 releng || exit $?
+  git submodule update --init --depth 1 subprojects/frida-core subprojects/frida-gum
+  git submodule update --init --depth 1 --recursive releng
 fi
 
 cd - >/dev/null
