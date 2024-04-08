@@ -1,9 +1,6 @@
-/.vs
-/build
-/deps
-/ipch
-/releng/*.user
+/build/
+/deps/
 /releng/__pycache__/
 /releng/modules/frida-gadget-ios/*.dylib
 /releng/modules/frida-gadget-ios/node_modules
-/g-ir-cpp-*.c
+/subprojects/*
