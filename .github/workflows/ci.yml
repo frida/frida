@@ -1860,7 +1860,7 @@ jobs:
     strategy:
       matrix:
         arch: [x86, x86_64]
-        config: [release, debug]
+        config: [md, mdd, mt, mtd]
       fail-fast: false
     runs-on: windows-latest
     steps:
