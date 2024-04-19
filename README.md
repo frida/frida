@@ -19,17 +19,19 @@ Frida's [releases](https://github.com/frida/frida/releases) page on GitHub.
 
 ## 2. Build your own binaries
 
-### Dependencies
-
-For running the Frida CLI tools, e.g. `frida`, `frida-ls-devices`, `frida-ps`,
-`frida-kill`, `frida-trace`, `frida-discover`, etc., you need Python plus a
-few packages:
-
-    pip install colorama prompt-toolkit pygments
-
-### Linux
+Run:
 
     make
+
+You may also invoke `./configure` first if you want to specify a `--prefix`, or
+any other options.
+
+### CLI tools
+
+For running the Frida CLI tools, e.g. `frida`, `frida-ls-devices`, `frida-ps`,
+`frida-kill`, `frida-trace`, `frida-discover`, etc., you need a few packages:
+
+    pip install colorama prompt-toolkit pygments
 
 ### Apple OSes
 
@@ -52,15 +54,6 @@ To ensure that macOS accepts the newly created certificate, restart the
 `taskgated` daemon:
 
     sudo killall taskgated
-
-### Windows
-
-    frida.sln
-
-(Requires Visual Studio 2022.)
-
-See [https://frida.re/docs/building/](https://frida.re/docs/building/)
-for details.
 
 ## Learn more
 
