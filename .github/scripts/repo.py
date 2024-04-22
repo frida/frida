@@ -57,13 +57,13 @@ def main(argv: list[str]):
 
 
 def bump():
-    for name, repo in projects_in_release_cycle():
+    for name, repo in enumerate_projects_in_release_cycle():
         bump_subproject(name, repo)
     bump_submodules()
 
 
 def bump_subproject(name: str, repo: Path):
-    assert_no_local_changes(name, repo)
+    assert_no_local_changes(repo)
 
     print("Bumping:", name)
     run(["git", "checkout", "main"], cwd=repo)
@@ -79,21 +79,16 @@ def bump_subproject(name: str, repo: Path):
         run(["git", "add", "releng"], cwd=repo)
         run(["git", "commit", "-m", "submodules: Bump releng"], cwd=repo)
 
-    dep_packages = load_dependency_parameters().packages
     bumped_files: list[Path] = []
-    for wrapfile in (repo / "subprojects").glob("*.wrap"):
-        config = ConfigParser()
-        config.read(wrapfile)
-
-        pkg_id = wrapfile.stem
-        pkg = dep_packages.get(pkg_id)
+    dep_packages = load_dependency_parameters().packages
+    for identifier, config, wrapfile in enumerate_wraps_in_repo(repo):
+        pkg = dep_packages.get(identifier)
         if pkg is not None:
             current_revision = pkg.version
         else:
-            other_repo = ROOT_DIR / "subprojects" / pkg_id
-            assert other_repo.exists(), f"{pkg_id}: unknown subproject"
+            other_repo = ROOT_DIR / "subprojects" / identifier
+            assert other_repo.exists(), f"{identifier}: unknown subproject"
             current_revision = run(["git", "rev-parse", "HEAD"], cwd=other_repo).stdout.strip()
-
         if config["wrap-git"]["revision"] != current_revision:
             config["wrap-git"]["revision"] = current_revision
             with wrapfile.open("w") as f:
@@ -119,13 +114,26 @@ def bump_submodules():
 
 
 def tag(version: str):
-    for name, repo in projects_in_release_cycle():
-        tag_repo(name, version, repo)
-    tag_repo("frida", version, ROOT_DIR)
+    for name, repo in enumerate_projects_in_release_cycle():
+        prepublish(name, version, repo)
+    prepublish("frida", version, ROOT_DIR)
 
 
-def tag_repo(name: str, version: str, repo: Path):
-    assert_no_local_changes(name, repo)
+def prepublish(name: str, version: str, repo: Path):
+    assert_no_local_changes(repo)
+
+    modified_wrapfiles: list[Path] = []
+    for identifier, config, wrapfile in enumerate_wraps_in_repo(repo):
+        if identifier in PROJECT_NAMES_IN_RELEASE_CYCLE:
+            config["wrap-git"]["revision"] = version
+            with wrapfile.open("w") as f:
+                config.write(f)
+            modified_wrapfiles.append(wrapfile)
+
+    if modified_wrapfiles:
+        run(["git", "add", *modified_wrapfiles], cwd=repo)
+        run(["git", "commit", "-m", "subprojects: Prepare for release"], cwd=repo)
+
     run(["git", "tag", version], cwd=repo)
     run(["git", "push", "--atomic", "origin", "main", version], cwd=repo)
 
@@ -133,20 +141,30 @@ def tag_repo(name: str, version: str, repo: Path):
 def backtag(version: str):
     run(["git", "checkout", version], cwd=ROOT_DIR)
     run(["git", "submodule", "update"], cwd=ROOT_DIR)
-    for name, repo in projects_in_release_cycle():
+    for name, repo in enumerate_projects_in_release_cycle():
         if not run(["git", "tag", "-l", version], cwd=repo).stdout.strip():
             run(["git", "tag", version], cwd=repo)
             ensure_remote_origin_writable(name, repo)
             run(["git", "push", "origin", version], cwd=repo)
 
 
-def projects_in_release_cycle() -> Iterator[tuple[str, Path]]:
+def enumerate_projects_in_release_cycle() -> Iterator[tuple[str, Path]]:
     for name in PROJECT_NAMES_IN_RELEASE_CYCLE:
         yield name, ROOT_DIR / "subprojects" / name
 
 
-def assert_no_local_changes(name: str, repo: Path):
-    assert not query_local_changes(repo), f"{name}: expected clean repo"
+def enumerate_wraps_in_repo(repo: Path) -> Iterator[tuple[str, ConfigParser, Path]]:
+    for wrapfile in (repo / "subprojects").glob("*.wrap"):
+        identifier = wrapfile.stem
+
+        config = ConfigParser()
+        config.read(wrapfile)
+
+        yield identifier, config, wrapfile
+
+
+def assert_no_local_changes(repo: Path):
+    assert not query_local_changes(repo), f"{repo.name}: expected clean repo"
 
 
 def query_local_changes(repo: Path) -> list[str]:
