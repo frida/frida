@@ -9,8 +9,11 @@ from typing import Iterator
 
 ROOT_DIR = Path(__file__).parent.parent.parent.resolve()
 RELENG_DIR = ROOT_DIR / "releng"
+if not (RELENG_DIR / "meson" / "meson.py").exists():
+    subprocess.run(["git", "submodule", "update", "--init", "--depth", "1", "--recursive", "releng"],
+                   cwd=ROOT_DIR)
 sys.path.insert(0, str(ROOT_DIR))
-from releng.deps import load_dependency_parameters
+from releng.deps import load_dependency_parameters, query_repo_commits
 
 
 PROJECT_NAMES_IN_RELEASE_CYCLE = [
@@ -58,14 +61,18 @@ def main(argv: list[str]):
 
 def bump():
     for name, repo in enumerate_projects_in_release_cycle():
+        assert_no_local_changes(repo)
+    for name, repo in enumerate_projects_in_release_cycle():
         bump_subproject(name, repo)
-    bump_submodules()
+    if bump_submodules():
+        push_changes("frida", ROOT_DIR)
 
 
 def bump_subproject(name: str, repo: Path):
-    assert_no_local_changes(repo)
-
     print("Bumping:", name)
+
+    if not (repo / "meson.build").exists():
+        run(["git", "submodule", "update", "--init", "--depth", "1", Path("subprojects") / repo], cwd=ROOT_DIR)
     run(["git", "checkout", "main"], cwd=repo)
     run(["git", "pull"], cwd=repo)
 
@@ -74,6 +81,7 @@ def bump_subproject(name: str, repo: Path):
         run(["git", "submodule", "update", "--init", "--depth", "1", "--recursive", "releng"], cwd=repo)
     run(["git", "checkout", "main"], cwd=repo_releng)
     run(["git", "pull"], cwd=repo_releng)
+
     if query_local_changes(repo):
         run(["git", "submodule", "update"], cwd=repo_releng)
         run(["git", "add", "releng"], cwd=repo)
@@ -87,8 +95,10 @@ def bump_subproject(name: str, repo: Path):
             current_revision = pkg.version
         else:
             other_repo = ROOT_DIR / "subprojects" / identifier
-            assert other_repo.exists(), f"{identifier}: unknown subproject"
-            current_revision = run(["git", "rev-parse", "HEAD"], cwd=other_repo).stdout.strip()
+            if other_repo.exists():
+                current_revision = run(["git", "rev-parse", "HEAD"], cwd=other_repo).stdout.strip()
+            else:
+                current_revision = query_repo_commits(identifier)["sha"]
         if config["wrap-git"]["revision"] != current_revision:
             config["wrap-git"]["revision"] = current_revision
             with wrapfile.open("w") as f:
@@ -102,7 +112,7 @@ def bump_subproject(name: str, repo: Path):
     push_changes(name, repo)
 
 
-def bump_submodules():
+def bump_submodules() -> list[str]:
     changes = query_local_changes(ROOT_DIR)
     relevant_changes = [name for kind, name in changes
                         if kind == "M" and (name.startswith("releng") or name.startswith("subprojects/"))]
@@ -110,12 +120,13 @@ def bump_submodules():
     if relevant_changes:
         run(["git", "add", *relevant_changes], cwd=ROOT_DIR)
         run(["git", "commit", "-m", "submodules: Bump outdated"], cwd=ROOT_DIR)
-        push_changes("frida", ROOT_DIR)
+    return relevant_changes
 
 
 def tag(version: str):
     for name, repo in enumerate_projects_in_release_cycle():
         prepublish(name, version, repo)
+    bump_submodules()
     prepublish("frida", version, ROOT_DIR)
 
 
