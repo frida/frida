@@ -7,7 +7,7 @@ import subprocess
 import sys
 from typing import Iterator
 
-ROOT_DIR = Path(__file__).parent.resolve()
+ROOT_DIR = Path(__file__).parent.parent.parent.resolve()
 RELENG_DIR = ROOT_DIR / "releng"
 sys.path.insert(0, str(ROOT_DIR))
 from releng.deps import load_dependency_parameters
