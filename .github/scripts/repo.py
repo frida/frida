@@ -90,6 +90,8 @@ def bump_subproject(name: str, repo: Path):
     bumped_files: list[Path] = []
     dep_packages = load_dependency_parameters().packages
     for identifier, config, wrapfile in enumerate_wraps_in_repo(repo):
+        source = config["wrap-git"]
+
         pkg = dep_packages.get(identifier)
         if pkg is not None:
             current_revision = pkg.version
@@ -98,9 +100,15 @@ def bump_subproject(name: str, repo: Path):
             if other_repo.exists():
                 current_revision = run(["git", "rev-parse", "HEAD"], cwd=other_repo).stdout.strip()
             else:
-                current_revision = query_repo_commits(identifier)["sha"]
-        if config["wrap-git"]["revision"] != current_revision:
-            config["wrap-git"]["revision"] = current_revision
+                url = source["url"]
+                assert url.startswith("https://github.com/"), f"{url}: unhandled repo URL"
+                assert url.endswith(".git")
+                tokens = url[19:-4].split("/")
+                assert len(tokens) == 2
+                current_revision = query_repo_commits(organization=tokens[0], repo=tokens[1])["sha"]
+
+        if source["revision"] != current_revision:
+            source["revision"] = current_revision
             with wrapfile.open("w") as f:
                 config.write(f)
             bumped_files.append(wrapfile)
