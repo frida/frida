@@ -60,6 +60,7 @@ def main(argv: list[str]):
 
 
 def bump():
+    bump_releng(ROOT_DIR / "releng")
     for name, repo in enumerate_projects_in_release_cycle():
         assert_no_local_changes(repo)
     for name, repo in enumerate_projects_in_release_cycle():
@@ -76,14 +77,10 @@ def bump_subproject(name: str, repo: Path):
     run(["git", "checkout", "main"], cwd=repo)
     run(["git", "pull"], cwd=repo)
 
-    repo_releng = repo / "releng"
-    if not (repo_releng / "meson" / "meson.py").exists():
-        run(["git", "submodule", "update", "--init", "--depth", "1", "--recursive", "releng"], cwd=repo)
-    run(["git", "checkout", "main"], cwd=repo_releng)
-    run(["git", "pull"], cwd=repo_releng)
-
+    releng = repo / "releng"
+    bump_releng(releng)
     if query_local_changes(repo):
-        run(["git", "submodule", "update"], cwd=repo_releng)
+        run(["git", "submodule", "update"], cwd=releng)
         run(["git", "add", "releng"], cwd=repo)
         run(["git", "commit", "-m", "submodules: Bump releng"], cwd=repo)
 
@@ -118,6 +115,13 @@ def bump_subproject(name: str, repo: Path):
         run(["git", "commit", "-m", "subprojects: Bump outdated"], cwd=repo)
 
     push_changes(name, repo)
+
+
+def bump_releng(releng: Path):
+    if not (releng / "meson" / "meson.py").exists():
+        run(["git", "submodule", "update", "--init", "--depth", "1", "--recursive", "releng"], cwd=releng.parent)
+    run(["git", "checkout", "main"], cwd=releng)
+    run(["git", "pull"], cwd=releng)
 
 
 def bump_submodules() -> list[str]:
