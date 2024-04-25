@@ -60,12 +60,20 @@ def main(argv: list[str]):
 
 
 def bump():
-    bump_releng(ROOT_DIR / "releng")
-
     projects = list(enumerate_projects_in_release_cycle())
     projects.append(("frida-tools", ROOT_DIR / "subprojects" / "frida-tools"))
+
+    assert_no_local_changes(ROOT_DIR)
     for _, repo in projects:
         assert_no_local_changes(repo)
+
+    print("# releng")
+    bump_releng(ROOT_DIR / "releng")
+    if query_local_changes(ROOT_DIR):
+        print("\tbumped")
+    else:
+        print("\tup-to-date")
+
     for name, repo in projects:
         bump_subproject(name, repo)
 
@@ -74,7 +82,7 @@ def bump():
 
 
 def bump_subproject(name: str, repo: Path):
-    print("Bumping:", name)
+    print(f"# {name}")
 
     if not (repo / "meson.build").exists():
         run(["git", "submodule", "update", "--init", "--depth", "1", Path("subprojects") / repo], cwd=ROOT_DIR)
@@ -87,6 +95,9 @@ def bump_subproject(name: str, repo: Path):
         run(["git", "submodule", "update"], cwd=releng)
         run(["git", "add", "releng"], cwd=repo)
         run(["git", "commit", "-m", "submodules: Bump releng"], cwd=repo)
+        print("\treleng: bumped")
+    else:
+        print("\treleng: up-to-date")
 
     bumped_files: list[Path] = []
     dep_packages = load_dependency_parameters().packages
@@ -117,6 +128,9 @@ def bump_subproject(name: str, repo: Path):
     if bumped_files:
         run(["git", "add", *bumped_files], cwd=repo)
         run(["git", "commit", "-m", "subprojects: Bump outdated"], cwd=repo)
+        print(f"\tsubprojects: bumped {', '.join([f.stem for f in bumped_files])}")
+    else:
+        print("\tsubprojects: up-to-date")
 
     push_changes(name, repo)
 
@@ -129,6 +143,7 @@ def bump_releng(releng: Path):
 
 
 def bump_submodules() -> list[str]:
+    print("# submodules")
     changes = query_local_changes(ROOT_DIR)
     relevant_changes = [relpath for kind, relpath in changes
                         if kind == "M" and (relpath == "releng" or relpath.startswith("subprojects/"))]
@@ -136,6 +151,9 @@ def bump_submodules() -> list[str]:
     if relevant_changes:
         run(["git", "add", *relevant_changes], cwd=ROOT_DIR)
         run(["git", "commit", "-m", "submodules: Bump outdated"], cwd=ROOT_DIR)
+        print(f"\tbumped {', '.join([Path(relpath).name for relpath in relevant_changes])}")
+    else:
+        print("\tup-to-date")
     return relevant_changes
 
 
@@ -144,11 +162,14 @@ def tag(version: str):
         assert_no_local_changes(repo)
     for name, repo in enumerate_projects_in_release_cycle():
         prepublish(name, version, repo)
+
     bump_submodules()
+
     prepublish("frida", version, ROOT_DIR)
 
 
 def prepublish(name: str, version: str, repo: Path):
+    print("Prepublishing:", name)
 
     modified_wrapfiles: list[Path] = []
     for identifier, config, wrapfile in enumerate_wraps_in_repo(repo):
@@ -161,9 +182,13 @@ def prepublish(name: str, version: str, repo: Path):
     if modified_wrapfiles:
         run(["git", "add", *modified_wrapfiles], cwd=repo)
         run(["git", "commit", "-m", "subprojects: Prepare for release"], cwd=repo)
+        print(f"\tsubprojects: prepared {', '.join([f.stem for f in modified_wrapfiles])}")
+    else:
+        print("\tsubprojects: no changes needed")
 
     run(["git", "tag", version], cwd=repo)
     run(["git", "push", "--atomic", "origin", "main", version], cwd=repo)
+    print("\tpushed")
 
 
 def backtag(version: str):
