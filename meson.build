@@ -1,5 +1,6 @@
 project('frida', 'c',
   version: run_command('releng' / 'frida_version.py', check: true).stdout().strip(),
+  meson_version: '>=1.1.0',
 )
 
 fs = import('fs')
