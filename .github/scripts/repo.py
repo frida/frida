@@ -140,6 +140,8 @@ def bump_submodules() -> list[str]:
 
 
 def tag(version: str):
+    for _, repo in enumerate_projects_in_release_cycle():
+        assert_no_local_changes(repo)
     for name, repo in enumerate_projects_in_release_cycle():
         prepublish(name, version, repo)
     bump_submodules()
@@ -147,7 +149,6 @@ def tag(version: str):
 
 
 def prepublish(name: str, version: str, repo: Path):
-    assert_no_local_changes(repo)
 
     modified_wrapfiles: list[Path] = []
     for identifier, config, wrapfile in enumerate_wraps_in_repo(repo):
