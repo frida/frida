@@ -3,7 +3,6 @@ project('frida', 'c',
   meson_version: '>=1.1.0',
 )
 
-fs = import('fs')
 python = import('python').find_installation()
 
 is_cross_build = meson.is_cross_build()
@@ -24,19 +23,16 @@ foreach component : ['gadget', 'server', 'inject']
 endforeach
 subproject('frida-core', default_options: core_options)
 
-grab_submodule = ['git', 'submodule', 'update', '--init', '--depth', '1']
+ensure_submodules = [python, files('tools' / 'ensure-submodules.py')]
 
 if get_option('frida_clr') \
     .disable_auto_if(is_cross_build) \
     .disable_auto_if(build_machine.system() != 'windows') \
     .disable_auto_if(get_option('b_vscrt').startswith('mt')) \
     .allowed()
-  dir = 'subprojects' / 'frida-clr'
-  if not fs.exists(dir / 'meson.build')
-    run_command(grab_submodule, dir, check: true)
-  endif
+  run_command(ensure_submodules, 'frida-clr', check: true)
   if get_option('frida_clr').auto()
-    detect_result = run_command(python, dir / 'detect-netfx.py', check: false)
+    detect_result = run_command(python, 'subprojects' / 'frida-clr' / 'detect-netfx.py', check: false)
     build_clr_bindings = detect_result.returncode() == 0
   else
     build_clr_bindings = true
@@ -49,20 +45,14 @@ endif
 if get_option('frida_node') \
     .disable_auto_if(is_cross_build) \
     .allowed()
-  dir = 'subprojects' / 'frida-node'
-  if not fs.exists(dir / 'meson.build')
-    run_command(grab_submodule, dir, check: true)
-  endif
+  run_command(ensure_submodules, 'frida-node', check: true)
   subproject('frida-node')
 endif
 
 if get_option('frida_python') \
     .disable_auto_if(is_cross_build) \
     .allowed()
-  dir = 'subprojects' / 'frida-python'
-  if not fs.exists(dir / 'meson.build')
-    run_command(grab_submodule, dir, check: true)
-  endif
+  run_command(ensure_submodules, 'frida-python', check: true)
   subproject('frida-python')
 endif
 
@@ -70,10 +60,7 @@ if get_option('frida_swift') \
     .disable_auto_if(is_cross_build) \
     .disable_auto_if(build_machine.system() != 'macos') \
     .allowed()
-  dir = 'subprojects' / 'frida-swift'
-  if not fs.exists(dir / 'meson.build')
-    run_command(grab_submodule, dir, check: true)
-  endif
+  run_command(ensure_submodules, 'frida-swift', check: true)
   subproject('frida-swift')
 endif
 
@@ -82,19 +69,13 @@ if get_option('frida_qml') \
     .disable_auto_if(is_cross_build) \
     .disable_auto_if(not qt6_dep.found()) \
     .allowed()
-  dir = 'subprojects' / 'frida-qml'
-  if not fs.exists(dir / 'meson.build')
-    run_command(grab_submodule, dir, check: true)
-  endif
+  run_command(ensure_submodules, 'frida-qml', check: true)
   subproject('frida-qml')
 endif
 
 if get_option('frida_tools') \
     .disable_auto_if(is_cross_build) \
     .allowed()
-  dir = 'subprojects' / 'frida-tools'
-  if not fs.exists(dir / 'meson.build')
-    run_command(grab_submodule, dir, check: true)
-  endif
+  run_command(ensure_submodules, 'frida-tools', check: true)
   subproject('frida-tools')
 endif

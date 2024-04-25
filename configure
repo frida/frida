@@ -3,14 +3,8 @@
 [ -z "$PYTHON" ] && PYTHON=$(which python3 >/dev/null && echo python3 || echo python)
 
 cd $(dirname $0)
-
 srcroot=$(pwd)
-
-if [ ! -f releng/meson/meson.py ]; then
-  git submodule update --init --depth 1 subprojects/frida-core subprojects/frida-gum
-  git submodule update --init --depth 1 --recursive releng
-fi
-
+[ ! -f releng/meson/meson.py ] && "$PYTHON" tools/ensure-submodules.py
 cd - >/dev/null
 
 exec "$PYTHON" \
