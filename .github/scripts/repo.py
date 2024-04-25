@@ -61,10 +61,14 @@ def main(argv: list[str]):
 
 def bump():
     bump_releng(ROOT_DIR / "releng")
-    for name, repo in enumerate_projects_in_release_cycle():
+
+    projects = list(enumerate_projects_in_release_cycle())
+    projects.append(("frida-tools", ROOT_DIR / "subprojects" / "frida-tools"))
+    for name, repo in projects:
         assert_no_local_changes(repo)
-    for name, repo in enumerate_projects_in_release_cycle():
+    for name, repo in projects:
         bump_subproject(name, repo)
+
     if bump_submodules():
         push_changes("frida", ROOT_DIR)
 
