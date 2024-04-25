@@ -106,9 +106,9 @@ jobs:
       - name: Package tvOS assets
         uses: ./.github/actions/package-tvos-assets
       - name: Package Cirrus CI artifacts
-        run: releng/package-cirrus-ci-artifacts.sh ${{ github.sha }}
+        run: .github/scripts/package-cirrus-ci-artifacts.sh ${{ github.sha }}
       - name: Rename release assets
-        run: releng/rename-release-assets.sh
+        run: .github/scripts/rename-release-assets.sh
       - name: Publish release to GitHub
         uses: softprops/action-gh-release@v1
         with:
