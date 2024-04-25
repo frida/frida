@@ -64,7 +64,7 @@ def bump():
 
     projects = list(enumerate_projects_in_release_cycle())
     projects.append(("frida-tools", ROOT_DIR / "subprojects" / "frida-tools"))
-    for name, repo in projects:
+    for _, repo in projects:
         assert_no_local_changes(repo)
     for name, repo in projects:
         bump_subproject(name, repo)
@@ -130,8 +130,8 @@ def bump_releng(releng: Path):
 
 def bump_submodules() -> list[str]:
     changes = query_local_changes(ROOT_DIR)
-    relevant_changes = [name for kind, name in changes
-                        if kind == "M" and (name.startswith("releng") or name.startswith("subprojects/"))]
+    relevant_changes = [relpath for kind, relpath in changes
+                        if kind == "M" and (relpath == "releng" or relpath.startswith("subprojects/"))]
     assert len(changes) == len(relevant_changes), "frida: expected clean repo"
     if relevant_changes:
         run(["git", "add", *relevant_changes], cwd=ROOT_DIR)
