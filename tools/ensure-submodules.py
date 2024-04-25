@@ -18,6 +18,7 @@ def main(argv: list[str]):
         releng = SOURCE_ROOT / "releng"
         if not (releng / "meson" / "meson.py").exists():
             print(f"Fetching releng...", flush=True)
+            run(["git", "submodule", "update", *UPDATE_FLAGS, releng.name], cwd=SOURCE_ROOT)
             run(["git", "submodule", "update", *UPDATE_FLAGS], cwd=releng)
 
         for relpath in paths_to_check:
