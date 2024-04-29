@@ -64,13 +64,16 @@ if get_option('frida_swift') \
   subproject('frida-swift')
 endif
 
-qt6_dep = dependency('qt6', modules: ['Core'], required: false)
 if get_option('frida_qml') \
     .disable_auto_if(is_cross_build) \
-    .disable_auto_if(not qt6_dep.found()) \
     .allowed()
-  run_command(ensure_submodules, 'frida-qml', check: true)
-  subproject('frida-qml')
+  qt6_dep = dependency('qt6', modules: ['Core'], required: false)
+  if get_option('frida_qml') \
+      .disable_auto_if(not qt6_dep.found()) \
+      .allowed()
+    run_command(ensure_submodules, 'frida-qml', check: true)
+    subproject('frida-qml')
+  endif
 endif
 
 if get_option('frida_tools') \
