@@ -24,15 +24,16 @@ runs:
         git config --global user.name "Frida Developers"
         git config --global user.email "oleavr@frida.re"
       shell: pwsh
-    - name: Clean repos
-      run: |
-        git fetch origin --prune --prune-tags
-        git submodule foreach "git clean -ffdx"
-        git submodule foreach "git reset --hard HEAD"
-        git submodule foreach "git fetch origin --prune --prune-tags"
-      shell: pwsh
     - name: Check out releng
-      run: git submodule update --init --recursive --depth 1 releng
+      run: |
+        git submodule update --init --depth 1 releng
+        cd releng
+        git submodule update --init --depth 1
+      shell: pwsh
+    - name: Add convenience environment variables
+      run: |
+        echo "FRIDA_PREFIX=$Env:RUNNER_WORKSPACE\dist" >> $Env:GITHUB_ENV
+        echo "FRIDA_VERSION=$(python releng/frida_version.py)" >> $Env:GITHUB_ENV
       shell: pwsh
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -49,23 +50,14 @@ runs:
             token: ${{ inputs.cloudflare-token }}
         "@ | Set-Content -Path $HOME\.cfcli.yml -NoNewline
       shell: pwsh
-    - name: Install NASM
-      uses: ilammy/setup-nasm@v1
     - name: Install Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.12'
         architecture: ${{ inputs.architecture }}
-    - name: Install Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 18
-        architecture: ${{ inputs.architecture }}
+    - name: Install setuptools
+      run: pip install setuptools
+      shell: pwsh
     - name: Install cloudflare-cli
       run: npm install -g cloudflare-cli
-      shell: pwsh
-    - name: Set Frida environment variables
-      run: |
-        echo "FRIDA=$Env:GITHUB_WORKSPACE" >> $Env:GITHUB_ENV
-        echo "FRIDA_VERSION=$(python releng/frida_version.py)" >> $Env:GITHUB_ENV
       shell: pwsh

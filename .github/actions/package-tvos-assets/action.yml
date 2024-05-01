@@ -12,7 +12,7 @@ runs:
       run: |
         cd build
         mkdir -p release-assets
-        ../frida-core/tools/package-server-fruity.sh \
+        ../subprojects/frida-core/tools/package-server-fruity.sh \
             appletvos-arm64 \
             tvos-assets \
             release-assets/frida_${FRIDA_VERSION}_appletvos-arm64.deb

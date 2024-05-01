@@ -30,13 +30,9 @@ task:
       git fetch origin pull/$CIRRUS_PR/head:pull/$CIRRUS_PR
     fi
     git reset --hard $CIRRUS_CHANGE_IN_REPO
-    git submodule update --init --recursive --depth 1 releng
+    $PYTHON tools/ensure-submodules.py
   setup_environment_script: |
-    (
-      echo "FRIDA=$CIRRUS_WORKING_DIR"
-      echo "FRIDA_VERSION=$(releng/frida_version.py)"
-      echo "npm_config_jobs=max"
-    ) >> $CIRRUS_ENV
+    echo "FRIDA_PREFIX=$CIRRUS_WORKING_DIR/dist" >> $CIRRUS_ENV
     mkdir -p ~/.aws
     (
       echo "[default]"
@@ -55,51 +51,66 @@ task:
     ) > ~/.cfcli.yml
   roll_toolchain_script: $PYTHON releng/deps.py roll toolchain freebsd-x86_64 --activate
   roll_sdk_script: $PYTHON releng/deps.py roll sdk freebsd-x86_64
-  build_gum_script: |
-    make gum
-    $PYTHON releng/mkdevkit.py frida-gum freebsd-x86_64 build/devkits/gum
-    $PYTHON releng/mkdevkit.py frida-gumjs freebsd-x86_64 build/devkits/gumjs
+  configure_script: >-
+    ./configure
+    "--prefix=$FRIDA_PREFIX"
+    --enable-gadget
+    --enable-server
+    --enable-portal
+    --enable-inject
+    --
+    -Dfrida-gum:devkits=gum,gumjs
+    -Dfrida-core:devkits=core
+  compile_script: make
+  install_script: make install
   frida_gum_devkit_freebsd_x86_64_artifacts:
-    path: "build/devkits/gum/*"
+    path: "$FRIDA_PREFIX/lib/frida/devkits/gum/"
   frida_gumjs_devkit_freebsd_x86_64_artifacts:
-    path: "build/devkits/gumjs/*"
-  test_gum_script: make check-gum
-  build_core_script: |
-    make core
-    $PYTHON releng/mkdevkit.py frida-core freebsd-x86_64 build/devkits/core
+    path: "$FRIDA_PREFIX/lib/frida/devkits/gumjs/"
   frida_core_devkit_freebsd_x86_64_artifacts:
-    path: "build/devkits/core/*"
+    path: "$FRIDA_PREFIX/lib/frida/devkits/core/"
   frida_server_freebsd_x86_64_artifacts:
-    path: "build/frida-freebsd-x86_64/bin/frida-server"
+    path: "$FRIDA_PREFIX/bin/frida-server"
   frida_portal_freebsd_x86_64_artifacts:
-    path: "build/frida-freebsd-x86_64/bin/frida-portal"
+    path: "$FRIDA_PREFIX/bin/frida-portal"
   frida_inject_freebsd_x86_64_artifacts:
-    path: "build/frida-freebsd-x86_64/bin/frida-inject"
+    path: "$FRIDA_PREFIX/bin/frida-inject"
   frida_gadget_freebsd_x86_64_artifacts:
-    path: "build/frida-freebsd-x86_64/lib/frida/64/frida-gadget.so"
-  test_core_script: make check-core || true
-  build_python_script: |
-    make python
-    export FRIDA_EXTENSION=$PWD/build/frida-freebsd-x86_64/lib/python3.9/site-packages/_frida.so
-    cd frida-python
-    pip wheel -w ../build/wheels --no-deps .
+    path: "$FRIDA_PREFIX/lib/frida/64/frida-gadget.so"
+  package_python_script: |
+    export FRIDA_EXTENSION=$(find "$FRIDA_PREFIX" -name _frida.abi3.so)
+    cd subprojects/frida-python
+    pip wheel -w "$FRIDA_PREFIX/wheels" --no-deps .
   frida_python_freebsd_x86_64_artifacts:
-    path: "build/wheels/frida-*.whl"
-  test_python_script: make check-python
-  build_node_script: |
-    cd frida-node
-    npm version $FRIDA_VERSION
-    npm install
-    for target in $NODE_TARGETS_FREEBSD; do
-      npx prebuild -r node -t $target --strip
-    done
-    for target in $ELECTRON_TARGETS_FREEBSD; do
-      npx prebuild -r electron -t $target --strip
-    done
+    path: "$FRIDA_PREFIX/wheels/*.whl"
+  build_node_task: |
+    env:
+      CIRRUS_SHELL: bash
+    build_node_script:
+      installdir=$FRIDA_PREFIX/prebuilds
+      version=$(python releng/frida_version.py)
+      declare -A prebuilds=(
+        [node]="${{ env.NODE_TARGETS_DEFAULT }}"
+        [electron]="${{ env.ELECTRON_TARGETS_DEFAULT }}"
+      )
+      export FRIDA_DEPS=$PWD/deps
+      export PKG_CONFIG_PATH=$FRIDA_PREFIX/lib/pkgconfig
+      python tools/ensure-submodules.py frida-node
+      cd subprojects/frida-node
+      npm version $version
+      mkdir "$installdir"
+      for runtime in "${!prebuilds[@]}"; do
+        targets=${prebuilds[$runtime]}
+        for target in $targets; do
+          ./configure \
+              "--prefix=$FRIDA_PREFIX" \
+              --host=$XTOOLS_HOST \
+              --with-runtime=$runtime \
+              --with-target=$target
+          make prebuild
+          cp build/*.tar.gz "$installdir"
+          rm -rf build
+        done
+      done
   frida_node_freebsd_x86_64_artifacts:
-    path: "frida-node/prebuilds/*"
-  test_node_script: |
-    cd frida-node
-    rm -rf build prebuilds
-    node_modules/.bin/node-gyp rebuild
-    npm run test
+    path: "$FRIDA_PREFIX/prebuilds/*"

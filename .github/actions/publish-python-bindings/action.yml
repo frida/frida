@@ -15,8 +15,8 @@ runs:
   steps:
     - name: Create source distribution
       run: |
-        cd frida-python
-        python setup.py sdist --dist-dir ../build/python-packages
+        cd subprojects/frida-python
+        python setup.py sdist --dist-dir ../../build/python-packages
       shell: bash
     - name: Download wheel for Windows/x86
       uses: actions/download-artifact@v4

@@ -22,15 +22,18 @@ runs:
         git config --global user.email "oleavr@frida.re"
         git config --global --add safe.directory $GITHUB_WORKSPACE
       shell: bash
-    - name: Clean repos
-      run: |
-        git fetch origin --prune --prune-tags
-        git submodule foreach "git clean -ffdx"
-        git submodule foreach "git reset --hard HEAD"
-        git submodule foreach "git fetch origin --prune --prune-tags"
-      shell: bash
     - name: Check out releng
-      run: git submodule update --init --recursive --depth 1 releng
+      run: |
+        git submodule update --init --depth 1 releng
+        cd releng
+        git submodule update --init --depth 1
+      shell: bash
+    - name: Add convenience environment variables
+      run: |
+        (
+          echo "FRIDA_PREFIX=$RUNNER_WORKSPACE/dist"
+          echo "FRIDA_VERSION=$(releng/frida_version.py)"
+        ) >> $GITHUB_ENV
       shell: bash
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -46,11 +49,4 @@ runs:
           echo "    email: ${{ inputs.cloudflare-email }}"
           echo "    token: ${{ inputs.cloudflare-token }}"
         ) > ~/.cfcli.yml
-      shell: bash
-    - name: Set Frida environment variables
-      run: |
-        (
-          echo "FRIDA=$GITHUB_WORKSPACE"
-          echo "FRIDA_VERSION=$(releng/frida_version.py)"
-        ) >> $GITHUB_ENV
       shell: bash
