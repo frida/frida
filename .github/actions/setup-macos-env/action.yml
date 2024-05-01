@@ -54,37 +54,25 @@ runs:
         git config --global user.name "Frida Developers"
         git config --global user.email "oleavr@frida.re"
       shell: bash
-    - name: Clean repos
-      run: |
-        git fetch origin --prune --prune-tags
-        git submodule foreach "git clean -ffdx"
-        git submodule foreach "git reset --hard HEAD"
-        git submodule foreach "git fetch origin --prune --prune-tags"
-      shell: bash
     - name: Check out releng
-      run: git submodule update --init --recursive --depth 1 releng
+      run: |
+        git submodule update --init --depth 1 releng
+        cd releng
+        git submodule update --init --depth 1
       shell: bash
-    - name: Configure AWS credentials (x64)
-      if: runner.arch == 'X64'
+    - name: Add convenience environment variables
+      run: |
+        (
+          echo "FRIDA_PREFIX=$RUNNER_WORKSPACE/dist"
+          echo "FRIDA_VERSION=$(releng/frida_version.py)"
+        ) >> $GITHUB_ENV
+      shell: bash
+    - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ inputs.aws-access-key-id }}
         aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
         aws-region: us-east-1
-    - name: Configure AWS credentials (arm64)
-      if: runner.arch == 'ARM64'
-      run: |
-        mkdir -p ~/.aws
-        (
-          echo "[default]"
-          echo "region = us-east-1"
-        ) > ~/.aws/config
-        (
-          echo "[default]"
-          echo "aws_access_key_id = ${{ inputs.aws-access-key-id }}"
-          echo "aws_secret_access_key = ${{ inputs.aws-secret-access-key }}"
-        ) > ~/.aws/credentials
-      shell: bash
     - name: Configure Cloudflare credentials
       run: |
         (
@@ -94,19 +82,9 @@ runs:
           echo "    token: ${{ inputs.cloudflare-token }}"
         ) > ~/.cfcli.yml
       shell: bash
-    - name: Install Python
-      if: runner.arch == 'X64'
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-    - name: Install cloudflare-cli
-      if: runner.arch == 'X64'
-      run: npm install -g cloudflare-cli
+    - name: Install setuptools
+      run: brew install python-setuptools
       shell: bash
-    - name: Set Frida environment variables
-      run: |
-        (
-          echo "FRIDA=$GITHUB_WORKSPACE"
-          echo "FRIDA_VERSION=$(releng/frida_version.py)"
-        ) >> $GITHUB_ENV
+    - name: Install cloudflare-cli
+      run: npm install -g cloudflare-cli
       shell: bash
