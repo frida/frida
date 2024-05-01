@@ -82,8 +82,12 @@ runs:
           echo "    token: ${{ inputs.cloudflare-token }}"
         ) > ~/.cfcli.yml
       shell: bash
+    - name: Install Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
     - name: Install setuptools
-      run: brew install python-setuptools
+      run: pip install setuptools
       shell: bash
     - name: Install cloudflare-cli
       run: npm install -g cloudflare-cli
