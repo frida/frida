@@ -2017,7 +2017,7 @@ jobs:
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Roll toolchain
-        run: releng/deps.py roll toolchain linux-${{ matrix.arch }}
+        run: releng/deps.py roll toolchain $XTOOLS_HOST
 
   sdk-linux:
     needs: toolchain-linux
@@ -2044,7 +2044,7 @@ jobs:
         if: ${{ !startsWith(matrix.arch, 'x86') }}
         run: echo "FRIDA_QEMU_SYSROOT=/opt/x-tools/$XTOOLS_HOST/$XTOOLS_HOST/sysroot" >> $GITHUB_ENV
       - name: Roll SDK
-        run: releng/deps.py roll sdk linux-${{ matrix.arch }} --activate
+        run: releng/deps.py roll sdk $XTOOLS_HOST --activate
 
   sdk-android-32:
     needs: toolchain-linux
