@@ -16,6 +16,7 @@ runs:
     - name: Create source distribution
       run: |
         cd subprojects/frida-python
+        git submodule update --init --recursive
         python setup.py sdist --dist-dir ../../build/python-packages
       shell: bash
     - name: Download wheel for Windows/x86
