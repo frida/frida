@@ -923,7 +923,6 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/lib/frida/64/frida-gadget.dll
       - name: Package Python bindings
         run: |
-          $Env:MESON_SOURCE_ROOT = $PWD
           $Env:FRIDA_EXTENSION = "$Env:FRIDA_PREFIX\lib\site-packages\frida\_frida.pyd"
           cd subprojects\frida-python
           pip wheel -w "$Env:FRIDA_PREFIX\wheels" --no-deps .
@@ -1104,7 +1103,6 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/Frameworks/
       - name: Package Python bindings
         run: |
-          export MESON_SOURCE_ROOT=$PWD
           export FRIDA_EXTENSION=$(find "$FRIDA_PREFIX" -name _frida.abi3.so)
           case ${{ matrix.arch }} in
             x86_64)
@@ -1260,7 +1258,6 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/lib/frida/64/frida-gadget.so
       - name: Package Python bindings
         run: |
-          export MESON_SOURCE_ROOT=$PWD
           export FRIDA_EXTENSION=$(find "$FRIDA_PREFIX" -name _frida.abi3.so)
           frida_arch=$(echo "${{ matrix.arch }}" | cut -f1 -d"-")
           case $frida_arch in
@@ -1726,7 +1723,6 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/lib/frida/64/frida-gadget.so
       - name: Package Python bindings
         run: |
-          export MESON_SOURCE_ROOT=$PWD
           export FRIDA_EXTENSION=$(find "$FRIDA_PREFIX" -name _frida.abi3.so)
           cd subprojects/frida-python
           pip wheel -w "$FRIDA_PREFIX/wheels" --no-deps .
