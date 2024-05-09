@@ -15,6 +15,7 @@ runs:
   steps:
     - name: Create source distribution
       run: |
+        export MESON_SOURCE_ROOT=$PWD
         cd subprojects/frida-python
         python setup.py sdist --dist-dir ../../build/python-packages
       shell: bash

@@ -78,6 +78,7 @@ task:
   frida_gadget_freebsd_x86_64_artifacts:
     path: "$FRIDA_PREFIX/lib/frida/64/frida-gadget.so"
   package_python_script: |
+    export MESON_SOURCE_ROOT=$PWD
     export FRIDA_EXTENSION=$(find "$FRIDA_PREFIX" -name _frida.abi3.so)
     cd subprojects/frida-python
     pip wheel -w "$FRIDA_PREFIX/wheels" --no-deps .
