@@ -1259,6 +1259,20 @@ jobs:
       - name: Package Python bindings
         run: |
           export FRIDA_EXTENSION=$(find "$FRIDA_PREFIX" -name _frida.abi3.so)
+          case ${{ matrix.arch }} in
+            *-musl)
+              py_oses=(musllinux_1_1)
+              ;;
+            x86*)
+              py_oses=(manylinux_2_5 manylinux1)
+              ;;
+            arm*|ppc*|s390x)
+              py_oses=(manylinux_2_17 manylinux2014)
+              ;;
+            *)
+              py_oses=(manylinux_2_5)
+              ;;
+          esac
           frida_arch=$(echo "${{ matrix.arch }}" | cut -f1 -d"-")
           case $frida_arch in
             x86)
@@ -1274,24 +1288,14 @@ jobs:
               py_arch=$frida_arch
               ;;
           esac
-          case ${{ matrix.arch }} in
-            *-musl)
-              py_platform=musllinux_1_1_${py_arch}
-              ;;
-            x86*)
-              py_platform=manylinux_2_5_${py_arch}
-              ;;
-            arm*|ppc*|s390x)
-              py_platform=manylinux_2_17_${py_arch}
-              ;;
-            *)
-              py_platform=manylinux_2_5_${py_arch}
-              ;;
-          esac
           cd subprojects/frida-python
           export _PYTHON_HOST_PLATFORM=linux-$py_arch
-          echo "plat_name = $py_platform" >> setup.cfg
-          pip wheel -w "$FRIDA_PREFIX/wheels" --no-deps .
+          for py_os in "${py_oses[@]}"; do
+            echo "plat_name = ${py_os}_${py_arch}" >> setup.cfg
+            pip wheel -w "$FRIDA_PREFIX/wheels" --no-deps .
+            git checkout setup.cfg
+          done
+        shell: bash
       - name: Upload Python bindings
         uses: actions/upload-artifact@v4
         with:
