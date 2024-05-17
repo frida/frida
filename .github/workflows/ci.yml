@@ -528,6 +528,7 @@ jobs:
         with:
           name: frida-clr-windows-${{ matrix.arch }}
       - name: Package QML bindings
+        if: matrix.arch == 'x86_64'
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
           name: frida-qml-windows-${{ matrix.arch }}
