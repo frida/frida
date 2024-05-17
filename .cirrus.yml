@@ -11,7 +11,6 @@ task:
     PYTHON3: /usr/local/bin/python3.9
     NODE_TARGETS_FREEBSD: '20.0.0'
     ELECTRON_TARGETS_FREEBSD: '27.0.0'
-    CIRRUS_SHELL: bash
   timeout_in: 2h
   install_dependencies_script: |
     pkg install -y \
@@ -21,6 +20,7 @@ task:
       npm \
       py39-pip \
       py39-setuptools
+    echo "CIRRUS_SHELL=$(which bash)" >> $CIRRUS_ENV
     pip install awscli typing-extensions
     npm install -g cloudflare-cli
   clone_script: |
