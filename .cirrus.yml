@@ -65,11 +65,11 @@ task:
   compile_script: make
   install_script: make install
   frida_gum_devkit_freebsd_x86_64_artifacts:
-    path: "$FRIDA_PREFIX/lib/frida/devkits/gum/"
+    path: "$FRIDA_PREFIX/lib/frida/devkits/gum/*"
   frida_gumjs_devkit_freebsd_x86_64_artifacts:
-    path: "$FRIDA_PREFIX/lib/frida/devkits/gumjs/"
+    path: "$FRIDA_PREFIX/lib/frida/devkits/gumjs/*"
   frida_core_devkit_freebsd_x86_64_artifacts:
-    path: "$FRIDA_PREFIX/lib/frida/devkits/core/"
+    path: "$FRIDA_PREFIX/lib/frida/devkits/core/*"
   frida_server_freebsd_x86_64_artifacts:
     path: "$FRIDA_PREFIX/bin/frida-server"
   frida_portal_freebsd_x86_64_artifacts:
