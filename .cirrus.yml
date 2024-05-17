@@ -92,7 +92,7 @@ task:
       [electron]="$ELECTRON_TARGETS_FREEBSD"
     )
     export FRIDA_DEPS=$PWD/deps
-    export PKG_CONFIG_PATH=$FRIDA_PREFIX/lib/pkgconfig
+    export PKG_CONFIG_PATH=$FRIDA_PREFIX/libdata/pkgconfig
     python tools/ensure-submodules.py frida-node
     cd subprojects/frida-node
     npm version $FRIDA_VERSION
