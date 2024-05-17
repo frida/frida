@@ -78,7 +78,7 @@ for task in freebsd_x86_64; do
   for component in gum gumjs core; do
     enter_artifact frida_${component}_devkit
 
-    mv build/devkits/$component/* .
+    mv dist/lib/frida/devkits/$component/* .
     rm -rf build
     tar -cJf "$output_dir/frida-$component-devkit-$host.tar.xz" .
 
@@ -107,10 +107,10 @@ for task in freebsd_x86_64; do
   done
 
   enter_artifact frida_python
-  mv build/wheels/* "$output_dir"
+  mv dist/wheels/* "$output_dir"
   leave_artifact
 
   enter_artifact frida_node
-  mv frida-node/prebuilds/* "$output_dir"
+  mv dist/prebuilds/* "$output_dir"
   leave_artifact
 done
