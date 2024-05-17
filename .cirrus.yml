@@ -11,6 +11,7 @@ task:
     PYTHON3: /usr/local/bin/python3.9
     NODE_TARGETS_FREEBSD: '20.0.0'
     ELECTRON_TARGETS_FREEBSD: '27.0.0'
+    CIRRUS_SHELL: bash
   timeout_in: 2h
   install_dependencies_script: |
     pkg install -y \
@@ -84,33 +85,30 @@ task:
     pip wheel -w "$FRIDA_PREFIX/wheels" --no-deps .
   frida_python_freebsd_x86_64_artifacts:
     path: "$FRIDA_PREFIX/wheels/*.whl"
-  build_node_task: |
-    env:
-      CIRRUS_SHELL: bash
-    build_node_script:
-      installdir=$FRIDA_PREFIX/prebuilds
-      declare -A prebuilds=(
-        [node]="${{ env.NODE_TARGETS_DEFAULT }}"
-        [electron]="${{ env.ELECTRON_TARGETS_DEFAULT }}"
-      )
-      export FRIDA_DEPS=$PWD/deps
-      export PKG_CONFIG_PATH=$FRIDA_PREFIX/lib/pkgconfig
-      python tools/ensure-submodules.py frida-node
-      cd subprojects/frida-node
-      npm version $FRIDA_VERSION
-      mkdir "$installdir"
-      for runtime in "${!prebuilds[@]}"; do
-        targets=${prebuilds[$runtime]}
-        for target in $targets; do
-          ./configure \
-              "--prefix=$FRIDA_PREFIX" \
-              --host=$XTOOLS_HOST \
-              --with-runtime=$runtime \
-              --with-target=$target
-          make prebuild
-          cp build/*.tar.gz "$installdir"
-          rm -rf build
-        done
+  build_node_script: |
+    installdir=$FRIDA_PREFIX/prebuilds
+    declare -A prebuilds=(
+      [node]="$NODE_TARGETS_FREEBSD"
+      [electron]="$ELECTRON_TARGETS_FREEBSD"
+    )
+    export FRIDA_DEPS=$PWD/deps
+    export PKG_CONFIG_PATH=$FRIDA_PREFIX/lib/pkgconfig
+    python tools/ensure-submodules.py frida-node
+    cd subprojects/frida-node
+    npm version $FRIDA_VERSION
+    mkdir "$installdir"
+    for runtime in "${!prebuilds[@]}"; do
+      targets=${prebuilds[$runtime]}
+      for target in $targets; do
+        ./configure \
+            "--prefix=$FRIDA_PREFIX" \
+            --host=$XTOOLS_HOST \
+            --with-runtime=$runtime \
+            --with-target=$target
+        make prebuild
+        cp build/*.tar.gz "$installdir"
+        rm -rf build
       done
+    done
   frida_node_freebsd_x86_64_artifacts:
     path: "$FRIDA_PREFIX/prebuilds/*"
