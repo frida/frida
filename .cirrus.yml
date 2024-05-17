@@ -102,7 +102,6 @@ task:
       for target in $targets; do
         ./configure \
             "--prefix=$FRIDA_PREFIX" \
-            --host=$XTOOLS_HOST \
             --with-runtime=$runtime \
             --with-target=$target
         make prebuild
