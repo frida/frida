@@ -121,23 +121,26 @@ jobs:
         uses: ./.github/actions/publish-debs
         with:
           site: production
+      - name: Setup npm authentication
+        uses: actions/setup-node@v4
+        with:
+          registry-url: "https://registry.npmjs.org"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish Node.js bindings to npm
         run: |
           cd subprojects/frida-node
+          git submodule update --init --recursive
           npm version $FRIDA_VERSION
           mkdir prebuilds
           cp ../../build/release-assets/frida-*-node-*-linux-x64.tar.gz prebuilds/
           npm install
           npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish frida-gadget-ios to npm
         run: |
           cd releng/modules/frida-gadget-ios
           npm version $FRIDA_VERSION
           npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Trigger magisk-frida CI
         run: |
           curl \
