@@ -101,7 +101,7 @@ def bump_subproject(name: str, repo: Path):
 
     bumped_files: list[Path] = []
     dep_packages = load_dependency_parameters().packages
-    for identifier, config, wrapfile in enumerate_wraps_in_repo(repo):
+    for identifier, config, wrapfile in enumerate_git_wraps_in_repo(repo):
         source = config["wrap-git"]
 
         pkg = dep_packages.get(identifier)
@@ -172,7 +172,7 @@ def prepublish(name: str, version: str, repo: Path):
     print("Prepublishing:", name)
 
     modified_wrapfiles: list[Path] = []
-    for identifier, config, wrapfile in enumerate_wraps_in_repo(repo):
+    for identifier, config, wrapfile in enumerate_git_wraps_in_repo(repo):
         if identifier in PROJECT_NAMES_IN_RELEASE_CYCLE:
             config["wrap-git"]["revision"] = version
             with wrapfile.open("w") as f:
@@ -206,12 +206,15 @@ def enumerate_projects_in_release_cycle() -> Iterator[tuple[str, Path]]:
         yield name, ROOT_DIR / "subprojects" / name
 
 
-def enumerate_wraps_in_repo(repo: Path) -> Iterator[tuple[str, ConfigParser, Path]]:
+def enumerate_git_wraps_in_repo(repo: Path) -> Iterator[tuple[str, ConfigParser, Path]]:
     for wrapfile in (repo / "subprojects").glob("*.wrap"):
         identifier = wrapfile.stem
 
         config = ConfigParser()
         config.read(wrapfile)
+
+        if "wrap-git" not in config:
+            continue
 
         yield identifier, config, wrapfile
 
