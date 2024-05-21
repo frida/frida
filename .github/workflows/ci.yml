@@ -1139,7 +1139,7 @@ jobs:
           npm version $FRIDA_VERSION
           mkdir "$installdir"
           for runtime targets in ${(kv)prebuilds}; do
-            for target in $targets; do
+            for target in ${(@s/ /)targets}; do
               ./configure \
                   "--prefix=$FRIDA_PREFIX" \
                   --host=macos-${{ matrix.arch }} \
