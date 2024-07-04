@@ -215,23 +215,16 @@ jobs:
         with:
           name: frida-server-ios-arm64e
           path: ios-arm64e/
-      - name: Download universal frida-server for iOS/arm64(eoabi)
-        uses: actions/download-artifact@v4
-        with:
-          name: frida-server-ios-arm64eoabi
-          path: ios-arm64eoabi/
       - name: Create universal frida-server for iOS
         run: |
           lipo ios-arm64e/frida-server -thin arm64 -output frida-server-arm64
           lipo ios-arm64e/frida-server -thin arm64e -output frida-server-arm64e
-          lipo ios-arm64eoabi/frida-server -thin arm64e -output frida-server-arm64eoabi
-          for arch in arm64 arm64eoabi arm64e; do
+          for arch in arm64 arm64e; do
             codesign -f -s "-" --preserve-metadata=entitlements frida-server-$arch
           done
           ./releng/mkfatmacho.py \
               frida-server-ios-universal \
               frida-server-arm64 \
-              frida-server-arm64eoabi \
               frida-server-arm64e
       - name: Download universal frida-agent for iOS/arm64(e)
         uses: actions/download-artifact@v4
@@ -653,7 +646,7 @@ jobs:
     needs: frida-ios
     strategy:
       matrix:
-        arch: [arm64, arm64e, arm64eoabi, x86_64-simulator, arm64-simulator]
+        arch: [arm64, arm64e, x86_64-simulator, arm64-simulator]
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
@@ -1347,12 +1340,12 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/lib/qml/
 
   frida-ios:
-    needs: [sdk-macos, sdk-ios, sdk-ios-arm64eoabi]
+    needs: [sdk-macos, sdk-ios]
     strategy:
       matrix:
-        arch: [arm64, arm64e, arm64eoabi, x86_64-simulator, arm64-simulator]
+        arch: [arm64, arm64e, x86_64-simulator, arm64-simulator]
       fail-fast: false
-    runs-on: ${{ matrix.arch == 'arm64eoabi' && 'macos-11' || 'macos-latest' }}
+    runs-on: macos-latest
     env:
       XCODE11: /Applications/Xcode_11.7.app
     steps:
@@ -1942,26 +1935,6 @@ jobs:
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Roll SDK
         run: releng/deps.py roll sdk ios-${{ matrix.arch }} --activate
-
-  sdk-ios-arm64eoabi:
-    needs: [toolchain-macos, sdk-ios]
-    runs-on: macos-11
-    env:
-      XCODE11: /Applications/Xcode_11.7.app
-    steps:
-      - name: Check out repo
-        uses: actions/checkout@v4
-      - name: Set up environment
-        uses: ./.github/actions/setup-macos-env
-        with:
-          certificates-p12: ${{ secrets.APPLE_CERTIFICATES_P12 }}
-          certificates-password: ${{ secrets.APPLE_CERTIFICATES_PASSWORD }}
-          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
-          cloudflare-email: ${{ secrets.CF_EMAIL }}
-          cloudflare-token: ${{ secrets.CF_TOKEN }}
-      - name: Roll SDK
-        run: releng/deps.py roll sdk ios-arm64eoabi --post post-process-oabi.py --activate
 
   sdk-watchos:
     needs: toolchain-macos
