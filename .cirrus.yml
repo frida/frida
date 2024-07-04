@@ -10,7 +10,7 @@ task:
     PYTHON: /usr/local/bin/python3.9
     PYTHON3: /usr/local/bin/python3.9
     NODE_TARGETS_FREEBSD: '20.0.0'
-    ELECTRON_TARGETS_FREEBSD: '27.0.0'
+    ELECTRON_TARGETS_FREEBSD: '30.0.0'
   timeout_in: 2h
   install_dependencies_script: |
     pkg install -y \
