@@ -63,3 +63,45 @@ option('frida_qml',
   value: 'disabled',
   description: 'Build QML bindings',
 )
+
+option('connectivity',
+  type: 'feature',
+  value: 'enabled',
+  description: 'Internet connectivity features (TLS and ICE support)'
+)
+
+option('quickjs',
+  type: 'feature',
+  value: 'enabled',
+  description: 'Build JavaScript bindings with QuickJS runtime included'
+)
+
+option('v8',
+  type: 'feature',
+  value: 'auto',
+  description: 'Build JavaScript bindings with V8 runtime included'
+)
+
+option('database',
+  type: 'feature',
+  value: 'enabled',
+  description: 'Build JavaScript bindings with Database API included'
+)
+
+option('frida_objc_bridge',
+  type: 'feature',
+  value: 'auto',
+  description: 'Build JavaScript bindings with ObjC bridge included'
+)
+
+option('frida_swift_bridge',
+  type: 'feature',
+  value: 'auto',
+  description: 'Build JavaScript bindings with Swift bridge included'
+)
+
+option('frida_java_bridge',
+  type: 'feature',
+  value: 'auto',
+  description: 'Build JavaScript bindings with Java bridge included'
+)

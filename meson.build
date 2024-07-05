@@ -12,11 +12,18 @@ gum_options = [
   'frida_version=' + meson.project_version(),
   'graft_tool=' + (get_option('graft_tool').disable_auto_if(is_cross_build).allowed() ? 'enabled' : 'disabled'),
   'gumjs=enabled',
+  'database=' + get_option('database'),
+  'quickjs=' + get_option('quickjs'),
+  'v8=' + get_option('v8'),
+  'frida_objc_bridge=' + get_option('frida_objc_bridge'),
+  'frida_swift_bridge=' + get_option('frida_swift_bridge'),
+  'frida_java_bridge=' + get_option('frida_java_bridge'),
 ]
 subproject('frida-gum', default_options: gum_options)
 
 core_options = [
   'frida_version=' + meson.project_version(),
+  'connectivity=' + get_option('connectivity'),
 ]
 core_options += 'gadget=' + (get_option('gadget').disable_auto_if(not is_cross_build).allowed() ? 'enabled' : 'disabled')
 foreach component : ['server', 'portal', 'inject']
