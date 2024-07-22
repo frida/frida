@@ -22,7 +22,6 @@ jobs:
       - package-watchos
       - package-tvos
       - package-android
-      - package-freebsd
       - package-qnx
       - package-apple-universal
       - assemble-ios-assets
@@ -92,11 +91,6 @@ jobs:
         with:
           name: frida-node-linux-arm64
           path: build/release-assets/
-      - name: Download Node.js and Electron prebuilds for FreeBSD/arm64
-        uses: actions/download-artifact@v4
-        with:
-          name: frida-node-freebsd-arm64
-          path: build/release-assets/
       - name: Package iOS assets
         uses: ./.github/actions/package-ios-assets
       - name: Package tvOS assets
@@ -157,7 +151,6 @@ jobs:
       - frida-windows
       - frida-macos
       - frida-linux
-      - frida-freebsd
       - assemble-ios-assets
       - assemble-tvos-assets
     steps:
@@ -753,45 +746,6 @@ jobs:
         uses: ./.github/actions/package-artifact-file
         with:
           name: frida-inject-android-${{ matrix.arch }}
-
-  package-freebsd:
-    if: startsWith(github.ref, 'refs/tags/')
-    needs: frida-freebsd
-    strategy:
-      matrix:
-        arch: [arm64]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repo
-        uses: actions/checkout@v4
-      - name: Package Gum devkit
-        uses: ./.github/actions/package-artifact-files-as-tarball
-        with:
-          name: frida-gum-devkit-freebsd-${{ matrix.arch }}
-      - name: Package GumJS devkit
-        uses: ./.github/actions/package-artifact-files-as-tarball
-        with:
-          name: frida-gumjs-devkit-freebsd-${{ matrix.arch }}
-      - name: Package Core devkit
-        uses: ./.github/actions/package-artifact-files-as-tarball
-        with:
-          name: frida-core-devkit-freebsd-${{ matrix.arch }}
-      - name: Package frida-server
-        uses: ./.github/actions/package-artifact-file
-        with:
-          name: frida-server-freebsd-${{ matrix.arch }}
-      - name: Package frida-portal
-        uses: ./.github/actions/package-artifact-file
-        with:
-          name: frida-portal-freebsd-${{ matrix.arch }}
-      - name: Package frida-gadget
-        uses: ./.github/actions/package-artifact-file
-        with:
-          name: frida-gadget-freebsd-${{ matrix.arch }}
-      - name: Package frida-inject
-        uses: ./.github/actions/package-artifact-file
-        with:
-          name: frida-inject-freebsd-${{ matrix.arch }}
 
   package-qnx:
     if: startsWith(github.ref, 'refs/tags/')
@@ -1653,116 +1607,6 @@ jobs:
         with:
           name: frida-gadget-android-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida/64/frida-gadget.so
-
-  frida-freebsd:
-    runs-on: [freebsd, arm64]
-    steps:
-      - name: Check out repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Set up environment
-        uses: ./.github/actions/setup-freebsd-env
-        with:
-           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
-           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
-           cloudflare-email: ${{ secrets.CF_EMAIL }}
-           cloudflare-token: ${{ secrets.CF_TOKEN }}
-      - name: Roll toolchain
-        run: releng/deps.py roll toolchain freebsd-arm64 --activate
-      - name: Roll SDK
-        run: releng/deps.py roll sdk freebsd-arm64
-      - name: Configure
-        run: >-
-          ./configure
-          "--prefix=$FRIDA_PREFIX"
-          --enable-gadget
-          --enable-server
-          --enable-portal
-          --enable-inject
-          --
-          -Dfrida-gum:devkits=gum,gumjs
-          -Dfrida-core:devkits=core
-      - name: Compile
-        run: make
-      - name: Install
-        run: make install
-      - name: Upload Gum devkit
-        uses: actions/upload-artifact@v4
-        with:
-          name: frida-gum-devkit-freebsd-arm64
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gum/
-      - name: Upload GumJS devkit
-        uses: actions/upload-artifact@v4
-        with:
-          name: frida-gumjs-devkit-freebsd-arm64
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gumjs/
-      - name: Upload Core devkit
-        uses: actions/upload-artifact@v4
-        with:
-          name: frida-core-devkit-freebsd-arm64
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/core/
-      - name: Upload frida-server
-        uses: actions/upload-artifact@v4
-        with:
-          name: frida-server-freebsd-arm64
-          path: ${{ env.FRIDA_PREFIX }}/bin/frida-server
-      - name: Upload frida-portal
-        uses: actions/upload-artifact@v4
-        with:
-          name: frida-portal-freebsd-arm64
-          path: ${{ env.FRIDA_PREFIX }}/bin/frida-portal
-      - name: Upload frida-inject
-        uses: actions/upload-artifact@v4
-        with:
-          name: frida-inject-freebsd-arm64
-          path: ${{ env.FRIDA_PREFIX }}/bin/frida-inject
-      - name: Upload frida-gadget
-        uses: actions/upload-artifact@v4
-        with:
-          name: frida-gadget-freebsd-arm64
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/64/frida-gadget.so
-      - name: Package Python bindings
-        run: |
-          export FRIDA_EXTENSION=$(find "$FRIDA_PREFIX" -name _frida.abi3.so)
-          cd subprojects/frida-python
-          pip wheel -w "$FRIDA_PREFIX/wheels" --no-deps .
-      - name: Upload Python bindings
-        uses: actions/upload-artifact@v4
-        with:
-          name: frida-python-freebsd-arm64
-          path: ${{ env.FRIDA_PREFIX }}/wheels/*.whl
-      - name: Build Node.js bindings
-        run: |
-          installdir=$FRIDA_PREFIX/prebuilds
-          declare -A prebuilds=(
-            [node]="${{ env.NODE_TARGETS_FREEBSD }}"
-            [electron]="${{ env.ELECTRON_TARGETS_FREEBSD }}"
-          )
-          export FRIDA_DEPS=$PWD/deps
-          export PKG_CONFIG_PATH=$FRIDA_PREFIX/lib/pkgconfig
-          python tools/ensure-submodules.py frida-node
-          cd subprojects/frida-node
-          npm version $FRIDA_VERSION
-          mkdir "$installdir"
-          for runtime in "${!prebuilds[@]}"; do
-            targets=${prebuilds[$runtime]}
-            for target in $targets; do
-              ./configure \
-                  "--prefix=$FRIDA_PREFIX" \
-                  --with-runtime=$runtime \
-                  --with-target=$target
-              make prebuild
-              cp build/*.tar.gz "$installdir"
-              rm -rf build
-            done
-          done
-        shell: bash
-      - name: Upload Node.js bindings
-        uses: actions/upload-artifact@v4
-        with:
-          name: frida-node-freebsd-arm64
-          path: ${{ env.FRIDA_PREFIX }}/prebuilds/*.tar.gz
 
   frida-qnx:
     runs-on: ubuntu-latest
