@@ -60,6 +60,7 @@ task:
     --enable-server
     --enable-portal
     --enable-inject
+    --disable-frida-tools
     --
     -Dfrida-gum:devkits=gum,gumjs
     -Dfrida-core:devkits=core
