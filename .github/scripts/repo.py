@@ -102,6 +102,9 @@ def bump_subproject(name: str, repo: Path):
     bumped_files: list[Path] = []
     dep_packages = load_dependency_parameters().packages
     for identifier, config, wrapfile in enumerate_git_wraps_in_repo(repo):
+        if identifier == "nan":
+            continue
+
         source = config["wrap-git"]
 
         pkg = dep_packages.get(identifier)
