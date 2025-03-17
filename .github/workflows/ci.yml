@@ -595,7 +595,7 @@ jobs:
     needs: frida-linux
     strategy:
       matrix:
-        arch: [x86, x86_64, x86_64-musl, armhf, armhf-musl, arm64, arm64-musl, mips, mipsel, mips64, mips64el]
+        arch: [x86, x86_64, x86_64-musl, armhf, armhf-musl, armbe8, arm64, arm64-musl, mips, mipsel, mips64, mips64el]
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
@@ -1115,7 +1115,7 @@ jobs:
     needs: sdk-linux
     strategy:
       matrix:
-        arch: [x86, x86_64, x86_64-musl, armhf, armhf-musl, arm64, arm64-musl, mips, mipsel, mips64, mips64el]
+        arch: [x86, x86_64, x86_64-musl, armhf, armhf-musl, armbe8, arm64, arm64-musl, mips, mipsel, mips64, mips64el]
       fail-fast: false
     runs-on: ubuntu-latest
     container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
@@ -1827,7 +1827,7 @@ jobs:
   toolchain-linux:
     strategy:
       matrix:
-        arch: [x86, x86_64, x86_64-musl, armhf, armhf-musl, arm64, arm64-musl]
+        arch: [x86, x86_64, x86_64-musl, armhf, armhf-musl, armbe8, arm64, arm64-musl]
       fail-fast: false
     runs-on: ubuntu-latest
     container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
@@ -1848,7 +1848,7 @@ jobs:
     needs: toolchain-linux
     strategy:
       matrix:
-        arch: [x86, x86_64, x86_64-musl, armhf, armhf-musl, arm64, arm64-musl, mips, mipsel, mips64, mips64el]
+        arch: [x86, x86_64, x86_64-musl, armhf, armhf-musl, armbe8, arm64, arm64-musl, mips, mipsel, mips64, mips64el]
       fail-fast: false
     runs-on: ubuntu-latest
     container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
