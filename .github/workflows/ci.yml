@@ -1253,7 +1253,7 @@ jobs:
           name: frida-python-linux-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/wheels/*.whl
       - name: Build Node.js bindings
-        if: ${{ !(startsWith(matrix.arch, 'mips') || endsWith(matrix.arch, '-musl')) }}
+        if: ${{ !(startsWith(matrix.arch, 'mips') || endsWith(matrix.arch, '-musl') || matrix.arch == 'armbe8' || matrix.arch == 'arm64be') }}
         run: |
           installdir=$FRIDA_PREFIX/prebuilds
           declare -A prebuilds=(
@@ -1281,7 +1281,7 @@ jobs:
           done
         shell: bash
       - name: Upload Node.js bindings
-        if: ${{ !(startsWith(matrix.arch, 'mips') || endsWith(matrix.arch, '-musl')) }}
+        if: ${{ !(startsWith(matrix.arch, 'mips') || endsWith(matrix.arch, '-musl') || matrix.arch == 'armbe8' || matrix.arch == 'arm64be') }}
         uses: actions/upload-artifact@v4
         with:
           name: frida-node-linux-${{ matrix.arch }}
