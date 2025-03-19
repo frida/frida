@@ -1115,7 +1115,7 @@ jobs:
     needs: sdk-linux
     strategy:
       matrix:
-        arch: [x86, x86_64, x86_64-musl, armhf, armhf-musl, armbe8, arm64, arm64be, arm64beilp32, arm64-musl, mips, mipsel, mips64, mips64el]
+        arch: [x86, x86_64, x86_64-musl, armhf, armhf-musl, armbe8, arm64, arm64be, arm64-musl, mips, mipsel, mips64, mips64el]
       fail-fast: false
     runs-on: ubuntu-latest
     container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
