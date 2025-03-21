@@ -61,13 +61,13 @@ runs:
         path: build/python-packages/
     - name: Publish to pypi.org
       if: inputs.site == 'production'
-      uses: pypa/gh-action-pypi-publish@release/v1.5
+      uses: pypa/gh-action-pypi-publish@release/v1
       with:
         password: ${{ inputs.pypi-token }}
         packages_dir: build/python-packages/
     - name: Publish to test.pypi.org
       if: inputs.site == 'development'
-      uses: pypa/gh-action-pypi-publish@release/v1.5
+      uses: pypa/gh-action-pypi-publish@release/v1
       with:
         password: ${{ inputs.testpypi-token }}
         repository_url: https://test.pypi.org/legacy/
