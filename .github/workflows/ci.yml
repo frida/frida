@@ -105,12 +105,13 @@ jobs:
           name: "Frida ${{ env.FRIDA_VERSION }}"
           body: "See https://frida.re/news/ for details."
           files: build/release-assets/*
-      - name: Publish Python bindings to PyPI
-        uses: ./.github/actions/publish-python-bindings
+      - name: Prepare Python packages
+        uses: ./.github/actions/prepare-python-packages
+      - name: Publish Python bindings to pypi.org
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          site: production
-          pypi-token: ${{ secrets.PYPI_API_TOKEN }}
-          testpypi-token: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          packages-dir: build/python-packages/
       - name: Publish .deb packages
         uses: ./.github/actions/publish-debs
         with:
@@ -176,12 +177,14 @@ jobs:
         uses: ./.github/actions/package-ios-assets
       - name: Package tvOS assets
         uses: ./.github/actions/package-tvos-assets
+      - name: Prepare Python packages
+        uses: ./.github/actions/prepare-python-packages
       - name: Publish Python bindings to TestPyPI
-        uses: ./.github/actions/publish-python-bindings
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          site: development
-          pypi-token: ${{ secrets.PYPI_API_TOKEN }}
-          testpypi-token: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          packages-dir: build/python-packages/
+          repository-url: https://test.pypi.org/legacy/
       - name: Publish .deb packages
         uses: ./.github/actions/publish-debs
         with:
