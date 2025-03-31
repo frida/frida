@@ -811,7 +811,7 @@ jobs:
           architecture: ${{ matrix.arch == 'x86_64' && 'x64' || matrix.arch }}
       - name: Install Qt
         if: ${{ contains(matrix.arch, '64') }}
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           version: '6.7.0'
           cache: true
@@ -982,7 +982,7 @@ jobs:
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Install Qt
         if: matrix.arch != 'arm64e'
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           version: '6.7.0'
           cache: true
@@ -1144,7 +1144,7 @@ jobs:
           apt-get install -y sudo
       - name: Install Qt
         if: matrix.arch == 'x86_64'
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           version: '6.7.0'
           cache: true
