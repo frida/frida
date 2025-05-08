@@ -47,11 +47,6 @@ jobs:
           pattern: release-asset-*
           merge-multiple: true
           path: build/release-assets/
-      - name: Download Node-API prebuilds for Windows/x86
-        uses: actions/download-artifact@v4
-        with:
-          name: frida-node-windows-x86
-          path: build/release-assets/
       - name: Download Node-API prebuilds for Windows/x86_64
         uses: actions/download-artifact@v4
         with:
@@ -886,6 +881,7 @@ jobs:
           name: frida-python-windows-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/wheels/*.whl
       - name: Build Node.js bindings
+        if: ${{ contains(matrix.arch, '64') }}
         run: |
           $installdir = "$Env:FRIDA_PREFIX\prebuilds"
           $Env:FRIDA_DEPS = "$pwd\deps"
@@ -909,6 +905,7 @@ jobs:
           New-Item -ItemType Directory -Path $installdir
           Copy-Item .\build\*.tar.gz -Destination $installdir
       - name: Upload Node.js bindings
+        if: ${{ contains(matrix.arch, '64') }}
         uses: actions/upload-artifact@v4
         with:
           name: frida-node-windows-${{ matrix.arch }}
