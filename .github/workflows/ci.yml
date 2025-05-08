@@ -4,10 +4,6 @@ on: push
 
 env:
   ANDROID_NDK_VERSION: r25b
-  NODE_TARGETS_DEFAULT: '16.0.0 18.0.0 20.0.0 22.0.0'
-  NODE_TARGETS_FREEBSD: '20.0.0'
-  ELECTRON_TARGETS_DEFAULT: '31.0.0'
-  ELECTRON_TARGETS_FREEBSD: '30.0.0'
 
 jobs:
   publish-prod:
@@ -39,7 +35,7 @@ jobs:
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Grab needed submodules
-        run: python tools/ensure-submodules.py frida-core frida-python frida-node
+        run: python tools/ensure-submodules.py frida-gum frida-core frida-python frida-node
       - name: Install tools
         run: |
           sudo apt-get update
@@ -124,11 +120,15 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish Node.js bindings to npm
         run: |
-          cd subprojects/frida-node
+          export FRIDA_DEPS=$PWD/deps
+          cd subprojects/frida-node/subprojects
+          ln -s ../../frida-gum .
+          ln -s ../../frida-core .
+          cd ..
           git submodule update --init --recursive
           npm version $FRIDA_VERSION
-          mkdir prebuilds
-          cp ../../build/release-assets/frida-*-node-*-linux-x64.tar.gz prebuilds/
+          ./configure -- -Dfrida-core:compat=disabled
+          make
           npm install
           npm publish
       - name: Publish frida-gadget-ios to npm
@@ -888,16 +888,6 @@ jobs:
       - name: Build Node.js bindings
         run: |
           $installdir = "$Env:FRIDA_PREFIX\prebuilds"
-          $nodeTargets = '${{ env.NODE_TARGETS_DEFAULT }}'.Split(' ')
-          $electronTargets = '${{ env.ELECTRON_TARGETS_DEFAULT }}'.Split(' ')
-          if ('${{ matrix.arch }}' -eq 'x86') {
-            $nodeTargets = $nodeTargets | where { [int]($_.Split('.')[0]) -le 16 }
-            $electronTargets = @()
-          }
-          $prebuilds = @{
-            node = $nodeTargets
-            electron = $electronTargets
-          }
           $Env:FRIDA_DEPS = "$pwd\deps"
           $Env:PKG_CONFIG_PATH = "$Env:FRIDA_PREFIX\lib\pkgconfig"
           function Run() {
@@ -912,20 +902,12 @@ jobs:
           Run python .\tools\ensure-submodules.py frida-node
           cd subprojects\frida-node
           Run npm version $FRIDA_VERSION
+          Run .\configure `
+              --prefix=$Env:FRIDA_PREFIX `
+              --host=windows-${{ matrix.arch }}
+          Run .\make prebuild
           New-Item -ItemType Directory -Path $installdir
-          foreach ($item in $prebuilds.GetEnumerator()) {
-            $runtime = $item.Key
-            foreach ($target in $item.Value) {
-              Run .\configure `
-                  --prefix=$Env:FRIDA_PREFIX `
-                  --host=windows-${{ matrix.arch }} `
-                  --with-runtime=$runtime `
-                  --with-target=$target
-              Run .\make prebuild
-              Copy-Item .\build\*.tar.gz -Destination $installdir
-              Remove-Item build -Recurse
-            }
-          }
+          Copy-Item .\build\*.tar.gz -Destination $installdir
       - name: Upload Node.js bindings
         uses: actions/upload-artifact@v4
         with:
@@ -1078,28 +1060,17 @@ jobs:
         if: matrix.arch != 'arm64e'
         run: |
           installdir=$FRIDA_PREFIX/prebuilds
-          declare -A prebuilds=(
-            [node]="${{ env.NODE_TARGETS_DEFAULT }}"
-            [electron]="${{ env.ELECTRON_TARGETS_DEFAULT }}"
-          )
           export FRIDA_DEPS=$PWD/deps
           export PKG_CONFIG_PATH=$FRIDA_PREFIX/lib/pkgconfig
           python tools/ensure-submodules.py frida-node
           cd subprojects/frida-node
           npm version $FRIDA_VERSION
+          ./configure \
+              "--prefix=$FRIDA_PREFIX" \
+              --host=macos-${{ matrix.arch }}
+          make prebuild
           mkdir "$installdir"
-          for runtime targets in ${(kv)prebuilds}; do
-            for target in ${(@s/ /)targets}; do
-              ./configure \
-                  "--prefix=$FRIDA_PREFIX" \
-                  --host=macos-${{ matrix.arch }} \
-                  --with-runtime=$runtime \
-                  --with-target=$target
-              make prebuild
-              cp build/*.tar.gz "$installdir"
-              rm -rf build
-            done
-          done
+          cp build/*.tar.gz "$installdir"
         shell: zsh {0}
       - name: Upload Node.js bindings
         if: matrix.arch != 'arm64e'
@@ -1260,29 +1231,17 @@ jobs:
         if: ${{ !(startsWith(matrix.arch, 'mips') || endsWith(matrix.arch, '-musl') || matrix.arch == 'armbe8' || matrix.arch == 'arm64be') }}
         run: |
           installdir=$FRIDA_PREFIX/prebuilds
-          declare -A prebuilds=(
-            [node]="${{ env.NODE_TARGETS_DEFAULT }}"
-            [electron]="${{ contains(matrix.arch, '64') && env.ELECTRON_TARGETS_DEFAULT || '' }}"
-          )
           export FRIDA_DEPS=$PWD/deps
           export PKG_CONFIG_PATH=$FRIDA_PREFIX/lib/pkgconfig
           python tools/ensure-submodules.py frida-node
           cd subprojects/frida-node
           npm version $FRIDA_VERSION
+          ./configure \
+              "--prefix=$FRIDA_PREFIX" \
+              --host=$XTOOLS_HOST
+          make prebuild
           mkdir "$installdir"
-          for runtime in "${!prebuilds[@]}"; do
-            targets=${prebuilds[$runtime]}
-            for target in $targets; do
-              ./configure \
-                  "--prefix=$FRIDA_PREFIX" \
-                  --host=$XTOOLS_HOST \
-                  --with-runtime=$runtime \
-                  --with-target=$target
-              make prebuild
-              cp build/*.tar.gz "$installdir"
-              rm -rf build
-            done
-          done
+          cp build/*.tar.gz "$installdir"
         shell: bash
       - name: Upload Node.js bindings
         if: ${{ !(startsWith(matrix.arch, 'mips') || endsWith(matrix.arch, '-musl') || matrix.arch == 'armbe8' || matrix.arch == 'arm64be') }}
