@@ -35,7 +35,7 @@ jobs:
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Grab needed submodules
-        run: python tools/ensure-submodules.py frida-core frida-python frida-node
+        run: python tools/ensure-submodules.py frida-gum frida-core frida-python frida-node
       - name: Install tools
         run: |
           sudo apt-get update
@@ -120,7 +120,11 @@ jobs:
       #    NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish Node.js bindings to npm
         run: |
-          cd subprojects/frida-node
+          export FRIDA_DEPS=$PWD/deps
+          cd subprojects/frida-node/subprojects
+          ln -s ../../frida-gum .
+          ln -s ../../frida-core .
+          cd ..
           git submodule update --init --recursive
           npm version $FRIDA_VERSION
           ./configure -- -Dfrida-core:compat=disabled
