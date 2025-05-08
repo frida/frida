@@ -47,42 +47,42 @@ jobs:
           pattern: release-asset-*
           merge-multiple: true
           path: build/release-assets/
-      - name: Download Node.js and Electron prebuilds for Windows/x86
+      - name: Download Node-API prebuilds for Windows/x86
         uses: actions/download-artifact@v4
         with:
           name: frida-node-windows-x86
           path: build/release-assets/
-      - name: Download Node.js and Electron prebuilds for Windows/x86_64
+      - name: Download Node-API prebuilds for Windows/x86_64
         uses: actions/download-artifact@v4
         with:
           name: frida-node-windows-x86_64
           path: build/release-assets/
-      - name: Download Node.js and Electron prebuilds for macOS/x86_64
+      - name: Download Node-API prebuilds for macOS/x86_64
         uses: actions/download-artifact@v4
         with:
           name: frida-node-macos-x86_64
           path: build/release-assets/
-      - name: Download Node.js and Electron prebuilds for macOS/arm64
+      - name: Download Node-API prebuilds for macOS/arm64
         uses: actions/download-artifact@v4
         with:
           name: frida-node-macos-arm64
           path: build/release-assets/
-      - name: Download Node.js and Electron prebuilds for Linux/x86
+      - name: Download Node-API prebuilds for Linux/x86
         uses: actions/download-artifact@v4
         with:
           name: frida-node-linux-x86
           path: build/release-assets/
-      - name: Download Node.js and Electron prebuilds for Linux/x86_64
+      - name: Download Node-API prebuilds for Linux/x86_64
         uses: actions/download-artifact@v4
         with:
           name: frida-node-linux-x86_64
           path: build/release-assets/
-      - name: Download Node.js and Electron prebuilds for Linux/armhf
+      - name: Download Node-API prebuilds for Linux/armhf
         uses: actions/download-artifact@v4
         with:
           name: frida-node-linux-armhf
           path: build/release-assets/
-      - name: Download Node.js and Electron prebuilds for Linux/arm64
+      - name: Download Node-API prebuilds for Linux/arm64
         uses: actions/download-artifact@v4
         with:
           name: frida-node-linux-arm64
