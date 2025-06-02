@@ -3,6 +3,7 @@ name: CI
 on: push
 
 env:
+  FRIDA_COMPILER_MOD: subprojects/frida-core/src/compiler/go.mod
   ANDROID_NDK_VERSION: r25b
 
 jobs:
@@ -804,6 +805,13 @@ jobs:
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
           architecture: ${{ matrix.arch == 'x86_64' && 'x64' || matrix.arch }}
+      - name: Grab frida-core
+        run: python tools/ensure-submodules.py frida-core
+      - name: Install Go toolchain
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ env.FRIDA_COMPILER_MOD }}
+          cache-dependency-path: ${{ env.FRIDA_COMPILER_MOD }}
       - name: Install Qt
         if: ${{ contains(matrix.arch, '64') }}
         uses: jurplel/install-qt-action@v4
@@ -959,6 +967,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Grab frida-core
+        run: python tools/ensure-submodules.py frida-core
+      - name: Install Go toolchain
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ env.FRIDA_COMPILER_MOD }}
+          cache-dependency-path: ${{ env.FRIDA_COMPILER_MOD }}
       - name: Install Qt
         if: matrix.arch != 'arm64e'
         uses: jurplel/install-qt-action@v4
@@ -1102,6 +1117,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Grab frida-core
+        run: python tools/ensure-submodules.py frida-core
+      - name: Install Go toolchain
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ env.FRIDA_COMPILER_MOD }}
+          cache-dependency-path: ${{ env.FRIDA_COMPILER_MOD }}
       - name: Configure qemu-user
         if: ${{ !startsWith(matrix.arch, 'x86') }}
         run: echo "FRIDA_QEMU_SYSROOT=/opt/x-tools/$XTOOLS_HOST/$XTOOLS_HOST/sysroot" >> $GITHUB_ENV
@@ -1277,6 +1299,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Grab frida-core
+        run: python tools/ensure-submodules.py frida-core
+      - name: Install Go toolchain
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ env.FRIDA_COMPILER_MOD }}
+          cache-dependency-path: ${{ env.FRIDA_COMPILER_MOD }}
       - name: Configure
         run: >-
           ./configure
@@ -1420,6 +1449,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Grab frida-core
+        run: python tools/ensure-submodules.py frida-core
       - name: Configure
         run: >-
           ./configure
@@ -1504,6 +1535,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Grab frida-core
+        run: python tools/ensure-submodules.py frida-core
+      - name: Install Go toolchain
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ env.FRIDA_COMPILER_MOD }}
+          cache-dependency-path: ${{ env.FRIDA_COMPILER_MOD }}
       - name: Set up NDK
         id: setup-ndk
         uses: nttld/setup-ndk@v1
