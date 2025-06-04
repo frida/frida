@@ -478,7 +478,7 @@ jobs:
     needs: frida-windows
     strategy:
       matrix:
-        arch: [x86, x86_64]
+        arch: [x86, x86_64, arm64]
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
@@ -789,9 +789,9 @@ jobs:
     needs: sdk-windows
     strategy:
       matrix:
-        arch: [x86, x86_64]
+        arch: [x86, x86_64, arm64]
       fail-fast: false
-    runs-on: windows-latest
+    runs-on: ${{ matrix.arch == 'arm64' && 'windows-11-arm' || 'windows-latest' }}
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
@@ -813,7 +813,7 @@ jobs:
           go-version-file: ${{ env.FRIDA_COMPILER_MOD }}
           cache-dependency-path: ${{ env.FRIDA_COMPILER_MOD }}
       - name: Install Qt
-        if: ${{ contains(matrix.arch, '64') }}
+        if: matrix.arch == 'x86_64'
         uses: jurplel/install-qt-action@v4
         with:
           version: '6.7.0'
@@ -1676,7 +1676,11 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/lib/frida/32/frida-gadget.so
 
   toolchain-windows:
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        arch: [x86, arm64]
+      fail-fast: false
+    runs-on: ${{ matrix.arch == 'arm64' && 'windows-11-arm' || 'windows-latest' }}
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
@@ -1688,16 +1692,16 @@ jobs:
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Roll toolchain
-        run: python releng\deps.py roll toolchain windows-x86
+        run: python releng\deps.py roll toolchain windows-${{ matrix.arch }}
 
   sdk-windows:
     needs: toolchain-windows
     strategy:
       matrix:
-        arch: [x86, x86_64]
+        arch: [x86, x86_64, arm64]
         config: [md, mdd, mt, mtd]
       fail-fast: false
-    runs-on: windows-latest
+    runs-on: ${{ matrix.arch == 'arm64' && 'windows-11-arm' || 'windows-latest' }}
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
