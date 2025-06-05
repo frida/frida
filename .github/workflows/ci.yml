@@ -831,6 +831,7 @@ jobs:
           --
           "-Dfrida_qml=auto"
           "-Dfrida-gum:devkits=gum,gumjs"
+          "-Dfrida-core:compiler_backend=enabled"
           "-Dfrida-core:devkits=core"
       - name: Compile
         run: .\make
@@ -996,6 +997,7 @@ jobs:
           -Dfrida_qml=${{ matrix.arch != 'arm64e' && 'enabled' || 'disabled' }}
           -Dfrida-gum:graft_tool=enabled
           -Dfrida-gum:devkits=gum,gumjs
+          -Dfrida-core:compiler_backend=${{ matrix.arch != 'arm64e' && 'enabled' || 'disabled' }}
           -Dfrida-core:devkits=core
       - name: Compile
         run: make
@@ -1154,6 +1156,7 @@ jobs:
           -Dlibdir=lib
           -Dfrida_qml=${{ matrix.arch == 'x86_64' && 'enabled' || 'disabled' }}
           -Dfrida-gum:devkits=gum,gumjs
+          -Dfrida-core:compiler_backend=${{ !(startsWith(matrix.arch, 'mips') || matrix.arch == 'armbe8' || matrix.arch == 'arm64be') && 'enabled' || 'disabled' }}
           -Dfrida-core:devkits=core
       - name: Compile
         run: make
@@ -1314,6 +1317,7 @@ jobs:
           --enable-portal
           --
           -Dfrida-gum:devkits=gum,gumjs
+          -Dfrida-core:compiler_backend=${{ matrix.arch != 'arm64e' && 'enabled' || 'disabled' }}
           -Dfrida-core:assets=installed
           -Dfrida-core:devkits=core
       - name: Compile
@@ -1558,6 +1562,7 @@ jobs:
           --enable-portal
           --
           -Dfrida-gum:devkits=gum,gumjs
+          -Dfrida-core:compiler_backend=enabled
           -Dfrida-core:devkits=core
       - name: Compile
         run: make
