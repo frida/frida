@@ -15,6 +15,7 @@ task:
       bash \
       bison \
       git \
+      go \
       npm \
       py311-pip \
       py311-setuptools
@@ -61,6 +62,7 @@ task:
     --disable-frida-tools
     --
     -Dfrida-gum:devkits=gum,gumjs
+    -Dfrida-core:compiler_backend=enabled
     -Dfrida-core:devkits=core
   compile_script: make
   install_script: make install
