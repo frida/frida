@@ -53,6 +53,11 @@ jobs:
         with:
           name: frida-node-windows-x86_64
           path: build/release-assets/
+      - name: Download Node-API prebuilds for Windows/arm64
+        uses: actions/download-artifact@v4
+        with:
+          name: frida-node-windows-arm64
+          path: build/release-assets/
       - name: Download Node-API prebuilds for macOS/x86_64
         uses: actions/download-artifact@v4
         with:
