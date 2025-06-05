@@ -512,6 +512,7 @@ jobs:
         with:
           name: frida-gadget-windows-${{ matrix.arch }}
       - name: Package .NET bindings
+        if: matrix.arch != 'arm64'
         uses: ./.github/actions/package-artifact-file
         with:
           name: frida-clr-windows-${{ matrix.arch }}
@@ -931,6 +932,7 @@ jobs:
           name: frida-node-windows-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/prebuilds/*.tar.gz
       - name: Build .NET bindings
+        if: matrix.arch != 'arm64'
         run: >-
           Remove-Item build -Recurse
           && .\configure
@@ -943,12 +945,13 @@ jobs:
           "-Dfrida-core:compiler_backend=disabled"
           && .\make install
       - name: Upload .NET bindings
+        if: matrix.arch != 'arm64'
         uses: actions/upload-artifact@v4
         with:
           name: frida-clr-windows-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/bin/Frida.dll
       - name: Upload QML bindings
-        if: ${{ contains(matrix.arch, '64') }}
+        if: matrix.arch == 'x86_64'
         uses: actions/upload-artifact@v4
         with:
           name: frida-qml-windows-${{ matrix.arch }}
