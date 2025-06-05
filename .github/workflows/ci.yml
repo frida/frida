@@ -789,7 +789,10 @@ jobs:
     needs: sdk-windows
     strategy:
       matrix:
-        arch: [x86, x86_64, arm64]
+        include:
+          - { arch: x86,    sys: MINGW32,    pkg: 'mingw-w64-i686-gcc'            }
+          - { arch: x86_64, sys: MINGW64,    pkg: 'mingw-w64-x86_64-gcc'          }
+          - { arch: arm64,  sys: CLANGARM64, pkg: 'mingw-w64-clang-aarch64-clang' }
       fail-fast: false
     runs-on: ${{ matrix.arch == 'arm64' && 'windows-11-arm' || 'windows-latest' }}
     steps:
@@ -805,6 +808,12 @@ jobs:
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
           architecture: ${{ matrix.arch == 'x86_64' && 'x64' || matrix.arch }}
+      - name: Install MinGW toolchain for cgo support
+        id: msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.sys }}
+          install: ${{ matrix.pkg }}
       - name: Grab frida-core
         run: python tools/ensure-submodules.py frida-core
       - name: Install Go toolchain
@@ -833,6 +842,8 @@ jobs:
           "-Dfrida-gum:devkits=gum,gumjs"
           "-Dfrida-core:compiler_backend=enabled"
           "-Dfrida-core:devkits=core"
+        env:
+          MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
       - name: Compile
         run: .\make
       - name: Install
