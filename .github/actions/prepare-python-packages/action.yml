@@ -19,6 +19,11 @@ runs:
       with:
         name: frida-python-windows-x86_64
         path: build/python-packages/
+    - name: Download wheel for Windows/arm64
+      uses: actions/download-artifact@v4
+      with:
+        name: frida-python-windows-arm64
+        path: build/python-packages/
     - name: Download wheel for macOS/x86_64
       uses: actions/download-artifact@v4
       with:
