@@ -54,3 +54,8 @@ runs:
       with:
         name: frida-python-linux-arm64
         path: build/python-packages/
+    - name: Download wheel for frida-tools
+      uses: actions/download-artifact@v4
+      with:
+        name: frida-tools
+        path: build/python-packages/
