@@ -791,6 +791,50 @@ jobs:
         with:
           name: frida-inject-qnx-${{ matrix.arch }}
 
+  frida-tools:
+    runs-on: ubuntu-latest
+    container: ghcr.io/frida/x-tools-linux-x86_64:latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up environment
+        uses: ./.github/actions/setup-linux-env
+        with:
+          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
+          cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Configure
+        run: >-
+          ./configure
+          "--prefix=$FRIDA_PREFIX"
+          --enable-frida-tools
+          --disable-graft-tool
+          --disable-gadget
+          --disable-server
+          --disable-inject
+          --disable-frida-python
+      - name: Compile
+        run: |
+          make
+          mv build/subprojects/frida-tools subprojects/frida-tools/build
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
+      - name: Package Python bindings
+        run: |
+          cd subprojects/frida-tools
+          uv build -o "$FRIDA_PREFIX/wheels"
+        shell: bash
+      - name: Upload Python bindings
+        uses: actions/upload-artifact@v4
+        with:
+          name: frida-tools
+          path: ${{ env.FRIDA_PREFIX }}/wheels/*
+
   frida-windows:
     needs: sdk-windows
     strategy:
