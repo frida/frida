@@ -791,16 +791,15 @@ jobs:
         with:
           name: frida-inject-qnx-${{ matrix.arch }}
 
-  frida-windows:
+  frida-windows-intel:
     needs: sdk-windows
     strategy:
       matrix:
         include:
           - { arch: x86,    sys: MINGW32,    pkg: 'mingw-w64-i686-gcc'            }
           - { arch: x86_64, sys: MINGW64,    pkg: 'mingw-w64-x86_64-gcc'          }
-          - { arch: arm64,  sys: CLANGARM64, pkg: 'mingw-w64-clang-aarch64-clang' }
       fail-fast: false
-    runs-on: ${{ matrix.arch == 'arm64' && 'windows-11-arm' || 'windows-latest' }}
+    runs-on: windows-latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
@@ -854,6 +853,16 @@ jobs:
         run: .\make
       - name: Install
         run: .\make install
+      - name: Upload components needed for emulation on arm64
+        if: matrix.arch == 'x86_64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: frida-core-emulation-windows
+          path: |
+            build/subprojects/frida-core/src/frida-helper.exe
+            build/subprojects/frida-core/lib/agent/frida-agent.dll
+            build/subprojects/frida-core/compat/frida-helper.exe
+            build/subprojects/frida-core/compat/frida-agent.dll
       - name: Upload Gum devkit
         uses: actions/upload-artifact@v4
         with:
@@ -885,13 +894,13 @@ jobs:
           name: frida-inject-windows-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/bin/frida-inject.exe
       - name: Upload 32-bit frida-gadget
-        if: ${{ !contains(matrix.arch, '64') }}
+        if: matrix.arch != 'x86_64'
         uses: actions/upload-artifact@v4
         with:
           name: frida-gadget-windows-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida/32/frida-gadget.dll
       - name: Upload 64-bit frida-gadget
-        if: ${{ contains(matrix.arch, '64') }}
+        if: matrix.arch == 'x86_64'
         uses: actions/upload-artifact@v4
         with:
           name: frida-gadget-windows-${{ matrix.arch }}
@@ -907,7 +916,7 @@ jobs:
           name: frida-python-windows-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/wheels/*.whl
       - name: Build Node.js bindings
-        if: ${{ contains(matrix.arch, '64') }}
+        if: matrix.arch == 'x86_64'
         run: |
           $installdir = "$Env:FRIDA_PREFIX\prebuilds"
           $Env:FRIDA_DEPS = "$pwd\deps"
@@ -931,13 +940,12 @@ jobs:
           New-Item -ItemType Directory -Path $installdir
           Copy-Item .\build\*.tar.gz -Destination $installdir
       - name: Upload Node.js bindings
-        if: ${{ contains(matrix.arch, '64') }}
+        if: matrix.arch == 'x86_64'
         uses: actions/upload-artifact@v4
         with:
           name: frida-node-windows-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/prebuilds/*.tar.gz
       - name: Build .NET bindings
-        if: matrix.arch != 'arm64'
         run: >-
           Remove-Item build -Recurse
           && .\configure
@@ -950,7 +958,6 @@ jobs:
           "-Dfrida-core:compiler_backend=disabled"
           && .\make install
       - name: Upload .NET bindings
-        if: matrix.arch != 'arm64'
         uses: actions/upload-artifact@v4
         with:
           name: frida-clr-windows-${{ matrix.arch }}
@@ -964,6 +971,143 @@ jobs:
             ${{ env.FRIDA_PREFIX }}/lib/qml/
             !*.lib
             !*.pdb
+
+  frida-windows:
+    needs: frida-windows-intel
+    runs-on: windows-11-arm
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up environment
+        uses: ./.github/actions/setup-windows-env
+        with:
+          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
+          cloudflare-token: ${{ secrets.CF_TOKEN }}
+          architecture: arm64
+      - name: Install MinGW toolchain for cgo support
+        id: msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: CLANGARM64
+          install: mingw-w64-clang-aarch64-clang
+      - name: Grab frida-core
+        run: python tools/ensure-submodules.py frida-core
+      - name: Install Go toolchain
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ env.FRIDA_COMPILER_MOD }}
+          cache-dependency-path: ${{ env.FRIDA_COMPILER_MOD }}
+      - name: Download emulation components
+        uses: actions/download-artifact@v4
+        with:
+          name: frida-core-emulation-windows
+          path: emulation/
+      - name: Configure
+        run: |
+          $helperModern = (Resolve-Path "emulation/src/frida-helper.exe").Path
+          $agentModern = (Resolve-Path "emulation/lib/agent/frida-agent.dll").Path
+          $helperLegacy = (Resolve-Path "emulation/compat/frida-helper.exe").Path
+          $agentLegacy = (Resolve-Path "emulation/compat/frida-agent.dll").Path
+
+          .\configure `
+            --prefix=$Env:FRIDA_PREFIX `
+            --host=windows-arm64 `
+            --enable-gadget `
+            --enable-server `
+            --enable-portal `
+            --enable-inject `
+            -- `
+            "-Dfrida_qml=auto" `
+            "-Dfrida-gum:devkits=gum,gumjs" `
+            "-Dfrida-core:compiler_backend=enabled" `
+            "-Dfrida-core:devkits=core" `
+            "-Dfrida-core:helper_emulated_modern=$helperModern" `
+            "-Dfrida-core:agent_emulated_modern=$agentModern" `
+            "-Dfrida-core:helper_emulated_legacy=$helperLegacy" `
+            "-Dfrida-core:agent_emulated_legacy=$agentLegacy"
+        env:
+          MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
+      - name: Compile
+        run: .\make
+      - name: Install
+        run: .\make install
+      - name: Upload Gum devkit
+        uses: actions/upload-artifact@v4
+        with:
+          name: frida-gum-devkit-windows-arm64
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gum/
+      - name: Upload GumJS devkit
+        uses: actions/upload-artifact@v4
+        with:
+          name: frida-gumjs-devkit-windows-arm64
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gumjs/
+      - name: Upload Core devkit
+        uses: actions/upload-artifact@v4
+        with:
+          name: frida-core-devkit-windows-arm64
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/core/
+      - name: Upload frida-server
+        uses: actions/upload-artifact@v4
+        with:
+          name: frida-server-windows-arm64
+          path: ${{ env.FRIDA_PREFIX }}/bin/frida-server.exe
+      - name: Upload frida-portal
+        uses: actions/upload-artifact@v4
+        with:
+          name: frida-portal-windows-arm64
+          path: ${{ env.FRIDA_PREFIX }}/bin/frida-portal.exe
+      - name: Upload frida-inject
+        uses: actions/upload-artifact@v4
+        with:
+          name: frida-inject-windows-arm64
+          path: ${{ env.FRIDA_PREFIX }}/bin/frida-inject.exe
+      - name: Upload frida-gadget
+        uses: actions/upload-artifact@v4
+        with:
+          name: frida-gadget-windows-arm64
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida/64/frida-gadget.dll
+      - name: Package Python bindings
+        run: |
+          $Env:FRIDA_EXTENSION = "$Env:FRIDA_PREFIX\lib\site-packages\frida\_frida.pyd"
+          cd subprojects\frida-python
+          pip wheel -w "$Env:FRIDA_PREFIX\wheels" --no-deps .
+      - name: Upload Python bindings
+        uses: actions/upload-artifact@v4
+        with:
+          name: frida-python-windows-arm64
+          path: ${{ env.FRIDA_PREFIX }}/wheels/*.whl
+      - name: Build Node.js bindings
+        run: |
+          $installdir = "$Env:FRIDA_PREFIX\prebuilds"
+          $Env:FRIDA_DEPS = "$pwd\deps"
+          $Env:PKG_CONFIG_PATH = "$Env:FRIDA_PREFIX\lib\pkgconfig"
+          function Run() {
+            $program = $args[0]
+            $arglist = $args | Select-Object -Skip 1
+            & $program $arglist
+            $result = $LASTEXITCODE
+            if ($result -ne 0) {
+              throw "'$program $arglist' failed with exit status $result"
+            }
+          }
+          Run python .\tools\ensure-submodules.py frida-node
+          cd subprojects\frida-node
+          Run npm version $FRIDA_VERSION
+          Run .\configure `
+              --prefix=$Env:FRIDA_PREFIX `
+              --host=windows-arm64
+          Run .\make prebuild
+          New-Item -ItemType Directory -Path $installdir
+          Copy-Item .\build\*.tar.gz -Destination $installdir
+      - name: Upload Node.js bindings
+        uses: actions/upload-artifact@v4
+        with:
+          name: frida-node-windows-arm64
+          path: ${{ env.FRIDA_PREFIX }}/prebuilds/*.tar.gz
 
   frida-macos:
     needs: sdk-macos
