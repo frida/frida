@@ -1,30 +1,18 @@
-name: Patch and Build
+name: Patch and Build Android
 
 on:
   workflow_dispatch:
-    inputs:
-      patch_url:
-        description: 'Optional URL to a .patch file to apply before building'
-        required: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: ghcr.io/frida/x-tools-linux-arm64:latest
 
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
-
-      - name: Apply patch
-        if: github.event.inputs.patch_url != ''
-        run: |
-          apt-get update && apt-get install -y --no-install-recommends wget
-          wget -O patch.diff ${{ github.event.inputs.patch_url }}
-          git apply patch.diff
-
-      - name: Grab needed submodules
-        run: python tools/ensure-submodules.py frida-gum frida-core frida-python frida-node frida-tools
+        with:
+          repository: 'Ylarod/Florida'
+          submodules: 'recursive'
 
       - name: Install Go toolchain
         uses: actions/setup-go@v5
@@ -32,32 +20,23 @@ jobs:
           go-version-file: 'subprojects/frida-core/src/compiler/go.mod'
           cache-dependency-path: 'subprojects/frida-core/src/compiler/go.mod'
 
-      - name: Prepare environment for installing Qt
-        run: |
-          apt-get update
-          apt-get install -y --no-install-recommends sudo
-          echo "PIP_BREAK_SYSTEM_PACKAGES=1" >> $GITHUB_ENV
-
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4
+      - name: Set up NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
         with:
-          version: '6.7.0'
-          cache: true
-          setup-python: false
+          ndk-version: r25b
+          add-to-path: false
+
+      - name: Add ANDROID_NDK_ROOT to environment
+        run: echo "ANDROID_NDK_ROOT=${{ steps.setup-ndk.outputs.ndk-path }}" >> $GITHUB_ENV
 
       - name: Configure
         run: |
           ./configure \
             --prefix=/build \
-            --host=$XTOOLS_HOST \
-            --enable-gadget \
-            --enable-server \
+            --host=android-arm64 \
             --enable-portal \
-            --enable-inject \
-            --enable-frida-python \
             -- \
-            -Dlibdir=lib \
-            -Dfrida_qml=enabled \
             -Dfrida-gum:devkits=gum,gumjs \
             -Dfrida-core:compiler_backend=enabled \
             -Dfrida-core:devkits=core
@@ -71,5 +50,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: frida-patched-build-linux-arm64
+          name: frida-patched-build-android-arm64
           path: /build
