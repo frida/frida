@@ -1,0 +1,75 @@
+name: Patch and Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      patch_url:
+        description: 'Optional URL to a .patch file to apply before building'
+        required: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: ghcr.io/frida/x-tools-linux-arm64:latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Apply patch
+        if: github.event.inputs.patch_url != ''
+        run: |
+          apt-get update && apt-get install -y --no-install-recommends wget
+          wget -O patch.diff ${{ github.event.inputs.patch_url }}
+          git apply patch.diff
+
+      - name: Grab needed submodules
+        run: python tools/ensure-submodules.py frida-gum frida-core frida-python frida-node frida-tools
+
+      - name: Install Go toolchain
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'subprojects/frida-core/src/compiler/go.mod'
+          cache-dependency-path: 'subprojects/frida-core/src/compiler/go.mod'
+
+      - name: Prepare environment for installing Qt
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends sudo
+          echo "PIP_BREAK_SYSTEM_PACKAGES=1" >> $GITHUB_ENV
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.7.0'
+          cache: true
+          setup-python: false
+
+      - name: Configure
+        run: |
+          ./configure \
+            --prefix=/build \
+            --host=$XTOOLS_HOST \
+            --enable-gadget \
+            --enable-server \
+            --enable-portal \
+            --enable-inject \
+            --enable-frida-python \
+            -- \
+            -Dlibdir=lib \
+            -Dfrida_qml=enabled \
+            -Dfrida-gum:devkits=gum,gumjs \
+            -Dfrida-core:compiler_backend=enabled \
+            -Dfrida-core:devkits=core
+
+      - name: Compile
+        run: make
+
+      - name: Install
+        run: make install
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frida-patched-build-linux-arm64
+          path: /build
