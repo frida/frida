@@ -1,0 +1,62 @@
+if (SelectedCharacter.add(284).readPointer().add(64).readPointer().toInt32()) {
+SkillUltiProjectile = SelectedCharacter.add(284).readPointer().add(64).readPointer();
+}
+if (SelectedCharacter.add(284).readPointer().add(112).readPointer().toInt32()) {
+SkillUltiSecondaryProjectile = SelectedCharacter.add(284).readPointer().add(112).readPointer();
+}
+if (SelectedCharacter.add(284).readPointer().add(116).readPointer().toInt32()) {
+SkillUltiThirdProjectile = SelectedCharacter.add(284).readPointer().add(116).readPointer();
+}
+}
+
+if (!MainAttackProjectile.equals(0)) {  
+                        SaveObject.ReplacedProjectiles.push([ReadStringFromStringObject(LogicData_getName(SkillProjectile)), ReadStringFromStringObject(LogicData_getName(MainAttackProjectile)), i]);  
+                    }  
+                    if (!SecondaryProjectile.equals(0)) {  
+                        SaveObject.ReplacedProjectiles.push([ReadStringFromStringObject(LogicData_getName(SkillSecondaryProjectile)), ReadStringFromStringObject(LogicData_getName(SecondaryProjectile)), i]);  
+                    }  
+                    if (!ThirdProjectile.equals(0)) {  
+                        SaveObject.ReplacedProjectiles.push([ReadStringFromStringObject(LogicData_getName(SkillThirdProjectile)), ReadStringFromStringObject(LogicData_getName(ThirdProjectile)), i]);  
+                    }  
+                    if (!UltiProjectile.equals(0)) {  
+                        SaveObject.ReplacedProjectiles.push([ReadStringFromStringObject(LogicData_getName(SkillUltiProjectile)), ReadStringFromStringObject(LogicData_getName(UltiProjectile)), i]);  
+                    }  
+
+                }  
+                WriteToFile(ModSaveFilePath, "w", FormatJSONString(SaveObject));  
+
+                let ptr1 = malloc(300);  
+                BrawlerMenuPopup(ptr1, true, true);  
+                let ptr2 = malloc(300);  
+                ModMenuPopup(ptr2);  
+
+                GUI_closeAllPopups(base.add(GUI_instanceAddr).readPointer());  
+
+                GUI_showPopup(base.add(GUI_instanceAddr).readPointer(), ptr2, 1, 0, 0);  
+                GUI_showPopup(base.add(GUI_instanceAddr).readPointer(), ptr1, 1, 1, 0);  
+
+                TextSkinChangerChooseBrawlerShowCounter = TextSkinChangerChooseBrawlerShowCounter + 1;  
+
+                if (TextSkinChangerChooseBrawlerShowCounter % 4 == 0 && TextSkinChangerChooseBrawlerShowCounter <= 16) {  
+                    ShowFloaterTextAtDefaultPosition(LocalizationObject.TextSkinChangerChooseBrawlerPart1);  
+                    ShowFloaterTextAtDefaultPosition(LocalizationObject.TextSkinChangerChooseBrawlerPart2, 0.0, 0xFFF5ECA9);  
+                }  
+                else {  
+                    ShowFloaterTextAtDefaultPosition(LocalizationObject.TextSkinChangerChooseBrawler);  
+                }  
+            }  
+            else {  
+                let CurrentSkinConf = LogicDataTables_getSkinConfByName(LogicData_getValueAt(CurrentSkinItem, 1), ptr(0));  
+                let CurrentBrawler = LogicDataTables_getCharacterByName(LogicData_getValueAt(CurrentSkinConf, 1), ptr(0));  
+                HomeScreen_doOfflineGatcha(0, CurrentBrawler, CurrentSkinItem);  
+            }  
+        }  
+    }  
+}
+
+}, 'void', ['pointer', 'pointer']));
+
+function BrawlerMenuPopup(a1, isForSkins=false, isForSkinChanger=false) {
+function BrawlerMenuPopup_refreshItems(a1) {
+function BrawlerMenuItem(a1, Item) { peki bu aimbot yada mod menulumu
+
