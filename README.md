@@ -35,25 +35,27 @@ For running the Frida CLI tools, e.g. `frida`, `frida-ls-devices`, `frida-ps`,
 
 ### Apple OSes
 
-First make a trusted code-signing certificate. You can use the guide at
-https://sourceware.org/gdb/wiki/PermissionsDarwin in the sections
-“Create a certificate in the System Keychain” and “Trust the certificate
-for code signing”. You can use the name `frida-cert` instead of `gdb-cert`
-if you'd like.
+First make a trusted code-signing certificate. If you have already used Xcode
+before, chances are you already have an Apple development certificate.
+You can check it with the following command:
 
-Next export the name of the created certificate to relevant environment
+    security find-identity -v -p codesigning
+
+Which will return the certificate in the following format:
+
+    1) XXXXX "Apple Development: user@mail.com (XXXXX)"
+
+If you do not have a certificate, follow this guide: 
+https://help.apple.com/xcode/mac/current/#/dev154b28f09.
+
+Next export the name of your certificate to relevant environment
 variables, and run `make`:
 
-    export MACOS_CERTID=frida-cert
-    export IOS_CERTID=frida-cert
-    export WATCHOS_CERTID=frida-cert
-    export TVOS_CERTID=frida-cert
+    export MACOS_CERTID="Apple Development: user@mail.com (XXXXXXXXXX)"
+    export IOS_CERTID="Apple Development: user@mail.com (XXXXXXXXXX)"
+    export WATCHOS_CERTID="Apple Development: user@mail.com (XXXXXXXXXX)"
+    export TVOS_CERTID="Apple Development: user@mail.com (XXXXXXXXXX)"
     make
-
-To ensure that macOS accepts the newly created certificate, restart the
-`taskgated` daemon:
-
-    sudo killall taskgated
 
 ## Learn more
 
