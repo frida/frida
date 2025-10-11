@@ -921,18 +921,21 @@ jobs:
           $installdir = "$Env:FRIDA_PREFIX\prebuilds"
           $Env:FRIDA_DEPS = "$pwd\deps"
           $Env:PKG_CONFIG_PATH = "$Env:FRIDA_PREFIX\lib\pkgconfig"
-          function Run() {
-            $program = $args[0]
-            $arglist = $args | Select-Object -Skip 1
-            & $program $arglist
-            $result = $LASTEXITCODE
-            if ($result -ne 0) {
-              throw "'$program $arglist' failed with exit status $result"
+          function Run {
+            param(
+              [Parameter(Mandatory)]
+              [string] $FilePath,
+              [Parameter(ValueFromRemainingArguments = $true)]
+              [string[]] $Argv
+            )
+            $p = Start-Process -FilePath $FilePath -ArgumentList $Argv -NoNewWindow -Wait -PassThru
+            if ($p.ExitCode -ne 0) {
+              throw "'$FilePath $($Argv -join ' ')' failed with exit status $($p.ExitCode)"
             }
           }
           Run python .\tools\ensure-submodules.py frida-node
           cd subprojects\frida-node
-          Run npm version $FRIDA_VERSION
+          Run npm.cmd version $FRIDA_VERSION
           Run .\configure `
               --prefix=$Env:FRIDA_PREFIX `
               --host=windows-${{ matrix.arch }}
@@ -1085,18 +1088,21 @@ jobs:
           $installdir = "$Env:FRIDA_PREFIX\prebuilds"
           $Env:FRIDA_DEPS = "$pwd\deps"
           $Env:PKG_CONFIG_PATH = "$Env:FRIDA_PREFIX\lib\pkgconfig"
-          function Run() {
-            $program = $args[0]
-            $arglist = $args | Select-Object -Skip 1
-            & $program $arglist
-            $result = $LASTEXITCODE
-            if ($result -ne 0) {
-              throw "'$program $arglist' failed with exit status $result"
+          function Run {
+            param(
+              [Parameter(Mandatory)]
+              [string] $FilePath,
+              [Parameter(ValueFromRemainingArguments = $true)]
+              [string[]] $Argv
+            )
+            $p = Start-Process -FilePath $FilePath -ArgumentList $Argv -NoNewWindow -Wait -PassThru
+            if ($p.ExitCode -ne 0) {
+              throw "'$FilePath $($Argv -join ' ')' failed with exit status $($p.ExitCode)"
             }
           }
           Run python .\tools\ensure-submodules.py frida-node
           cd subprojects\frida-node
-          Run npm version $FRIDA_VERSION
+          Run npm.cmd version $FRIDA_VERSION
           Run .\configure `
               --prefix=$Env:FRIDA_PREFIX `
               --host=windows-arm64
