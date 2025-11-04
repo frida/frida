@@ -449,34 +449,6 @@ jobs:
         with:
           name: release-asset-frida-gadget-tvos-arm64-simulator
           path: frida-gadget-tvos-arm64-simulator.dylib.xz
-      - name: Download Swift bindings for macOS/x86_64
-        uses: actions/download-artifact@v4
-        with:
-          name: frida-swift-macos-x86_64
-          path: macos-x86_64/
-      - name: Download Swift bindings for macOS/arm64
-        uses: actions/download-artifact@v4
-        with:
-          name: frida-swift-macos-arm64
-          path: macos-arm64/
-      - name: Create universal Swift bindings for macOS
-        run: |
-          lipo \
-              macos-x86_64/Frida.framework/Frida \
-              macos-arm64/Frida.framework/Frida \
-              -create -output Frida.framework
-      - name: Package universal Swift bindings for macOS
-        run: |
-          tar \
-              -cJf frida-swift-macos-universal.tar.xz \
-              Frida.framework
-        env:
-          XZ_OPT: "-T 0"
-      - name: Upload universal Swift bindings for macOS
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-assets
-          path: frida-swift-macos-universal.tar.xz
 
   package-windows:
     if: startsWith(github.ref, 'refs/tags/')
@@ -1161,7 +1133,6 @@ jobs:
           --enable-portal
           --enable-inject
           --enable-frida-python
-          --enable-frida-swift
           --
           -Dfrida_qml=${{ matrix.arch != 'arm64e' && 'enabled' || 'disabled' }}
           -Dfrida-gum:graft_tool=enabled
@@ -1214,12 +1185,6 @@ jobs:
         with:
           name: frida-gadget-macos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida/frida-gadget.dylib
-      - name: Upload Swift bindings
-        if: matrix.arch != 'arm64e'
-        uses: actions/upload-artifact@v4
-        with:
-          name: frida-swift-macos-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/Frameworks/
       - name: Package Python bindings
         run: |
           export FRIDA_EXTENSION=$(find "$FRIDA_PREFIX" -name _frida.abi3.so)
