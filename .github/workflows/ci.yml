@@ -98,22 +98,8 @@ jobs:
         run: .github/scripts/package-cirrus-ci-artifacts.sh ${{ github.sha }}
       - name: Rename release assets
         run: .github/scripts/rename-release-assets.sh
-      - name: Publish release to GitHub
-        uses: softprops/action-gh-release@v1
-        with:
-          name: "Frida ${{ env.FRIDA_VERSION }}"
-          body: "See https://frida.re/news/ for details."
-          files: build/release-assets/*
       - name: Prepare Python packages
         uses: ./.github/actions/prepare-python-packages
-      - name: Publish Python bindings to pypi.org
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: build/python-packages/
-      - name: Publish .deb packages
-        uses: ./.github/actions/publish-debs
-        with:
-          site: production
       - name: Setup npm authentication
         uses: actions/setup-node@v6
         with:
