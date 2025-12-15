@@ -117,8 +117,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           registry-url: "https://registry.npmjs.org"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish Node.js bindings to npm
         run: |
           export FRIDA_DEPS=$PWD/deps
