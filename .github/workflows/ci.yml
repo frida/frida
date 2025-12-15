@@ -115,7 +115,7 @@ jobs:
         with:
           site: production
       - name: Setup npm authentication
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           registry-url: "https://registry.npmjs.org"
       - name: Publish Node.js bindings to npm
