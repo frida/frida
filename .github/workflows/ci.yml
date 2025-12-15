@@ -23,6 +23,8 @@ jobs:
       - package-apple-universal
       - assemble-ios-assets
       - assemble-tvos-assets
+    permissions:
+      id-token: write
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
@@ -107,7 +109,6 @@ jobs:
       - name: Publish Python bindings to pypi.org
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
           packages-dir: build/python-packages/
       - name: Publish .deb packages
         uses: ./.github/actions/publish-debs
@@ -153,6 +154,8 @@ jobs:
       - frida-linux
       - assemble-ios-assets
       - assemble-tvos-assets
+    permissions:
+      id-token: write
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
@@ -181,7 +184,6 @@ jobs:
       - name: Publish Python bindings to TestPyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           packages-dir: build/python-packages/
           repository-url: https://test.pypi.org/legacy/
       - name: Publish .deb packages
