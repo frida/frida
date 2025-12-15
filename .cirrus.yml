@@ -1,7 +1,7 @@
 task:
   name: freebsd-x86_64
   freebsd_instance:
-    image_family: freebsd-14-2
+    image_family: freebsd-14-3
   environment:
     S3_ACCESS_KEY: ENCRYPTED[2f368bef589e43779394e459191eaad2fc4cc50dc36c6f03168a1e8e43897476e8bf596fd4dd0d988bcbab8fa8e171f8]
     S3_SECRET_KEY: ENCRYPTED[45f352473433a1053622a662ce8d57bc7421bce5772c9c5caf4a0e54f63944bd420f71101e014876e038f0c66c134ac2]
