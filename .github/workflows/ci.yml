@@ -114,23 +114,18 @@ jobs:
         uses: ./.github/actions/publish-debs
         with:
           site: production
-      - name: Setup npm authentication
+      - name: Trigger frida-node publish
+        env:
+          GH_TOKEN: ${{ secrets.FRIDA_NODE_BOT_PAT }}
+          FRIDA_VERSION: ${{ env.FRIDA_VERSION }}
+        run: |
+          gh api repos/frida/frida-node/dispatches \
+              -f event_type=publish-prod-started \
+              -f client_payload[frida_version]="${FRIDA_VERSION}"
+      - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-      - name: Publish Node.js bindings to npm
-        run: |
-          export FRIDA_DEPS=$PWD/deps
-          cd subprojects/frida-node/subprojects
-          ln -s ../../frida-gum .
-          ln -s ../../frida-core .
-          cd ..
-          git submodule update --init --recursive
-          npm version $FRIDA_VERSION
-          ./configure -- -Dfrida-core:compat=disabled
-          make
-          npm install
-          npm publish
       - name: Publish frida-gadget-ios to npm
         run: |
           cd releng/modules/frida-gadget-ios
