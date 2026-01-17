@@ -100,11 +100,12 @@ jobs:
       - name: Rename release assets
         run: .github/scripts/rename-release-assets.sh
       - name: Publish release to GitHub
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           name: "Frida ${{ env.FRIDA_VERSION }}"
           body: "See https://frida.re/news/ for details."
           files: build/release-assets/*
+          token: ${{ github.token }}
       - name: Prepare Python packages
         uses: ./.github/actions/prepare-python-packages
       - name: Publish Python bindings to pypi.org
