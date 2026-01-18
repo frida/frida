@@ -95,8 +95,6 @@ jobs:
         uses: ./.github/actions/package-ios-assets
       - name: Package tvOS assets
         uses: ./.github/actions/package-tvos-assets
-      - name: Package Cirrus CI artifacts
-        run: .github/scripts/package-cirrus-ci-artifacts.sh ${{ github.sha }}
       - name: Rename release assets
         run: .github/scripts/rename-release-assets.sh
       - name: Publish release to GitHub
