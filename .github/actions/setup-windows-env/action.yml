@@ -7,9 +7,6 @@ inputs:
   aws-secret-access-key:
     required: true
     description: The aws-secret-access-key used to authenticate with AWS
-  cloudflare-email:
-    required: true
-    description: The email used to authenticate with Cloudflare
   cloudflare-token:
     required: true
     description: The token used to authenticate with Cloudflare
@@ -46,7 +43,6 @@ runs:
         @"
         defaults:
             domain: frida.re
-            email: ${{ inputs.cloudflare-email }}
             token: ${{ inputs.cloudflare-token }}
         "@ | Set-Content -Path $HOME\.cfcli.yml -NoNewline
       shell: pwsh
