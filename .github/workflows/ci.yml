@@ -100,7 +100,7 @@ jobs:
       - name: Rename release assets
         run: .github/scripts/rename-release-assets.sh
       - name: Publish release to GitHub
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@78237c54eb15310cb292a15480c4be010be47aeb
         with:
           name: "Frida ${{ env.FRIDA_VERSION }}"
           body: "See https://frida.re/news/ for details."
