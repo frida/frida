@@ -21,7 +21,7 @@ task:
       py311-setuptools
     echo "CIRRUS_SHELL=$(which bash)" >> $CIRRUS_ENV
     pip install awscli typing-extensions
-    npm install -g cloudflare-cli
+    npm install -g cloudflare-cli@5.0.5
   clone_script: |
     if [ -z "$CIRRUS_PR" ]; then
       git clone --branch=$CIRRUS_BRANCH https://x-access-token:${CIRRUS_REPO_CLONE_TOKEN}@github.com/${CIRRUS_REPO_FULL_NAME}.git $CIRRUS_WORKING_DIR

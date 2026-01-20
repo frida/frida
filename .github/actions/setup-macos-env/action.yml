@@ -90,5 +90,5 @@ runs:
       run: pip install setuptools
       shell: bash
     - name: Install cloudflare-cli
-      run: npm install -g cloudflare-cli
+      run: npm install -g cloudflare-cli@5.0.5
       shell: bash

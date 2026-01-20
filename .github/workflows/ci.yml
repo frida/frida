@@ -44,7 +44,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y reprepro
-          sudo npm install -g cloudflare-cli
+          sudo npm install -g cloudflare-cli@5.0.5
       - name: Download release assets
         uses: actions/download-artifact@v4
         with:
@@ -168,7 +168,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y reprepro
-          sudo npm install -g cloudflare-cli
+          sudo npm install -g cloudflare-cli@5.0.5
       - name: Package iOS assets
         uses: ./.github/actions/package-ios-assets
       - name: Package tvOS assets
