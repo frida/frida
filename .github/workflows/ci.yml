@@ -36,6 +36,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Grab needed submodules
         run: python tools/ensure-submodules.py frida-gum frida-core frida-python frida-node
@@ -159,6 +160,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Grab needed submodules
         run: python tools/ensure-submodules.py frida-core frida-python
@@ -197,6 +199,7 @@ jobs:
           keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Download universal frida-server for iOS/arm64(e)
         uses: actions/download-artifact@v4
@@ -246,6 +249,7 @@ jobs:
           keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Download frida-server for tvOS/arm64
         uses: actions/download-artifact@v4
@@ -287,6 +291,7 @@ jobs:
           keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Download frida-gadget for macOS/x86_64
         uses: actions/download-artifact@v4
@@ -771,6 +776,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
           architecture: ${{ matrix.arch == 'x86_64' && 'x64' || matrix.arch }}
       - name: Install MinGW toolchain for cgo support
@@ -948,6 +954,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
           architecture: arm64
       - name: Install MinGW toolchain for cgo support
@@ -1094,6 +1101,7 @@ jobs:
           keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Grab frida-core
         run: python tools/ensure-submodules.py frida-core
@@ -1237,6 +1245,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Grab frida-core
         run: python tools/ensure-submodules.py frida-core
@@ -1419,6 +1428,7 @@ jobs:
           keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Grab frida-core
         run: python tools/ensure-submodules.py frida-core
@@ -1514,6 +1524,7 @@ jobs:
           keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Configure
         run: >-
@@ -1568,6 +1579,7 @@ jobs:
           keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Grab frida-core
         run: python tools/ensure-submodules.py frida-core
@@ -1653,6 +1665,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Grab frida-core
         run: python tools/ensure-submodules.py frida-core
@@ -1740,6 +1753,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Add CFLAGS to environment
         run: echo "CFLAGS=\"--sysroot=$QNX_TARGET/armle-v7\"" >> $GITHUB_ENV
@@ -1808,6 +1822,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Roll toolchain
         run: python releng\deps.py roll toolchain windows-${{ matrix.arch }}
@@ -1828,6 +1843,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Roll SDK
         run: python releng\deps.py roll sdk windows-${{ matrix.arch }}-${{ matrix.config }} --activate
@@ -1849,6 +1865,7 @@ jobs:
           keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Roll toolchain
         run: releng/deps.py roll toolchain macos-${{ matrix.arch }}
@@ -1871,6 +1888,7 @@ jobs:
           keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Roll SDK
         run: releng/deps.py roll sdk macos-${{ matrix.arch }} --activate
@@ -1892,6 +1910,7 @@ jobs:
           certificates-password: ${{ secrets.APPLE_CERTIFICATES_PASSWORD }}
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Roll SDK
         run: releng/deps.py roll sdk ios-${{ matrix.arch }} --activate
@@ -1913,6 +1932,7 @@ jobs:
           certificates-password: ${{ secrets.APPLE_CERTIFICATES_PASSWORD }}
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Roll SDK
         run: releng/deps.py roll sdk watchos-${{ matrix.arch }} --activate
@@ -1934,6 +1954,7 @@ jobs:
           certificates-password: ${{ secrets.APPLE_CERTIFICATES_PASSWORD }}
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Roll SDK
         run: releng/deps.py roll sdk tvos-${{ matrix.arch }} --activate
@@ -1953,6 +1974,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Roll toolchain
         run: releng/deps.py roll toolchain $XTOOLS_HOST
@@ -1973,6 +1995,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Set FRIDA_CAN_RUN_HOST_BINARIES
         if: ${{ matrix.arch == 'x86' }}
@@ -1999,6 +2022,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Set up NDK
         id: setup-ndk
@@ -2027,6 +2051,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Set up NDK
         id: setup-ndk
