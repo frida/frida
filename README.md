@@ -43,7 +43,7 @@ You can check it with the following command:
 
 Which will return the certificate in the following format:
 
-    1) XXXXX "Apple Development: user@mail.com (XXXXX)"
+    1) XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX "Apple Development: user@mail.com (YYYYYYYYYY)"
 
 If you do not have a certificate, follow this guide: 
 https://help.apple.com/xcode/mac/current/#/dev154b28f09.
@@ -51,10 +51,10 @@ https://help.apple.com/xcode/mac/current/#/dev154b28f09.
 Next export the name of your certificate to relevant environment
 variables, and run `make`:
 
-    export MACOS_CERTID="Apple Development: user@mail.com (XXXXXXXXXX)"
-    export IOS_CERTID="Apple Development: user@mail.com (XXXXXXXXXX)"
-    export WATCHOS_CERTID="Apple Development: user@mail.com (XXXXXXXXXX)"
-    export TVOS_CERTID="Apple Development: user@mail.com (XXXXXXXXXX)"
+    export MACOS_CERTID=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    export IOS_CERTID=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    export WATCHOS_CERTID=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    export TVOS_CERTID=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     make
 
 ## Learn more
