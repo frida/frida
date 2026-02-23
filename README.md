@@ -31,7 +31,7 @@ any other options.
 For running the Frida CLI tools, e.g. `frida`, `frida-ls-devices`, `frida-ps`,
 `frida-kill`, `frida-trace`, `frida-discover`, etc., you need a few packages:
 
-    pip install colorama prompt-toolkit pygments
+    pip install colorama prompt-toolkit pygments websockets
 
 ### Apple OSes
 
