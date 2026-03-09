@@ -4,7 +4,7 @@ on: push
 
 env:
   FRIDA_COMPILER_MOD: subprojects/frida-core/src/compiler/go.mod
-  ANDROID_NDK_VERSION: r25b
+  ANDROID_NDK_VERSION: r29
 
 jobs:
   publish-prod:
