@@ -833,17 +833,17 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frida-gum-devkit-windows-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gum/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gum/
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v4
         with:
           name: frida-gumjs-devkit-windows-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gumjs/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gumjs/
       - name: Upload Core devkit
         uses: actions/upload-artifact@v4
         with:
           name: frida-core-devkit-windows-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/core/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/core/
       - name: Upload frida-server
         uses: actions/upload-artifact@v4
         with:
@@ -1008,17 +1008,17 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frida-gum-devkit-windows-arm64
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gum/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gum/
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v4
         with:
           name: frida-gumjs-devkit-windows-arm64
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gumjs/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gumjs/
       - name: Upload Core devkit
         uses: actions/upload-artifact@v4
         with:
           name: frida-core-devkit-windows-arm64
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/core/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/core/
       - name: Upload frida-server
         uses: actions/upload-artifact@v4
         with:
@@ -1141,7 +1141,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frida-gum-devkit-macos-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gum/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gum/
       - name: Upload gum-graft
         if: matrix.arch != 'arm64e'
         uses: actions/upload-artifact@v4
@@ -1152,12 +1152,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frida-gumjs-devkit-macos-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gumjs/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gumjs/
       - name: Upload Core devkit
         uses: actions/upload-artifact@v4
         with:
           name: frida-core-devkit-macos-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/core/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/core/
       - name: Upload frida-server
         uses: actions/upload-artifact@v4
         with:
@@ -1294,17 +1294,17 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frida-gum-devkit-linux-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gum/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gum/
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v4
         with:
           name: frida-gumjs-devkit-linux-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gumjs/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gumjs/
       - name: Upload Core devkit
         uses: actions/upload-artifact@v4
         with:
           name: frida-core-devkit-linux-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/core/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/core/
       - name: Upload frida-server
         uses: actions/upload-artifact@v4
         with:
@@ -1456,17 +1456,17 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frida-gum-devkit-ios-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida/devkits/gum/
+          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/devkits/gum/
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v4
         with:
           name: frida-gumjs-devkit-ios-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida/devkits/gumjs/
+          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/devkits/gumjs/
       - name: Upload Core devkit
         uses: actions/upload-artifact@v4
         with:
           name: frida-core-devkit-ios-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida/devkits/core/
+          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/devkits/core/
       - name: Upload frida-server
         if: ${{ matrix.arch != 'arm64' && !endsWith(matrix.arch, '-simulator') }}
         uses: actions/upload-artifact@v4
@@ -1542,17 +1542,17 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frida-gum-devkit-watchos-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gum/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gum/
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v4
         with:
           name: frida-gumjs-devkit-watchos-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gumjs/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gumjs/
       - name: Upload Core devkit
         uses: actions/upload-artifact@v4
         with:
           name: frida-core-devkit-watchos-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/core/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/core/
       - name: Upload frida-gadget
         uses: actions/upload-artifact@v4
         with:
@@ -1601,17 +1601,17 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frida-gum-devkit-tvos-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida/devkits/gum/
+          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/devkits/gum/
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v4
         with:
           name: frida-gumjs-devkit-tvos-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida/devkits/gumjs/
+          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/devkits/gumjs/
       - name: Upload Core devkit
         uses: actions/upload-artifact@v4
         with:
           name: frida-core-devkit-tvos-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida/devkits/core/
+          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/devkits/core/
       - name: Upload frida-server
         if: ${{ !endsWith(matrix.arch, '-simulator') }}
         uses: actions/upload-artifact@v4
@@ -1700,17 +1700,17 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frida-gum-devkit-android-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gum/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gum/
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v4
         with:
           name: frida-gumjs-devkit-android-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gumjs/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gumjs/
       - name: Upload Core devkit
         uses: actions/upload-artifact@v4
         with:
           name: frida-core-devkit-android-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/core/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/core/
       - name: Upload frida-server
         uses: actions/upload-artifact@v4
         with:
@@ -1776,17 +1776,17 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frida-gum-devkit-qnx-armeabi
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gum/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gum/
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v4
         with:
           name: frida-gumjs-devkit-qnx-armeabi
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gumjs/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gumjs/
       - name: Upload Core devkit
         uses: actions/upload-artifact@v4
         with:
           name: frida-core-devkit-qnx-armeabi
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/devkits/core/
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/core/
       - name: Upload frida-server
         uses: actions/upload-artifact@v4
         with:
