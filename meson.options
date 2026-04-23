@@ -1,12 +1,12 @@
 option('frida_tools',
   type: 'feature',
-  value: 'auto',
+  value: 'disabled',
   description: 'Build CLI tools, like frida, frida-trace, etc.',
 )
 
 option('graft_tool',
   type: 'feature',
-  value: 'auto',
+  value: 'disabled',
   description: 'Build gum-graft tool',
 )
 
@@ -18,7 +18,7 @@ option('gadget',
 
 option('server',
   type: 'feature',
-  value: 'auto',
+  value: 'disabled',
   description: 'Build frida-server',
 )
 
@@ -30,7 +30,7 @@ option('portal',
 
 option('inject',
   type: 'feature',
-  value: 'auto',
+  value: 'disabled',
   description: 'Build frida-inject',
 )
 
