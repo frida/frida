@@ -31,12 +31,15 @@ jobs:
 
       - name: Cook the Binary
         run: |
-          # frida_python=disabled is already set in the committed meson.options
-          # Building specifically for the iPhone 17 Pro (arm64e)
-          make ios-arm64e
+          # Configure cross-compilation for iPhone 17 Pro (arm64e)
+          ./configure --host=arm64e-apple-ios
+
+          # This is a long cook. Let the stove sizzle.
+          make
 
       - name: The Surgical Sign
         run: |
+          # Grabbing your identity from the keychain
           IDENTITY=$(security find-identity -v -p codesigning | grep "Apple Development" | head -n 1 | awk -F '"' '{print $2}')
 
           if [ -z "$IDENTITY" ]; then
@@ -45,18 +48,24 @@ jobs:
           fi
           echo "[+] SIGNING WITH IDENTITY: $IDENTITY"
 
-          TARGET_PATH="build/frida-ios-arm64e/lib/frida/64/frida-gadget.dylib"
+          # Find the gadget dylib wherever the build system put it
+          TARGET_PATH=$(find build -name "frida-gadget.dylib" | head -n 1)
 
-          if [ -f "$TARGET_PATH" ]; then
-            codesign -f -s "$IDENTITY" "$TARGET_PATH"
-            echo "[+] GADGET SIGNED AND READY FOR THE STREETS."
-          else
-            echo "[-] BUILD FAILED. NO DYLIB FOUND."
+          if [ -z "$TARGET_PATH" ]; then
+            echo "[-] BUILD FAILED. NO DYLIB FOUND. BUILD TREE:"
+            find build -name "*.dylib" 2>/dev/null || echo "No dylibs found at all."
             exit 1
           fi
+
+          echo "[+] FOUND GADGET AT: $TARGET_PATH"
+          codesign -f -s "$IDENTITY" "$TARGET_PATH"
+          echo "[+] GADGET SIGNED AND READY FOR THE STREETS."
+
+          # Stash path for the upload step
+          echo "GADGET_PATH=$TARGET_PATH" >> $GITHUB_ENV
 
       - name: Stash the Product
         uses: actions/upload-artifact@v4
         with:
           name: frida-ios-signed-gadget
-          path: build/frida-ios-arm64e/lib/frida/64/frida-gadget.dylib
+          path: ${{ env.GADGET_PATH }}
