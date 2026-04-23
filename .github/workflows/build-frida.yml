@@ -35,10 +35,12 @@ jobs:
 
       - name: Cook the Binary
         run: |
-          # Building specifically for the iPhone 17 Pro (arm64e)
-          # This is a long cook. Let the stove sizzle.
-          make ios-arm64e
+          # Nuke language binding subprojects — we only need the gadget dylib.
+          # frida-python, frida-node, frida-clr all fail or bloat the build.
+          rm -rf subprojects/frida-python subprojects/frida-node subprojects/frida-clr
 
+          # Building specifically for the iPhone 17 Pro (arm64e)
+          make ios-arm64e
       - name: The Surgical Sign
         run: |
           # Grabbing your identity from the keychain
