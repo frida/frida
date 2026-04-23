@@ -48,7 +48,7 @@ option('frida_node',
 
 option('frida_python',
   type: 'feature',
-  value: 'auto',
+  value: 'disabled',
   description: 'Build Python bindings',
 )
 
