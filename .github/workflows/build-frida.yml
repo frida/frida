@@ -1,10 +1,8 @@
 name: Build and Sign Frida iOS (The Gospel)
-
 on:
   workflow_dispatch: # Manual trigger for when the block is hot
   push:
     branches: [ main ]
-
 jobs:
   build:
     runs-on: macos-latest # Apple SDKs only live here
@@ -32,8 +30,8 @@ jobs:
       - name: Install the Hall Pass (Provisioning Profile)
         run: |
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          # We decode your .mobileprovision directly into the Apple vault
-          echo -n "${{ secrets.PROVISION_BASE64 }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/signed.mobileprovision
+          # macOS base64 uses -D, not --decode (that's GNU/Linux only)
+          echo -n "${{ secrets.PROVISION_BASE64 }}" | base64 -D > ~/Library/MobileDevice/Provisioning\ Profiles/signed.mobileprovision
 
       - name: Cook the Binary
         run: |
@@ -50,7 +48,6 @@ jobs:
             echo "[-] COULD NOT FIND THE ICE. CHECK YOUR P12_BASE64."
             exit 1
           fi
-
           echo "[+] SIGNING WITH IDENTITY: $IDENTITY"
           
           # Target the specific dylib for injection
