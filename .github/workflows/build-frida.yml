@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     runs-on: macos-latest # Apple SDKs only live here
-    
+
     steps:
       - name: Checkout the Heat
         uses: actions/checkout@v4
@@ -15,10 +15,7 @@ jobs:
 
       - name: Setup the Lab
         run: |
-          # Install the heavy machinery
           brew install meson ninja pkg-config node
-          
-          # Bypass PEP 668: No permission asked, no permission given.
           pip3 install --break-system-packages colorama prompt-toolkit pygments websockets
 
       - name: Import the Ice (P12 Certificate)
@@ -30,45 +27,26 @@ jobs:
       - name: Install the Hall Pass (Provisioning Profile)
         run: |
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          # macOS base64 uses -D, not --decode (that's GNU/Linux only)
           echo -n "${{ secrets.PROVISION_BASE64 }}" | base64 -D > ~/Library/MobileDevice/Provisioning\ Profiles/signed.mobileprovision
 
       - name: Cook the Binary
         run: |
-          # Patch meson.options: frida_python defaults to 'auto' which gets
-          # included during the host config pass and crashes. Gadget-only build
-          # doesn't need any language bindings.
-          python3 - <<'EOF'
-import re, pathlib
-p = pathlib.Path('meson.options')
-txt = p.read_text()
-txt = re.sub(
-  r"(option\('frida_python'.*?value:\s*)'auto'",
-  r"\1'disabled'",
-  txt, flags=re.DOTALL
-)
-p.write_text(txt)
-print("[+] meson.options patched: frida_python=disabled")
-EOF
-
+          # frida_python=disabled is already set in the committed meson.options
           # Building specifically for the iPhone 17 Pro (arm64e)
-          # This is a long cook. Let the stove sizzle.
           make ios-arm64e
 
       - name: The Surgical Sign
         run: |
-          # Grabbing your identity from the keychain
           IDENTITY=$(security find-identity -v -p codesigning | grep "Apple Development" | head -n 1 | awk -F '"' '{print $2}')
-          
+
           if [ -z "$IDENTITY" ]; then
             echo "[-] COULD NOT FIND THE ICE. CHECK YOUR P12_BASE64."
             exit 1
           fi
           echo "[+] SIGNING WITH IDENTITY: $IDENTITY"
-          
-          # Target the specific dylib for injection
+
           TARGET_PATH="build/frida-ios-arm64e/lib/frida/64/frida-gadget.dylib"
-          
+
           if [ -f "$TARGET_PATH" ]; then
             codesign -f -s "$IDENTITY" "$TARGET_PATH"
             echo "[+] GADGET SIGNED AND READY FOR THE STREETS."
