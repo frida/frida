@@ -31,15 +31,15 @@ jobs:
 
       - name: Cook the Binary
         run: |
-          # Configure cross-compilation for iPhone 17 Pro (arm64e)
-          ./configure --host=arm64e-apple-ios
+          # arm64e-apple-ios has no pre-built SDK on Frida's CDN.
+          # arm64-apple-ios does, and the gadget runs fine on iPhone 17 Pro.
+          ./configure --host=arm64-apple-ios
 
           # This is a long cook. Let the stove sizzle.
           make
 
       - name: The Surgical Sign
         run: |
-          # Grabbing your identity from the keychain
           IDENTITY=$(security find-identity -v -p codesigning | grep "Apple Development" | head -n 1 | awk -F '"' '{print $2}')
 
           if [ -z "$IDENTITY" ]; then
@@ -61,7 +61,6 @@ jobs:
           codesign -f -s "$IDENTITY" "$TARGET_PATH"
           echo "[+] GADGET SIGNED AND READY FOR THE STREETS."
 
-          # Stash path for the upload step
           echo "GADGET_PATH=$TARGET_PATH" >> $GITHUB_ENV
 
       - name: Stash the Product
