@@ -35,12 +35,26 @@ jobs:
 
       - name: Cook the Binary
         run: |
-          # Nuke language binding subprojects — we only need the gadget dylib.
-          # frida-python, frida-node, frida-clr all fail or bloat the build.
-          rm -rf subprojects/frida-python subprojects/frida-node subprojects/frida-clr
+          # Patch meson.options: frida_python defaults to 'auto' which gets
+          # included during the host config pass and crashes. Gadget-only build
+          # doesn't need any language bindings.
+          python3 - <<'EOF'
+import re, pathlib
+p = pathlib.Path('meson.options')
+txt = p.read_text()
+txt = re.sub(
+  r"(option\('frida_python'.*?value:\s*)'auto'",
+  r"\1'disabled'",
+  txt, flags=re.DOTALL
+)
+p.write_text(txt)
+print("[+] meson.options patched: frida_python=disabled")
+EOF
 
           # Building specifically for the iPhone 17 Pro (arm64e)
+          # This is a long cook. Let the stove sizzle.
           make ios-arm64e
+
       - name: The Surgical Sign
         run: |
           # Grabbing your identity from the keychain
