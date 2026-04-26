@@ -226,9 +226,9 @@ jobs:
         run: codesign -f -s "-" ios-arm64e/frida-agent.dylib
       - name: Assemble iOS assets
         run: |
-          mkdir -p ios-assets/usr/bin ios-assets/usr/lib/frida
+          mkdir -p ios-assets/usr/bin ios-assets/usr/lib/frida-1.0
           mv frida-server-ios-universal ios-assets/usr/bin/frida-server
-          mv ios-arm64e/frida-agent.dylib ios-assets/usr/lib/frida/frida-agent.dylib
+          mv ios-arm64e/frida-agent.dylib ios-assets/usr/lib/frida-1.0/frida-agent.dylib
       - name: Upload iOS assets
         uses: actions/upload-artifact@v4
         with:
@@ -267,9 +267,9 @@ jobs:
         run: codesign -f -s "-" tvos-arm64/frida-agent.dylib
       - name: Assemble tvOS assets
         run: |
-          mkdir -p tvos-assets/usr/bin tvos-assets/usr/lib/frida
+          mkdir -p tvos-assets/usr/bin tvos-assets/usr/lib/frida-1.0
           mv tvos-arm64/frida-server tvos-assets/usr/bin/frida-server
-          mv tvos-arm64/frida-agent.dylib tvos-assets/usr/lib/frida/frida-agent.dylib
+          mv tvos-arm64/frida-agent.dylib tvos-assets/usr/lib/frida-1.0/frida-agent.dylib
       - name: Upload tvOS assets
         uses: actions/upload-artifact@v4
         with:
@@ -864,13 +864,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frida-gadget-windows-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/32/frida-gadget.dll
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/x86/frida-gadget.dll
       - name: Upload 64-bit frida-gadget
         if: matrix.arch == 'x86_64'
         uses: actions/upload-artifact@v4
         with:
           name: frida-gadget-windows-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/64/frida-gadget.dll
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/x86_64/frida-gadget.dll
       - name: Package Python bindings
         run: |
           $Env:FRIDA_EXTENSION = "$Env:FRIDA_PREFIX\lib\site-packages\frida\_frida.pyd"
@@ -1038,7 +1038,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frida-gadget-windows-arm64
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/64/frida-gadget.dll
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/arm64/frida-gadget.dll
       - name: Package Python bindings
         run: |
           $Env:FRIDA_EXTENSION = "$Env:FRIDA_PREFIX\lib\site-packages\frida\_frida.pyd"
@@ -1178,7 +1178,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frida-gadget-macos-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/frida-gadget.dylib
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/frida-gadget.dylib
       - name: Package Python bindings
         run: |
           export FRIDA_EXTENSION=$(find "$FRIDA_PREFIX" -name _frida.abi3.so)
@@ -1325,13 +1325,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frida-gadget-linux-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/32/frida-gadget.so
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/32/frida-gadget.so
       - name: Upload 64-bit frida-gadget
         if: ${{ contains(matrix.arch, '64') }}
         uses: actions/upload-artifact@v4
         with:
           name: frida-gadget-linux-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/64/frida-gadget.so
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/64/frida-gadget.so
       - name: Package Python bindings
         run: |
           export FRIDA_EXTENSION=$(find "$FRIDA_PREFIX" -name _frida.abi3.so)
@@ -1490,19 +1490,19 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frida-helper-ios-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida/frida-helper
+          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/frida-helper
       - name: Upload frida-agent
         if: ${{ matrix.arch != 'arm64' && !endsWith(matrix.arch, '-simulator') }}
         uses: actions/upload-artifact@v4
         with:
           name: frida-agent-ios-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida/frida-agent.dylib
+          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/frida-agent.dylib
       - name: Upload frida-gadget
         if: matrix.arch != 'arm64'
         uses: actions/upload-artifact@v4
         with:
           name: frida-gadget-ios-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida/frida-gadget.dylib
+          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/frida-gadget.dylib
 
   frida-watchos:
     needs: [sdk-macos, sdk-watchos]
@@ -1557,7 +1557,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frida-gadget-watchos-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/frida-gadget.dylib
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/frida-gadget.dylib
 
   frida-tvos:
     needs: [sdk-macos, sdk-tvos]
@@ -1635,18 +1635,18 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frida-helper-tvos-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida/frida-helper
+          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/frida-helper
       - name: Upload frida-agent
         if: ${{ !endsWith(matrix.arch, '-simulator') }}
         uses: actions/upload-artifact@v4
         with:
           name: frida-agent-tvos-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida/frida-agent.dylib
+          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/frida-agent.dylib
       - name: Upload frida-gadget
         uses: actions/upload-artifact@v4
         with:
           name: frida-gadget-tvos-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida/frida-gadget.dylib
+          path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/frida-gadget.dylib
 
   frida-android:
     needs: [sdk-linux, sdk-android-32, sdk-android-64]
@@ -1731,13 +1731,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frida-gadget-android-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/32/frida-gadget.so
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/32/frida-gadget.so
       - name: Upload 64-bit frida-gadget
         if: ${{ contains(matrix.arch, '64') }}
         uses: actions/upload-artifact@v4
         with:
           name: frida-gadget-android-${{ matrix.arch }}
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/64/frida-gadget.so
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/64/frida-gadget.so
 
   frida-qnx:
     runs-on: ubuntu-latest
@@ -1806,7 +1806,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frida-gadget-qnx-armeabi
-          path: ${{ env.FRIDA_PREFIX }}/lib/frida/32/frida-gadget.so
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/32/frida-gadget.so
 
   toolchain-windows:
     strategy:
