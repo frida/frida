@@ -1,0 +1,319 @@
+diff --git a/bindings/gumjs/gumscriptscheduler.c b/bindings/gumjs/gumscriptscheduler.c
+index b86a6c57..8c22ce13 100644
+--- a/bindings/gumjs/gumscriptscheduler.c
++++ b/bindings/gumjs/gumscriptscheduler.c
+@@ -114,7 +114,7 @@ gum_script_scheduler_start (GumScriptScheduler * self)
+   {
+     self->js_loop = g_main_loop_new (self->js_context, TRUE);
+ 
+-    self->js_thread = g_thread_new ("gum-js-loop",
++    self->js_thread = g_thread_new (GUM_STEALTH_THREAD_JS,
+         (GThreadFunc) gum_script_scheduler_run_js_loop, self);
+   }
+ }
+diff --git a/gum/arch-arm64/gumarm64writer.c b/gum/arch-arm64/gumarm64writer.c
+index 674f69ba..2b710dcf 100644
+--- a/gum/arch-arm64/gumarm64writer.c
++++ b/gum/arch-arm64/gumarm64writer.c
+@@ -1745,6 +1745,54 @@ gum_arm64_writer_put_xpaci_reg (GumArm64Writer * self,
+   return TRUE;
+ }
+ 
++gboolean
++gum_arm64_writer_put_movz_reg_imm (GumArm64Writer * self,
++                                   arm64_reg dst_reg,
++                                   guint16 imm,
++                                   guint8 shift)
++{
++  GumArm64RegInfo ri;
++  guint32 hw;
++
++  gum_arm64_writer_describe_reg (self, dst_reg, &ri);
++
++  if (ri.width != 64)
++    return FALSE;
++  if (shift != 0 && shift != 16 && shift != 32 && shift != 48)
++    return FALSE;
++
++  hw = shift / 16;
++
++  gum_arm64_writer_put_instruction (self,
++      ri.sf | 0x52800000 | (hw << 21) | ((guint32) imm << 5) | ri.index);
++
++  return TRUE;
++}
++
++gboolean
++gum_arm64_writer_put_movk_reg_imm (GumArm64Writer * self,
++                                   arm64_reg dst_reg,
++                                   guint16 imm,
++                                   guint8 shift)
++{
++  GumArm64RegInfo ri;
++  guint32 hw;
++
++  gum_arm64_writer_describe_reg (self, dst_reg, &ri);
++
++  if (ri.width != 64)
++    return FALSE;
++  if (shift != 0 && shift != 16 && shift != 32 && shift != 48)
++    return FALSE;
++
++  hw = shift / 16;
++
++  gum_arm64_writer_put_instruction (self,
++      ri.sf | 0x72800000 | (hw << 21) | ((guint32) imm << 5) | ri.index);
++
++  return TRUE;
++}
++
+ void
+ gum_arm64_writer_put_nop (GumArm64Writer * self)
+ {
+diff --git a/gum/arch-arm64/gumarm64writer.h b/gum/arch-arm64/gumarm64writer.h
+index 45479338..5b7e470e 100644
+--- a/gum/arch-arm64/gumarm64writer.h
++++ b/gum/arch-arm64/gumarm64writer.h
+@@ -231,6 +231,11 @@ GUM_API gboolean gum_arm64_writer_put_cmp_reg_reg (GumArm64Writer * self,
+ GUM_API gboolean gum_arm64_writer_put_xpaci_reg (GumArm64Writer * self,
+     arm64_reg reg);
+ 
++GUM_API gboolean gum_arm64_writer_put_movz_reg_imm (GumArm64Writer * self,
++    arm64_reg dst_reg, guint16 imm, guint8 shift);
++GUM_API gboolean gum_arm64_writer_put_movk_reg_imm (GumArm64Writer * self,
++    arm64_reg dst_reg, guint16 imm, guint8 shift);
++
+ GUM_API void gum_arm64_writer_put_nop (GumArm64Writer * self);
+ GUM_API void gum_arm64_writer_put_brk_imm (GumArm64Writer * self, guint16 imm);
+ GUM_API gboolean gum_arm64_writer_put_mrs (GumArm64Writer * self,
+diff --git a/gum/backend-arm64/guminterceptor-arm64.c b/gum/backend-arm64/guminterceptor-arm64.c
+index 224adc65..6cf561c9 100644
+--- a/gum/backend-arm64/guminterceptor-arm64.c
++++ b/gum/backend-arm64/guminterceptor-arm64.c
+@@ -26,6 +26,7 @@
+ #endif
+ 
+ #define GUM_INTERCEPTOR_FULL_REDIRECT_SIZE 16
++#define GUM_INTERCEPTOR_MOVW_REDIRECT_SIZE 20
+ 
+ #define GUM_ARM64_LOGICAL_PAGE_SIZE 4096
+ 
+@@ -635,6 +636,14 @@ gum_interceptor_backend_prepare_trampoline (GumInterceptorBackend * self,
+   *need_deflector = FALSE;
+ 
+   if (gum_arm64_relocator_can_relocate (function_address,
++        GUM_INTERCEPTOR_MOVW_REDIRECT_SIZE, GUM_SCENARIO_ONLINE,
++        &redirect_limit, &data->scratch_reg))
++  {
++    data->redirect_code_size = GUM_INTERCEPTOR_MOVW_REDIRECT_SIZE;
++
++    ctx->trampoline_slice = gum_code_allocator_alloc_slice (self->allocator);
++  }
++  else if (gum_arm64_relocator_can_relocate (function_address,
+         GUM_INTERCEPTOR_FULL_REDIRECT_SIZE, GUM_SCENARIO_ONLINE,
+         &redirect_limit, &data->scratch_reg))
+   {
+@@ -779,18 +788,50 @@ _gum_interceptor_backend_create_trampoline (GumInterceptorBackend * self,
+ 
+   if (ctx->type != GUM_INTERCEPTOR_TYPE_FAST)
+   {
+-    gum_arm64_writer_put_ldr_reg_address (aw, ARM64_REG_X17, GUM_ADDRESS (ctx));
+-    gum_arm64_writer_put_ldr_reg_address (aw, ARM64_REG_X16,
+-        GUM_ADDRESS (gum_sign_code_pointer (self->enter_thunk)));
+-    gum_arm64_writer_put_br_reg (aw, ARM64_REG_X16);
++    GumAddress ctx_addr = GUM_ADDRESS (ctx);
++    GumAddress enter_addr =
++        GUM_ADDRESS (gum_sign_code_pointer (self->enter_thunk));
++    GumAddress leave_addr =
++        GUM_ADDRESS (gum_sign_code_pointer (self->leave_thunk));
++
++    gum_arm64_writer_put_movz_reg_imm (aw, ARM64_REG_X17,
++        (ctx_addr) & 0xffff, 0);
++    gum_arm64_writer_put_movk_reg_imm (aw, ARM64_REG_X17,
++        (ctx_addr >> 16) & 0xffff, 16);
++    gum_arm64_writer_put_movk_reg_imm (aw, ARM64_REG_X17,
++        (ctx_addr >> 32) & 0xffff, 32);
++    gum_arm64_writer_put_movk_reg_imm (aw, ARM64_REG_X17,
++        (ctx_addr >> 48) & 0xffff, 48);
++    gum_arm64_writer_put_movz_reg_imm (aw, ARM64_REG_X16,
++        (enter_addr) & 0xffff, 0);
++    gum_arm64_writer_put_movk_reg_imm (aw, ARM64_REG_X16,
++        (enter_addr >> 16) & 0xffff, 16);
++    gum_arm64_writer_put_movk_reg_imm (aw, ARM64_REG_X16,
++        (enter_addr >> 32) & 0xffff, 32);
++    gum_arm64_writer_put_movk_reg_imm (aw, ARM64_REG_X16,
++        (enter_addr >> 48) & 0xffff, 48);
++    gum_arm64_writer_put_br_reg_no_auth (aw, ARM64_REG_X16);
+ 
+     ctx->on_leave_trampoline =
+         (guint8 *) ctx->trampoline_slice->pc + gum_arm64_writer_offset (aw);
+ 
+-    gum_arm64_writer_put_ldr_reg_address (aw, ARM64_REG_X17, GUM_ADDRESS (ctx));
+-    gum_arm64_writer_put_ldr_reg_address (aw, ARM64_REG_X16,
+-        GUM_ADDRESS (gum_sign_code_pointer (self->leave_thunk)));
+-    gum_arm64_writer_put_br_reg (aw, ARM64_REG_X16);
++    gum_arm64_writer_put_movz_reg_imm (aw, ARM64_REG_X17,
++        (ctx_addr) & 0xffff, 0);
++    gum_arm64_writer_put_movk_reg_imm (aw, ARM64_REG_X17,
++        (ctx_addr >> 16) & 0xffff, 16);
++    gum_arm64_writer_put_movk_reg_imm (aw, ARM64_REG_X17,
++        (ctx_addr >> 32) & 0xffff, 32);
++    gum_arm64_writer_put_movk_reg_imm (aw, ARM64_REG_X17,
++        (ctx_addr >> 48) & 0xffff, 48);
++    gum_arm64_writer_put_movz_reg_imm (aw, ARM64_REG_X16,
++        (leave_addr) & 0xffff, 0);
++    gum_arm64_writer_put_movk_reg_imm (aw, ARM64_REG_X16,
++        (leave_addr >> 16) & 0xffff, 16);
++    gum_arm64_writer_put_movk_reg_imm (aw, ARM64_REG_X16,
++        (leave_addr >> 32) & 0xffff, 32);
++    gum_arm64_writer_put_movk_reg_imm (aw, ARM64_REG_X16,
++        (leave_addr >> 48) & 0xffff, 48);
++    gum_arm64_writer_put_br_reg_no_auth (aw, ARM64_REG_X16);
+ 
+     gum_arm64_writer_flush (aw);
+     g_assert (gum_arm64_writer_offset (aw) <= ctx->trampoline_slice->size);
+@@ -907,8 +948,15 @@ _gum_interceptor_backend_create_trampoline (GumInterceptorBackend * self,
+ 
+     resume_at = gum_sign_code_address (
+         GUM_ADDRESS (function_address) + reloc_bytes);
+-    gum_arm64_writer_put_ldr_reg_address (aw, data->scratch_reg, resume_at);
+-    gum_arm64_writer_put_br_reg (aw, data->scratch_reg);
++    gum_arm64_writer_put_movz_reg_imm (aw, data->scratch_reg,
++        (resume_at) & 0xffff, 0);
++    gum_arm64_writer_put_movk_reg_imm (aw, data->scratch_reg,
++        (resume_at >> 16) & 0xffff, 16);
++    gum_arm64_writer_put_movk_reg_imm (aw, data->scratch_reg,
++        (resume_at >> 32) & 0xffff, 32);
++    gum_arm64_writer_put_movk_reg_imm (aw, data->scratch_reg,
++        (resume_at >> 48) & 0xffff, 48);
++    gum_arm64_writer_put_br_reg_no_auth (aw, data->scratch_reg);
+   }
+ 
+   gum_arm64_writer_flush (aw);
+@@ -1003,8 +1051,35 @@ _gum_interceptor_backend_activate_trampoline (GumInterceptorBackend * self,
+         gum_arm64_writer_put_br_reg_no_auth (aw, data->scratch_reg);
+         break;
+       case GUM_INTERCEPTOR_FULL_REDIRECT_SIZE:
+-        gum_arm64_writer_put_ldr_reg_address (aw, data->scratch_reg, on_enter);
+-        gum_arm64_writer_put_br_reg (aw, data->scratch_reg);
++      {
++        GumAddress page_start = on_enter & ~((GumAddress) 0xfff);
++        guint32 page_offset = on_enter & 0xfff;
++        if (gum_arm64_writer_put_adrp_reg_address (aw, data->scratch_reg,
++            page_start))
++        {
++          gum_arm64_writer_put_add_reg_reg_imm (aw, data->scratch_reg,
++              data->scratch_reg, page_offset);
++          gum_arm64_writer_put_br_reg_no_auth (aw, data->scratch_reg);
++        }
++        else
++        {
++          /* Fallback: target too far for ADRP, use LDR literal */
++          gum_arm64_writer_put_ldr_reg_address (aw, data->scratch_reg,
++              on_enter);
++          gum_arm64_writer_put_br_reg_no_auth (aw, data->scratch_reg);
++        }
++        break;
++      }
++      case GUM_INTERCEPTOR_MOVW_REDIRECT_SIZE:
++        gum_arm64_writer_put_movz_reg_imm (aw, data->scratch_reg,
++            (on_enter) & 0xffff, 0);
++        gum_arm64_writer_put_movk_reg_imm (aw, data->scratch_reg,
++            (on_enter >> 16) & 0xffff, 16);
++        gum_arm64_writer_put_movk_reg_imm (aw, data->scratch_reg,
++            (on_enter >> 32) & 0xffff, 32);
++        gum_arm64_writer_put_movk_reg_imm (aw, data->scratch_reg,
++            (on_enter >> 48) & 0xffff, 48);
++        gum_arm64_writer_put_br_reg_no_auth (aw, data->scratch_reg);
+         break;
+       default:
+         g_assert_not_reached ();
+diff --git a/gum/backend-posix/gummemory-posix.c b/gum/backend-posix/gummemory-posix.c
+index 848b430a..156546b8 100644
+--- a/gum/backend-posix/gummemory-posix.c
++++ b/gum/backend-posix/gummemory-posix.c
+@@ -12,6 +12,15 @@
+ #include <errno.h>
+ #include <unistd.h>
+ #include <sys/mman.h>
++#ifdef HAVE_LINUX
++# include <sys/syscall.h>
++# ifndef MFD_CLOEXEC
++#  define MFD_CLOEXEC 0x0001U
++# endif
++# ifndef MAP_FIXED_NOREPLACE
++#  define MAP_FIXED_NOREPLACE 0x100000
++# endif
++#endif
+ 
+ typedef struct _GumAllocNearContext GumAllocNearContext;
+ typedef struct _GumEnumerateFreeRangesContext GumEnumerateFreeRangesContext;
+@@ -282,6 +291,34 @@ gum_allocate_page_aligned (gpointer address,
+   }
+ #endif
+ 
++#ifdef HAVE_LINUX
++  if ((prot & PROT_EXEC) != 0)
++  {
++    int memfd = syscall (__NR_memfd_create, GUM_STEALTH_MEMFD_NAME,
++        MFD_CLOEXEC);
++    if (memfd >= 0)
++    {
++      if (ftruncate (memfd, size) == 0)
++      {
++        gint memfd_flags = MAP_SHARED | extra_flags | region_flags;
++        if (address != NULL)
++          memfd_flags |= MAP_FIXED_NOREPLACE;
++        result = mmap (address, size, prot, memfd_flags, memfd, 0);
++        if (result == MAP_FAILED && address != NULL)
++          result = mmap (NULL, size, prot,
++              MAP_SHARED | extra_flags, memfd, 0);
++      }
++      else
++      {
++        result = MAP_FAILED;
++      }
++      close (memfd);
++      if (result != MAP_FAILED)
++        return result;
++    }
++  }
++#endif
++
+   result = mmap (address, size, prot, base_flags | region_flags, -1, 0);
+ 
+ #if defined (HAVE_FREEBSD) && GLIB_SIZEOF_VOID_P == 8
+diff --git a/meson.build b/meson.build
+index 40f706d4..5afb3c53 100644
+--- a/meson.build
++++ b/meson.build
+@@ -135,6 +135,9 @@ cdata = configuration_data()
+ 
+ cdata.set_quoted('FRIDA_VERSION', frida_version)
+ 
++cdata.set_quoted('GUM_STEALTH_MEMFD_NAME', get_option('stealth_memfd_name'))
++cdata.set_quoted('GUM_STEALTH_THREAD_JS', get_option('stealth_thread_js'))
++
+ static = get_option('default_library') == 'static'
+ if static
+   extra_cflags += '-DGUM_STATIC'
+diff --git a/meson.options b/meson.options
+index c4478cb8..46c7e8a7 100644
+--- a/meson.options
++++ b/meson.options
+@@ -86,3 +86,15 @@ option('tests',
+   value: 'auto',
+   description: 'Build tests'
+ )
++
++option('stealth_memfd_name',
++  type: 'string',
++  value: 'jit-cache',
++  description: 'Name used for memfd_create when allocating executable memory (appears in /proc/self/maps)'
++)
++
++option('stealth_thread_js',
++  type: 'string',
++  value: 'gum-js-loop',
++  description: 'Thread name for the GumJS event loop thread'
++)

@@ -1,0 +1,77 @@
+name: Stealth Build CI
+
+# 在 stealth 相关文件变更时自动验证编译
+on:
+  push:
+    branches: [main, 'feature/stealth-*']
+    paths:
+      - 'subprojects/frida-gum/**'
+      - 'subprojects/frida-core/**'
+      - 'tools/build-stealth.sh'
+      - 'tools/stealth.conf.example'
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-options:
+    runs-on: ubuntu-latest
+    name: Validate meson options
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate stealth options exist
+        run: |
+          echo "Checking frida-gum meson.options..."
+          grep -q "stealth_memfd_name" subprojects/frida-gum/meson.options
+          grep -q "stealth_thread_js" subprojects/frida-gum/meson.options
+
+          echo "Checking frida-core meson.options..."
+          grep -q "stealth_server_name" subprojects/frida-core/meson.options
+          grep -q "stealth_helper_name" subprojects/frida-core/meson.options
+          grep -q "stealth_gadget_name" subprojects/frida-core/meson.options
+          grep -q "stealth_port" subprojects/frida-core/meson.options
+          grep -q "stealth_thread_main" subprojects/frida-core/meson.options
+          grep -q "stealth_thread_gadget" subprojects/frida-core/meson.options
+          grep -q "stealth_server_dir" subprojects/frida-core/meson.options
+          grep -q "stealth_magic" subprojects/frida-core/meson.options
+
+          echo "Checking config.vapi..."
+          grep -q "FRIDA_STEALTH_PORT" subprojects/frida-core/vapi/config.vapi
+          grep -q "FRIDA_STEALTH_MAGIC" subprojects/frida-core/vapi/config.vapi
+
+          echo "✅ All stealth options validated"
+
+      - name: Validate build scripts
+        run: |
+          bash -n tools/build-stealth.sh
+          bash -n tools/deploy-stealth.sh
+          echo "✅ Scripts syntax OK"
+
+      - name: Check stealth code integrity
+        run: |
+          # Verify memfd integration
+          grep -q "memfd_create" subprojects/frida-gum/gum/backend-posix/gummemory-posix.c
+          grep -q "GUM_STEALTH_MEMFD_NAME" subprojects/frida-gum/gum/backend-posix/gummemory-posix.c
+
+          # Verify trampoline changes
+          grep -q "put_movz_reg_imm" subprojects/frida-gum/gum/backend-arm64/guminterceptor-arm64.c
+          grep -q "put_movk_reg_imm" subprojects/frida-gum/gum/backend-arm64/guminterceptor-arm64.c
+          grep -q "MOVW_REDIRECT_SIZE" subprojects/frida-gum/gum/backend-arm64/guminterceptor-arm64.c
+
+          # Verify thread name config
+          grep -q "GUM_STEALTH_THREAD_JS" subprojects/frida-gum/bindings/gumjs/gumscriptscheduler.c
+          grep -q "FRIDA_STEALTH_THREAD_MAIN" subprojects/frida-core/src/frida-glue.c
+          grep -q "FRIDA_STEALTH_THREAD_GADGET" subprojects/frida-core/lib/gadget/gadget-glue.c
+
+          # Verify magic auth
+          grep -q "FRIDA_STEALTH_MAGIC" subprojects/frida-core/src/control-service.vala
+          grep -q "stealth_magic\|FRIDA_STEALTH_MAGIC" subprojects/frida-core/src/socket/socket-host-session.vala
+
+          echo "✅ All stealth code integrity checks passed"

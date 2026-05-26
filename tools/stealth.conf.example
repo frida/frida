@@ -1,0 +1,44 @@
+# Frida Stealth Configuration File
+# Copy this to tools/stealth.conf and customize
+#
+# Used by: ./tools/build-stealth.sh <target> custom
+#
+
+# --- Memory Layer ---
+# Name shown in /proc/self/maps for executable memory
+# Must match Android system whitelist: jit-cache, boot.oat, boot-framework.oat
+STEALTH[memfd_name]="jit-cache"
+
+# --- Thread Names ---
+# Tip: check real thread names on target device:
+#   adb shell 'ls /proc/1/task/*/comm | xargs cat | sort -u'
+STEALTH[thread_js]="Signal Catcher"
+STEALTH[thread_main]="HwBinder:1"
+STEALTH[thread_gadget]="RenderThread"
+
+# --- Binary Names ---
+# Server binary name (appears in /proc/*/cmdline and /proc/*/comm)
+STEALTH[server_name]="media.codec"
+
+# Helper binary name
+STEALTH[helper_name]="media.extractor"
+
+# Gadget shared library name (without lib prefix and .so suffix)
+# Final output: lib<name>.so
+STEALTH[gadget_name]="libhwui"
+
+# --- Network ---
+# Control port (default frida: 27042, change to avoid port scan)
+# Cluster port will be this + 10
+STEALTH[port]=52173
+
+# --- Filesystem ---
+# Temp directory name used by server
+STEALTH[server_dir]="com.android.providers.media"
+
+# --- Protocol ---
+# Magic bytes for D-Bus pre-authentication (hex string, even length)
+# Empty = disabled (compatible with stock frida-tools)
+# Non-empty = both server and client must use same value
+# Generate random: openssl rand -hex 8
+STEALTH[magic]="deadbeefcafebabe"

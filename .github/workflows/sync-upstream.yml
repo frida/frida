@@ -1,0 +1,146 @@
+name: Sync Upstream Frida
+
+# 每天 UTC 8:00 自动同步上游，也可手动触发
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync-upstream:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout fork
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/frida/frida.git || true
+          git fetch upstream --tags
+
+      - name: Check for upstream changes
+        id: check
+        run: |
+          UPSTREAM_HEAD=$(git rev-parse upstream/main)
+          LOCAL_BASE=$(git merge-base HEAD upstream/main 2>/dev/null || echo "none")
+
+          if [ "$LOCAL_BASE" = "none" ]; then
+            echo "already_up_to_date=false" >> $GITHUB_OUTPUT
+            echo "commits_behind=unknown" >> $GITHUB_OUTPUT
+          elif [ "$UPSTREAM_HEAD" = "$LOCAL_BASE" ]; then
+            echo "already_up_to_date=true" >> $GITHUB_OUTPUT
+          else
+            COMMITS_BEHIND=$(git rev-list --count HEAD..upstream/main)
+            echo "already_up_to_date=false" >> $GITHUB_OUTPUT
+            echo "commits_behind=$COMMITS_BEHIND" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Sync main repo
+        if: steps.check.outputs.already_up_to_date == 'false'
+        id: merge_main
+        run: |
+          # Merge upstream main (this updates submodule pointers)
+          if git merge upstream/main --no-edit -m "chore: sync upstream frida ($(git rev-parse --short upstream/main))"; then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            git merge --abort
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update submodules to new pointers
+        if: steps.merge_main.outputs.success == 'true'
+        run: |
+          git submodule update --init --recursive
+
+      - name: Re-apply stealth patches
+        if: steps.merge_main.outputs.success == 'true'
+        id: patches
+        run: |
+          if [ -f tools/apply-patches.sh ]; then
+            if bash tools/apply-patches.sh; then
+              echo "patches_ok=true" >> $GITHUB_OUTPUT
+            else
+              echo "patches_ok=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "patches_ok=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Push if everything succeeded
+        if: steps.merge_main.outputs.success == 'true' && steps.patches.outputs.patches_ok == 'true'
+        run: |
+          git push origin HEAD
+
+      - name: Create PR for failures
+        if: steps.merge_main.outputs.success == 'false' || steps.patches.outputs.patches_ok == 'false'
+        run: |
+          SYNC_BRANCH="sync/upstream-$(date +%Y%m%d)"
+          git checkout -b "$SYNC_BRANCH" || git checkout "$SYNC_BRANCH"
+
+          if [ "${{ steps.merge_main.outputs.success }}" = "false" ]; then
+            REASON="主仓库合并冲突"
+            git merge upstream/main --no-commit || true
+            git add -A
+            git commit --allow-empty -m "sync: upstream merge conflicts" || true
+          else
+            REASON="Stealth patch 应用失败（上游改动了我们修改过的文件）"
+            git add -A
+            git commit --allow-empty -m "sync: patch apply failed after upstream update" || true
+          fi
+
+          git push origin "$SYNC_BRANCH" --force
+
+          gh pr create \
+            --title "Sync upstream: manual resolution needed" \
+            --body "$(cat <<EOF
+          ## 上游同步失败
+
+          **原因**: $REASON
+          **上游落后**: ${{ steps.check.outputs.commits_behind }} commits
+
+          ### 解决步骤
+
+          1. \`git fetch origin $SYNC_BRANCH && git checkout $SYNC_BRANCH\`
+          2. 解决冲突或手动调整 patch
+          3. 运行 \`./tools/apply-patches.sh\` 确认 patch 可以正常应用
+          4. 运行 \`./tools/build-stealth.sh android-arm64 full\` 确认编译通过
+          5. 如果 patch 需要更新: \`./tools/generate-patches.sh\`
+          6. 提交并合并此 PR
+
+          ### 可能冲突的文件
+
+          - \`subprojects/frida-gum/gum/backend-posix/gummemory-posix.c\`
+          - \`subprojects/frida-gum/gum/backend-arm64/guminterceptor-arm64.c\`
+          - \`subprojects/frida-core/src/control-service.vala\`
+          - \`subprojects/frida-core/lib/base/socket.vala\`
+          EOF
+          )" \
+            --base main \
+            --head "$SYNC_BRANCH" \
+            --label "upstream-sync"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "## Sync Result" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.check.outputs.already_up_to_date }}" = "true" ]; then
+            echo "✅ Already up to date" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.merge_main.outputs.success }}" = "true" ] && [ "${{ steps.patches.outputs.patches_ok }}" = "true" ]; then
+            echo "✅ Synced + patches re-applied successfully" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Manual resolution needed — PR created" >> $GITHUB_STEP_SUMMARY
+          fi

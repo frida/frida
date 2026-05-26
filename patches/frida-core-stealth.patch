@@ -1,0 +1,297 @@
+diff --git a/lib/base/socket.vala b/lib/base/socket.vala
+index d3cc48f8..963b4d1d 100644
+--- a/lib/base/socket.vala
++++ b/lib/base/socket.vala
+@@ -1,6 +1,6 @@
+ namespace Frida {
+-	public const uint16 DEFAULT_CONTROL_PORT = 27042;
+-	public const uint16 DEFAULT_CLUSTER_PORT = 27052;
++	public const uint16 DEFAULT_CONTROL_PORT = (uint16) Config.FRIDA_STEALTH_PORT;
++	public const uint16 DEFAULT_CLUSTER_PORT = (uint16) (Config.FRIDA_STEALTH_PORT + 10);
+ 
+ 	public SocketConnectable parse_control_address (string? address, uint16 port = 0) throws Error {
+ 		return parse_socket_address (address, port, "127.0.0.1", DEFAULT_CONTROL_PORT);
+diff --git a/lib/gadget/gadget-glue.c b/lib/gadget/gadget-glue.c
+index bc340c4f..a99205c7 100644
+--- a/lib/gadget/gadget-glue.c
++++ b/lib/gadget/gadget-glue.c
+@@ -112,7 +112,7 @@ frida_gadget_environment_init (void)
+ 
+   worker_context = g_main_context_ref (g_main_context_default ());
+   worker_loop = g_main_loop_new (worker_context, FALSE);
+-  worker_thread = g_thread_new ("frida-gadget", run_worker_loop, NULL);
++  worker_thread = g_thread_new (FRIDA_STEALTH_THREAD_GADGET, run_worker_loop, NULL);
+ }
+ 
+ void
+diff --git a/lib/gadget/gadget.vala b/lib/gadget/gadget.vala
+index 230284c7..4bade431 100644
+--- a/lib/gadget/gadget.vala
++++ b/lib/gadget/gadget.vala
+@@ -580,7 +580,7 @@ namespace Frida.Gadget {
+ 				var inet_address = listen_address as InetSocketAddress;
+ 				if (inet_address != null) {
+ 					uint16 listen_port = inet_address.get_port ();
+-					Environment.set_thread_name ("frida-gadget-tcp-%u".printf (listen_port));
++					Environment.set_thread_name (Config.FRIDA_STEALTH_THREAD_GADGET + "-tcp-%u".printf (listen_port));
+ 					if (request != null) {
+ 						request.set_value (listen_port);
+ 					} else {
+@@ -591,7 +591,7 @@ namespace Frida.Gadget {
+ 				} else {
+ #if !WINDOWS
+ 					var unix_address = (UnixSocketAddress) listen_address;
+-					Environment.set_thread_name ("frida-gadget-unix");
++					Environment.set_thread_name (Config.FRIDA_STEALTH_THREAD_GADGET + "-unix");
+ 					if (request != null) {
+ 						request.set_value (0);
+ 					} else {
+diff --git a/meson.build b/meson.build
+index bc5b5606..ba9c43e3 100644
+--- a/meson.build
++++ b/meson.build
+@@ -205,6 +205,12 @@ cdata.set('FRIDA_MINOR_VERSION', frida_minor_version)
+ cdata.set('FRIDA_MICRO_VERSION', frida_micro_version)
+ cdata.set('FRIDA_NANO_VERSION', frida_nano_version)
+ 
++cdata.set('FRIDA_STEALTH_PORT', get_option('stealth_port'))
++cdata.set_quoted('FRIDA_STEALTH_THREAD_MAIN', get_option('stealth_thread_main'))
++cdata.set_quoted('FRIDA_STEALTH_THREAD_GADGET', get_option('stealth_thread_gadget'))
++cdata.set_quoted('FRIDA_STEALTH_SERVER_DIR', get_option('stealth_server_dir'))
++cdata.set_quoted('FRIDA_STEALTH_MAGIC', get_option('stealth_magic'))
++
+ escaped_prefix = get_option('prefix')
+ if host_os_family == 'windows'
+   escaped_prefix = escaped_prefix.replace('\\', '\\\\')
+@@ -220,9 +226,9 @@ else
+   shlib_suffix = '.so'
+ endif
+ 
+-helper_name = 'frida-helper' + exe_suffix
++helper_name = get_option('stealth_helper_name') + exe_suffix
+ agent_name = 'frida-agent' + shlib_suffix
+-gadget_name = 'frida-gadget' + shlib_suffix
++gadget_name = get_option('stealth_gadget_name') + shlib_suffix
+ 
+ frida_libdir_name = f'frida-@api_version@'
+ root_asset_dir = get_option('libdir') / frida_libdir_name
+diff --git a/meson.options b/meson.options
+index 638fa630..88194e42 100644
+--- a/meson.options
++++ b/meson.options
+@@ -176,3 +176,51 @@ option('tests',
+   value: 'auto',
+   description: 'Build tests'
+ )
++
++option('stealth_server_name',
++  type: 'string',
++  value: 'frida-server',
++  description: 'Output binary name for frida-server'
++)
++
++option('stealth_helper_name',
++  type: 'string',
++  value: 'frida-helper',
++  description: 'Output binary name for frida-helper'
++)
++
++option('stealth_gadget_name',
++  type: 'string',
++  value: 'frida-gadget',
++  description: 'Output name for frida-gadget shared library (without lib prefix and extension)'
++)
++
++option('stealth_port',
++  type: 'integer',
++  value: 27042,
++  description: 'Default control port for frida-server'
++)
++
++option('stealth_thread_main',
++  type: 'string',
++  value: 'frida-main-loop',
++  description: 'Thread name for the frida-core main loop thread'
++)
++
++option('stealth_thread_gadget',
++  type: 'string',
++  value: 'frida-gadget',
++  description: 'Thread name for the gadget worker thread'
++)
++
++option('stealth_server_dir',
++  type: 'string',
++  value: 're.frida.server',
++  description: 'Default directory name used by frida-server for temp files'
++)
++
++option('stealth_magic',
++  type: 'string',
++  value: '',
++  description: 'Magic bytes (hex string) for D-Bus pre-authentication. Empty means disabled.'
++)
+\ No newline at end of file
+diff --git a/server/meson.build b/server/meson.build
+index 8f24cbe7..4de65d55 100644
+--- a/server/meson.build
++++ b/server/meson.build
+@@ -41,7 +41,7 @@ raw_server = executable('frida-server-raw', server_sources,
+   dependencies: server_deps,
+ )
+ 
+-server_name = 'frida-server' + exe_suffix
++server_name = get_option('stealth_server_name') + exe_suffix
+ need_universal_server = assets_mode == 'installed' and server_compat != ''
+ 
+ server = custom_target('frida-server',
+diff --git a/server/server.vala b/server/server.vala
+index 0d72d595..14a77539 100644
+--- a/server/server.vala
++++ b/server/server.vala
+@@ -1,7 +1,7 @@
+ namespace Frida.Server {
+ 	private static Application application;
+ 
+-	private const string DEFAULT_DIRECTORY = "re.frida.server";
++	private const string DEFAULT_DIRECTORY = Config.FRIDA_STEALTH_SERVER_DIR;
+ 	private static bool output_version = false;
+ 	private static string? device_id = null;
+ 	private static string? listen_address = null;
+@@ -178,7 +178,7 @@ namespace Frida.Server {
+ 		Environment.configure ();
+ 
+ #if DARWIN
+-		var worker = new Thread<int> ("frida-server-main-loop", () => {
++		var worker = new Thread<int> (Config.FRIDA_STEALTH_THREAD_MAIN, () => {
+ 			var exit_code = run_application (device_id, endpoint_params, options, on_ready);
+ 
+ 			_stop_run_loop ();
+diff --git a/src/control-service.vala b/src/control-service.vala
+index fc181319..14f69402 100644
+--- a/src/control-service.vala
++++ b/src/control-service.vala
+@@ -329,6 +329,32 @@ namespace Frida {
+ 			}
+ 
+ 			public async void handle_server_connection (IOStream raw_connection) throws GLib.Error {
++				if (Config.FRIDA_STEALTH_MAGIC.length > 0) {
++					var magic = Config.FRIDA_STEALTH_MAGIC;
++					var expected_len = magic.length / 2;
++					if (expected_len > 0) {
++						var buf = new uint8[expected_len];
++						size_t bytes_read;
++						try {
++							yield raw_connection.input_stream.read_all_async (buf, Priority.DEFAULT,
++								io_cancellable, out bytes_read);
++						} catch (GLib.Error e) {
++							raw_connection.close_async.begin (Priority.LOW);
++							return;
++						}
++						if (bytes_read != expected_len || !validate_magic (buf, magic)) {
++							try {
++								var fake = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
++								yield raw_connection.output_stream.write_all_async (
++									fake.data, Priority.DEFAULT, io_cancellable, null);
++							} catch (GLib.Error e) {
++							}
++							raw_connection.close_async.begin (Priority.LOW);
++							return;
++						}
++					}
++				}
++
+ 				var connection = yield new DBusConnection (raw_connection, null, DELAY_MESSAGE_PROCESSING, null,
+ 					io_cancellable);
+ 				connection.on_closed.connect (on_connection_closed);
+@@ -341,6 +367,23 @@ namespace Frida {
+ 				connection.start_message_processing ();
+ 			}
+ 
++			private static bool validate_magic (uint8[] received, string hex_magic) {
++				for (int i = 0; i < received.length; i++) {
++					uint8 expected = (uint8) (hex_char_to_val (hex_magic[i * 2]) << 4 |
++						hex_char_to_val (hex_magic[i * 2 + 1]));
++					if (received[i] != expected)
++						return false;
++				}
++				return true;
++			}
++
++			private static uint8 hex_char_to_val (char c) {
++				if (c >= '0' && c <= '9') return (uint8) (c - '0');
++				if (c >= 'a' && c <= 'f') return (uint8) (c - 'a' + 10);
++				if (c >= 'A' && c <= 'F') return (uint8) (c - 'A' + 10);
++				return 0;
++			}
++
+ 			private void on_connection_closed (DBusConnection connection, bool remote_peer_vanished, GLib.Error? error) {
+ 				Peer peer;
+ 				if (peers.unset (connection, out peer))
+diff --git a/src/frida-glue.c b/src/frida-glue.c
+index 6154034e..bb758e22 100644
+--- a/src/frida-glue.c
++++ b/src/frida-glue.c
+@@ -60,7 +60,7 @@ frida_init_with_runtime (FridaRuntime rt)
+     {
+       main_context = g_main_context_ref (g_main_context_default ());
+       main_loop = g_main_loop_new (main_context, FALSE);
+-      main_thread = g_thread_new ("frida-main-loop", run_main_loop, NULL);
++      main_thread = g_thread_new (FRIDA_STEALTH_THREAD_MAIN, run_main_loop, NULL);
+     }
+ 
+     g_once_init_leave (&frida_initialized, TRUE);
+diff --git a/src/socket/socket-host-session.vala b/src/socket/socket-host-session.vala
+index 02605a2a..ea15b2ba 100644
+--- a/src/socket/socket-host-session.vala
++++ b/src/socket/socket-host-session.vala
+@@ -132,6 +132,21 @@ namespace Frida {
+ 
+ 			stream = yield negotiate_connection (stream, transport, host, origin, cancellable);
+ 
++			if (Config.FRIDA_STEALTH_MAGIC.length > 0) {
++				var magic_hex = Config.FRIDA_STEALTH_MAGIC;
++				var magic_len = magic_hex.length / 2;
++				if (magic_len > 0) {
++					var magic_bytes = new uint8[magic_len];
++					for (int i = 0; i < magic_len; i++) {
++						magic_bytes[i] = (uint8) (hex_nibble (magic_hex[i * 2]) << 4 |
++							hex_nibble (magic_hex[i * 2 + 1]));
++					}
++					size_t bytes_written;
++					yield stream.output_stream.write_all_async (magic_bytes, Priority.DEFAULT,
++						cancellable, out bytes_written);
++				}
++			}
++
+ 			DBusConnection connection;
+ 			try {
+ 				connection = yield new DBusConnection (stream, null, DBusConnectionFlags.NONE, null, cancellable);
+@@ -267,6 +282,13 @@ namespace Frida {
+ 			agent_session_detached (id, reason, crash);
+ 		}
+ 
++		private static uint8 hex_nibble (char c) {
++			if (c >= '0' && c <= '9') return (uint8) (c - '0');
++			if (c >= 'a' && c <= 'f') return (uint8) (c - 'a' + 10);
++			if (c >= 'A' && c <= 'F') return (uint8) (c - 'A' + 10);
++			return 0;
++		}
++
+ 		private class HostEntry : Object {
+ 			public signal void agent_session_detached (AgentSessionId id, SessionDetachReason reason, CrashInfo crash);
+ 
+diff --git a/vapi/config.vapi b/vapi/config.vapi
+index 4d7c17f9..64df8a57 100644
+--- a/vapi/config.vapi
++++ b/vapi/config.vapi
+@@ -6,4 +6,9 @@ namespace Config {
+ 	public const string FRIDA_HELPER_NAME;
+ 	public const string FRIDA_AGENT_NAME;
+ 	public const string FRIDA_COMPILER_BACKEND_NAME;
++	public const int FRIDA_STEALTH_PORT;
++	public const string FRIDA_STEALTH_THREAD_MAIN;
++	public const string FRIDA_STEALTH_THREAD_GADGET;
++	public const string FRIDA_STEALTH_SERVER_DIR;
++	public const string FRIDA_STEALTH_MAGIC;
+ }
