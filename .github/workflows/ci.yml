@@ -1808,6 +1808,55 @@ jobs:
           name: frida-gadget-qnx-armeabi
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/32/frida-gadget.so
 
+  frida-gum-none-arm64:
+    needs: sdk-none-arm64
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+      - name: Set up environment
+        uses: ./.github/actions/setup-linux-env
+        with:
+          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
+          cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Grab frida-gum
+        run: python tools/ensure-submodules.py frida-gum
+      - name: Check out barebone agent
+        run: git submodule update --init --depth 1 subprojects/frida-core
+      - name: Set up C toolchain
+        working-directory: subprojects/frida-core/src/barebone/agent
+        run: |
+          npm install -g xpm
+          xpm install
+          echo "$PWD/xpacks/.bin" >> $GITHUB_PATH
+      - name: Configure Gum
+        working-directory: subprojects/frida-gum
+        run: >-
+          ./configure
+          --host=aarch64-none-elf
+          --enable-gumjs
+          --with-devkits=gum,gumjs
+          --with-devkit-symbol-scope=original
+      - name: Compile
+        working-directory: subprojects/frida-gum
+        run: make
+      - name: Upload Gum devkit
+        uses: actions/upload-artifact@v4
+        with:
+          name: frida-gum-devkit-none-arm64
+          path: subprojects/frida-gum/build/bindings/gum/devkit/
+      - name: Upload GumJS devkit
+        uses: actions/upload-artifact@v4
+        with:
+          name: frida-gumjs-devkit-none-arm64
+          path: subprojects/frida-gum/build/bindings/gumjs/devkit/
+
   toolchain-windows:
     strategy:
       matrix:
