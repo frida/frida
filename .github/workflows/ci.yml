@@ -2063,3 +2063,31 @@ jobs:
         run: releng/deps.py roll sdk android-${{ matrix.arch }} --build=$XTOOLS_HOST --activate
         env:
           ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+
+  sdk-none-arm64:
+    needs: toolchain-linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+      - name: Set up environment
+        uses: ./.github/actions/setup-linux-env
+        with:
+          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
+          cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Check out barebone agent
+        run: git submodule update --init --depth 1 subprojects/frida-core
+      - name: Set up C toolchain
+        working-directory: subprojects/frida-core/src/barebone/agent
+        run: |
+          npm install -g xpm
+          xpm install
+          echo "$PWD/xpacks/.bin" >> $GITHUB_PATH
+      - name: Roll SDK
+        run: releng/deps.py roll sdk aarch64-none-elf --activate
