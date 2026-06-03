@@ -1857,6 +1857,41 @@ jobs:
           name: frida-gumjs-devkit-none-arm64
           path: subprojects/frida-gum/build/bindings/gumjs/devkit/
 
+  frida-barebone-agent-none-arm64:
+    needs: frida-gum-none-arm64
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+      - name: Grab frida-core
+        run: python tools/ensure-submodules.py frida-core
+      - name: Set up C toolchain
+        working-directory: subprojects/frida-core/src/barebone/agent
+        run: |
+          npm install -g xpm
+          xpm install
+          echo "$PWD/xpacks/.bin" >> $GITHUB_PATH
+      - name: Set up Rust target
+        run: rustup target add aarch64-unknown-none
+      - name: Download GumJS devkit
+        uses: actions/download-artifact@v4
+        with:
+          name: frida-gumjs-devkit-none-arm64
+          path: ${{ runner.workspace }}/gumjs-devkit
+      - name: Build agent
+        working-directory: subprojects/frida-core/src/barebone/agent
+        run: cargo build --release
+        env:
+          CC_aarch64_unknown_none: aarch64-none-elf-gcc
+          AR_aarch64_unknown_none: aarch64-none-elf-ar
+          RANLIB_aarch64_unknown_none: aarch64-none-elf-ranlib
+          GUMJS_DEVKIT_DIR: ${{ runner.workspace }}/gumjs-devkit
+      - name: Upload agent
+        uses: actions/upload-artifact@v4
+        with:
+          name: frida-barebone-agent-none-arm64
+          path: subprojects/frida-core/src/barebone/agent/target/aarch64-unknown-none/release/frida-barebone-agent
+
   toolchain-windows:
     strategy:
       matrix:
