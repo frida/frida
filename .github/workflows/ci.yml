@@ -757,6 +757,26 @@ jobs:
         with:
           name: frida-inject-qnx-${{ matrix.arch }}
 
+  package-none-arm64:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [frida-gum-none-arm64, frida-barebone-agent-none-arm64]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+      - name: Package Gum devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-gum-devkit-none-arm64
+      - name: Package GumJS devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-gumjs-devkit-none-arm64
+      - name: Package barebone agent
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-barebone-agent-none-arm64
+
   frida-windows-intel:
     needs: sdk-windows
     strategy:
