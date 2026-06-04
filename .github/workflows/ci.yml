@@ -21,6 +21,7 @@ jobs:
       - package-android
       - package-qnx
       - package-apple-universal
+      - package-none-arm64
       - assemble-ios-assets
       - assemble-tvos-assets
     permissions:
