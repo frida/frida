@@ -1871,7 +1871,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frida-gum-devkit-none-arm64
-          path: subprojects/frida-gum/build/bindings/gum/devkit/
+          path: subprojects/frida-gum/build/gum/devkit/
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v4
         with:
