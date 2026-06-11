@@ -2172,6 +2172,7 @@ jobs:
   sdk-none-arm64:
     needs: toolchain-linux
     runs-on: ubuntu-latest
+    container: ghcr.io/frida/x-tools-linux-x86_64:latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
