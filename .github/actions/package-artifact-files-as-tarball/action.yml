@@ -8,7 +8,7 @@ runs:
   using: composite
   steps:
     - name: Download
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: ${{ inputs.name }}
         path: ${{ inputs.name }}
@@ -18,7 +18,7 @@ runs:
         XZ_OPT: "-T 0"
       shell: bash
     - name: Upload
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: release-asset-${{ inputs.name }}-tarball
         path: ${{ inputs.name }}.tar.xz

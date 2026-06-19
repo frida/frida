@@ -8,7 +8,7 @@ runs:
   using: composite
   steps:
     - name: Download
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: ${{ inputs.name }}
         path: ${{ inputs.name }}
@@ -18,7 +18,7 @@ runs:
         7z a -sfx -r ..\${{ inputs.name }}.exe .
       shell: pwsh
     - name: Upload
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: release-asset-${{ inputs.name }}-sfx
         path: ${{ inputs.name }}.exe
