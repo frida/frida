@@ -22,9 +22,19 @@ def main(argv: list[str]):
             run(["git", "submodule", "update", *UPDATE_FLAGS], cwd=releng)
 
         for relpath in paths_to_check:
-            if not (SOURCE_ROOT / relpath / "meson.build").exists():
+            subproject = SOURCE_ROOT / relpath
+            if not (subproject / "meson.build").exists():
                 print(f"Fetching {relpath.name}...", flush=True)
                 run(["git", "submodule", "update", *UPDATE_FLAGS, relpath], cwd=SOURCE_ROOT)
+
+            # frida-python/-node/-swift vendor the shared frida-bindgen generator
+            # as a nested submodule that their meson build needs.
+            gitmodules = subproject / ".gitmodules"
+            bindgen = subproject / "frida-bindgen"
+            if gitmodules.exists() and "frida-bindgen" in gitmodules.read_text() \
+                    and not (bindgen / "frida_bindgen_core" / "__init__.py").exists():
+                print(f"Fetching {relpath.name}'s frida-bindgen...", flush=True)
+                run(["git", "submodule", "update", *UPDATE_FLAGS, "frida-bindgen"], cwd=subproject)
     except Exception as e:
         print(e, file=sys.stderr)
         if isinstance(e, subprocess.CalledProcessError):
