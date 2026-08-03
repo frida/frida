@@ -2197,3 +2197,39 @@ jobs:
           echo "$PWD/xpacks/.bin" >> $GITHUB_PATH
       - name: Roll SDK
         run: releng/deps.py roll sdk aarch64-none-elf --activate
+
+  sdk-none-arm64-softfloat:
+    needs: toolchain-linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+      - name: Set up environment
+        uses: ./.github/actions/setup-linux-env
+        with:
+          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
+          cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Check whether the SDK is already published
+        id: sdk
+        run: echo "published=$(releng/deps.py published sdk none-arm64-softfloat)" >> $GITHUB_OUTPUT
+      # -mabi=aapcs-soft landed in clang 19, which is newer than the runner's own.
+      - name: Set up C toolchain
+        if: steps.sdk.outputs.published == 'false'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gperf
+          sudo npm install -g cloudflare-cli@5.0.5
+          curl -sSL https://apt.llvm.org/llvm.sh -o llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh $CLANG_VERSION
+          sudo ln -sf /usr/bin/clang-$CLANG_VERSION /usr/bin/clang
+          sudo ln -sf /usr/bin/clang++-$CLANG_VERSION /usr/bin/clang++
+        env:
+          CLANG_VERSION: 21
+      - name: Roll SDK
+        run: releng/deps.py roll sdk none-arm64-softfloat --activate
+        env:
+          CC: clang
+          CXX: clang++
