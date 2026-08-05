@@ -2035,9 +2035,6 @@ jobs:
           AGENT_NM=aarch64-linux-gnu-nm
           AGENT_OBJCOPY=aarch64-linux-gnu-objcopy
         env:
-          CC_aarch64_unknown_none: >-
-            clang --target=aarch64-none-elf -mabi=aapcs-soft -mgeneral-regs-only
-            -ffixed-x18 -fno-pic --sysroot=${{ runner.workspace }}/sdk-none-arm64-softfloat
           GUMJS_DEVKIT_DIR: ${{ runner.workspace }}/gumjs-devkit
       # Everything the module needs from the kernel goes through frida-kmod.c, and
       # everything the kernel may see of us is the two entry points it calls. Both
