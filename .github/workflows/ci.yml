@@ -22,7 +22,7 @@ jobs:
       - package-qnx
       - package-apple-universal
       - package-none-arm64
-      - package-none-arm64-softfloat
+      - package-none-softfloat
       - assemble-ios-assets
       - assemble-tvos-assets
     permissions:
@@ -781,9 +781,13 @@ jobs:
 
   # No agent here: the soft-float one is a static library that only means anything
   # once linked into a module for a specific kernel.
-  package-none-arm64-softfloat:
+  package-none-softfloat:
     if: startsWith(github.ref, 'refs/tags/')
-    needs: frida-gum-none-arm64-softfloat
+    needs: frida-gum-none-softfloat
+    strategy:
+      matrix:
+        arch: [x86_64, arm64]
+      fail-fast: false
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
@@ -791,11 +795,11 @@ jobs:
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
-          name: frida-gum-devkit-none-arm64-softfloat
+          name: frida-gum-devkit-none-${{ matrix.arch }}-softfloat
       - name: Package GumJS devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
-          name: frida-gumjs-devkit-none-arm64-softfloat
+          name: frida-gumjs-devkit-none-${{ matrix.arch }}-softfloat
 
   frida-windows-intel:
     needs: sdk-windows
@@ -1932,8 +1936,12 @@ jobs:
           name: frida-barebone-agent-none-arm64
           path: subprojects/frida-core/src/barebone/agent/target/aarch64-unknown-none/release/frida-barebone-agent
 
-  frida-gum-none-arm64-softfloat:
-    needs: sdk-none-arm64-softfloat
+  frida-gum-none-softfloat:
+    needs: sdk-none-softfloat
+    strategy:
+      matrix:
+        arch: [x86_64, arm64]
+      fail-fast: false
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
@@ -1951,8 +1959,6 @@ jobs:
           node-version: 24
       - name: Grab frida-gum
         run: python tools/ensure-submodules.py frida-gum
-      # GCC has no -mabi=aapcs-soft, so this flavour is clang-only, and 19 is where
-      # it landed.
       - name: Set up C toolchain
         run: |
           curl -sSL https://apt.llvm.org/llvm.sh -o llvm.sh
@@ -1966,7 +1972,7 @@ jobs:
         working-directory: subprojects/frida-gum
         run: >-
           ./configure
-          --host=none-arm64-softfloat
+          --host=none-${{ matrix.arch }}-softfloat
           --enable-gumjs
           --with-devkits=gum,gumjs
           --with-devkit-symbol-scope=original
@@ -1979,31 +1985,48 @@ jobs:
       - name: Upload Gum devkit
         uses: actions/upload-artifact@v7
         with:
-          name: frida-gum-devkit-none-arm64-softfloat
+          name: frida-gum-devkit-none-${{ matrix.arch }}-softfloat
           path: subprojects/frida-gum/build/gum/devkit/
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v7
         with:
-          name: frida-gumjs-devkit-none-arm64-softfloat
+          name: frida-gumjs-devkit-none-${{ matrix.arch }}-softfloat
           path: subprojects/frida-gum/build/bindings/gumjs/devkit/
 
   # The Makefile drives Cargo and the prelink itself, so the flags the agent needs live
   # there rather than here. It stops at the prelinked object: a .ko is only loadable on
   # the exact GKI build it was made for, since vermagic names it verbatim, so the
   # kernel half is left to whoever has that kernel.
-  frida-barebone-agent-none-arm64-softfloat:
-    needs: frida-gum-none-arm64-softfloat
+  frida-barebone-agent-none-softfloat:
+    needs: frida-gum-none-softfloat
+    strategy:
+      matrix:
+        include:
+          - arch: x86_64
+            kernel_arch: x86
+            rust_target: x86_64-unknown-none
+            toolprefix: ''
+            binutils: ''
+          - arch: arm64
+            kernel_arch: arm64
+            rust_target: aarch64-unknown-none
+            toolprefix: aarch64-linux-gnu-
+            binutils: binutils-aarch64-linux-gnu
+      fail-fast: false
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v7
       - name: Grab frida-core
         run: python tools/ensure-submodules.py frida-core
-      - name: Set up C toolchain
+      # The prelink reads nm's archive map, which only GNU nm emits.
+      - name: Set up binutils
+        if: matrix.binutils != ''
         run: |
           sudo apt-get update
-          # The prelink reads nm's archive map, which only GNU nm emits.
-          sudo apt-get install -y binutils-aarch64-linux-gnu
+          sudo apt-get install -y ${{ matrix.binutils }}
+      - name: Set up C toolchain
+        run: |
           curl -sSL https://apt.llvm.org/llvm.sh -o llvm.sh
           chmod +x llvm.sh
           sudo ./llvm.sh $CLANG_VERSION
@@ -2011,29 +2034,28 @@ jobs:
         env:
           CLANG_VERSION: 21
       - name: Fetch the SDK
-        run: releng/deps.py sync sdk none-arm64-softfloat $SDK_PREFIX
+        run: releng/deps.py sync sdk none-${{ matrix.arch }}-softfloat $SDK_PREFIX
         env:
-          SDK_PREFIX: ${{ runner.workspace }}/sdk-none-arm64-softfloat
-      # x18 is the kernel's shadow call stack pointer, so core, alloc and
-      # compiler_builtins have to be rebuilt from source to honour it.
+          SDK_PREFIX: ${{ runner.workspace }}/sdk-none-${{ matrix.arch }}-softfloat
       - name: Set up Rust target
         run: |
-          rustup target add aarch64-unknown-none
+          rustup target add ${{ matrix.rust_target }}
           rustup component add rust-src
       - name: Download GumJS devkit
         uses: actions/download-artifact@v8
         with:
-          name: frida-gumjs-devkit-none-arm64-softfloat
+          name: frida-gumjs-devkit-none-${{ matrix.arch }}-softfloat
           path: ${{ runner.workspace }}/gumjs-devkit
       - name: Build agent
         working-directory: subprojects/frida-core/src/barebone/agent/linux
         run: >-
           make frida-agent-prelinked.o.bin
-          FRIDA_SDK=${{ runner.workspace }}/sdk-none-arm64-softfloat
-          AGENT_LD=aarch64-linux-gnu-ld
-          AGENT_AR=aarch64-linux-gnu-ar
-          AGENT_NM=aarch64-linux-gnu-nm
-          AGENT_OBJCOPY=aarch64-linux-gnu-objcopy
+          ARCH=${{ matrix.kernel_arch }}
+          FRIDA_SDK=${{ runner.workspace }}/sdk-none-${{ matrix.arch }}-softfloat
+          AGENT_LD=${{ matrix.toolprefix }}ld
+          AGENT_AR=${{ matrix.toolprefix }}ar
+          AGENT_NM=${{ matrix.toolprefix }}nm
+          AGENT_OBJCOPY=${{ matrix.toolprefix }}objcopy
         env:
           GUMJS_DEVKIT_DIR: ${{ runner.workspace }}/gumjs-devkit
       # Everything the module needs from the kernel goes through frida-kmod.c, and
@@ -2043,16 +2065,30 @@ jobs:
       - name: Check the prelink
         working-directory: subprojects/frida-core/src/barebone/agent/linux
         run: |
-          undefined=$(aarch64-linux-gnu-nm --undefined-only frida-agent-prelinked.o.bin \
+          undefined=$(${{ matrix.toolprefix }}nm --undefined-only frida-agent-prelinked.o.bin \
             | awk '{ print $2 }' | grep -v '^frida_kmod_' || true)
           if [ -n "$undefined" ]; then
             echo "Undefined beyond the kmod glue:" $undefined
             exit 1
           fi
-          globals=$(aarch64-linux-gnu-nm --defined-only --extern-only frida-agent-prelinked.o.bin \
-            | awk '{ print $3 }' | sort | tr '\n' ' ')
-          if [ "$globals" != "frida_agent_start frida_agent_stop " ]; then
+          globals=$(${{ matrix.toolprefix }}nm --defined-only --extern-only frida-agent-prelinked.o.bin \
+            | awk '{ print $3 }' | sort | paste -sd' ')
+          if [ "$globals" != "$EXPECTED_GLOBALS" ]; then
             echo "Global symbols beyond the entry points:" $globals
+            exit 1
+          fi
+        env:
+          EXPECTED_GLOBALS: >-
+            frida_agent_start frida_agent_stop
+            gum_interceptor_begin_transaction gum_interceptor_end_transaction
+            gum_interceptor_obtain gum_interceptor_replace
+            gum_interceptor_revert
+      - name: Check for notrack jumps
+        if: matrix.kernel_arch == 'x86'
+        working-directory: subprojects/frida-core/src/barebone/agent/linux
+        run: |
+          if objdump -d frida-agent-prelinked.o.bin | grep -q notrack; then
+            objdump -d frida-agent-prelinked.o.bin | grep -B 2 notrack
             exit 1
           fi
 
@@ -2341,8 +2377,12 @@ jobs:
       - name: Roll SDK
         run: releng/deps.py roll sdk aarch64-none-elf --activate
 
-  sdk-none-arm64-softfloat:
+  sdk-none-softfloat:
     needs: toolchain-linux
+    strategy:
+      matrix:
+        arch: [x86_64, arm64]
+      fail-fast: false
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
@@ -2356,8 +2396,7 @@ jobs:
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Check whether the SDK is already published
         id: sdk
-        run: echo "published=$(releng/deps.py published sdk none-arm64-softfloat)" >> $GITHUB_OUTPUT
-      # -mabi=aapcs-soft landed in clang 19, which is newer than the runner's own.
+        run: echo "published=$(releng/deps.py published sdk none-${{ matrix.arch }}-softfloat)" >> $GITHUB_OUTPUT
       - name: Set up C toolchain
         if: steps.sdk.outputs.published == 'false'
         run: |
@@ -2372,7 +2411,7 @@ jobs:
         env:
           CLANG_VERSION: 21
       - name: Roll SDK
-        run: releng/deps.py roll sdk none-arm64-softfloat --activate
+        run: releng/deps.py roll sdk none-${{ matrix.arch }}-softfloat --activate
         env:
           CC: clang
           CXX: clang++
