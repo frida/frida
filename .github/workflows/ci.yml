@@ -786,7 +786,7 @@ jobs:
     needs: frida-gum-none-softfloat
     strategy:
       matrix:
-        arch: [x86_64, arm64]
+        arch: [x86, x86_64, arm64]
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
@@ -1940,7 +1940,7 @@ jobs:
     needs: sdk-none-softfloat
     strategy:
       matrix:
-        arch: [x86_64, arm64]
+        arch: [x86, x86_64, arm64]
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
@@ -2003,11 +2003,13 @@ jobs:
       matrix:
         include:
           - arch: x86_64
+            bits: 64
             kernel_arch: x86
             rust_target: x86_64-unknown-none
             toolprefix: ''
             binutils: ''
           - arch: arm64
+            bits: 64
             kernel_arch: arm64
             rust_target: aarch64-unknown-none
             toolprefix: aarch64-linux-gnu-
@@ -2051,6 +2053,7 @@ jobs:
         run: >-
           make frida-agent-prelinked.o.bin
           ARCH=${{ matrix.kernel_arch }}
+          BITS=${{ matrix.bits }}
           FRIDA_SDK=${{ runner.workspace }}/sdk-none-${{ matrix.arch }}-softfloat
           AGENT_LD=${{ matrix.toolprefix }}ld
           AGENT_AR=${{ matrix.toolprefix }}ar
@@ -2381,7 +2384,7 @@ jobs:
     needs: toolchain-linux
     strategy:
       matrix:
-        arch: [x86_64, arm64]
+        arch: [x86, x86_64, arm64]
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
