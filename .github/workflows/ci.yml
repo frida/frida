@@ -2002,6 +2002,14 @@ jobs:
     strategy:
       matrix:
         include:
+          # Rust ships no freestanding 32-bit x86 target, so the agent spells one out
+          # and build-std compiles for it; there is nothing for rustup to add.
+          - arch: x86
+            bits: 32
+            kernel_arch: x86
+            rust_target: ''
+            toolprefix: ''
+            binutils: ''
           - arch: x86_64
             bits: 64
             kernel_arch: x86
@@ -2041,7 +2049,9 @@ jobs:
           SDK_PREFIX: ${{ runner.workspace }}/sdk-none-${{ matrix.arch }}-softfloat
       - name: Set up Rust target
         run: |
-          rustup target add ${{ matrix.rust_target }}
+          if [ -n "${{ matrix.rust_target }}" ]; then
+            rustup target add ${{ matrix.rust_target }}
+          fi
           rustup component add rust-src
       - name: Download GumJS devkit
         uses: actions/download-artifact@v8
