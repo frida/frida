@@ -1,0 +1,19 @@
+name: Set up LLVM
+description: Install the LLVM toolchain and put its tools on the path
+inputs:
+  version:
+    required: false
+    default: "21"
+    description: The LLVM major version to install
+runs:
+  using: composite
+  steps:
+    - name: Install LLVM
+      shell: bash
+      run: |
+        curl -sSL https://apt.llvm.org/llvm.sh -o llvm.sh
+        chmod +x llvm.sh
+        sudo ./llvm.sh $VERSION
+        echo "/usr/lib/llvm-$VERSION/bin" >> $GITHUB_PATH
+      env:
+        VERSION: ${{ inputs.version }}

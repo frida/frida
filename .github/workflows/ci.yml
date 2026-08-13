@@ -1960,14 +1960,7 @@ jobs:
       - name: Grab frida-gum
         run: python tools/ensure-submodules.py frida-gum
       - name: Set up C toolchain
-        run: |
-          curl -sSL https://apt.llvm.org/llvm.sh -o llvm.sh
-          chmod +x llvm.sh
-          sudo ./llvm.sh $CLANG_VERSION
-          sudo ln -sf /usr/bin/clang-$CLANG_VERSION /usr/bin/clang
-          sudo ln -sf /usr/bin/clang++-$CLANG_VERSION /usr/bin/clang++
-        env:
-          CLANG_VERSION: 21
+        uses: ./.github/actions/setup-llvm
       - name: Configure Gum
         working-directory: subprojects/frida-gum
         run: >-
@@ -2036,13 +2029,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ${{ matrix.binutils }}
       - name: Set up C toolchain
-        run: |
-          curl -sSL https://apt.llvm.org/llvm.sh -o llvm.sh
-          chmod +x llvm.sh
-          sudo ./llvm.sh $CLANG_VERSION
-          sudo ln -sf /usr/bin/clang-$CLANG_VERSION /usr/bin/clang
-        env:
-          CLANG_VERSION: 21
+        uses: ./.github/actions/setup-llvm
       - name: Fetch the SDK
         run: releng/deps.py sync sdk none-${{ matrix.arch }}-softfloat $SDK_PREFIX
         env:
@@ -2410,19 +2397,15 @@ jobs:
       - name: Check whether the SDK is already published
         id: sdk
         run: echo "published=$(releng/deps.py published sdk none-${{ matrix.arch }}-softfloat)" >> $GITHUB_OUTPUT
-      - name: Set up C toolchain
+      - name: Set up build prerequisites
         if: steps.sdk.outputs.published == 'false'
         run: |
           sudo apt-get update
           sudo apt-get install -y gperf
           sudo npm install -g cloudflare-cli@5.0.5
-          curl -sSL https://apt.llvm.org/llvm.sh -o llvm.sh
-          chmod +x llvm.sh
-          sudo ./llvm.sh $CLANG_VERSION
-          sudo ln -sf /usr/bin/clang-$CLANG_VERSION /usr/bin/clang
-          sudo ln -sf /usr/bin/clang++-$CLANG_VERSION /usr/bin/clang++
-        env:
-          CLANG_VERSION: 21
+      - name: Set up C toolchain
+        if: steps.sdk.outputs.published == 'false'
+        uses: ./.github/actions/setup-llvm
       - name: Roll SDK
         run: releng/deps.py roll sdk none-${{ matrix.arch }}-softfloat --activate
         env:
