@@ -21,8 +21,8 @@ jobs:
       - package-android
       - package-qnx
       - package-apple-universal
-      - package-none-arm64
-      - package-none-softfloat
+      - package-none
+      - package-barebone-agent
       - assemble-ios-assets
       - assemble-tvos-assets
     permissions:
@@ -759,34 +759,19 @@ jobs:
         with:
           name: frida-inject-qnx-${{ matrix.arch }}
 
-  package-none-arm64:
+  package-none:
     if: startsWith(github.ref, 'refs/tags/')
-    needs: [frida-gum-none-arm64, frida-barebone-agent-none-arm64]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repo
-        uses: actions/checkout@v7
-      - name: Package Gum devkit
-        uses: ./.github/actions/package-artifact-files-as-tarball
-        with:
-          name: frida-gum-devkit-none-arm64
-      - name: Package GumJS devkit
-        uses: ./.github/actions/package-artifact-files-as-tarball
-        with:
-          name: frida-gumjs-devkit-none-arm64
-      - name: Package barebone agent
-        uses: ./.github/actions/package-artifact-file
-        with:
-          name: frida-barebone-agent-none-arm64
-
-  # No agent here: the soft-float one is a static library that only means anything
-  # once linked into a module for a specific kernel.
-  package-none-softfloat:
-    if: startsWith(github.ref, 'refs/tags/')
-    needs: frida-gum-none-softfloat
+    needs: frida-gum-none
     strategy:
       matrix:
-        arch: [x86, x86_64, arm64]
+        machine:
+          - none-x86-softfloat_nopic
+          - none-x86-softfloat_pic
+          - none-x86_64-softfloat_nopic
+          - none-x86_64-softfloat_pic
+          - none-x86_64-softfloat_pic_msabi
+          - none-arm64-softfloat_nopic
+          - none-arm64-softfloat_pic
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
@@ -795,11 +780,27 @@ jobs:
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
-          name: frida-gum-devkit-none-${{ matrix.arch }}-softfloat
+          name: frida-gum-devkit-${{ matrix.machine }}
       - name: Package GumJS devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
-          name: frida-gumjs-devkit-none-${{ matrix.arch }}-softfloat
+          name: frida-gumjs-devkit-${{ matrix.machine }}
+
+  package-barebone-agent:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: frida-barebone-agent-blob
+    strategy:
+      matrix:
+        flavor: [win9x-x86, winnt-x86, winnt-x86_64, xnu-arm64]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+      - name: Package barebone agent
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-barebone-agent-${{ matrix.flavor }}
 
   frida-windows-intel:
     needs: sdk-windows
@@ -1852,95 +1853,18 @@ jobs:
           name: frida-gadget-qnx-armeabi
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/32/frida-gadget.so
 
-  frida-gum-none-arm64:
-    needs: sdk-none-arm64
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repo
-        uses: actions/checkout@v7
-      - name: Set up environment
-        uses: ./.github/actions/setup-linux-env
-        with:
-          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
-          cloudflare-email: ${{ secrets.CF_EMAIL }}
-          cloudflare-token: ${{ secrets.CF_TOKEN }}
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-      - name: Grab frida-gum
-        run: python tools/ensure-submodules.py frida-gum
-      - name: Check out barebone agent
-        run: git submodule update --init --depth 1 subprojects/frida-core
-      - name: Set up C toolchain
-        working-directory: subprojects/frida-core/src/barebone/agent
-        run: |
-          npm install -g xpm
-          xpm install
-          echo "$PWD/xpacks/.bin" >> $GITHUB_PATH
-      - name: Configure Gum
-        working-directory: subprojects/frida-gum
-        run: >-
-          ./configure
-          --host=aarch64-none-elf
-          --enable-gumjs
-          --with-devkits=gum,gumjs
-          --with-devkit-symbol-scope=original
-      - name: Compile
-        working-directory: subprojects/frida-gum
-        run: make
-      - name: Upload Gum devkit
-        uses: actions/upload-artifact@v7
-        with:
-          name: frida-gum-devkit-none-arm64
-          path: subprojects/frida-gum/build/gum/devkit/
-      - name: Upload GumJS devkit
-        uses: actions/upload-artifact@v7
-        with:
-          name: frida-gumjs-devkit-none-arm64
-          path: subprojects/frida-gum/build/bindings/gumjs/devkit/
-
-  frida-barebone-agent-none-arm64:
-    needs: frida-gum-none-arm64
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repo
-        uses: actions/checkout@v7
-      - name: Grab frida-core
-        run: python tools/ensure-submodules.py frida-core
-      - name: Set up C toolchain
-        working-directory: subprojects/frida-core/src/barebone/agent
-        run: |
-          npm install -g xpm
-          xpm install
-          echo "$PWD/xpacks/.bin" >> $GITHUB_PATH
-      - name: Set up Rust target
-        run: rustup target add aarch64-unknown-none
-      - name: Download GumJS devkit
-        uses: actions/download-artifact@v8
-        with:
-          name: frida-gumjs-devkit-none-arm64
-          path: ${{ runner.workspace }}/gumjs-devkit
-      - name: Build agent
-        working-directory: subprojects/frida-core/src/barebone/agent
-        run: cargo build --release --features xnu
-        env:
-          CC_aarch64_unknown_none: aarch64-none-elf-gcc
-          AR_aarch64_unknown_none: aarch64-none-elf-ar
-          RANLIB_aarch64_unknown_none: aarch64-none-elf-ranlib
-          GUMJS_DEVKIT_DIR: ${{ runner.workspace }}/gumjs-devkit
-      - name: Upload agent
-        uses: actions/upload-artifact@v7
-        with:
-          name: frida-barebone-agent-none-arm64
-          path: subprojects/frida-core/src/barebone/agent/target/aarch64-unknown-none/release/frida-barebone-agent
-
-  frida-gum-none-softfloat:
-    needs: sdk-none-softfloat
+  frida-gum-none:
+    needs: sdk-none
     strategy:
       matrix:
-        arch: [x86, x86_64, arm64]
+        machine:
+          - none-x86-softfloat_nopic
+          - none-x86-softfloat_pic
+          - none-x86_64-softfloat_nopic
+          - none-x86_64-softfloat_pic
+          - none-x86_64-softfloat_pic_msabi
+          - none-arm64-softfloat_nopic
+          - none-arm64-softfloat_pic
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
@@ -1965,7 +1889,7 @@ jobs:
         working-directory: subprojects/frida-gum
         run: >-
           ./configure
-          --host=none-${{ matrix.arch }}-softfloat
+          --host=${{ matrix.machine }}
           --enable-gumjs
           --with-devkits=gum,gumjs
           --with-devkit-symbol-scope=original
@@ -1978,20 +1902,85 @@ jobs:
       - name: Upload Gum devkit
         uses: actions/upload-artifact@v7
         with:
-          name: frida-gum-devkit-none-${{ matrix.arch }}-softfloat
+          name: frida-gum-devkit-${{ matrix.machine }}
           path: subprojects/frida-gum/build/gum/devkit/
       - name: Upload GumJS devkit
         uses: actions/upload-artifact@v7
         with:
-          name: frida-gumjs-devkit-none-${{ matrix.arch }}-softfloat
+          name: frida-gumjs-devkit-${{ matrix.machine }}
           path: subprojects/frida-gum/build/bindings/gumjs/devkit/
+
+  frida-barebone-agent-blob:
+    needs: frida-gum-none
+    strategy:
+      matrix:
+        include:
+          - flavor: win9x
+            arch: x86
+            machine: none-x86-softfloat_pic
+            rust_target: i686-unknown-none-pic
+            target_flags: --target ./i686-unknown-none-pic.json -Z json-target-spec
+          - flavor: winnt
+            arch: x86
+            machine: none-x86-softfloat_pic
+            rust_target: i686-unknown-none-pic
+            target_flags: --target ./i686-unknown-none-pic.json -Z json-target-spec
+          - flavor: winnt
+            arch: x86_64
+            machine: none-x86_64-softfloat_pic_msabi
+            rust_target: x86_64-unknown-none-pic
+            target_flags: --target ./x86_64-unknown-none-pic.json -Z json-target-spec
+          - flavor: xnu
+            arch: arm64
+            machine: none-arm64-softfloat_nopic
+            rust_target: aarch64-unknown-none-softfloat
+            target_flags: --target aarch64-unknown-none-softfloat
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+      - name: Grab frida-core
+        run: python tools/ensure-submodules.py frida-core
+      - name: Set up C toolchain
+        uses: ./.github/actions/setup-llvm
+      - name: Fetch the SDK
+        run: |
+          releng/deps.py sync sdk ${{ matrix.machine }} "$SDK"
+          echo "CC=clang -I$SDK/include -I$SDK/include/glib-2.0 -I$SDK/lib/glib-2.0/include -I$SDK/include/capstone -I$SDK/include/json-glib-1.0" >> $GITHUB_ENV
+          echo "RUSTFLAGS=-L native=$SDK/lib" >> $GITHUB_ENV
+        env:
+          SDK: ${{ runner.workspace }}/sdk-${{ matrix.machine }}
+      - name: Set up Rust
+        run: rustup component add rust-src
+      - name: Download GumJS devkit
+        uses: actions/download-artifact@v8
+        with:
+          name: frida-gumjs-devkit-${{ matrix.machine }}
+          path: ${{ runner.workspace }}/gumjs-devkit
+      - name: Build agent
+        working-directory: subprojects/frida-core/src/barebone/agent
+        run: >-
+          cargo build --release
+          --features ${{ matrix.flavor }}
+          ${{ matrix.target_flags }}
+          -Z build-std=core,alloc,compiler_builtins
+          --target-dir target-${{ matrix.flavor }}
+        env:
+          RUSTC_BOOTSTRAP: 1
+          GUMJS_DEVKIT_DIR: ${{ runner.workspace }}/gumjs-devkit
+      - name: Upload agent
+        uses: actions/upload-artifact@v7
+        with:
+          name: frida-barebone-agent-${{ matrix.flavor }}-${{ matrix.arch }}
+          path: subprojects/frida-core/src/barebone/agent/target-${{ matrix.flavor }}/${{ matrix.rust_target }}/release/frida-barebone-agent
 
   # The Makefile drives Cargo and the prelink itself, so the flags the agent needs live
   # there rather than here. It stops at the prelinked object: a .ko is only loadable on
   # the exact GKI build it was made for, since vermagic names it verbatim, so the
   # kernel half is left to whoever has that kernel.
-  frida-barebone-agent-none-softfloat:
-    needs: frida-gum-none-softfloat
+  frida-barebone-agent-linux:
+    needs: frida-gum-none
     strategy:
       matrix:
         include:
@@ -2031,9 +2020,9 @@ jobs:
       - name: Set up C toolchain
         uses: ./.github/actions/setup-llvm
       - name: Fetch the SDK
-        run: releng/deps.py sync sdk none-${{ matrix.arch }}-softfloat $SDK_PREFIX
+        run: releng/deps.py sync sdk none-${{ matrix.arch }}-softfloat_nopic $SDK_PREFIX
         env:
-          SDK_PREFIX: ${{ runner.workspace }}/sdk-none-${{ matrix.arch }}-softfloat
+          SDK_PREFIX: ${{ runner.workspace }}/sdk-none-${{ matrix.arch }}-softfloat_nopic
       - name: Set up Rust target
         run: |
           if [ -n "${{ matrix.rust_target }}" ]; then
@@ -2043,7 +2032,7 @@ jobs:
       - name: Download GumJS devkit
         uses: actions/download-artifact@v8
         with:
-          name: frida-gumjs-devkit-none-${{ matrix.arch }}-softfloat
+          name: frida-gumjs-devkit-none-${{ matrix.arch }}-softfloat_nopic
           path: ${{ runner.workspace }}/gumjs-devkit
       - name: Build agent
         working-directory: subprojects/frida-core/src/barebone/agent/linux
@@ -2051,7 +2040,7 @@ jobs:
           make frida-agent-prelinked.o.bin
           ARCH=${{ matrix.kernel_arch }}
           BITS=${{ matrix.bits }}
-          FRIDA_SDK=${{ runner.workspace }}/sdk-none-${{ matrix.arch }}-softfloat
+          FRIDA_SDK=${{ runner.workspace }}/sdk-none-${{ matrix.arch }}-softfloat_nopic
           AGENT_LD=${{ matrix.toolprefix }}ld
           AGENT_AR=${{ matrix.toolprefix }}ar
           AGENT_NM=${{ matrix.toolprefix }}nm
@@ -2348,40 +2337,18 @@ jobs:
         env:
           ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
 
-  sdk-none-arm64:
-    needs: toolchain-linux
-    runs-on: ubuntu-latest
-    container: ghcr.io/frida/x-tools-linux-x86_64:latest
-    steps:
-      - name: Check out repo
-        uses: actions/checkout@v7
-      - name: Set up environment
-        uses: ./.github/actions/setup-linux-env
-        with:
-          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
-          cloudflare-email: ${{ secrets.CF_EMAIL }}
-          cloudflare-token: ${{ secrets.CF_TOKEN }}
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-      - name: Check out barebone agent
-        run: git submodule update --init --depth 1 subprojects/frida-core
-      - name: Set up C toolchain
-        working-directory: subprojects/frida-core/src/barebone/agent
-        run: |
-          npm install -g xpm
-          xpm install
-          echo "$PWD/xpacks/.bin" >> $GITHUB_PATH
-      - name: Roll SDK
-        run: releng/deps.py roll sdk aarch64-none-elf --activate
-
-  sdk-none-softfloat:
+  sdk-none:
     needs: toolchain-linux
     strategy:
       matrix:
-        arch: [x86, x86_64, arm64]
+        machine:
+          - none-x86-softfloat_nopic
+          - none-x86-softfloat_pic
+          - none-x86_64-softfloat_nopic
+          - none-x86_64-softfloat_pic
+          - none-x86_64-softfloat_pic_msabi
+          - none-arm64-softfloat_nopic
+          - none-arm64-softfloat_pic
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
@@ -2396,7 +2363,7 @@ jobs:
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Check whether the SDK is already published
         id: sdk
-        run: echo "published=$(releng/deps.py published sdk none-${{ matrix.arch }}-softfloat)" >> $GITHUB_OUTPUT
+        run: echo "published=$(releng/deps.py published sdk ${{ matrix.machine }})" >> $GITHUB_OUTPUT
       - name: Set up build prerequisites
         if: steps.sdk.outputs.published == 'false'
         run: |
@@ -2407,7 +2374,7 @@ jobs:
         if: steps.sdk.outputs.published == 'false'
         uses: ./.github/actions/setup-llvm
       - name: Roll SDK
-        run: releng/deps.py roll sdk none-${{ matrix.arch }}-softfloat --activate
+        run: releng/deps.py roll sdk ${{ matrix.machine }} --activate
         env:
           CC: clang
           CXX: clang++
