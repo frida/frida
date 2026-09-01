@@ -1968,27 +1968,27 @@ jobs:
           - flavor: xnu
             feature: xnu
             arch: arm64
-            machine: none-arm64-softfloat_nopic
-            rust_target: aarch64-unknown-none-softfloat
-            target_flags: --target aarch64-unknown-none-softfloat
+            machine: none-arm64-softfloat_pic
+            rust_target: aarch64-unknown-none-pic
+            target_flags: --target ./aarch64-unknown-none-pic.json -Z json-target-spec
           - flavor: linux
             feature: linux-injected
             arch: arm64
-            machine: none-arm64-softfloat_nopic
-            rust_target: aarch64-unknown-none
-            target_flags: --target aarch64-unknown-none
+            machine: none-arm64-softfloat_pic
+            rust_target: aarch64-unknown-none-pic
+            target_flags: --target ./aarch64-unknown-none-pic.json -Z json-target-spec
           - flavor: linux
             feature: linux-injected
             arch: x86_64
-            machine: none-x86_64-softfloat_nopic
-            rust_target: x86_64-unknown-none
-            target_flags: --target x86_64-unknown-none
+            machine: none-x86_64-softfloat_pic
+            rust_target: x86_64-unknown-none-pic
+            target_flags: --target ./x86_64-unknown-none-pic.json -Z json-target-spec
           - flavor: linux
             feature: linux-injected
             arch: x86
-            machine: none-x86-softfloat_nopic
-            rust_target: i686-unknown-none
-            target_flags: --target ./i686-unknown-none.json -Z json-target-spec
+            machine: none-x86-softfloat_pic
+            rust_target: i686-unknown-none-pic
+            target_flags: --target ./i686-unknown-none-pic.json -Z json-target-spec
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
