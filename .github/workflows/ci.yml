@@ -814,7 +814,7 @@ jobs:
     needs: frida-barebone-agent-blob
     strategy:
       matrix:
-        flavor: [win9x-x86, winnt-x86, winnt-x86_64, xnu-arm64, linux-arm64, linux-x86_64, linux-x86]
+        flavor: [win9x-x86, winnt-x86, winnt-x86_64, xnu-arm64, linux-arm64]
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
@@ -1968,27 +1968,15 @@ jobs:
           - flavor: xnu
             feature: xnu
             arch: arm64
-            machine: none-arm64-softfloat_pic
-            rust_target: aarch64-unknown-none-pic
-            target_flags: --target ./aarch64-unknown-none-pic.json -Z json-target-spec
+            machine: none-arm64-softfloat_nopic
+            rust_target: aarch64-unknown-none-softfloat
+            target_flags: --target aarch64-unknown-none-softfloat
           - flavor: linux
             feature: linux-injected
             arch: arm64
-            machine: none-arm64-softfloat_pic
-            rust_target: aarch64-unknown-none-pic
-            target_flags: --target ./aarch64-unknown-none-pic.json -Z json-target-spec
-          - flavor: linux
-            feature: linux-injected
-            arch: x86_64
-            machine: none-x86_64-softfloat_pic
-            rust_target: x86_64-unknown-none-pic
-            target_flags: --target ./x86_64-unknown-none-pic.json -Z json-target-spec
-          - flavor: linux
-            feature: linux-injected
-            arch: x86
-            machine: none-x86-softfloat_pic
-            rust_target: i686-unknown-none-pic
-            target_flags: --target ./i686-unknown-none-pic.json -Z json-target-spec
+            machine: none-arm64-softfloat_nopic
+            rust_target: aarch64-unknown-none-softfloat
+            target_flags: --target aarch64-unknown-none-softfloat
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
