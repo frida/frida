@@ -7,8 +7,29 @@ env:
   ANDROID_NDK_VERSION: r29
 
 jobs:
-  publish-prod:
+  publish-barebone-prerelease:
     if: startsWith(github.ref, 'refs/tags/')
+    needs: package-barebone-agent
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download barebone agents
+        uses: actions/download-artifact@v8
+        with:
+          pattern: release-asset-frida-barebone-agent-*
+          merge-multiple: true
+          path: build/release-assets/
+      - name: Publish pre-release to GitHub
+        uses: softprops/action-gh-release@v1
+        with:
+          name: "Barebone agents ${{ github.ref_name }}"
+          body: "Barebone agents only, for testing. Not a Frida release."
+          prerelease: true
+          files: build/release-assets/*
+
+  publish-prod:
+    if: false
     runs-on: ubuntu-latest
     needs:
       - package-windows
@@ -142,7 +163,7 @@ jobs:
               -d '{"event_type":"build"}'
 
   publish-dev:
-    if: github.ref == 'refs/heads/main'
+    if: false
     runs-on: ubuntu-latest
     needs:
       - frida-windows
@@ -188,6 +209,7 @@ jobs:
           site: development
 
   assemble-ios-assets:
+    if: false
     runs-on: macos-latest
     needs: frida-ios
     steps:
@@ -238,6 +260,7 @@ jobs:
           path: ios-assets/*
 
   assemble-tvos-assets:
+    if: false
     runs-on: macos-latest
     needs: frida-tvos
     steps:
@@ -279,7 +302,7 @@ jobs:
           path: tvos-assets/*
 
   package-apple-universal:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     runs-on: macos-latest
     needs: [frida-macos, frida-ios, frida-watchos, frida-tvos]
     steps:
@@ -447,7 +470,7 @@ jobs:
           path: frida-gadget-tvos-arm64-simulator.dylib.xz
 
   package-windows:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     needs: frida-windows
     strategy:
       matrix:
@@ -496,7 +519,7 @@ jobs:
           name: frida-qml-windows-${{ matrix.arch }}
 
   package-windows-sfx:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     needs: frida-windows
     strategy:
       matrix:
@@ -519,7 +542,7 @@ jobs:
           name: frida-core-devkit-windows-${{ matrix.arch }}
 
   package-macos:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     needs: frida-macos
     strategy:
       matrix:
@@ -564,7 +587,7 @@ jobs:
           name: frida-qml-macos-${{ matrix.arch }}
 
   package-linux:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     needs: frida-linux
     strategy:
       matrix:
@@ -608,7 +631,7 @@ jobs:
           name: frida-qml-linux-${{ matrix.arch }}
 
   package-ios:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     needs: frida-ios
     strategy:
       matrix:
@@ -636,7 +659,7 @@ jobs:
           name: frida-portal-ios-${{ matrix.arch }}
 
   package-watchos:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     needs: frida-watchos
     strategy:
       matrix:
@@ -659,7 +682,7 @@ jobs:
           name: frida-core-devkit-watchos-${{ matrix.arch }}
 
   package-tvos:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     needs: frida-tvos
     strategy:
       matrix:
@@ -682,7 +705,7 @@ jobs:
           name: frida-core-devkit-tvos-${{ matrix.arch }}
 
   package-android:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     needs: frida-android
     strategy:
       matrix:
@@ -721,7 +744,7 @@ jobs:
           name: frida-inject-android-${{ matrix.arch }}
 
   package-qnx:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     needs: frida-qnx
     strategy:
       matrix:
@@ -760,7 +783,7 @@ jobs:
           name: frida-inject-qnx-${{ matrix.arch }}
 
   package-none:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     needs: frida-gum-none
     strategy:
       matrix:
@@ -803,6 +826,7 @@ jobs:
           name: frida-barebone-agent-${{ matrix.flavor }}
 
   frida-windows-intel:
+    if: false
     needs: sdk-windows
     strategy:
       matrix:
@@ -987,6 +1011,7 @@ jobs:
             !*.pdb
 
   frida-windows:
+    if: false
     needs: frida-windows-intel
     runs-on: windows-11-arm
     steps:
@@ -1127,6 +1152,7 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/prebuilds/*.tar.gz
 
   frida-macos:
+    if: false
     needs: sdk-macos
     strategy:
       matrix:
@@ -1273,6 +1299,7 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/lib/qml/
 
   frida-linux:
+    if: false
     needs: sdk-linux
     strategy:
       matrix:
@@ -1452,6 +1479,7 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/lib/qml/
 
   frida-ios:
+    if: false
     needs: [sdk-macos, sdk-ios]
     strategy:
       matrix:
@@ -1550,6 +1578,7 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/frida-gadget.dylib
 
   frida-watchos:
+    if: false
     needs: [sdk-macos, sdk-watchos]
     strategy:
       matrix:
@@ -1605,6 +1634,7 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/frida-gadget.dylib
 
   frida-tvos:
+    if: false
     needs: [sdk-macos, sdk-tvos]
     strategy:
       matrix:
@@ -1694,6 +1724,7 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/frida-gadget.dylib
 
   frida-android:
+    if: false
     needs: [sdk-linux, sdk-android-32, sdk-android-64]
     strategy:
       matrix:
@@ -1785,6 +1816,7 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/64/frida-gadget.so
 
   frida-qnx:
+    if: false
     runs-on: ubuntu-latest
     needs: sdk-linux
     container: ghcr.io/frida/qnx-tools:latest
@@ -2002,6 +2034,7 @@ jobs:
   # the exact GKI build it was made for, since vermagic names it verbatim, so the
   # kernel half is left to whoever has that kernel.
   frida-barebone-agent-linux:
+    if: false
     needs: frida-gum-none
     strategy:
       matrix:
@@ -2104,6 +2137,7 @@ jobs:
           fi
 
   toolchain-windows:
+    if: false
     strategy:
       matrix:
         arch: [x86, arm64]
@@ -2123,6 +2157,7 @@ jobs:
         run: python releng\deps.py roll toolchain windows-${{ matrix.arch }}
 
   sdk-windows:
+    if: false
     needs: toolchain-windows
     strategy:
       matrix:
@@ -2144,6 +2179,7 @@ jobs:
         run: python releng\deps.py roll sdk windows-${{ matrix.arch }}-${{ matrix.config }} --activate
 
   toolchain-macos:
+    if: false
     strategy:
       matrix:
         arch: [x86_64, arm64]
@@ -2166,6 +2202,7 @@ jobs:
         run: releng/deps.py roll toolchain macos-${{ matrix.arch }}
 
   sdk-macos:
+    if: false
     needs: toolchain-macos
     strategy:
       matrix:
@@ -2189,6 +2226,7 @@ jobs:
         run: releng/deps.py roll sdk macos-${{ matrix.arch }} --activate
 
   sdk-ios:
+    if: false
     needs: toolchain-macos
     strategy:
       matrix:
@@ -2211,6 +2249,7 @@ jobs:
         run: releng/deps.py roll sdk ios-${{ matrix.arch }} --activate
 
   sdk-watchos:
+    if: false
     needs: toolchain-macos
     strategy:
       matrix:
@@ -2233,6 +2272,7 @@ jobs:
         run: releng/deps.py roll sdk watchos-${{ matrix.arch }} --activate
 
   sdk-tvos:
+    if: false
     needs: toolchain-macos
     strategy:
       matrix:
@@ -2275,6 +2315,7 @@ jobs:
         run: releng/deps.py roll toolchain $XTOOLS_HOST
 
   sdk-linux:
+    if: false
     needs: toolchain-linux
     strategy:
       matrix:
@@ -2302,6 +2343,7 @@ jobs:
         run: releng/deps.py roll sdk $XTOOLS_HOST --activate
 
   sdk-android-32:
+    if: false
     needs: toolchain-linux
     strategy:
       matrix:
@@ -2331,6 +2373,7 @@ jobs:
           ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
 
   sdk-android-64:
+    if: false
     needs: toolchain-linux
     strategy:
       matrix:
