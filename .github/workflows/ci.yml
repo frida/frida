@@ -793,6 +793,7 @@ jobs:
           - none-x86_64-softfloat_nopic
           - none-x86_64-softfloat_pic
           - none-x86_64-softfloat_pic_msabi
+          - none-arm-softfloat_pic
           - none-arm64-softfloat_nopic
           - none-arm64-softfloat_pic
       fail-fast: false
@@ -1895,6 +1896,7 @@ jobs:
           - none-x86_64-softfloat_nopic
           - none-x86_64-softfloat_pic
           - none-x86_64-softfloat_pic_msabi
+          - none-arm-softfloat_pic
           - none-arm64-softfloat_nopic
           - none-arm64-softfloat_pic
       fail-fast: false
@@ -2400,6 +2402,7 @@ jobs:
           - none-x86_64-softfloat_nopic
           - none-x86_64-softfloat_pic
           - none-x86_64-softfloat_pic_msabi
+          - none-arm-softfloat_pic
           - none-arm64-softfloat_nopic
           - none-arm64-softfloat_pic
       fail-fast: false
