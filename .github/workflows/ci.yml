@@ -815,7 +815,7 @@ jobs:
     needs: frida-barebone-agent-blob
     strategy:
       matrix:
-        flavor: [win9x-x86, winnt-x86, winnt-x86_64, xnu-arm64, linux-arm64]
+        flavor: [win9x-x86, winnt-x86, winnt-x86_64, xnu-arm64, linux-arm, linux-arm64]
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
@@ -1973,6 +1973,12 @@ jobs:
             machine: none-arm64-softfloat_pic
             rust_target: aarch64-unknown-none-pic
             target_flags: --target ./aarch64-unknown-none-pic.json -Z json-target-spec
+          - flavor: linux
+            feature: linux-injected
+            arch: arm
+            machine: none-arm-softfloat_pic
+            rust_target: armv7a-unknown-none-pic
+            target_flags: --target ./armv7a-unknown-none-pic.json -Z json-target-spec
           - flavor: linux
             feature: linux-injected
             arch: arm64
