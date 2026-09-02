@@ -9,7 +9,7 @@ env:
 jobs:
   publish-barebone-prerelease:
     if: startsWith(github.ref, 'refs/tags/')
-    needs: package-barebone-agent
+    needs: [package-barebone-agent, package-barebone-agent-kext]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -825,6 +825,18 @@ jobs:
         uses: ./.github/actions/package-artifact-file
         with:
           name: frida-barebone-agent-${{ matrix.flavor }}
+
+  package-barebone-agent-kext:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: frida-barebone-agent-kext
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+      - name: Package barebone agent kext
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-barebone-agent-xnu-kext-arm64e
 
   frida-windows-intel:
     if: false
@@ -1943,6 +1955,90 @@ jobs:
         with:
           name: frida-gumjs-devkit-${{ matrix.machine }}
           path: subprojects/frida-gum/build/bindings/gumjs/devkit/
+
+  sdk-macos-kernel:
+    runs-on: macos-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+      - name: Set up environment
+        uses: ./.github/actions/setup-macos-env
+        with:
+          certificates-p12: ${{ secrets.APPLE_CERTIFICATES_P12 }}
+          certificates-password: ${{ secrets.APPLE_CERTIFICATES_PASSWORD }}
+          keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
+          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
+          cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Roll SDK
+        run: releng/deps.py roll sdk macos-arm64e-kernel --activate
+
+  frida-gum-macos-kernel:
+    needs: sdk-macos-kernel
+    runs-on: macos-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+      - name: Set up environment
+        uses: ./.github/actions/setup-macos-env
+        with:
+          certificates-p12: ${{ secrets.APPLE_CERTIFICATES_P12 }}
+          certificates-password: ${{ secrets.APPLE_CERTIFICATES_PASSWORD }}
+          keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
+          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
+          cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Grab frida-gum
+        run: python tools/ensure-submodules.py frida-gum
+      - name: Configure Gum
+        working-directory: subprojects/frida-gum
+        run: >-
+          ./configure
+          --host=macos-arm64e-kernel
+          --enable-gumjs
+          --with-devkits=gumjs
+          --with-devkit-symbol-scope=original
+      - name: Compile
+        working-directory: subprojects/frida-gum
+        run: make
+      - name: Upload GumJS devkit
+        uses: actions/upload-artifact@v7
+        with:
+          name: frida-gumjs-devkit-macos-arm64e-kernel
+          path: subprojects/frida-gum/build/bindings/gumjs/devkit/
+
+  frida-barebone-agent-kext:
+    needs: frida-gum-macos-kernel
+    runs-on: macos-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+      - name: Grab frida-core
+        run: python tools/ensure-submodules.py frida-core
+      - name: Fetch the SDK
+        run: releng/deps.py sync sdk macos-arm64e-kernel $FRIDA_SDK
+        env:
+          FRIDA_SDK: ${{ runner.workspace }}/sdk-macos-arm64e-kernel
+      - name: Set up Rust
+        run: rustup component add rust-src
+      - name: Download GumJS devkit
+        uses: actions/download-artifact@v8
+        with:
+          name: frida-gumjs-devkit-macos-arm64e-kernel
+          path: ${{ runner.workspace }}/gumjs-devkit
+      - name: Build agent
+        working-directory: subprojects/frida-core/src/barebone/agent/macos
+        run: make
+        env:
+          FRIDA_SDK: ${{ runner.workspace }}/sdk-macos-arm64e-kernel
+          GUMJS_DEVKIT_DIR: ${{ runner.workspace }}/gumjs-devkit
+      - name: Upload agent
+        uses: actions/upload-artifact@v7
+        with:
+          name: frida-barebone-agent-xnu-kext-arm64e
+          path: subprojects/frida-core/src/barebone/agent/macos/frida-agent.kext
 
   frida-barebone-agent-blob:
     needs: frida-gum-none
