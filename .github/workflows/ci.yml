@@ -7,8 +7,29 @@ env:
   ANDROID_NDK_VERSION: r29
 
 jobs:
-  publish-prod:
+  publish-barebone-prerelease:
     if: startsWith(github.ref, 'refs/tags/')
+    needs: [package-barebone-agent, package-barebone-agent-kext]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download barebone agents
+        uses: actions/download-artifact@v8
+        with:
+          pattern: release-asset-frida-barebone-agent-*
+          merge-multiple: true
+          path: build/release-assets/
+      - name: Publish pre-release to GitHub
+        uses: softprops/action-gh-release@v1
+        with:
+          name: "Barebone agents ${{ github.ref_name }}"
+          body: "Barebone agents only, for testing. Not a Frida release."
+          prerelease: true
+          files: build/release-assets/*
+
+  publish-prod:
+    if: false
     runs-on: ubuntu-latest
     needs:
       - package-windows
@@ -142,7 +163,7 @@ jobs:
               -d '{"event_type":"build"}'
 
   publish-dev:
-    if: github.ref == 'refs/heads/main'
+    if: false
     runs-on: ubuntu-latest
     needs:
       - frida-windows
@@ -188,6 +209,7 @@ jobs:
           site: development
 
   assemble-ios-assets:
+    if: false
     runs-on: macos-latest
     needs: frida-ios
     steps:
@@ -238,6 +260,7 @@ jobs:
           path: ios-assets/*
 
   assemble-tvos-assets:
+    if: false
     runs-on: macos-latest
     needs: frida-tvos
     steps:
@@ -279,7 +302,7 @@ jobs:
           path: tvos-assets/*
 
   package-apple-universal:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     runs-on: macos-latest
     needs: [frida-macos, frida-ios, frida-watchos, frida-tvos]
     steps:
@@ -447,7 +470,7 @@ jobs:
           path: frida-gadget-tvos-arm64-simulator.dylib.xz
 
   package-windows:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     needs: frida-windows
     strategy:
       matrix:
@@ -496,7 +519,7 @@ jobs:
           name: frida-qml-windows-${{ matrix.arch }}
 
   package-windows-sfx:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     needs: frida-windows
     strategy:
       matrix:
@@ -519,7 +542,7 @@ jobs:
           name: frida-core-devkit-windows-${{ matrix.arch }}
 
   package-macos:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     needs: frida-macos
     strategy:
       matrix:
@@ -564,7 +587,7 @@ jobs:
           name: frida-qml-macos-${{ matrix.arch }}
 
   package-linux:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     needs: frida-linux
     strategy:
       matrix:
@@ -608,7 +631,7 @@ jobs:
           name: frida-qml-linux-${{ matrix.arch }}
 
   package-ios:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     needs: frida-ios
     strategy:
       matrix:
@@ -636,7 +659,7 @@ jobs:
           name: frida-portal-ios-${{ matrix.arch }}
 
   package-watchos:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     needs: frida-watchos
     strategy:
       matrix:
@@ -659,7 +682,7 @@ jobs:
           name: frida-core-devkit-watchos-${{ matrix.arch }}
 
   package-tvos:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     needs: frida-tvos
     strategy:
       matrix:
@@ -682,7 +705,7 @@ jobs:
           name: frida-core-devkit-tvos-${{ matrix.arch }}
 
   package-android:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     needs: frida-android
     strategy:
       matrix:
@@ -721,7 +744,7 @@ jobs:
           name: frida-inject-android-${{ matrix.arch }}
 
   package-qnx:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     needs: frida-qnx
     strategy:
       matrix:
@@ -760,7 +783,7 @@ jobs:
           name: frida-inject-qnx-${{ matrix.arch }}
 
   package-none:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: false
     needs: frida-gum-none
     strategy:
       matrix:
@@ -770,6 +793,7 @@ jobs:
           - none-x86_64-softfloat_nopic
           - none-x86_64-softfloat_pic
           - none-x86_64-softfloat_pic_msabi
+          - none-arm-softfloat_pic
           - none-arm64-softfloat_nopic
           - none-arm64-softfloat_pic
       fail-fast: false
@@ -791,7 +815,8 @@ jobs:
     needs: frida-barebone-agent-blob
     strategy:
       matrix:
-        flavor: [win9x-x86, winnt-x86, winnt-x86_64, xnu-arm64]
+        flavor: [win9x-x86, winnt-x86, winnt-x86_64, xnu-arm64, linux-x86, linux-x86_64,
+                 linux-arm, linux-arm64]
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
@@ -802,7 +827,20 @@ jobs:
         with:
           name: frida-barebone-agent-${{ matrix.flavor }}
 
+  package-barebone-agent-kext:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: frida-barebone-agent-kext
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+      - name: Package barebone agent kext
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-barebone-agent-xnu-kext-arm64e
+
   frida-windows-intel:
+    if: false
     needs: sdk-windows
     strategy:
       matrix:
@@ -987,6 +1025,7 @@ jobs:
             !*.pdb
 
   frida-windows:
+    if: false
     needs: frida-windows-intel
     runs-on: windows-11-arm
     steps:
@@ -1127,6 +1166,7 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/prebuilds/*.tar.gz
 
   frida-macos:
+    if: false
     needs: sdk-macos
     strategy:
       matrix:
@@ -1273,6 +1313,7 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/lib/qml/
 
   frida-linux:
+    if: false
     needs: sdk-linux
     strategy:
       matrix:
@@ -1452,6 +1493,7 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/lib/qml/
 
   frida-ios:
+    if: false
     needs: [sdk-macos, sdk-ios]
     strategy:
       matrix:
@@ -1550,6 +1592,7 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/frida-gadget.dylib
 
   frida-watchos:
+    if: false
     needs: [sdk-macos, sdk-watchos]
     strategy:
       matrix:
@@ -1605,6 +1648,7 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/frida-gadget.dylib
 
   frida-tvos:
+    if: false
     needs: [sdk-macos, sdk-tvos]
     strategy:
       matrix:
@@ -1694,6 +1738,7 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/frida-gadget.dylib
 
   frida-android:
+    if: false
     needs: [sdk-linux, sdk-android-32, sdk-android-64]
     strategy:
       matrix:
@@ -1785,6 +1830,7 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/64/frida-gadget.so
 
   frida-qnx:
+    if: false
     runs-on: ubuntu-latest
     needs: sdk-linux
     container: ghcr.io/frida/qnx-tools:latest
@@ -1863,6 +1909,7 @@ jobs:
           - none-x86_64-softfloat_nopic
           - none-x86_64-softfloat_pic
           - none-x86_64-softfloat_pic_msabi
+          - none-arm-softfloat_pic
           - none-arm64-softfloat_nopic
           - none-arm64-softfloat_pic
       fail-fast: false
@@ -1910,31 +1957,147 @@ jobs:
           name: frida-gumjs-devkit-${{ matrix.machine }}
           path: subprojects/frida-gum/build/bindings/gumjs/devkit/
 
+  sdk-macos-kernel:
+    runs-on: macos-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+      - name: Set up environment
+        uses: ./.github/actions/setup-macos-env
+        with:
+          certificates-p12: ${{ secrets.APPLE_CERTIFICATES_P12 }}
+          certificates-password: ${{ secrets.APPLE_CERTIFICATES_PASSWORD }}
+          keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
+          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
+          cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Roll SDK
+        run: releng/deps.py roll sdk macos-arm64e-kernel --activate
+
+  frida-gum-macos-kernel:
+    needs: sdk-macos-kernel
+    runs-on: macos-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+      - name: Set up environment
+        uses: ./.github/actions/setup-macos-env
+        with:
+          certificates-p12: ${{ secrets.APPLE_CERTIFICATES_P12 }}
+          certificates-password: ${{ secrets.APPLE_CERTIFICATES_PASSWORD }}
+          keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
+          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
+          cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Grab frida-gum
+        run: python tools/ensure-submodules.py frida-gum
+      - name: Configure Gum
+        working-directory: subprojects/frida-gum
+        run: >-
+          ./configure
+          --host=macos-arm64e-kernel
+          --enable-gumjs
+          --with-devkits=gumjs
+          --with-devkit-symbol-scope=original
+        env:
+          FRIDA_DEPS: ${{ runner.workspace }}/deps
+      - name: Compile
+        working-directory: subprojects/frida-gum
+        run: make
+        env:
+          FRIDA_DEPS: ${{ runner.workspace }}/deps
+      - name: Upload GumJS devkit
+        uses: actions/upload-artifact@v7
+        with:
+          name: frida-gumjs-devkit-macos-arm64e-kernel
+          path: subprojects/frida-gum/build/bindings/gumjs/devkit/
+
+  frida-barebone-agent-kext:
+    needs: frida-gum-macos-kernel
+    runs-on: macos-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+      - name: Grab frida-core
+        run: python tools/ensure-submodules.py frida-core
+      - name: Fetch the SDK
+        run: releng/deps.py sync sdk macos-arm64e-kernel $FRIDA_SDK
+        env:
+          FRIDA_SDK: ${{ runner.workspace }}/sdk-macos-arm64e-kernel
+      - name: Set up Rust
+        run: rustup component add rust-src
+      - name: Download GumJS devkit
+        uses: actions/download-artifact@v8
+        with:
+          name: frida-gumjs-devkit-macos-arm64e-kernel
+          path: ${{ runner.workspace }}/gumjs-devkit
+      - name: Build agent
+        working-directory: subprojects/frida-core/src/barebone/agent/macos
+        run: make
+        env:
+          FRIDA_SDK: ${{ runner.workspace }}/sdk-macos-arm64e-kernel
+          GUMJS_DEVKIT_DIR: ${{ runner.workspace }}/gumjs-devkit
+      - name: Upload agent
+        uses: actions/upload-artifact@v7
+        with:
+          name: frida-barebone-agent-xnu-kext-arm64e
+          path: subprojects/frida-core/src/barebone/agent/macos/frida-agent.kext
+
   frida-barebone-agent-blob:
     needs: frida-gum-none
     strategy:
       matrix:
         include:
           - flavor: win9x
+            feature: win9x
             arch: x86
             machine: none-x86-softfloat_pic
             rust_target: i686-unknown-none-pic
             target_flags: --target ./i686-unknown-none-pic.json -Z json-target-spec
           - flavor: winnt
+            feature: winnt
             arch: x86
             machine: none-x86-softfloat_pic
             rust_target: i686-unknown-none-pic
             target_flags: --target ./i686-unknown-none-pic.json -Z json-target-spec
           - flavor: winnt
+            feature: winnt
             arch: x86_64
             machine: none-x86_64-softfloat_pic_msabi
             rust_target: x86_64-unknown-none-pic
             target_flags: --target ./x86_64-unknown-none-pic.json -Z json-target-spec
           - flavor: xnu
+            feature: xnu
             arch: arm64
-            machine: none-arm64-softfloat_nopic
-            rust_target: aarch64-unknown-none-softfloat
-            target_flags: --target aarch64-unknown-none-softfloat
+            machine: none-arm64-softfloat_pic
+            rust_target: aarch64-unknown-none-pic
+            target_flags: --target ./aarch64-unknown-none-pic.json -Z json-target-spec
+          - flavor: linux
+            feature: linux-injected
+            arch: x86
+            machine: none-x86-softfloat_pic
+            rust_target: i686-unknown-none-pic
+            target_flags: --target ./i686-unknown-none-pic.json -Z json-target-spec
+          - flavor: linux
+            feature: linux-injected
+            arch: x86_64
+            machine: none-x86_64-softfloat_pic
+            rust_target: x86_64-unknown-none-pic
+            target_flags: --target ./x86_64-unknown-none-pic.json -Z json-target-spec
+          - flavor: linux
+            feature: linux-injected
+            arch: arm
+            machine: none-arm-softfloat_pic
+            rust_target: armv7a-unknown-none-pic
+            target_flags: --target ./armv7a-unknown-none-pic.json -Z json-target-spec
+          - flavor: linux
+            feature: linux-injected
+            arch: arm64
+            machine: none-arm64-softfloat_pic
+            rust_target: aarch64-unknown-none-pic
+            target_flags: --target ./aarch64-unknown-none-pic.json -Z json-target-spec
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
@@ -1962,7 +2125,7 @@ jobs:
         working-directory: subprojects/frida-core/src/barebone/agent
         run: >-
           cargo build --release
-          --features ${{ matrix.flavor }}
+          --features ${{ matrix.feature }}
           ${{ matrix.target_flags }}
           -Z build-std=core,alloc,compiler_builtins
           --target-dir target-${{ matrix.flavor }}
@@ -1980,6 +2143,7 @@ jobs:
   # the exact GKI build it was made for, since vermagic names it verbatim, so the
   # kernel half is left to whoever has that kernel.
   frida-barebone-agent-linux:
+    if: false
     needs: frida-gum-none
     strategy:
       matrix:
@@ -2082,6 +2246,7 @@ jobs:
           fi
 
   toolchain-windows:
+    if: false
     strategy:
       matrix:
         arch: [x86, arm64]
@@ -2101,6 +2266,7 @@ jobs:
         run: python releng\deps.py roll toolchain windows-${{ matrix.arch }}
 
   sdk-windows:
+    if: false
     needs: toolchain-windows
     strategy:
       matrix:
@@ -2122,6 +2288,7 @@ jobs:
         run: python releng\deps.py roll sdk windows-${{ matrix.arch }}-${{ matrix.config }} --activate
 
   toolchain-macos:
+    if: false
     strategy:
       matrix:
         arch: [x86_64, arm64]
@@ -2144,6 +2311,7 @@ jobs:
         run: releng/deps.py roll toolchain macos-${{ matrix.arch }}
 
   sdk-macos:
+    if: false
     needs: toolchain-macos
     strategy:
       matrix:
@@ -2167,6 +2335,7 @@ jobs:
         run: releng/deps.py roll sdk macos-${{ matrix.arch }} --activate
 
   sdk-ios:
+    if: false
     needs: toolchain-macos
     strategy:
       matrix:
@@ -2189,6 +2358,7 @@ jobs:
         run: releng/deps.py roll sdk ios-${{ matrix.arch }} --activate
 
   sdk-watchos:
+    if: false
     needs: toolchain-macos
     strategy:
       matrix:
@@ -2211,6 +2381,7 @@ jobs:
         run: releng/deps.py roll sdk watchos-${{ matrix.arch }} --activate
 
   sdk-tvos:
+    if: false
     needs: toolchain-macos
     strategy:
       matrix:
@@ -2253,6 +2424,7 @@ jobs:
         run: releng/deps.py roll toolchain $XTOOLS_HOST
 
   sdk-linux:
+    if: false
     needs: toolchain-linux
     strategy:
       matrix:
@@ -2280,6 +2452,7 @@ jobs:
         run: releng/deps.py roll sdk $XTOOLS_HOST --activate
 
   sdk-android-32:
+    if: false
     needs: toolchain-linux
     strategy:
       matrix:
@@ -2309,6 +2482,7 @@ jobs:
           ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
 
   sdk-android-64:
+    if: false
     needs: toolchain-linux
     strategy:
       matrix:
@@ -2347,6 +2521,7 @@ jobs:
           - none-x86_64-softfloat_nopic
           - none-x86_64-softfloat_pic
           - none-x86_64-softfloat_pic_msabi
+          - none-arm-softfloat_pic
           - none-arm64-softfloat_nopic
           - none-arm64-softfloat_pic
       fail-fast: false
