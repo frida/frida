@@ -1,0 +1,15 @@
+<SECTION>
+<FILE>foo</FILE>
+<TITLE>FooObj</TITLE>
+FooObj
+FooObjClass
+foo_do_something
+</SECTION>
+
+<SECTION>
+<FILE>version</FILE>
+<TITLE>version</TITLE>
+FOO_MAJOR_VERSION
+FOO_MINOR_VERSION
+FOO_MICRO_VERSION
+</SECTION>

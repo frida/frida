@@ -1,0 +1,6 @@
+array = [
+         "This might most likely happen in multiline arrays",
+         Like here,
+         "or here,
+         and here"
+         ]

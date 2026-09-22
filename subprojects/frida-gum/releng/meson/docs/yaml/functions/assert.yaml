@@ -1,0 +1,17 @@
+name: assert
+returns: void
+description: Abort with an error message if `condition` evaluates to `false`.
+
+notes:
+  - The `message` argument is optional since 0.53.0 and defaults to print
+    the condition statement.
+
+posargs:
+  condition:
+    type: bool
+    description: Abort if this evaluates to `false`
+
+optargs:
+  message:
+    type: str
+    description: The error message to print.

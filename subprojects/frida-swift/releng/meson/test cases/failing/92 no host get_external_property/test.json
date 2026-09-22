@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/92 no host get_external_property/meson.build:3:14: ERROR: Unknown property for host machine: nonexisting"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+[
+  {
+    "type": "kwargs",
+    "function": "project",
+    "id": "/",
+    "operation": "set",
+    "kwargs": {
+      "default_options": ["cpp_std=c++14", "buildtype=release", "debug=true"]
+    }
+  },
+  {
+    "type": "kwargs",
+    "function": "project",
+    "id": "/",
+    "operation": "remove_regex",
+    "kwargs": {
+      "default_options": ["cpp_std=.*"]
+    }
+  },
+  {
+    "type": "kwargs",
+    "function": "project",
+    "id": "//",
+    "operation": "remove_regex",
+    "kwargs": {
+      "default_options": ["buildtype=.*"]
+    }
+  }
+]

@@ -1,0 +1,42 @@
+{
+  "connection": {
+    "host": "127.0.0.1",
+    "port": 9000
+  },
+  "allocator": {
+    "mode": "target-functions",
+    "alloc_function": "0xfffffff007a3c278",
+    "free_function": "0xfffffff007a3c338"
+  },
+  "agent": {
+    "path": "/Users/oleavr/src/frida-core/src/barebone/agent/target/aarch64-unknown-none/release/frida-barebone-agent",
+    "transport": {
+      "type": "hostlink",
+      "qmp": "unix:/Users/oleavr/src/frida-barebone-ios/qmp.sock"
+    }
+  },
+  "image": {
+    "file": "/Users/oleavr/src/frida-barebone-ios/iPhone11_8_iPhone12_1_14.0_18A5351d_Restore/kernelcache.research.iphone12b",
+    "base": "0xfffffff007004000",
+    "symbols": {
+      "IOLog": "0xfedb68",
+      "_ZN6OSData9withBytesEPKvj": "0xf88588",
+      "_ZN8OSSymbol17withCStringNoCopyEPKc": "0xfc05dc",
+      "_ZN9IOService11getPlatformEv": "0x101ad48",
+      "_ZN9IOServiceC2Ev": "0x1018318",
+      "absolutetime_to_nanoseconds": "0xb5d1e4",
+      "assert_wait": "0xa4d294",
+      "assert_wait_timeout": "0xa4d430",
+      "clock_get_calendar_microtime": "0xa1f32c",
+      "kalloc": "0xa38278",
+      "kernel_thread_start": "0xa70674",
+      "kfree": "0xa38338",
+      "mach_absolute_time": "0xb5ccc0",
+      "ml_io_map": "0xb57a04",
+      "ml_vtophys": "0xb584a0",
+      "panic": "0x27d7944",
+      "thread_block": "0xa51728",
+      "thread_wakeup": "0xa54ea0"
+    }
+  }
+}

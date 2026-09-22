@@ -1,0 +1,140 @@
+{
+  "a": {
+    "a": {
+      "b": {
+        "type": "integer",
+        "value": "1"
+      }
+    }
+  },
+  "arr": [
+    {
+      "T": {
+        "a": {
+          "b": {
+            "type": "integer",
+            "value": "1"
+          }
+        }
+      },
+      "t": {
+        "a": {
+          "b": {
+            "type": "integer",
+            "value": "1"
+          }
+        }
+      }
+    },
+    {
+      "T": {
+        "a": {
+          "b": {
+            "type": "integer",
+            "value": "2"
+          }
+        }
+      },
+      "t": {
+        "a": {
+          "b": {
+            "type": "integer",
+            "value": "2"
+          }
+        }
+      }
+    }
+  ],
+  "b": {
+    "a": {
+      "b": {
+        "type": "integer",
+        "value": "1"
+      }
+    }
+  },
+  "c": {
+    "a": {
+      "b": {
+        "type": "integer",
+        "value": "1"
+      }
+    }
+  },
+  "d": {
+    "a": {
+      "b": {
+        "type": "integer",
+        "value": "1"
+      }
+    }
+  },
+  "e": {
+    "a": {
+      "b": {
+        "type": "integer",
+        "value": "1"
+      }
+    }
+  },
+  "inline": {
+    "a": {
+      "b": {
+        "type": "integer",
+        "value": "42"
+      }
+    }
+  },
+  "many": {
+    "dots": {
+      "here": {
+        "dot": {
+          "dot": {
+            "dot": {
+              "a": {
+                "b": {
+                  "c": {
+                    "type": "integer",
+                    "value": "1"
+                  },
+                  "d": {
+                    "type": "integer",
+                    "value": "2"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tbl": {
+    "a": {
+      "b": {
+        "c": {
+          "d": {
+            "e": {
+              "type": "integer",
+              "value": "1"
+            }
+          }
+        }
+      }
+    },
+    "x": {
+      "a": {
+        "b": {
+          "c": {
+            "d": {
+              "e": {
+                "type": "integer",
+                "value": "1"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

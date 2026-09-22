@@ -1,0 +1,91 @@
+name: Update website
+
+concurrency:
+  group: mesonbuild.com
+  # We do NOT want `cancel-in-progress` here since only one website job
+  # should run at a time to avoid upload race conditions.
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - .github/workflows/website.yml
+      - docs/**
+  pull_request:
+    paths:
+      - .github/workflows/website.yml
+      - docs/**
+  workflow_dispatch:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: write # for release creation (svenstaro/upload-release-action)
+
+# This job is copy/paster into wrapdb CI, please update it there when doing any
+# change here.
+jobs:
+  update_website:
+    env:
+      HAS_SSH_KEY: ${{ secrets.WEBSITE_PRIV_KEY != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/cache/restore@v3
+        id: restore-cache
+        with:
+          # should use 'pip3 cache dir' to discover this path
+          path: ~/.cache/pip
+          key: website-pip-${{ github.run_number }}
+          restore-keys: website-pip-
+
+      - name: Install package
+        run: |
+          sudo apt-get -y install python3-pip ninja-build libjson-glib-dev
+          pip install hotdoc chevron strictyaml
+
+      - uses: actions/cache/save@v3
+        with:
+          # should use 'pip3 cache dir' to discover this path
+          path: ~/.cache/pip
+          key: website-pip-${{ github.run_number }}
+
+      - name: Setup SSH Keys and known_hosts
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.WEBSITE_PRIV_KEY }}"
+        if: github.ref == 'refs/heads/master' && env.HAS_SSH_KEY == 'true'
+      - name: Build website
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          cd docs
+          ../meson.py setup _build
+          ninja -C _build
+          ninja -C _build test
+      - name: Update website
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          cd docs
+          ninja -C _build upload
+        if: github.ref == 'refs/heads/master' && env.HAS_SSH_KEY == 'true'
+      - name: Release the current JSON docs
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: docs/_build/reference_manual.json
+          tag: ${{ github.ref }}
+        if: ${{ github.event_name == 'release' }}
+      - name: Release the current man docs
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: docs/_build/meson-reference.3
+          tag: ${{ github.ref }}
+        if: ${{ github.event_name == 'release' }}

@@ -1,0 +1,25 @@
+{
+  "installed": [
+    {"type": "shared_lib", "platform": "gcc", "file": "usr/lib/some"},
+    {"type": "shared_lib", "platform": "gcc", "file": "usr/lib/some", "version": "0"},
+    {"type": "shared_lib", "platform": "gcc", "file": "usr/lib/some", "version": "1.2.3"},
+    {"type": "shared_lib", "platform": "gcc", "file": "usr/lib/noversion"},
+    {"type": "shared_lib", "platform": "gcc", "file": "usr/lib/onlyversion"},
+    {"type": "shared_lib", "platform": "gcc", "file": "usr/lib/onlyversion", "version": "1"},
+    {"type": "shared_lib", "platform": "gcc", "file": "usr/lib/onlyversion", "version": "1.4.5"},
+    {"type": "shared_lib", "platform": "gcc", "file": "usr/lib/onlysoversion"},
+    {"type": "shared_lib", "platform": "gcc", "file": "usr/lib/onlysoversion", "version": "5"},
+    {"type": "shared_lib", "platform": "msvc", "file": "usr/bin/noversion"},
+    {"type": "pdb", "file": "usr/bin/noversion", "language": "d"},
+    {"type": "shared_lib", "platform": "msvc", "file": "usr/bin/onlysoversion", "version": "5"},
+    {"type": "pdb", "file": "usr/bin/onlysoversion", "version": "5", "language": "d"},
+    {"type": "shared_lib", "platform": "msvc", "file": "usr/bin/onlyversion", "version": "1"},
+    {"type": "pdb", "file": "usr/bin/onlyversion", "version": "1", "language": "d"},
+    {"type": "shared_lib", "platform": "msvc", "file": "usr/bin/some", "version": "0"},
+    {"type": "pdb", "file": "usr/bin/some", "version": "0", "language": "d"},
+    {"type": "implib", "file": "usr/lib/noversion"},
+    {"type": "implib", "file": "usr/lib/onlysoversion"},
+    {"type": "implib", "file": "usr/lib/onlyversion"},
+    {"type": "implib", "file": "usr/lib/some"}
+  ]
+}

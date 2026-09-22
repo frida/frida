@@ -1,0 +1,5 @@
+module FridaCore [system] {
+    header "shim.h"
+    link "frida-core-1.0"
+    export *
+}

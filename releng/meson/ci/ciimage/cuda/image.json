@@ -1,0 +1,8 @@
+{
+  "base_image": "archlinux:latest",
+  "args": ["--only", "cuda"],
+  "env": {
+    "CI": "1",
+    "MESON_CI_JOBNAME": "linux-cuda-gcc"
+  }
+}

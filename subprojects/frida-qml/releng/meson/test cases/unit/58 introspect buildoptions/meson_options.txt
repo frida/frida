@@ -1,0 +1,2 @@
+option('max_register_count', type: 'integer', min: 0, value: 125)
+option('use_external_fmt',   type: 'boolean', value: false)

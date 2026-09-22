@@ -1,0 +1,30 @@
+{
+  "empty1": {},
+  "empty2": {},
+  "empty_in_array": [
+    {
+      "not_empty": {
+        "type": "integer",
+        "value": "1"
+      }
+    },
+    {}
+  ],
+  "empty_in_array2": [
+    {},
+    {
+      "not_empty": {
+        "type": "integer",
+        "value": "1"
+      }
+    }
+  ],
+  "many_empty": [
+    {},
+    {},
+    {}
+  ],
+  "nested_empty": {
+    "empty": {}
+  }
+}

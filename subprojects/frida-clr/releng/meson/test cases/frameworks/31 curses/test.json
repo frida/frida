@@ -1,0 +1,12 @@
+{
+  "matrix": {
+    "options": {
+      "method": [
+        { "val": "pkg-config" },
+        { "val": "config-tool", "expect_skip_on_jobname": ["msys2"] },
+        { "val": "system", "expect_skip_on_os": ["windows"] }
+      ]
+    }
+  },
+  "expect_skip_on_jobname": ["azure", "cygwin"]
+}

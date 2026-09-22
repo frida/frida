@@ -1,0 +1,18 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/share/dircheck/fifth.dat"},
+    {"type": "file", "file": "usr/share/dircheck/seventh.dat"},
+    {"type": "file", "file": "usr/share/dircheck/ninth.dat"},
+    {"type": "file", "file": "usr/share/eighth.dat"},
+    {"type": "file", "file": "usr/share/fourth.dat"},
+    {"type": "file", "file": "usr/share/sixth.dat"},
+    {"type": "file", "file": "usr/share/sub1/data1.dat"},
+    {"type": "file", "file": "usr/share/sub1/second.dat"},
+    {"type": "file", "file": "usr/share/sub1/third.dat"},
+    {"type": "file", "file": "usr/share/sub1/sub2/data2.dat"},
+    {"type": "file", "file": "usr/share/sub2/one.dat"},
+    {"type": "file", "file": "usr/share/sub2/dircheck/excluded-three.dat"},
+    {"type": "file", "file": "usr/share/sub3/data/data.txt"},
+    {"type": "dir", "file": "usr/share/new_directory"}
+  ]
+}

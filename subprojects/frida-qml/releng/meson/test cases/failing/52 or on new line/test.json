@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/52 or on new line/meson.build:4:8: ERROR: Invalid or clause."
+    }
+  ]
+}

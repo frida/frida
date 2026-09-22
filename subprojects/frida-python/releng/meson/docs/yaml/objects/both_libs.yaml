@@ -1,0 +1,14 @@
+name: both_libs
+long_name: Both libraries object
+extends: lib
+description: Container for both a static and shared library.
+since: 0.46.0
+
+methods:
+  - name: get_shared_lib
+    returns: lib
+    description: Returns the stored shared library
+
+  - name: get_static_lib
+    returns: lib
+    description: Returns the stored static library

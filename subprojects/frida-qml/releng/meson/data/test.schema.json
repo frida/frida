@@ -1,0 +1,183 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "env": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "installed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "file": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "file",
+              "python_file",
+              "dir",
+              "exe",
+              "shared_lib",
+              "python_lib",
+              "python_limited_lib",
+              "python_bytecode",
+              "pdb",
+              "implib",
+              "py_implib",
+              "py_limited_implib",
+              "implibempty",
+              "expr",
+              "link"
+            ]
+          },
+          "platform": {
+            "type": "string",
+            "enum": [
+              "msvc",
+              "gcc",
+              "cygwin",
+              "!cygwin"
+            ]
+          },
+          "version": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "file",
+          "type"
+        ]
+      }
+    },
+    "matrix": {
+      "type": "object",
+      "properties": {
+        "options": {
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "val": {
+                  "type": ["string", "boolean", "null", "array"],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "compilers": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "skip_on_env": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "expect_skip_on_jobname": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "expect_skip_on_os": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "val"
+              ]
+            }
+          },
+          "exclude": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "type": ["string", "boolean", "array"],
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "do_not_set_opts": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "libdir",
+          "prefix"
+        ]
+      }
+    },
+    "tools": {
+      "type": "object"
+    },
+    "stdout": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "line": {
+            "type": "string"
+          },
+          "match": {
+            "type": "string",
+            "enum": [
+              "literal",
+              "re"
+            ]
+          },
+          "count": {
+            "type": "integer"
+          },
+          "comment": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "line"
+        ]
+      }
+    },
+    "skip_on_env": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "expect_skip_on_jobname": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "expect_skip_on_os": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

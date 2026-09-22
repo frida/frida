@@ -1,0 +1,3 @@
+option('defopoverride', type : 'string', value : 'optfile', description : 'A value for overriding.')
+option('fromcmdline', type : 'string', value : 'optfile', description : 'A value for overriding.')
+option('fromoptfile', type : 'string', value : 'optfile', description : 'A value for not overriding.')

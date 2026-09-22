@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/org/foo/my">
+    <file compressed="true" preprocess="xml-stripblanks">mywidget.ui</file>
+  </gresource>
+</gresources>

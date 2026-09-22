@@ -1,0 +1,95 @@
+.event-list {
+    font-size: 12px;
+    scrollbar-color: #e4e4e4 #555;
+}
+
+.event-list code {
+    font-size: 12px;
+}
+
+.event-item {
+    overflow: hidden;
+}
+
+.event-heading {
+    margin-left: 71px;
+    user-select: text;
+}
+
+.event-spacer {
+    height: 5px;
+}
+
+.event-summary .bp5-button {
+    padding-top: 7px;
+    white-space: pre;
+    user-select: text;
+}
+
+.event-details {
+    display: inline-block;
+    margin: 0 0 5px 86px;
+}
+
+.event-timestamp {
+    display: inline-block;
+    min-width: 60px;
+    padding: 7px;
+    color: #555;
+    vertical-align: top;
+    text-align: right;
+}
+
+.event-indent {
+    display: inline-block;
+    padding-top: 7px;
+    vertical-align: top;
+}
+
+.event-message {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.event-message:focus {
+    outline: 0;
+}
+
+.event-item .bp5-card {
+    color: #1e1e1e;
+}
+
+.event-details td {
+    padding: 5px;
+}
+
+.event-details td:nth-child(1) {
+    vertical-align: top;
+    text-align: right;
+    font-weight: bold;
+}
+
+.event-details td:nth-child(2) {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    user-select: text;
+}
+
+.event-details .bp5-button {
+    font-size: 10px;
+}
+
+.event-selected {
+    background: linear-gradient(to right, #ef6456, #1e1e1e);
+    background-size: 90px;
+    background-repeat: no-repeat;
+}
+
+.event-selected .event-timestamp {
+    color: white;
+}
+
+.event-dismiss {
+    margin-top: 10px;
+}

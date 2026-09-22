@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/18 wrong plusassign/meson.build:3:0: ERROR: Plusassignment target must be an id."
+    }
+  ]
+}

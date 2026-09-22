@@ -1,0 +1,15 @@
+glib_sources = files(
+  'DateTime.swift',
+  'DBusConnection.swift',
+  'File.swift',
+  'GLib.swift',
+  'IOStream.swift',
+  'MainContext.swift',
+  'MainLoop.swift',
+  'Socket.swift',
+  'TimeZone.swift',
+  'TlsCertificate.swift',
+  'Type.swift',
+  'UUID.swift',
+  'Variant.swift',
+)

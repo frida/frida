@@ -1,0 +1,83 @@
+name: generator
+returns: generator
+description: |
+  See also: [[custom_target]]
+
+  This function creates a [[@generator]] object that can
+  be used to run custom compilation commands. The only positional
+  argument is the executable to use. It can either be a self-built
+  executable or one returned by find_program.
+
+  The template strings passed to all the keyword arguments accept
+  the following special substitutions:
+
+  - `@PLAINNAME@`: the complete input file name, e.g: `foo.c` becomes `foo.c` (unchanged)
+  - `@BASENAME@`: the base of the input filename, e.g.: `foo.c.y` becomes `foo.c` (extension is removed)
+
+  Each string passed to the `output` keyword argument *must* be
+  constructed using one or both of these two substitutions.
+
+  In addition to the above substitutions, the `arguments` keyword
+  argument also accepts the following:
+
+  - `@OUTPUT@`: the full path to the output file
+  - `@INPUT@`: the full path to the input file
+  - `@DEPFILE@`: the full path to the depfile
+  - `@SOURCE_DIR@`: the full path to the root of the source tree
+  - `@CURRENT_SOURCE_DIR@`: this is the directory where the currently processed meson.build is located in
+  - `@BUILD_DIR@`: the full path to the root of the build dir where the output will be placed
+
+  NOTE: Generators should only be used for outputs that will ***only***
+  be used as inputs for a [[build_target]] or a [[custom_target]].
+  When you use the processed output of a
+  generator in multiple targets, the generator will be run multiple
+  times to create outputs for each target. Each output will be created
+  in a target-private directory `@BUILD_DIR@`.
+
+  If you want to generate files for general purposes such as for
+  generating headers to be used by several sources, or data that will be
+  installed, and so on, use a [[custom_target]] instead.
+
+posargs:
+  exe:
+    type: exe | external_program
+    description: Executable for the command to run
+
+kwargs:
+  arguments:
+    type: list[str]
+    description: A list of template strings that will be the command line arguments passed to the executable.
+
+  depends:
+    # Not sure why this is not just `target`
+    type: list[build_tgt | custom_tgt]
+    since: 0.51.0
+    description: |
+      An array of build targets that must be built before
+      this generator can be run. This is used if you have a generator that calls
+      a second executable that is built in this project.
+
+  depfile:
+    type: str
+    description: |
+      A template string pointing to a dependency file that a
+      generator can write listing all the additional files this target
+      depends on, for example a C compiler would list all the header files
+      it included, and a change in any one of these files triggers a
+      recompilation,
+
+  output:
+    type: list[str]
+    description: |
+      Template string (or list of template strings) defining
+      how an output file name is (or multiple output names are) generated
+      from a single source file name.
+
+  capture:
+    type: bool
+    default: false
+    since: 0.43.0
+    description: |
+      When this argument is set to true, Meson captures `stdout`
+      of the `executable` and writes it to the target file
+      specified as `output`.

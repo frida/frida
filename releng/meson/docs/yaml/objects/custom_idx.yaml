@@ -1,0 +1,15 @@
+name: custom_idx
+long_name: Custom target index
+description: References a specific output file of a [[@custom_tgt]] object.
+
+methods:
+  - name: full_path
+    returns: str
+    since: 0.54.0
+    description: |
+      Returns a full path pointing to the result target file
+      NOTE: In most cases using the object itself will do the same job as
+      this and will also allow Meson to setup inter-target dependencies
+      correctly. Please file a bug if that doesn't work for you.
+
+      See [[custom_tgt.full_path]]

@@ -1,0 +1,18 @@
+{
+  "installed": [
+    {"type": "exe", "file": "usr/bin/app_d"},
+    {"type": "pdb", "file": "usr/bin/app_d", "language": "d"},
+    {"type": "shared_lib", "platform": "gcc", "file": "usr/lib/say1"},
+    {"type": "shared_lib", "platform": "gcc", "file": "usr/lib/say1", "version": "0"},
+    {"type": "shared_lib", "platform": "gcc", "file": "usr/lib/say1", "version": "1.2.3"},
+    {"type": "shared_lib", "platform": "gcc", "file": "usr/lib/say2"},
+    {"type": "shared_lib", "platform": "gcc", "file": "usr/lib/say2", "version": "1"},
+    {"type": "shared_lib", "platform": "gcc", "file": "usr/lib/say2", "version": "1.2.4"},
+    {"type": "shared_lib", "platform": "msvc", "file": "usr/bin/say1", "version": "0"},
+    {"type": "pdb", "file": "usr/bin/say1", "version": "0", "language": "d"},
+    {"type": "shared_lib", "platform": "msvc", "file": "usr/bin/say2", "version": "1"},
+    {"type": "pdb", "file": "usr/bin/say2", "version": "1", "language": "d"},
+    {"type": "implib", "file": "usr/lib/say1"},
+    {"type": "implib", "file": "usr/lib/say2"}
+  ]
+}

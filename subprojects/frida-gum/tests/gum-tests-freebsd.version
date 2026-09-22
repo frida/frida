@@ -1,0 +1,8 @@
+{
+  global:
+    __progname;
+    environ;
+
+  local:
+    *;
+};

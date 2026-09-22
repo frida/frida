@@ -1,0 +1,4 @@
+# for some reason this doesn't work by default any way I can see
+
+- import: codeql-suites/python-lgtm.qls
+  from: codeql/python-queries

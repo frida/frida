@@ -1,0 +1,6 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/bin/prog.exe"},
+    {"type": "pdb", "file": "usr/bin/prog"}
+  ]
+}

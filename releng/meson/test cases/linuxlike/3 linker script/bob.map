@@ -1,0 +1,6 @@
+V1_0_0 {
+  global:
+    "bobMcBob";
+  local:
+    *;
+};

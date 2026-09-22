@@ -1,0 +1,143 @@
+name: msys2
+
+concurrency:
+  group: msys2-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - master
+      # Stable branches such as 0.56 or 1.0
+      - '[0-9]+.[0-9]+'
+    paths:
+      - "mesonbuild/**"
+      - "test cases/**"
+      - "unittests/**"
+      - ".github/workflows/msys2.yml"
+      - "run*tests.py"
+  pull_request:
+    paths:
+      - "mesonbuild/**"
+      - "test cases/**"
+      - "unittests/**"
+      - ".github/workflows/msys2.yml"
+      - "run*tests.py"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: windows-2019
+    name: ${{ matrix.NAME }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - NAME: gccx86ninja
+            MSYSTEM: MINGW32
+            MSYS2_ARCH: i686
+            MSYS2_CURSES: ncurses
+            COMPILER: gcc
+            TOOLCHAIN: toolchain
+          - NAME: gccx64ninja
+            MSYSTEM: MINGW64
+            MSYS2_ARCH: x86_64
+            MSYS2_CURSES: pdcurses
+            COMPILER: gcc
+            TOOLCHAIN: toolchain
+          - NAME: clangx64ninja
+            MSYSTEM: MINGW64
+            MSYS2_ARCH: x86_64
+            MSYS2_CURSES:
+            COMPILER: clang
+            TOOLCHAIN: clang
+    env:
+      MESON_CI_JOBNAME: msys2-${{ matrix.NAME }}
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.MSYSTEM }}
+          update: true
+          install: >-
+            base-devel
+            git
+            mercurial
+            lcov
+            wget
+            unzip
+            mingw-w64-${{ matrix.MSYS2_ARCH }}-cmake
+            mingw-w64-${{ matrix.MSYS2_ARCH }}-glib2
+            mingw-w64-${{ matrix.MSYS2_ARCH }}-libxml2
+            mingw-w64-${{ matrix.MSYS2_ARCH }}-ninja
+            mingw-w64-${{ matrix.MSYS2_ARCH }}-pkg-config
+            mingw-w64-${{ matrix.MSYS2_ARCH }}-python2
+            mingw-w64-${{ matrix.MSYS2_ARCH }}-python
+            mingw-w64-${{ matrix.MSYS2_ARCH }}-python-lxml
+            mingw-w64-${{ matrix.MSYS2_ARCH }}-python-setuptools
+            mingw-w64-${{ matrix.MSYS2_ARCH }}-python-pip
+            mingw-w64-${{ matrix.MSYS2_ARCH }}-python-fastjsonschema
+            mingw-w64-${{ matrix.MSYS2_ARCH }}-${{ matrix.TOOLCHAIN }}
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip --disable-pip-version-check install gcovr pefile pytest pytest-subtests pytest-xdist coverage
+
+      - name: Install pypy3 on x86_64
+        run: |
+          mkdir pypy3local
+          pushd pypy3local
+          wget -nv https://downloads.python.org/pypy/pypy3.8-v7.3.9-win64.zip
+          unzip pypy3.8-v7.3.9-win64.zip
+          mv pypy3.8-v7.3.9-win64/* ./
+          popd
+        if: ${{ matrix.MSYS2_ARCH == 'x86_64' }}
+
+      - name: Run Tests
+        run: |
+          if [[ "${{ matrix.MSYS2_ARCH }}" == "x86_64" ]]; then
+            # There apparently is no clean way to add to the PATH in the
+            # previous step?
+            # See for instance https://github.com/msys2/setup-msys2/issues/171
+            export PATH=$PATH:$PWD/pypy3local
+            # Make sure it is on the PATH
+            pypy3 -c "import sys; print(sys.version)"
+          fi
+          export PATHEXT="$PATHEXT;.py"
+
+          if [[ '${{ matrix.COMPILER }}' == 'clang' ]]; then
+            export CC=clang
+            export CXX=clang++
+            export OBJC=clang
+            export OBJCXX=clang++
+          fi
+
+          if [[ "${{ matrix.MSYS2_CURSES }}" != "" ]]; then
+            pacman --noconfirm --needed -S mingw-w64-${{ matrix.MSYS2_ARCH }}-${{ matrix.MSYS2_CURSES }}
+          fi
+
+          MSYSTEM= python3 ./tools/run_with_cov.py run_tests.py --backend=ninja
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.NAME }}
+          path: meson-test-run.*
+
+      - name: Aggregate coverage reports
+        run: ./ci/combine_cov.sh
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          files: .coverage/coverage.xml
+          name: "${{ matrix.NAME }}"
+          fail_ci_if_error: false
+          verbose: true

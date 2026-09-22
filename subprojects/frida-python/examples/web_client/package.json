@@ -1,0 +1,33 @@
+{
+  "name": "frida-web-client-example",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "vue-cli-service build",
+    "watch": "vue-cli-service build --watch"
+  },
+  "dependencies": {
+    "core-js": "^3.6.5",
+    "dbus-next": "frida/node-dbus-next",
+    "duplexify": "^4.1.1",
+    "vue": "^2.6.11",
+    "vue-class-component": "^7.2.3",
+    "vue-property-decorator": "^9.1.2",
+    "vuex": "^3.4.0"
+  },
+  "devDependencies": {
+    "@babel/plugin-transform-object-assign": "^7.12.13",
+    "@types/duplexify": "^3.6.0",
+    "@vue/cli-plugin-babel": "~5.0.8",
+    "@vue/cli-plugin-typescript": "~5.0.8",
+    "@vue/cli-plugin-vuex": "~5.0.8",
+    "@vue/cli-service": "~5.0.8",
+    "typescript": "~4.1.5",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

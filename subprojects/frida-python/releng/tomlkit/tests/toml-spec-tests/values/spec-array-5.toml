@@ -1,0 +1,1 @@
+nested_mixed_array = [ [ 1, 2 ], ["a", "b", "c"] ]

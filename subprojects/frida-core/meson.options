@@ -1,0 +1,178 @@
+option('frida_version',
+  type: 'string',
+  value: '',
+  description: 'Frida version, such as 16.2.2 or 16.2.2-dev.27',
+)
+
+option('local_backend',
+  type: 'feature',
+  value: 'auto',
+  description: 'Include backend for the local system',
+)
+
+option('simmy_backend',
+  type: 'feature',
+  value: 'auto',
+  description: 'Include the iDevice Simulator backend',
+)
+
+option('fruity_backend',
+  type: 'feature',
+  value: 'auto',
+  description: 'Include the Fruity backend',
+)
+
+option('droidy_backend',
+  type: 'feature',
+  value: 'auto',
+  description: 'Include the Droidy backend',
+)
+
+option('socket_backend',
+  type: 'feature',
+  value: 'auto',
+  description: 'Include the Socket backend',
+)
+
+option('barebone_backend',
+  type: 'feature',
+  value: 'auto',
+  description: 'Include the Barebone backend',
+)
+
+option('compiler_backend',
+  type: 'feature',
+  value: 'auto',
+  description: 'Include frida-compile backend powered by ESBuild and typescript-go',
+)
+
+option('assets',
+  type: 'combo',
+  choices: ['auto', 'embedded', 'installed'],
+  value: 'auto',
+  description: 'Whether assets such as frida-agent should be embedded vs installed and loaded at runtime'
+)
+
+option('asset_path_template',
+  type: 'string',
+  description: 'Override the default installed asset path template'
+)
+
+option('compat',
+  type: 'array',
+  choices: ['auto', 'disabled', 'native', 'emulated'],
+  value: ['auto'],
+  description: 'Support for targets with a different architecture',
+)
+
+option('helper_modern',
+  type: 'string',
+  value: 'auto',
+  description: 'Prebuilt frida-helper to embed for supporting modern targets'
+)
+
+option('helper_legacy',
+  type: 'string',
+  value: 'auto',
+  description: 'Prebuilt frida-helper to embed for supporting legacy targets'
+)
+
+option('helper_emulated_modern',
+  type: 'string',
+  value: 'auto',
+  description: 'Prebuilt frida-helper to embed for supporting modern emulated targets'
+)
+
+option('helper_emulated_legacy',
+  type: 'string',
+  value: 'auto',
+  description: 'Prebuilt frida-helper to embed for supporting legacy emulated targets'
+)
+
+option('agent_modern',
+  type: 'string',
+  value: 'auto',
+  description: 'Prebuilt agent to embed for use on modern targets'
+)
+
+option('agent_legacy',
+  type: 'string',
+  value: 'auto',
+  description: 'Prebuilt agent to embed for use on legacy targets'
+)
+
+option('agent_emulated_modern',
+  type: 'string',
+  value: 'auto',
+  description: 'Prebuilt agent to embed for use on modern emulated targets'
+)
+
+option('agent_emulated_legacy',
+  type: 'string',
+  value: 'auto',
+  description: 'Prebuilt agent to embed for use on legacy emulated targets'
+)
+
+option('gadget',
+  type: 'feature',
+  value: 'auto',
+  description: 'Build frida-gadget',
+)
+
+option('server',
+  type: 'feature',
+  value: 'auto',
+  description: 'Build frida-server',
+)
+
+option('portal',
+  type: 'feature',
+  value: 'auto',
+  description: 'Build frida-portal',
+)
+
+option('inject',
+  type: 'feature',
+  value: 'auto',
+  description: 'Build frida-inject',
+)
+
+option('connectivity',
+  type: 'feature',
+  value: 'enabled',
+  description: 'Internet connectivity features (TLS and ICE support)'
+)
+
+option('apple_tls',
+  type: 'feature',
+  value: 'auto',
+  description: 'Use the Apple TLS backend (requires recent deployment targets); auto-detected when on a Darwin host'
+)
+
+option('mapper',
+  type: 'feature',
+  value: 'auto',
+  description: 'Use our own out-of-process dynamic linker for injection on i/macOS'
+)
+
+option('devkits',
+  type: 'array',
+  choices: ['core'],
+  value: [],
+  description: 'Devkits to build'
+)
+
+option('devkit_symbol_scope',
+  type: 'combo',
+  choices: ['prefixed', 'original'],
+  value: 'prefixed',
+  description : 'How devkit generation treats third-party symbols:\n'
+                + ' - prefixed: add the \'_frida_\' prefix\n'
+                + ' - original: keep symbols exactly as upstream\n'
+)
+
+option('tests',
+  type: 'feature',
+  value: 'auto',
+  description: 'Build tests'
+)

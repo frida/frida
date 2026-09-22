@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/14 invalid option name/meson_options.txt:1:0: ERROR: Option names can only contain letters, numbers or dashes."
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+name: executable
+returns: exe
+description: |
+  Creates a new executable. The first argument specifies its name and
+  the remaining positional arguments define the input files to use.
+
+  The lists for the kwargs (such as `sources`, `objects`, and `dependencies`) are
+  always flattened, which means you can freely nest and add lists while
+  creating the final list.
+
+  The returned object also has methods that are documented in [[@exe]].
+
+  *Since 1.3.0* executable names can be the same across multiple targets as
+  long as they each have a different `name_suffix`.
+
+warnings:
+  - The `link_language` kwarg was broken until 0.55.0
+
+posargs_inherit: _build_target_base
+varargs_inherit: _build_target_base
+kwargs_inherit: _build_target_base
+
+kwargs:
+  export_dynamic:
+    type: bool
+    since: 0.45.0
+    description: |
+       when set to true causes the target's symbols to be
+        dynamically exported, allowing modules built using the
+        [[shared_module]] function to refer to functions,
+        variables and other symbols defined in the executable itself. Implies
+        the `implib` argument.
+
+  implib:
+    type: bool | str
+    since: 0.42.0
+    description: |
+      When set to true, an import library is generated for the
+      executable (the name of the import library is based on *exe_name*).
+      Alternatively, when set to a string, that gives the base name for
+      the import library.  The import library is used when the returned
+      build target object appears in `link_with:` elsewhere.  Only has any
+      effect on platforms where that is meaningful (e.g. Windows). Implies
+      the `export_dynamic` argument.
+
+  pie:
+    type: bool
+    since: 0.49.0
+    description: Build a position-independent executable.
+
+  vs_module_defs:
+    type: str | file | custom_tgt | custom_idx
+    since: 1.3.0
+    description: |
+      Specify a Microsoft module definition file for controlling symbol exports,
+      etc., on platforms where that is possible (e.g. Windows).
+
+      This can be used to expose which functions a shared_module loaded by an
+      executable will be allowed to use.

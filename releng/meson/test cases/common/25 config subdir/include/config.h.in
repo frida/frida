@@ -1,0 +1,6 @@
+#ifndef CONFIG_H_
+#define CONFIG_H_
+
+#define RETURN_VALUE @number@
+
+#endif

@@ -1,0 +1,1 @@
+ml-escaped-nl: "  foo bar \\\n  baz \\quux"

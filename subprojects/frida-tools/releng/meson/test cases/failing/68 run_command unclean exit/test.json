@@ -1,0 +1,8 @@
+{
+  "stdout": [
+    {
+      "match": "re",
+      "line": "test cases/failing/68 run_command unclean exit/meson\\.build:4:0: ERROR: Command `.*['\"].*[\\\\/]test cases[\\\\/]failing[\\\\/]68 run_command unclean exit[\\\\/]\\.[\\\\/]returncode\\.py['\"] 1` failed with status 1\\."
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="test">
+  <interface name="ext_test" version="1">
+    <request name="destroy" type="destructor"/>
+  </interface>
+</protocol>

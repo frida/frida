@@ -1,0 +1,26 @@
+name: subdir
+returns: void
+description: |
+  Enters the specified subdirectory and executes the `meson.build` file in it.
+  Once that is done, it returns and execution continues on the
+  line following this `subdir()` command. Variables defined in that
+  `meson.build` file are then available for use in later parts of the
+  current build file and in all subsequent build files executed with
+  `subdir()`.
+
+  Note that this means that each `meson.build` file in a source tree can
+  and must only be executed once.
+
+posargs:
+  dir_name:
+    type: str
+    description: |
+      Directory relative to the current `meson.build` to enter.
+
+      Cannot contain `..`
+
+kwargs:
+  if_found:
+    type: list[dep]
+    since: 0.44.0
+    description: Only enter the subdir if all [[dep.found]] methods return `true`.

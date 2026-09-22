@@ -1,0 +1,15 @@
+{
+  "connection": {
+    "host": "127.0.0.1",
+    "port": 1234
+  },
+  "kernel": "winnt",
+  "agent": {
+    "path": "/home/oleavr/src/frida-core/src/barebone/agent/target-winnt/i686-unknown-none-pic/release/frida-barebone-agent",
+    "transport": {
+      "type": "hostlink",
+      "qmp": "unix:/tmp/qmp.sock",
+      "bus": "frida-vserial.0"
+    }
+  }
+}

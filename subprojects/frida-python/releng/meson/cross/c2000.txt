@@ -1,0 +1,28 @@
+# This file assumes that path to the Texas Instruments C20000 toolchain is added
+# to the environment(PATH) variable, so that Meson can find
+# cl2000 and ar2000 while building.
+[binaries]
+c = 'cl2000'
+ar = 'ar2000'
+strip = 'cl2000'
+
+[host_machine]
+system = 'bare metal'
+cpu_family = 'c2000'
+cpu = 'c28x'
+endian = 'little'
+
+[built-in options]
+c_args = [
+    '-v28',
+    '-ml',
+    '-mt']
+c_link_args = [
+    '-z',
+    '--rom_model',
+    '\f28004x_flash.cmd']
+cpp_args = []
+cpp_link_args = []
+
+[properties]
+needs_exe_wrapper = true

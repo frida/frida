@@ -1,0 +1,17 @@
+name: add_project_link_arguments
+returns: void
+description: |
+  Adds project specific arguments to the linker command line.
+
+  Like [[add_project_arguments]] but the arguments are passed to the linker.
+
+notes:
+  - You must pass always arguments individually `arg1, arg2, ...`
+    rather than as a string `'arg1 arg2', ...`
+
+varargs:
+  type: str
+  name: Linker argument
+  description: The linker arguments to add
+
+kwargs_inherit: add_project_arguments

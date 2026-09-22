@@ -1,0 +1,50 @@
+html, body, #root {
+    height: 100%;
+    user-select: none;
+}
+
+#root {
+    display: flex;
+}
+
+.ansi-cyan {
+    color: #06989a !important;
+}
+.ansi-cyan-bright {
+    color: #34e2e2 !important;
+}
+
+.ansi-magenta {
+    color: #75507b !important;
+}
+.ansi-magenta-bright {
+    color: #ad7fa8 !important;
+}
+
+.ansi-yellow {
+    color: #c4a000 !important;
+}
+.ansi-yellow-bright {
+    color: #fce94f !important;
+}
+
+.ansi-green {
+    color: #4e9a06 !important;
+}
+.ansi-green-bright {
+    color: #8ae234 !important;
+}
+
+.ansi-red {
+    color: #cc0000 !important;
+}
+.ansi-red-bright {
+    color: #ef2929 !important;
+}
+
+.ansi-blue {
+    color: #3465a4 !important;
+}
+.ansi-blue-bright {
+    color: #729fcf !important;
+}

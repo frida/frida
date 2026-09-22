@@ -1,0 +1,15 @@
+{
+  "connection": {
+    "host": "127.0.0.1",
+    "port": 1234
+  },
+  "kernel": "win9x",
+  "agent": {
+    "path": "/home/oleavr/src/frida-core/src/barebone/agent/target-win9x/i686-unknown-none-pic/release/frida-barebone-agent",
+    "transport": {
+      "type": "hostlink",
+      "qmp": "unix:/tmp/claude-1000/-home-oleavr-src-frida-core/0f3e358c-8f66-4246-b793-deb2cd3727f3/scratchpad/qmp.sock",
+      "bus": "frida-vserial.0"
+    }
+  }
+}

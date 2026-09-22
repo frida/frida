@@ -1,0 +1,179 @@
+name: feature
+long_name: Feature option object
+since: 0.47.0
+description: Meson object representing a [`feature` options](Build-options.md#features)
+
+methods:
+- name: enabled
+  returns: bool
+  description: Returns whether the feature was set to `'enabled'`
+
+- name: disabled
+  returns: bool
+  description: Returns whether the feature was set to `'disabled'`
+
+- name: auto
+  returns: bool
+  description: Returns whether the feature was set to `'auto'`
+
+- name: allowed
+  since: 0.59.0
+  returns: bool
+  description: Returns whether the feature was set to `'enabled'` or `'auto'`
+
+- name: disable_auto_if
+  since: 0.59.0
+  returns: feature
+  description: |
+    Returns the feature, with `'auto'` converted to `'disabled'` if value is true.
+
+    | Feature  | `value = true` | `value = false` |
+    | -------- | -------------- | --------------- |
+    | Auto     | Disabled       | Auto            |
+    | Enabled  | Enabled        | Enabled         |
+    | Disabled | Disabled       | Disabled        |
+
+  example: |
+    `disable_auto_if` is useful to give precedence to mutually exclusive dependencies
+    (that provide the same API) if either or both are available:
+
+    ```
+    # '-Dfoo=auto -Dbar=enabled' will not pick foo even if installed.
+    use_bar = get_option('bar')
+    use_foo = get_option('foo').disable_auto_if(use_bar.enabled())
+    dep_foo = dependency('foo', required: use_foo)
+    if not dep_foo.found()
+      dep_foo = dependency('bar', required: use_bar)
+    endif
+    ```
+
+  posargs:
+    value:
+      type: bool
+      description: See the table above
+
+- name: enable_auto_if
+  since: 1.1.0
+  returns: feature
+  description: |
+    Returns the feature, with `'auto'` converted to `'enabled'` if value is true.
+
+    | Feature  | `value = true` | `value = false` |
+    | -------- | -------------- | --------------- |
+    | Auto     | Enabled        | Auto            |
+    | Enabled  | Enabled        | Enabled         |
+    | Disabled | Disabled       | Disabled        |
+
+  posargs:
+    value:
+      type: bool
+      description: See the table above
+
+- name: require
+  returns: feature
+  since: 0.59.0
+  description: |
+    Returns the object itself if the value is true; an error if the object is
+    `'enabled'` and the value is false; a disabled feature if the object
+    is `'auto'` or `'disabled'` and the value is false.
+
+    | Feature  | `value = true` | `value = false` |
+    | -------- | -------------- | --------------- |
+    | Auto     | Auto           | Disabled        |
+    | Enabled  | Enabled        | Error           |
+    | Disabled | Disabled       | Disabled        |
+
+  example: |
+    `require` is useful to restrict the applicability of `'auto'` features,
+    for example based on other features or on properties of the host machine:
+
+    ```
+    if get_option('directx').require(host_machine.system() == 'windows',
+          error_message: 'DirectX only available on Windows').allowed() then
+      src += ['directx.c']
+      config.set10('HAVE_DIRECTX', true)
+    endif
+    ```
+
+  posargs:
+    value:
+      type: bool
+      description: The value to check
+
+  kwargs:
+    error_message:
+      type: str
+      default: "''"
+      description: The error message to print if the check fails
+
+- name: enable_if
+  returns: feature
+  since: 1.1.0
+  description: |
+    Returns the object itself if the value is false; an error if the object is
+    `'disabled'` and the value is true; an enabled feature if the object
+    is `'auto'` or `'enabled'` and the value is true.
+
+    | Feature  | `value = true` | `value = false` |
+    | -------- | -------------- | --------------- |
+    | Auto     | Enabled        | Auto            |
+    | Enabled  | Enabled        | Enabled         |
+    | Disabled | Error          | Disabled        |
+
+  example: |
+    `enable_if` is useful to restrict the applicability of `'auto'` features,
+    particularly when passing them to [[dependency]]:
+
+    ```
+    use_llvm = get_option('llvm').enable_if(with_clang).enable_if(with_llvm_libs)
+    dep_llvm = dependency('llvm', required: use_llvm)
+    ```
+
+  posargs:
+    value:
+      type: bool
+      description: The value to check
+
+  kwargs:
+    error_message:
+      type: str
+      default: "''"
+      description: The error message to print if the check fails
+
+- name: disable_if
+  returns: feature
+  since: 1.1.0
+  description: |
+    Returns the object itself if the value is false; an error if the object is
+    `'enabled'` and the value is true; a disabled feature if the object
+    is `'auto'` or `'disabled'` and the value is true.
+
+    | Feature  | `value = true` | `value = false` |
+    | -------- | -------------- | --------------- |
+    | Auto     | Disabled       | Auto            |
+    | Enabled  | Error          | Enabled         |
+    | Disabled | Disabled       | Disabled        |
+
+    This is equivalent to `feature_opt.require(not condition)`, but may make
+    code easier to reason about, especially when mixed with `enable_if`
+
+  example: |
+    `disable_if` is useful to restrict the applicability of `'auto'` features,
+    particularly when passing them to [[dependency]]:
+
+    ```
+    use_os_feature = get_option('foo') \
+      .disable_if(host_machine.system() == 'darwin', error_message : 'os feature not supported on MacOS')
+    dep_os_feature = dependency('os_feature', required: use_os_feature)
+    ```
+
+  posargs:
+    value:
+      type: bool
+      description: The value to check
+
+  kwargs:
+    error_message:
+      type: str
+      default: "''"
+      description: The error message to print if the check fails

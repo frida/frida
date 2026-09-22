@@ -1,0 +1,9 @@
+{
+  "stdout": [
+    {
+      "match": "re",
+      "comment": "'subdir/meson.build' gets transformed with os.path.sep separators",
+      "line": "test cases/failing/4 missing meson\\.build/meson\\.build:3:0: ERROR: Nonexistent build file 'subdir[\\\\/]meson\\.build'"
+    }
+  ]
+}

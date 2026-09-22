@@ -1,0 +1,8 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/120 pkgconfig not relocatable outside prefix/meson\\.build:17:5: ERROR: Pkgconfig prefix cannot be outside of the prefix when pkgconfig\\.relocatable=true. Pkgconfig prefix is (C:)?/opt/lib/pkgconfig.",
+      "match": "re"
+    }
+  ]
+}

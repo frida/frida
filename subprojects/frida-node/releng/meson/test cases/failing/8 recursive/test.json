@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/8 recursive/subprojects/b/meson.build:3:4: ERROR: Recursive include of subprojects: a => b => a."
+    }
+  ]
+}

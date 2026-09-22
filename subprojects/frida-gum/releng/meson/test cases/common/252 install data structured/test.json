@@ -1,0 +1,18 @@
+{
+  "installed": [
+    {"type": "python_file", "file": "usr/@PYTHON_PURELIB@/mod/__init__.py"},
+    {"type": "python_file", "file": "usr/@PYTHON_PURELIB@/mod/foo.py"},
+    {"type": "python_file", "file": "usr/@PYTHON_PURELIB@/mod/bar.py"},
+    {"type": "python_file", "file": "usr/@PYTHON_PURELIB@/mod/submod/__init__.py"},
+    {"type": "python_file", "file": "usr/@PYTHON_PURELIB@/mod/submod/baz.py"},
+    {"type": "file", "file": "usr/share/dir1/file1"},
+    {"type": "file", "file": "usr/share/dir1/file2"},
+    {"type": "file", "file": "usr/share/dir1/file3"},
+    {"type": "file", "file": "usr/share/dir2/file1"},
+    {"type": "file", "file": "usr/share/dir2/file2"},
+    {"type": "file", "file": "usr/share/dir2/file3"},
+    {"type": "file", "file": "usr/share/dir3/file1"},
+    {"type": "file", "file": "usr/share/dir3/file2"},
+    {"type": "file", "file": "usr/share/dir3/file3"}
+  ]
+}

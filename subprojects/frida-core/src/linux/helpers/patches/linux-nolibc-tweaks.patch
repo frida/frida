@@ -1,0 +1,360 @@
+diff --git a/tools/include/nolibc/arch-aarch64.h b/tools/include/nolibc/arch-aarch64.h
+index f68baf8f3..18710dd30 100644
+--- a/tools/include/nolibc/arch-aarch64.h
++++ b/tools/include/nolibc/arch-aarch64.h
+@@ -181,6 +181,8 @@ struct sys_stat_struct {
+ 	_arg1;                                                                \
+ })
+ 
++#ifndef NOLIBC_DISABLE_START
++
+ /* startup code */
+ __asm__ (".section .text\n"
+     ".weak _start\n"
+@@ -196,4 +198,6 @@ __asm__ (".section .text\n"
+     "svc #0\n"
+     "");
+ 
++#endif
++
+ #endif // _NOLIBC_ARCH_AARCH64_H
+diff --git a/tools/include/nolibc/arch-arm.h b/tools/include/nolibc/arch-arm.h
+index f31be8e96..f7a870074 100644
+--- a/tools/include/nolibc/arch-arm.h
++++ b/tools/include/nolibc/arch-arm.h
+@@ -174,6 +174,28 @@ struct sys_stat_struct {
+ 	_arg1;                                                                \
+ })
+ 
++#define my_syscall6(num, arg1, arg2, arg3, arg4, arg5, arg6)                  \
++({                                                                            \
++	register long _num __asm__ ("r7") = (num);                            \
++	register long _arg1 __asm__ ("r0") = (long)(arg1);                    \
++	register long _arg2 __asm__ ("r1") = (long)(arg2);                    \
++	register long _arg3 __asm__ ("r2") = (long)(arg3);                    \
++	register long _arg4 __asm__ ("r3") = (long)(arg4);                    \
++	register long _arg5 __asm__ ("r4") = (long)(arg5);                    \
++	register long _arg6 __asm__ ("r5") = (long)(arg6);                    \
++	                                                                      \
++	__asm__  volatile (                                                   \
++		"svc #0\n"                                                    \
++		: "=r" (_arg1)                                                \
++		: "r"(_arg1), "r"(_arg2), "r"(_arg3), "r"(_arg4), "r"(_arg5), \
++		  "r"(_arg6), "r"(_num)                                       \
++		: "memory", "cc", "lr"                                        \
++	);                                                                    \
++	_arg1;                                                                \
++})
++
++#ifndef NOLIBC_DISABLE_START
++
+ /* startup code */
+ __asm__ (".section .text\n"
+     ".weak _start\n"
+@@ -201,4 +223,6 @@ __asm__ (".section .text\n"
+     "svc $0x00\n"
+     "");
+ 
++#endif
++
+ #endif // _NOLIBC_ARCH_ARM_H
+diff --git a/tools/include/nolibc/arch-i386.h b/tools/include/nolibc/arch-i386.h
+index d7e721234..8fe4c2dfc 100644
+--- a/tools/include/nolibc/arch-i386.h
++++ b/tools/include/nolibc/arch-i386.h
+@@ -190,6 +190,8 @@ struct sys_stat_struct {
+ 	_eax;							\
+ })
+ 
++#ifndef NOLIBC_DISABLE_START
++
+ /* startup code */
+ /*
+  * i386 System V ABI mandates:
+@@ -216,4 +218,6 @@ __asm__ (".section .text\n"
+     "hlt\n"                     // ensure it does not
+     "");
+ 
++#endif
++
+ #endif // _NOLIBC_ARCH_I386_H
+diff --git a/tools/include/nolibc/arch-mips.h b/tools/include/nolibc/arch-mips.h
+index 7380093ba..89bdae056 100644
+--- a/tools/include/nolibc/arch-mips.h
++++ b/tools/include/nolibc/arch-mips.h
+@@ -188,6 +188,34 @@ struct sys_stat_struct {
+ 	_arg4 ? -_num : _num;                                                 \
+ })
+ 
++#define my_syscall6(num, arg1, arg2, arg3, arg4, arg5, arg6)                  \
++({                                                                            \
++	register long _num __asm__ ("v0") = (num);                            \
++	register long _arg1 __asm__ ("a0") = (long)(arg1);                    \
++	register long _arg2 __asm__ ("a1") = (long)(arg2);                    \
++	register long _arg3 __asm__ ("a2") = (long)(arg3);                    \
++	register long _arg4 __asm__ ("a3") = (long)(arg4);                    \
++	register long _arg5 = (long)(arg5);                                   \
++	register long _arg6 = (long)(arg6);                                   \
++	                                                                      \
++	__asm__  volatile (                                                   \
++		"addiu $sp, $sp, -32\n"                                       \
++		"sw %8, 20($sp)\n"                                            \
++		"sw %7, 16($sp)\n"                                            \
++		"syscall\n  "                                                 \
++		"addiu $sp, $sp, 32\n"                                        \
++		: "=r" (_num), "=r"(_arg4)                                    \
++		: "0"(_num),                                                  \
++		  "r"(_arg1), "r"(_arg2), "r"(_arg3), "r"(_arg4), "r"(_arg5), \
++		  "r"(_arg6)                                                  \
++		: "memory", "cc", "at", "v1", "hi", "lo",                     \
++	          "t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7", "t8", "t9"  \
++	);                                                                    \
++	_arg4 ? -_num : _num;                                                 \
++})
++
++#ifndef NOLIBC_DISABLE_START
++
+ /* startup code, note that it's called __start on MIPS */
+ __asm__ (".section .text\n"
+     ".weak __start\n"
+@@ -214,4 +242,6 @@ __asm__ (".section .text\n"
+     ".set pop\n"
+     "");
+ 
++#endif
++
+ #endif // _NOLIBC_ARCH_MIPS_H
+diff --git a/tools/include/nolibc/arch-riscv.h b/tools/include/nolibc/arch-riscv.h
+index a3bdd9803..3bfe25450 100644
+--- a/tools/include/nolibc/arch-riscv.h
++++ b/tools/include/nolibc/arch-riscv.h
+@@ -182,6 +182,8 @@ struct sys_stat_struct {
+ 	_arg1;                                                                \
+ })
+ 
++#ifndef NOLIBC_DISABLE_START
++
+ /* startup code */
+ __asm__ (".section .text\n"
+     ".weak _start\n"
+@@ -201,4 +203,6 @@ __asm__ (".section .text\n"
+     "ecall\n"
+     "");
+ 
++#endif
++
+ #endif // _NOLIBC_ARCH_RISCV_H
+diff --git a/tools/include/nolibc/arch-x86_64.h b/tools/include/nolibc/arch-x86_64.h
+index 0e1e9eb85..0e9159af2 100644
+--- a/tools/include/nolibc/arch-x86_64.h
++++ b/tools/include/nolibc/arch-x86_64.h
+@@ -190,6 +190,8 @@ struct sys_stat_struct {
+ 	_ret;                                                                 \
+ })
+ 
++#ifndef NOLIBC_DISABLE_START
++
+ /* startup code */
+ /*
+  * x86-64 System V ABI mandates:
+@@ -212,4 +214,6 @@ __asm__ (".section .text\n"
+     "hlt\n"                     // ensure it does not return
+     "");
+ 
++#endif
++
+ #endif // _NOLIBC_ARCH_X86_64_H
+diff --git a/tools/include/nolibc/arch.h b/tools/include/nolibc/arch.h
+index 4c6992321..009098fea 100644
+--- a/tools/include/nolibc/arch.h
++++ b/tools/include/nolibc/arch.h
+@@ -23,7 +23,7 @@
+ #include "arch-arm.h"
+ #elif defined(__aarch64__)
+ #include "arch-aarch64.h"
+-#elif defined(__mips__) && defined(_ABIO32)
++#elif defined(__mips__)
+ #include "arch-mips.h"
+ #elif defined(__riscv)
+ #include "arch-riscv.h"
+diff --git a/tools/include/nolibc/signal.h b/tools/include/nolibc/signal.h
+index 137552216..c411bd979 100644
+--- a/tools/include/nolibc/signal.h
++++ b/tools/include/nolibc/signal.h
+@@ -12,9 +12,8 @@
+ #include "types.h"
+ #include "sys.h"
+ 
+-/* This one is not marked static as it's needed by libgcc for divide by zero */
+-__attribute__((weak,unused,section(".text.nolibc_raise")))
+-int raise(int signal)
++__attribute__((unused,section(".text.nolibc_raise")))
++static int raise(int signal)
+ {
+ 	return sys_kill(sys_getpid(), signal);
+ }
+diff --git a/tools/include/nolibc/std.h b/tools/include/nolibc/std.h
+index 1747ae125..69e54708d 100644
+--- a/tools/include/nolibc/std.h
++++ b/tools/include/nolibc/std.h
+@@ -25,25 +25,91 @@ typedef unsigned short     uint16_t;
+ typedef   signed short      int16_t;
+ typedef unsigned int       uint32_t;
+ typedef   signed int        int32_t;
++#if defined(__x86_64__) || defined(__aarch64__) || defined(__mips64) || defined(__riscv)
++#if defined(__ILP32__)
+ typedef unsigned long long uint64_t;
+ typedef   signed long long  int64_t;
++#else
++typedef unsigned long      uint64_t;
++typedef   signed long       int64_t;
++#endif
+ typedef unsigned long        size_t;
+ typedef   signed long       ssize_t;
++#if defined(__ILP32__)
++typedef unsigned int      uintptr_t;
++typedef   signed int       intptr_t;
++#else
+ typedef unsigned long     uintptr_t;
+ typedef   signed long      intptr_t;
++#endif
+ typedef   signed long     ptrdiff_t;
++#elif defined(__arm__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
++typedef unsigned long long uint64_t;
++typedef   signed long long  int64_t;
++typedef unsigned int         size_t;
++typedef   signed int        ssize_t;
++typedef unsigned long     uintptr_t;
++typedef   signed int       intptr_t;
++typedef   signed int      ptrdiff_t;
++#else
++typedef unsigned long long uint64_t;
++typedef   signed long long  int64_t;
++typedef unsigned int         size_t;
++typedef   signed int        ssize_t;
++typedef unsigned int      uintptr_t;
++typedef   signed int       intptr_t;
++typedef   signed int      ptrdiff_t;
++#endif
+ 
+ /* those are commonly provided by sys/types.h */
++#if defined(__ANDROID__)
++#if defined(__LP64__)
++typedef uint64_t              dev_t;
++#else
++typedef uint32_t              dev_t;
++#endif
++#else
+ typedef unsigned int          dev_t;
++#endif
+ typedef unsigned long         ino_t;
++#if defined(__x86_64__) || defined(__aarch64__) || defined(__mips__) || defined(__riscv)
+ typedef unsigned int         mode_t;
++#else
++typedef unsigned short       mode_t;
++#endif
+ typedef   signed int          pid_t;
++#if defined(__ANDROID__)
++typedef unsigned int          uid_t;
++typedef unsigned int          gid_t;
++typedef uint32_t            nlink_t;
++#elif defined(__x86_64__) || defined(__aarch64__) || (defined(__mips__) && !defined(__mips64)) || defined(__riscv)
+ typedef unsigned int          uid_t;
+ typedef unsigned int          gid_t;
+ typedef unsigned long       nlink_t;
++#elif defined(__mips64)
++typedef unsigned int          uid_t;
++typedef unsigned int          gid_t;
++typedef unsigned int        nlink_t;
++#else
++typedef unsigned short        uid_t;
++typedef unsigned short        gid_t;
++typedef unsigned short      nlink_t;
++#endif
++#if defined(__ANDROID__)
++typedef   int64_t             off_t;
++#else
+ typedef   signed long         off_t;
++#endif
++#if defined(__ANDROID__)
++typedef unsigned long     blksize_t;
++#else
+ typedef   signed long     blksize_t;
++#endif
++#if !defined(__ANDROID__) && (defined(__x86_64__) || defined(__aarch64__) || defined(__riscv))
+ typedef   signed long      blkcnt_t;
++#else
++typedef unsigned long      blkcnt_t;
++#endif
+ typedef   signed long        time_t;
+ 
+ #endif /* _NOLIBC_STD_H */
+diff --git a/tools/include/nolibc/string.h b/tools/include/nolibc/string.h
+index fffdaf6ff..78eae91d0 100644
+--- a/tools/include/nolibc/string.h
++++ b/tools/include/nolibc/string.h
+@@ -52,8 +52,8 @@ void *_nolibc_memcpy_down(void *dst, const void *src, size_t len)
+ /* might be ignored by the compiler without -ffreestanding, then found as
+  * missing.
+  */
+-__attribute__((weak,unused,section(".text.nolibc_memmove")))
+-void *memmove(void *dst, const void *src, size_t len)
++__attribute__((unused,section(".text.nolibc_memmove")))
++static void *memmove(void *dst, const void *src, size_t len)
+ {
+ 	size_t dir, pos;
+ 
+@@ -83,8 +83,8 @@ void *memcpy(void *dst, const void *src, size_t len)
+ /* might be ignored by the compiler without -ffreestanding, then found as
+  * missing.
+  */
+-__attribute__((weak,unused,section(".text.nolibc_memset")))
+-void *memset(void *dst, int b, size_t len)
++__attribute__((unused,section(".text.nolibc_memset")))
++static void *memset(void *dst, int b, size_t len)
+ {
+ 	char *p = dst;
+ 
+diff --git a/tools/include/nolibc/sys.h b/tools/include/nolibc/sys.h
+index 78473d34e..f17e6f598 100644
+--- a/tools/include/nolibc/sys.h
++++ b/tools/include/nolibc/sys.h
+@@ -392,7 +392,11 @@ int fsync(int fd)
+ static __attribute__((unused))
+ int sys_getdents64(int fd, struct linux_dirent64 *dirp, int count)
+ {
++#ifdef __NR_getdents64
+ 	return my_syscall3(__NR_getdents64, fd, dirp, count);
++#else
++	return -ENOSYS;
++#endif
+ }
+ 
+ static __attribute__((unused))
+@@ -791,7 +795,7 @@ int open(const char *path, int flags, ...)
+ 		va_list args;
+ 
+ 		va_start(args, flags);
+-		mode = va_arg(args, mode_t);
++		mode = va_arg(args, /* mode_t */ unsigned int);
+ 		va_end(args);
+ 	}
+
+diff --git a/tools/include/nolibc/stdlib.h b/tools/include/nolibc/stdlib.h
+index a24000d1e..5b35ddb45 100644
+--- a/tools/include/nolibc/stdlib.h
++++ b/tools/include/nolibc/stdlib.h
+@@ -59,11 +59,13 @@ long atol(const char *s)
+ 	return neg ? -ret : ret;
+ }
+ 
++#ifndef __ANDROID__
+ static __attribute__((unused))
+ int atoi(const char *s)
+ {
+ 	return atol(s);
+ }
++#endif
+ 
+ static __attribute__((unused))
+ void free(void *ptr)

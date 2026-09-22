@@ -1,0 +1,531 @@
+name: meson
+long_name: Meson object
+description: |
+  The `meson` object allows you to introspect various properties of the
+  system. This object is always mapped in the `meson` variable.
+
+methods:
+  - name: add_dist_script
+    returns: void
+    since: 0.48.0
+    description: |
+      Causes the script given as argument to run during `dist`
+      operation after the
+      distribution source has been generated but before it is
+      archived. Note that this runs the script file that is in the
+      _staging_ directory, not the one in the source directory. If the
+      script file cannot be found in the staging directory, it is a hard
+      error. The `MESON_DIST_ROOT` environment variables is set when dist scripts is
+      run.
+
+      *(since 0.54.0)* The `MESON_SOURCE_ROOT` and `MESON_BUILD_ROOT`
+      environment variables are set when dist scripts are run. They are path to the
+      root source and build directory of the main project, even when the script
+      comes from a subproject.
+
+      *(since 0.58.0)* This command can be invoked from a subproject, it was a hard
+      error in earlier versions. Subproject dist scripts will only be executed
+      when running `meson dist --include-subprojects`. `MESON_PROJECT_SOURCE_ROOT`,
+      `MESON_PROJECT_BUILD_ROOT` and `MESON_PROJECT_DIST_ROOT` environment
+      variables are set when dist scripts are run. They are identical to
+      `MESON_SOURCE_ROOT`, `MESON_BUILD_ROOT` and `MESON_DIST_ROOT` for main project
+      scripts, but for subproject scripts they have the path to the root of the
+      subproject appended, usually `subprojects/<subproject-name>`.
+
+      *(since 1.4.0)* The `MESONREWRITE` environment variable contains the path
+      to the rewrite command that corresponds to the `meson` executable that
+      was used to configure the build. (This might be a different path than the
+      first executable found in `PATH`.) It can be used to remove or replace
+      any [[run_command]] that depends on the revision control system from the
+      build configuration. Note that the value will contain many parts. For
+      example, it may be `python3 /path/to/meson.py introspect`. The user is
+      responsible for splitting the string to an array if needed by splitting
+      lexically like a UNIX shell would. If your script uses Python,
+      `shlex.split()` is the easiest correct way to do this.
+
+    posargs:
+      script_name:
+        type: str | file | external_program
+        description: |
+          The script to execute.
+
+          *(since 0.55.0)* The output of [[find_program]] as well as strings are accepted.
+
+          *(since 0.57.0)* [[@file]] objects and the output of [[configure_file]] may be used.
+
+    varargs:
+      name: arg
+      type: str | file | external_program
+      since: 0.49.0
+      description: |
+        Additional arguments
+
+        *(since 0.55.0)* The output of [[configure_file]], [[files]], and [[find_program]]
+        as well as strings are accepted.
+
+  - name: add_install_script
+    returns: void
+    description: |
+      Causes the script given as an argument to be run during the install step,
+      this script  will have the environment variables `MESON_SOURCE_ROOT`,
+      `MESON_BUILD_ROOT`, `MESON_INSTALL_PREFIX`,
+      `MESON_INSTALL_DESTDIR_PREFIX`, and `MESONINTROSPECT` set.
+      All positional arguments are passed as parameters.
+
+      *(since 0.54.0)* If `meson install` is called with the `--quiet` option, the
+      environment variable `MESON_INSTALL_QUIET` will be set.
+
+      *(since 1.1.0)* If `meson install` is called with the `--dry-run` option, the
+      environment variable `MESON_INSTALL_DRY_RUN` will be set.
+
+      Meson uses the `DESTDIR` environment variable as set by the
+      inherited environment to determine the (temporary) installation
+      location for files. Your install script must be aware of this while
+      manipulating and installing files. The correct way to handle this is
+      with the `MESON_INSTALL_DESTDIR_PREFIX` variable which is always set
+      and contains `DESTDIR` (if set) and `prefix` joined together. This
+      is useful because both are usually absolute paths and there are
+      platform-specific edge-cases in joining two absolute paths.
+
+      In case it is needed, `MESON_INSTALL_PREFIX` is also always set and
+      has the value of the `prefix` option passed to Meson.
+
+      `MESONINTROSPECT` contains the path to the introspect command that
+      corresponds to the `meson` executable that was used to configure the
+      build. (This might be a different path than the first executable
+      found in `PATH`.) It can be used to query build configuration. Note
+      that the value will contain many parts, f.ex., it may be `python3
+      /path/to/meson.py introspect`. The user is responsible for splitting
+      the string to an array if needed by splitting lexically like a UNIX
+      shell would. If your script uses Python, `shlex.split()` is the
+      easiest correct way to do this.
+
+    posargs:
+      script_name:
+        type: str | file | external_program | exe | custom_tgt | custom_idx
+        description: |
+          The script to execute.
+
+          *(since 0.55.0)* The output of [[find_program]], [[executable]],
+          [[custom_target]], as well as strings are accepted.
+
+          *(since 0.57.0)* [[@file]] objects and the output of [[configure_file]] may be used.
+
+    varargs:
+      name: arg
+      type: str | file | external_program | exe | custom_tgt | custom_idx
+      since: 0.49.0
+      description: |
+        Additional arguments
+
+        *(since 0.55.0)* The output of [[find_program]], [[executable]],
+        [[custom_target]], as well as strings are accepted.
+
+    kwargs:
+      skip_if_destdir:
+        type: bool
+        since: 0.57.0
+        default: false
+        description: |
+          If `true` the script will not be run if DESTDIR is set during installation.
+          This is useful in the case the script updates system wide
+          cache that is only needed when copying files into final destination.
+
+      install_tag:
+        type: str
+        since: 0.60.0
+        description: |
+          A string used by the `meson install --tags` command
+          to install only a subset of the files.
+          By default the script has no install tag which means it is not being run when
+          `meson install --tags` argument is specified.
+
+      dry_run:
+        type: bool
+        since: 1.1.0
+        default: false
+        description: |
+          If `true` the script will be run even if `--dry-run` option is provided to
+          the `meson install` command. The script can use the `MESON_INSTALL_DRY_RUN`
+          variable to determine if it is in dry run mode or not.
+
+  - name: add_postconf_script
+    returns: void
+    description: |
+      Runs the given command after all project files have been generated.
+      This script will have the environment variables
+      `MESON_SOURCE_ROOT` and `MESON_BUILD_ROOT` set.
+
+    posargs_inherit: meson.add_dist_script
+    varargs_inherit: meson.add_dist_script
+
+  - name: backend
+    returns: str
+    since: 0.37.0
+    description: |
+      Returns a string representing the current backend:
+
+      - `ninja`
+      - `vs2010`
+      - `vs2012`
+      - `vs2013`
+      - `vs2015`
+      - `vs2017`
+      - `vs2019`
+      - `vs2022`
+      - `xcode`
+
+  - name: build_options
+    returns: str
+    since: 1.1.0
+    description: |
+      Returns a string with the configuration line used to set the current project up.
+    notes:
+      - |
+        **Do not try to parse this string!**
+
+        You should use [[cfg_data.set_quoted]] to safely escape any embedded
+        quotes prior to storing it into e.g. a C header macro.
+
+        The contents returned by this function are the same as the
+        "Build Options:" line reported in `<builddir>/meson-logs/meson-log.txt`.
+
+  - name: build_root
+    returns: str
+    deprecated: 0.56.0
+    description: |
+      Returns a string with the absolute path to the build root directory.
+      This function will return the
+      build root of the parent project if called from a subproject, which is usually
+      not what you want. Try using [[meson.current_build_dir]] or [[meson.project_build_root]].
+      In the rare cases where the root of the main project is needed,
+      use [[meson.global_build_root]] that has the same behaviour but with a more explicit
+      name.
+
+  - name: source_root
+    returns: str
+    deprecated: 0.56.0
+    description: |
+      Returns a string with the absolute path to the source root directory.
+
+      This function will return the source root of the
+      parent project if called from a subproject, which is usually not what you want.
+      Try using [[meson.current_source_dir]] or [[meson.project_source_root]].
+      In the rare cases where the root of the main project is needed,
+      use [[meson.global_source_root]] that has the same behaviour but with a more explicit
+      name.
+
+    notes:
+      - |
+        You should use the [[files]] function
+        to refer to files in the root source directory instead of
+        constructing paths manually with [[meson.source_root]].
+
+  - name: project_build_root
+    returns: str
+    since: 0.56.0
+    description: Returns a string with the absolute path to the build root directory of the current (sub)project.
+
+  - name: project_source_root
+    returns: str
+    since: 0.56.0
+    description: Returns a string with the absolute path to the source root directory of the current (sub)project.
+
+  - name: global_build_root
+    returns: str
+    since: 0.58.0
+    description: |
+      Returns a string with the absolute path to the build root directory.
+      This function will return the build root of the
+      main project if called from a subproject, which is usually not what you want.
+      It is usually preferable to use [[meson.current_build_dir]] or [[meson.project_build_root]].
+
+  - name: global_source_root
+    returns: str
+    since: 0.58.0
+    description: |
+      Returns a string with the absolute path to the source root directory.
+      This function will return the source root of the
+      main project if called from a subproject, which is usually not what you want.
+      It is usually preferable to use [[meson.current_source_dir]] or [[meson.project_source_root]].
+
+  - name: current_build_dir
+    returns: str
+    description: Returns a string with the absolute path to the current build directory.
+
+  - name: current_source_dir
+    returns: str
+    description: Returns a string to the current source directory.
+    notes:
+      - |
+        **You do not need to use this function!**
+
+        When passing files from the current source directory to a function since
+        that is the default. Also, you can use the [[files]] function to
+        refer to files in the current or any other source directory instead
+        of constructing paths manually with [[meson.current_source_dir]].
+
+  - name: get_compiler
+    returns: compiler
+    description: Returns a [[@compiler]] object describing a compiler.
+
+    posargs:
+      language:
+        type: str
+        description: |
+          The language of the compiler to return.
+
+          See our [list of supported languages](Reference-tables.md#language-arguments-parameter-names).
+
+    kwargs:
+      native:
+        type: bool
+        default: false
+        description: |
+          When set to `true` Meson returns the compiler for the build
+          machine (the "native" compiler) and when `false` it returns the host
+          compiler (the "cross" compiler). If `native` is omitted, Meson
+          returns the "cross" compiler if we're currently cross-compiling and
+          the "native" compiler if we're not.
+
+  - name: get_cross_property
+    returns: any
+    deprecated: 0.58.0
+    description: |
+      Returns the given property from a cross file, the optional fallback_value
+      is returned if not cross compiling or the given property is not found.
+
+      This method is replaced by [[meson.get_external_property]].
+
+    arg_flattening: false
+    posargs_inherit: meson.get_external_property
+    optargs_inherit: meson.get_external_property
+
+  - name: get_external_property
+    returns: any
+    since: 0.54.0
+    description: |
+      Returns the given property from a native or cross file.
+      The optional fallback_value is returned if the given property is not found.
+
+    arg_flattening: false
+
+    posargs:
+      propname:
+        type: str
+        description: Name of the property in the cross / native file.
+
+    optargs:
+      fallback_value:
+        type: any
+        description: Value to return if `propname` is not set in the machine file.
+
+    kwargs:
+      native:
+        type: bool
+        description: |
+          Setting `native` to `true` forces retrieving a variable from the
+          native file, even when cross-compiling.
+          If `native: false` or not specified, the variable is retrieved from the
+          cross-file if cross-compiling, and from the native-file when not cross-compiling.
+
+  - name: has_external_property
+    returns: bool
+    since: 0.58.0
+    description: Checks whether the given property exist in a native or cross file.
+    posargs_inherit: meson.get_external_property
+    kwargs_inherit: meson.get_external_property
+
+  - name: can_run_host_binaries
+    returns: bool
+    since: 0.55.0
+    description: |
+      Returns true if the build machine can run binaries compiled for the host.
+      This returns `true` unless you are
+      cross compiling, need a helper to run host binaries, and don't have one.
+      For example when cross compiling from Linux to Windows, one can use `wine`
+      as the helper.
+
+  - name: has_exe_wrapper
+    returns: bool
+    deprecated: 0.55.0
+    description: Use [[meson.can_run_host_binaries]] instead.
+
+  - name: install_dependency_manifest
+    returns: void
+    description: |
+      Installs a manifest file
+      containing a list of all subprojects, their versions and license names
+      to the file name given as the argument.
+
+      If license files are defined as well, they will be copied next to the
+      manifest and referenced in it.
+
+      If this function is not used, the builtin option `licensedir` can
+      be used to install the manifest to a given directory with the name
+      `depmf.json`.
+
+    posargs:
+      output_name:
+        type: str
+        description: Name of the manifest file to install
+
+  - name: override_find_program
+    returns: void
+    since: 0.46.0
+    description: |
+      specifies that whenever [[find_program]] is used to find a program
+      named `progname`, Meson should not look it up on the system but
+      instead return `program`, which may either be the result of
+      [[find_program]], [[configure_file]] or [[executable]].
+
+      *(since 0.55.0)* If a version
+      check is passed to [[find_program]] for a program that has been overridden with
+      an executable, the current project version is used.
+
+    posargs:
+      progname:
+        type: str
+        description: The name of the program to override.
+
+      program:
+        type: exe | file | external_program
+        description: The program to set as the override for `progname`.
+
+      native:
+        type: bool
+        since: 1.3.0
+        default: false
+        description : |
+          If set to `true`, the override is for the build machine, and will be returned
+          by `find_program(..., native : true)`, otherwise for the host machine. This
+          is an important distinction when cross compiling.
+
+  - name: override_dependency
+    returns: void
+    since: 0.54.0
+    description: |
+      Specifies that whenever [[dependency]] with `name` is used, Meson should not
+      look it up on the system but instead return `dep_object`, which may either be
+      the result of [[dependency]] or [[declare_dependency]].
+
+      Doing this in a subproject allows the parent
+      project to retrieve the dependency without having to know the dependency
+      variable name: `dependency(name, fallback : subproject_name)`.
+
+    posargs:
+      name:
+        type: str
+        description: The name of the dependency to override.
+
+      dep_object:
+        type: dep
+        description: The dependency to set as the override for `name`.
+
+    kwargs:
+      native:
+        type: bool
+        default: false
+        description: |
+          If set to `true`, the dependency is always overwritten for the build machine.
+          Otherwise, the dependency is overwritten for the host machine, which
+          differs from the build machine when cross-compiling.
+
+      static:
+        type: bool
+        since: 0.60.0
+        description: |
+          Used to override static and/or shared dependencies separately.
+          If not specified it is assumed
+          `dep_object` follows `default_library` option value.
+
+  - name: is_cross_build
+    returns: bool
+    description: Returns `true` if the current build is a [cross build](Cross-compilation.md) and `false` otherwise.
+
+  - name: is_subproject
+    returns: bool
+    description: Returns `true` if the current project is being built as a subproject of some other project and `false` otherwise.
+
+  - name: is_unity
+    returns: bool
+    description: Returns `true` when doing a [unity build](Unity-builds.md) (multiple sources are combined before compilation to reduce build time) and `false` otherwise.
+
+  - name: project_version
+    returns: str
+    description: Returns the version string specified in [[project]] function call.
+
+  - name: project_license
+    returns: list[str]
+    since: 0.45.0
+    description: Returns the array of licenses specified in [[project]] function call.
+
+  - name: project_license_files
+    returns: list[file]
+    since: 1.1.0
+    description: Returns the array of license files specified in the [[project]] function call.
+
+  - name: project_name
+    returns: str
+    description: Returns the project name specified in the [[project]] function call.
+
+  - name: version
+    returns: str
+    description: Return a string with the version of Meson.
+
+  - name: add_devenv
+    returns: void
+    since: 0.58.0
+    description: |
+      add an [[@env]] object (returned by [[environment]])
+      to the list of environments that will be applied when using [`meson devenv`](Commands.md#devenv)
+      command line.
+
+      This is useful for developers who wish to use the project without
+      installing it, it is often needed to set for example the path to plugins
+      directory, etc. Alternatively, a list or dictionary can be passed as first
+      argument.
+
+      ``` meson
+      devenv = environment()
+      devenv.set('PLUGINS_PATH', meson.current_build_dir())
+      ...
+      meson.add_devenv(devenv)
+      ```
+
+      After configuring and compiling that project, a terminal can be opened with
+      the environment set:
+
+      ```sh
+      $ meson devenv -C <builddir>
+      $ echo $PLUGINS_PATH
+      /path/to/source/subdir
+      ```
+
+      See [`meson devenv`](Commands.md#devenv) command documentation for a list of
+      environment variables that are set by default by Meson.
+
+    posargs:
+      env:
+        type: env | str | list[str] | dict[str] | dict[list[str]]
+        description: |
+          The [[@env]] object to add.
+          Since *0.62.0* list of strings is allowed in dictionary values. In that
+          case values are joined using the separator.
+    kwargs:
+      separator:
+        type: str
+        since: 0.62.0
+        description: |
+          The separator to use for the initial values defined in
+          the first positional argument. If not explicitly specified, the default
+          path separator for the host operating system will be used, i.e. ';' for
+          Windows and ':' for UNIX/POSIX systems.
+      method:
+        type: str
+        since: 0.62.0
+        description: |
+          Must be one of 'set', 'prepend', or 'append'
+          (defaults to 'set'). Controls if initial values defined in the first
+          positional argument are prepended, appended or replace the current value
+          of the environment variable.

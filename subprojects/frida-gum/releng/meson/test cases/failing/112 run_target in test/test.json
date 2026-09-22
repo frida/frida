@@ -1,0 +1,8 @@
+{
+    "stdout": [
+        {
+            "line": "test cases/failing/112 run_target in test/meson.build:7:0: ERROR: test keyword argument 'args' was of type array[RunTarget] but should have been array[str | File | BuildTarget | CustomTarget | CustomTargetIndex]"
+        }
+    ]
+}
+

@@ -1,0 +1,15 @@
+{
+  "matrix": {
+    "options": {
+      "b_vscrt": [
+        { "val": "none" },
+        { "val": "mdd" },
+        { "val": "md" },
+        { "val": "mtd" },
+        { "val": "mt" },
+        { "val": "from_buildtype" },
+        { "val": "static_from_buildtype" }
+      ]
+    }
+  }
+}

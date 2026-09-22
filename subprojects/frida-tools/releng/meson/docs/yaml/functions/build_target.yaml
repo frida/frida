@@ -1,0 +1,48 @@
+name: build_target
+returns: build_tgt
+description: |
+  Creates a build target whose type can be set dynamically with the
+  `target_type` keyword argument.
+
+  `target_type` may be set to one of:
+
+  - `executable` (see [[executable]])
+  - `shared_library` (see [[shared_library]])
+  - `shared_module` (see [[shared_module]])
+  - `static_library` (see [[static_library]])
+  - `both_libraries` (see [[both_libraries]])
+  - `library` (see [[library]])
+  - `jar` (see [[jar]])*
+
+  This declaration:
+
+  ```meson
+  executable(<arguments and keyword arguments>)
+  ```
+
+  is equivalent to this:
+
+  ```meson
+  build_target(<arguments and keyword arguments>, target_type : 'executable')
+  ```
+
+  The lists for the kwargs (such as `sources`, `objects`, and `dependencies`) are
+  always flattened, which means you can freely nest and add lists while
+  creating the final list.
+
+  The returned object also has methods that are documented in [[@build_tgt]].
+
+  *"jar" is deprecated because it is fundementally a different thing than the
+  other build_target types.
+
+posargs_inherit: _build_target_base
+varargs_inherit: _build_target_base
+kwargs_inherit:
+  - executable
+  - library
+  - jar
+
+kwargs:
+  target_type:
+    type: str
+    description: The actual target type to build

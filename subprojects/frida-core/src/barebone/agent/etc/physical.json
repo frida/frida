@@ -1,0 +1,18 @@
+{
+  "connection": {
+    "host": "127.0.0.1",
+    "port": 9000
+  },
+  "allocator": {
+    "mode": "physical",
+    "physical_base": "0x8ec9b4000"
+  },
+  "agent": {
+    "path": "/Users/oleavr/src/frida-core/src/barebone/agent/target/aarch64-unknown-none/debug/frida-barebone-agent",
+    "transport": {
+      "type": "ram",
+      "path": "/Volumes/RAM Disk/ios-dram",
+      "base_address": "0x800000000"
+    }
+  }
+}

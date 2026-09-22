@@ -1,0 +1,8 @@
+{
+  "base_image": "gentoo/stage3:desktop",
+  "env": {
+    "CI": "1",
+    "MESON_CI_JOBNAME": "linux-gentoo-gcc",
+    "SKIP_STATIC_BOOST": "1"
+  }
+}

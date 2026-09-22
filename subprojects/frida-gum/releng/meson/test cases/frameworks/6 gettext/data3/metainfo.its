@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!--
+  Copyright (C) 2015-2021 Matthias Klumpp <matthias@tenstral.net>
+  Copyright (C) 2019 Takao Fujiwara <takao.fujiwara1@gmail.com>
+  SPDX-License-Identifier: FSFAP
+-->
+<its:rules xmlns:its="http://www.w3.org/2005/11/its"
+           version="2.0">
+
+  <its:withinTextRule withinText="yes" selector="/component//description//em   |
+                                                 /component//description//code"/>
+
+  <its:translateRule selector="/component" translate="no"/>
+  <its:translateRule selector="/component/name |
+                               /component/summary |
+                               /component/description |
+                               /component/developer_name |
+                               /component/name_variant_suffix |
+                               /component/screenshots/screenshot/caption |
+                               /component/releases/release/description |
+                               /component/agreement/agreement_section/name |
+                               /component/agreement/agreement_section/description"
+                     translate="yes"/>
+
+  <its:translateRule selector="/component/name[@translatable = 'no']"
+                     translate="no"/>
+  <its:translateRule selector="/component/developer_name[@translatable = 'no']"
+                     translate="no"/>
+  <its:translateRule selector="/component/name_variant_suffix[@translatable = 'no']"
+                     translate="no"/>
+  <its:translateRule selector="/component/releases/release/description[@translatable = 'no']"
+                     translate="no"/>
+</its:rules>

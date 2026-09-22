@@ -1,0 +1,2 @@
+option('custom-target', type: 'boolean', value: true)
+option('run-target', type: 'boolean', value: true)

@@ -1,0 +1,5 @@
+{
+  "installed": [
+    {"type": "exe", "file": "usr/bin/testEXE"}
+  ]
+}

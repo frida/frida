@@ -1,0 +1,5 @@
+option('defopoverride', type : 'string', value : 's_optfile', description : 'A value for overriding.')
+option('fromcmdline', type : 'string', value : 's_optfile', description : 'A value for overriding.')
+option('fromspfunc', type : 'string', value : 's_optfile', description : 'A value for overriding.')
+option('fromspfunconly', type : 'string', value : 's_optfile', description : 'A value for overriding.')
+option('fromoptfile', type : 'string', value : 's_optfile', description : 'A value for not overriding.')

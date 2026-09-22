@@ -1,0 +1,8 @@
+{
+    "stdout": [
+      {
+        "line": "test cases/failing/129 utf8 with bom/meson.build:0:0: ERROR: Builder file must be encoded in UTF-8 (with no BOM)"
+      }
+    ]
+  }
+  

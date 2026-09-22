@@ -1,0 +1,6 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/lib/cmake/cmakeModule/cmakeModuleConfig.cmake"},
+    {"type": "file", "file": "usr/lib/cmake/cmakeModule/cmakeModuleConfigVersion.cmake"}
+  ]
+}

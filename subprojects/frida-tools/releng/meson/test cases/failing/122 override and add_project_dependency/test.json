@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/122 override and add_project_dependency/subprojects/a/meson.build:6:0: ERROR: Dependencies must be external dependencies"
+    }
+  ]
+}

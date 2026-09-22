@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/43 abs subdir/meson.build:5:0: ERROR: Subdir argument must be a relative path."
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "installed": [
+    { "type": "file", "file": "usr/share/man/man1/foo.1"       },
+    { "type": "file", "file": "usr/share/man/fr/man1/foo.1"    },
+    { "type": "file", "file": "usr/share/man/man2/bar.2"       },
+    { "type": "file", "file": "usr/share/man/man1/vanishing.1" },
+    { "type": "file", "file": "usr/share/man/man2/vanishing.2" },
+    { "type": "file", "file": "usr/share/man/man1/baz.1"       }
+  ]
+}

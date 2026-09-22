@@ -1,0 +1,8 @@
+{
+    "stdout": [
+        {
+            "line": "test cases/failing/111 nonsensical bindgen/meson.build:17:24: ERROR: bindgen source file must be a C header, not an object or build target"
+        }
+    ]
+}
+

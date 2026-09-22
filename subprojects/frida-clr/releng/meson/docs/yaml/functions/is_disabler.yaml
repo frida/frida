@@ -1,0 +1,9 @@
+name: is_disabler
+returns: bool
+since: 0.52.0
+description: Returns true if a variable is a disabler and false otherwise.
+
+posargs:
+  var:
+    type: any
+    description: The variable to test

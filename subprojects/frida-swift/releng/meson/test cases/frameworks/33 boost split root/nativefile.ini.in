@@ -1,0 +1,3 @@
+[properties]
+boost_includedir = '@MESON_TEST_ROOT@/boost/extra-dir/include'
+boost_librarydir = '@MESON_TEST_ROOT@/boost/lib'

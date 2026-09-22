@@ -1,0 +1,29 @@
+{
+  "stdout": [
+    {
+      "line": ".*DEPRECATION: Option 'o1' is deprecated",
+      "match": "re",
+      "count": 1
+    },
+    {
+      "line": ".*DEPRECATION: Option 'o2' value 'a' is deprecated",
+      "match": "re",
+      "count": 1
+    },
+    {
+      "line": ".*DEPRECATION: Option 'o3' value 'a' is replaced by 'c'",
+      "match": "re",
+      "count": 1
+    },
+    {
+      "line": ".*DEPRECATION: Option 'o4' value 'true' is replaced by 'enabled'",
+      "match": "re",
+      "count": 1
+    },
+    {
+      "line": ".*DEPRECATION: Option 'o5' value 'auto' is replaced by 'false'",
+      "match": "re",
+      "count": 1
+    }
+  ]
+}

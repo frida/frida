@@ -1,0 +1,83 @@
+name: install_headers
+returns: void
+description: |
+  Installs the specified header files from the source tree into the
+  system header directory (usually `/{prefix}/include`) during the
+  install step. This directory can be overridden by specifying it with
+  the `install_dir` keyword argument. If you just want to install into a
+  subdirectory of the system header directory, then use the `subdir`
+  argument. As an example if this has the value `myproj` then the
+  headers would be installed to `/{prefix}/include/myproj`.
+
+example: |
+  For example, this will install `common.h` and `kola.h` into
+  `/{prefix}/include`:
+
+  ```meson
+  install_headers('common.h', 'proj/kola.h')
+  ```
+
+  This will install `common.h` and `kola.h` into `/{prefix}/include/myproj`:
+
+  ```meson
+  install_headers('common.h', 'proj/kola.h', subdir : 'myproj')
+  ```
+
+  This will install `common.h` and `kola.h` into `/{prefix}/cust/myproj`:
+
+  ```meson
+  install_headers('common.h', 'proj/kola.h', install_dir : 'cust', subdir : 'myproj')
+  ```
+
+  This will install `common.h` into `/{prefix}/include` and `kola.h`
+  into `/{prefix}/include/proj/`:
+
+  ```meson
+  install_headers('common.h, 'proj/kola.h', preserve_path : true)
+  ```
+
+varargs:
+  name: file
+  type: file | str
+  description: Header files to install.
+
+warnings:
+  - the `install_mode` kwarg ignored integer values between 0.59.0 -- 1.1.0.
+
+kwargs:
+  install_dir:
+    type: str
+    description: Where to install to.
+
+  subdir:
+    type: str
+    description: |
+      Install to the `subdir` subdirectory of the default includedir.
+
+      Incompatible with the `install_dir` kwarg.
+
+  install_mode:
+    type: list[str | int]
+    since: 0.47.0
+    description: |
+      Specify the file mode in symbolic format
+      and optionally the owner/uid and group/gid for the installed files.
+
+      See the `install_mode` kwarg of [[install_data]] for more information.
+
+  preserve_path:
+    type: bool
+    since: 0.63.0
+    default: false
+    description: |
+      Disable stripping child-directories from header files when installing.
+
+      This is equivalent to GNU Automake's `nobase` option.
+
+  follow_symlinks:
+    type: bool
+    since: 1.3.0
+    default: true
+    description: |
+      If true, dereferences links and copies their target instead.  The default
+      value will become false in the future.

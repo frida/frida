@@ -1,0 +1,7 @@
+{
+  "file": "linux-mingw-w64-64bit.txt",
+  "tests": ["common", "cmake"],
+  "env": {
+    "WINEPATH": "/usr/lib/gcc/x86_64-w64-mingw32/9.2-posix;/usr/x86_64-w64-mingw32/bin;/usr/x86_64-w64-mingw32/lib"
+  }
+}

@@ -1,0 +1,7 @@
+{
+    "stdout": [
+        {
+            "line": "test cases/failing/114 pathsep in install_symlink/meson.build:3:0: ERROR: Link name is \"foo/bar\", but link names cannot contain path separators. The dir part should be in install_dir."
+        }
+    ]
+}

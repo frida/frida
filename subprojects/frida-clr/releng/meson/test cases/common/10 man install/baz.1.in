@@ -1,0 +1,6 @@
+This is a man page of baz.1 it was generated @TODAY@.
+
+You should not put generation timestamps in real world projects
+because they break reproducible builds. This manpage is written
+by professionals or under the supervision of professionals. Do
+not try this at home.

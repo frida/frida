@@ -1,0 +1,1 @@
+// Force C++ linking

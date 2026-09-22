@@ -1,0 +1,9 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/lib/girepository-1.0/Meson-1.0.typelib"},
+    {"type": "expr", "file": "usr/lib/?libgirlib.so"},
+    {"type": "file", "platform": "cygwin", "file": "usr/lib/libgirlib.dll.a"},
+    {"type": "file", "file": "usr/share/gir-1.0/Meson-1.0.gir"}
+  ],
+  "expect_skip_on_jobname": ["azure", "bionic", "cygwin", "macos", "msys2"]
+}

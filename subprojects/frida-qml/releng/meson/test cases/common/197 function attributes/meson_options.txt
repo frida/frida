@@ -1,0 +1,7 @@
+option(
+    'mode',
+    type : 'combo',
+    choices : ['single', 'parallel'],
+    value : 'single',
+    description : 'Test the one at a time function or many at a time function.'
+)

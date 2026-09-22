@@ -1,0 +1,5 @@
+{
+  "stdout": [
+    { "line": "test cases/failing/98 number in combo/meson.build:1:0: ERROR: Value \"1\" (of type \"number\") for option \"optimization\" is not one of the choices. Possible choices are (as string): \"plain\", \"0\", \"g\", \"1\", \"2\", \"3\", \"s\"." }
+  ]
+}

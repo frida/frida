@@ -1,0 +1,98 @@
+{
+  "name": "frida",
+  "version": "0.0.0",
+  "authors": [
+    "Frida Developers"
+  ],
+  "description": "Inject JavaScript to explore native apps on Windows, Mac, Linux, iOS and Android",
+  "keywords": [
+    "debugger",
+    "tracer",
+    "instrumentation",
+    "hooking",
+    "inject",
+    "windows",
+    "macos",
+    "linux",
+    "ios",
+    "iphone",
+    "ipad",
+    "android"
+  ],
+  "homepage": "https://frida.re",
+  "engines": {
+    "node": ">=16"
+  },
+  "main": "build/src/frida.js",
+  "exports": {
+    ".": "./build/src/frida.js"
+  },
+  "type": "module",
+  "files": [
+    "BSDmakefile",
+    "Makefile",
+    "build/src/*.d.ts",
+    "build/src/*.js",
+    "configure",
+    "configure.bat",
+    "frida-bindgen/frida_bindgen_core/",
+    "make.bat",
+    "meson.build",
+    "meson.options",
+    "tsconfig.json",
+    "releng/*.py",
+    "releng/*.toml",
+    "releng/devkit-assets/",
+    "releng/meson-scripts/",
+    "releng/meson/meson.py",
+    "releng/meson/mesonbuild/",
+    "releng/tomlkit/tomlkit/",
+    "scripts/",
+    "src/",
+    "subprojects/frida-core.wrap",
+    "subprojects/nan.wrap",
+    "subprojects/packagefiles/",
+    "test/"
+  ],
+  "dependencies": {
+    "bindings": "^1.5.0",
+    "minimatch": "^10.0.1",
+    "prebuild-install": "^7.1.3"
+  },
+  "devDependencies": {
+    "@types/bindings": "^1.5.5",
+    "@types/chai": "^5.2.1",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.13.16",
+    "chai": "^5.2.0",
+    "mocha": "^11.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "install": "node scripts/install.js",
+    "test": "node --loader ts-node/esm --expose-gc node_modules/mocha/bin/_mocha --extension ts test/*.ts",
+    "examples:build": "tsc -p tsconfig.examples.json",
+    "examples:watch": "tsc -p tsconfig.examples.json -w"
+  },
+  "binary": {
+    "host": "https://github.com",
+    "remote_path": "frida/frida/releases/download/{version}",
+    "module_path": "build",
+    "napi_versions": [
+      8
+    ]
+  },
+  "config": {
+    "runtime": "napi",
+    "target": "8"
+  },
+  "license": "LGPL-2.0 WITH WxWindows-exception-3.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/frida/frida-node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/frida/frida-node/issues"
+  }
+}

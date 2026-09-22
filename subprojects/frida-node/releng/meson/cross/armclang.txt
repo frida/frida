@@ -1,0 +1,20 @@
+# This file assumes that path to the arm compiler toolchain is added
+# to the environment(PATH) variable, so that Meson can find
+# the armclang, armlink and armar while building.
+[binaries]
+c = ['armclang', '--target=arm-arm-none-eabi']
+cpp = ['armclang', '--target=arm-arm-none-eabi']
+ar = 'armar'
+strip = 'armar'
+
+[built-in options]
+# The '--target', '-mcpu' options with the appropriate values should be mentioned
+# to cross compile c/c++ code with armclang.
+c_args      = ['-mcpu=cortex-m0plus']
+cpp_args    = ['-mcpu=cortex-m0plus']
+
+[host_machine]
+system = 'bare metal'      # Update with your system name - bare metal/OS.
+cpu_family = 'arm'
+cpu = 'Cortex-M0+'
+endian = 'little'

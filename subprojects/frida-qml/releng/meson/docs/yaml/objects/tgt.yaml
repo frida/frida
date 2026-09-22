@@ -1,0 +1,3 @@
+name: tgt
+long_name: Meson Target
+description: Opaque base object for all Meson targets

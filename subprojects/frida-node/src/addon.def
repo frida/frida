@@ -1,0 +1,3 @@
+EXPORTS
+	node_api_module_get_api_version_v1
+	napi_register_module_v1

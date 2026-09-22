@@ -1,0 +1,10 @@
+{
+  "installed": [
+    {"type": "exe", "file": "usr/bin/prog1"},
+    {"type": "pdb", "file": "usr/bin/prog1"},
+    {"type": "exe", "file": "usr/bin/prog2"},
+    {"type": "pdb", "file": "usr/bin/prog2"},
+    {"type": "exe", "file": "usr/bin/prog3"},
+    {"type": "pdb", "file": "usr/bin/prog3"}
+  ]
+}

@@ -1,0 +1,5 @@
+option(
+  'case',
+  type : 'combo',
+  choices : ['find_program', 'config_dep', 'python3', 'python']
+)

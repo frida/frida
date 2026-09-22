@@ -1,0 +1,8 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/common/33 run program/meson.build:1: WARNING: Project targets '>=0.1.0' but uses feature introduced in '0.47.0': check arg in run_command.",
+      "comment": "This triggers on line 1 -- the line with the project() function"
+    }
+  ]
+}

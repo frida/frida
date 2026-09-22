@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/54 assign custom target index/meson.build:24:0: ERROR: Assignment target must be an id."
+    }
+  ]
+}

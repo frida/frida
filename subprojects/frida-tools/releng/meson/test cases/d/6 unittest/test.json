@@ -1,0 +1,6 @@
+{
+  "installed": [
+    {"type": "exe", "file": "usr/bin/dapp"},
+    {"type": "pdb", "file": "usr/bin/dapp", "language": "d"}
+  ]
+}

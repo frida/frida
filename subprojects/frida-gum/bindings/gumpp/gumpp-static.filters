@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="backtracer.cpp" />
+    <ClCompile Include="interceptor.cpp" />
+    <ClCompile Include="invocationlistener.cpp" />
+    <ClCompile Include="profiler.cpp" />
+    <ClCompile Include="returnaddress.cpp" />
+    <ClCompile Include="sampler.cpp" />
+    <ClCompile Include="sanitychecker.cpp" />
+    <ClCompile Include="symbolutil.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="gumpp.hpp" />
+    <ClInclude Include="invocationcontext.hpp" />
+    <ClInclude Include="invocationlistener.hpp" />
+    <ClInclude Include="objectwrapper.hpp" />
+    <ClInclude Include="podwrapper.hpp" />
+    <ClInclude Include="string.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="frida-gum32-lib">
+      <UniqueIdentifier>{03327442-c52b-47a0-87b6-77585055cb08}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\..\..\build\tmp-windows\Win32-Release\gum-32\gum-32.lib">
+      <Filter>frida-gum32-lib</Filter>
+    </Library>
+  </ItemGroup>
+</Project>

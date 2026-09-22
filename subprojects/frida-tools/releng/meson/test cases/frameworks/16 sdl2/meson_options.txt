@@ -1,0 +1,6 @@
+option(
+    'method',
+    type : 'combo',
+    choices : ['auto', 'pkg-config', 'config-tool', 'sdlconfig', 'extraframework', 'cmake'],
+    value : 'auto',
+)

@@ -1,0 +1,79 @@
+name: build_tgt
+long_name: Build target
+extends: tgt
+description: |
+  A build target is either an executable, shared library, static library,
+  both shared and static library or shared module.
+
+methods:
+- name: extract_objects
+  returns: extracted_obj
+  description: |
+    Returns an opaque value representing the object files generated for those
+    source files. This is typically used to take single object files and link
+    them to unit tests or to compile some source files with custom flags. To
+    use the object file(s) in another build target, use the
+    `objects:` keyword argument to a [[build_target]] or [[declare_dependency]],
+    or include them in the command line of a [[custom_target]].
+  varargs:
+    name: source
+    type: str | file
+    description: |
+      Source filenames for which the built objects should be extracted.
+    min_varargs: 1
+
+- name: extract_all_objects
+  returns: extracted_obj
+  description: |
+    Acts the same as `extract_objects`, but returns all object files generated
+    by this target.
+
+    By default only objects built for this target are returned to maintain
+    backward compatibility with previous versions.  The default value for the
+    `recursive` kwarg will eventually be changed to `true` in a future version.
+  kwargs:
+    recursive:
+      type: bool
+      description: |
+        Also return objects passed to the `objects` argument of this target.
+      since: 0.46.0
+      default: true
+
+- name: full_path
+  returns: str
+  description: |
+    Returns a full path pointing to the result target file.
+    **NOTE:** In most cases using the object itself will do the same job
+    as this and will also allow Meson to setup inter-target dependencies
+    correctly. Please file a bug if that doesn't work for you.
+
+- name: path
+  returns: str
+  since: 0.59.0
+  deprecated: 0.59.0
+  description: |
+    Does the exact same as [[build_tgt.full_path]]. **NOTE**: This
+    function is solely kept for compatibility with [[@external_program]] objects.
+    It will be removed once the, also deprecated, corresponding `path()`
+    function in the [[@external_program]] object is removed.
+
+- name: private_dir_include
+  returns: inc
+  description: |
+    Returns a value that works like [[include_directories]], but points to the
+    private directory of this target. Usually only needed if an another target
+    needs to access some generated internal headers of this target.
+
+- name: name
+  returns: str
+  since: 0.54.0
+  description: Returns the name of the target.
+
+- name: found
+  returns: bool
+  since: 0.59.0
+  description: |
+    Always returns `true`. This function is meant to make executables
+    objects feature compatible with [[@external_program]] objects. This
+    simplifies use-cases where an executable is used instead of
+    an [[@external_program]].

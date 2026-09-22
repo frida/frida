@@ -1,0 +1,68 @@
+name: library
+returns: lib
+description: |
+  Builds a library that is either static, shared or both depending on
+  the value of `default_library`
+  user [option](https://mesonbuild.com/Builtin-options.html).
+  You should use this instead of [[shared_library]],
+  [[static_library]] or
+  [[both_libraries]] most of the time. This allows you
+  to toggle your entire project (including subprojects) from shared to
+  static with only one option. This option applies to libraries being
+  built internal to the entire project. For external dependencies, the
+  default library type preferred is shared. This can be adapted on a per
+  library basis using the [[dependency]] `static` keyword.
+
+  The keyword arguments for this are the same as for
+  [[build_target]]
+
+warnings:
+  - using <lang>_shared_args and/or <lang>_static_args may lead to much higher
+    compilation times with both_library, as object files cannot be shared between
+    the static and shared targets. It is guaranteed to not duplicate the build if
+    these arguments are empty arrays
+
+posargs_inherit: _build_target_base
+varargs_inherit: _build_target_base
+kwargs_inherit:
+  - shared_library
+  - static_library
+
+kwargs:
+  rust_abi:
+    type: str
+    since: 1.3.0
+    description: |
+      Set the specific ABI to compile (when compiling rust).
+      - 'rust' (default): Create a "rlib" or "dylib" crate depending on the library
+        type being build.
+      - 'c': Create a "cdylib" or "staticlib" crate depending on the library
+        type being build.
+
+  <lang>_static_args:
+    type: list[str]
+    since: 1.3.0
+    description:
+      Arguments that are only passed to a static library
+
+  vala_static_args:
+    type: list[str | file]
+    since: 1.3.0
+    description:
+      Arguments that are only passed to a static library
+
+      Like `vala_args`, [[files]] is allowed in addition to string
+
+  <lang>_shared_args:
+    type: list[str]
+    since: 1.3.0
+    description:
+      Arguments that are only passed to a shared library
+
+  vala_shared_args:
+    type: list[str | file]
+    since: 1.3.0
+    description:
+      Arguments that are only passed to a shared library
+
+      Like `vala_args`, [[files]] is allowed in addition to string

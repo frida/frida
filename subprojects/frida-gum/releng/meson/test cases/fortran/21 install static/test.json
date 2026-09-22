@@ -1,0 +1,10 @@
+{
+    "installed": [
+        {"file": "usr/lib/libmainstatic.a", "type": "file"}
+    ],
+    "matrix": {
+        "options": {
+            "default_library": [ { "val": "static" } ]
+        }
+    }
+}

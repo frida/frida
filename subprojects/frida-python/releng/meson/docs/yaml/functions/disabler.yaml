@@ -1,0 +1,4 @@
+name: disabler
+returns: disabler
+description: Returns a [[@disabler]] object.
+since: 0.44.0

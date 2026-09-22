@@ -1,0 +1,19 @@
+{
+  "matrix": {
+    "options": {
+      "warning_level": [
+        {
+          "val": "1",
+          "skip_on_env": [
+            "SINGLE_DUB_COMPILER"
+          ]
+        }
+      ]
+    }
+  },
+  "stdout": [
+    {
+      "line": "test cases/failing/82 dub compiler/meson.build:17:0: ERROR: Dependency \"dubtestproject:test2\" not found"
+    }
+  ]
+}

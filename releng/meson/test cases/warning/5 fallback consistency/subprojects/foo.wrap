@@ -1,0 +1,6 @@
+[wrap-file]
+source_url = http://host.invalid/foo.tar.gz
+source_filename = foo.tar.gz
+
+[provide]
+foo = bar_dep

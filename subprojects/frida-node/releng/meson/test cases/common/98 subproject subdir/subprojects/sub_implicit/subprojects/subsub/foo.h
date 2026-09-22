@@ -1,0 +1,1 @@
+#define DUMMY 42

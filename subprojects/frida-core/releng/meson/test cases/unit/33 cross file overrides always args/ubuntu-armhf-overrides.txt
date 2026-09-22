@@ -1,0 +1,19 @@
+[binaries]
+# we could set exe_wrapper = qemu-arm-static but to test the case
+# when cross compiled binaries can't be run we don't do that
+c = '/usr/bin/arm-linux-gnueabihf-gcc'
+cpp = '/usr/bin/arm-linux-gnueabihf-g++'
+rust = ['rustc', '--target', 'arm-unknown-linux-gnueabihf', '-C', 'linker=/usr/bin/arm-linux-gnueabihf-gcc-7']
+ar = '/usr/arm-linux-gnueabihf/bin/ar'
+strip = '/usr/arm-linux-gnueabihf/bin/strip'
+pkg-config = '/usr/bin/arm-linux-gnueabihf-pkg-config'
+
+[properties]
+root = '/usr/arm-linux-gnueabihf'
+c_args = ['-U_FILE_OFFSET_BITS']
+
+[host_machine]
+system = 'linux'
+cpu_family = 'arm'
+cpu = 'armv7' # Not sure if correct.
+endian = 'little'

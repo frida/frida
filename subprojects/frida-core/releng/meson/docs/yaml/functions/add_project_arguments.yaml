@@ -1,0 +1,19 @@
+name: add_project_arguments
+returns: void
+description: |
+  Adds project specific arguments to the compiler command line.
+
+  This function behaves in the same way as [[add_global_arguments]] except
+  that the arguments are only used for the current project, they won't
+  be used in any other subproject.
+
+notes:
+  - You must pass always arguments individually `arg1, arg2, ...`
+    rather than as a string `'arg1 arg2', ...`
+
+varargs:
+  type: str
+  name: Compiler argument
+  description: The compiler arguments to add
+
+kwargs_inherit: add_global_arguments

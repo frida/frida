@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/49 inconsistent comparison/meson.build:5:12: ERROR: Object <[ArrayHolder] holds [list]: []> of type array does not support the `<` operator."
+    }
+  ]
+}

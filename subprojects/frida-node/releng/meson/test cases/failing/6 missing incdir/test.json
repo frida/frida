@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/6 missing incdir/meson.build:3:6: ERROR: Include dir nosuchdir does not exist."
+    }
+  ]
+}

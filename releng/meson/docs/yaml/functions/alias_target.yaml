@@ -1,0 +1,21 @@
+name: alias_target
+since: 0.52.0
+returns: alias_tgt
+description: |
+  This function creates a new top-level target. Like all top-level
+  targets, this integrates with the selected backend. For instance, with
+  you can run it as `meson compile target_name`. This is a dummy target
+  that does not execute any command, but ensures that all dependencies
+  are built. Dependencies can be any build target. Since 0.60.0, this includes
+  [[@run_tgt]].
+
+posargs:
+  target_name:
+    type: str
+    description: The name of the alias target
+
+varargs:
+  name: Dep
+  type: tgt
+  min_varargs: 1
+  description: The targets to depend on

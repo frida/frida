@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/27 noprog use/meson.build:5:0: ERROR: Tried to use not-found external program in \"command\""
+    }
+  ]
+}

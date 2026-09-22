@@ -1,0 +1,1 @@
+build_flags="$build_flags ./cmd/toml-test"

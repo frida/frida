@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/105 enter subdir twice/meson.build:3:0: ERROR: Tried to enter directory \"sub\", which has already been visited."
+    }
+  ]
+}

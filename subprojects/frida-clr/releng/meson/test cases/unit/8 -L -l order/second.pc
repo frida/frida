@@ -1,0 +1,13 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib/x86_64-linux-gnu
+sharedlibdir=${libdir}
+includedir=${prefix}/include
+
+Name: jonne2
+Description: jonne2 library
+Version: 1.0.0
+
+Requires:
+Libs: -L/me/third -lfoo3 -L/me/fourth -lfoo4
+Cflags: -I${includedir}

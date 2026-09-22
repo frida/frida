@@ -1,0 +1,504 @@
+[dependencies]
+version = "20260717"
+bootstrap_version = "20250801"
+
+[ninja]
+scope = "toolchain"
+name = "Ninja"
+version = "516800b093d1a2e5589ee1cdd7393dffdf9c702e"
+url = "https://github.com/frida/ninja.git"
+
+[pkg-config]
+scope = "toolchain"
+name = "pkg-config"
+version = "4696795673d1d3dec46b663df48f8cbf66461d14"
+url = "https://github.com/frida/pkg-config.git"
+dependencies = [
+    "glib",
+]
+
+[vala]
+scope = "toolchain"
+name = "Vala"
+version = "172348fa9123ff4a95d541c5f9e56837434c4b6e"
+url = "https://github.com/frida/vala.git"
+dependencies = [
+    "glib",
+]
+
+[picolibc]
+# The C library for the bare-metal targets. They are all soft-float, and newlib has
+# no soft-float build for arm64, where the flavor is -mabi=aapcs-soft throughout.
+when = "machine.is_freestanding"
+name = "picolibc"
+version = "e89d30c090837ba889ce0f6546b530d883653324"
+url = "https://github.com/frida/picolibc.git"
+options = [
+    "-Dmultilib=false",
+    # Nothing here has an entry point: the SDK is linked into a kernel module.
+    "-Dpicocrt=false",
+    "-Dsemihost=false",
+    "-Dspecsdir=none",
+    "-Dthread-local-storage=false",
+    "-Dio-pos-args=true",
+]
+
+[compiler-rt]
+# The compiler runtime to go with it. Under -mabi=aapcs-soft a double is passed in
+# x0, so __muldf3 and the rest have to be the soft-float ones; the copies Rust's
+# toolchain carries expect d0 and quietly return nonsense.
+when = "machine.is_freestanding"
+name = "compiler-rt"
+version = "6694311465c3d7711fb1a8f4744e36a164eb9ee2"
+url = "https://github.com/frida/compiler-rt.git"
+dependencies = [
+    "picolibc",
+]
+
+
+[libiconv]
+# Needed on non-Windows systems where iconv is not part of the libc.
+# On Apple OSes we include it in SDKs to avoid dependencies beyond libSystem.
+# We use Apple's implementation in toolchains to make them smaller.
+when = """ \
+       (machine.is_apple and bundle is Bundle.SDK) \
+       or machine.os in {'android', 'qnx', 'none'} \
+       or machine.config == 'uclibc' \
+       """
+name = "libiconv"
+version = "cc24563b2c9c43727242e3bcc55bfcc210926ff2"
+url = "https://github.com/frida/libiconv.git"
+dependencies = [
+    { id = "picolibc", when = "machine.is_freestanding" },
+    { id = "compiler-rt", when = "machine.is_freestanding" },
+]
+
+
+[zlib]
+name = "zlib"
+version = "171a3eacaea8b731ef1fc586e7777b77742e2a1d"
+url = "https://github.com/frida/zlib.git"
+dependencies = [
+    { id = "picolibc", when = "machine.is_freestanding" },
+    { id = "compiler-rt", when = "machine.is_freestanding" },
+]
+
+
+[libffi]
+name = "libffi"
+version = "2b42587b9b5c8f4ab4144b615014e20d9e4d396f"
+url = "https://github.com/frida/libffi.git"
+options = [
+    "-Dexe_static_tramp=false",
+    "-Dtests=false",
+]
+dependencies = [
+    { id = "picolibc", when = "machine.is_freestanding" },
+    { id = "compiler-rt", when = "machine.is_freestanding" },
+]
+
+
+[pcre2]
+name = "PCRE2"
+version = "b47486922fdc3486499b310dc9cf903449700474"
+url = "https://github.com/frida/pcre2.git"
+options = [
+    "-Dgrep=false",
+    "-Dtest=false",
+]
+dependencies = [
+    { id = "picolibc", when = "machine.is_freestanding" },
+    { id = "compiler-rt", when = "machine.is_freestanding" },
+]
+
+
+[selinux]
+when = "machine.os == 'android' and not machine.is_freestanding"
+name = "SELinux Userspace"
+version = "b7c8cd70d821bb3fc69500e6273149299b80b923"
+url = "https://github.com/frida/selinux.git"
+options = [
+    "-Dregex=disabled",
+]
+
+[glib]
+name = "GLib"
+version = "129e8d998936cdd47be41d25d3ffd1294c26a920"
+url = "https://github.com/frida/glib.git"
+options = [
+    "-Dcocoa=disabled",
+    "-Dselinux=disabled",
+    "-Dxattr=false",
+    "-Dlibmount=disabled",
+    "-Dtests=false",
+    "--force-fallback-for=pcre",
+    { value = "-Ddiet=true", when = "machine.is_freestanding" },
+    { value = "-Dglib_debug=disabled", when = "machine.config_is_optimized" },
+    { value = "-Dglib_assert=false", when = "machine.config_is_optimized" },
+    { value = "-Dglib_checks=false", when = "machine.config_is_optimized" },
+    { value = "-Diconv=external", when = """ \
+                                         machine.is_apple \
+                                         or machine.os in {'android', 'qnx', 'none'} \
+                                         or machine.config == 'uclibc' \
+                                         """ }
+]
+dependencies = [
+    "pcre2",
+    "libffi",
+    "zlib",
+    { id = "libiconv", when = """ \
+                              (machine.is_apple and bundle is Bundle.SDK) \
+                              or machine.os in {'android', 'qnx', 'none'} \
+                              or machine.config == 'uclibc' \
+                              """ }
+]
+
+[elfutils]
+when = "machine.os in {'linux', 'android'} and not machine.is_freestanding"
+name = "elfutils"
+version = "1284bbc128473aea220337685985d465607fbac8"
+url = "https://github.com/frida/elfutils.git"
+dependencies = [
+    "zlib",
+]
+
+[libdwarf]
+when = "machine.os in {'linux', 'android', 'freebsd', 'qnx'} and not machine.is_freestanding"
+name = "libdwarf"
+version = "61ff154ae803d2b0202dbc1bf385cda1ac3ece54"
+url = "https://github.com/frida/libdwarf.git"
+options = [
+    "-Ddecompression=false",
+]
+
+[libbpf]
+when = "machine.os in {'linux', 'android'} and not machine.is_freestanding"
+name = "libbpf"
+version = "6c8d0d00a122fe126b7a3094f0785340128506f5"
+url = "https://github.com/frida/libbpf.git"
+dependencies = [
+    "elfutils",
+    "zlib",
+]
+
+[xz]
+when = "not machine.is_freestanding"
+name = "XZ Utils"
+version = "e70f5800ab5001c9509d374dbf3e7e6b866c43fe"
+url = "https://github.com/frida/xz.git"
+options = [
+    "-Dcli=disabled",
+]
+
+[brotli]
+when = "not machine.is_freestanding"
+name = "Brotli"
+version = "01d9e2922ca878965ebcd71ee8965d2a7aadb47a"
+url = "https://github.com/frida/brotli.git"
+
+[lzfse]
+name = "LZFSE"
+version = "5cfb7c86919d3c2c636d0d7552b51855a611ba1c"
+url = "https://github.com/frida/lzfse.git"
+dependencies = [
+    { id = "picolibc", when = "machine.is_freestanding" },
+    { id = "compiler-rt", when = "machine.is_freestanding" },
+]
+
+
+[minizip-ng]
+when = "not machine.is_freestanding"
+name = "minizip-ng"
+version = "3a87bc9dedd9d1ece0845632a80d6c359e750d75"
+url = "https://github.com/frida/minizip-ng.git"
+options = [
+    "-Dzlib=enabled",
+    "-Dlzma=disabled",
+]
+dependencies = [
+    "zlib",
+    { id = "libiconv", when = """ \
+                              machine.is_apple \
+                              or machine.os in {'android', 'qnx'} \
+                              or machine.config == 'uclibc' \
+                              """ },
+]
+
+[sqlite]
+when = "not machine.is_freestanding"
+name = "SQLite"
+version = "ef9edc77c069f6824bc88352a437f00aabef6e11"
+url = "https://github.com/frida/sqlite.git"
+
+[libunwind]
+when = "machine.os in {'linux', 'android', 'freebsd', 'qnx'} and not machine.is_freestanding"
+name = "libunwind"
+version = "4d0abea0effd3c80916e70abe38c2a6156596f05"
+url = "https://github.com/frida/libunwind.git"
+options = [
+    "-Dgeneric_library=disabled",
+    "-Dcoredump_library=disabled",
+    "-Dptrace_library=disabled",
+    "-Dsetjmp_library=disabled",
+    "-Dmsabi_support=false",
+    "-Dminidebuginfo=enabled",
+    "-Dzlibdebuginfo=enabled",
+]
+dependencies = [
+    "zlib",
+    "xz",
+]
+
+[glib-networking]
+when = "not machine.is_freestanding"
+name = "glib-networking"
+version = "ef47b1a09cf8c1875f181bcf901643689a56d12f"
+url = "https://github.com/frida/glib-networking.git"
+options = [
+    "-Dgnutls=disabled",
+    "-Dopenssl=enabled",
+    "-Dlibproxy=disabled",
+    "-Dgnome_proxy=disabled",
+    "-Dtests=false",
+]
+dependencies = [
+    "glib",
+    "openssl",
+]
+
+[libnice]
+when = "not machine.is_freestanding"
+name = "libnice"
+version = "9a3da6e3e5bbcf935fd85b6b8557ff8c7dd9032c"
+url = "https://github.com/frida/libnice.git"
+options = [
+    "-Dgupnp=disabled",
+    "-Dgstreamer=disabled",
+    "-Dcrypto-library=auto",
+    "-Dexamples=disabled",
+    "-Dtests=disabled",
+    "-Dintrospection=disabled",
+]
+dependencies = [
+    "glib",
+    "openssl",
+]
+
+[libusb]
+when = "machine.os in {'windows', 'macos', 'linux'} and not machine.is_freestanding"
+name = "libusb"
+version = "ffff4bdfe8faa38cecfad5aab106cae923502d55"
+url = "https://github.com/frida/libusb.git"
+
+[lwip]
+when = "not machine.is_freestanding"
+name = "lwIP"
+version = "9122f0d0006b7990c0f9d0c58506cc454f6a1f49"
+url = "https://github.com/frida/lwip.git"
+options = [
+    "-Dipv4=disabled",
+    "-Dipv6=enabled",
+    "-Ddns=disabled",
+    "-Darp=disabled",
+    "-Dethernet=enabled",
+    { value = "-Dlwip_debug=disabled", when = "machine.config_is_optimized" },
+]
+dependencies = [
+    "glib",
+]
+
+[usrsctp]
+when = "not machine.is_freestanding"
+name = "usrsctp"
+version = "377fecfe06bb766c69cc0e1e1f6d5c72cf7704e6"
+url = "https://github.com/frida/usrsctp.git"
+options = [
+    "-Dsctp_inet=false",
+    "-Dsctp_inet6=false",
+    "-Dsctp_build_programs=false",
+]
+
+[libgee]
+when = "not machine.is_freestanding"
+name = "libgee"
+version = "ad17ed847039469fcc2dc711ecfee2bbf7d2bf87"
+url = "https://github.com/frida/libgee.git"
+options = [
+    "-Ddisable-internal-asserts=true",
+    "-Ddisable-introspection=true",
+]
+dependencies = [
+    "glib",
+]
+
+[json-glib]
+name = "JSON-GLib"
+version = "1a39cbe151b02c4192987c8fcc98997a59db2154"
+url = "https://github.com/frida/json-glib.git"
+options = [
+    "-Dintrospection=disabled",
+    "-Dgtk_doc=disabled",
+    "-Dtests=false",
+    "-Dnls=disabled",
+]
+dependencies = [
+    "glib",
+]
+
+[libpsl]
+when = "not machine.is_freestanding"
+name = "libpsl"
+version = "b76c0fed2e27353d5fbb067ecdfdf76d2281eb91"
+url = "https://github.com/frida/libpsl.git"
+options = [
+    "-Druntime=no",
+    "-Dbuiltin=false",
+    "-Dtests=false",
+]
+
+[libxml2]
+when = "not machine.is_freestanding"
+name = "libxml2"
+version = "f09ad5551829b7f2df3666759e701644a0ea8558"
+url = "https://github.com/frida/libxml2.git"
+options = [
+    "-Dhttp=disabled",
+    "-Dlzma=disabled",
+    "-Dzlib=disabled",
+]
+
+[ngtcp2]
+when = "not machine.is_freestanding"
+name = "ngtcp2"
+version = "5b21d4418ff668d9b5ddc4f744b7a28af4196abf"
+url = "https://github.com/frida/ngtcp2.git"
+dependencies = [
+    "openssl",
+]
+
+[nghttp2]
+when = "not machine.is_freestanding"
+name = "nghttp2"
+version = "ae13d24ea59c30e36ca53d1b22c4e664588d0445"
+url = "https://github.com/frida/nghttp2.git"
+
+[libsoup]
+when = "not machine.is_freestanding"
+name = "libsoup"
+version = "4fd67869310b9de8fe2947bc8504ccbcf1abf285"
+url = "https://github.com/frida/libsoup.git"
+options = [
+    "-Dgssapi=disabled",
+    "-Dntlm=disabled",
+    "-Dbrotli=enabled",
+    "-Dtls_check=false",
+    "-Dintrospection=disabled",
+    "-Dvapi=disabled",
+    "-Ddocs=disabled",
+    "-Dexamples=disabled",
+    "-Dtests=false",
+    "-Dsysprof=disabled",
+]
+dependencies = [
+    "glib",
+    "nghttp2",
+    "sqlite",
+    "libpsl",
+    "brotli",
+]
+
+[capstone]
+name = "Capstone"
+version = "d536b1577fd033a31d75f48fd183aa425256cc18"
+url = "https://github.com/frida/capstone.git"
+options = [
+    { value = "-Darchs=all", when = "not machine.is_freestanding" },
+    { value = "-Darchs=arm64", when = "machine.is_freestanding and machine.arch == 'arm64'" },
+    { value = "-Darchs=arm", when = "machine.is_freestanding and machine.arch == 'arm'" },
+    { value = "-Darchs=x86", when = "machine.is_freestanding and machine.arch in {'x86', 'x86_64'}" },
+    "-Duse_arch_registration=true",
+    "-Dx86_att_disable=true",
+    "-Dcli=disabled",
+]
+dependencies = [
+    { id = "picolibc", when = "machine.is_freestanding" },
+    { id = "compiler-rt", when = "machine.is_freestanding" },
+]
+
+
+[quickjs]
+name = "QuickJS"
+version = "fd4842d54368a52d44dc3913df291ea82ca6174f"
+url = "https://github.com/frida/quickjs.git"
+options = [
+    "-Dlibc=false",
+    "-Dbignum=true",
+    "-Datomics=disabled",
+    # Only worth its cost where the host offers the runtime a small stack.
+    { value = "-Dstack_check=disabled", when = "not machine.is_freestanding" },
+    { value = "-Dstack_check=enabled", when = "machine.os == 'none'" },
+    { value = "-Dstack_mode=optimize", when = "machine.os == 'none'" },
+]
+dependencies = [
+    { id = "picolibc", when = "machine.is_freestanding" },
+    { id = "compiler-rt", when = "machine.is_freestanding" },
+]
+
+
+[tinycc]
+when = """ \
+       machine.arch in { \
+           'x86', 'x86_64', \
+           'arm', 'armbe8', 'armeabi', 'armhf', \
+           'arm64', 'arm64e', 'arm64eoabi' \
+       } \
+       """
+name = "TinyCC"
+version = "3da7432bebd348bf16cdc7a22c3717b4f22946af"
+url = "https://github.com/frida/tinycc.git"
+dependencies = [
+    { id = "picolibc", when = "machine.is_freestanding" },
+    { id = "compiler-rt", when = "machine.is_freestanding" },
+]
+
+
+[openssl]
+when = "not machine.is_freestanding"
+name = "OpenSSL"
+version = "fa60a1c8c704e4ca0cc0dcb289c3be1fea1b50ff"
+url = "https://github.com/frida/openssl.git"
+options = [
+    "-Dcli=disabled",
+    { value = "-Dasm=disabled", when = "machine.config == 'mingw'" }
+]
+
+[v8]
+when = """ \
+       machine.config != 'mingw' \
+       and machine.arch != 'arm64beilp32' \
+       and not machine.arch.startswith('mips') \
+       and not machine.arch.startswith('powerpc') \
+       and machine.os not in {'none', 'qnx'} \
+       and not machine.is_freestanding \
+       """
+name = "V8"
+version = "a07af892420dfd873b33bd4ce4ba9d963072e1b9"
+url = "https://github.com/frida/v8.git"
+options = [
+    "-Ddebug=false",
+    "-Dembedder_string=-frida",
+    "-Dsnapshot_compression=disabled",
+    "-Dpointer_compression=disabled",
+    "-Dshared_ro_heap=disabled",
+    "-Dcppgc_caged_heap=disabled",
+]
+dependencies = [
+    "zlib",
+    { id = "zlib", for_machine = "build" },
+]
+
+[libcxx]
+when = "machine.is_apple and not machine.is_freestanding"
+name = "libc++"
+version = "626b6731a24ed412a70b60b5fdaab3f36632d6f6"
+url = "https://github.com/frida/libcxx.git"

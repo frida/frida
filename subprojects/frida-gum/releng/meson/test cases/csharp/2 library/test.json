@@ -1,0 +1,9 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/bin/prog.exe"},
+    {"type": "pdb", "file": "usr/bin/prog"},
+    {"type": "file", "platform": "msvc", "file": "usr/bin/helper.dll"},
+    {"type": "pdb", "file": "usr/bin/helper"},
+    {"type": "file", "platform": "gcc", "file": "usr/lib/helper.dll"}
+  ]
+}

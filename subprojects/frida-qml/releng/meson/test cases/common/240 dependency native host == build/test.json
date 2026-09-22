@@ -1,0 +1,14 @@
+{
+  "stdout": [
+    {
+      "line": "Dependency zlib for (build|host) machine found: YES .* \\(cached\\)",
+      "match": "re",
+      "count": 2
+    },
+    {
+      "line": "Dependency expat for (build|host) machine found: YES .* \\(overridden\\)",
+      "match": "re",
+      "count": 3
+    }
+  ]
+}

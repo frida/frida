@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package subdirectorial;
+
+import "com/mesonbuild/simple.proto";
+
+message ComplexMessage {
+  string a_message = 1;
+  SimpleMessage sm = 2;
+}

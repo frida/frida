@@ -1,0 +1,13 @@
+{
+  "installed": [
+    {"type": "exe", "file": "usr/bin/vapigen-test"},
+    {"type": "expr", "file": "usr/lib/?libfoo.so"},
+    {"type": "file", "platform": "cygwin", "file": "usr/lib/libfoo.dll.a"},
+    {"type": "expr", "file": "usr/lib/?libbar.so"},
+    {"type": "file", "platform": "cygwin", "file": "usr/lib/libbar.dll.a"},
+    {"type": "file", "file": "usr/share/vala/vapi/foo-1.0.vapi"},
+    {"type": "file", "file": "usr/share/vala/vapi/foo-1.0.deps"},
+    {"type": "file", "file": "usr/share/vala/vapi/bar-1.0.vapi"},
+    {"type": "file", "file": "usr/share/vala/vapi/bar-1.0.deps"}
+  ]
+}

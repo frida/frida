@@ -1,0 +1,47 @@
+%__meson %{_bindir}/meson
+%__meson_wrap_mode nodownload
+%__meson_auto_features enabled
+%__meson_verbose 1
+
+%meson \
+    %set_build_flags \
+    %{shrink:%{__meson} setup \
+        --buildtype=plain \
+        --prefix=%{_prefix} \
+        --libdir=%{_libdir} \
+        --libexecdir=%{_libexecdir} \
+        --bindir=%{_bindir} \
+        --sbindir=%{_sbindir} \
+        --includedir=%{_includedir} \
+        --datadir=%{_datadir} \
+        --mandir=%{_mandir} \
+        --infodir=%{_infodir} \
+        --localedir=%{_datadir}/locale \
+        --sysconfdir=%{_sysconfdir} \
+        --localstatedir=%{_localstatedir} \
+        --sharedstatedir=%{_sharedstatedir} \
+        --wrap-mode=%{__meson_wrap_mode} \
+        --auto-features=%{__meson_auto_features} \
+        %{_vpath_srcdir} %{_vpath_builddir} \
+        %{nil}}
+
+%meson_build \
+    %{shrink:%{__meson} compile \
+        -C %{_vpath_builddir} \
+        -j %{_smp_build_ncpus} \
+        %{?__meson_verbose:--verbose} \
+        %{nil}}
+
+%meson_install \
+    %{shrink:DESTDIR=%{buildroot} %{__meson} install \
+        -C %{_vpath_builddir} \
+        --no-rebuild \
+        %{!?__meson_verbose:--quiet} \
+        %{nil}}
+
+%meson_test \
+    %{shrink:%{__meson} test \
+        -C %{_vpath_builddir} \
+        --num-processes %{_smp_build_ncpus} \
+        --print-errorlogs \
+        %{nil}}

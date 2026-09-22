@@ -1,0 +1,327 @@
+name: _build_target_base
+returns: void
+description: PRIVATE
+
+posargs:
+  target_name:
+    description: The *unique* name of the build target
+    type: str
+
+varargs:
+  name: source
+  type: str | file | custom_tgt | custom_idx | generated_list
+  description: |
+    Input source to compile. The following types are supported:
+
+    - Strings relative to the current source directory
+    - [[@file]] objects defined in any preceding build file
+    - The return value of configure-time generators such as [[configure_file]]
+    - The return value of build-time generators such as
+      [[custom_target]] or [[generator.process]]
+
+    These input files can be sources, objects, libraries, or any other
+    file. Meson will automatically categorize them based on the extension
+    and use them accordingly. For instance, sources (`.c`, `.cpp`,
+    `.vala`, `.rs`, etc) will be compiled and objects (`.o`, `.obj`) and
+    libraries (`.so`, `.dll`, etc) will be linked.
+
+    With the Ninja backend, Meson will create a build-time [order-only
+    dependency](https://ninja-build.org/manual.html#ref_dependencies) on
+    all generated input files, including unknown files. This is needed to
+    bootstrap the generation of the real dependencies in the
+    [depfile](https://ninja-build.org/manual.html#ref_headers) generated
+    by your compiler to determine when to rebuild sources. Ninja relies on
+    this dependency file for all input files, generated and non-generated.
+    The behavior is similar for other backends.
+
+warnings:
+  - The `link_language` kwarg was broken until 0.55.0
+
+kwargs:
+  <lang>_pch:
+    type: str
+    description: precompiled header file to use for the given language
+
+  <lang>_args:
+    type: list[str]
+    description: |
+      compiler flags to use for the given language;
+      eg: `cpp_args` for C++
+
+  vala_args:
+    type: list[str | file]
+    description: |
+      Compiler flags for Vala. Unlike other languages this may contain Files
+
+  sources:
+    type: str | file | custom_tgt | custom_idx | generated_list | structured_src
+    description: Additional source files. Same as the source varargs.
+
+  build_by_default:
+    type: bool
+    default: true
+    since: 0.38.0
+    description: |
+      Causes, when set to `true`, to have this target be built by default.
+      This means it will be built when `meson compile` is called without any
+      arguments. The default value is `true` for all built target types.
+
+  build_rpath:
+    type: str
+    since: 0.42.0
+    description: |
+      A string to add to target's rpath definition in the build dir,
+      but which will be removed on install
+
+  dependencies:
+    type: list[dep]
+    description: |
+      one or more dependency objects
+      created with
+      [[dependency]] or [[compiler.find_library]]
+      (for external deps) or [[declare_dependency]]
+      (for deps built by the project)
+
+  extra_files:
+    type: str | file | custom_tgt | custom_idx
+    description: |
+      Not used for the build itself but are shown as source files in IDEs
+      that group files by targets (such as Visual Studio)
+
+  gui_app:
+    type: bool
+    deprecated: 0.56.0
+    default: false
+    description: |
+      When set to true flags this target as a GUI application
+      on platforms where this makes a difference, **deprecated** since
+      0.56.0, use `win_subsystem` instead.
+
+  link_args:
+    type: list[str]
+    description: |
+      Flags to use during linking. You can use UNIX-style
+      flags here for all platforms.
+
+  link_depends:
+    type: str | file | custom_tgt | custom_idx
+    description: |
+      Strings, files, or custom targets the link step depends on
+      such as a symbol visibility map. The purpose is to
+      automatically trigger a re-link (but not a re-compile) of the target
+      when this file changes.
+
+  link_language:
+    type: str
+    since: 0.51.0
+    description: |
+      Makes the linker for this target be for the specified language.
+      It is generally unnecessary to set
+      this, as Meson will detect the right linker to use in most cases. There are
+      only two cases where this is needed. One, your main function in an
+      executable is not in the language Meson picked, or second you want to force
+      a library to use only one ABI.
+
+      *(broken until 0.55.0)*
+
+  link_whole:
+    type: list[lib | custom_tgt | custom_idx]
+    since: 0.40.0
+    description: |
+      Links all contents of the given static libraries whether they are used or
+      not, equivalent to the `-Wl,--whole-archive` argument flag of GCC, or the
+      '/WHOLEARCHIVE' MSVC linker option. This allows the linked target to
+      re-export symbols from all objects in the static libraries.
+
+      *(since 0.41.0)* If passed a list that list will be flattened.
+
+      *(since 0.51.0)* This argument also accepts outputs produced by
+      custom targets. The user must ensure that the output is a library in
+      the correct format.
+
+  link_with:
+    type: list[lib | custom_tgt | custom_idx]
+    description: |
+      One or more shared or static libraries
+      (built by this project) that this target should be linked with. *(since 0.41.0)* If passed a
+      list this list will be flattened. *(since 0.51.0)* The arguments can also be custom targets.
+      In this case Meson will assume that merely adding the output file in the linker command
+      line is sufficient to make linking work. If this is not sufficient,
+      then the build system writer must write all other steps manually.
+
+  implicit_include_directories:
+    type: bool
+    since: 0.42.0
+    default: true
+    description: Controls whether Meson adds the current source and build directories to the include path
+
+  include_directories:
+    type: list[inc | str]
+    description: |
+      one or more objects created with the [[include_directories]] function,
+      or *(since 0.50.0)* strings, which will be transparently expanded to include directory objects
+
+  install:
+    type: bool
+    default: false
+    description: When set to true, this executable should be installed.
+
+  install_dir:
+    type: str
+    description: |
+      override install directory for this file. If the value is a relative path,
+      it will be considered relative the `prefix` option.
+      For example, if you want to install plugins into a subdir, you'd use
+      something like this: `install_dir : get_option('libdir') / 'projectname-1.0'`.
+
+  install_mode:
+    type: list[str | int]
+    since: 0.47.0
+    description: |
+      Specify the file mode in symbolic format
+      and optionally the owner/uid and group/gid for the installed files.
+
+      See the `install_mode` kwarg of [[install_data]] for more information.
+
+  install_tag:
+    type: str
+    since: 0.60.0
+    description: |
+      A string used by the `meson install --tags` command
+      to install only a subset of the files. By default all build targets have the
+      tag `runtime` except for static libraries that have the `devel` tag.
+
+  install_rpath:
+    type: str
+    description: |
+      A string to set the target's rpath to after install
+      (but *not* before that). On Windows, this argument has no effect.
+
+  objects:
+    type: list[extracted_obj | file | str]
+    description: |
+      List of object files that should be linked in this target.
+
+      **Since 1.1.0** this can include generated files in addition to
+      object files that you don't have source to or that object files
+      produced by other build targets.  In earlier release, generated
+      object files had to be placed in `sources`.
+
+  name_prefix:
+    type: str | list[void]
+    description: |
+      The string that will be used as the prefix for the
+      target output filename by overriding the default (only used for
+      libraries). By default this is `lib` on all platforms and compilers,
+      except for MSVC shared libraries where it is omitted to follow
+      convention, and Cygwin shared libraries where it is `cyg`.
+
+      Set this to `[]`, or omit the keyword argument for the default behaviour.
+
+  name_suffix:
+    type: str | list[void]
+    description: |
+      The string that will be used as the extension for the
+      target by overriding the default. By default on Windows this is
+      `exe` for executables and on other platforms it is omitted.
+
+      For shared libraries, the default value
+      is `dylib` on macOS, `dll` on Windows, and `so` everywhere else.
+      For static libraries, it is `a` everywhere. By convention MSVC
+      static libraries use the `lib` suffix, but we use `a` to avoid a
+      potential name clash with shared libraries which also generate
+      import libraries with a `lib` suffix.
+
+      Set this to `[]`, or omit the keyword argument for the default behaviour.
+
+  override_options:
+    type: list[str] | dict[str | bool | int | list[str]]
+    since: 0.40.0
+    description: |
+      takes an array of strings in the same format as `project`'s `default_options`
+      overriding the values of these options
+      for this target only.
+      *(since 1.2.0)*: A dictionary may now be passed.
+
+  gnu_symbol_visibility:
+    type: str
+    since: 0.48.0
+    description: |
+      Specifies how symbols should be exported, see
+      e.g [the GCC Wiki](https://gcc.gnu.org/wiki/Visibility) for more
+      information. This value can either be an empty string or one of
+      `default`, `internal`, `hidden`, `protected` or `inlineshidden`, which
+      is the same as `hidden` but also includes things like C++ implicit
+      constructors as specified in the GCC manual. Ignored on compilers that
+      do not support GNU visibility arguments.
+
+  d_import_dirs:
+    type: list[str]
+    description: List of directories to look in for string imports used in the D programming language.
+
+  d_unittest:
+    type: bool
+    default: false
+    description: When set to true, the D modules are compiled in debug mode.
+
+  d_module_versions:
+    type: list[str | int]
+    description: List of module version identifiers set when compiling D sources.
+
+  d_debug:
+    type: list[str]
+    description: |
+      The [D version identifiers](https://dlang.org/spec/version.html#version) to add
+      during the compilation of D source files.
+
+  native:
+    type: bool
+    default: false
+    description: Controls whether the target is compiled for the build or host machines.
+
+  win_subsystem:
+    type: str
+    default: "'console'"
+    since: 0.56.0
+    description: |
+      Specifies the subsystem type to use
+      on the Windows platform. Typical values include `console` for text
+      mode programs and `windows` for gui apps. The value can also contain
+      version specification such as `windows,6.0`. See [MSDN
+      documentation](https://docs.microsoft.com/en-us/cpp/build/reference/subsystem-specify-subsystem)
+      for the full list.
+
+  rust_crate_type:
+    type: str
+    since: 0.42.0
+    deprecated: 1.3.0
+    description: |
+      Set the specific type of rust crate to compile (when compiling rust).
+
+      If the target is an [[executable]] this defaults to "bin", the only
+      allowed value.
+
+      If it is a [[static_library]] it defaults to "lib", and may be "lib",
+      "staticlib", or "rlib". If "lib" then Rustc will pick a default, "staticlib"
+      means a C ABI library, "rlib" means a Rust ABI.
+
+      If it is a [[shared_library]] it defaults to "lib", and may be "lib",
+      "dylib", "cdylib", or "proc-macro". If "lib" then Rustc will pick a
+      default, "cdylib" means a C ABI library, "dylib" means a Rust ABI, and
+      "proc-macro" is a special rust procedural macro crate.
+
+      "proc-macro" is new in 0.62.0.
+
+      *Since 1.3.0* this is deprecated and replaced by "rust_abi" keyword argument.
+      `proc_macro` crates are now handled by the [`rust.proc_macro()`](Rust-module.md#proc_macro)
+      method.
+
+  rust_dependency_map:
+    type: dict[str]
+    since: 1.2.0
+    description: |
+      On rust targets this provides a map of library names to the crate name
+      with which it would be available inside the rust code.
+
+      This allows renaming similar to the dependency renaming feature of cargo
+      or `extern crate foo as bar` inside rust code.

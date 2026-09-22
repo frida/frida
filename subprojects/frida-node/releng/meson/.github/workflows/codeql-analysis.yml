@@ -1,0 +1,33 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  analyze:
+    # lgtm.com does not run in forks, for good reason
+    if: github.repository == 'mesonbuild/meson'
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        # bypass cache: https://github.com/github/codeql-action/issues/1445
+        tools: latest
+        config-file: .github/codeql/codeql-config.yml
+        languages: python
+        # we have none
+        setup-python-dependencies: false
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2

@@ -1,0 +1,13 @@
+{
+  "installed": [
+    {"type": "exe", "file": "usr/bin/appdc_d"},
+    {"type": "pdb", "file": "usr/bin/appdc_d", "language": "d"},
+    {"type": "exe", "file": "usr/bin/appdc_s"},
+    {"type": "pdb", "file": "usr/bin/appdc_s", "language": "d"},
+    {"type": "file", "file": "usr/lib/libstuff.a"},
+    {"type": "shared_lib", "platform": "gcc", "file": "usr/lib/stuff"},
+    {"type": "shared_lib", "platform": "msvc",  "file": "usr/bin/stuff"},
+    {"type": "pdb", "file": "usr/bin/stuff", "language": "c"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/stuff.lib"}
+  ]
+}

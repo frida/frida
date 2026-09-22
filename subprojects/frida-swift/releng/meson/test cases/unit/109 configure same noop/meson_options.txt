@@ -1,0 +1,6 @@
+option('string', type : 'string', value: '')
+option('boolean', type : 'boolean', value: false)
+option('combo', type : 'combo', choices : ['one', 'two', 'three'], value: 'one')
+option('integer', type : 'integer', value: 5)
+option('array', type : 'array', value: ['one', 'two'])
+option('feature', type : 'feature', value : 'enabled')

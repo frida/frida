@@ -1,0 +1,6 @@
+option(
+  'disabled',
+  type : 'feature',
+  value : 'disabled',
+  description : 'test disabled'
+)

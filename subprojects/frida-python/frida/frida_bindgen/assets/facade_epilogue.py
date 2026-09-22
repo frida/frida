@@ -1,0 +1,1 @@
+ScriptExportsAsync = aio._ScriptExports

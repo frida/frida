@@ -1,0 +1,10 @@
+[wrap-file]
+directory = zlib-1.2.8
+
+source_url = http://zlib.net/fossils/zlib-1.2.8.tar.gz
+source_filename = zlib-1.2.8.tar.gz
+source_hash = 36658cb768a54c1d4dec43c3116c27ed893e88b02ecfcb44f2166f9c0b7f2a0d
+
+patch_url = https://wrapdb.mesonbuild.com/v1/projects/zlib/1.2.8/8/get_zip
+patch_filename = zlib-1.2.8-8-wrap.zip
+patch_hash = 17c52a0e0c59ce926d3959005d5cd8178c6c7e2c9a4a1304279a8320c955ac60

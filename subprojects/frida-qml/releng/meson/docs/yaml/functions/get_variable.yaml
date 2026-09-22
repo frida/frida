@@ -1,0 +1,21 @@
+name: get_variable
+returns: any
+description: |
+  This function can be used to dynamically obtain a variable. `res =
+  get_variable(varname, fallback)` takes the value of `varname` (which
+  must be a string) and stores the variable of that name into `res`. If
+  the variable does not exist, the variable `fallback` is stored to
+  `res`instead. If a fallback is not specified, then attempting to read
+  a non-existing variable will cause a fatal error.
+
+arg_flattening: false
+
+posargs:
+  variable_name:
+    type: str
+    description: Name of the variable to get
+
+optargs:
+  default:
+    type: any
+    description: Fallback value to return when the variable does not exist

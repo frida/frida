@@ -1,0 +1,13 @@
+querySystemParameters
+spawn
+resume
+kill
+attach
+injectLibraryFile
+injectLibraryBlob
+enumerateDevices
+getDeviceManager
+getLocalDevice
+getRemoteDevice
+getUsbDevice
+getDevice

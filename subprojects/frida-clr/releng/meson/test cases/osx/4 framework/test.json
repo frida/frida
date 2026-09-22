@@ -1,0 +1,6 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/bin/prog"},
+    {"type": "file", "file": "usr/lib/libstat.a"}
+  ]
+}

@@ -1,0 +1,28 @@
+[package]
+name = "foo"
+version = "0.0.1"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+path = "lib.rs"
+
+# This dependency does not exist, verify optional works.
+[dependencies.notfound]
+optional = true
+version = "1.0"
+
+# This dependency is optional but required for f3 which is on by default.
+[dependencies.extra-dep]
+optional = true
+version = "1.0"
+
+[dependencies]
+mybar = { version = "0.1", package = "bar", default-features = false }
+
+[features]
+default = ["f1"]
+f1 = ["f2", "f3"]
+f2 = ["f1"]
+f3 = ["mybar/f1", "dep:extra-dep", "notfound?/invalid"]
+f4 = ["dep:notfound"]

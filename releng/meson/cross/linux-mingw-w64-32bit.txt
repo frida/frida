@@ -1,0 +1,31 @@
+[binaries]
+c = '/usr/bin/i686-w64-mingw32-gcc'
+cpp = '/usr/bin/i686-w64-mingw32-g++'
+objc = '/usr/bin/i686-w64-mingw32-gcc'
+ar = '/usr/bin/i686-w64-mingw32-ar'
+strip = '/usr/bin/i686-w64-mingw32-strip'
+pkg-config = '/usr/bin/i686-w64-mingw32-pkg-config'
+windres = '/usr/bin/i686-w64-mingw32-windres'
+exe_wrapper = 'wine'
+ld = '/usr/bin/i686-w64-mingw32-ld'
+cmake = '/usr/bin/cmake'
+
+[properties]
+# Directory that contains 'bin', 'lib', etc
+root = '/usr/i686-w64-mingw32'
+# Directory that contains 'bin', 'lib', etc for the toolchain and system libraries
+sys_root = '/usr/i686-w64-mingw32/sys-root/mingw'
+
+[host_machine]
+system = 'windows'
+cpu_family = 'x86'
+cpu = 'i686'
+endian = 'little'
+
+[cmake]
+
+CMAKE_BUILD_WITH_INSTALL_RPATH     = 'ON'
+CMAKE_FIND_ROOT_PATH_MODE_PROGRAM  = 'NEVER'
+CMAKE_FIND_ROOT_PATH_MODE_LIBRARY  = 'ONLY'
+CMAKE_FIND_ROOT_PATH_MODE_INCLUDE  = 'ONLY'
+CMAKE_FIND_ROOT_PATH_MODE_PACKAGE  = 'ONLY'

@@ -1,0 +1,32 @@
+name: subproject
+long_name: Subproject object
+description: This object is returned by [[subproject]] and is an opaque object representing it.
+
+methods:
+- name: found
+  returns: bool
+  since: 0.48.0
+  description: Returns whether the subproject was successfully setup.
+
+- name: get_variable
+  returns: any
+  description: |
+    fetches the specified variable from inside the subproject.
+    This is useful to, for instance, get a
+    [[declare_dependency]] from the [subproject](Subprojects.md).
+
+    If the variable does not exist, the variable `fallback` is returned.
+    If a fallback is not specified, then attempting to read a non-existing
+    variable will cause a fatal error.
+
+  arg_flattening: false
+
+  posargs:
+    var_name:
+      type: str
+      description: The name of the variable to query
+
+  optargs:
+    fallback:
+      type: any
+      description: The fallback value to return if `var_name` does not exist.

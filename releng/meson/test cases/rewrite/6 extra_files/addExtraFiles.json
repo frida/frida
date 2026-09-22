@@ -1,0 +1,111 @@
+[
+  {
+    "type": "target",
+    "target": "trivialprog1",
+    "operation": "extra_files_add",
+    "sources": ["a2.hpp", "a1.hpp", "a2.hpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog2",
+    "operation": "extra_files_add",
+    "sources": ["a7.hpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog3",
+    "operation": "extra_files_add",
+    "sources": ["a5.hpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog4",
+    "operation": "extra_files_add",
+    "sources": ["a5.hpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog5",
+    "operation": "extra_files_add",
+    "sources": ["a3.hpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog7",
+    "operation": "extra_files_add",
+    "sources": ["a6.hpp", "a1.hpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog8",
+    "operation": "extra_files_add",
+    "sources": ["a2.hpp", "a7.hpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog9",
+    "operation": "extra_files_add",
+    "sources": ["a9.hpp", "a8.hpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog10",
+    "operation": "extra_files_add",
+    "sources": ["a4.hpp", "a1.hpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog0",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog1",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog2",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog3",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog4",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog5",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog6",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog7",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog8",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog9",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog10",
+    "operation": "info"
+  }
+]

@@ -1,0 +1,7 @@
+prefix=/foo
+libdir=${prefix}/dummy
+
+Name: dummy
+Description: Nonexisting lib but add an rpath
+Version: 1.0.0
+Libs: -Wl,-rpath,${libdir}

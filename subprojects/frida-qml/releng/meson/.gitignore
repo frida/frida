@@ -1,0 +1,34 @@
+.mypy_cache/
+.pytest_cache/
+/.project
+/.pydevproject
+/.settings
+/.cproject
+/.idea
+/.vscode
+
+__pycache__
+/.coverage/
+/.coveragerc
+/install dir
+/work area
+
+/meson-test-run.txt
+/meson-test-run.xml
+/meson-cross-test-run.txt
+/meson-cross-test-run.xml
+
+.DS_Store
+*~
+*.swp
+packagecache
+/MANIFEST
+/build
+/dist
+/meson.egg-info
+
+/docs/built_docs
+/docs/hotdoc-private*
+
+*.pyc
+/*venv*

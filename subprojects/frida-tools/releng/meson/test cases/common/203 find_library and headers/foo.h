@@ -1,0 +1,1 @@
+#define VAL 42

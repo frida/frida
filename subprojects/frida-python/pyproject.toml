@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 120
+extend-exclude = "frida/frida_bindgen/assets/"
+
+[tool.isort]
+profile = "black"
+line_length = 120
+extend_skip_glob = ["frida/frida_bindgen/assets/*"]
+known_first_party = ["frida", "frida_bindgen_core"]
+
+[tool.mypy]
+exclude = ["frida/frida_bindgen/assets/"]
+
+[[tool.mypy.overrides]]
+module = "frida_bindgen_core.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["_frida", "frida._frida", "frida.aio", "frida.core"]
+ignore_missing_imports = true

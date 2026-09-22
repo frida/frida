@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/15 kwarg before arg/meson.build:3:0: ERROR: All keyword arguments must be after positional arguments."
+    }
+  ]
+}

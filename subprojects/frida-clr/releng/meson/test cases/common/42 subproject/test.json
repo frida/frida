@@ -1,0 +1,10 @@
+{
+  "installed": [
+    {"type": "exe", "file": "usr/bin/user"},
+    {"type": "pdb", "file": "usr/bin/user"},
+    {"type": "file", "file": "usr/share/sublib/sublib.depmf"},
+    {"type": "file", "file": "usr/share/sublib/mylicense.txt"},
+    {"type": "file", "file": "usr/share/sublib/subprojects/sublib/sublicense1.txt"},
+    {"type": "file", "file": "usr/share/sublib/subprojects/sublib/sublicense2.txt"}
+  ]
+}

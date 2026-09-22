@@ -1,0 +1,6 @@
+[submodule "meson"]
+	path = meson
+	url = https://github.com/frida/meson.git
+[submodule "tomlkit"]
+	path = tomlkit
+	url = https://github.com/python-poetry/tomlkit.git

@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "WARNING: Project targets '>= 0.63' but uses feature introduced in '1.1': meson.options file. Use meson_options.txt instead"
+    }
+  ]
+}

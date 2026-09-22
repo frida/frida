@@ -1,0 +1,10 @@
+{
+  "stdout": [
+    {
+      "line": "WARNING: Inconsistency: Subproject has overridden the dependency with another variable than 'bar_dep'"
+    }
+  ],
+  "tools": {
+    "cmake": ">=3.14"
+  }
+}

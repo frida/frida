@@ -1,0 +1,9 @@
+name: Install frida-go examples
+description: Install frida-go examples
+runs:
+  using: composite
+  steps:
+    - run: |
+        git clone https://github.com/nsecho/frida-go-examples.git ./frida-go-examples
+        rm ./frida-go-examples/README.md
+      shell: bash

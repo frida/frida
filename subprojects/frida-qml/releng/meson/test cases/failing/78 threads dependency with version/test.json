@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/78 threads dependency with version/meson.build:3:6: ERROR: Dependency lookup for threads with method 'system' failed: Unknown version, but need ['>0']."
+    }
+  ]
+}

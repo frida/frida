@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/45 pkgconfig variables reserved/meson.build:8:5: ERROR: Variable \"prefix\" is reserved"
+    }
+  ]
+}

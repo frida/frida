@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/46 pkgconfig variables zero length/meson.build:8:5: ERROR: pkgconfig.generate keyword argument \"variables\" empty variable name"
+    }
+  ]
+}

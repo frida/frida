@@ -1,0 +1,5 @@
+[wrap-file]
+directory = sub
+
+[provide]
+program_names = sometool

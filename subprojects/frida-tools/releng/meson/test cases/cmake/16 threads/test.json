@@ -1,0 +1,11 @@
+{
+  "matrix": {
+    "options": {
+      "use_pthread": [
+        { "val": "ON"      },
+        { "val": "OFF"     },
+        { "val": "NOT_SET" }
+      ]
+    }
+  }
+}

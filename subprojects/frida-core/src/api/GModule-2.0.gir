@@ -1,0 +1,1635 @@
+<?xml version="1.0"?>
+<!-- This file was automatically generated from C sources - DO NOT EDIT!
+To affect the contents of this file, edit the original C definitions,
+and/or use gtk-doc annotations.  -->
+<repository version="1.2"
+            xmlns="http://www.gtk.org/introspection/core/1.0"
+            xmlns:c="http://www.gtk.org/introspection/c/1.0"
+            xmlns:doc="http://www.gtk.org/introspection/doc/1.0"
+            xmlns:glib="http://www.gtk.org/introspection/glib/1.0">
+  <include name="GLib" version="2.0"/>
+  <package name="gmodule-2.0"/>
+  <c:include name="gmodule.h"/>
+  <doc:format name="gi-docgen"/>
+  <namespace name="GModule"
+             version="2.0"
+             shared-library="libgmodule-2.0.so.0"
+             c:identifier-prefixes="G"
+             c:symbol-prefixes="gmodule,g">
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_26_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_26_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="42"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_28_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_28_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="76"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_30_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_30_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="110"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_32_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_32_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="144"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_34_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_34_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="178"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_36_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_36_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="212"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_38_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_38_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="246"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_40_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_40_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="280"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_42_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_42_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="314"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_44_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_44_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="348"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_46_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_46_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="382"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_48_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_48_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="416"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_50_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_50_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="450"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_52_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_52_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="484"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_54_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_54_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="518"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_56_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_56_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="552"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_58_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_58_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="586"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_60_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_60_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="620"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_62_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_62_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="654"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_64_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_64_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="688"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_66_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_66_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="722"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_68_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_68_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="756"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_70_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_70_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="790"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_72_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_72_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="824"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_74_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_74_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="858"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_76_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_76_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="892"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_78_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_78_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="926"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_80_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_80_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="960"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_82_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_82_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="994"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_84_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_84_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="1028"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_ENUMERATOR_IN_2_86_FOR"
+                    c:identifier="GMODULE_DEPRECATED_ENUMERATOR_IN_2_86_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="1062"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_FOR"
+                    c:identifier="GMODULE_DEPRECATED_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="26"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_26_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_26_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="38"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_28_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_28_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="72"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_30_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_30_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="106"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_32_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_32_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="140"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_34_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_34_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="174"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_36_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_36_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="208"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_38_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_38_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="242"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_40_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_40_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="276"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_42_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_42_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="310"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_44_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_44_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="344"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_46_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_46_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="378"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_48_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_48_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="412"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_50_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_50_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="446"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_52_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_52_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="480"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_54_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_54_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="514"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_56_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_56_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="548"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_58_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_58_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="582"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_60_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_60_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="616"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_62_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_62_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="650"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_64_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_64_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="684"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_66_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_66_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="718"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_68_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_68_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="752"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_70_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_70_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="786"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_72_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_72_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="820"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_74_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_74_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="854"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_76_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_76_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="888"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_78_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_78_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="922"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_80_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_80_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="956"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_82_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_82_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="990"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_84_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_84_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="1024"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_IN_2_86_FOR"
+                    c:identifier="GMODULE_DEPRECATED_IN_2_86_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="1058"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_26_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_26_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="40"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_28_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_28_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="74"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_30_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_30_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="108"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_32_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_32_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="142"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_34_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_34_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="176"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_36_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_36_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="210"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_38_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_38_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="244"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_40_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_40_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="278"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_42_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_42_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="312"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_44_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_44_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="346"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_46_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_46_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="380"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_48_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_48_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="414"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_50_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_50_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="448"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_52_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_52_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="482"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_54_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_54_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="516"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_56_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_56_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="550"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_58_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_58_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="584"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_60_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_60_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="618"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_62_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_62_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="652"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_64_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_64_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="686"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_66_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_66_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="720"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_68_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_68_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="754"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_70_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_70_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="788"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_72_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_72_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="822"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_74_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_74_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="856"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_76_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_76_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="890"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_78_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_78_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="924"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_80_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_80_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="958"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_82_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_82_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="992"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_84_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_84_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="1026"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_MACRO_IN_2_86_FOR"
+                    c:identifier="GMODULE_DEPRECATED_MACRO_IN_2_86_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="1060"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_26_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_26_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="44"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_28_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_28_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="78"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_30_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_30_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="112"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_32_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_32_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="146"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_34_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_34_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="180"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_36_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_36_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="214"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_38_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_38_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="248"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_40_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_40_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="282"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_42_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_42_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="316"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_44_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_44_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="350"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_46_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_46_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="384"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_48_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_48_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="418"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_50_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_50_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="452"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_52_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_52_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="486"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_54_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_54_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="520"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_56_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_56_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="554"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_58_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_58_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="588"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_60_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_60_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="622"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_62_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_62_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="656"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_64_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_64_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="690"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_66_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_66_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="724"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_68_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_68_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="758"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_70_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_70_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="792"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_72_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_72_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="826"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_74_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_74_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="860"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_76_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_76_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="894"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_78_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_78_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="928"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_80_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_80_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="962"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_82_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_82_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="996"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_84_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_84_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="1030"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="DEPRECATED_TYPE_IN_2_86_FOR"
+                    c:identifier="GMODULE_DEPRECATED_TYPE_IN_2_86_FOR"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="1064"/>
+      <parameters>
+        <parameter name="f">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <constant name="MODULE_IMPL_AR" value="7" c:type="G_MODULE_IMPL_AR">
+      <source-position filename="gmodule/gmoduleconf.h" line="31"/>
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="MODULE_IMPL_DL" value="1" c:type="G_MODULE_IMPL_DL">
+      <source-position filename="gmodule/gmoduleconf.h" line="29"/>
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="MODULE_IMPL_NONE" value="0" c:type="G_MODULE_IMPL_NONE">
+      <source-position filename="gmodule/gmoduleconf.h" line="28"/>
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="MODULE_IMPL_WIN32" value="3" c:type="G_MODULE_IMPL_WIN32">
+      <source-position filename="gmodule/gmoduleconf.h" line="30"/>
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <record name="Module" c:type="GModule" disguised="1" opaque="1">
+      <doc xml:space="preserve"
+           filename="gmodule/gmodule.c"
+           line="56">The #GModule struct is an opaque data structure to represent a
+[dynamically-loaded module](modules.html#dynamic-loading-of-modules).
+It should only be accessed via the following functions.
+
+To ensure correct lock ordering, these functions must not be called from
+global constructors (for example, those using GCC’s
+`__attribute__((constructor))` attribute).</doc>
+      <source-position filename="gmodule/gmodule.h" line="70"/>
+      <method name="close" c:identifier="g_module_close">
+        <doc xml:space="preserve"
+             filename="gmodule/gmodule.c"
+             line="715">Closes a module.</doc>
+        <source-position filename="gmodule/gmodule.h" line="110"/>
+        <return-value transfer-ownership="none">
+          <doc xml:space="preserve"
+               filename="gmodule/gmodule.c"
+               line="721">%TRUE on success</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <instance-parameter name="module" transfer-ownership="none">
+            <doc xml:space="preserve"
+                 filename="gmodule/gmodule.c"
+                 line="717">a #GModule to close</doc>
+            <type name="Module" c:type="GModule*"/>
+          </instance-parameter>
+        </parameters>
+      </method>
+      <method name="make_resident" c:identifier="g_module_make_resident">
+        <doc xml:space="preserve"
+             filename="gmodule/gmodule.c"
+             line="776">Ensures that a module will never be unloaded.
+Any future g_module_close() calls on the module will be ignored.</doc>
+        <source-position filename="gmodule/gmodule.h" line="114"/>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <instance-parameter name="module" transfer-ownership="none">
+            <doc xml:space="preserve"
+                 filename="gmodule/gmodule.c"
+                 line="778">a #GModule to make permanently resident</doc>
+            <type name="Module" c:type="GModule*"/>
+          </instance-parameter>
+        </parameters>
+      </method>
+      <method name="name" c:identifier="g_module_name">
+        <doc xml:space="preserve"
+             filename="gmodule/gmodule.c"
+             line="859">Returns the filename that the module was opened with.
+
+If @module refers to the application itself, "main" is returned.</doc>
+        <source-position filename="gmodule/gmodule.h" line="128"/>
+        <return-value transfer-ownership="none">
+          <doc xml:space="preserve"
+               filename="gmodule/gmodule.c"
+               line="867">the filename of the module</doc>
+          <type name="utf8" c:type="const gchar*"/>
+        </return-value>
+        <parameters>
+          <instance-parameter name="module" transfer-ownership="none">
+            <doc xml:space="preserve"
+                 filename="gmodule/gmodule.c"
+                 line="861">a #GModule</doc>
+            <type name="Module" c:type="GModule*"/>
+          </instance-parameter>
+        </parameters>
+      </method>
+      <method name="symbol" c:identifier="g_module_symbol">
+        <doc xml:space="preserve"
+             filename="gmodule/gmodule.c"
+             line="804">Gets a symbol pointer from a module, such as one exported
+by %G_MODULE_EXPORT. Note that a valid symbol can be %NULL.</doc>
+        <source-position filename="gmodule/gmodule.h" line="122"/>
+        <return-value transfer-ownership="none">
+          <doc xml:space="preserve"
+               filename="gmodule/gmodule.c"
+               line="813">%TRUE on success</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <instance-parameter name="module" transfer-ownership="none">
+            <doc xml:space="preserve"
+                 filename="gmodule/gmodule.c"
+                 line="806">a #GModule</doc>
+            <type name="Module" c:type="GModule*"/>
+          </instance-parameter>
+          <parameter name="symbol_name" transfer-ownership="none">
+            <doc xml:space="preserve"
+                 filename="gmodule/gmodule.c"
+                 line="807">the name of the symbol to find</doc>
+            <type name="utf8" c:type="const gchar*"/>
+          </parameter>
+          <parameter name="symbol"
+                     direction="out"
+                     caller-allocates="0"
+                     transfer-ownership="full"
+                     nullable="1">
+            <doc xml:space="preserve"
+                 filename="gmodule/gmodule.c"
+                 line="808">returns the pointer to the symbol value</doc>
+            <type name="gpointer" c:type="gpointer*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <function name="build_path"
+                c:identifier="g_module_build_path"
+                deprecated="1"
+                deprecated-version="2.76">
+        <doc xml:space="preserve"
+             filename="gmodule/gmodule.c"
+             line="880">A portable way to build the filename of a module. The platform-specific
+prefix and suffix are added to the filename, if needed, and the result
+is added to the directory, using the correct separator character.
+
+The directory should specify the directory where the module can be found.
+It can be %NULL or an empty string to indicate that the module is in a
+standard platform-specific directory, though this is not recommended
+since the wrong module may be found.
+
+For example, calling g_module_build_path() on a Linux system with a
+@directory of `/lib` and a @module_name of "mylibrary" will return
+`/lib/libmylibrary.so`. On a Windows system, using `\Windows` as the
+directory it will return `\Windows\mylibrary.dll`.</doc>
+        <doc-deprecated xml:space="preserve">Use g_module_open() instead with @module_name as the
+basename of the file_name argument. See %G_MODULE_SUFFIX for why.</doc-deprecated>
+        <source-position filename="gmodule/gmodule.h" line="142"/>
+        <return-value transfer-ownership="full">
+          <doc xml:space="preserve"
+               filename="gmodule/gmodule.c"
+               line="901">the complete path of the module, including the standard library
+    prefix and suffix. This should be freed when no longer needed</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+        <parameters>
+          <parameter name="directory"
+                     transfer-ownership="none"
+                     nullable="1"
+                     allow-none="1">
+            <doc xml:space="preserve"
+                 filename="gmodule/gmodule.c"
+                 line="882">the directory where the module is. This can be
+    %NULL or the empty string to indicate that the standard platform-specific
+    directories will be used, though that is not recommended</doc>
+            <type name="utf8" c:type="const gchar*"/>
+          </parameter>
+          <parameter name="module_name" transfer-ownership="none">
+            <doc xml:space="preserve"
+                 filename="gmodule/gmodule.c"
+                 line="885">the name of the module</doc>
+            <type name="utf8" c:type="const gchar*"/>
+          </parameter>
+        </parameters>
+      </function>
+      <function name="error" c:identifier="g_module_error">
+        <doc xml:space="preserve"
+             filename="gmodule/gmodule.c"
+             line="791">Gets a string describing the last module error.</doc>
+        <source-position filename="gmodule/gmodule.h" line="118"/>
+        <return-value transfer-ownership="none">
+          <doc xml:space="preserve"
+               filename="gmodule/gmodule.c"
+               line="796">a string describing the last module error</doc>
+          <type name="utf8" c:type="const gchar*"/>
+        </return-value>
+      </function>
+      <function name="error_quark" c:identifier="g_module_error_quark">
+        <return-value transfer-ownership="none">
+          <type name="GLib.Quark" c:type="GQuark"/>
+        </return-value>
+      </function>
+      <function name="open" c:identifier="g_module_open" introspectable="0">
+        <doc xml:space="preserve"
+             filename="gmodule/gmodule.c"
+             line="697">A thin wrapper function around g_module_open_full()</doc>
+        <source-position filename="gmodule/gmodule.h" line="100"/>
+        <return-value>
+          <doc xml:space="preserve"
+               filename="gmodule/gmodule.c"
+               line="706">a #GModule on success, or %NULL on failure</doc>
+          <type name="Module" c:type="GModule*"/>
+        </return-value>
+        <parameters>
+          <parameter name="file_name"
+                     transfer-ownership="none"
+                     nullable="1"
+                     allow-none="1">
+            <doc xml:space="preserve"
+                 filename="gmodule/gmodule.c"
+                 line="699">the name or path to the file containing the module,
+    or %NULL to obtain a #GModule representing the main program itself</doc>
+            <type name="utf8" c:type="const gchar*"/>
+          </parameter>
+          <parameter name="flags" transfer-ownership="none">
+            <doc xml:space="preserve"
+                 filename="gmodule/gmodule.c"
+                 line="701">the flags used for opening the module. This can be the
+    logical OR of any of the #GModuleFlags.</doc>
+            <type name="ModuleFlags" c:type="GModuleFlags"/>
+          </parameter>
+        </parameters>
+      </function>
+      <function name="open_full"
+                c:identifier="g_module_open_full"
+                version="2.70"
+                introspectable="0"
+                throws="1">
+        <doc xml:space="preserve"
+             filename="gmodule/gmodule.c"
+             line="433">Opens a module. If the module has already been opened, its reference count
+is incremented. If not, the module is searched using @file_name.
+
+Since 2.76, the search order/behavior is as follows:
+
+1. If @file_name exists as a regular file, it is used as-is; else
+2. If @file_name doesn't have the correct suffix and/or prefix for the
+   platform, then possible suffixes and prefixes will be added to the
+   basename till a file is found and whatever is found will be used; else
+3. If @file_name doesn't have the ".la"-suffix, ".la" is appended. Either
+   way, if a matching .la file exists (and is a libtool archive) the
+   libtool archive is parsed to find the actual file name, and that is
+   used.
+
+If, at the end of all this, we have a file path that we can access on disk,
+it is opened as a module. If not, @file_name is attempted to be opened as a
+module verbatim in the hopes that the system implementation will somehow be
+able to access it. If that is not possible, %NULL is returned.
+
+Note that this behaviour was different prior to 2.76, but there is some
+overlap in functionality. If backwards compatibility is an issue, kindly
+consult earlier #GModule documentation for the prior search order/behavior
+of @file_name.</doc>
+        <source-position filename="gmodule/gmodule.h" line="104"/>
+        <return-value>
+          <doc xml:space="preserve"
+               filename="gmodule/gmodule.c"
+               line="465">a #GModule on success, or %NULL on failure</doc>
+          <type name="Module" c:type="GModule*"/>
+        </return-value>
+        <parameters>
+          <parameter name="file_name"
+                     transfer-ownership="none"
+                     nullable="1"
+                     allow-none="1">
+            <doc xml:space="preserve"
+                 filename="gmodule/gmodule.c"
+                 line="435">the name or path to the file containing the module,
+    or %NULL to obtain a #GModule representing the main program itself</doc>
+            <type name="utf8" c:type="const gchar*"/>
+          </parameter>
+          <parameter name="flags" transfer-ownership="none">
+            <doc xml:space="preserve"
+                 filename="gmodule/gmodule.c"
+                 line="437">the flags used for opening the module. This can be the
+    logical OR of any of the #GModuleFlags</doc>
+            <type name="ModuleFlags" c:type="GModuleFlags"/>
+          </parameter>
+        </parameters>
+      </function>
+      <function name="supported" c:identifier="g_module_supported">
+        <doc xml:space="preserve"
+             filename="gmodule/gmodule.c"
+             line="293">Checks if modules are supported on the current platform.</doc>
+        <source-position filename="gmodule/gmodule.h" line="96"/>
+        <return-value transfer-ownership="none">
+          <doc xml:space="preserve"
+               filename="gmodule/gmodule.c"
+               line="298">%TRUE if modules are supported</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+      </function>
+    </record>
+    <callback name="ModuleCheckInit" c:type="GModuleCheckInit">
+      <doc xml:space="preserve"
+           filename="gmodule/gmodule.c"
+           line="68">Specifies the type of the module initialization function.
+If a module contains a function named g_module_check_init() it is called
+automatically when the module is loaded. It is passed the #GModule structure
+and should return %NULL on success or a string describing the initialization
+error.</doc>
+      <source-position filename="gmodule/gmodule.h" line="71"/>
+      <return-value transfer-ownership="none">
+        <doc xml:space="preserve"
+             filename="gmodule/gmodule.c"
+             line="78">%NULL on success, or a string describing the initialization error</doc>
+        <type name="utf8" c:type="const gchar*"/>
+      </return-value>
+      <parameters>
+        <parameter name="module" transfer-ownership="none">
+          <doc xml:space="preserve"
+               filename="gmodule/gmodule.c"
+               line="70">the #GModule corresponding to the module which has just been loaded</doc>
+          <type name="Module" c:type="GModule*"/>
+        </parameter>
+      </parameters>
+    </callback>
+    <enumeration name="ModuleError"
+                 version="2.70"
+                 c:type="GModuleError"
+                 glib:error-domain="g-module-error-quark">
+      <doc xml:space="preserve"
+           filename="gmodule/gmodule.h"
+           line="78">Errors returned by g_module_open_full().</doc>
+      <source-position filename="gmodule/gmodule.h" line="91"/>
+      <member name="failed" value="0" c:identifier="G_MODULE_ERROR_FAILED">
+        <doc xml:space="preserve"
+             filename="gmodule/gmodule.h"
+             line="80">there was an error loading or opening a module file</doc>
+      </member>
+      <member name="check_failed"
+              value="1"
+              c:identifier="G_MODULE_ERROR_CHECK_FAILED">
+        <doc xml:space="preserve"
+             filename="gmodule/gmodule.h"
+             line="81">a module returned an error from its `g_module_check_init()` function</doc>
+      </member>
+    </enumeration>
+    <bitfield name="ModuleFlags" c:type="GModuleFlags">
+      <doc xml:space="preserve"
+           filename="gmodule/gmodule.h"
+           line="49">Flags passed to g_module_open().
+Note that these flags are not supported on all platforms.</doc>
+      <source-position filename="gmodule/gmodule.h" line="68"/>
+      <member name="lazy" value="1" c:identifier="G_MODULE_BIND_LAZY">
+        <doc xml:space="preserve"
+             filename="gmodule/gmodule.h"
+             line="51">specifies that symbols are only resolved when
+    needed. The default action is to bind all symbols when the module
+    is loaded.</doc>
+      </member>
+      <member name="local" value="2" c:identifier="G_MODULE_BIND_LOCAL">
+        <doc xml:space="preserve"
+             filename="gmodule/gmodule.h"
+             line="54">specifies that symbols in the module should
+    not be added to the global name space. The default action on most
+    platforms is to place symbols in the module in the global name space,
+    which may cause conflicts with existing symbols.</doc>
+      </member>
+      <member name="mask" value="3" c:identifier="G_MODULE_BIND_MASK">
+        <doc xml:space="preserve"
+             filename="gmodule/gmodule.h"
+             line="58">mask for all flags.</doc>
+      </member>
+    </bitfield>
+    <callback name="ModuleUnload" c:type="GModuleUnload">
+      <doc xml:space="preserve"
+           filename="gmodule/gmodule.c"
+           line="81">Specifies the type of the module function called when it is unloaded.
+If a module contains a function named g_module_unload() it is called
+automatically when the module is unloaded.
+It is passed the #GModule structure.</doc>
+      <source-position filename="gmodule/gmodule.h" line="72"/>
+      <return-value transfer-ownership="none">
+        <type name="none" c:type="void"/>
+      </return-value>
+      <parameters>
+        <parameter name="module" transfer-ownership="none">
+          <doc xml:space="preserve"
+               filename="gmodule/gmodule.c"
+               line="83">the #GModule about to be unloaded</doc>
+          <type name="Module" c:type="GModule*"/>
+        </parameter>
+      </parameters>
+    </callback>
+    <function-macro name="UNAVAILABLE"
+                    c:identifier="GMODULE_UNAVAILABLE"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="27"/>
+      <parameters>
+        <parameter name="maj">
+        </parameter>
+        <parameter name="min">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function-macro name="UNAVAILABLE_STATIC_INLINE"
+                    c:identifier="GMODULE_UNAVAILABLE_STATIC_INLINE"
+                    introspectable="0">
+      <source-position filename="gmodule/gmodule-visibility.h" line="28"/>
+      <parameters>
+        <parameter name="maj">
+        </parameter>
+        <parameter name="min">
+        </parameter>
+      </parameters>
+    </function-macro>
+    <function name="module_build_path"
+              c:identifier="g_module_build_path"
+              moved-to="Module.build_path"
+              deprecated="1"
+              deprecated-version="2.76">
+      <doc xml:space="preserve"
+           filename="gmodule/gmodule.c"
+           line="880">A portable way to build the filename of a module. The platform-specific
+prefix and suffix are added to the filename, if needed, and the result
+is added to the directory, using the correct separator character.
+
+The directory should specify the directory where the module can be found.
+It can be %NULL or an empty string to indicate that the module is in a
+standard platform-specific directory, though this is not recommended
+since the wrong module may be found.
+
+For example, calling g_module_build_path() on a Linux system with a
+@directory of `/lib` and a @module_name of "mylibrary" will return
+`/lib/libmylibrary.so`. On a Windows system, using `\Windows` as the
+directory it will return `\Windows\mylibrary.dll`.</doc>
+      <doc-deprecated xml:space="preserve">Use g_module_open() instead with @module_name as the
+basename of the file_name argument. See %G_MODULE_SUFFIX for why.</doc-deprecated>
+      <source-position filename="gmodule/gmodule.h" line="142"/>
+      <return-value transfer-ownership="full">
+        <doc xml:space="preserve"
+             filename="gmodule/gmodule.c"
+             line="901">the complete path of the module, including the standard library
+    prefix and suffix. This should be freed when no longer needed</doc>
+        <type name="utf8" c:type="gchar*"/>
+      </return-value>
+      <parameters>
+        <parameter name="directory"
+                   transfer-ownership="none"
+                   nullable="1"
+                   allow-none="1">
+          <doc xml:space="preserve"
+               filename="gmodule/gmodule.c"
+               line="882">the directory where the module is. This can be
+    %NULL or the empty string to indicate that the standard platform-specific
+    directories will be used, though that is not recommended</doc>
+          <type name="utf8" c:type="const gchar*"/>
+        </parameter>
+        <parameter name="module_name" transfer-ownership="none">
+          <doc xml:space="preserve"
+               filename="gmodule/gmodule.c"
+               line="885">the name of the module</doc>
+          <type name="utf8" c:type="const gchar*"/>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="module_error"
+              c:identifier="g_module_error"
+              moved-to="Module.error">
+      <doc xml:space="preserve"
+           filename="gmodule/gmodule.c"
+           line="791">Gets a string describing the last module error.</doc>
+      <source-position filename="gmodule/gmodule.h" line="118"/>
+      <return-value transfer-ownership="none">
+        <doc xml:space="preserve"
+             filename="gmodule/gmodule.c"
+             line="796">a string describing the last module error</doc>
+        <type name="utf8" c:type="const gchar*"/>
+      </return-value>
+    </function>
+    <function name="module_error_quark"
+              c:identifier="g_module_error_quark"
+              moved-to="Module.error_quark">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
+    <function name="module_supported"
+              c:identifier="g_module_supported"
+              moved-to="Module.supported">
+      <doc xml:space="preserve"
+           filename="gmodule/gmodule.c"
+           line="293">Checks if modules are supported on the current platform.</doc>
+      <source-position filename="gmodule/gmodule.h" line="96"/>
+      <return-value transfer-ownership="none">
+        <doc xml:space="preserve"
+             filename="gmodule/gmodule.c"
+             line="298">%TRUE if modules are supported</doc>
+        <type name="gboolean" c:type="gboolean"/>
+      </return-value>
+    </function>
+  </namespace>
+</repository>

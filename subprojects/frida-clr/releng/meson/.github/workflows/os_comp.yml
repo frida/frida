@@ -1,0 +1,167 @@
+name: linux
+
+concurrency:
+  group: linux-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - master
+      # Stable branches such as 0.56 or 1.0
+      - '[0-9]+.[0-9]+'
+    paths:
+      - "mesonbuild/**"
+      - "test cases/**"
+      - "unittests/**"
+      - ".github/workflows/images.yml"
+      - ".github/workflows/os_comp.yml"
+      - "run*tests.py"
+  pull_request:
+    paths:
+      - "mesonbuild/**"
+      - "test cases/**"
+      - "unittests/**"
+      - ".github/workflows/images.yml"
+      - ".github/workflows/os_comp.yml"
+      - "run*tests.py"
+
+permissions:
+  contents: read
+
+jobs:
+  arch:
+    name: ${{ matrix.cfg.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cfg:
+          - { name: Arch Linux,       id: arch     }
+          - { name: CUDA (on Arch),   id: cuda     }
+          - { name: Fedora,           id: fedora   }
+          - { name: Gentoo,           id: gentoo   }
+          - { name: OpenSUSE,         id: opensuse }
+          - { name: Ubuntu Bionic,    id: bionic   }
+    container: mesonbuild/${{ matrix.cfg.id }}:latest
+    env:
+      MESON_CI_JOBNAME: linux-${{ matrix.cfg.id }}-gcc
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Run tests
+      # All environment variables are stored inside the docker image in /ci/env_vars.sh
+      # They are defined in the `env` section in each image.json. CI_ARGS should be set
+      # via the `args` array ub the image.json
+      run: bash -c 'source /ci/env_vars.sh; cd $GITHUB_WORKSPACE; ./tools/run_with_cov.py ./run_tests.py $CI_ARGS'
+
+    - name: Aggregate coverage reports
+      run: ./ci/combine_cov.sh
+
+    - name: Upload coverage report
+      uses: codecov/codecov-action@v3
+      with:
+        files: .coverage/coverage.xml
+        name: "OS Comp [${{ matrix.cfg.name }}]"
+        fail_ci_if_error: false
+        verbose: true
+
+  pypy:
+    name: 'Arch / PyPy'
+    runs-on: ubuntu-latest
+    container: mesonbuild/arch:latest
+    env:
+      MESON_CI_JOBNAME_UPDATE: linux-arch-gcc-pypy
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Run tests
+      run: |
+        source /ci/env_vars.sh
+        export MESON_CI_JOBNAME=$MESON_CI_JOBNAME_UPDATE
+        pypy3 run_tests.py
+
+  ubuntu-rolling:
+    name: 'Ubuntu Rolling'
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        cfg:
+          - CC: 'gcc'
+            CXX: 'g++'
+          - MESON_ARGS: '--unity=on -Ddefault_library=static'
+            RUN_TESTS_ARGS: '--no-unittests'
+            CC: 'gcc'
+            CXX: 'g++'
+          - MESON_ARGS: '-Ddefault_library=both'
+            RUN_TESTS_ARGS: '--no-unittests'
+            CC: 'gcc'
+            CXX: 'g++'
+          - CC: 'clang'
+            CXX: 'clang++'
+          - MESON_ARGS: '--unity=on'
+            RUN_TESTS_ARGS: '--no-unittests'
+            CC: 'clang'
+            CXX: 'clang++'
+          - RUN_TESTS_ARGS: '--cross ubuntu-armhf.json --cross linux-mingw-w64-64bit.json'
+            MESON_RSP_THRESHOLD: '0'
+            CC: 'gcc'
+            CXX: 'g++'
+          - RUN_TESTS_ARGS: '--cross ubuntu-armhf.json --cross linux-mingw-w64-64bit.json'
+            MESON_ARGS: '--unity=on'
+            CC: 'gcc'
+            CXX: 'g++'
+
+    env:
+      MESON_CI_JOBNAME_UPDATE: linux-${{ github.job }}-${{ matrix.cfg.CC }}
+
+    container:
+      image: mesonbuild/ubuntu-rolling
+      env:
+        MESON_RSP_THRESHOLD: ${{ matrix.cfg.MESON_RSP_THRESHOLD }}
+        MESON_ARGS: ${{ matrix.cfg.MESON_ARGS }}
+        RUN_TESTS_ARGS: ${{ matrix.cfg.RUN_TESTS_ARGS }}
+        CC: ${{ matrix.cfg.CC }}
+        CXX: ${{ matrix.cfg.CXX }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run tests
+        shell: bash
+        run: |
+          export HOME=/root
+
+          export CC=$CC
+          export CXX=$CXX
+          export OBJC=$CC
+          export OBJCXX=$CXX
+          export PATH=$(pwd)/tools:$PATH
+          if test "$MESON_RSP_THRESHOLD" != ""
+          then
+            export MESON_RSP_THRESHOLD=$MESON_RSP_THRESHOLD
+          fi
+
+          source /ci/env_vars.sh
+          export MESON_CI_JOBNAME=$MESON_CI_JOBNAME_UPDATE
+
+          update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix
+          update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
+          update-alternatives --set i686-w64-mingw32-gcc   /usr/bin/i686-w64-mingw32-gcc-posix
+          update-alternatives --set i686-w64-mingw32-g++   /usr/bin/i686-w64-mingw32-g++-posix
+
+          ./tools/run_with_cov.py ./run_tests.py $RUN_TESTS_ARGS -- $MESON_ARGS
+
+      - name: Aggregate coverage reports
+        run: ./ci/combine_cov.sh
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          files: .coverage/coverage.xml
+          name: "Ubuntu [${{ matrix.cfg.CC }} ${{ matrix.cfg.RUN_TESTS_ARGS }} ${{ matrix.cfg.MESON_ARGS }}]"
+          fail_ci_if_error: false
+          verbose: true

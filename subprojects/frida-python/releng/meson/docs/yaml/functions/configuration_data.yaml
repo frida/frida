@@ -1,0 +1,15 @@
+name: configuration_data
+returns: cfg_data
+description: |
+  Creates an empty configuration object. You should add your
+  configuration with the [[@cfg_data]] method calls and
+  finally use it in a call to [[configure_file]].
+
+optargs:
+  data:
+    type: dict[str | bool | int]
+    since: 0.49.0
+    description: |
+      Optional dictionary to specify an initial data set. If
+      provided, each key/value pair is added into the [[@cfg_data]] object
+      as if the [[cfg_data.set]] method was called for each of them.

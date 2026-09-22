@@ -1,0 +1,10 @@
+{
+  "matrix": {
+    "options": {
+      "cython_language": [
+         { "val": "c" },
+         { "val": "cpp" }
+      ]
+    }
+  }
+}

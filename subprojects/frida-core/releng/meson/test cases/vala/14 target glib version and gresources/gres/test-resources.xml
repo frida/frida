@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/org/Meson">
+    <file compressed="true" preprocess="xml-stripblanks">test.ui</file>
+  </gresource>
+</gresources>

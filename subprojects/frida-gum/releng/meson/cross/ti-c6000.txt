@@ -1,0 +1,22 @@
+# Cross file tested on Texas Instruments C6000 compiler (bare metal DSP devices)
+# This file assumes that path to the Texas Instruments C6000 toolchain is added
+# to the environment(PATH) variable.
+
+[host_machine]
+system = 'c6000'
+cpu_family = 'c6000'
+cpu = 'c64x'
+endian = 'little'
+
+[binaries]
+c = 'cl6x'
+cpp = 'cl6x'
+ar = 'ar6x'
+strip = 'strip6x'
+nm = 'nm6x'
+as = 'asm6x'
+
+[properties]
+needs_exe_wrapper = true
+has_function_printf = true
+bits = 32

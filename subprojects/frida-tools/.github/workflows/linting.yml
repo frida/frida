@@ -1,0 +1,8 @@
+name: linting
+on: [push, pull_request]
+jobs:
+  pyflakes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: lgeiger/pyflakes-action@master

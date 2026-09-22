@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/89 custom target install data/meson.build:11:0: ERROR: install_data argument 1 was of type \"CustomTarget\" but should have been one of: \"str\", \"File\""
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+[flake8]
+min_python_version = 3.7.0
+max-line-length = 88
+ignore = E501, E203, W503
+per-file-ignores =
+    # N818: error suffix in exception names (API-breaking change)
+    tomlkit/exceptions.py: N818,
+    # FS003: f-string missing prefix
+    tests/test_items.py: FS003,
+    tests/test_api.py: FS003,
+    tests/test_toml_document.py: FS003,
+exclude =
+    .git
+    __pycache__
+    setup.py
+    build
+    dist
+    releases
+    .venv
+    .tox
+    .mypy_cache
+    .pytest_cache
+    .vscode
+    .github
+ban-relative-imports = true
+# flake8-use-fstring: https://github.com/MichaelKim0407/flake8-use-fstring#--percent-greedy-and---format-greedy
+format-greedy = 1
+inline-quotes = double
+eradicate-whitelist-extend = ^-.*;
+extend-ignore =
+    # E203: Whitespace before ':' (pycqa/pycodestyle#373)
+    E203,
+    # SIM106: Handle error-cases first
+    SIM106,

@@ -1,0 +1,4 @@
+option('method', type : 'combo',
+       choices : ['find_library', 'pkg-config', 'cmake'],
+       value : 'find_library')
+option('search_dir', type : 'string', value : 'auto')

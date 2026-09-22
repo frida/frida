@@ -1,0 +1,14 @@
+{
+  global:
+    ClaimSignalChain;
+    UnclaimSignalChain;
+    InvokeUserSignalHandler;
+    InitializeSignalChain;
+    EnsureFrontOfChain;
+    SetSpecialSignalHandlerFn;
+    AddSpecialSignalHandlerFn;
+    RemoveSpecialSignalHandlerFn;
+
+  local:
+    *;
+};

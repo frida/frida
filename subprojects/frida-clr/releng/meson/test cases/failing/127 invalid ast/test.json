@@ -1,0 +1,9 @@
+{
+  "stdout": [
+    {
+      "match": "re",
+      "line": "test cases/failing/127 invalid ast/meson.build:1:44: ERROR: Meson version is [0-9.]+(\\.rc[0-9]+)? but project requires 0.1.0"
+    }
+  ]
+}
+

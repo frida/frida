@@ -1,0 +1,3 @@
+project('sub')
+
+subproject('subsub')

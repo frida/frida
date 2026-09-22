@@ -1,0 +1,11 @@
+{
+  "matrix": {
+    "options": {
+      "method": [
+        { "val": "pkg-config", "expect_skip_on_jobname": ["linux-gentoo-gcc"] },
+        { "val": "config-tool", "expect_skip_on_jobname": ["macos"] }
+      ]
+    }
+  },
+  "expect_skip_on_jobname": ["azure", "cygwin", "fedora", "msys2", "opensuse"]
+}

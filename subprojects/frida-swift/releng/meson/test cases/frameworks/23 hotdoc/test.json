@@ -1,0 +1,9 @@
+{
+  "installed": [
+    {"type": "dir", "file": "usr/share/doc/foobar/html"}
+  ],
+  "tools": {
+    "hotdoc": ">=0.1.0"
+  },
+  "expect_skip_on_jobname": ["msys2"]
+}

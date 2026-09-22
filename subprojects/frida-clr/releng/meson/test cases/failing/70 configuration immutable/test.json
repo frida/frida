@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/70 configuration immutable/meson.build:12:16: ERROR: Can not set values on configuration object that has been used."
+    }
+  ]
+}

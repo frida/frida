@@ -1,0 +1,1 @@
+option('broken_dist_script', type: 'boolean', value: true)

@@ -1,0 +1,30 @@
+name: files
+returns: list[file]
+description: |
+  This command takes the strings given to it in arguments and returns
+  corresponding File objects that you can use as sources for build
+  targets. The difference is that file objects remember the subdirectory
+  they were defined in and can be used anywhere in the source tree.
+
+example: |
+  As an example suppose you have source file `foo.cpp` in subdirectory
+  `bar1` and you would like to use it in a build target that is defined
+  in `bar2`. To make this happen you first create the object in `bar1`
+  like this:
+
+  ```meson
+      foofile = files('foo.cpp')
+  ```
+
+  Then you can use it in `bar2` like this:
+
+  ```meson
+      executable('myprog', 'myprog.cpp', foofile, ...)
+  ```
+
+  Meson will then do the right thing.
+
+varargs:
+  name: file
+  type: str
+  description: Path to the file.

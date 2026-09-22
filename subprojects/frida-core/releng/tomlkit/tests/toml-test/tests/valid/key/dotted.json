@@ -1,0 +1,132 @@
+{
+  "a": {
+    "few": {
+      "dots": {
+        "polka": {
+          "dance-with": {
+            "type": "string",
+            "value": "Dot"
+          },
+          "dot": {
+            "type": "string",
+            "value": "again?"
+          }
+        }
+      }
+    }
+  },
+  "arr": [
+    {
+      "a": {
+        "b": {
+          "c": {
+            "type": "integer",
+            "value": "1"
+          },
+          "d": {
+            "type": "integer",
+            "value": "2"
+          }
+        }
+      }
+    },
+    {
+      "a": {
+        "b": {
+          "c": {
+            "type": "integer",
+            "value": "3"
+          },
+          "d": {
+            "type": "integer",
+            "value": "4"
+          }
+        }
+      }
+    }
+  ],
+  "count": {
+    "a": {
+      "type": "integer",
+      "value": "1"
+    },
+    "b": {
+      "type": "integer",
+      "value": "2"
+    },
+    "c": {
+      "type": "integer",
+      "value": "3"
+    },
+    "d": {
+      "type": "integer",
+      "value": "4"
+    },
+    "e": {
+      "type": "integer",
+      "value": "5"
+    },
+    "f": {
+      "type": "integer",
+      "value": "6"
+    },
+    "g": {
+      "type": "integer",
+      "value": "7"
+    },
+    "h": {
+      "type": "integer",
+      "value": "8"
+    },
+    "i": {
+      "type": "integer",
+      "value": "9"
+    },
+    "j": {
+      "type": "integer",
+      "value": "10"
+    },
+    "k": {
+      "type": "integer",
+      "value": "11"
+    },
+    "l": {
+      "type": "integer",
+      "value": "12"
+    }
+  },
+  "many": {
+    "dots": {
+      "here": {
+        "dot": {
+          "dot": {
+            "dot": {
+              "type": "integer",
+              "value": "42"
+            }
+          }
+        }
+      }
+    }
+  },
+  "name": {
+    "first": {
+      "type": "string",
+      "value": "Arthur"
+    },
+    "last": {
+      "type": "string",
+      "value": "Dent"
+    }
+  },
+  "tbl": {
+    "a": {
+      "b": {
+        "c": {
+          "type": "float",
+          "value": "42.666"
+        }
+      }
+    }
+  }
+}

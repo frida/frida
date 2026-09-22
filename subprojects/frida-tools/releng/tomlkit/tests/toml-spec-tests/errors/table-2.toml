@@ -1,0 +1,7 @@
+# DO NOT DO THIS EITHER
+
+[fruit]
+apple = "red"
+
+[fruit.apple]
+texture = "smooth"

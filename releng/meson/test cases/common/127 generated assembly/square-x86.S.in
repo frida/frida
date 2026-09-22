@@ -1,0 +1,34 @@
+#include "symbol-underscore.h"
+
+#if defined(_MSC_VER) && !defined(__clang__)
+
+.386
+.MODEL FLAT, C
+
+PUBLIC square_unsigned
+_TEXT   SEGMENT
+
+square_unsigned PROC var1:DWORD
+        mov     eax, var1
+	imul	eax, eax
+	ret
+square_unsigned ENDP
+
+_TEXT   ENDS
+END
+
+#else
+
+.text
+.globl SYMBOL_NAME(square_unsigned)
+/* Only supported with GAS */
+# if defined(__linux__) || defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__)
+.type  square_unsigned,@function
+# endif
+
+SYMBOL_NAME(square_unsigned):
+	movl	4(%esp), %eax
+	imull	%eax, %eax
+	retl
+
+#endif

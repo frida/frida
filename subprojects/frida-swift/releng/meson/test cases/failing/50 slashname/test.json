@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/50 slashname/meson.build:9:0: ERROR: Target \"sub/prog\" has a path segment pointing to directory \"sub\". This is an error."
+    }
+  ]
+}

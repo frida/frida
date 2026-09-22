@@ -1,0 +1,6 @@
+option(
+  'start_native',
+  type : 'boolean',
+  value : 'false',
+  description : 'Start by creating a dependency() with native : true',
+)

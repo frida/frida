@@ -1,0 +1,5 @@
+dep_type=native
+
+Name: dependency() test
+Description: dependency() test
+Version: 0

@@ -1,0 +1,1 @@
+option('static', type : 'boolean', value : false, description : 'build statically linked binaries')

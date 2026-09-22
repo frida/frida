@@ -1,0 +1,16 @@
+#include <stdio.h>
+
+#include "../lib.h"
+
+SYMBOL_IMPORT int get_@LIBTYPE@@DEPENDENCY@dep_value (void);
+
+int main(void) {
+  int val;
+
+  val = get_@LIBTYPE@@DEPENDENCY@dep_value ();
+  if (val != @VALUE@) {
+    printf("@LIBTYPE@@DEPENDENCY@ was %i instead of @VALUE@\n", val);
+    return -1;
+  }
+  return 0;
+}

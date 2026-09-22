@@ -1,0 +1,31 @@
+[package]
+name = "barebone-helpers"
+version = "0.1.0"
+edition = "2021"
+build = "build.rs"
+
+[[bin]]
+name = "memory-scanner"
+path = "bin/memory_scanner.rs"
+test = false
+
+[[bin]]
+name = "marker"
+path = "bin/marker.rs"
+test = false
+
+[features]
+panic-info = []
+
+[profile.release]
+panic = "abort"
+opt-level = "z"
+overflow-checks = false
+lto = true
+codegen-units = 1
+
+[profile.dev]
+panic = "abort"
+
+[dependencies]
+memory-scanner = { version = "0.1.0", path = "memory-scanner" }

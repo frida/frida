@@ -1,0 +1,43 @@
+name: install_man
+returns: void
+description: |
+  Installs the specified man files from the source tree into system's man directory
+  during the install step. This directory can be
+  overridden by specifying it with the `install_dir` keyword argument.
+
+  *(since 0.49.0)* [manpages are no longer compressed implicitly][install_man_49].
+
+  [install_man_49]:
+  https://mesonbuild.com/Release-notes-for-0-49-0.html#manpages-are-no-longer-compressed-implicitly
+
+varargs:
+  name: file
+  type: file | str
+  description: Man pages to install.
+
+warnings:
+  - the `install_mode` kwarg ignored integer values between 0.59.0 -- 1.1.0.
+
+kwargs:
+  install_mode:
+    type: list[str | int]
+    since: 0.47.0
+    description: |
+      Specify the file mode in symbolic format
+      and optionally the owner/uid and group/gid for the installed files.
+
+      See the `install_mode` kwarg of [[install_data]] for more information.
+
+  install_dir:
+    type: str
+    description: Where to install to.
+
+  locale:
+    type: str
+    since: 0.58.0
+    description: |
+      Can be used to specify the locale
+      into which the
+      man page will be installed within the manual page directory tree.
+      An example manual might be `foo.fr.1` with a locale of `fr`, such
+      that `{mandir}/{locale}/man{num}/foo.1` becomes the installed file.

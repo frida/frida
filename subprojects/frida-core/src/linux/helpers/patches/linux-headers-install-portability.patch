@@ -1,0 +1,33 @@
+diff --git a/scripts/headers_install.sh b/scripts/headers_install.sh
+index 404188174..6adb0a5b4 100755
+--- a/scripts/headers_install.sh
++++ b/scripts/headers_install.sh
+@@ -20,16 +20,17 @@ fi
+ INFILE=$1
+ OUTFILE=$2
+ TMPFILE=$OUTFILE.tmp
++: "${SED:=sed}"
+ 
+ trap 'rm -f $OUTFILE $TMPFILE' EXIT
+ 
+ # SPDX-License-Identifier with GPL variants must have "WITH Linux-syscall-note"
+-if [ -n "$(sed -n -e "/SPDX-License-Identifier:.*GPL-/{/WITH Linux-syscall-note/!p}" $INFILE)" ]; then
++if [ -n "$("$SED" -n -e "/SPDX-License-Identifier:.*GPL-/{/WITH Linux-syscall-note/!p}" $INFILE)" ]; then
+ 	echo "error: $INFILE: missing \"WITH Linux-syscall-note\" for SPDX-License-Identifier" >&2
+ 	exit 1
+ fi
+ 
+-sed -E -e '
++"$SED" -E -e '
+ 	s/([[:space:](])(__user|__force|__iomem)[[:space:]]/\1/g
+ 	s/__attribute_const__([[:space:]]|$)/\1/g
+ 	s@^#include <linux/compiler(|_types).h>@@
+@@ -42,7 +43,7 @@ scripts/unifdef -U__KERNEL__ -D__EXPORTED_HEADERS__ $TMPFILE > $OUTFILE
+ [ $? -gt 1 ] && exit 1
+ 
+ # Remove /* ... */ style comments, and find CONFIG_ references in code
+-configs=$(sed -e '
++configs=$("$SED" -e '
+ :comment
+ 	s:/\*[^*][^*]*:/*:
+ 	s:/\*\*\**\([^/]\):/*\1:

@@ -1,0 +1,8 @@
+{
+    "stdout": [
+        {
+            "line": "test cases/failing/110 allow_fallback with fallback/meson.build:3:0: ERROR: \"fallback\" and \"allow_fallback\" arguments are mutually exclusive"
+        }
+    ]
+}
+

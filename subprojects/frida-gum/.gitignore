@@ -1,0 +1,4 @@
+/build/
+/deps/
+/gum/backend-darwin/helpers/build/
+/subprojects/*

@@ -1,0 +1,4 @@
+integers3 = [
+  1,
+  2, # this is ok
+]

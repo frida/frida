@@ -1,0 +1,26 @@
+name: get_option
+returns: str | int | bool | feature | list[str | int | bool]
+description: |
+  Obtains the value of the [project build option](Build-options.md)
+  specified in the positional argument.
+
+  Note that the value returned for built-in options that end in `dir`
+  such as `bindir` and `libdir` is usually a path relative to (and
+  inside) the `prefix` but you should not rely on that, as it can also
+  be an absolute path [in some cases](Builtin-options.md#universal-options).
+  [`install_dir` arguments](Installing.md) handle that as expected
+  but if you need an absolute path, e.g. to use in a define etc.,
+  you should use the path concatenation operator like this:
+  `get_option('prefix') / get_option('localstatedir')`.
+  Never manually join paths as if they were strings.
+
+  For options of type `feature` a
+  [[@feature]] option object
+  is returned instead of a string.
+  See [`feature` options](Build-options.md#features)
+  documentation for more details.
+
+posargs:
+  option_name:
+    type: str
+    description: Name of the option to query

@@ -1,0 +1,14 @@
+[wrap-file]
+directory = foo-1.0-patchfile
+
+source_url = http://something.invalid
+source_filename = foo-1.0.tar.xz
+source_hash = 9ed8f67d75e43d3be161efb6eddf30dd01995a958ca83951ea64234bac8908c1
+lead_directory_missing = true
+
+patch_directory = foo-1.0
+
+diff_files =
+  patchfile/0001-Change-return-value-to-43.patch,
+  patchfile/0002-Change-return-value-to-44.patch,
+  patchfile/0001-Change-foo-to-executable.patch

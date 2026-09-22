@@ -1,0 +1,14 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+  <interface name="com.example">
+    <method name="Hello">
+      <arg direction="in" type="s" name="name"/>
+      <arg direction="out" type="s" name="greeting"/>
+    </method>
+    <method name="Bye">
+      <arg direction="in" type="s" name="name"/>
+      <arg direction="out" type="s" name="greeting"/>
+    </method>
+  </interface>
+</node>

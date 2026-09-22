@@ -1,0 +1,3 @@
+#pragma once
+
+#define CONFIG_OPT @CONFIG_OPT@

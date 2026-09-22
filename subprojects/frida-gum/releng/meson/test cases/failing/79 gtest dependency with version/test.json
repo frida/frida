@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/79 gtest dependency with version/meson.build:8:6: ERROR: Dependency 'gtest' is required but not found."
+    }
+  ]
+}

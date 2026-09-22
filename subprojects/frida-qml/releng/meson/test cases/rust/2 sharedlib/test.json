@@ -1,0 +1,10 @@
+{
+  "installed": [
+    {"type": "exe", "file": "usr/bin/prog"},
+    {"type": "pdb", "file": "usr/bin/prog"},
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libstuff.so"},
+    {"type": "file", "platform": "msvc", "file": "usr/bin/stuff.dll"},
+    {"type": "pdb", "file": "usr/bin/stuff"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/stuff.dll.lib"}
+  ]
+}

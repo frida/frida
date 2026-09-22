@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/24 int conversion/meson.build:3:13: ERROR: String 'notanumber' cannot be converted to int"
+    }
+  ]
+}

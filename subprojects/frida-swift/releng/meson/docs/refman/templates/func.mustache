@@ -1,0 +1,59 @@
+{{base_level}}# {{name}}()
+
+{{&description}}
+
+<p style="padding: 5px; margin: 0px;"></p> <!-- A bit of space because we remove the top margin below -->
+<div style="display: flex;">
+  <{{signature_level}} style="margin-top: 0px;">Signature</{{signature_level}}>
+  <div style="flex-grow: 1;"></div>
+  <div>{{>taggs}}</div>
+</div>
+
+<pre><code class="language-meson">{{&signature}}</code></pre>
+
+{{#example}}
+  <p style="padding: 5px; margin: 0px;"></p> <!-- A bit more space -->
+
+  {{base_level}}## Example
+
+{{&example}}
+{{/example}}
+
+{{>notes}}
+
+{{#has_args}}
+  <p style="padding: 5px; margin: 0px;"></p> <!-- A bit more space -->
+
+  {{base_level}}## Arguments
+
+{{^arg_flattening}}
+  [Argument flattening](Syntax.md#argument-flattening) is **NOT SUPPORTED** by this function.
+{{/arg_flattening}}
+{{/has_args}}
+
+{{#posargs}}
+  The {{type_name}} `{{name}}()` accepts the following positional arguments:
+
+  {{>args}}
+
+  <p style="padding: 5px; margin: 0px;"></p> <!-- Extra space -->
+{{/posargs}}
+
+{{#varargs}}
+  {{#posargs}}Additionally, the{{/posargs}}{{^posargs}}The{{/posargs}}
+  {{type_name}} accepts between `{{min}}` and `{{max}}` variadic
+  arguments (`{{name}}...`) of type <code>{{&type}}</code>.
+
+  {{&description}}
+
+  {{>taggs}}
+
+  <p style="padding: 5px; margin: 0px;"></p> <!-- Extra space -->
+{{/varargs}}
+
+{{#kwargs}}
+  {{#posargs}}Finally, `{{name}}()`{{/posargs}}{{^posargs}}The {{type_name}} `{{name}}()`{{/posargs}}
+  accepts the following keyword arguments:
+
+  {{>args}}
+{{/kwargs}}

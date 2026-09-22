@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "lib": ["ES2022"],
+        "target": "ES2022",
+        "module": "Node18",
+        "rootDir": ".",
+        "outDir": "build",
+        "strict": true
+    },
+    "include": [
+        "examples/**/*.ts"
+    ]
+}

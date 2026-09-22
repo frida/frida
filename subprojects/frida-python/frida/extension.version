@@ -1,0 +1,7 @@
+{
+  global:
+    PyInit__frida;
+
+  local:
+    *;
+};

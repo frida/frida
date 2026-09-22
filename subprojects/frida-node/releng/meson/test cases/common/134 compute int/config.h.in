@@ -1,0 +1,4 @@
+#define INTSIZE @INTSIZE@
+#define FOOBAR_IN_CONFIG_H @FOOBAR@
+#define MAXINT @MAXINT@
+#define MININT @MININT@

@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/124 extract from unity/meson.build:4:37: ERROR: Single object files cannot be extracted in Unity builds. You can only extract all the object files for each compiler at once."
+    }
+  ]
+}

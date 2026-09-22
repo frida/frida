@@ -1,0 +1,50 @@
+{
+  "connection": {
+    "host": "127.0.0.1",
+    "port": 52494,
+    "flavor": "vz",
+    "pid": 49248
+  },
+  "allocator": {
+    "mode": "target-functions",
+    "alloc_function": "0xfffffe0007ab6cdc",
+    "free_function": "0xfffffe0007ab74a8",
+    "alloc_flags": 512
+  },
+  "agent": {
+    "path": "/Users/oleavr/src/frida-core/src/barebone/agent/target/aarch64-unknown-none/release/frida-barebone-agent",
+    "transport": {
+      "type": "vsock",
+      "socket_path": "/tmp/claude-501/vphone-frida-21528.sock",
+      "port": 1339
+    }
+  },
+  "image": {
+    "file": "/Users/oleavr/src/vphone-cli/vm/iPhone17,3_26.1_23B85_Restore/kernelcache.research.vresearch101",
+    "symbols": {
+      "panic": "0x12a2814",
+      "IOLog": "0xac44cc",
+      "thread_block": "0xad3dac",
+      "assert_wait": "0xacf1f8",
+      "assert_wait_timeout": "0xacf3a0",
+      "thread_wakeup": "0xad24e0",
+      "kalloc_data": "0xab2cdc",
+      "kfree_data": "0xab34a8",
+      "sock_socket": "0x1006c88",
+      "sock_connect": "0x1005714",
+      "sock_send": "0x1006708",
+      "sock_receive": "0x100669c",
+      "sock_close": "0x1006de8",
+      "mach_absolute_time": "0xc0548c",
+      "absolutetime_to_nanoseconds": "0xc05a34",
+      "clock_get_calendar_microtime": "0xa996c0",
+      "kernel_thread_start": "0xafb660",
+      "sb_evaluate_internal": "0x214dc00",
+      "hook_cred_label_update_execve": "0x2156004",
+      "hook_vnode_check_create": "0x213cf48",
+      "hook_policy_syscall": "0x21443bc",
+      "gLoadedKextSummaries": "0x24ec160",
+      "proc_pid": "0xf65e5c"
+    }
+  }
+}

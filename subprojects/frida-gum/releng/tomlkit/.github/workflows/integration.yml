@@ -1,0 +1,102 @@
+name: Integration Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - "**"
+
+concurrency:
+  group: integration-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  integration:
+    name: Integration / ${{ matrix.os }} / ${{ matrix.python-version }} / ${{ matrix.project }}
+    runs-on: ${{ matrix.image }}
+    strategy:
+      matrix:
+        os: [ Ubuntu, macOS, Windows ]
+        python-version: [ "3.10" ]
+        project: [ "poetry", "poetry-core" ]
+        include:
+          - os: Ubuntu
+            image: ubuntu-latest
+          - os: Windows
+            image: windows-latest
+          - os: macOS
+            image: macos-latest
+      fail-fast: false
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout Source (${{ matrix.project }})
+        uses: actions/checkout@v3
+        with:
+          repository: python-poetry/${{ matrix.project }}
+
+      - name: Checkout Source (tomlkit)
+        uses: actions/checkout@v3
+        with:
+          path: tomlkit
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Bootstrap poetry
+        run: |
+          curl -sL https://install.python-poetry.org | python - -y ${{ matrix.bootstrap-args }}
+
+      - name: Update PATH
+        if: ${{ matrix.os != 'Windows' }}
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Update Path for Windows
+        if: ${{ matrix.os == 'Windows' }}
+        run: echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
+
+      - name: Configure poetry
+        run: poetry config virtualenvs.in-project true
+
+      - name: Get full Python version
+        if: matrix.project != 'poetry-core'
+        id: full-python-version
+        run: echo ::set-output name=version::$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))")
+
+      - name: Set up cache
+        uses: actions/cache@v3
+        if: matrix.project != 'poetry-core'
+        id: cache
+        with:
+          path: ./.venv
+          key: venv-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-${{ hashFiles('poetry.lock') }}
+
+      - name: Ensure cache is healthy
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: timeout 10s poetry run pip --version || rm -rf .venv
+
+      - name: Patch tomlkit dependency
+        if: matrix.project != 'poetry-core'
+        run: |
+          # we explicitly remove to mitigate a bug in poetry 1.1.13, can be removed with 1.2.0
+          poetry run pip uninstall -y tomlkit
+          poetry add --lock ./tomlkit
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Remove poetry-core vendored tomlkit
+        run: |
+          rm -rf $(poetry run python -c "import poetry.core; print(poetry.core.__vendor_site__)")/tomlkit
+
+      - name: Patch vendored tomlkit
+        if: matrix.project == 'poetry-core'
+        run: |
+          cp -R ./tomlkit/tomlkit src/poetry/core/_vendor/.
+
+      - name: Run tests
+        run: poetry run pytest -q tests/

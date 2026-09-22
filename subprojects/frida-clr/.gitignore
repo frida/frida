@@ -1,0 +1,7 @@
+*.user
+/build/
+/deps/
+/examples/HelloFrida/.vs/
+/examples/HelloFrida/bin/
+/examples/HelloFrida/obj/
+/subprojects/*

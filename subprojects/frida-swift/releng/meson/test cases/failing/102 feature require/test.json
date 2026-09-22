@@ -1,0 +1,8 @@
+{
+  "stdout": [
+    {
+      "match": "re",
+      "line": ".*/meson\\.build:2:31: ERROR: Feature reqfeature cannot be enabled: frobnicator not available"
+    }
+  ]
+}

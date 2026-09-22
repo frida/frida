@@ -1,0 +1,34 @@
+name: import
+returns: module
+description: |
+  Imports the given extension module. Returns an object that can be used to call
+  the methods of the module. Here's an example for a hypothetical `testmod`
+  module.
+
+example: |
+  ```meson
+  tmod = import('testmod')
+  tmod.do_something()
+  ```
+
+posargs:
+  module_name:
+    type: str
+    description: Name of the module to import.
+
+kwargs:
+  required:
+    type: bool | feature
+    default: true
+    since: 0.59.0
+    description:
+      When set to `false`, Meson will proceed with the build even if the module
+      is not found.
+
+      When set to a [`feature`](Build-options.md#features) option, the feature
+      will control if it is searched and whether to fail if not found.
+
+  disabler:
+    type: bool
+    since: 0.59.0
+    description: Returns a [[@disabler]] object when not found.

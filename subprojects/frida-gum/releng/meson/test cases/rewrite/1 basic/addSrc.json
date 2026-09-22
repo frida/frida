@@ -1,0 +1,94 @@
+[
+  {
+    "type": "target",
+    "target": "trivialprog1",
+    "operation": "src_add",
+    "sources": ["a2.cpp", "a1.cpp", "a2.cpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog2",
+    "operation": "src_add",
+    "sources": ["a7.cpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog3",
+    "operation": "src_add",
+    "sources": ["a5.cpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog4",
+    "operation": "src_add",
+    "sources": ["a5.cpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog5",
+    "operation": "src_add",
+    "sources": ["a3.cpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog6",
+    "operation": "src_add",
+    "sources": ["a4.cpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog9",
+    "operation": "src_add",
+    "sources": ["a6.cpp", "a1.cpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog0",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog1",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog2",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog3",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog4",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog5",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog6",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog7",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog8",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog9",
+    "operation": "info"
+  }
+]

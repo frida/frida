@@ -1,0 +1,28 @@
+{
+    "stdout": [
+      {
+        "line": "Message: auto auto auto [auto] {'key' : auto}"
+      },
+      {
+        "line": "Message: 42 42 42 [42] {'key' : 42}"
+      },
+      {
+        "line": "Message: true true true [true] {'key' : true}"
+      },
+      {
+        "line": "Message: false false false [false] {'key' : false}"
+      },
+      {
+        "line": "Message: str str str ['str'] {'key' : 'str'}"
+      },
+      {
+        "line": "Message: ['list'] ['list'] ['list'] [['list']] {'key' : ['list']}"
+      },
+      {
+        "line": "Message: {'dict' : 'value'} {'dict' : 'value'} {'dict' : 'value'} [{'dict' : 'value'}] {'key' : {'dict' : 'value'}}"
+      },
+      {
+        "line": "Message: <EnvironmentVariables: []>"
+      }
+    ]
+  }

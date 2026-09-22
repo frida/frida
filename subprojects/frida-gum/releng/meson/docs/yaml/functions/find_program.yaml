@@ -1,0 +1,125 @@
+name: find_program
+returns: external_program
+description: |
+  `program_name` here is a string that can be an executable or script
+  to be searched for in `PATH` or other places inside the project.
+  The search order is:
+
+  1. Program overrides set via [[meson.override_find_program]]
+  1. [`[provide]` sections](Wrap-dependency-system-manual.md#provide-section)
+    in subproject wrap files, if [`wrap_mode`](Builtin-options.md#core-options) is
+    set to `forcefallback`
+  1. [`[binaries]` section](Machine-files.md#binaries) in your machine files
+  1. Directories provided using the `dirs:` kwarg (see below)
+  1. Project's source tree relative to the current subdir
+     - If you use the return value of [[configure_file]], the
+       current subdir inside the build tree is used instead
+  1. `PATH` environment variable
+  1. [`[provide]` sections](Wrap-dependency-system-manual.md#provide-section) in
+    subproject wrap files, if [`wrap_mode`](Builtin-options.md#core-options) is
+    set to anything other than `nofallback`
+
+  Meson will also autodetect scripts with a shebang line and run them
+  with the executable/interpreter specified in it both on Windows
+  (because the command invocator will reject the command otherwise) and
+  Unixes (if the script file does not have the executable bit set).
+  Hence, you *must not* manually add the interpreter while using this
+  script as part of a list of commands. Since *0.50.0* if the "python3"
+  program is requested and it is not found in the system, Meson will return
+  its current interpreter.
+
+  If you need to check for a program in a non-standard location, you can
+  just pass an absolute path to `find_program`, e.g.
+
+  ```meson
+  setcap = find_program('setcap', '/usr/sbin/setcap', '/sbin/setcap', required : false)
+  ```
+
+  It is also possible to pass an array to `find_program` in case you
+  need to construct the set of paths to search on the fly:
+
+  ```meson
+  setcap = find_program(['setcap', '/usr/sbin/setcap', '/sbin/setcap'], required : false)
+  ```
+
+  *Since 1.2.0* `find_program('meson')` is automatically overridden to the Meson
+  command used to execute the build script.
+
+  The returned [[@external_program]] object also has documented methods.
+
+posargs:
+  program_name:
+    type: str | file
+    description: |
+      The name of the program to search, or a [[@file]] object to be used
+      without searching.
+
+varargs:
+  name: fallback
+  type: str | file
+  since: 0.37.0
+  description: |
+    These parameters are used as fallback names to search for.
+    This is meant to be used for cases where the
+    program may have many alternative names, such as `foo` and
+    `foo.py`. The function will check for the arguments one by one and the
+    first one that is found is returned.
+
+kwargs:
+  required:
+    type: bool | feature
+    default: true
+    description: |
+      When `true`, Meson will abort if no program can be found.
+      If `required` is set to `false`,
+      Meson continue even if none of the programs can be found. You can
+      then use the `.found()` method on the returned [[@external_program]] to check
+      whether it was found or not. *(since 0.47.0)* The value of a
+      [`feature`](Build-options.md#features) option can also be passed to the
+      `required` keyword argument.
+
+  native:
+    type: bool
+    default: false
+    since: 0.43.0
+    description: |
+      Defines how this executable should be searched. By default
+      it is set to `false`, which causes Meson to first look for the
+      executable in the cross file (when cross building) and if it is not
+      defined there, then from the system. If set to `true`, the cross
+      file is ignored and the program is only searched from the system.
+
+  disabler:
+    type: bool
+    since: 0.49.0
+    default: false
+    description: |
+      If `true` and the program couldn't be found, return a [[@disabler]] object
+      instead of a not-found object.
+
+  version:
+    type: str | list[str]
+    since: 0.52.0
+    description: |
+      Specifies the required version, see
+      [[dependency]] for argument format. The version of the program
+      is determined by running `program_name --version` command. If stdout is empty
+      it fallbacks to stderr. If the output contains more text than simply a version
+      number, only the first occurrence of numbers separated by dots is kept.
+      If the output is more complicated than that, the version checking will have to
+      be done manually using [[run_command]].
+
+  dirs:
+    type: list[str]
+    since: 0.53.0
+    description: extra list of absolute paths where to look for program names.
+
+  default_options:
+    type: list[str] | dict[str | bool | int | list[str]]
+    since: 1.3.0
+    description: |
+      An array of default option values
+      that override those set in the subproject's `meson.options`
+      (like `default_options` in [[project]], they only have
+      effect when Meson is run for the first time, and command line
+      arguments override any default options in build files)

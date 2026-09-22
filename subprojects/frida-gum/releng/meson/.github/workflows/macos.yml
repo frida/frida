@@ -1,0 +1,156 @@
+name: macos
+
+concurrency:
+  group: macos-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - master
+      # Stable branches such as 0.56 or 1.0
+      - '[0-9]+.[0-9]+'
+    paths:
+      - "mesonbuild/**"
+      - "test cases/**"
+      - "unittests/**"
+      - ".github/workflows/macos.yml"
+      - "run*tests.py"
+  pull_request:
+    paths:
+      - "mesonbuild/**"
+      - "test cases/**"
+      - "unittests/**"
+      - ".github/workflows/macos.yml"
+      - "run*tests.py"
+
+permissions:
+  contents: read
+
+jobs:
+  unittests-appleclang:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    - run: |
+        python -m pip install --upgrade pip
+        python -m pip install pytest pytest-xdist pytest-subtests fastjsonschema coverage
+    - run: brew install pkg-config ninja llvm qt@5
+    - env:
+        CPPFLAGS: "-I/usr/local/include"
+        LDFLAGS: "-L/usr/local/lib"
+        MESON_CI_JOBNAME: unittests-appleclang
+        MESON_UNIT_TEST_BACKEND: ninja
+        HOMEBREW_NO_AUTO_UPDATE: 1
+        # These cannot evaluate anything, so we cannot set PATH or SDKROOT here
+      run: |
+        export SDKROOT="$(xcodebuild -version -sdk macosx Path)"
+        export PATH="$HOME/tools:/usr/local/opt/qt@5/bin:$PATH:$(brew --prefix llvm)/bin"
+        export PKG_CONFIG_PATH="/usr/local/opt/qt@5/lib/pkgconfig:$PKG_CONFIG_PATH"
+        ./tools/run_with_cov.py ./run_unittests.py
+
+    - name: Aggregate coverage reports
+      run: ./ci/combine_cov.sh
+
+    - name: Upload coverage report
+      uses: codecov/codecov-action@v3
+      with:
+        files: .coverage/coverage.xml
+        name: "appleclang [unit tests]"
+        fail_ci_if_error: false
+        verbose: true
+
+
+  project-tests-appleclang:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - NAME: macos-clang
+          unity: off
+        - NAME: macos-clang-unity
+          unity: on
+
+    name: ${{ matrix.NAME }}
+    env:
+      MESON_CI_JOBNAME: ${{ matrix.NAME }}
+      HOMEBREW_NO_AUTO_UPDATE: 1
+
+    steps:
+    - uses: actions/checkout@v3
+    # Avoid picking up an older version of LLVM that does not work.
+    - run: brew update
+    # github actions overwrites brew's python. Force it to reassert itself, by running in a separate step.
+    - name: unbreak python in github actions
+      run: |
+        find /usr/local/bin -lname '*/Library/Frameworks/Python.framework/*' -delete
+        sudo rm -rf /Library/Frameworks/Python.framework/
+        brew install --force python3 && brew unlink python3 && brew unlink python3 && brew link --overwrite python3
+        # Delete nonsensical PEP 668 breakage. It is the wrong solution to the problem and isn't designed to be
+        # productive -- only victim blaming -- however it bites particularly badly because this is a container/VM
+        # See commit 5c479d7a13a518c18ccb4dc3b6bdd7bfc2a9bdb5 for a more thorough analysis.
+        find /usr/local/Cellar/python* -name EXTERNALLY-MANAGED -print0 | xargs -0 rm -vf
+    # use python3 from homebrew because it is a valid framework, unlike the actions one:
+    # https://github.com/actions/setup-python/issues/58
+    - run: brew install pkg-config ninja llvm qt@5 boost ldc hdf5 openmpi lapack scalapack sdl2 boost-python3 gtk-doc
+    - run: |
+        python3 -m pip install --upgrade setuptools
+        python3 -m pip install --upgrade pip
+        python3 -m pip install cython coverage
+    - env:
+        CPPFLAGS: "-I/usr/local/include"
+        LDFLAGS: "-L/usr/local/lib"
+        MESON_ARGS: --unity=${{ matrix.unity }}
+        CI: 1
+        # These cannot evaluate anything, so we cannot set PATH or SDKROOT here
+      run: |
+        export SDKROOT="$(xcodebuild -version -sdk macosx Path)"
+        export PATH="$HOME/tools:/usr/local/opt/qt@5/bin:$PATH:$(brew --prefix llvm)/bin"
+        export PKG_CONFIG_PATH="/usr/local/opt/qt@5/lib/pkgconfig:$PKG_CONFIG_PATH"
+        export XML_CATALOG_FILES="/usr/local/etc/xml/catalog"
+        ./tools/run_with_cov.py ./run_project_tests.py --backend=ninja
+
+    - name: Aggregate coverage reports
+      run: ./ci/combine_cov.sh
+
+    - name: Upload coverage report
+      uses: codecov/codecov-action@v3
+      with:
+        files: .coverage/coverage.xml
+        name: "appleclang [project tests; unity=${{ matrix.unity }}]"
+        fail_ci_if_error: false
+        verbose: true
+
+  Qt4macos:
+    runs-on: macos-latest
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    - run: python -m pip install -e .
+    - run: brew install pkg-config ninja gcc
+    - run: brew tap cartr/qt4
+    - run: brew install qt@4
+    - run: brew link qt@4
+      # qt4 tap seems to be broken
+    - run: ln -sfn /usr/local/Cellar/qt@4/4.8.7_6.reinstall /usr/local/Cellar/qt@4/4.8.7_6
+    - run: meson setup "test cases/frameworks/4 qt" build -Drequired=qt4
+    - run: meson compile -C build
+    - uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: Qt4_Mac_build
+        path: build/meson-logs/meson-log.txt
+    - run: meson test -C build -v
+    - uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: Qt4_Mac_test
+        path: build/meson-logs/testlog.txt

@@ -1,0 +1,23 @@
+/*
+ * Regenerate with:
+ *
+ * $(xcrun --sdk macosx -f mig) \
+ *     -isysroot $(xcrun --sdk macosx --show-sdk-path) \
+ *     -sheader substratedserver.h \
+ *     -server substratedserver.c \
+ *     -header substratedclient.h \
+ *     -user substratedclient.c \
+ *     substrated.defs
+ */
+
+subsystem substrated 9000;
+
+#include <mach/std_types.defs>
+#include <mach/mach_types.defs>
+
+routine substrated_mark(
+		server		: mach_port_t;
+		task		: vm_task_entry_t;
+		source_address	: mach_vm_address_t;
+		source_size	: mach_vm_size_t;
+	inout	target_address	: mach_vm_address_t);

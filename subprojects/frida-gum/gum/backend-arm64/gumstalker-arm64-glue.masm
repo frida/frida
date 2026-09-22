@@ -1,0 +1,38 @@
+  EXPORT gum_stalker_follow_me
+  EXPORT gum_stalker_activate
+  EXPORT gum_stalker_deactivate
+
+  IMPORT _gum_stalker_do_follow_me
+  IMPORT _gum_stalker_do_activate
+  IMPORT _gum_stalker_do_deactivate
+
+  AREA |.text|, CODE, ALIGN=8
+
+|gum_stalker_follow_me| PROC
+  stp x29, x30, [sp, -16]!
+  mov x29, sp
+  mov x3, x30
+  bl _gum_stalker_do_follow_me
+  ldp x29, x30, [sp], 16
+  br x0
+  ENDP
+
+|gum_stalker_activate| PROC
+  stp x29, x30, [sp, -16]!
+  mov x29, sp
+  mov x2, x30
+  bl _gum_stalker_do_activate
+  ldp x29, x30, [sp], 16
+  br x0
+  ENDP
+
+|gum_stalker_deactivate| PROC
+  stp x29, x30, [sp, -16]!
+  mov x29, sp
+  mov x1, x30
+  bl _gum_stalker_do_deactivate
+  ldp x29, x30, [sp], 16
+  br x0
+  ENDP
+
+  END

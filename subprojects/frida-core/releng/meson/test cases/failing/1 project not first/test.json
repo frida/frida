@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "ERROR: Invalid source tree: first statement must be a call to project()"
+    }
+  ]
+}

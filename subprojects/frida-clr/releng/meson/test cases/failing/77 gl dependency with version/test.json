@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/77 gl dependency with version/meson.build:9:6: ERROR: Dependency lookup for gl with method 'system' failed: Unknown version, but need ['>0']."
+    }
+  ]
+}

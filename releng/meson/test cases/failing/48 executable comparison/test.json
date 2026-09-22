@@ -1,0 +1,8 @@
+{
+  "stdout": [
+    {
+      "match": "re",
+      "line": "test cases/failing/48 executable comparison/meson.build:6:14: ERROR: Object <ExecutableHolder prog1@exe: prog1(.exe)?> of type Executable does not support the `<` operator."
+    }
+  ]
+}

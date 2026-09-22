@@ -1,0 +1,26 @@
+name: runresult
+long_name: Run result object
+description: |
+  This object encapsulates the result of trying to compile and run a
+  sample piece of code with [[compiler.run]] or
+  [[run_command]].
+
+methods:
+- name: compiled
+  returns: bool
+  description: |
+    If `true`, the compilation succeeded, if `false` it did not
+    and the other methods return unspecified data. This is only available
+    for `compiler.run()` results.
+
+- name: returncode
+  returns: int
+  description: The return code of executing the compiled binary
+
+- name: stderr
+  returns: str
+  description: The standard error produced when the command was run.
+
+- name: stdout
+  returns: str
+  description: The standard out produced when the command was run.

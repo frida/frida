@@ -1,0 +1,14 @@
+name: cmake_options
+long_name: CMake subproject options
+description: Central configuration object for CMake subprojects
+since: 0.55.0
+
+methods:
+- name: add_cmake_defines
+  returns: void
+  description: Add CMake defines (`-D<VAR>=<VAL>`) to the CMake commandline
+
+  varargs:
+    name: defines
+    description: A `key` `value` map of CMake defines to add (`-D<key>=<val>`)
+    type: dict[str]

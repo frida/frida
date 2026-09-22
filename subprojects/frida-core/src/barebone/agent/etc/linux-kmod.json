@@ -1,0 +1,8 @@
+{
+  "agent": {
+    "transport": {
+      "type": "device",
+      "path": "/dev/frida"
+    }
+  }
+}

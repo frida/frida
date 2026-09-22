@@ -1,0 +1,8 @@
+{
+    "stdout": [
+        {
+            "line": "test cases/failing/113 run_target in add_install_script/meson.build:7:6: ERROR: meson.add_install_script argument 2 was of type \"RunTarget\" but should have been one of: \"str\", \"File\", \"BuildTarget\", \"CustomTarget\", \"CustomTargetIndex\", \"ExternalProgram\""
+        }
+    ]
+}
+

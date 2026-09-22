@@ -1,0 +1,7 @@
+{
+  "installed": [
+    {"type": "exe", "file": "usr/bin/generatedtestparent"},
+    {"type": "exe", "file": "usr/bin/generatedtest"},
+    {"type": "exe", "file": "usr/bin/onlygentest"}
+  ]
+}

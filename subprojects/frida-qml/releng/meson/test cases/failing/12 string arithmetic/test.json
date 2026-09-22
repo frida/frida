@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/12 string arithmetic/meson.build:3:12: ERROR: The `+` operator of str does not accept objects of type int (3)"
+    }
+  ]
+}

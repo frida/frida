@@ -1,0 +1,14 @@
+{
+  "env": {
+    "CMAKE_PREFIX_PATH": "@ROOT@/cmake_fake1;@ROOT@/cmake_fake2:@ROOT@/cmake_pref_env",
+    "PATH": "@ROOT@/cmake_fake3/bin:@PATH@"
+  },
+  "stdout": [
+    {
+      "line": "WARNING: Could not find and exact match for the CMake dependency cmMesonTestF1."
+    },
+    {
+      "line": "    ['CMMesonTESTf1::evil_non_standard_target']"
+    }
+  ]
+}

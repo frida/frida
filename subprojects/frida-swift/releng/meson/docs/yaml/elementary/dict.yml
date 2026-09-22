@@ -1,0 +1,48 @@
+name: dict
+long_name: Dict
+since: 0.47.0
+is_container: true
+description: |
+  Stores a mapping of strings to other objects. See [dictionaries](Syntax.md#dictionaries).
+
+  You can also iterate over dictionaries with the [`foreach`
+  statement](Syntax.md#foreach-statements).
+
+  *(since 0.48.0)*: Dictionaries can be added (e.g. `d1 = d2 + d3` and `d1 += d2`).
+  Values from the second dictionary overrides values from the first.
+  *(since 0.62.0)*: Dictionary order is guaranteed to be insertion order.
+
+
+methods:
+- name: has_key
+  returns: bool
+  description: Returns `true` if the dictionary contains the key given as argument, `false` otherwise.
+
+  posargs:
+    key:
+      type: str
+      description: The key to query.
+
+- name: get
+  returns: any
+  description: |
+    returns the value for the key given as first
+    argument if it is present in the dictionary, or the optional
+    fallback value given as the second argument. If a single argument
+    was given and the key was not found, causes a fatal error
+
+  arg_flattening: false
+
+  posargs:
+    key:
+      type: str
+      description: The key to query.
+
+  optargs:
+    fallback:
+      type: any
+      description: Fallback value that is returned if the key is not in the [[@dict]].
+
+- name: keys
+  returns: list[str]
+  description: Returns an array of keys in the dictionary.

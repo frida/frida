@@ -1,0 +1,21 @@
+name: Install Frida Devkit
+description: Install Frida Devkit
+inputs:
+  arch:
+    required: true
+    path: the architecture of the devkit
+  os:
+    required: true
+    path: the target operating system of the devkit
+  version:
+    required: true
+    path: the version of the devkit
+runs:
+  using: composite
+  steps:
+    - run: |
+        mkdir /tmp/frida-core-devkit && cd /tmp/frida-core-devkit
+        wget https://github.com/frida/frida/releases/download/${{ inputs.version }}/frida-core-devkit-${{ inputs.version }}-${{ inputs.os }}-${{ inputs.arch }}.tar.xz -O - | tar --extract --xz
+        sudo cp frida-core.h /usr/local/include/frida-core.h
+        sudo cp libfrida-core.a /usr/local/lib/libfrida-core.a
+      shell: bash

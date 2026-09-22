@@ -1,0 +1,5 @@
+module mylib [extern_c] {
+    header "mylib.h"
+    link "mylib"
+    export *
+}

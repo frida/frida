@@ -1,0 +1,54 @@
+@require(page)
+
+<li class="dropdown">
+  <a class="dropdown-toggle" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Modules <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" id="modules-menu">
+    @for tup in [ \
+            ("CMake-module.html","CMake"), \
+            ("Cuda-module.html","CUDA"), \
+            ("Dlang-module.html","Dlang"), \
+            ("External-Project-module.html","External Project"), \
+            ("Fs-module.html","Filesystem"), \
+            ("Gnome-module.html","GNOME"), \
+            ("Hotdoc-module.html","Hotdoc"), \
+            ("i18n-module.html","i18n"), \
+            ("Icestorm-module.html","Icestorm"), \
+            ("Java-module.html","Java"), \
+            ("Keyval-module.html","Keyval"), \
+            ("Pkgconfig-module.html","Pkgconfig"), \
+            ("Python-3-module.html","Python 3"), \
+            ("Python-module.html","Python"), \
+            ("Qt4-module.html","Qt4"), \
+            ("Qt5-module.html","Qt5"), \
+            ("Qt6-module.html","Qt6"), \
+            ("Rust-module.html","Rust"), \
+            ("Simd-module.html","Simd"), \
+            ("SourceSet-module.html","SourceSet"), \
+            ("Wayland-module.html","Wayland"), \
+            ("Windows-module.html","Windows")]:
+        <li>
+            <a href="@tup[0]">@tup[1]</a>
+        </li>
+    @end
+	</ul>
+</li>
+\
+<li class="dropdown">
+	<a class="dropdown-toggle" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		Quick References <span class="caret"></span>
+	</a>
+	<ul class="dropdown-menu" id="quick-refs-menu">
+		@for tup in (("Reference-manual.html", "Functions"), \
+           ("Build-options.html", "Options"), \
+           ("Configuration.html", "Configuration"), \
+           ("Dependencies.html", "Dependencies"), \
+           ("Unit-tests.html", "Tests"), \
+           ("Syntax.html", "Syntax")):
+			<li>
+				<a href="@tup[0]">@tup[1]</a>
+			</li>
+		@end
+	</ul>
+</li>

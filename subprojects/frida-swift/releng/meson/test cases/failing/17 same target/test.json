@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/17 same target/meson.build:4:0: ERROR: Tried to create target \"foo\", but a target of that name already exists."
+    }
+  ]
+}

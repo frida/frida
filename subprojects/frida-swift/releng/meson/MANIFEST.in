@@ -1,0 +1,19 @@
+graft test?cases
+graft manual?tests
+graft cross
+graft data
+graft graphics
+graft man
+graft tools
+graft packaging
+graft unittests
+
+include contributing.md
+include COPYING
+include README.md
+include run_cross_test.py
+include run_tests.py
+include run_unittests.py
+include run_meson_command_tests.py
+include run_project_tests.py
+include meson.py

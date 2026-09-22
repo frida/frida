@@ -1,0 +1,3 @@
+#pragma once
+
+#define CPY_INC_WAS_INCLUDED 1

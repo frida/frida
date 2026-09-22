@@ -1,0 +1,21 @@
+LIBGUMPP_1.0 {
+  global:
+    Interceptor_obtain;
+    Backtracer_make_accurate;
+    Backtracer_make_fuzzy;
+    ReturnAddressDetails_from_address;
+    SanityChecker_new;
+    SanityChecker_new_with_heap_api;
+    BusyCycleSampler_new;
+    CycleSampler_new;
+    MallocCountSampler_new;
+    WallClockSampler_new;
+    CallCountSampler_new;
+    CallCountSampler_new_by_name;
+    Profiler_new;
+    find_function_ptr;
+    find_matching_functions_array;
+
+  local:
+    *;
+};

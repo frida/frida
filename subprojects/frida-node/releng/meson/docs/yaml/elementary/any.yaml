@@ -1,0 +1,5 @@
+name: any
+long_name: Any
+description: |
+  A placeholder representing all types.
+  This includes builtin, as well as returned objects.

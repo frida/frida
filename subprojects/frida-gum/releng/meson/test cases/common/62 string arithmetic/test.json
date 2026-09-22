@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/common/62 string arithmetic/meson.build:25: WARNING: Project targets '>=0.62.0' but uses feature introduced in '0.63.0': multiline format strings."
+    }
+  ]
+}

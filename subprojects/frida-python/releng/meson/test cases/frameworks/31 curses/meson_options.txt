@@ -1,0 +1,6 @@
+option(
+    'method',
+    type : 'combo',
+    choices : ['pkg-config', 'config-tool', 'system'],
+    value : 'pkg-config',
+)

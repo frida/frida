@@ -1,0 +1,24 @@
+name: subdir_done
+returns: void
+since: 0.46.0
+description: |
+  Stops further interpretation of the Meson script file from the point
+  of the invocation. All steps executed up to this point are valid and
+  will be executed by Meson. This means that all targets defined before
+  the call of [[subdir_done]] will be build.
+
+  If the current script was called by `subdir` the execution returns to
+  the calling directory and continues as if the script had reached the
+  end. If the current script is the top level script Meson configures
+  the project as defined up to this point.
+
+example: |
+  ```meson
+  project('example exit', 'cpp')
+  executable('exe1', 'exe1.cpp')
+  subdir_done()
+  executable('exe2', 'exe2.cpp')
+  ```
+
+  The executable `exe1` will be build, while the executable `exe2` is not
+  build.

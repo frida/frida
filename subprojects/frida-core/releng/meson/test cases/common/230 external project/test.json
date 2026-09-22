@@ -1,0 +1,7 @@
+{
+  "installed": [
+    { "type": "shared_lib",  "file": "usr/lib/foo" },
+    { "type": "file",  "file": "usr/include/libfoo.h" },
+    { "type": "file", "file": "usr/lib/pkgconfig/somelib.pc" }
+  ]
+}

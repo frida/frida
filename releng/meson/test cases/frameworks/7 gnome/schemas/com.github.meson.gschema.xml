@@ -1,0 +1,12 @@
+<schemalist>
+  <schema id="com.github.meson" path="/com/github/meson/" gettext-domain="test">
+
+    <key name="greeting" type="s">
+      <default l10n="messages">"Hello"</default>
+      <summary>A greeting</summary>
+      <description>
+        Sample text to test schema compilation
+      </description>
+    </key>
+  </schema>
+</schemalist>

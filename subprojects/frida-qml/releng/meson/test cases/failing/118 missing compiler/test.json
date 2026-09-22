@@ -1,0 +1,7 @@
+{
+    "stdout": [
+        {
+            "line": "test cases/failing/118 missing compiler/subprojects/sub/meson.build:4:0: ERROR: No host machine compiler for 'subprojects/sub/main.c'"
+        }
+    ]
+}

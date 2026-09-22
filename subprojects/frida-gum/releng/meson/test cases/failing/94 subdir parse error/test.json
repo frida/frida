@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/94 subdir parse error/subdir/meson.build:1:0: ERROR: Plusassignment target must be an id."
+    }
+  ]
+}

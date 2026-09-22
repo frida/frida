@@ -1,0 +1,93 @@
+[
+  {
+    "type": "target",
+    "target": "trivialprog1",
+    "operation": "extra_files_rm",
+    "sources": ["fileA.hpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog3",
+    "operation": "extra_files_rm",
+    "sources": ["fileA.hpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog4",
+    "operation": "extra_files_rm",
+    "sources": ["fileA.hpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog5",
+    "operation": "extra_files_rm",
+    "sources": ["fileB.hpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog6",
+    "operation": "extra_files_rm",
+    "sources": ["fileA.hpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog7",
+    "operation": "extra_files_rm",
+    "sources": ["fileA.hpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog0",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog1",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog2",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog3",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog4",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog5",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog6",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog7",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog8",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog9",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog10",
+    "operation": "info"
+  }
+]

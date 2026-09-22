@@ -1,0 +1,13 @@
+option('testoption', type : 'string', value : 'optval', description : 'An option ' + 'to do something')
+option('other_one', type : 'boolean', value : not (not (not (not false))))
+option('combo_opt', type : 'co' + 'mbo', choices : ['one', 'two', 'combo'], value : 'combo')
+option('array_opt', type : 'array', choices : ['one', 'two', 'three'], value : ['one', 'two'])
+option('free_array_opt', type : 'array')
+option('integer_opt', type : 'integer', min : 0, max : -(-5), value : 3)
+option('neg' + '_' + 'int' + '_' + 'opt', type : 'integer', min : -5, max : 5, value : -3)
+option('CaseSenSiTivE', type : 'string', value: 'Some CAPS', description : 'An option with mixed capitalization')
+option('CASESENSITIVE', type : 'string', value: 'ALL CAPS', description : 'An option with all caps')
+
+option('boolean_string', type : 'boolean', value : 'false')
+option('boolean_string2', type : 'boolean', value : 'true')
+option('integer_string', type : 'integer', value : '42')

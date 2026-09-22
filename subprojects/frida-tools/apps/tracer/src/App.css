@@ -1,0 +1,100 @@
+.app-content {
+    flex: 1;
+}
+
+.top-area {
+    display: flex;
+    overflow: hidden;
+}
+
+.app-splitter {
+    border-top: 5px groove #ef6456;
+}
+
+.bottom-area {
+    display: flex;
+}
+
+.navigation-area {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px #ccc solid;
+}
+
+.handler-list {
+    flex: 1;
+    overflow: scroll;
+}
+
+.target-actions {
+    padding: 5px;
+}
+
+.editor-area {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    white-space: nowrap;
+}
+
+.editor-area section {
+    flex: 1;
+}
+
+.editor-area .bp5-button:focus {
+    outline: 0;
+}
+
+.editor-area section.editor-toolbar {
+    display: flex;
+    justify-content: space-between;
+    flex: 0;
+}
+
+.editor-toolbar .bp5-switch {
+    padding-top: 10px;
+}
+
+.handler-muted input:checked ~ .bp5-control-indicator {
+    background: #cd4246 !important;
+}
+
+.monaco-editor {
+    position: absolute !important;
+}
+
+.bottom-tabs {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.bottom-tabs .bp5-tab-list {
+    padding-left: 10px;
+}
+
+.bottom-tabs .bp5-tab:focus {
+    outline: 0;
+}
+
+.bottom-tab-panel {
+    display: flex;
+    margin-top: 0;
+    flex: 1;
+    overflow: hidden;
+    font-family: monospace;
+    background-color: #1e1e1e;
+    color: #e4e4e4;
+}
+
+.event-view {
+    flex: 1;
+}
+
+.disassembly-view {
+    flex: 1;
+}
+
+.memory-view {
+    flex: 1;
+}

@@ -1,0 +1,49 @@
+name: run_command
+returns: runresult
+description: |
+  Runs the command specified in positional arguments. `command` can be a
+  string, or the output of [[find_program]],
+  [[files]] or [[configure_file]], or [a
+  compiler object](#compiler-object).
+
+  Returns a [[@runresult]] object containing the result
+  of the invocation. The command is run from an *unspecified* directory,
+  and Meson will set three environment variables `MESON_SOURCE_ROOT`,
+  `MESON_BUILD_ROOT` and `MESON_SUBDIR` that specify the source
+  directory, build directory and subdirectory the target was defined in,
+  respectively.
+
+  See also [External commands](External-commands.md).
+
+varargs:
+  name: command
+  type: str | file | external_program
+  description: The command to execute during the setup process.
+
+kwargs:
+  check:
+    type: bool
+    since: 0.47.0
+    default: false
+    description: |
+      If `true`, the exit status code of the command will be checked,
+      and the configuration will fail if it is non-zero. Note that
+      the default value will be `true` in future releases.
+
+  capture:
+    type: bool
+    since: 0.47.0
+    default: true
+    description: |
+      If `true`, any output generated on stdout will be captured and returned by
+      the `.stdout()` method. If it is false, then `.stdout()` will return an
+      empty string.
+
+  env:
+    type: env | list[str] | dict[str]
+    since: 0.50.0
+    description: |
+      environment variables to set,
+      such as `['NAME1=value1', 'NAME2=value2']`,
+      or an [[@env]] object which allows more sophisticated
+      environment juggling. *(Since 0.52.0)* A dictionary is also accepted.

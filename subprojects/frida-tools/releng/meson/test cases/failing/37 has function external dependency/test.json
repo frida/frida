@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/37 has function external dependency/meson.build:8:3: ERROR: Dependencies must be external dependencies"
+    }
+  ]
+}

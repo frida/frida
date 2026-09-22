@@ -1,0 +1,33 @@
+From b79f6cc4a096f6c2888f73b947b652491885896a Mon Sep 17 00:00:00 2001
+From: Xavier Claessens <xavier.claessens@collabora.com>
+Date: Fri, 30 Nov 2018 14:13:47 -0500
+Subject: [PATCH] Change foo to executable
+
+---
+ foo.c       | 4 ++++
+ meson.build | 2 +-
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/foo.c b/foo.c
+index 54f9119..468f033 100644
+--- a/foo.c
++++ b/foo.c
+@@ -1,3 +1,7 @@
+ int dummy_func(void) {
+     return 44;
+ }
++
++int main(void) {
++    return dummy_func() == 44 ? 0 : 1;
++}
+diff --git a/meson.build b/meson.build
+index 318e81d..4a281d9 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1,2 +1,2 @@
+ project('static lib patchdir', 'c')
+-libfoo = static_library('foo', 'foo.c')
++foo_exe = executable('foo', 'foo.c')
+-- 
+2.17.1
+

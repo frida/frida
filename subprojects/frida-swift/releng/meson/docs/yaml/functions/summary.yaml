@@ -1,0 +1,96 @@
+name: summary
+returns: void
+since: 0.53.0
+description: |
+  This function is used to summarize build configuration at the end of the build
+  process. This function provides a way for projects (and subprojects) to report
+  this information in a clear way.
+
+  The content is a series of key/value pairs grouped into sections. If
+  the section keyword argument is omitted, those key/value pairs are
+  implicitly grouped into a section with no title. key/value pairs can
+  optionally be grouped into a dictionary, but keep in mind that
+  dictionaries do not guarantee ordering. `key` must be string,
+  `value` can be:
+
+  - an integer, boolean or string
+  - *since 0.57.0* an external program or a dependency
+  - *since 0.58.0* a feature option
+  - a list of those.
+
+  Instead of calling summary as `summary(key, value)`, it is also possible to
+  directly pass a dictionary to the [[summary]] function, as seen in the example
+  below.
+
+  `summary()` can be called multiple times as long as the same
+  section/key pair doesn't appear twice. All sections will be collected
+  and printed at the end of the configuration in the same order as they
+  have been called.
+
+example: |
+  Example `meson.build`:
+  ```meson
+  project('My Project', version : '1.0')
+  summary({'bindir': get_option('bindir'),
+          'libdir': get_option('libdir'),
+          'datadir': get_option('datadir'),
+          }, section: 'Directories')
+  summary({'Some boolean': false,
+          'Another boolean': true,
+          'Some string': 'Hello World',
+          'A list': ['string', 1, true],
+          }, section: 'Configuration')
+  ```
+
+  Output:
+  ```
+  My Project 1.0
+
+    Directories
+      prefix         : /opt/gnome
+      bindir         : bin
+      libdir         : lib/x86_64-linux-gnu
+      datadir        : share
+
+    Configuration
+      Some boolean   : False
+      Another boolean: True
+      Some string    : Hello World
+      A list         : string
+                       1
+                       True
+  ```
+
+arg_flattening: false
+
+posargs:
+  key_or_dict:
+    type: str | dict[str | bool | int | dep | external_program | list[str | bool | int | dep | external_program]]
+    description: |
+      The name of the new entry, or a dict containing multiple entries.  If a
+      dict is passed it is equivalent to calling summary() once for each
+      key-value pair.  Keep in mind that dictionaries do not guarantee
+      ordering.
+
+optargs:
+  value:
+    type: str | bool | int | dep | external_program | list[str | bool | int | dep | external_program]
+    description: |
+      The value to print for the `key`.  Only valid if `key_or_dict` is a str.
+
+kwargs:
+  bool_yn:
+    type: bool
+    default: false
+    description: Convert bool values to yes and no
+  section:
+    type: str
+    description: The section to put this summary information under.  If the
+      section keyword argument is omitted, key/value pairs are implicitly
+      grouped into a section with no title.
+  list_sep:
+    type: str
+    since: 0.54.0
+    description: |
+      The separator to use when printing list values in this summary.  If no
+      separator is given, each list item will be printed on its own line.

@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/55 getoption prefix/meson.build:5:0: ERROR: Having a colon in option name is forbidden, projects are not allowed to directly access options of other subprojects."
+    }
+  ]
+}

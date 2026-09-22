@@ -1,0 +1,13 @@
+option(
+    'combo',
+    type : 'combo',
+    choices : ['a', 'b', 'c'],
+    value : 'a',
+)
+
+option(
+    'array',
+    type : 'array',
+    choices : ['a', 'b', 'c'],
+    value : ['a'],
+)

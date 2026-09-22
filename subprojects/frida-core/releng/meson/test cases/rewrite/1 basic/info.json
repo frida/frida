@@ -1,0 +1,57 @@
+[
+  {
+    "type": "target",
+    "target": "trivialprog0",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog1",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "exe2",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog3",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "exe4",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog5",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "exe6",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog7",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "exe8",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog9",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog10",
+    "operation": "info"
+  }
+]

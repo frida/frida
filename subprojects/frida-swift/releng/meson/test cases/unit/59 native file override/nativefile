@@ -1,0 +1,16 @@
+[paths]
+bindir = 'binfoo'
+datadir = 'datafoo'
+includedir = 'includefoo'
+infodir = 'infofoo'
+libdir = 'libfoo'
+libexecdir = 'libexecfoo'
+localedir = 'localefoo'
+localstatedir = 'localstatefoo'
+mandir = 'manfoo'
+prefix = '/prefix'
+sbindir = 'sbinfoo'
+sharedstatedir = 'sharedstatefoo'
+sysconfdir = 'sysconffoo'
+
+; vim: ft=dosini

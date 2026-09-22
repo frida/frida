@@ -1,0 +1,19 @@
+name: add_global_link_arguments
+returns: void
+description: |
+  Adds global arguments to the linker command line.
+
+  Like [[add_global_arguments]] but the arguments are passed to the linker.
+
+notes:
+  - Usually you should use [[add_project_link_arguments]] instead,
+    because that works even when you project is used as a subproject.
+  - You must pass always arguments individually `arg1, arg2, ...`
+    rather than as a string `'arg1 arg2', ...`
+
+varargs:
+  type: str
+  name: Linker argument
+  description: The linker arguments to add
+
+kwargs_inherit: add_global_arguments

@@ -1,0 +1,10 @@
+[
+  {
+    "type": "target",
+    "target": "newLib",
+    "operation": "target_add",
+    "sources": ["new1.cpp", "new2.cpp"],
+    "target_type": "shared_library",
+    "subdir": "sub2"
+  }
+]

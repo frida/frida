@@ -1,0 +1,7 @@
+{
+  "installed": [
+    {"type": "expr", "platform": "gcc", "file": "usr/lib/?libfoo.so"},
+    {"type": "file", "platform": "cygwin", "file": "usr/lib/libfoo.dll.a"},
+    {"type": "file", "file": "usr/share/gir-1.0/Foo-1.0.gir"}
+  ]
+}

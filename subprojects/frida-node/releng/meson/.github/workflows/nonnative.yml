@@ -1,0 +1,53 @@
+name: Cross-only compilation environment
+
+concurrency:
+  group: nonnative-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - master
+      # Stable branches such as 0.56 or 1.0
+      - '[0-9]+.[0-9]+'
+    paths:
+      - "mesonbuild/**"
+      - "test cases/**"
+      - ".github/workflows/nonnative.yml"
+      - "run*tests.py"
+  pull_request:
+    paths:
+      - "mesonbuild/**"
+      - "test cases/**"
+      - ".github/workflows/nonnative.yml"
+      - "run*tests.py"
+
+permissions:
+  contents: read
+
+jobs:
+  cross-only-armhf:
+    runs-on: ubuntu-latest
+    container: mesonbuild/eoan:latest
+    env:
+      MESON_CI_JOBNAME: ubuntu-${{ github.job }}
+
+    steps:
+    - run: |
+        apt-get -y purge clang gcc gdc
+        apt-get -y autoremove
+        python3 -m pip install coverage
+    - uses: actions/checkout@v3
+    - name: Run tests
+      run: bash -c 'source /ci/env_vars.sh; cd $GITHUB_WORKSPACE; ./tools/run_with_cov.py ./run_tests.py $CI_ARGS --cross ubuntu-armhf.json --cross-only'
+
+    - name: Aggregate coverage reports
+      run: ./ci/combine_cov.sh
+
+    - name: Upload coverage report
+      uses: codecov/codecov-action@v3
+      with:
+        files: .coverage/coverage.xml
+        name: "Ubuntu nonnative"
+        fail_ci_if_error: false
+        verbose: true

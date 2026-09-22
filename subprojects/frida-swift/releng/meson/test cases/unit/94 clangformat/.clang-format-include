@@ -1,0 +1,3 @@
+
+# Only reformat in src/
+src/**/*

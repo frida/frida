@@ -1,0 +1,6 @@
+#include<stdio.h>
+
+int main(void) {
+  printf("I am a program.\n");
+  return 0;
+}

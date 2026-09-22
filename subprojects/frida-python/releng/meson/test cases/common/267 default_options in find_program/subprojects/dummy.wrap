@@ -1,0 +1,5 @@
+[wrap-file]
+directory = dummy
+
+[provide]
+program_names = dummy

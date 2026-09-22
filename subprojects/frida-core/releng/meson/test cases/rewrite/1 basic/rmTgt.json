@@ -1,0 +1,17 @@
+[
+  {
+    "type": "target",
+    "target": "exe0",
+    "operation": "target_rm"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog1",
+    "operation": "target_rm"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog9",
+    "operation": "target_rm"
+  }
+]

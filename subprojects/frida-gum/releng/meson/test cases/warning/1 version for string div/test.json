@@ -1,0 +1,8 @@
+{
+  "stdout": [
+    {
+      "comment": "literal '/' appears in output, irrespective of os.path.sep, as that's the operator",
+      "line": "test cases/warning/1 version for string div/meson.build:3: WARNING: Project targets '>=0.48.0' but uses feature introduced in '0.49.0': / with string arguments."
+    }
+  ]
+}

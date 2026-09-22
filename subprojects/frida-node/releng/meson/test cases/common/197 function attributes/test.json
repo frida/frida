@@ -1,0 +1,10 @@
+{
+  "matrix": {
+    "options": {
+      "mode": [
+        { "val": "single" },
+        { "val": "parallel" }
+      ]
+    }
+  }
+}

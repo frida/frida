@@ -1,0 +1,5 @@
+{
+  "stdout": [
+    { "line": "ERROR: An exe_wrapper is needed but was not found. Please define one in cross file and check the command and/or add it to PATH." }
+  ]
+}

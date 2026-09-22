@@ -1,0 +1,5 @@
+{
+  "stdout": [
+    { "line": "test cases/failing/99 bool in combo/meson.build:1:0: ERROR: Value \"True\" (of type \"boolean\") for option \"opt\" is not one of the choices. Possible choices are (as string): \"true\", \"false\"." }
+  ]
+}

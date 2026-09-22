@@ -1,0 +1,8 @@
+{
+  "installed": [
+    {"type": "python_limited_lib", "file": "usr/@PYTHON_PLATLIB@/limited"},
+    {"type": "py_limited_implib", "file": "usr/@PYTHON_PLATLIB@/limited"},
+    {"type": "python_lib", "file": "usr/@PYTHON_PLATLIB@/not_limited"},
+    {"type": "py_implib", "file": "usr/@PYTHON_PLATLIB@/not_limited"}
+  ]
+}

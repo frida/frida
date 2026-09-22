@@ -1,0 +1,10 @@
+{
+  "matrix": {
+    "options": {
+      "testoption": [{ "val": "A string with spaces" }],
+      "other_one":  [{ "val": "true"                 }],
+      "combo_opt":  [{ "val": "one"                  }],
+      "werror":     [{ "val": "true"                 }]
+    }
+  }
+}

@@ -1,0 +1,2 @@
+[properties]
+boost_root = '@MESON_TEST_ROOT@/boost'

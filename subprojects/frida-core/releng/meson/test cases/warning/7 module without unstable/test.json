@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/warning/7 module without unstable/meson.build:3: WARNING: Project targets '>= 0.55' but uses feature introduced in '0.56.0': module keyval as stable module. Consider either adding \"unstable-\" to the module name, or updating the meson required version to \">= 0.56.0\""
+    }
+  ]
+}

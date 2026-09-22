@@ -1,0 +1,22 @@
+name: Style
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check_style:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+      - name: Find changed lines
+        id: changed_lines
+        uses: hestonhoffman/changed-lines@v1
+      - name: Verify changed lines
+        run: |
+          cat << EOF > /tmp/changed-lines.json
+          ${{ steps.changed_lines.outputs.changed_lines }}
+          EOF
+          ./tests/stylecheck.py /tmp/changed-lines.json

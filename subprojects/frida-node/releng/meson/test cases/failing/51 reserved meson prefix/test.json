@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/51 reserved meson prefix/meson.build:3:0: ERROR: The \"meson-\" prefix is reserved and cannot be used for top-level subdir()."
+    }
+  ]
+}

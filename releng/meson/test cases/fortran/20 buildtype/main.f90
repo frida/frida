@@ -1,0 +1,2 @@
+program main
+end program

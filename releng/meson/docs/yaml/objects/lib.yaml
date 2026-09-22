@@ -1,0 +1,4 @@
+name: lib
+long_name: Library target
+extends: build_tgt
+description: Represents either a shared or static library

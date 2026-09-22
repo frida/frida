@@ -1,0 +1,6 @@
+project('bar', 'c')
+bar = executable('bar', 'bar.c')
+test('Test bar', bar)
+add_test_setup('onlyinbar')
+add_test_setup('worksforall')
+add_test_setup('missingfromfoo')

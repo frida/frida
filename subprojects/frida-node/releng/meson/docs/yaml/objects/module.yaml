@@ -1,0 +1,13 @@
+name: module
+long_name: Imported module object
+description: |
+  Base type for all modules.
+
+  Modules provide their own specific implementation methods, but all modules
+  provide the following methods:
+
+methods:
+- name: found
+  returns: bool
+  since: 0.59.0
+  description: Returns `true` if the module was successfully imported, otherwise `false`.

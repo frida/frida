@@ -1,0 +1,98 @@
+name: UnusedMissingReturn
+# this workflow checks for
+# * unused input arguments
+# * missing return values
+# * strict prototypes
+# some users have default configs that will needlessly fail Meson self-tests due to these syntax.
+env:
+  CFLAGS: "-Werror=unused-parameter -Werror=return-type -Werror=strict-prototypes"
+  CPPFLAGS: "-Werror=unused-parameter -Werror=return-type"
+  FFLAGS: "-fimplicit-none"
+
+concurrency:
+  group: unusedargs-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    paths:
+    - ".github/workflows/unusedargs_missingreturn.yml"
+    - "test cases/cmake/**"
+    - "test cases/common/**"
+    - "test cases/fortran/**"
+    - "test cases/linuxlike/**"
+    - "test cases/objc/**"
+    - "test cases/objcpp/**"
+    - "test cases/windows/**"
+
+  pull_request:
+    paths:
+    - ".github/workflows/unusedargs_missingreturn.yml"
+    - "test cases/cmake/**"
+    - "test cases/common/**"
+    - "test cases/fortran/**"
+    - "test cases/linuxlike/**"
+    - "test cases/objc/**"
+    - "test cases/objcpp/**"
+    - "test cases/windows/**"
+
+permissions:
+  contents: read
+
+jobs:
+
+  linux:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    - name: Install Compilers
+      run: |
+        sudo apt update -yq
+        sudo apt install -yq --no-install-recommends g++ gfortran ninja-build gobjc gobjc++
+        python -m pip install coverage
+    - run: ./tools/run_with_cov.py run_project_tests.py --only cmake common fortran platform-linux "objective c" "objective c++"
+      env:
+        MESON_CI_JOBNAME: linux-ubuntu-gcc-werror
+
+    - name: Aggregate coverage reports
+      run: ./ci/combine_cov.sh
+
+    - name: Upload coverage report
+      uses: codecov/codecov-action@v3
+      with:
+        files: .coverage/coverage.xml
+        name: "UnusedMissingReturn"
+        fail_ci_if_error: false
+        verbose: true
+
+  windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - run: pip install ninja pefile coverage
+
+    - run: python ./tools/run_with_cov.py run_project_tests.py --only platform-windows
+      env:
+        CC: gcc
+        CXX: g++
+        FC: gfortran
+        MESON_CI_JOBNAME: msys2-gcc-werror
+
+    - name: Aggregate coverage reports
+      run: ./ci/combine_cov.sh
+      shell: C:\msys64\usr\bin\bash.exe --noprofile --norc -o igncr -eo pipefail '{0}'
+
+    - name: Upload coverage report
+      uses: codecov/codecov-action@v3
+      with:
+        files: .coverage/coverage.xml
+        name: "UnusedMissingReturn Windows"
+        fail_ci_if_error: false
+        verbose: true

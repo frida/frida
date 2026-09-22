@@ -1,0 +1,44 @@
+[package]
+name = "frida-barebone-agent"
+version = "1.0.0"
+edition = "2024"
+build = "build.rs"
+
+[lib]
+name = "frida_barebone_agent"
+path = "src/lib.rs"
+crate-type = ["rlib", "staticlib"]
+
+# The XNU flavour is a freestanding executable the host injects and calls into.
+# The Linux flavour is the staticlib above, linked into a .ko by linux/Kbuild.
+[[bin]]
+name = "frida-barebone-agent"
+path = "src/main.rs"
+required-features = ["blob"]
+
+[features]
+# Flavors the host injects and calls into, as opposed to the module Linux loads.
+blob = []
+# The XNU flavour itself, and the two ways it is packaged: a blob the host injects
+# into a running kernel, and a kext that kernel loads.
+xnu-core = []
+xnu = ["xnu-core", "blob"]
+xnu-kext = ["xnu-core"]
+win9x = ["blob"]
+winnt = ["blob"]
+linux = []
+linux-injected = ["blob"]
+
+[profile.release]
+panic = "abort"
+opt-level = "z"
+overflow-checks = false
+lto = true
+codegen-units = 1
+
+[profile.dev]
+panic = "abort"
+
+[build-dependencies]
+cc = "1.2"
+bindgen = "0.72.0"

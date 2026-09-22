@@ -1,0 +1,34 @@
+[
+  {
+    "type": "kwargs",
+    "function": "project",
+    "id": "//",
+    "operation": "set",
+    "kwargs": {
+      "version": "0.0.2",
+      "meson_version": "0.50.0",
+      "license": ["GPL", "MIT"]
+    }
+  },
+  {
+    "type": "kwargs",
+    "function": "target",
+    "id": "helloWorld",
+    "operation": "set",
+    "kwargs": {
+      "build_by_default": false,
+      "build_rpath": "/usr/local",
+      "dependencies": "dep1"
+    }
+  },
+  {
+    "type": "kwargs",
+    "function": "dependency",
+    "id": "zlib",
+    "operation": "set",
+    "kwargs": {
+      "required": true,
+      "method": "cmake"
+    }
+  }
+]

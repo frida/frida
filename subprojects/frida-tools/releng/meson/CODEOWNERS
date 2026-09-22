@@ -1,0 +1,12 @@
+* @jpakkane
+/mesonbuild/modules/pkgconfig.py @xclaesse
+/mesonbuild/modules/cmake.py @mensinda
+/mesonbuild/modules/unstable_external_project.py @xclaesse
+/mesonbuild/modules/unstable_rust.py @dcbaker
+/mesonbuild/modules/unstable_wayland.py @markbolhuis
+/mesonbuild/ast/ @mensinda
+/mesonbuild/cmake/ @mensinda
+/mesonbuild/compilers/ @dcbaker
+/mesonbuild/linkers.py @dcbaker
+/mesonbuild/mtest.py @bonzini
+/docs/refman @mensinda

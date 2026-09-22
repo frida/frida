@@ -1,0 +1,30 @@
+name: install_emptydir
+returns: void
+since: 0.60.0
+description: |
+  Installs a new directory entry to the location specified by the positional
+  argument. If the directory exists and is not empty, the contents are left in
+  place.
+
+warnings:
+  - the `install_mode` kwarg ignored integer values before 1.1.0.
+
+varargs:
+  name: dirpath
+  type: str
+  description: Directory to create during installation.
+
+kwargs:
+  install_mode:
+    type: list[str | int]
+    description: |
+      Specify the file mode in symbolic format and optionally the owner/uid and
+      group/gid for the created directory.
+
+      See the `install_mode` kwarg of [[install_data]] for more information.
+  install_tag:
+    type: str
+    description: |
+      A string used by the `meson install --tags` command to install only a
+      subset of the files. By default this directory has no install tag which
+      means it is not installed when the `--tags` argument is specified.

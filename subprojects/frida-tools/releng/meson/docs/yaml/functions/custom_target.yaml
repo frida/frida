@@ -1,0 +1,234 @@
+name: custom_target
+returns: custom_tgt
+description: |
+  Create a custom top level build target. The only positional argument
+  is the name of this target and cannot contain path separators (`/` or `\`).
+  The name of custom target might not be used by every backends, for instance with
+  the Ninja backend, `subdir/meson.build` containing the example below,
+  `ninja -C builddir foo` or `ninja -C builddir subdir/foo` won't work,
+  it is instead `ninja -C builddir subdir/file.txt`. However, `meson compile subdir/foo`
+  is accepted.
+  ```meson
+  custom_target('foo', output: 'file.txt', ...)
+  ```
+
+  *Since 0.60.0* the name argument is optional and defaults to the basename of the first
+  output (`file.txt` in the example above).
+
+  The list of strings passed to the `command` keyword argument accept
+  the following special string substitutions:
+
+  - `@INPUT@`: the full path to the input passed to `input`. If more than
+    one input is specified, all of them will be substituted as separate
+    arguments only if the command uses `'@INPUT@'` as a
+    standalone-argument. For instance, this would not work: `command :
+    ['cp', './@INPUT@']`, but this would: `command : ['cp', '@INPUT@']`.
+  - `@OUTPUT@`: the full path to the output passed to `output`. If more
+    than one outputs are specified, the behavior is the same as
+    `@INPUT@`.
+  - `@INPUT0@` `@INPUT1@` `...`: the full path to the input with the specified array index in `input`
+  - `@OUTPUT0@` `@OUTPUT1@` `...`: the full path to the output with the specified array index in `output`
+  - `@OUTDIR@`: the full path to the directory where the output(s) must be written
+  - `@DEPFILE@`: the full path to the dependency file passed to `depfile`
+  - `@PLAINNAME@`: the input filename, without a path
+  - `@BASENAME@`: the input filename, with extension removed
+  - `@PRIVATE_DIR@` *(since 0.50.1)*: path to a directory where the custom target must store all its intermediate files.
+  - `@SOURCE_ROOT@`: the path to the root of the source tree. Depending on the backend,
+    this may be an absolute or a relative to current workdir path.
+  - `@BUILD_ROOT@`: the path to the root of the build tree. Depending on the backend,
+    this may be an absolute or a relative to current workdir path.
+  - `@CURRENT_SOURCE_DIR@`: this is the directory where the currently
+    processed meson.build is located in.  Depending on the backend,
+    this may be an absolute or a relative to current workdir path.
+
+  *(since 0.47.0)* The `depfile` keyword argument also accepts the
+  `@BASENAME@` and `@PLAINNAME@` substitutions.
+
+  The returned object also has methods that are documented in [[@custom_tgt]].
+
+notes:
+  - |
+    Assuming that `command:` is executed by a POSIX `sh` shell
+    is not portable, notably to Windows. Instead, consider using a
+    `native: true` [[executable]], or a python script.
+
+warnings:
+  - the `install_mode` kwarg ignored integer values between 0.60.0 -- 1.1.0.
+
+optargs:
+  name:
+    type: str
+    description: |
+      The *unique* id of the custom target
+
+      This posarg is optional *since 0.60.0*. It defaults to the basename
+      of the first output.
+
+kwargs:
+  build_by_default:
+    type: bool
+    since: 0.38.0
+    description: |
+      Causes, when set to true, to
+      have this target be built by default. This means it will be built when
+      `meson compile` is called without any arguments. The default value is `false`.
+
+      *(since 0.50.0)* If `build_by_default` is explicitly set to false, `install`
+      will no longer override it. If `build_by_default` is not set, `install` will
+      still determine its default.
+
+  build_always:
+    type: bool
+    deprecated: 0.47.0
+    description: |
+      If `true` this target is always considered out of
+      date and is rebuilt every time.  Equivalent to setting both
+      `build_always_stale` and `build_by_default` to true.
+
+  build_always_stale:
+    type: bool
+    since: 0.47.0
+    default: false
+    description: |
+      If `true` the target is always considered out of date.
+      Useful for things such as build timestamps or revision control tags.
+      The associated command is run even if the outputs are up to date.
+
+  capture:
+    type: bool
+    default: false
+    description: |
+      There are some compilers that can't be told to write
+      their output to a file but instead write it to standard output. When
+      this argument is set to true, Meson captures `stdout` and writes it
+      to the target file. Note that your command argument list may not
+      contain `@OUTPUT@` when capture mode is active.
+
+  console:
+    type: bool
+    since: 0.48.0
+    description: |
+      Keyword argument conflicts with `capture`, and is meant
+      for commands that are resource-intensive and take a long time to
+      finish. With the Ninja backend, setting this will add this target
+      to [Ninja's `console` pool](https://ninja-build.org/manual.html#_the_literal_console_literal_pool),
+      which has special properties such as not buffering stdout and
+      serializing all targets in this pool.
+
+  command:
+    type: list[str | file | exe | external_program]
+    description: |
+      Command to run to create outputs from inputs. The command
+      may be strings or the return value of functions that return file-like
+      objects such as [[find_program]],
+      [[executable]], [[configure_file]],
+      [[files]], [[custom_target]], etc.
+      Meson will automatically insert the appropriate dependencies on
+      targets and files listed in this keyword argument.
+      Note: always specify commands in array form `['commandname',
+      '-arg1', '-arg2']` rather than as a string `'commandname -arg1
+      -arg2'` as the latter will *not* work.
+
+  depend_files:
+    type: list[str | file]
+    description: |
+      files ([[@str]],
+      [[@file]], or the return value of [[configure_file]] that
+      this target depends on but are not listed in the `command` keyword
+      argument. Useful for adding regen dependencies.
+
+  depends:
+    type: list[build_tgt | custom_tgt]
+    description: |
+      Specifies that this target depends on the specified
+      target(s), even though it does not take any of them as a command
+      line argument. This is meant for cases where you have a tool that
+      e.g. does globbing internally. Usually you should just put the
+      generated sources as inputs and Meson will set up all dependencies
+      automatically.
+
+  depfile:
+    type: str
+    description: |
+      A dependency file that the command can write listing
+      all the additional files this target depends on, for example a C
+      compiler would list all the header files it included, and a change
+      in any one of these files triggers a recompilation.
+
+      *(since 0.47.0)* the `@BASENAME@` and `@PLAINNAME@` substitutions
+      are also accepted.
+
+  input:
+    type: list[str | file]
+    description: List of source files. *(since 0.41.0)* the list is flattened.
+
+  install:
+    type: bool
+    description: When true, one or more files of this target are installed during
+      the install step (see `install_dir` for details).
+
+  install_dir:
+    type: str | list[str | bool]
+    description: |
+      If only one install_dir is provided, all outputs are installed there.
+      *Since 0.40.0* Allows you to specify the installation directory for each
+      corresponding output. For example:
+      ```meson
+      custom_target('different-install-dirs',
+        output : ['first.file', 'second.file'],
+        install : true,
+        install_dir : ['somedir', 'otherdir'])
+      ```
+      This would install `first.file` to `somedir` and `second.file` to `otherdir`.
+
+      To only install some outputs, pass `false` for the outputs that you
+      don't want installed. For example:
+      ```meson
+          custom_target('only-install-second',
+            output : ['first.file', 'second.file'],
+            install : true,
+            install_dir : [false, 'otherdir'])
+      ```
+      This would install `second.file` to `otherdir` and not install `first.file`.
+
+  install_mode:
+    type: list[str | int]
+    since: 0.47.0
+    description: |
+      The file mode and optionally the owner/uid and group/gid.
+      See the `install_mode` kwarg of [[install_data]] for more information.
+
+  install_tag:
+    type: list[str]
+    since: 0.60.0
+    description: |
+      A list of strings, one per output, used by the `meson install --tags` command
+      to install only a subset of the files.
+
+      By default all outputs have no install tag which means they are not being
+      installed when `--tags` argument is specified. If only one tag is specified,
+      it is assumed that all outputs have the same tag. `false` can be used for
+      outputs that have no tag or are not installed.
+
+  output:
+    type: list[str]
+    description: List of output files.
+
+  env:
+    since: 0.57.0
+    type: env | list[str] | dict[str]
+    description: |
+      environment variables to set, such as
+      `{'NAME1': 'value1', 'NAME2': 'value2'}` or `['NAME1=value1', 'NAME2=value2']`,
+      or an [[@env]] object which allows more
+      sophisticated environment juggling.
+
+  feed:
+    type: bool
+    since: 0.59.0
+    default: false
+    description: |
+      There are some compilers that can't be told to read
+      their input from a file and instead read it from standard input. When this
+      argument is set to `true`, Meson feeds the input file to `stdin`. Note that
+      your argument list may not contain `@INPUT@` when feed mode is active.

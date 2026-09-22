@@ -1,0 +1,8 @@
+{
+  "matrix": {
+    "options": {
+      "c_args":      [{ "val": "-funroll-loops" }],
+      "c_link_args": [{ "val": "-Dtest_harmless_but_useless_link_arg"   }]
+    }
+  }
+}

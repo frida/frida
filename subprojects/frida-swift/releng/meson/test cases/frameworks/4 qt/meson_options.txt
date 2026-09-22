@@ -1,0 +1,2 @@
+option('method', type : 'string', value : 'auto', description : 'The method to use to find Qt')
+option('required', type : 'string', value : 'qt5', description : 'The version of Qt which is required to be present')

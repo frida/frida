@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "WARNING: Build target no sources has no sources. This was never supposed to be allowed but did because of a bug, support will be removed in a future release of Meson"
+    }
+  ]
+}

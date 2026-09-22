@@ -1,0 +1,56 @@
+name: shared_library
+returns: lib
+description: Builds a shared library with the given sources.
+
+posargs_inherit: _build_target_base
+varargs_inherit: _build_target_base
+kwargs_inherit: _build_target_base
+
+kwargs:
+  version:
+    type: str
+    description: |
+      A string specifying the version of this shared library,
+      such as `1.1.0`. On Linux and OS X, this is used to set the shared
+      library version in the filename, such as `libfoo.so.1.1.0` and
+      `libfoo.1.1.0.dylib`. If this is not specified, `soversion` is used
+      instead (see above).
+
+  soversion:
+    type: str | int
+    description: |
+      A string or integer specifying the soversion of this shared library,
+      such as `0`. On Linux and Windows this is used to set the
+      soversion (or equivalent) in the filename. For example, if
+      `soversion` is `4`, a Windows DLL will be called `foo-4.dll` and one
+      of the aliases of the Linux shared library would be
+      `libfoo.so.4`. If this is not specified, the first part of `version`
+      is used instead (see below). For example, if `version` is `3.6.0` and
+      `soversion` is not defined, it is set to `3`.
+
+  darwin_versions:
+    type: str | int | list[str]
+    since: 0.48.0
+    description: |
+      Defines the `compatibility version` and `current version` for the dylib on macOS.
+      If a list is specified, it must be
+      either zero, one, or two elements. If only one element is specified
+      or if it's not a list, the specified value will be used for setting
+      both compatibility version and current version. If unspecified, the
+      `soversion` will be used as per the aforementioned rules.
+
+  vs_module_defs:
+    type: str | file | custom_tgt | custom_idx
+    description: |
+      Specify a Microsoft module definition file for controlling symbol exports,
+      etc., on platforms where that is possible (e.g. Windows).
+
+      *(Since 1.3.0)* [[@custom_idx]] are supported
+
+  rust_abi:
+    type: str
+    since: 1.3.0
+    description: |
+      Set the specific ABI to compile (when compiling rust).
+      - 'rust' (default): Create a "dylib" crate.
+      - 'c': Create a "cdylib" crate.

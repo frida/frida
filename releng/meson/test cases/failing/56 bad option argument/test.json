@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/56 bad option argument/meson_options.txt:1:0: ERROR: string option got unknown keyword arguments \"value_\""
+    }
+  ]
+}

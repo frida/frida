@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="console-application">
+  <id>com.mesonbuild.test.intlprog</id>
+
+  <name>Test</name>
+  <summary>Application</summary>
+
+  <metadata_license>FSFAP</metadata_license>
+  <project_license>FSFAP</project_license>
+
+  <description>
+    <p>
+      Test Application
+    </p>
+    <p>
+      International greeting.
+    </p>
+    <p>
+      This is <code>text</code> with <em>embedded XML tags</em>. Nice!
+    </p>
+  </description>
+
+  <icon type="stock">meson-unittest-intlprog</icon>
+
+  <categories>
+    <category>Development</category>
+    <category>Building</category>
+  </categories>
+
+  <provides>
+    <binary>intlprog</binary>
+  </provides>
+</component>

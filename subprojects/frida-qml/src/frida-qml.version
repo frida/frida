@@ -1,0 +1,8 @@
+{
+  global:
+    qt_plugin_query_metadata_v2;
+    qt_plugin_instance;
+
+  local:
+    *;
+};

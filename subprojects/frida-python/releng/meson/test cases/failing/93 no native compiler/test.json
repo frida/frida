@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/93 no native compiler/meson.build:12:0: ERROR: No host machine compiler for \"main.c\""
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/bin/prog.exe"},
+    {"type": "pdb", "file": "usr/bin/prog"},
+    {"type": "file", "file": "usr/bin/prog2.exe"},
+    {"type": "pdb", "file": "usr/bin/prog2"},
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libprog.exe.a"},
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libburble.a"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/prog.exe.lib"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/burble.lib"}
+  ]
+}

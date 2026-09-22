@@ -1,0 +1,17 @@
+{
+    "name": "repl-agent",
+    "version": "1.0.0",
+    "description": "Agent used by the Frida REPL",
+    "private": true,
+    "main": "agent.ts",
+    "type": "module",
+    "scripts": {
+        "build": "frida-compile agent.ts -S -c -o ../../frida_tools/repl_agent.js",
+        "watch": "frida-compile agent.ts -w -o ../../frida_tools/repl_agent.js"
+    },
+    "devDependencies": {
+        "@types/frida-gum": "^19.0.0",
+        "@types/node": "^18.11.9",
+        "frida-compile": "^17.0.0"
+    }
+}

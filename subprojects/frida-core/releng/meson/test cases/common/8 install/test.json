@@ -1,0 +1,9 @@
+{
+  "installed": [
+    { "type": "exe",  "file": "usr/bin/prog"           },
+    { "type": "pdb",  "file": "usr/bin/prog"           },
+    { "type": "file", "file": "usr/share/dir/file.txt" },
+    { "type": "file", "file": "usr/libtest/libstat.a"  }
+  ],
+  "do_not_set_opts": ["libdir"]
+}

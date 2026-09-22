@@ -1,0 +1,16 @@
+{
+  "installed": [
+    {"type": "expr", "file": "usr/lib/?libinstalled_vala_lib.so"},
+    {"type": "file", "platform": "cygwin", "file": "usr/lib/libinstalled_vala_lib.dll.a"},
+    {"type": "expr", "file": "usr/lib/?libinstalled_vala_all.so"},
+    {"type": "file", "platform": "cygwin", "file": "usr/lib/libinstalled_vala_all.dll.a"},
+    {"type": "file", "file": "usr/include/installed_vala_all.h"},
+    {"type": "file", "file": "usr/include/valah/installed_vala_all_nolib.h"},
+    {"type": "file", "file": "usr/include/installed_vala_onlyh.h"},
+    {"type": "file", "file": "usr/share/vala/vapi/installed_vala_all.vapi"},
+    {"type": "file", "file": "usr/share/vala-1.0/vapi/installed_vala_all_nolib.vapi"},
+    {"type": "file", "file": "usr/share/vala/vapi/installed_vala_onlyvapi.vapi"},
+    {"type": "python_file", "file": "usr/@PYTHON_PURELIB@/source.py"},
+    {"type": "python_bytecode", "file": "usr/@PYTHON_PURELIB@/source.py"}
+  ]
+}

@@ -1,0 +1,4 @@
+ftdetect sets the filetype
+ftplugin sets Meson indentation rules
+indent does Meson indentation
+syntax does Meson syntax highlighting

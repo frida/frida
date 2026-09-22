@@ -1,0 +1,12 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/lib/libsome.dylib"},
+    {"type": "file", "file": "usr/lib/libsome.7.dylib"},
+    {"type": "file", "file": "usr/lib/libnoversion.dylib"},
+    {"type": "file", "file": "usr/lib/libonlyversion.dylib"},
+    {"type": "file", "file": "usr/lib/libonlyversion.1.dylib"},
+    {"type": "file", "file": "usr/lib/libonlysoversion.dylib"},
+    {"type": "file", "file": "usr/lib/libonlysoversion.5.dylib"},
+    {"type": "file", "file": "usr/lib/libmodule.dylib"}
+  ]
+}

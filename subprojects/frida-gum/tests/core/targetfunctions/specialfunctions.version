@@ -1,0 +1,7 @@
+{
+  global:
+    gum_test_special_function;
+
+  local:
+    *;
+};

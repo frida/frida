@@ -1,0 +1,36 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/include/simple.h"},
+    {"type": "file", "file": "usr/include/inc1.h"},
+    {"type": "file", "file": "usr/include/inc2.h"},
+    {"type": "file", "file": "usr/lib/libstat2.a"},
+    {"type": "file", "file": "usr/lib/pkgconfig/simple.pc"},
+    {"type": "file", "file": "usr/lib/pkgconfig/libanswer.pc"},
+    {"type": "file", "file": "usr/lib/pkgconfig/libfoo.pc"},
+    {"type": "file", "file": "usr/lib/pkgconfig/libhello.pc"},
+    {"type": "file", "file": "usr/lib/pkgconfig/libvartest.pc"},
+    {"type": "file", "file": "usr/lib/pkgconfig/libvartest2.pc"},
+    {"type": "file", "file": "usr/lib/pkgconfig/libvartest3.pc"},
+    {"type": "file", "file": "usr/lib/pkgconfig/simple2.pc"},
+    {"type": "file", "file": "usr/lib/pkgconfig/simple3.pc"},
+    {"type": "file", "file": "usr/lib/pkgconfig/simple5.pc"},
+    {"type": "file", "file": "usr/lib/pkgconfig/simple6.pc"},
+    {"type": "file", "file": "usr/lib/pkgconfig/simple7.pc"},
+    {"type": "file", "file": "usr/lib/pkgconfig/ct.pc"},
+    {"type": "file", "file": "usr/lib/pkgconfig/ct0.pc"},
+    {"type": "file", "file": "usr/share/pkgconfig/libhello_nolib.pc"}
+  ],
+  "stdout": [
+    {
+      "line": "test cases/common/44 pkgconfig-gen/meson.build:160: WARNING: Project targets '>=0.60.0' but uses feature introduced in '0.62.0': pkgconfig.generate implicit variable for builtin directories."
+    },
+    {
+      "line": "test cases/common/44 pkgconfig-gen/meson.build:170: WARNING: Project targets '>=0.60.0' but uses feature introduced in '0.62.0': pkgconfig.generate implicit variable for builtin directories.",
+      "count": 0
+    },
+    {
+      "comment": "This will either match in the future-deprecated notice summary, or match the warning summary",
+      "line": " * 0.62.0: {'pkgconfig.generate variable for builtin directories'}"
+    }
+  ]
+}

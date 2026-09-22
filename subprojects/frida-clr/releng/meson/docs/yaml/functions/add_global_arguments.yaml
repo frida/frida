@@ -1,0 +1,38 @@
+name: add_global_arguments
+returns: void
+description: Adds global arguments to the compiler command line.
+
+notes:
+  - Usually you should use [[add_project_arguments]] instead,
+    because that works even when you project is used as a subproject.
+  - You must pass always arguments individually `arg1, arg2, ...`
+    rather than as a string `'arg1 arg2', ...`
+
+varargs:
+  type: str
+  name: Compiler argument
+  description: The compiler arguments to add
+
+kwargs:
+  language:
+    type: list[str]
+    required: true
+    description: |
+      Specifies the language(s) that the arguments should be
+      applied to. If a list of languages is given, the arguments are added
+      to each of the corresponding compiler command lines. Note that there
+      is no way to remove an argument set in this way. If you have an
+      argument that is only used in a subset of targets, you have to specify
+      it in per-target flags.
+
+  native:
+    type: bool
+    default: false
+    since: 0.48.0
+    description: |
+      A boolean specifying whether the arguments should be
+      applied to the native or cross compilation. If `true` the arguments
+      will only be used for native compilations. If `false` the arguments
+      will only be used in cross compilations. If omitted, the flags are
+      added to native compilations if compiling natively and cross
+      compilations (only) when cross compiling.

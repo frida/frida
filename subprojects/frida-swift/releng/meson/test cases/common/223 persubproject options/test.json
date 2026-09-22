@@ -1,0 +1,7 @@
+{
+    "matrix": {
+        "options": {
+            "default_library": [ { "val": "both" } ]
+        }
+    }
+}

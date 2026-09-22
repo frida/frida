@@ -1,0 +1,4 @@
+option('bool', type: 'boolean', value: false)
+option('int', type: 'integer', value: 0)
+option('str', type: 'string', value: 'bar')
+option('array', type: 'array', value: ['bar'])

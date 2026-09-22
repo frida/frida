@@ -1,0 +1,13 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/lib/girepository-1.0/Meson-1.0.typelib"},
+    {"type": "file", "file": "usr/lib/girepository-1.0/MesonSub-1.0.typelib"},
+    {"type": "file", "file": "usr/share/gir-1.0/Meson-1.0.gir"},
+    {"type": "file", "file": "usr/share/gir-1.0/MesonSub-1.0.gir"},
+    {"type": "expr", "file": "usr/lib/?libgirsubproject.so"},
+    {"type": "file", "platform": "cygwin", "file": "usr/lib/libgirlib.dll.a"},
+    {"type": "expr", "file": "usr/lib/?libgirlib.so"},
+    {"type": "file", "platform": "cygwin", "file": "usr/lib/libgirsubproject.dll.a"}
+  ],
+  "expect_skip_on_jobname": ["azure", "cygwin", "macos", "msys2", "pypy"]
+}

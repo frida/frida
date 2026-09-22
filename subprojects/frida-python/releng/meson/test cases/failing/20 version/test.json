@@ -1,0 +1,8 @@
+{
+  "stdout": [
+    {
+      "match": "re",
+      "line": "test cases/failing/20 version/meson\\.build:1:44: ERROR: Meson version is .* but project requires >100\\.0\\.0"
+    }
+  ]
+}

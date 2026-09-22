@@ -1,0 +1,13 @@
+{
+  "matrix": {
+    "options": {
+      "python": [
+        { "val": null },
+        { "val": "python2" },
+        { "val": "python3" },
+        { "val": "pypy" },
+        { "val": "pypy3" }
+      ]
+    }
+  }
+}

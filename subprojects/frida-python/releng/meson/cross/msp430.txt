@@ -1,0 +1,25 @@
+# This file assumes that path to the Texas Instruments MSP430 toolchain is added
+# to the environment(PATH) variable, so that Meson can find
+# cl430 and ar430 while building.
+[binaries]
+c      = cl430
+ar     = ar430
+strip  = strip430
+
+[host_machine]
+system = 'baremetal'
+cpu_family = 'msp430'
+endian = 'little'
+
+[built-in options]
+c_args = [
+    '-vmsp',
+    '--printf_support=minimal']
+c_link_args = [
+    '--rom_model',
+    '-llibc.a',]
+cpp_args = []
+cpp_link_args = []
+
+[properties]
+needs_exe_wrapper = true

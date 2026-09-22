@@ -1,0 +1,58 @@
+name: external_program
+long_name: External program
+description: Opaque object representing an external program
+
+methods:
+- name: found
+  returns: bool
+  description: Returns whether the executable was found.
+
+- name: path
+  returns: str
+  deprecated: 0.55.0
+  description: |
+    *Deprecated:* Use [[external_program.full_path]] instead.
+
+    Returns a string pointing to the script or executable.
+
+    **NOTE:** You should not usually need to use this method. Passing the
+    object itself should work in most contexts where a program can appear,
+    and allows Meson to setup inter-target dependencies correctly (for
+    example in cases where a program might be overridden by a [[@build_tgt]]).
+    Only use this if you specifically need a string, such as when embedding
+    a program path into a header file, or storing it into an environment
+    variable.
+
+    For example:
+
+    ```meson
+    run_command(find_program('foo'), 'arg1', 'arg2')
+    ```
+
+- name: version
+  returns: str
+  since: 0.62.0
+  description: |
+    The version number as a string, for example `1.2.8`.
+
+    `unknown` if the program cannot determine the version via a `--version` argument.
+
+- name: full_path
+  returns: str
+  since: 0.55.0
+  description: |
+    Returns a string pointing to the script or executable.
+
+    **NOTE:** You should not usually need to use this method. Passing the
+    object itself should work in most contexts where a program can appear,
+    and allows Meson to setup inter-target dependencies correctly (for
+    example in cases where a program might be overridden by a [[@build_tgt]]).
+    Only use this if you specifically need a string, such as when embedding
+    a program path into a header file, or storing it into an environment
+    variable.
+
+    For example:
+
+    ```meson
+    run_command(find_program('foo'), 'arg1', 'arg2')
+    ```

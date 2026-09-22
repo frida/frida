@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/90 add dict non string key/meson.build:9:9: ERROR: Key must be a string"
+    }
+  ]
+}

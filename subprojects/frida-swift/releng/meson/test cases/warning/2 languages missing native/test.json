@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/warning/2 languages missing native/meson.build:3: WARNING: add_languages is missing native:, assuming languages are wanted for both host and build."
+    }
+  ]
+}

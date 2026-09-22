@@ -1,0 +1,55 @@
+name: run_target
+returns: run_tgt
+description: |
+  This function creates a new top-level target that runs a specified
+  command with the specified arguments. Like all top-level targets, this
+  integrates with the selected backend. For instance, you can run it as
+  `meson compile target_name`. Note that a run target produces no output
+  as far as Meson is concerned. It is only meant for tasks such as
+  running a code formatter or flashing an external device's firmware
+  with a built file.
+
+  The command is run from an *unspecified* directory, and Meson will set
+  three environment variables `MESON_SOURCE_ROOT`, `MESON_BUILD_ROOT`
+  and `MESON_SUBDIR` that specify the source directory, build directory
+  and subdirectory the target was defined in, respectively.
+
+  *Since 0.57.0* The template strings passed to `command` keyword arguments accept
+  the following special substitutions:
+  - `@SOURCE_ROOT@`: the path to the root of the source tree. Depending on the backend,
+    this may be an absolute or a relative to current workdir path.
+  - `@BUILD_ROOT@`: the path to the root of the build tree. Depending on the backend,
+    this may be an absolute or a relative to current workdir path.
+  - `@CURRENT_SOURCE_DIR@` *Since 0.57.1*: this is the directory where the currently
+    processed meson.build is located in. Depending on the backend,
+    this may be an absolute or a relative to current workdir path.
+
+posargs:
+  target_name:
+    type: str
+    description: The name of the run target
+
+kwargs:
+  command:
+    type: list[exe| external_program | custom_tgt | file | str]
+    description: |
+      A list containing the command to run and the arguments
+      to pass to it. Each list item may be a string or a target. For
+      instance, passing the return value of [[executable]]
+      as the first item will run that executable, or passing a string as
+      the first item will find that command in `PATH` and run it.
+
+  depends:
+    type: list[build_tgt | custom_tgt]
+    description: |
+      A list of targets that this target depends on but which
+      are not listed in the command array (because, for example, the
+      script does file globbing internally)
+
+  env:
+    since: 0.57.0
+    type: env | list[str] | dict[str]
+    description: |
+      environment variables to set, such as
+      `{'NAME1': 'value1', 'NAME2': 'value2'}` or `['NAME1=value1', 'NAME2=value2']`,
+      or an [[@env]] object which allows more sophisticated environment juggling.

@@ -1,0 +1,4 @@
+This is a data file to be installed in a subdirectory.
+
+It is installed from a different subdir to test that the
+installer strips the source tree dir prefix.

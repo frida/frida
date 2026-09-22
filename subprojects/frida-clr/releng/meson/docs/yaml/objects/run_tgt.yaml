@@ -1,0 +1,4 @@
+name: run_tgt
+long_name: Run target
+description: Opaque object returned by [[run_target]].
+extends: tgt

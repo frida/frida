@@ -1,0 +1,87 @@
+name: declare_dependency
+returns: dep
+description: |
+  This function returns a [[@dep]] object that
+  behaves like the return value of [[dependency]] but is
+  internal to the current build. The main use case for this is in
+  subprojects. This allows a subproject to easily specify how it should
+  be used. This makes it interchangeable with the same dependency that
+  is provided externally by the system.
+
+kwargs:
+  compile_args:
+    type: list[str]
+    description: Compile arguments to use.
+
+  dependencies:
+    type: list[dep]
+    description: Other dependencies needed to use this dependency.
+
+  include_directories:
+    type: list[inc | str]
+    description: |
+      the directories to add to header search path,
+      must be [[@inc]] objects or *(since 0.50.0)* plain strings.
+
+  link_args:
+    type: list[str]
+    description: Link arguments to use.
+
+  link_with:
+    type: list[lib]
+    description: Libraries to link against.
+
+  link_whole:
+    type: list[lib]
+    since: 0.46.0
+    description: Libraries to link fully, same as [[executable]].
+
+  sources:
+    type: list[str | file | custom_tgt | custom_idx | generated_list]
+    description: |
+      sources to add to targets
+      (or generated header files
+      that should be built before sources including them are built)
+
+  extra_files:
+    type: list[str | file]
+    since: 1.2.0
+    description: |
+      extra files to add to targets.
+      mostly used for IDE integration.
+      
+  version:
+    type: str
+    description: |
+      the version of this dependency,
+      such as `1.2.3`. Defaults to the project version.
+
+  variables:
+    type: dict[str] | list[str]
+    since: 0.54.0
+    description: |
+      a dictionary of arbitrary strings,
+      this is meant to be used
+      in subprojects where special variables would be provided via cmake or
+      pkg-config. *since 0.56.0* it can also be a list of `'key=value'` strings.
+
+  d_module_versions:
+    type: str | int | list[str | int]
+    since: 0.62.0
+    description: |
+      The [D version identifiers](https://dlang.org/spec/version.html#version) to add
+      during the compilation of D source files.
+
+  d_import_dirs:
+    type: list[inc | str]
+    since: 0.62.0
+    description: |
+      the directories to add to the string search path (i.e. `-J` switch for DMD).
+      Must be [[@inc]] objects or plain strings.
+
+  objects:
+    type: list[extracted_obj]
+    since: 1.1.0
+    description: |
+      a list of object files, to be linked directly into the targets that use the
+      dependency.

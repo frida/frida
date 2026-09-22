@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/81 dub executable/meson.build:11:0: ERROR: Dependency \"dubtestproject:test1\" not found"
+    }
+  ]
+}

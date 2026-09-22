@@ -1,0 +1,2 @@
+subdir('dbghelp')
+subdir('symsrv')

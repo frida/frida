@@ -1,0 +1,153 @@
+name: configure_file
+returns: file
+description: |
+  This function can run in three modes depending on the keyword arguments
+  passed to it.
+
+  When a [[@cfg_data]] object is passed
+  to the `configuration:` keyword argument, it takes a template file as
+  the `input:` (optional) and produces the `output:` (required) by
+  substituting values from the configuration data as detailed in [the
+  configuration file documentation](Configuration.md). *(since 0.49.0)*
+  A dictionary can be passed instead of a
+  [[@cfg_data]] object.
+
+  When a list of strings is passed to the `command:` keyword argument,
+  it takes any source or configured file as the `input:` and assumes
+  that the `output:` is produced when the specified command is run.
+
+  *(since 0.47.0)* When the `copy:` keyword argument is set to `true`,
+  this function will copy the file provided in `input:` to a file in the
+  build directory with the name `output:` in the current directory.
+
+warnings:
+  - the `install_mode` kwarg ignored integer values between 0.62 -- 1.1.0.
+
+kwargs:
+  capture:
+    type: bool
+    since: 0.41.0
+    default: false
+    description: |
+      When this argument is set to true,
+      Meson captures `stdout` of the `command` and writes it to the target
+      file specified as `output`.
+
+  command:
+    type: list[str | file]
+    description: |
+      As explained above, if specified, Meson does not create
+      the file itself but rather runs the specified command, which allows
+      you to do fully custom file generation. *(since 0.52.0)* The command can contain
+      file objects and more than one file can be passed to the `input` keyword
+      argument, see [[custom_target]] for details about string
+      substitutions.
+
+  configuration:
+    type: "cfg_data | dict[str | int | bool]"
+    description: |
+      As explained above, when passed this will provide the replacement
+      data for the input file (if provided) or key value pairs to be
+      written to the output.
+
+  copy:
+    type: bool
+    default: false
+    since: 0.47.0
+    description: |
+      As explained above, if specified Meson only
+      copies the file from input to output.
+
+  depfile:
+    type: str
+    since: 0.52.0
+    description: |
+      A dependency file that the command can write listing
+      all the additional files this target depends on. A change
+      in any one of these files triggers a reconfiguration.
+
+  format:
+    type: str
+    since: 0.46.0
+    default: "'meson'"
+    description: |
+      The format of defines. It defaults to `'meson'`, and so substitutes
+      `#mesondefine` statements and variables surrounded by `@` characters, you can also use `'cmake'`
+      to replace `#cmakedefine` statements and variables with the `${variable}` syntax. Finally you can use
+      `'cmake@'` in which case substitutions will apply on `#cmakedefine` statements and variables with
+      the `@variable@` syntax.
+
+  input:
+    type: str | file
+    description: |
+      The input file name. If it's not specified in configuration
+      mode, all the variables in the `configuration:` object (see above)
+      are written to the `output:` file.
+
+  install:
+    type: bool
+    default: false
+    since: 0.50.0
+    description: |
+      When true, this generated file is installed during
+      the install step, and `install_dir` must be set and not empty. When false, this
+      generated file is not installed regardless of the value of `install_dir`.
+      When omitted it defaults to true when `install_dir` is set and not empty,
+      false otherwise.
+
+  install_dir:
+    type: str
+    description: |
+      The subdirectory to install the generated file to
+      (e.g. `share/myproject`), if omitted or given the value of empty
+      string, the file is not installed.
+
+  install_mode:
+    type: list[str | int]
+    since: 0.47.0
+    description: |
+      Specify the file mode in symbolic format
+      and optionally the owner/uid and group/gid for the installed files.
+
+      See the `install_mode` kwarg of [[install_data]] for more information.
+
+  install_tag:
+    type: str
+    since: 0.60.0
+    description: |
+      A string used by the `meson install --tags` command
+      to install only a subset of the files. By default the file has no install
+      tag which means it is not being installed when `--tags` argument is specified.
+
+  output:
+    type: str
+    description: |
+      The output file name. *(since 0.41.0)* may contain
+      `@PLAINNAME@` or `@BASENAME@` substitutions. In configuration mode,
+      the permissions of the input file (if it is specified) are copied to
+      the output file.
+
+  output_format:
+    type: str
+    since: 0.47.0
+    description: |
+      The format of the output to generate when no input
+      was specified. It defaults to `c`, in which case preprocessor directives
+      will be prefixed with `#`, you can also use `nasm`, in which case the
+      prefix will be `%`. *(since 1.3.0)* `json` format can also be used.
+
+  encoding:
+    type: str
+    default: "'utf-8'"
+    since: 0.47.0
+    description: |
+      Set the file encoding for the input and output file.
+      The supported encodings are those of python3, see
+      [standard-encodings](https://docs.python.org/3/library/codecs.html#standard-encodings).
+
+  macro_name:
+    type: str
+    since: 1.3.0
+    description: |
+      When specified, macro guards will be used instead of '#pragma once'. The
+      macro guard name will be the specified name.

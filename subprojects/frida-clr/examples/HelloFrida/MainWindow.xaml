@@ -1,0 +1,40 @@
+﻿<Window x:Class="HelloFrida.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Hello Frida" Height="580" Width="644">
+    <Window.Resources>
+        <DataTemplate x:Key="DeviceTemplate">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="{Binding Icon}"
+                       Width="{Binding Icon.Width}"
+                       Height="{Binding Icon.Height}"/>
+                <TextBlock Text="{Binding Name}"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="ProcessTemplate">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="{Binding Icons[0]}"
+                       Width="{Binding Icons[0].Width}"
+                       Height="{Binding Icons[0].Height}"/>
+                <TextBlock Text="{Binding Name}"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>
+    <Grid>
+        <ListView Height="69" HorizontalAlignment="Left" Margin="12,12,0,0" Name="deviceList" VerticalAlignment="Top" Width="269" ItemsSource="{Binding Devices}" ItemTemplate="{StaticResource DeviceTemplate}" SelectionChanged="deviceList_SelectionChanged" />
+        <Button Content="Refresh" Height="23" HorizontalAlignment="Left" Margin="287,12,0,0" Name="refreshButton" VerticalAlignment="Top" Width="93" Click="refreshButton_Click" />
+        <ListView HorizontalAlignment="Left" Margin="12,87,0,0" Name="processList" Width="269" ItemsSource="{Binding Processes}" ItemTemplate="{StaticResource ProcessTemplate}" Height="136" VerticalAlignment="Top" SelectionChanged="processList_SelectionChanged" />
+        <ListBox Margin="12,0,12,12" Name="debugConsole" Height="110" VerticalAlignment="Bottom" />
+        <Button Content="Spawn" Height="23" HorizontalAlignment="Left" Margin="287,87,0,0" Name="spawnButton" VerticalAlignment="Top" Width="93" Click="spawnButton_Click" />
+        <Button Content="Resume" Height="23" HorizontalAlignment="Left" Margin="287,116,0,0" Name="resumeButton" VerticalAlignment="Top" Width="93" Click="resumeButton_Click" />
+        <Button Content="Attach" Height="23" HorizontalAlignment="Left" Margin="287,145,0,0" Name="attachButton" VerticalAlignment="Top" Width="93" Click="attachButton_Click" />
+        <Button Content="Load Script" Height="23" Margin="287,256,0,0" Name="loadScriptButton" VerticalAlignment="Top" Click="loadScriptButton_Click" HorizontalAlignment="Left" Width="93" />
+        <TextBox Margin="12,229,0,128" Name="scriptSource" AcceptsReturn="True" AcceptsTab="True" Text="const a = Memory.allocUtf8String(&quot;Hei&quot;);&#xA;send({woot: 1227});&#xA;send({hello: 1337}, a.readByteArray(4));&#xA;function onMessage(m) {&#xA;  send({reply: m});&#xA;  recv(onMessage);&#xA;}&#xA;recv(onMessage);" HorizontalAlignment="Left" Width="269" />
+        <Button Content="Unload Script" Height="23" HorizontalAlignment="Left" Margin="287,285,0,0" Name="unloadScriptButton" VerticalAlignment="Top" Width="93" Click="unloadScriptButton_Click" />
+        <Button Content="Create Script" Height="23" HorizontalAlignment="Left" Margin="287,228,0,0" Name="createScriptButton" VerticalAlignment="Top" Width="93" Click="createScriptButton_Click" />
+        <Button Content="Post to Script" Height="23" HorizontalAlignment="Left" Margin="287,314,0,0" Name="postToScriptButton" VerticalAlignment="Top" Width="93" Click="postToScriptButton_Click" />
+        <Button Content="Detach" Height="23" HorizontalAlignment="Left" Margin="287,174,0,0" Name="detachButton" VerticalAlignment="Top" Width="93" Click="detachButton_Click" />
+    </Grid>
+</Window>

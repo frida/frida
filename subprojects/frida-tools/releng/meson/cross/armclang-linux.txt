@@ -1,0 +1,31 @@
+# Using ARM compilers from Linux command line is tricky and
+# not really well documented because they want you to use
+# their IDE instead.
+#
+# First you need to do the full install with the IDE and set
+# up license files et al. This may be possible from the command
+# line.
+#
+# Then you need to do the following:
+#
+# Select toolchain by running /opt/arm/developmentstudio-2019.0/bin/select_default_toolchain
+# Armcc is only available in toolchain version 5.
+# Armclang is only available in toolchain version 6.
+# Start shell with /opt/arm/developmentstudio-2019.0/bin/suite_exec zsh
+# Now the compilers will work.
+
+[binaries]
+# we could set exe_wrapper = qemu-arm-static but to test the case
+# when cross compiled binaries can't be run we don't do that
+c = ['/opt/arm/developmentstudio-2019.0/sw/ARMCompiler6.12/bin/armclang', '--target=aarch64-arm-none-eabi']
+#c = '/opt/arm/developmentstudio-2019.0/sw/ARMCompiler5.06u6/bin/armcc'
+#cpp = '/usr/bin/arm-linux-gnueabihf-g++'
+ar = '/opt/arm/developmentstudio-2019.0/sw/ARMCompiler6.12/bin/armar'
+#strip = '/usr/arm-linux-gnueabihf/bin/strip'
+#pkg-config = '/usr/bin/arm-linux-gnueabihf-pkg-config'
+
+[host_machine]
+system = 'baremetal'
+cpu_family = 'arm'
+cpu = 'armv7' # Not sure if correct.
+endian = 'little'

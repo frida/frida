@@ -1,0 +1,8 @@
+name: cmake
+long_name: CMake module
+description: The CMake module
+
+methods:
+- name: subproject_options
+  description: Returns an empty `cmake_options` object.
+  returns: cmake_options

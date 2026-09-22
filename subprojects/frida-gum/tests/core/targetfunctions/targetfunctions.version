@@ -1,0 +1,10 @@
+{
+  global:
+    gum_test_target_function;
+    gum_test_target_nop_function_a;
+    gum_test_target_nop_function_b;
+    gum_test_target_nop_function_c;
+
+  local:
+    *;
+};

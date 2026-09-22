@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/22 assert/meson.build:3:0: ERROR: Assert failed: I am fail."
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "base_image": "opensuse/tumbleweed:latest",
+  "env": {
+    "CI":                  "1",
+    "SKIP_STATIC_BOOST":   "1",
+    "SINGLE_DUB_COMPILER": "1",
+    "MESON_CI_JOBNAME": "linux-opensuse-gcc"
+  }
+}

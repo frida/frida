@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/42 project name colon/meson.build:1:0: ERROR: Project name 'name with :' must not contain ':'"
+    }
+  ]
+}

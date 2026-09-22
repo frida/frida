@@ -1,0 +1,18 @@
+name: set_variable
+returns: void
+description: |
+  Assigns a value to the given variable name. Calling
+  `set_variable('foo', bar)` is equivalent to `foo = bar`.
+
+  *(since 0.46.1)* The `value` parameter can be an array type.
+
+arg_flattening: false
+
+posargs:
+  variable_name:
+    type: str
+    description: The name of the variable to set
+
+  value:
+    type: any
+    description: The value to set the variable to

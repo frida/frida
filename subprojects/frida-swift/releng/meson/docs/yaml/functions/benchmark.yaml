@@ -1,0 +1,115 @@
+name: benchmark
+returns: void
+description: |
+  Creates a benchmark item that will be run when the benchmark target is
+  run. The behavior of this function is identical to [[test]]
+  except for:
+
+  * benchmark() has no `is_parallel` keyword because benchmarks are not run in parallel
+  * benchmark() does not automatically add the `MALLOC_PERTURB_` environment variable
+
+  Defined benchmarks can be run in a backend-agnostic way by calling
+  `meson test --benchmark` inside the build dir, or by using backend-specific
+  commands, such as `ninja benchmark` or `msbuild RUN_TESTS.vcxproj`.
+
+notes:
+  - Prior to 0.52.0 benchmark would warn that `depends` and
+    `priority` were unsupported, this is incorrect.
+
+posargs:
+  name:
+    type: str
+    description: The *unique* test id
+
+  executable:
+    type: exe | jar | external_program | file | custom_tgt | custom_idx
+    description: |
+      The program to execute. *(Since 1.4.0)* A CustomTarget is also accepted.
+
+kwargs:
+  args:
+    type: list[str | file | tgt]
+    description: Arguments to pass to the executable
+
+  env:
+    type: env | list[str] | dict[str]
+    description: |
+      environment variables to set, such as `['NAME1=value1',
+      'NAME2=value2']`, or an [[@env]] object which allows more sophisticated
+      environment juggling. *(Since 0.52.0)* A dictionary is also accepted.
+
+  should_fail:
+    type: bool
+    default: false
+    description: |
+      when true the test is considered passed if the
+      executable returns a non-zero return value (i.e. reports an error)
+
+  suite:
+    type: str | list[str]
+    description: |
+      `'label'` (or list of labels `['label1', 'label2']`)
+      attached to this test. The suite name is qualified by a (sub)project
+      name resulting in `(sub)project_name:label`. In the case of a list
+      of strings, the suite names will be `(sub)project_name:label1`,
+      `(sub)project_name:label2`, etc.
+
+  timeout:
+    type: int
+    default: 30
+    description: |
+      the amount of seconds the test is allowed to run, a test
+      that exceeds its time limit is always considered failed, defaults to
+      30 seconds. *Since 0.57* if timeout is `<= 0` the test has infinite duration,
+      in previous versions of Meson the test would fail with a timeout immediately.
+
+  workdir:
+    type: str
+    description: |
+      absolute path that will be used as the working directory
+      for the test
+
+  depends:
+    type: list[build_tgt | custom_tgt]
+    since: 0.46.0
+    description: |
+      specifies that this test depends on the specified
+      target(s), even though it does not take any of them as a command
+      line argument. This is meant for cases where test finds those
+      targets internally, e.g. plugins or globbing. Those targets are built
+      before test is executed even if they have `build_by_default : false`.
+
+  protocol:
+    type: str
+    since: 0.50.0
+    default: "'exitcode'"
+    description: |
+      specifies how the test results are parsed and can
+      be one of `exitcode`, `tap`, or `gtest`. For more information about test
+      harness protocol read [Unit Tests](Unit-tests.md). The following values are
+      accepted:
+
+      - `exitcode`: the executable's exit code is used by the test harness
+        to record the outcome of the test).
+      - `tap`: [Test Anything Protocol](https://www.testanything.org/).
+      - `gtest` *(since 0.55.0)*: for Google Tests.
+      - `rust` *(since 0.56.0)*: for native rust tests
+
+  priority:
+    type: int
+    since: 0.52.0
+    default: 0
+    description: |
+      specifies the priority of a test. Tests with a
+      higher priority are *started* before tests with a lower priority.
+      The starting order of tests with identical priorities is
+      implementation-defined. The default priority is 0, negative numbers are
+      permitted.
+
+  verbose:
+    type: bool
+    since: 0.62.0
+    default: false
+    description: |
+      if true, forces the test results to be logged as if `--verbose` was passed
+      to `meson test`.

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/com/example/myprog">
+    <file>res1.txt</file>
+    <file>subdir/res2.txt</file>
+    <file>res3.txt</file>
+    <file>subdir/res4.txt</file>
+  </gresource>
+</gresources>

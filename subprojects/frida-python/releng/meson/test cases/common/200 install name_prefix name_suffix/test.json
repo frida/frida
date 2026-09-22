@@ -1,0 +1,19 @@
+{
+  "installed": [
+    {"type": "pdb", "file": "usr/bin/baz"},
+    {"type": "pdb", "file": "usr/bin/bowcorge"},
+    {"type": "pdb", "file": "usr/bin/foo"},
+    {"type": "expr", "file": "usr/?lib/bowcorge.stern"},
+    {"type": "expr", "file": "usr/lib/?libbaz.cheese"},
+    {"type": "file", "file": "usr/lib/bar.a"},
+    {"type": "implib", "file": "usr/lib/bowcorge"},
+    {"type": "file", "file": "usr/lib/bowgrault.stern"},
+    {"type": "implib", "file": "usr/lib/foo"},
+    {"type": "expr", "file": "usr/lib/foo?so"},
+    {"type": "implib", "file": "usr/lib/libbaz"},
+    {"type": "file", "file": "usr/lib/libqux.cheese"},
+    {"type": "expr", "file": "usr/?lib/libgarply?so"},
+    {"type": "implib", "file": "usr/lib/libgarply"},
+    {"type": "pdb", "file": "usr/bin/garply"}
+  ]
+}

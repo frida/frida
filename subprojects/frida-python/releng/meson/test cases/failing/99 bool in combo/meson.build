@@ -1,0 +1,1 @@
+project('bool in combo')

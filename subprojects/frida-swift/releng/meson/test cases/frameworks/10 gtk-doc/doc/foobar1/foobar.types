@@ -1,0 +1,4 @@
+% This include is useless it's a regression test for https://github.com/mesonbuild/meson/issues/8744
+#include <foo.h>
+
+foo_obj_get_type

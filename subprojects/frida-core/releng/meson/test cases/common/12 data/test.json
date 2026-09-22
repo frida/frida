@@ -1,0 +1,17 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/share/progname/datafile.dat"},
+    {"type": "file", "file": "usr/share/progname/fileobject_datafile.dat"},
+    {"type": "file", "file": "usr/share/progname/vanishing.dat"},
+    {"type": "file", "file": "usr/share/progname/vanishing2.dat"},
+    {"type": "file", "file": "usr/share/data install test/renamed file.txt"},
+    {"type": "file", "file": "usr/share/data install test/somefile.txt"},
+    {"type": "file", "file": "usr/share/data install test/some/nested/path.txt"},
+    {"type": "file", "file": "usr/share/renamed/renamed 2.txt"},
+    {"type": "file", "file": "usr/share/renamed/renamed 3.txt"},
+    {"type": "file", "file": "etc/etcfile.dat"},
+    {"type": "file", "file": "usr/bin/runscript.sh"},
+    {"type": "file", "file": "usr/share/moredata/data.txt"},
+    {"type": "file", "file": "usr/share/data install test/subdir/data.txt"}
+  ]
+}

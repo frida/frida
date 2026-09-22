@@ -1,0 +1,10 @@
+{
+  "installed": [
+    { "type": "file", "file": "usr/include/rootdir.h"       },
+    { "type": "file", "file": "usr/include/subdir/subdir.h" },
+    { "type": "file", "file": "usr/include/subdir/childdir.h" },
+    { "type": "file", "file": "usr/include/subdir/child/childdir.h" },
+    { "type": "file", "file": "usr/include/vanished.h"      },
+    { "type": "file", "file": "usr/include/fileheader.h"    }
+  ]
+}

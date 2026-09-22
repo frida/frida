@@ -1,0 +1,1 @@
+executable('something', srcs)

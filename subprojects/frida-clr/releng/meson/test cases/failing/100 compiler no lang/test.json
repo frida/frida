@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/100 compiler no lang/meson.build:2:6: ERROR: Tried to access compiler for language \"c\", not specified for host machine."
+    }
+  ]
+}

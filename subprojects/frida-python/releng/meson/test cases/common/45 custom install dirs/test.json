@@ -1,0 +1,16 @@
+{
+  "installed": [
+    {"type": "exe", "file": "usr/dib/dab/dub/prog"},
+    {"type": "pdb", "file": "usr/dib/dab/dub/prog"},
+    {"type": "exe", "file": "usr/dib/dab/dub2/prog2"},
+    {"type": "pdb", "file": "usr/dib/dab/dub2/prog2"},
+    {"type": "file", "file": "usr/some/dir/sample.h"},
+    {"type": "file", "file": "usr/some/dir2/sample.h"},
+    {"type": "file", "file": "usr/woman/prog.1"},
+    {"type": "file", "file": "usr/woman2/prog.1"},
+    {"type": "file", "file": "usr/meow/datafile.cat"},
+    {"type": "file", "file": "usr/meow2/datafile.cat"},
+    {"type": "file", "file": "usr/woof/subdir/datafile.dog"},
+    {"type": "file", "file": "usr/woof2/subdir/datafile.dog"}
+  ]
+}

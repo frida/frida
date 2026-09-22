@@ -1,0 +1,35 @@
+name: stable build directories
+
+on:
+  push:
+    branches:
+      - '[0-9]+.[0-9]+'
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    env:
+      TESTDIR: "manual tests/13 builddir upgrade"
+    steps:
+      - uses: actions/checkout@v3
+      - name: install ninja
+        run: sudo apt-get -y install build-essential ninja-build
+      - name: Fetch tags and unshallow
+        run: git fetch --unshallow --tags
+      - name: Checkout latest release on this branch
+        run: |
+          cp -r "$TESTDIR" "$TESTDIR"-temp
+          git checkout "$(git describe --abbrev=0)"
+      - name: Configure with most recent tag
+        run: ./meson.py setup "$TESTDIR"-temp builddir
+      - name: Return to testing commit
+        run: git checkout $GITHUB_SHA
+      - name: check that everything still works
+        run: |
+          ./meson.py compile -C builddir
+          ninja -C builddir test
+          DESTDIR=pkg ninja -C builddir install
+          ./meson.py introspect builddir --all

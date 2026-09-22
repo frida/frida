@@ -1,0 +1,18 @@
+{
+  "installed": [
+    {"type": "file", "file": "pure/one.py"},
+    {"type": "file", "file": "pure/two.py"},
+    {"type": "file", "file": "pure/alpha/one.py"},
+    {"type": "file", "file": "pure/alpha/two.py"},
+    {"type": "file", "file": "pure/alpha/three.py"},
+    {"type": "file", "file": "pure/beta/one.py"},
+    {"type": "file", "file": "plat/kw/test.py"},
+    {"type": "file", "file": "pure/kwrevert/test.py"},
+    {"type": "file", "file": "plat/test.py"},
+    {"type": "file", "file": "pure/test.py"},
+    {"type": "file", "file": "plat/data/test.py"},
+    {"type": "file", "file": "pure/data/test.py"},
+    {"type": "file", "file": "plat/kw/data/test.py"},
+    {"type": "file", "file": "pure/kwrevert/data/test.py"}
+  ]
+}

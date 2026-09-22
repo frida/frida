@@ -1,0 +1,25 @@
+sources = [
+  '__init__.py',
+  '_repl_magic.py',
+  'apk.py',
+  'application.py',
+  'cli_formatting.py',
+  'compiler.py',
+  'creator.py',
+  'discoverer.py',
+  'join.py',
+  'kill.py',
+  'ls.py',
+  'lsd.py',
+  'model.py',
+  'pm.py',
+  'ps.py',
+  'pull.py',
+  'push.py',
+  'reactor.py',
+  'repl.py',
+  'rm.py',
+  'tracer.py',
+]
+
+python.install_sources(sources, subdir: 'frida_tools')

@@ -1,0 +1,79 @@
+name: install_data
+returns: void
+description: |
+  Installs files from the source tree that are listed as positional arguments.
+
+  See [Installing](Installing.md) for more examples.
+
+varargs:
+  name: file
+  type: file | str
+  description: Files to install.
+
+warnings:
+  - the `install_mode` kwarg ignored integer values between 0.59.0 -- 1.1.0.
+  - an omitted `install_dir` kwarg did not work correctly inside of a subproject until 1.3.0.
+  - an omitted `install_dir` kwarg did not work correctly when combined with the `preserve_path` kwarg untill 1.3.0.
+
+kwargs:
+  install_dir:
+    type: str
+    description: |
+      The absolute or relative path to the installation directory.
+      If this is a relative path, it is assumed to be relative to the prefix.
+
+      If omitted, the directory defaults to `{datadir}/{projectname}` *(since 0.45.0)*.
+
+  install_mode:
+    type: list[str | int]
+    since: 0.38.0
+    description: |
+      specify the file mode in symbolic format and
+      optionally the owner/uid and group/gid for the installed files. For
+      example:
+
+      `install_mode: 'rw-r--r--'` for just the file mode
+
+      `install_mode: ['rw-r--r--', 'nobody', 'nogroup']` for the file mode and the user/group
+
+      `install_mode: ['rw-r-----', 0, 0]` for the file mode and uid/gid
+
+      To leave any of these three as the default, specify `false`.
+
+  install_tag:
+    type: str
+    since: 0.60.0
+    description: |
+      A string used by the `meson install --tags` command
+      to install only a subset of the files. By default these files have no install
+      tag which means they are not being installed when `--tags` argument is specified.
+
+  preserve_path:
+    type: bool
+    since: 0.64.0
+    default: false
+    description: |
+      Disable stripping child-directories from data files when installing.
+
+      This is equivalent to GNU Automake's `nobase` option.
+
+  rename:
+    type: list[str]
+    since: 0.46.0
+    description: |
+      If specified renames each source file into corresponding file from `rename` list.
+      Nested paths are allowed and they are
+      joined with `install_dir`. Length of `rename` list must be equal to
+      the number of sources.
+
+  sources:
+    type: list[file | str]
+    description: Additional files to install.
+
+  follow_symlinks:
+    type: bool
+    since: 1.3.0
+    default: true
+    description: |
+      If true, dereferences links and copies their target instead.  The default
+      value will become false in the future.

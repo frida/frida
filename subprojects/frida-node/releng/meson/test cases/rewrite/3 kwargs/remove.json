@@ -1,0 +1,38 @@
+[
+  {
+    "type": "kwargs",
+    "function": "project",
+    "id": "/",
+    "operation": "set",
+    "kwargs": {
+      "license": ["GPL", "MIT", "BSD", "Boost"]
+    }
+  },
+  {
+    "type": "kwargs",
+    "function": "project",
+    "id": "/",
+    "operation": "remove",
+    "kwargs": {
+      "license": ["MIT"]
+    }
+  },
+  {
+    "type": "kwargs",
+    "function": "project",
+    "id": "/",
+    "operation": "remove",
+    "kwargs": {
+      "license": "BSD"
+    }
+  },
+  {
+    "type": "kwargs",
+    "function": "project",
+    "id": "//",
+    "operation": "remove",
+    "kwargs": {
+      "license": "Boost"
+    }
+  }
+]

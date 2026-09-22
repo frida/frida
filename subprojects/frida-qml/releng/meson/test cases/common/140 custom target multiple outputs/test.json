@@ -1,0 +1,10 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/include/diff.h"},
+    {"type": "file", "file": "usr/include/first.h"},
+    {"type": "file", "file": "usr/bin/diff.sh"},
+    {"type": "file", "file": "usr/bin/second.sh"},
+    {"type": "file", "file": "opt/same.h"},
+    {"type": "file", "file": "opt/same.sh"}
+  ]
+}

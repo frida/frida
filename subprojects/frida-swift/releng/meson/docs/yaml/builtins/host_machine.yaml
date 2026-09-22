@@ -1,0 +1,15 @@
+name: host_machine
+long_name: Host machine information
+extends: build_machine
+description: |
+  Provides information about the host machine -- the machine on which the
+  compiled binary will run. See
+  [Cross-compilation](Cross-compilation.md).
+
+  It has the same methods as [[@build_machine]].
+
+  When not cross-compiling, all the methods return the same values as
+  [[@build_machine]] (because the build machine is the host machine)
+
+  Note that while cross-compiling, it simply returns the values defined
+  in the cross-info file.

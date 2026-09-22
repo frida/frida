@@ -1,0 +1,5 @@
+name: void
+long_name: void
+description: |
+  Indicates that the function does not return anything.
+  Similar to `void` in C and C++

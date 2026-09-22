@@ -1,0 +1,39 @@
+{
+    "date": "1979-05-27",
+    "time": "07:32:00",
+    "plus-infinity": Infinity,
+    "sf1": Infinity,
+    "sf2": Infinity,
+    "sf3": -Infinity,
+    "sf4": NaN,
+    "sf5": NaN,
+    "sf6": NaN,
+    "hex1": 3735928559,
+    "hex2": 3735928559,
+    "hex3": 3735928559,
+    "oct1": 342391,
+    "oct2": 493,
+    "bin1": 214,
+    "physical": {
+        "color": "orange",
+        "shape": "round"
+    },
+    "site": {
+        "google.com": true
+    },
+    "a": {
+        "b": {
+            "c": 1,
+            "d": 2
+        }
+    },
+    "table": {
+        "a": {
+            "b": {
+                "c": 1,
+                "d": 2
+            },
+            "c": 3
+        }
+    }
+}

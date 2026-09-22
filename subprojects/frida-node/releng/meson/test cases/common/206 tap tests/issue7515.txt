@@ -1,0 +1,27 @@
+1..26
+ok 1 Gtk overrides UI template sets up internal and public template children
+ok 2 Gtk overrides UI template sets up public template children with the correct widgets
+ok 3 Gtk overrides UI template sets up internal template children with the correct widgets
+ok 4 Gtk overrides UI template connects template callbacks to the correct handler
+ok 5 Gtk overrides UI template binds template callbacks to the correct object
+ok 6 Gtk overrides UI template from resource sets up internal and public template children
+ok 7 Gtk overrides UI template from resource sets up public template children with the correct widgets
+ok 8 Gtk overrides UI template from resource sets up internal template children with the correct widgets
+ok 9 Gtk overrides UI template from resource connects template callbacks to the correct handler
+ok 10 Gtk overrides UI template from resource binds template callbacks to the correct object
+ok 11 Gtk overrides UI template from file sets up internal and public template children
+ok 12 Gtk overrides UI template from file sets up public template children with the correct widgets
+ok 13 Gtk overrides UI template from file sets up internal template children with the correct widgets
+ok 14 Gtk overrides UI template from file connects template callbacks to the correct handler
+ok 15 Gtk overrides UI template from file binds template callbacks to the correct object
+ok 16 Gtk overrides Class inheriting from template class sets up internal and public template children # SKIP pending
+ok 17 Gtk overrides Class inheriting from template class sets up public template children with the correct widgets # SKIP pending
+ok 18 Gtk overrides Class inheriting from template class sets up internal template children with the correct widgets # SKIP pending
+ok 19 Gtk overrides Class inheriting from template class connects template callbacks to the correct handler # SKIP pending
+ok 20 Gtk overrides Class inheriting from template class binds template callbacks to the correct object # SKIP pending
+ok 21 Gtk overrides sets CSS names on classes
+ok 22 Gtk overrides avoid crashing when GTK vfuncs are called in garbage collection
+ok 23 Gtk overrides accepts string in place of GdkAtom
+ok 24 Gtk overrides accepts null in place of GdkAtom as GDK_NONE
+ok 25 Gtk overrides uses the correct GType for null child properties
+ok 26 Gtk overrides can create a Gtk.TreeIter with accessible stamp field

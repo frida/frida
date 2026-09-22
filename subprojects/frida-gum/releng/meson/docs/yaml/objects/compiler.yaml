@@ -1,0 +1,700 @@
+name: compiler
+long_name: Compiler object
+description: |
+  This object is returned by [[meson.get_compiler]].
+  It represents a compiler for a given language and allows you to query its properties.
+
+notes:
+- |
+  These compiler checks do not use compiler arguments added
+  with `add_*_arguments()`, via `-Dlang_args` on the command-line, or
+  through `CFLAGS`/`LDFLAGS`, etc in the environment. Hence, you can
+  trust that the tests will be fully self-contained, and won't fail
+  because of custom flags added by other parts of the build file or by
+  users.
+
+- |
+  Note that if you have a single prefix with all your dependencies, you
+  might find it easier to append to the environment variables
+  `C_INCLUDE_PATH` with GCC/Clang and `INCLUDE` with MSVC to expand the
+  default include path, and `LIBRARY_PATH` with GCC/Clang and `LIB` with
+  MSVC to expand the default library search path.
+
+  However, with GCC, these variables will be ignored when
+  cross-compiling. In that case you need to use a specs file. See:
+  http://www.mingw.org/wiki/SpecsFileHOWTO
+
+methods:
+
+# Helper methods to pre-define common posargs
+- name: _code
+  returns: void
+  description: You have found a bug if you can see this!
+  posargs:
+    code:
+      type: str | file
+      description: |
+        The source code to check.
+
+        If a string is passed, the code is used directly. If a [[@file]] object
+        is passed, its content is used for the compiler check.
+
+# Helper methods to pre-define common kwargs
+- name: _args
+  returns: void
+  description: You have found a bug if you can see this!
+  kwargs:
+    args:
+      type: list[str]
+      description: |
+        Used to pass a list of compiler arguments.
+        Defining include paths for headers not in the default include path
+        via `-Isome/path/to/header` is generally supported, however, usually not
+        recommended.
+
+        This is because include directories can also be specified via the
+        `include_directories` or the `dependency` kwarg (if present).
+        The same is also true for passing libraries to link with `-lfoo`.
+
+- name: _include_directories
+  returns: void
+  description: You have found a bug if you can see this!
+  kwargs:
+    include_directories:
+      type: inc | list[inc]
+      since: 0.38.0
+      description: Extra directories for header searches.
+
+- name: _dependencies
+  returns: void
+  description: You have found a bug if you can see this!
+  kwargs:
+    dependencies:
+      type: dep | list[dep]
+      description: Additionally dependencies required for compiling and / or linking.
+
+- name: _prefix
+  returns: void
+  description: You have found a bug if you can see this!
+  kwargs:
+    prefix:
+      type: str | list[str]
+      description: |
+        Used to add `#include`s and other things that are required
+        for the symbol to be declared. Since 1.0.0 an array is accepted
+        too. When an array is passed, the items are concatenated together
+        separated by a newline.
+        System definitions should be passed via compiler args
+        (eg: `_GNU_SOURCE` is often required for some symbols to be exposed
+        on Linux, and it should be passed via `args` keyword argument).
+
+- name: _no_builtin_args
+  returns: void
+  description: You have found a bug if you can see this!
+  kwargs:
+    no_builtin_args:
+      type: bool
+      default: false
+      description: When set to `true`, the compiler arguments controlled by built-in configuration options are not added.
+
+- name: _name
+  returns: void
+  description: You have found a bug if you can see this!
+  kwargs:
+    name:
+      type: str
+      description: |
+        The name to use for printing a message about the compiler check.
+        If this keyword argument is not passed, no message will be printed about the check.
+
+# Even more convenient
+- name: _common
+  returns: void
+  description: You have found a bug if you can see this!
+  kwargs_inherit:
+    - compiler._args
+    - compiler._include_directories
+    - compiler._dependencies
+    - compiler._no_builtin_args
+    - compiler._prefix
+
+- name: _compiles
+  returns: void
+  description: You have found a bug if you can see this!
+  kwargs_inherit:
+    - compiler._args
+    - compiler._include_directories
+    - compiler._dependencies
+    - compiler._no_builtin_args
+    - compiler._name
+    - compiler._werror
+
+- name: _header
+  returns: void
+  description: You have found a bug if you can see this!
+  kwargs_inherit: compiler._common
+  kwargs:
+    required:
+      type: bool | feature
+      default: false
+      since: 0.50.0
+      description:
+        When set to `true`, Meson will halt if the header check fails.
+
+        When set to a [`feature`](Build-options.md#features) option, the feature
+        will control if it is searched and whether to fail if not found.
+
+- name: _required
+  returns: void
+  description: You have found a bug if you can see this!
+  kwargs:
+    required:
+      type: bool | feature
+      default: false
+      since: 1.3.0
+      description:
+        When set to `true`, Meson will halt if the check fails.
+
+        When set to a [`feature`](Build-options.md#features) option, the feature
+        will control if it is searched and whether to fail if not found.
+
+- name: _werror
+  returns: void
+  description: You have found a bug if you can see this!
+  kwargs:
+    werror:
+      type: bool
+      default: false
+      description: When set to `true`, compiler warnings are treated as error.
+      since: 1.3.0
+
+# Star of the actual functions
+- name: version
+  returns: str
+  description: Returns the compiler's version number as a string.
+
+- name: cmd_array
+  returns: list[str]
+  description: Returns an array containing the command(s) for the compiler.
+
+
+- name: alignment
+  returns: int
+  description: |
+    Returns the alignment of the specified type. For C-like languages,
+    For C-like languages, the header `stddef.h` and `stdio.h` are included
+    implicitly for native compilation, only `stddef.h` is included when
+    cross-compiling.
+
+  posargs:
+    typename:
+      type: str
+      description: The name of the type to check.
+
+  kwargs_inherit:
+    - compiler._args
+    - compiler._prefix
+    - compiler._dependencies
+    # TODO: why not also allow passing `include_directories`?
+
+- name: run
+  returns: runresult
+  description: Attempts to compile and execute the given code fragment.
+  posargs_inherit: compiler._code
+  kwargs_inherit: compiler._compiles
+
+- name: get_id
+  returns: str
+  description: |
+    Returns a string identifying the compiler.
+    For example, `gcc`, `msvc`, [and more](Reference-tables.md#compiler-ids).
+
+- name: get_linker_id
+  returns: str
+  since: 0.53.0
+  description: |
+    Returns a string identifying the linker.
+    For example, `ld.bfd`, `link`, [and more](Reference-tables.md#linker-ids).
+
+- name: symbols_have_underscore_prefix
+  returns: bool
+  since: 0.37.0
+  description: Returns `true` if the C symbol mangling is one underscore (`_`) prefixed to the symbol.
+
+- name: has_member
+  returns: bool
+  description: Returns true if the type has the specified member.
+  kwargs_inherit:
+    - compiler._common
+    - compiler._required
+  posargs:
+    typename:
+      type: str
+      description: The type to check.
+    membername:
+      type: str
+      description: The member to check.
+
+- name: has_members
+  returns: bool
+  description: Returns `true` if the type has *all* the specified members.
+  kwargs_inherit:
+    - compiler._common
+    - compiler._required
+  posargs:
+    typename:
+      type: str
+      description: The type to check.
+  varargs:
+    name: member
+    type: str
+    min_varargs: 1
+    description: The members to check
+
+- name: has_function
+  returns: bool
+  description: |
+    Returns true if the given function is provided
+    by the standard library or a library passed in with the `args` keyword.
+
+  kwargs_inherit:
+    - compiler._common
+    - compiler._required
+  posargs:
+    funcname:
+      type: str
+      description: The function to check.
+
+- name: has_type
+  returns: bool
+  description: Returns `true` if the specified token is a type.
+  kwargs_inherit:
+    - compiler._common
+    - compiler._required
+  posargs:
+    typename:
+      type: str
+      description: The type to check.
+
+- name: compute_int
+  returns: int
+  since: 0.40.0
+  kwargs_inherit: compiler._common
+  description: |
+    Computes the value of the given expression
+    (as an example `1 + 2`). When cross compiling this is evaluated with
+    an iterative algorithm, you can specify keyword arguments `low`
+    (defaults to -1024), `high` (defaults to 1024) and `guess` to
+    specify max and min values for the search and the value to try
+    first.
+    For C-like languages, the header `stddef.h` and `stdio.h` are included
+    implicitly for native compilation, only `stddef.h` is included when
+    cross-compiling.
+
+  posargs:
+    expr:
+      type: str
+      description: The expression to compute.
+
+  kwargs:
+    low:
+      type: int
+      default: -1024
+      description: The min value.
+    high:
+      type: int
+      default: 1024
+      description: The max value.
+    guess:
+      type: int
+      description: The value to try first.
+
+- name: sizeof
+  returns: int
+  description: |
+    returns the size of the given type (e.g. `'int'`) or -1 if the type is unknown.
+    For C-like languages, the header `stddef.h` and `stdio.h` are included
+    implicitly for native compilation, only `stddef.h` is included when
+    cross-compiling.
+  kwargs_inherit: compiler._common
+  posargs:
+    typename:
+      type: str
+      description: The type to compute.
+
+- name: get_define
+  returns: str
+  since: 0.40.0
+  description: |
+    Returns the given preprocessor symbol's value
+    as a string or empty string if it is not defined.
+
+    *(since 0.47.0)* This method will concatenate string literals as
+    the compiler would. E.g. `"a" "b"` will become `"ab"`.
+
+  kwargs_inherit: compiler._common
+  posargs:
+    definename:
+      type: str
+      description: The define to check.
+
+- name: has_define
+  returns: bool
+  since: 1.3.0
+  description: |
+    Returns true if the given preprocessor symbol is *defined*.
+  kwargs_inherit: compiler._common
+  posargs:
+    definename:
+      type: str
+      description: The define to check.
+
+- name: compiles
+  returns: bool
+  description: Returns true if the code compiles.
+  posargs_inherit: compiler._code
+  kwargs_inherit: compiler._compiles
+
+- name: links
+  returns: bool
+  description: |
+    Returns true if the code compiles and links.
+
+    *Since 0.60.0*, if the `file` object's
+    suffix does not match the compiler object's language, the compiler
+    corresponding to the suffix is used to compile the source, while the
+    target of the `links` method is used to link the resulting object file.
+  posargs_inherit: compiler._code
+  kwargs_inherit: compiler._compiles
+
+- name: check_header
+  returns: bool
+  since: 0.47.0
+  description: |
+    Returns true if the specified header is *usable*
+    with the specified prefix, dependencies, and arguments.
+
+  kwargs_inherit: compiler._header
+  posargs:
+    header_name:
+      type: str
+      description: The header to check.
+
+- name: has_header
+  returns: bool
+  description: |
+    Returns true if the specified header is *exists*
+    with the specified prefix, dependencies, and arguments.
+
+    This method is faster than [[compiler.check_header]] since it only does a
+    pre-processor check.
+
+  kwargs_inherit: compiler._header
+  posargs_inherit: compiler.check_header
+
+- name: has_header_symbol
+  returns: bool
+  description: |
+    Detects whether a particular symbol is declared in the specified header.
+
+    Symbols here include function, variable, `#define`, type definition, etc.
+
+  kwargs_inherit: compiler._header
+  posargs:
+    header:
+      type: str
+      description: The header to check.
+    symbol:
+      type: str
+      description: The symbol to check.
+
+- name: find_library
+  returns: dep
+  description: Tries to find the library specified in the positional argument.
+
+  posargs:
+    libname:
+      type: str
+      description: The library to find.
+  kwargs:
+    required:
+      type: bool | feature
+      default: true
+      description: |
+        If set `true`, Meson will abort with an error if the library could not
+        be found. Otherwise, Meson will continue and the found method of the
+        returned object will return `false`.
+
+        When set to a [`feature`](Build-options.md#features) option, the feature
+        will control if it is searched and whether to fail if not found.
+
+        *(since 0.47.0)* The value of a `feature` option can also be passed here.
+
+    has_headers:
+      type: list[str]
+      since: 0.50.0
+      description: |
+        List of headers that must be found as well.
+        This check is equivalent to checking each header with a
+        [[compiler.has_header]] call.
+
+        When used, kwargs that [[compiler.has_header]] would accept can be
+        passed here prefixed with `header_`, and will have the same effect on
+        the header check.
+
+    static:
+      type: bool
+      default: false
+      since: 0.51.0
+      description: |
+        If `true`, the search is limited to static libraries only.
+        Setting this value to `false` (the default) will search for both shared
+        *and* static libraries.
+
+    disabler:
+      type: bool
+      default: false
+      since: 0.49.0
+      description: If `true`, this method will return a [[@disabler]] on a failed check.
+
+    dirs:
+      type: list[str]
+      description: |
+        Additional directories to search in.
+
+        By default the library is searched for in the system library directory
+        (e.g. /usr/lib). Specifying more directories here, causes Meson to search
+        in those directories as well as the system directories.
+# does not work, since all _common kwargs need to be prefixed `header_` here
+# kwargs_inherit: compiler._common
+    header_args:
+      type: list[str]
+      since: 0.51.0
+      description: |
+        When the `has_headers` kwarg is also used, this argument is passed to
+        [[compiler.has_header]] as `args`.
+    header_include_directories:
+      type: inc | list[inc]
+      since: 0.51.0
+      description: |
+        When the `has_headers` kwarg is also used, this argument is passed to
+        [[compiler.has_header]] as `include_directories`.
+    header_dependencies:
+      type: dep | list[dep]
+      since: 0.51.0
+      description: |
+        When the `has_headers` kwarg is also used, this argument is passed to
+        [[compiler.has_header]] as `dependencies`.
+    header_no_builtin_args:
+      type: bool
+      default: false
+      since: 0.51.0
+      description: |
+        When the `has_headers` kwarg is also used, this argument is passed to
+        [[compiler.has_header]] as `no_builtin_args`.
+    header_prefix:
+      type: str
+      since: 0.51.0
+      description: |
+        When the `has_headers` kwarg is also used, this argument is passed to
+        [[compiler.has_header]] as `prefix`.
+
+# Compiler arguments
+- name: has_argument
+  returns: bool
+  description: |
+    Returns `true` if the compiler accepts the specified command line argument,
+    that is, can compile code without erroring out or printing a warning about
+    an unknown flag.
+
+  posargs:
+    argument:
+      type: str
+      description: The argument to check.
+  kwargs_inherit:
+    - compiler._required
+
+- name: has_multi_arguments
+  since: 0.37.0
+  returns: bool
+  description: |
+    the same as [[compiler.has_argument]] but takes multiple arguments
+    and uses them all in a single compiler invocation.
+
+  varargs:
+    name: arg
+    type: str
+    description: The arguments to check.
+  kwargs_inherit:
+    - compiler._required
+
+- name: get_supported_arguments
+  returns: list[str]
+  since: 0.43.0
+  varargs_inherit: compiler.has_multi_arguments
+  description: |
+    Returns an array containing only the arguments supported by the compiler,
+    as if [[compiler.has_argument]] were called on them individually.
+
+  kwargs:
+    checked:
+      type: str
+      since: 0.59.0
+      default: "'off'"
+      description: |
+        Supported values:
+          - `'off'`: Quietly ignore unsupported arguments
+          - `'warn'`: Print a warning for unsupported arguments
+          - `'require'`: Abort if at least one argument is not supported
+
+- name: first_supported_argument
+  returns: list[str]
+  since: 0.43.0
+  varargs_inherit: compiler.has_multi_arguments
+  description: |
+    Given a list of strings, returns a single-element list containing the first
+    argument that passes the [[compiler.has_argument]] test or an empty array if
+    none pass.
+
+
+# Linker arguments
+- name: has_link_argument
+  since: 0.46.0
+  returns: bool
+  description: |
+    Returns `true` if the linker accepts the specified command line argument,
+    that is, can
+    compile and link code without erroring out or printing a warning
+    about an unknown flag. Link arguments will be passed to the
+    compiler, so should usually have the `-Wl,` prefix. On VisualStudio
+    a `/link` argument will be prepended.
+
+  posargs:
+    argument:
+      type: str
+      description: The argument to check.
+  kwargs_inherit:
+    - compiler._required
+
+- name: has_multi_link_arguments
+  since: 0.46.0
+  returns: bool
+  description: |
+    the same as [[compiler.has_link_argument]] but takes multiple arguments
+    and uses them all in a single compiler invocation.
+
+  varargs:
+    name: arg
+    type: str
+    description: The link arguments to check.
+  kwargs_inherit:
+    - compiler._required
+
+- name: get_supported_link_arguments
+  returns: list[str]
+  since: 0.46.0
+  varargs_inherit: compiler.has_multi_link_arguments
+  description: |
+    Returns an array containing only the arguments supported by the compiler,
+    as if [[compiler.has_link_argument]] were called on them individually.
+
+  # TODO: why is this not present here?
+  # kwargs:
+  #   checked:
+  #     type: str
+  #     sinec: 0.59.0
+  #     default: "'off'"
+  #     description: |
+  #       Supported values:
+  #         - `'off'`: Quietly ignore unsupported arguments
+  #         - `'warn'`: Print a warning for unsupported arguments
+  #         - `'require'`: Abort if at least one argument is not supported
+
+- name: first_supported_link_argument
+  returns: list[str]
+  since: 0.46.0
+  varargs_inherit: compiler.has_multi_link_arguments
+  description: |
+    Given a list of strings, returns the first argument that passes the
+    [[compiler.has_link_argument]] test or an empty array if none pass.
+
+- name: has_function_attribute
+  returns: bool
+  since: 0.48.0
+  description: |
+    Returns `true` if the compiler supports the GNU style (`__attribute__(...)`) `name`.
+    This is preferable to manual compile checks as it may be optimized for compilers that
+    do not support such attributes.
+    [This table](Reference-tables.md#gcc-__attribute__) lists all of the supported attributes.
+
+  posargs:
+    name:
+      type: str
+      description: The attribute name to check.
+  kwargs_inherit:
+    - compiler._required
+
+- name: get_supported_function_attributes
+  returns: list[str]
+  since: 0.48.0
+  description: |
+    Returns an array containing any names that are supported GCC style attributes.
+    Equivalent to [[compiler.has_function_attribute]] was called on each of
+    them individually.
+
+  # TODO: Again why doesn't this function have the checked kwarg?
+
+- name: get_argument_syntax
+  returns: str
+  since: 0.49.0
+  description: |
+    returns a string identifying the type of arguments the compiler takes.
+    Can be one of `gcc`, `msvc`, or an undefined
+    string value. This method is useful for identifying compilers that are not
+    gcc or msvc, but use the same argument syntax as one of those two compilers
+    such as clang or icc, especially when they use different syntax on different
+    operating systems.
+
+- name: preprocess
+  returns: list[custom_idx]
+  since: 0.64.0
+  description: |
+    Preprocess a list of source files but do not compile them. The preprocessor
+    will receive the same arguments (include directories, defines, etc) as with
+    normal compilation. That includes for example args added with
+    `add_project_arguments()`, or on the command line with `-Dc_args=-DFOO`.
+  varargs:
+    name: source
+    type: str | file | custom_tgt | custom_idx | generated_list
+    description: |
+      Input source to preprocess. The following types are supported:
+
+      - Strings relative to the current source directory
+      - [[@file]] objects defined in any preceding build file
+      - The return value of configure-time generators such as [[configure_file]]
+      - The return value of build-time generators such as
+        [[custom_target]] or [[generator.process]]
+  kwargs_inherit:
+    - compiler._include_directories
+  kwargs:
+    output:
+      type: str
+      description: |
+        Template for name of preprocessed files: `@PLAINNAME@` is replaced by
+        the source filename and `@BASENAME@` is replaced by the source filename
+        without its extension.
+    compile_args:
+      type: list[str]
+      description: |
+        Extra flags to pass to the preprocessor
+    dependencies:
+      type: dep | list[dep]
+      description: Additionally dependencies required.
+      since: 1.1.0
+    depends:
+      type: list[build_tgt | custom_tgt]
+      description: |
+        Specifies that this target depends on the specified
+        target(s). These targets should be built before starting
+        to preprocess an input.
+      since: 1.4.0

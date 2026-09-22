@@ -1,0 +1,10 @@
+[wrap-file]
+directory = sqlite-amalgamation-3080802
+
+source_url = http://sqlite.com/2015/sqlite-amalgamation-3080802.zip
+source_filename = sqlite-amalgamation-3080802.zip
+source_hash = 5ebeea0dfb75d090ea0e7ff84799b2a7a1550db3fe61eb5f6f61c2e971e57663
+
+patch_url = https://wrapdb.mesonbuild.com/v1/projects/sqlite/3080802/5/get_zip
+patch_filename = sqlite-3080802-5-wrap.zip
+patch_hash = d66469a73fa1344562d56a1d7627d5d0ee4044a77b32d16cf4bbb85741d4c9fd

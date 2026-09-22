@@ -1,0 +1,28 @@
+name: bool
+long_name: Boolean
+description: A boolean object which is either `true` or `false`
+
+methods:
+- name: to_int
+  returns: int
+  description: Returns `1` if `true` and `0` if `false`
+
+- name: to_string
+  returns: str
+  description: |
+    Returns the string `'true'` if the boolean is true or `'false'` otherwise.
+    You can also pass it two strings as positional
+    arguments to specify what to return for true/false. For instance,
+    `bool.to_string('yes', 'no')` will return `yes` if the boolean is
+    true and `no` if it is false.
+
+  optargs:
+    true_str:
+      type: str
+      default: "'true'"
+      description: The string to return when the boolean is `true`
+
+    false_str:
+      type: str
+      default: "'false'"
+      description: The string to return when the boolean is `false`

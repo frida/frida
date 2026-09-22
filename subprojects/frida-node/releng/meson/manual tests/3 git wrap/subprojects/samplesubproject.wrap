@@ -1,0 +1,4 @@
+[wrap-git]
+directory=samplesubproject
+url=https://github.com/jpakkane/samplesubproject.git
+revision=head

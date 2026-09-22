@@ -1,0 +1,137 @@
+name: cfg_data
+long_name: Configuration data object
+description: |
+  This object encapsulates
+  configuration values to be used for generating configuration files. A
+  more in-depth description can be found in the [the configuration wiki
+  page](Configuration.md).
+
+methods:
+- name: set
+  returns: void
+  description: Sets a variable to a given value
+
+  posargs:
+    varname:
+      type: str
+      description: The name of the variable to set
+    value:
+      type: str | int | bool
+      description: The value to set
+
+  kwargs:
+    description:
+      type: str
+      description: |
+        Message / Comment that will be written in the
+        result file. The replacement assumes a file with C syntax. If your
+        generated file is source code in some other language, you probably
+        don't want to add a description field because it most likely will
+        cause a syntax error.
+
+- name: set10
+  returns: void
+  description: |
+    Is the same as [[cfg_data.set]] but the value
+    is either `true` or `false` and will be written as 1 or 0,
+    respectively
+
+  posargs:
+    varname:
+      type: str
+      description: The name of the variable to set
+    value:
+      type: bool | int
+      description: |
+        The value to set as either `1` or `0`
+
+        Passing numbers was never intended to work, and since 0.62 it has been
+        deprecated. It will be removed in a future version of Meson. If you
+        need to pass numbers use the `.set` method.
+  warnings:
+  - numeric values < 0 have the surprising behavior of being converted to
+    `true`, values > 1 have the more expected but unintentional behavior of
+    being interpreted as `true`.
+
+  kwargs_inherit: cfg_data.set
+
+- name: set_quoted
+  returns: void
+  description: Is same as [[cfg_data.set]] but quotes the value in double quotes (`"`)
+
+  posargs:
+    varname:
+      type: str
+      description: The name of the variable to set
+    value:
+      type: str | int | bool
+      description: The value to set
+
+  kwargs_inherit: cfg_data.set
+
+- name: get
+  returns: str | int | bool
+  since: 0.38.0
+  description: |
+    Returns the value of `varname`, if the
+    value has not been set returns `default_value` if it is defined
+    *(since 0.38.0)* and errors out if not
+
+  posargs:
+    varname:
+      type: str
+      description: The name of the variable to query
+
+  optargs:
+    default_value:
+      type: str | int | bool
+      description: The default value to return when `varname` does not exist
+
+- name: get_unquoted
+  returns: str | int | bool
+  since: 0.44.0
+  description: |
+    Returns the value
+    of `varname` but without surrounding double quotes (`"`). If the value has
+    not been set returns `default_value` if it is defined and errors out if not.
+
+  posargs:
+    varname:
+      type: str
+      description: The name of the variable to query
+
+  optargs:
+    default_value:
+      type: str | int | bool
+      description: The default value to return when `varname` does not exist
+
+- name: has
+  returns: bool
+  description: returns `true` if the specified variable is set
+  posargs:
+    varname:
+      type: str
+      description: The name of the variable to query
+
+- name: keys
+  returns: list[str]
+  since: 0.57.0
+  description: |
+    Returns an array of keys of
+    the configuration data object.
+
+    You can iterate over this array with the [`foreach`
+    statement](Syntax.md#foreach-statements).
+
+- name: merge_from
+  returns: void
+  since: 0.42.0
+  description: |
+    Takes as argument a different
+    configuration data object and copies all entries from that object to
+    the current.
+
+  posargs:
+    other:
+      type: cfg_data
+      description: The other [[@cfg_data]] object to merge into this one.

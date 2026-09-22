@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/88 unknown config tool/meson.build:2:0: ERROR: Dependency \"no-such-config-tool\" not found"
+    }
+  ]
+}

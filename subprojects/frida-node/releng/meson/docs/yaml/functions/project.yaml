@@ -1,0 +1,122 @@
+name: project
+returns: void
+description: |
+  The first function called in each project, to initialize Meson.
+
+  The first argument to this function must be a string defining the name
+  of this project.
+
+  The project name can be any string you want, it's not used for
+  anything except descriptive purposes. However since it is written to
+  e.g. the dependency manifest is usually makes sense to have it be the
+  same as the project tarball or pkg-config name. So for example you
+  would probably want to use the name _libfoobar_ instead of _The Foobar
+  Library_.
+
+  It may be followed by the list of programming languages that the project uses.
+
+  *(since 0.40.0)* The list of languages is optional.
+
+  These languages may be used both for `native: false` (the default)
+  (host machine) targets and for `native: true` (build machine) targets.
+  *(since 0.56.0)* The build machine compilers for the specified
+  languages are not required.
+
+  Supported values for languages are `c`, `cpp` (for `C++`), `cuda`,
+  `cython`, `d`, `objc`, `objcpp`, `fortran`, `java`, `cs` (for `C#`),
+  `vala` and `rust`.
+
+posargs:
+  project_name:
+    type: str
+    description: The name of the project.
+
+varargs:
+  name: language
+  type: str
+  description: The languages that Meson should initialize.
+
+kwargs:
+  default_options:
+    type: list[str] | dict[str | bool | int | list[str]]
+    description: |
+      Accepts strings in the form `key=value`
+      which have the same format as options to `meson configure`.
+      For example to set the default project type you would
+      set this: `default_options : ['buildtype=debugoptimized']`. Note
+      that these settings are only used when running Meson for the first
+      time. Global options such as `buildtype` can only be specified in
+      the master project, settings in subprojects are ignored. Project
+      specific options are used normally even in subprojects.
+
+      Note that some options can override the default behavior;
+      for example, using `c_args` here means that the `CFLAGS`
+      environment variable is not used. Consider using
+      [[add_project_arguments()]] instead.
+
+      *(since 1.2.0)*: A dictionary may now be passed.
+
+  version:
+    type: str | file
+    description: |
+      A free form string describing the version of this project.
+      You can access the value in your Meson build files
+      with [[meson.project_version]]. *(Since 0.57.0)* this can also be a
+      [[@file]] object pointing to a file that contains exactly one line of
+      text.
+
+  meson_version:
+    type: str
+    description: |
+      Takes a string describing which Meson version the project requires.
+      Usually something like `>=0.28.0`.
+
+  license:
+    type: str | list[str]
+    description: |
+      Takes a string or array of strings describing the license(s) the code is under.
+
+      This *should* be an [SPDX license expression](https://spdx.dev/ids/),
+      using the standardized license identifier from the [SPDX license
+      list](https://spdx.org/licenses/).  Usually this would be something like
+      `license : 'GPL-2.0-or-later'`. If there are multiple licenses you can use the
+      `AND` and `OR` operators to join them: `license : 'Apache-2.0 OR GPL-2.0'`.
+
+      For backwards compatibility reasons you can also pass an array of
+      licenses here. This is not recommended, as it is ambiguous: `license :
+      ['Apache-2.0', 'GPL-2.0-only']` instead use an SPDX expression: `license
+      : 'Apache-2.0 OR GPL-2.0-only'`, which makes it clear that the license
+      mean OR, not AND.
+
+      Note that the text is informal and is only written to the dependency
+      manifest. Meson does not do any license validation, you are responsible
+      for verifying that you abide by all licensing terms. You can access the
+      value in your Meson build files with `meson.project_license()`.
+
+  license_files:
+    type: str | list[str]
+    since: 1.1.0
+    description: |
+      Takes a string or array of strings with the paths to the license file(s)
+      the code is under.
+
+      This enhances the value of the `license` kwarg by allowing to specify both
+      the short license name and the full license text. Usually this would be
+      something like `license_files: ['COPYING']`.
+
+      Note that the files are informal and are only installed with the dependency
+      manifest. Meson does not do any license validation, you are responsible
+      for verifying that you abide by all licensing terms. You can access the
+      value in your Meson build files with [[meson.project_license_files]].
+
+  subproject_dir:
+    type: str
+    default: "'subprojects'"
+    description: |
+      Specifies the top level directory name that holds Meson subprojects.
+      This is only meant as a compatibility option
+      for existing code bases that house their embedded source code in a
+      custom directory. All new projects should not set this but instead
+      use the default value. It should be noted that this keyword
+      argument is ignored inside subprojects. There can be only one
+      subproject dir and it is set in the top level Meson file.

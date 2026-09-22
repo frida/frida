@@ -1,0 +1,4 @@
+name: range
+long_name: Range object
+since: 0.58.0
+description: Opaque object that can be used in a loop and accessed via `[num]`.

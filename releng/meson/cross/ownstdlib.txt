@@ -1,0 +1,13 @@
+# This is a setup for compiling a program that runs natively
+# but uses a custom std lib. This test will only work on
+# x86_64.
+
+[target_machine]
+system = 'linux'
+cpu_family = 'x86_64'
+cpu = 'x86_64'
+endian = 'little'
+
+[properties]
+
+c_stdlib = 'mylibc' # Subproject name

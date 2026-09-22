@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/125 subproject object as a dependency/meson.build:3:0: ERROR: Tried to use subproject object as a dependency."
+    }
+  ]
+}

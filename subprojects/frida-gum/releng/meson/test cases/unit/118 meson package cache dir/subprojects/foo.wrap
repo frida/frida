@@ -1,0 +1,5 @@
+[wrap-file]
+directory = foo
+source_url = http://server.invalid/foo.zip
+source_filename = foo.zip
+source_hash = c5dd7e8fca93045f736c83700686722b0fbc20b7dc4597b295060684c5b05b72

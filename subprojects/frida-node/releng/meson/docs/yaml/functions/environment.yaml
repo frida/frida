@@ -1,0 +1,35 @@
+name: environment
+returns: env
+since: 0.35.0
+description: Returns an empty [[@env]] object.
+
+arg_flattening: false
+
+optargs:
+  env:
+    type: str | list[str] | dict[str] | dict[list[str]]
+    since: 0.52.0
+    description: |
+      If provided, each key/value pair is added into the [[@env]] object
+      as if [[env.set]] method was called for each of them.
+      Since *0.62.0* list of strings is allowed in dictionary values. In that
+      case values are joined using the separator.
+
+kwargs:
+  separator:
+    type: str
+    since: 0.62.0
+    description: |
+      The separator to use for the initial values defined in
+      the first positional argument. If not explicitly specified, the default
+      path separator for the host operating system will be used, i.e. ';' for
+      Windows and ':' for UNIX/POSIX systems.
+
+  method:
+    type: str
+    since: 0.62.0
+    description: |
+      Must be one of 'set', 'prepend', or 'append'
+      (defaults to 'set'). Controls if initial values defined in the first
+      positional argument are prepended, appended or replace the current value
+      of the environment variable.

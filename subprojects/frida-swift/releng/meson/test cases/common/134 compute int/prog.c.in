@@ -1,0 +1,25 @@
+#include "@CONFIG@"
+#include <stdio.h>
+#include <wchar.h>
+#include <limits.h>
+#include "foobar.h"
+
+int main(void) {
+    if(INTSIZE != sizeof(int)) {
+        fprintf(stderr, "Mismatch: computed int size %d, actual size %d.\n", INTSIZE, (int)sizeof(int));
+        return 1;
+    }
+    if(FOOBAR_IN_CONFIG_H != FOOBAR_IN_FOOBAR_H) {
+        fprintf(stderr, "Mismatch: computed int %d, should be %d.\n", FOOBAR_IN_CONFIG_H, FOOBAR_IN_FOOBAR_H);
+        return 1;
+    }
+    if(MAXINT != INT_MAX) {
+        fprintf(stderr, "Mismatch: computed max int %d, should be %d.\n", MAXINT, INT_MAX);
+        return 1;
+    }
+    if(MININT != INT_MIN) {
+        fprintf(stderr, "Mismatch: computed min int %d, should be %d.\n", MININT, INT_MIN);
+        return 1;
+    }
+    return 0;
+}

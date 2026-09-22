@@ -1,0 +1,20 @@
+name: jar
+returns: jar
+description: |
+  Build a jar from the specified Java source files. Keyword arguments
+  are the same as [[executable]]'s, with the addition of
+  `main_class` which specifies the main class to execute when running
+  the jar with `java -jar file.jar`.
+
+posargs_inherit: _build_target_base
+varargs_inherit: _build_target_base
+kwargs_inherit: _build_target_base
+
+kwargs:
+  main_class:
+    type: str
+    description: Main class for running the built jar
+  java_resources:
+    type: structured_src
+    since: 0.62.0
+    description: Resources to be added to the jar

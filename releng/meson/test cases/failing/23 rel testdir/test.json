@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/23 rel testdir/meson.build:4:0: ERROR: test keyword argument \"workdir\" must be an absolute path"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+/frida-agent
+/frida-agent.kext/
+/frida-kext.o
+/frida-signing.o

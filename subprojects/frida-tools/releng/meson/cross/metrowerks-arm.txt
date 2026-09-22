@@ -1,0 +1,23 @@
+# This file assumes that the path to your Metrowerks Embedded ARM
+# toolchain is added to the environment(PATH) variable, so that
+# Meson can find the binaries while building.
+
+[binaries]
+c = 'mwccarm'
+c_ld = 'mwldarm'
+cpp = 'mwccarm'
+cpp_ld = 'mwldarm'
+ar = 'mwldarm'
+as = 'mwasmarm'
+
+[built-in options]
+c_args = ['-lang', 'c99', '-D_NITRO', '-nosyspath']
+c_link_args = '@DIRNAME@' / 'metrowerks.lcf'
+cpp_args = ['-lang', 'c++', '-D_NITRO', '-nosyspath']
+cpp_link_args = '@DIRNAME@' / 'metrowerks.lcf'
+
+[host_machine]
+system = 'bare metal'
+cpu = 'arm'
+cpu_family = 'arm'
+endian = 'little'

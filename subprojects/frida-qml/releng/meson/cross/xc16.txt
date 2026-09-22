@@ -1,0 +1,26 @@
+# This file assumes that path to the Microchip xc16 toolchain is added
+# to the environment(PATH) variable, so that Meson can find
+# xc16-gcc and xc16-ar while building.
+[binaries]
+c = 'xc16-gcc'
+ar = 'xc16-ar'
+strip = 'xc16-gcc'
+
+[host_machine]
+system = 'bare metal'
+cpu_family = 'dspic'
+cpu = '33ep64mc203'
+endian = 'little'
+
+[properties]
+needs_exe_wrapper = true
+
+[built-in options]
+c_args = [
+    '-c',
+    '-mcpu=33EP64MC203',
+    '-omf=elf']
+c_link_args = [
+    '-mcpu=33EP64MC203',
+    '-omf=elf',
+    '-Wl,--script=p33EP64MC203.gld,']

@@ -1,0 +1,62 @@
+---
+short-description: "{{obj_type_name}} object: {{long_name}}"
+title: {{title}}
+render-subpages: false
+...
+# {{long_name}} (`{{name}}`{{#extends}} extends [[@{{.}}]]{{/extends}})
+
+{{&description}}
+
+{{#has_subclasses}}
+## Extended by
+
+{{long_name}} is extended by the following subtypes:
+{{#extended_by}}
+- {{&.}}
+{{/extended_by}}
+{{/has_subclasses}}
+
+{{#is_returned}}
+## Returned by
+
+{{long_name}} objects are returned by the following functions and methods:
+{{#returned_by}}
+- {{&.}}
+{{/returned_by}}
+{{/is_returned}}
+
+{{#example}}
+## Example
+
+<pre><code class="language-meson">{{&example}}</code></pre>
+{{/example}}
+
+{{>notes}}
+
+{{#has_methods}}
+## {{long_name}} methods
+
+{{#methods}}
+<p style="padding: 7.5px; margin: 0px;"></p>
+
+{{>func}}
+
+<p style="padding: 7.5px; margin: 0px;"></p>
+
+---
+{{/methods}}
+{{/has_methods}}
+
+{{#has_inherited_methods}}
+## Inherited methods
+
+{{#inherited_methods}}
+<p style="padding: 7.5px; margin: 0px;"></p>
+
+{{>func}}
+
+<p style="padding: 7.5px; margin: 0px;"></p>
+
+---
+{{/inherited_methods}}
+{{/has_inherited_methods}}

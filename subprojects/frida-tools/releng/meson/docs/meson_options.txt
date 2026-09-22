@@ -1,0 +1,4 @@
+option('unsafe_yaml', type: 'boolean', value: false,
+    description: 'disable safety checks and use a faster, but less correct YAML loader')
+option('html', type: 'boolean', value: true,
+    description: 'build the hotdoc-based HTML documentation')

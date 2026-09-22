@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "ERROR: Multiple producers for Ninja target \"clash\". Please rename your targets."
+    }
+  ]
+}

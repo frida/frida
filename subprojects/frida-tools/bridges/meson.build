@@ -1,0 +1,27 @@
+custom_target('bridges.bundle',
+  input: [
+    'objc.ts',
+    'swift.ts',
+    'java.ts',
+    'package.json',
+    'package-lock.json',
+    'tsconfig.json',
+    'rollup.config.ts',
+  ],
+  output: [
+    'bridges.bundle',
+    'objc.js',
+    'swift.js',
+    'java.js',
+  ],
+  command: [
+    python,
+    files('build.py'),
+    meson.current_build_dir(),
+    '@PRIVATE_DIR@',
+    npm,
+    '@INPUT@',
+  ],
+  install: true,
+  install_dir: python.get_install_dir() / 'frida_tools' / 'bridges',
+)

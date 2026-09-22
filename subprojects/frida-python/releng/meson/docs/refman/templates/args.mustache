@@ -1,0 +1,28 @@
+<!-- Hotdoc / markdown inserts <p> around the table elements. Override the margin to make them invisible -->
+<style>
+  .nomargin p:last-child { margin-bottom: 0px !important; }
+</style>
+<table>
+  <thead>
+    <tr>
+      <th style="white-space: nowrap; text-align: center;">Name</th>
+      <th style="white-space: nowrap; text-align: center;">Type</th>
+      <th style="width: 56%;">Description</th>
+      <th style="white-space: nowrap; text-align: center; width: 0px;">Tags</th>
+    </tr>
+  </thead>
+  <tbody class="nomargin">
+    {{#args}}
+    <tr id="{{row-id}}">
+      <td style="white-space: nowrap; text-align: center; padding: 6px;"><code class="language-meson">{{name}}</code></td>
+      <td style="white-space: revert; text-align: center; padding: 6px; word-wrap: break-word;">{{&type}}</td>
+      <!-- This suboptimal formatting is required to ensure hotdoc correctly generates the HTML -->
+      <td style="width: 56%; padding: 6px;">
+
+{{&description}}
+</td>
+      <td style="white-space: nowrap; text-align: center; padding: 6px; width: 0px;">{{>taggs}}</td>
+    </tr>
+    {{/args}}
+  </tbody>
+</table>

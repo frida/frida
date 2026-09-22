@@ -1,0 +1,57 @@
+name: vcs_tag
+returns: custom_tgt
+description: |
+  This command detects revision control commit information at build time
+  and places it in the specified output file. This file is guaranteed to
+  be up to date on every build. Keywords are similar to [[custom_target]].
+
+  Meson will read the contents of `input`, substitute the
+  `replace_string` with the detected revision number, and write the
+  result to `output`. This method returns a
+  [[@custom_tgt]] object that (as usual) should be
+  used to signal dependencies if other targets use the file outputted
+  by this.
+
+  For example, if you generate a header with this and want to use that
+  in a build target, you must add the return value to the sources of
+  that build target. Without that, Meson will not know the order in
+  which to build the targets.
+
+  If you desire more specific behavior than what this command provides,
+  you should use [[custom_target]].
+
+kwargs:
+  command:
+    type: list[exe | external_program | custom_tgt | file | str]
+    description: |
+      The command to execute, see [[custom_target]] for details
+      on how this command must be specified.
+
+      This parameter is optional. If it is absent, Meson will try
+      its best to find a suitable default command.
+
+      *(since 0.62.0)* [[@file]] is accepted.
+
+      *(since 0.63.0)* [[@custom_tgt]], [[@exe]], and [[@external_program]] are accepted.
+
+  input:
+    type: str
+    required: true
+    description: File to modify (e.g. `version.c.in`).
+
+  output:
+    type: str
+    required: true
+    description: File to write the results to (e.g. `version.c`).
+
+  fallback:
+    type: str
+    default: "[[meson.project_version]]"
+    description: |
+      Version number to use when no revision control information is present,
+      such as when building from a release tarball.
+
+  replace_string:
+    type: str
+    default: "'@VCS_TAG@'"
+    description: String in the input file to substitute with the commit information.

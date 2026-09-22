@@ -1,0 +1,61 @@
+name: test
+returns: void
+description: |
+  Defines a test to run with the test harness. Takes two positional
+  arguments, the first is the name of the test and the second is the
+  executable to run. The executable can be an [[@exe]] object returned by
+  [[executable]] or an [[@external_program]] object] returned by
+  [[find_program]].
+
+  *(since 0.55.0)* When cross compiling, if an exe_wrapper is needed and
+  defined the environment variable `MESON_EXE_WRAPPER` will be set to
+  the string value of that wrapper (implementation detail: using
+  `mesonlib.join_args`). Test scripts may use this to run cross built
+  binaries. If your test needs `MESON_EXE_WRAPPER` in cross build
+  situations it is your responsibility to return code 77 to tell the
+  harness to report "skip".
+
+  By default, environment variable
+  [`MALLOC_PERTURB_`](http://man7.org/linux/man-pages/man3/mallopt.3.html)
+  is automatically set by `meson test` to a random value between 1..255.
+  This can help find memory leaks on configurations using glibc,
+  including with non-GCC compilers. However, this can have a performance
+  impact, and may fail a test due to external libraries whose internals
+  are out of the user's control. To check if this feature is causing an
+  expected runtime crash, disable the feature by temporarily setting
+  environment variable `MALLOC_PERTURB_=0`. While it's preferable to
+  only temporarily disable this check, if a project requires permanent
+  disabling of this check in meson.build do like:
+
+  ```meson
+  nomalloc = environment({'MALLOC_PERTURB_': '0'})
+
+  test(..., env: nomalloc, ...)
+  ```
+
+  By default, the environment variables `ASAN_OPTIONS`, `UBSAN_OPTIONS`,
+  and `MSAN_OPTIONS` are set to enable aborting on detected violations and to
+  give a backtrace. To suppress this, `ASAN_OPTIONS`, `UBSAN_OPTIONS`, or
+  `MSAN_OPTIONS` can be set in the environment.
+
+  In addition to running individual executables as test cases, `test()`
+  can also be used to invoke an external test harness.  In this case,
+  it is best to use `verbose: true` *(since 0.62.0)* and, if supported
+  by the external harness, `protocol: 'tap'` *(since 0.50.0)*.  This will
+  ensure that Meson logs each subtest as it runs, instead of including
+  the whole log at the end of the run.
+
+  Defined tests can be run in a backend-agnostic way by calling
+  `meson test` inside the build dir, or by using backend-specific
+  commands, such as `ninja test` or `msbuild RUN_TESTS.vcxproj`.
+
+posargs_inherit: benchmark
+kwargs_inherit: benchmark
+
+kwargs:
+  is_parallel:
+    type: bool
+    default: true
+    description: |
+      when false, specifies that no other test must be
+      running at the same time as this test

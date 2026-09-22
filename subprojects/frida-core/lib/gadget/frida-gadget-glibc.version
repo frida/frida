@@ -1,0 +1,11 @@
+FRIDA_1.0 {
+  local:
+    *;
+};
+
+GLIBC_2.2.5 {
+  local:
+    fopen*;
+    fseeko*;
+    ftello*;
+} FRIDA_1.0;

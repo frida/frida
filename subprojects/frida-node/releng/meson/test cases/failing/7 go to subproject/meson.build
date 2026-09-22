@@ -1,0 +1,3 @@
+project('fff')
+
+subdir('subprojects')

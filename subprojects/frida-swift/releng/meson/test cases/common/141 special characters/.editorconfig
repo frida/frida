@@ -1,0 +1,2 @@
+[meson.build]
+trim_trailing_whitespace = false

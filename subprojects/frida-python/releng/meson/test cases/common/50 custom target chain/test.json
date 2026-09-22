@@ -1,0 +1,6 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/subdir/data2.dat"},
+    {"type": "file", "file": "usr/subdir/data3.dat"}
+  ]
+}

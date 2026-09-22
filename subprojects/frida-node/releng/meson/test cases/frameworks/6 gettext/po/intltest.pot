@@ -1,0 +1,38 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the intltest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: intltest\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-05-31 05:16-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/intlmain.c:15
+msgid "International greeting."
+msgstr ""
+
+#: data/test.desktop.in:3
+msgid "Test"
+msgstr ""
+
+#: data/test.desktop.in:4
+msgid "Application"
+msgstr ""
+
+#: data/test.desktop.in:5
+msgid "Test Application"
+msgstr ""
+
+#: data/com.mesonbuild.test.dummy.metainfo.xml:19
+msgid "This is <code>text</code> with <em>embedded XML tags</em>. Nice!"
+msgstr ""

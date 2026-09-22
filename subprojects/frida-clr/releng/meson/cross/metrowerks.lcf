@@ -1,0 +1,18 @@
+# General-purpose linker script for Metrowerks toolchains.
+# This script will link a blank application. Its only purpose
+# is to allow the toolchains to run Meson tests. To link an
+# actual application, you need to write your own fine-tuned lcf.
+
+MEMORY {
+    TEST (RWX) : ORIGIN=0, LENGTH=0
+}
+
+SECTIONS {
+    .TEST:{
+        * (.text)
+	  * (.data)
+	  * (.rodata)
+	  * (.bss)
+        __startup=.;
+    } > TEST
+}

@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/83 subproj not-found dep/meson.build:2:10: ERROR: Dependency '(anonymous)' is required but not found."
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "env": {
+    "CFLAGS": "-DCMD_ARG"
+  },
+  "stdout": [
+    {
+      "line": "test cases/rust/12 bindgen/meson.build:47: WARNING: Project targets '>= 0.63' but uses feature introduced in '1.0.0': \"rust.bindgen\" keyword argument \"include_directories\" of type array[str]."
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/84 invalid configure file/meson.build:3:0: ERROR: \"install_dir\" must be specified when \"install\" in a configure_file is true"
+    }
+  ]
+}

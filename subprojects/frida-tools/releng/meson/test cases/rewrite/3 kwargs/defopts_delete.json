@@ -1,0 +1,18 @@
+[
+  {
+    "type": "kwargs",
+    "function": "project",
+    "id": "/",
+    "operation": "set",
+    "kwargs": {
+      "default_options": ["cpp_std=c++14", "buildtype=release", "debug=true"]
+    }
+  },
+  {
+    "type": "default_options",
+    "operation": "delete",
+    "options": {
+      "buildtype": null
+    }
+  }
+]

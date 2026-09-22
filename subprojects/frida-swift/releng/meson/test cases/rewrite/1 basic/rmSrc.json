@@ -1,0 +1,88 @@
+[
+  {
+    "type": "target",
+    "target": "trivialprog1",
+    "operation": "src_rm",
+    "sources": ["fileA.cpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog3",
+    "operation": "src_rm",
+    "sources": ["fileA.cpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog4",
+    "operation": "src_rm",
+    "sources": ["fileA.cpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog5",
+    "operation": "src_rm",
+    "sources": ["fileB.cpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog6",
+    "operation": "src_rm",
+    "sources": ["fileA.cpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog7",
+    "operation": "src_rm",
+    "sources": ["fileB.cpp"]
+  },
+  {
+    "type": "target",
+    "target": "trivialprog0",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog1",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog2",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog3",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog4",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog5",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog6",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog7",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog8",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "trivialprog9",
+    "operation": "info"
+  }
+]

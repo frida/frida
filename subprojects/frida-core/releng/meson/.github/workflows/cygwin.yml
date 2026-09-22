@@ -1,0 +1,121 @@
+name: cygwin
+
+concurrency:
+  group: cygwin-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - master
+      # Stable branches such as 0.56 or 1.0
+      - '[0-9]+.[0-9]+'
+    paths:
+      - "mesonbuild/**"
+      - "test cases/**"
+      - ".github/workflows/cygwin.yml"
+      - "run*tests.py"
+  pull_request:
+    paths:
+      - "mesonbuild/**"
+      - "test cases/**"
+      - ".github/workflows/cygwin.yml"
+      - "run*tests.py"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: windows-latest
+    name: ${{ matrix.NAME }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - NAME: gccx64ninja
+            ARCH: x86_64
+    env:
+      MESON_CI_JOBNAME: cygwin-${{ matrix.NAME }}
+
+    steps:
+      - uses: actions/cache/restore@v3
+        id: restore-cache
+        with:
+          # should use 'pip3 cache dir' to discover this path
+          path: C:\cygwin\home\runneradmin\.cache\pip
+          key: cygwin-pip-${{ github.run_number }}
+          restore-keys: cygwin-pip-
+
+      - run: git config --global core.autocrlf input
+
+      - uses: actions/checkout@v3
+
+      - uses: cygwin/cygwin-install-action@master
+        with:
+          platform: ${{ matrix.ARCH }}
+          packages: |
+            cmake
+            gcc-fortran
+            gcc-objc++
+            gcc-objc
+            git
+            gobject-introspection
+            gtk-doc
+            libboost-devel
+            libglib2.0-devel
+            libgtk3-devel
+            libxml2-devel
+            libxslt-devel
+            ninja
+            python2-devel
+            python3-devel
+            python3-libxml2
+            python3-libxslt
+            python39-pip
+            python39-wheel
+            vala
+            zlib-devel
+
+      - name: Run pip
+        run: |
+          export PATH=/usr/bin:/usr/local/bin:$(cygpath ${SYSTEMROOT})/system32
+          python3 -m pip --disable-pip-version-check install gcovr fastjsonschema pefile pytest pytest-subtests pytest-xdist coverage
+        shell: C:\cygwin\bin\bash.exe --noprofile --norc -o igncr -eo pipefail '{0}'
+
+      - uses: actions/cache/save@v3
+        with:
+          # should use 'pip3 cache dir' to discover this path
+          path: C:\cygwin\home\runneradmin\.cache\pip
+          key: cygwin-pip-${{ github.run_number }}
+
+      - name: Run tests
+        run: |
+          export PATH=/usr/bin:/usr/local/bin:$(cygpath ${SYSTEMROOT})/system32
+          python3 ./tools/run_with_cov.py run_tests.py --backend=ninja
+        env:
+          # Cygwin's static boost installation is broken (some static library
+          # variants such as boost_thread are not present)
+          SKIP_STATIC_BOOST: 1
+        shell: C:\cygwin\bin\bash.exe --noprofile --norc -o igncr -eo pipefail '{0}'
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.NAME }}
+          path: meson-test-run.*
+        # test log should be saved on failure
+        if: ${{ !cancelled() }}
+
+      - name: Aggregate coverage reports
+        run: |
+          export PATH=/usr/bin:/usr/local/bin:$(cygpath ${SYSTEMROOT})/system32
+          ./ci/combine_cov.sh
+        shell: C:\cygwin\bin\bash.exe --noprofile --norc -o igncr -eo pipefail '{0}'
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          files: .coverage/coverage.xml
+          name: "${{ matrix.NAME }}"
+          fail_ci_if_error: false
+          verbose: true

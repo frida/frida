@@ -1,0 +1,16 @@
+name: message
+returns: void
+description: This function prints its argument to stdout.
+
+arg_flattening: false
+
+posargs:
+  text:
+    type: str | int | bool | list[str | int | bool] | dict[str | int | bool]
+    description: The message to print.
+
+varargs:
+  name: more_text
+  since: 0.54.0
+  type: str | int | bool | list[str | int | bool] | dict[str | int | bool]
+  description: Additional text that will be printed separated by spaces.

@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/5 misplaced option/meson.build:3:0: ERROR: Tried to call option() in build description file. All options must be in the option file."
+    }
+  ]
+}

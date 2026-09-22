@@ -1,0 +1,22 @@
+{
+  "matrix": {
+    "options": {
+      "static": [
+        { "val": "true", "skip_on_env": [ "SKIP_STATIC_BOOST" ] },
+        { "val": "false" }
+      ],
+      "b_vscrt": [
+        { "val": null },
+        { "val": "md",  "compilers": { "cpp": "msvc" } },
+        { "val": "mdd", "compilers": { "cpp": "msvc" } },
+        { "val": "mt",  "compilers": { "cpp": "msvc" } },
+        { "val": "mtd", "compilers": { "cpp": "msvc" } }
+      ]
+    },
+    "exclude": [
+      { "static": "false", "b_vscrt": "mt"  },
+      { "static": "false", "b_vscrt": "mtd" }
+    ]
+  },
+  "expect_skip_on_jobname": ["azure", "msys2"]
+}

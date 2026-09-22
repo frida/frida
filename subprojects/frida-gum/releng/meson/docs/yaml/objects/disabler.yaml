@@ -1,0 +1,13 @@
+name: disabler
+long_name: Disabler
+description: |
+  A disabler object is an object that behaves in much the same way as
+  NaN numbers do in floating point math. That is when used in any
+  statement (function call, logical op, etc) they will cause the
+  statement evaluation to immediately short circuit to return a disabler
+  object. A disabler object has one method:
+
+methods:
+- name: found
+  returns: bool
+  description: Always returns `false`

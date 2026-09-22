@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/64 install_data rename bad size/meson.build:3:0: ERROR: \"rename\" and \"sources\" argument lists must be the same length if \"rename\" is given. Rename has 1 elements and sources has 2."
+    }
+  ]
+}

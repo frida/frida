@@ -1,0 +1,51 @@
+name: add_languages
+returns: bool
+description: |
+  Add programming languages used by the project.
+
+  This is equivalent to having
+  them in the `project` declaration. This function is usually used to
+  add languages that are only used under some conditions.
+
+  Returns `true` if all languages specified were found and `false` otherwise.
+
+  If `native` is omitted, the languages may be used for either build or host
+  machine, but are never required for the build machine.  (i.e. it is equivalent
+  to `add_languages(*langs*, native: false, required: *required*) and
+  add_languages(*langs*, native: true, required: false)`. This default behaviour
+  may change to `native: false` in a future Meson version.
+
+example: |
+  ```meson
+  project('foobar', 'c')
+
+  if compiling_for_osx
+    add_languages('objc')
+  endif
+  if add_languages('cpp', required : false)
+    executable('cpp-app', 'main.cpp')
+  endif
+
+  # More code...
+  ```
+
+varargs:
+  type: str
+  name: Language
+  description: The languages to add
+
+kwargs:
+  required:
+    type: bool | feature
+    default: true
+    description: |
+      If set to `true`, Meson will halt if any of the languages
+      specified are not found. *(since 0.47.0)* The value of a
+      [`feature`](Build-options.md#features) option can also be passed.
+  native:
+    type: bool
+    since: 0.54.0
+    description: |
+      If set to `true`, the language will be used to compile for the build
+      machine, if `false`, for the host machine.
+

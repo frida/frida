@@ -1,0 +1,29 @@
+#pragma once
+
+/**
+ * SECTION:version
+ * @section_id: foo-version
+ * @short_description: <filename>foo-version.h</filename>
+ * @title: Foo Versioning
+ */
+
+/**
+ * FOO_MAJOR_VERSION:
+ *
+ * The major version of foo.
+ */
+#define FOO_MAJOR_VERSION (@FOO_MAJOR_VERSION@)
+
+/**
+ * FOO_MINOR_VERSION:
+ *
+ * The minor version of foo.
+ */
+#define FOO_MINOR_VERSION (@FOO_MINOR_VERSION@)
+
+/**
+ * FOO_MICRO_VERSION:
+ *
+ * The micro version of foo.
+ */
+#define FOO_MICRO_VERSION (@FOO_MICRO_VERSION@)

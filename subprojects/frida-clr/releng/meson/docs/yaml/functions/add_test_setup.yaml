@@ -1,0 +1,60 @@
+name: add_test_setup
+returns: void
+description: |
+  Add a custom test setup. This setup can be used to run the tests with a
+  custom setup, for example under Valgrind.
+
+  To use the test setup, run `meson test --setup=*name*` inside the
+  build dir.
+
+  Note that all these options are also available while running the
+  `meson test` script for running tests instead of `ninja test` or
+  `msbuild RUN_TESTS.vcxproj`, etc depending on the backend.
+
+posargs:
+  name:
+    type: str
+    description: The name of the test setup
+
+kwargs:
+  env:
+    type: env | list[str] | dict[str]
+    description: |
+      environment variables to set
+      , such as `['NAME1=value1', 'NAME2=value2']`,
+      or an [[@env]] object which allows more sophisticated
+      environment juggling. *(Since 0.52.0)* A dictionary is also accepted.
+
+  exe_wrapper:
+    type: list[str | external_program]
+    description: The command or script followed by the arguments to it
+
+  gdb:
+    type: bool
+    default: false
+    description: If `true`, the tests are also run under `gdb`
+
+  timeout_multiplier:
+    type: int
+    default: 1
+    description: |
+      A number to multiply the test timeout with.
+      *Since 0.57* if timeout_multiplier is `<= 0` the test has infinite duration,
+      in previous versions of Meson the test would fail with a timeout immediately.
+
+  is_default:
+    type: bool
+    since: 0.49.0
+    default: false
+    description: |
+      Set whether this is the default test setup.
+      If `true`, the setup will be used whenever `meson test` is run
+      without the `--setup` option.
+
+  exclude_suites:
+    type: list[str]
+    since: 0.57.0
+    description:
+      A list of test suites that should be excluded when using this setup.
+      Suites specified in the `--suite` option
+      to `meson test` will always run, overriding `add_test_setup` if necessary.

@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/lang">
+        <file>qt5embedded_fr.qm</file>
+    </qresource>
+</RCC>
+

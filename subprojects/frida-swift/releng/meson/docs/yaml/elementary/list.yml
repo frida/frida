@@ -1,0 +1,42 @@
+name: list
+long_name: List
+description: An array of elements. See [arrays](Syntax.md#arrays).
+is_container: true
+
+methods:
+- name: contains
+  returns: bool
+  description: |
+    Returns `true` if the array contains the object
+    given as argument, `false` otherwise
+
+  arg_flattening: false
+
+  posargs:
+    item:
+      type: any
+      description: The item to check
+
+- name: get
+  returns: any
+  description: |
+    returns the object at the given index,
+    negative indices count from the back of the array, indexing out of
+    bounds returns the `fallback` value *(since 0.38.0)* or, if it is
+    not specified, causes a fatal error
+
+  arg_flattening: false
+
+  posargs:
+    index:
+      type: int
+      description: Index of the list position to query. Negative values start at the end of the list
+
+  optargs:
+    fallback:
+      type: any
+      description: Fallback value that is returned if the index is out of range.
+
+- name: length
+  returns: int
+  description: Returns the current size of the array / list.

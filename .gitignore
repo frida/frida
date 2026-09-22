@@ -3,4 +3,3 @@
 /releng/__pycache__/
 /releng/modules/frida-gadget-ios/*.dylib
 /releng/modules/frida-gadget-ios/node_modules
-/subprojects/*

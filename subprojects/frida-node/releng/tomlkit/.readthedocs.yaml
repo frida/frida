@@ -1,0 +1,28 @@
+---
+
+# .readthedocs.yaml
+# Read the Docs configuration file
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html
+# for details
+
+version: 2
+
+sphinx:
+  builder: dirhtml
+  configuration: docs/conf.py
+  fail_on_warning: true
+
+build:
+  os: ubuntu-22.04
+  tools:
+    python: >-
+      3.11
+
+python:
+  install:
+  - method: pip
+    path: .
+  - requirements: docs/requirements.txt
+  system_packages: false
+
+...

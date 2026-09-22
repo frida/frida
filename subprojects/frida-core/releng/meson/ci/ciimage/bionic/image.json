@@ -1,0 +1,8 @@
+{
+  "base_image": "ubuntu:bionic",
+  "env": {
+    "CI": "1",
+    "DC": "gdc",
+    "MESON_CI_JOBNAME": "linux-bionic-gcc"
+  }
+}

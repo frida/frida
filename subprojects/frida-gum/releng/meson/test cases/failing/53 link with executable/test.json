@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/53 link with executable/meson.build:4:4: ERROR: Link target 'prog' is not linkable."
+    }
+  ]
+}

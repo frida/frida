@@ -1,0 +1,5 @@
+{
+    "installed": [
+        { "type": "python_file", "file": "pure/a.py"}
+    ]
+}

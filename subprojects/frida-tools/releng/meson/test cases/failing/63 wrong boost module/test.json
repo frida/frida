@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/63 wrong boost module/meson.build:9:10: ERROR: Dependency \"boost\" not found, tried system"
+    }
+  ]
+}

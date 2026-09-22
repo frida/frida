@@ -1,0 +1,74 @@
+name: subproject
+returns: subproject
+description: |
+  Takes the project specified in the positional argument and brings that
+  in the current build specification by returning a [[@subproject]] object.
+  Subprojects must always be placed inside
+  the `subprojects` directory at the top source directory. So for
+  example a subproject called `foo` must be located in
+  `${MESON_SOURCE_ROOT}/subprojects/foo`.
+
+  - `default_options` *(since 0.37.0)*: an array of default option values
+    that override those set in the subproject's `meson.options`
+    (like `default_options` in `project`, they only have effect when
+    Meson is run for the first time, and command line arguments override
+    any default options in build files).
+    *(since 0.54.0)*: `default_library` built-in option can also be overridden.
+    *(since 1.2.0)*: A dictionary may be passed instead of array.
+  - `version`: works just like the same as in `dependency`.
+    It specifies what version the subproject should be, as an example `>=1.0.1`
+  - `required` *(since 0.48.0)*: By default, `required` is `true` and
+    Meson will abort if the subproject could not be setup. You can set
+    this to `false` and then use the `.found()` method on the [[@subproject]]
+    object. You may also pass the value of a
+    [`feature`](Build-options.md#features) option, same as
+    [[dependency]].
+
+  Note that you can use the returned [[@subproject]] object
+  to access any variable in the
+  subproject. However, if you want to use a dependency object from
+  inside a subproject, an easier way is to use the `fallback:` keyword
+  argument to [[dependency]].
+
+  [See additional documentation](Subprojects.md).
+
+posargs:
+  subproject_name:
+    type: str
+    description: |
+      Name of the subproject. The subproject must exist in the `subprojects`
+      directory (or the directory specified in the `subproject_dir` of
+      [[project]]) as a directory or wrap file.
+
+kwargs:
+  default_options:
+    type: list[str] | dict[str | bool | int | list[str]]
+    since: 0.37.0
+    description: |
+      An array of default option values
+      that override those set in the subproject's `meson.options`
+      (like `default_options` in [[project]], they only have effect when
+      Meson is run for the first time, and command line arguments override
+      any default options in build files).
+      *(since 0.54.0)*: `default_library` built-in option can also be overridden.
+      *(since 1.2.0)*: A dictionary may now be passed.
+
+  version:
+    type: str
+    description: |
+      Works just like the same as in [[dependency]].
+      It specifies what version the subproject should be, as an example `>=1.0.1`.
+
+  required:
+    type: bool | feature
+    since: 0.48.0
+    default: true
+    description: |
+      Works just the same as in [[dependency]].
+
+  native:
+    type: bool
+    since: 1.3.0
+    default: false
+    description : |
+      Whether to build this subproject for the host or build machine.

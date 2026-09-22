@@ -1,0 +1,17 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/share/gtk-doc/html/foo/up-insensitive.png"},
+    {"type": "file", "file": "usr/share/gtk-doc/html/foo/home.png"},
+    {"type": "file", "file": "usr/share/gtk-doc/html/foo/foo.html"},
+    {"type": "file", "file": "usr/share/gtk-doc/html/foo/foo-foo.html"},
+    {"type": "file", "file": "usr/share/gtk-doc/html/foo/style.css"},
+    {"type": "file", "file": "usr/share/gtk-doc/html/foo/index.html"},
+    {"type": "file", "file": "usr/share/gtk-doc/html/foo/foo.devhelp2"},
+    {"type": "file", "file": "usr/share/gtk-doc/html/foo/left.png"},
+    {"type": "file", "file": "usr/share/gtk-doc/html/foo/left-insensitive.png"},
+    {"type": "file", "file": "usr/share/gtk-doc/html/foo/right-insensitive.png"},
+    {"type": "file", "file": "usr/share/gtk-doc/html/foo/up.png"},
+    {"type": "file", "file": "usr/share/gtk-doc/html/foo/right.png"}
+  ],
+  "expect_skip_on_jobname": ["azure", "msys2"]
+}

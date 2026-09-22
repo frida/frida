@@ -1,0 +1,9 @@
+#pragma once
+
+int
+fun
+(
+int
+argc
+)
+;

@@ -1,0 +1,5 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/lib/libextractedlib.a"}
+  ]
+}

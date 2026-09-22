@@ -1,0 +1,16 @@
+[paths]
+bindir = 'binbar'
+datadir = 'databar'
+includedir = 'includebar'
+infodir = 'infobar'
+libdir = 'libbar'
+libexecdir = 'libexecbar'
+localedir = 'localebar'
+localstatedir = 'localstatebar'
+mandir = 'manbar'
+prefix = '/prefix'
+sbindir = 'sbinbar'
+sharedstatedir = 'sharedstatebar'
+sysconfdir = 'sysconfbar'
+
+; vim: ft=dosini

@@ -1,0 +1,20 @@
+[
+  {
+    "type": "kwargs",
+    "function": "project",
+    "id": "/",
+    "operation": "delete",
+    "kwargs": {
+      "version": null
+    }
+  },
+  {
+    "type": "kwargs",
+    "function": "target",
+    "id": "helloWorld",
+    "operation": "delete",
+    "kwargs": {
+      "build_by_default": false
+    }
+  }
+]

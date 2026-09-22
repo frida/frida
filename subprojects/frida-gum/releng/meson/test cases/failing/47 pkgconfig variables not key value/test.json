@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/47 pkgconfig variables not key value/meson.build:8:5: ERROR: pkgconfig.generate keyword argument \"variables\" variable 'this_should_be_key_value' must have a value separated by equals sign."
+    }
+  ]
+}

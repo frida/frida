@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/26 output subdir/meson.build:3:0: ERROR: configure_file keyword argument \"output\" Output 'subdir/foo' must not contain a path segment."
+    }
+  ]
+}

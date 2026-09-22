@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/39 kwarg assign/meson.build:3:30: ERROR: Tried to assign values inside an argument list."
+    }
+  ]
+}

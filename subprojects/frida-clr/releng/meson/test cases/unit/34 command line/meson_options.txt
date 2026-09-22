@@ -1,0 +1,2 @@
+option('set_sub_opt', type : 'boolean', value : false)
+option('set_percent_opt', type : 'string', value: 'not_set')

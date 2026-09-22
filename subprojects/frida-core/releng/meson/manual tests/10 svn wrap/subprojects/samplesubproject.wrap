@@ -1,0 +1,4 @@
+[wrap-svn]
+directory=samplesubproject
+url=https://svn.code.sf.net/p/mesonsubproject/code/trunk
+revision=head

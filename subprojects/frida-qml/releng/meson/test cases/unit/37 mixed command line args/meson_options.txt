@@ -1,0 +1,10 @@
+option(
+  'one',
+  type : 'string',
+)
+option(
+  'two',
+  type : 'combo',
+  choices : ['foo', 'bar'],
+  value : 'foo',
+)

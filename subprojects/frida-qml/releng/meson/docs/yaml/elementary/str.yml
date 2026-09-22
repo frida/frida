@@ -1,0 +1,312 @@
+name: str
+long_name: String
+description: |
+  All [strings](Syntax.md#strings) have the following methods. Strings
+  are immutable, all operations return their results as a new string.
+
+methods:
+
+# str.format(fmt, value...)
+- name: format
+  returns: str
+  description: |
+    Strings can be built using the string formatting functionality.
+
+    See [the Meson syntax entry](Syntax.md#string-formatting) for more
+    information.
+
+    *Since 1.3.0* values other than strings, integers, bools, options,
+    dictionaries and lists thereof are deprecated. They were previously printing
+    the internal representation of the raw Python object.
+  example: |
+    ```meson
+    template = 'string: @0@, number: @1@, bool: @2@'
+    res = template.format('text', 1, true)
+    # res now has value 'string: text, number: 1, bool: true'
+    ```
+
+  arg_flattening: false
+
+  posargs:
+    fmt:
+      description: |
+        The string to format.
+
+        The formatting works by replacing placeholders of type `@number@` with
+        the corresponding varargs.
+      type: str
+
+  varargs:
+    name: value
+    description: The values to replace the @number@ placeholders in the format string.
+    type: int | bool | str
+
+# str.replace(old, new)
+- name: replace
+  description: Search all occurrences of `old` and replace it with `new`
+  returns: str
+  since: 0.58.0
+  example: |
+    ```meson
+    # Replaces all instances of one substring with another
+    s = 'semicolons;as;separators'
+    s = s.replace('as', 'are')
+    # 's' now has the value of 'semicolons;are;separators'
+    ```
+
+  posargs:
+    old:
+      description: The substring to search
+      type: str
+
+    new:
+      description: The replacement string
+      type: str
+
+# str.strip()
+- name: strip
+  description: |
+    Removes leading/ending characters from the string.
+
+    By default the characters to remove are spaces and newlines.
+  returns: str
+  example: |
+    ```meson
+    # Similar to the Python str.strip(). Removes leading/ending spaces and newlines
+    define = ' -Dsomedefine '
+    stripped_define = define.strip()
+    # 'stripped_define' now has the value '-Dsomedefine'
+    ```
+
+  optargs:
+    strip_chars:
+      type: str
+      since: 0.43.0
+      description: Instead of whitespace, strip all the characters in this string.
+
+# str.to_lower()
+- name: to_lower
+  description: Converts all characters to lower case
+  returns: str
+  example: |
+    ```meson
+    target = 'x86_FreeBSD'
+    lower = target.to_lower() # t now has the value 'x86_freebsd'
+    ```
+
+# str.to_upper()
+- name: to_upper
+  description: Converts all characters to upper case
+  returns: str
+  example: |
+    ```meson
+    target = 'x86_FreeBSD'
+    upper = target.to_upper() # t now has the value 'X86_FREEBSD'
+    ```
+
+# str.to_int()
+- name: to_int
+  description: Converts the string to an int and throws an error if it can't be
+  returns: int
+  example: |
+    ```meson
+    version = '1'
+    # Converts the string to an int and throws an error if it can't be
+    ver_int = version.to_int()
+    ```
+
+# str.contains()
+- name: contains
+  returns: bool
+  description: Returns `true` if string contains the string specified as the argument.
+  example: |
+    ```meson
+    target = 'x86_FreeBSD'
+    is_fbsd = target.to_lower().contains('freebsd')
+    # is_fbsd now has the boolean value 'true'
+    ```
+
+  posargs:
+    fragment:
+      type: str
+      description: The string fragment to check
+
+# str.startswith()
+- name: startswith
+  returns: bool
+  description: Returns true if string starts with the string specified as the argument.
+  posargs_inherit: str.contains
+  example: |
+    ```meson
+    target = 'x86_FreeBSD'
+    is_x86 = target.startswith('x86') # boolean value 'true'
+    ```
+
+# str.endswith()
+- name: endswith
+  returns: bool
+  description: Returns true if string ends with the string specified as the argument.
+  posargs_inherit: str.contains
+  example: |
+    ```meson
+    target = 'x86_FreeBSD'
+    is_bsd = target.to_lower().endswith('bsd') # boolean value 'true'
+    ```
+
+# str.substring()
+- name: substring
+  returns: str
+  since: 0.56.0
+  description: |
+    Returns a substring specified from `start` to `end`.
+    Both `start` and `end` arguments are optional, so, for example, `'foobar'.substring()` will return `'foobar'`.
+
+    The method accepts negative values where negative `start` is relative to the end of
+    string `len(string) - start` as well as negative `end`.
+
+    If `start` or `end` are out of bounds, the position of the closest character will be used.
+    If `start` is bigger than `end`, the result will be an empty substring.
+
+  example: |
+    ```meson
+    # Similar to the Python str[start:end] syntax
+    target = 'x86_FreeBSD'
+    platform = target.substring(0, 3) # prefix string value 'x86'
+    system = target.substring(4) # suffix string value 'FreeBSD'
+    ```
+
+    Example with negative values:
+
+    ```meson
+    string = 'foobar'
+    string.substring(-5, -3) # => 'oo'
+    string.substring(1, -1) # => 'ooba'
+    ```
+
+    Example with out of bound values:
+
+    ```meson
+    string = 'foobar'
+    string.substring(64) # => ''
+    string.substring(0, 64) # => 'foobar'
+    string.substring(64, 0) # => ''
+    ```
+
+  optargs:
+    start:
+      type: int
+      description: The start position
+
+    end:
+      type: int
+      description: The end position
+
+# str.split
+- name: split
+  returns: list[str]
+  description: |
+    Splits the string at the specified character
+    (or whitespace if not set) and returns the parts in an
+    array.
+
+  example: |
+    ```meson
+    # Similar to the Python str.split()
+    components = 'a b   c d '.split()
+    # components now has the value ['a', 'b', 'c', 'd']
+    components = 'a b   c d '.split(' ')
+    # components now has the value ['a', 'b', '', '', 'c', 'd', '']
+    ```
+
+  optargs:
+    split_string:
+      type: str
+      description: Specifies the character / substring where to split the string.
+
+- name: splitlines
+  returns: list[str]
+  since: 1.2.0
+  description: |
+    Splits the string into an array of lines.
+    Unlike .split('\n'), the empty string produced an empty array,
+    and if the string ends in a newline, splitlines() doesn't split
+    on that last newline.
+    '\n', '\r' and '\r\n' are all considered newlines.
+
+  example: |
+    ```meson
+    output = 'hello\nworld\n'.splitlines()
+    # Output value is ['hello', 'world']
+    output = ''.splitlines()
+    # Output value is []
+    fs = import('fs')
+    paths = fs.read('my_paths.list').splitlines()
+    # paths is now the paths listed in 'my_paths.list', or an empty list
+    # if 'my_paths.list' is empty
+    ```
+
+# str.join()
+- name: join
+  returns: str
+  description: |
+    The opposite of split,
+    for example `'.'.join(['a', 'b', 'c']` yields `'a.b.c'`.
+
+  example: |
+    ```meson
+    # Similar to the Python str.join()
+    output = ' '.join(['foo', 'bar'])
+    # Output value is 'foo bar'
+    pathsep = ':'
+    path = pathsep.join(['/usr/bin', '/bin', '/usr/local/bin'])
+    # path now has the value '/usr/bin:/bin:/usr/local/bin'
+    ```
+
+  varargs:
+      name: strings
+      type: str
+      since: 0.60.0
+      description: |
+        The strings to join with the current string.
+
+        Before Meson *0.60.0* this function only accepts a single positional
+        argument of the type [[list[str]]].
+
+# str.underscorify
+- name: underscorify
+  returns: str
+  description: Creates a string where every non-alphabetical non-number character is replaced with `_`.
+  example: |
+    ```meson
+    name = 'Meson Docs.txt#Reference-manual'
+    # Replaces all characters other than `a-zA-Z0-9` with `_` (underscore)
+    # Useful for substituting into #defines, filenames, etc.
+    underscored = name.underscorify()
+    # underscored now has the value 'Meson_Docs_txt_Reference_manual'
+    ```
+
+# str.version_compare
+- name: version_compare
+  returns: bool
+  description: Does semantic version comparison.
+  example: |
+    ```meson
+    version = '1.2.3'
+    # Compare version numbers semantically
+    is_new = version.version_compare('>=2.0')
+    # is_new now has the boolean value false
+    # Supports the following operators: '>', '<', '>=', '<=', '!=', '==', '='
+    ```
+
+    Meson version comparison conventions include:
+
+    ```meson
+    '3.6'.version_compare('>=3.6.0') == false
+    ```
+
+    It is best to be unambiguous and specify the full revision level to compare.
+
+  posargs:
+    compare_string:
+      type: str
+      description: The string to compare to.

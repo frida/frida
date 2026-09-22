@@ -1,0 +1,11 @@
+{
+  "do_not_set_opts": [
+    "prefix"
+  ],
+  "stdout": [
+    {
+      "comment": "literal 'some/path/notabs' appears in output, irrespective of os.path.sep, as that's the prefix",
+      "line": "test cases/failing/38 prefix absolute/meson.build:1:0: ERROR: prefix value 'some/path/notabs' must be an absolute path"
+    }
+  ]
+}

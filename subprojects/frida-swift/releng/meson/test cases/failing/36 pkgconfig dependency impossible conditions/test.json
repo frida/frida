@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/36 pkgconfig dependency impossible conditions/meson.build:7:0: ERROR: Dependency 'zlib' is required but not found."
+    }
+  ]
+}

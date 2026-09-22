@@ -1,0 +1,7 @@
+{
+    "stdout": [
+        {
+            "line": "test cases/failing/106 invalid fstring/meson.build:3:4: ERROR: Identifier \"foo\" does not name a variable."
+        }
+    ]
+}

@@ -1,0 +1,4 @@
+[paths]
+bindir = 'binbar2'
+
+; vim: ft=dosini

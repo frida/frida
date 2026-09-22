@@ -1,0 +1,1 @@
+set(MESON_TEST_VAR2 VAR2)

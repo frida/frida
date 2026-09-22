@@ -1,0 +1,472 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '**'
+  pull_request:
+    branches:
+      - main
+
+env:
+  GUM_OPTIONS: '--enable-gumpp --enable-gumjs --with-devkits=gum,gumjs --enable-tests'
+
+jobs:
+  gir:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install \
+              gobject-introspection \
+              libgirepository1.0-dev \
+              libglib2.0-dev \
+              libjson-glib-dev \
+              libsoup-3.0-dev \
+              libsqlite3-dev \
+              libunwind-dev \
+              ninja-build
+      - name: Build
+        run: |
+          ./configure \
+              --enable-shared \
+              --without-prebuilds=toolchain,sdk \
+              --disable-tests \
+              -- \
+              --force-fallback-for=libdwarf
+          make
+      - name: Upload GObject introspection data
+        uses: actions/upload-artifact@v7
+        with:
+          name: gum-gir
+          path: |
+            build/gum/Gum-1.0.gir
+            build/gum/Gum-1.0.typelib
+
+  publish-gir:
+    if: ${{ github.ref_type == 'tag' }}
+    needs: gir
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download GObject introspection data
+        uses: actions/download-artifact@v8
+        with:
+          name: gum-gir
+          path: gir
+      - name: Attach to GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            gir/Gum-1.0.gir
+            gir/Gum-1.0.typelib
+          prerelease: ${{ contains(github.ref_name, 'snapshot') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  native:
+    strategy:
+      matrix:
+        include:
+          - { id: windows-x86_64, runner: '"windows-latest"'                    }
+          - { id: windows-x86,    runner: '"windows-latest"'                    }
+          - { id: windows-arm64,  runner: '"windows-11-arm"'                    }
+          - { id: macos-x86_64,   runner: '"macos-latest"'                      }
+          - { id: macos-arm64,    runner: '"macos-latest"'                      }
+          - { id: linux-x86_64,   runner: '"ubuntu-latest"'                     }
+          - { id: linux-x86,      runner: '"ubuntu-latest"'                     }
+      fail-fast: false
+    runs-on: ${{ fromJSON(matrix.runner) }}
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Install gcc-multilib
+        if: matrix.id == 'linux-x86'
+        run: |
+          sudo apt-get update
+          sudo apt-get install gcc-multilib lib32stdc++-13-dev
+      - name: Install Rosetta
+        if: matrix.id == 'macos-x86_64'
+        run: |
+          softwareupdate --install-rosetta --agree-to-license
+          echo 'int main (void) { return 0; }' > /tmp/warmup.c
+          arch -x86_64 clang -arch x86_64 -dynamiclib /tmp/warmup.c \
+              -o /tmp/warmup.dylib
+      - name: Build
+        if: ${{ startsWith(matrix.id, 'windows-') }}
+        run: |
+          .\configure ${{ env.GUM_OPTIONS }}
+          .\make
+      - name: Build
+        if: ${{ !startsWith(matrix.id, 'windows-') && matrix.id != 'linux-x86' && matrix.id != 'macos-x86_64' }}
+        run: |
+          ./configure ${{ env.GUM_OPTIONS }}
+          make
+      - name: Build
+        if: matrix.id == 'macos-x86_64'
+        run: |
+          ./configure --host=macos-x86_64 ${{ env.GUM_OPTIONS }}
+          make
+      - name: Build
+        if: matrix.id == 'linux-x86'
+        run: |
+          CC="gcc -m32" CXX="g++ -m32" STRIP="strip" \
+              ./configure --build=linux-x86 --host=linux-x86 ${{ env.GUM_OPTIONS }}
+          make
+      - name: Upload Gum devkit
+        if: ${{ !startsWith(matrix.id, 'linux-') }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: gum-devkit-${{ matrix.id }}
+          path: build/gum/devkit/
+      - name: Upload GumJS devkit
+        if: ${{ !startsWith(matrix.id, 'linux-') }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: gumjs-devkit-${{ matrix.id }}
+          path: build/bindings/gumjs/devkit/
+      - name: Test
+        run: make test
+
+  cross:
+    strategy:
+      matrix:
+        include:
+          - { id: windows-x86_64-mingw, opts: '--host=x86_64-w64-mingw32 --without-prebuilds=sdk:host', pkg: g++-mingw-w64-x86-64        }
+          - { id: windows-x86-mingw,    opts: '--host=i686-w64-mingw32 --without-prebuilds=sdk:host',   pkg: g++-mingw-w64-i686          }
+          - { id: linux-mips,           opts: '--host=mips-linux-gnu',                                  pkg: g++-mips-linux-gnu          }
+          - { id: linux-mipsel,         opts: '--host=mipsel-linux-gnu',                                pkg: g++-mipsel-linux-gnu        }
+          - { id: linux-mips64,         opts: '--host=mips64-linux-gnuabi64',                           pkg: g++-mips64-linux-gnuabi64   }
+          - { id: linux-mips64el,       opts: '--host=mips64el-linux-gnuabi64',                         pkg: g++-mips64el-linux-gnuabi64 }
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install ${{ matrix.pkg }}
+      - name: Build
+        run: |
+          ./configure ${{ matrix.opts }} ${{ env.GUM_OPTIONS }}
+          make
+      - name: Upload Gum devkit
+        if: ${{ !startsWith(matrix.id, 'linux-') }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: gum-devkit-${{ matrix.id }}
+          path: build/gum/devkit/
+      - name: Upload GumJS devkit
+        if: ${{ !startsWith(matrix.id, 'linux-') }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: gumjs-devkit-${{ matrix.id }}
+          path: build/bindings/gumjs/devkit/
+
+  manylinux:
+    strategy:
+      matrix:
+        arch: [x86, x86_64, x86_64-musl, armhf, arm64, arm64-musl, mips, mipsel, mips64, mips64el]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Build
+        run: |
+          ./configure --host=$XTOOLS_HOST ${{ env.GUM_OPTIONS }}
+          make
+      - name: Upload Gum devkit
+        uses: actions/upload-artifact@v7
+        with:
+          name: gum-devkit-linux-${{ matrix.arch }}
+          path: build/gum/devkit/
+      - name: Upload GumJS devkit
+        uses: actions/upload-artifact@v7
+        with:
+          name: gumjs-devkit-linux-${{ matrix.arch }}
+          path: build/bindings/gumjs/devkit/
+      - name: Test
+        if: matrix.arch == 'x86' || matrix.arch == 'x86_64'
+        run: make test
+
+  emulator:
+    strategy:
+      matrix:
+        arch: [armbe8, arm64be]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Build
+        run: |
+          ./configure --host=$XTOOLS_HOST --without-prebuilds=sdk:host ${{ env.GUM_OPTIONS }}
+          make
+      - name: Upload Gum devkit
+        uses: actions/upload-artifact@v7
+        with:
+          name: gum-devkit-linux-${{ matrix.arch }}
+          path: build/gum/devkit/
+      - name: Upload GumJS devkit
+        uses: actions/upload-artifact@v7
+        with:
+          name: gumjs-devkit-linux-${{ matrix.arch }}
+          path: build/bindings/gumjs/devkit/
+      - name: Run custom container
+        uses: addnab/docker-run-action@v3
+        with:
+          image: docker:stable
+          options: -v ${{ github.workspace }}:/workspace:delegated
+          run: |
+            cat <<EOF > /workspace/initscript
+            #!/bin/sh
+            dmesg -n1
+            mount -t proc none /proc
+            mount -t sysfs none /sys
+            mount -t tmpfs none /tmp
+            mount -t devtmpfs none /dev
+            mount -t 9p -o rw,sync,dirsync,relatime,trans=virtio,msize=131072,version=9p2000.L host0 /workspace
+            ip link set lo up
+            ip addr add 192.168.76.20/24 dev eth0
+            ip link set eth0 up
+            ip route add default via 192.168.76.2 dev eth0
+            export LD_LIBRARY_PATH=/lib:/lib64:/libilp32
+            /sbin/entropy
+            cat /etc/motd
+            export PS1='\u@frida:\w\$ '
+            /root/gum-tests
+            status=\$?
+            echo "exit status: \$status"
+            if [ \$status -eq 0 ]; then
+              echo EXIT_OK
+            elif [ \$status -gt 128 ]; then
+              signal=\$((\$status - 128))
+              echo "EXIT_FAIL (terminated by signal \$signal)"
+            else
+              echo "EXIT_FAIL (exit code \$status)"
+            fi
+            EOF
+
+            cat <<EOF > /workspace/launch.sh
+            #!/bin/sh
+            LOGFILE=/workspace/qemu.log
+            : > "\$LOGFILE"
+            timeout 120 qemu-system-aarch64 \
+                -M virt \
+                -machine virtualization=true \
+                -machine type=virt \
+                -cpu cortex-a72 \
+                -smp 4 \
+                -kernel /root/Image.gz \
+                -initrd /root/initramfs.img \
+                -append 'earlyprintk=serial,ttyAMA0 console=ttyAMA0 coredump_filter=0x3f' \
+                -m 4096M \
+                -net nic,id=eth \
+                -net user,id=mynet,net=192.168.76.0/24 \
+                -virtfs local,path=/workspace/,mount_tag=host0,security_model=passthrough,id=host0 \
+                -nographic \
+                -no-reboot \
+                >> "\$LOGFILE" 2>&1 &
+            QEMU_PID=\$!
+            echo "QEMU started with PID \$QEMU_PID"
+            tail -n 0 -f "\$LOGFILE" | while read line; do
+              echo "\$line"
+              echo "\$line" | grep "EXIT_OK" >/dev/null 2>&1
+              if [ \$? -eq 0 ]; then
+                echo "Success signal received from guest. Killing QEMU..."
+                kill -9 "\$QEMU_PID"
+                cat -n "\$LOGFILE"
+                exit 0
+              fi
+              echo "\$line" | grep "EXIT_FAIL" >/dev/null 2>&1
+              if [ \$? -eq 0 ]; then
+                echo "Failure signal received from guest. Killing QEMU..."
+                kill -9 "\$QEMU_PID"
+                cat -n "\$LOGFILE"
+                exit 1
+              fi
+              if ! kill -0 "\$QEMU_PID" 2>/dev/null; then
+                echo "QEMU process has exited."
+                cat -n "\$LOGFILE"
+                exit 1
+              fi
+            done
+            EOF
+
+            cat <<EOF > /workspace/Dockerfile.ci
+            FROM ghcr.io/frida/x-tools-linux-be-target:latest
+
+            ENV DEBIAN_FRONTEND=noninteractive
+            RUN apt-get update && \
+                apt-get install -y \
+                cpio
+
+            RUN mkdir /tmp/initramfs
+            WORKDIR /tmp/initramfs
+            RUN cpio --extract < /root/initramfs.img
+
+            RUN mkdir /tmp/initramfs/workspace
+
+            COPY initscript /tmp/initramfs/init
+            RUN chmod +x /tmp/initramfs/init
+
+            COPY build/tests /tmp/initramfs/root/
+            RUN find . | cpio -o --format=newc -R root:root > /root/initramfs.img
+
+            COPY launch.sh /root/launch.sh
+            RUN chmod +x /root/launch.sh
+            ENTRYPOINT ["/root/launch.sh"]
+            EOF
+
+            docker build -t ci-image -f /workspace/Dockerfile.ci /workspace
+            docker run --rm -v /workspace:/workspace ci-image
+
+  mobile:
+    strategy:
+      matrix:
+        id:
+          - ios-arm64
+          - android-x86
+          - android-x86_64
+          - android-arm
+          - android-arm64
+      fail-fast: false
+    runs-on: ${{ startsWith(matrix.id, 'ios-') && 'macos-latest' || 'ubuntu-latest' }}
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - uses: nttld/setup-ndk@v1
+        if: startsWith(matrix.id, 'android-')
+        id: setup-ndk
+        with:
+          ndk-version: r29
+          add-to-path: false
+      - name: Set ANDROID_NDK_ROOT
+        if: startsWith(matrix.id, 'android-')
+        run: echo "ANDROID_NDK_ROOT=${{ steps.setup-ndk.outputs.ndk-path }}" >> $GITHUB_ENV
+      - name: Build
+        run: |
+          ./configure --host=${{ matrix.id }} ${{ env.GUM_OPTIONS }}
+          make
+      - name: Upload Gum devkit
+        uses: actions/upload-artifact@v7
+        with:
+          name: gum-devkit-${{ matrix.id }}
+          path: build/gum/devkit/
+      - name: Upload GumJS devkit
+        uses: actions/upload-artifact@v7
+        with:
+          name: gumjs-devkit-${{ matrix.id }}
+          path: build/bindings/gumjs/devkit/
+      - name: Package tests
+        run: tar -C build/tests -czf /tmp/runner.tar.gz gum-tests data/
+      - name: Test on Corellium iOS device
+        if: matrix.id == 'ios-arm64'
+        continue-on-error: true
+        uses: frida/corellium-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          gateway: corellium.frida.re
+          device: ios-12.5.7-arm64
+          upload: /tmp/runner.tar.gz
+          run: |
+            cd /usr/local
+            rm -rf opt/frida
+            mkdir -p opt/frida
+            cd opt/frida
+            tar xf $ASSET_PATH
+            ./gum-tests
+      - name: Test on Corellium Android device
+        if: matrix.id == 'android-arm64'
+        continue-on-error: true
+        uses: frida/corellium-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          gateway: corellium.frida.re
+          device: android-8.1.0-arm64
+          upload: /tmp/runner.tar.gz
+          run: |
+            cd /data/local/tmp
+            tar xf $ASSET_PATH
+            ./gum-tests
+
+  qnx-armeabi:
+    runs-on: ubuntu-latest
+    container: ghcr.io/frida/qnx-tools:latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Build
+        run: |
+          CFLAGS="--sysroot=$QNX_TARGET/armle-v7" \
+              ./configure --host=arm-unknown-nto-qnx6.5.0eabi ${{ env.GUM_OPTIONS }}
+          make
+      - name: Upload Gum devkit
+        uses: actions/upload-artifact@v7
+        with:
+          name: gum-devkit-qnx-armeabi
+          path: build/gum/devkit/
+      - name: Upload GumJS devkit
+        uses: actions/upload-artifact@v7
+        with:
+          name: gumjs-devkit-qnx-armeabi
+          path: build/bindings/gumjs/devkit/
+      - name: Test
+        run: |
+          tar -C build/tests -cf /tmp/runner.tar gum-tests data/
+          /opt/sabrelite/run.sh /tmp/runner.tar /opt/frida/gum-tests
+
+  # This job is used to check that the targetfunctions are built correctly for
+  # all supported architectures. We do this because the binary artifacts are
+  # checked in, and we want to ensure that they are up-to-date with respect to
+  # the source for all architectures.
+  check-targetfunctions:
+    strategy:
+      matrix:
+        arch: [x86, x86_64, armhf, armbe8, arm64, arm64be, arm64beilp32, mips, mipsel, mips64, mips64el]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Build
+        run: |
+          ./tests/core/targetfunctions/rebuild.sh ${{ matrix.arch }}
+      - name: Check for unexpected changes
+        run: |
+          git config --global --add safe.directory "$(realpath .)"
+          status_output=$(git status --porcelain tests/data/{special,target}functions-linux-${{ matrix.arch }}.so)
+          if [ -n "$status_output" ]; then
+            echo "Unexpected changes detected:"
+            echo "$status_output"
+            echo "Diff:"
+            git diff
+            exit 1
+          else
+            echo "No unexpected changes detected."
+          fi

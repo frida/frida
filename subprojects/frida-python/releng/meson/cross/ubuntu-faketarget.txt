@@ -1,0 +1,13 @@
+# This is a setup for compiling a program that runs natively
+# but produces output that runs on a different platform.
+# That is either a cross compiler or something like binutils.
+
+# We don't need to specify any properties or compilers,
+# for we use the native ones and can run the resulting
+# binaries directly.
+
+[target_machine]
+system = 'linux'
+cpu_family = 'mips'
+cpu = 'mips'
+endian = 'little'

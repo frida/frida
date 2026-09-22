@@ -1,0 +1,4 @@
+option('opt1', type : 'string', value : 'default1')
+option('opt2', type : 'string', value : 'default2')
+option('opt3', type : 'string', value : 'default3')
+option('opt4', type : 'string', value : 'default4')

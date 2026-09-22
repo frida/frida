@@ -1,0 +1,1 @@
+option('MESON_TEST_DEFINE_VALUE', type : 'string', value : '')

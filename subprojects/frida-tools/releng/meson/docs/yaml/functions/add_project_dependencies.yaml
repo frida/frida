@@ -1,0 +1,16 @@
+name: add_project_dependencies
+since: 0.63.0
+returns: void
+description: |
+  Adds arguments to the compiler and linker command line, so that the
+  given set of dependencies is included in all build products for this
+  project.
+
+
+varargs:
+  type: dep
+  name: dependencies
+  description: The dependencies to add; if internal dependencies are included,
+    they must not include any built object.
+
+kwargs_inherit: add_global_arguments

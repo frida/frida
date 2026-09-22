@@ -1,0 +1,3 @@
+[submodule "releng"]
+	path = releng
+	url = https://github.com/frida/releng.git

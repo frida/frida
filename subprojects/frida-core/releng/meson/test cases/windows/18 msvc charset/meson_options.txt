@@ -1,0 +1,1 @@
+option('test-failure', type: 'boolean', value: false)

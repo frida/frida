@@ -1,0 +1,26 @@
+name: linting
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  staticcheck:
+    strategy:
+      matrix:
+        arch: [x86_64]
+        os: [linux]
+        frida_version: ["16.0.13"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+      - uses: ./.github/actions/install-frida-devkit
+        with:
+          arch: ${{ matrix.arch }}
+          os: ${{ matrix.os }}
+          version: ${{ matrix.frida_version }}
+      - run: go install honnef.co/go/tools/cmd/staticcheck@2023.1.6
+      - run: ~/go/bin/staticcheck -checks all ./frida

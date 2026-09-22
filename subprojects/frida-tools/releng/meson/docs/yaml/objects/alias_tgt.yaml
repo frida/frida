@@ -1,0 +1,4 @@
+name: alias_tgt
+long_name: Alias target
+description: Opaque object returned by [[alias_target]].
+extends: tgt

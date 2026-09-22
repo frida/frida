@@ -1,0 +1,211 @@
+name: dependency
+returns: dep
+description: |
+  Finds an external dependency (usually a library installed on your
+  system) with the given name with `pkg-config` and [with
+  CMake](Dependencies.md#cmake) if `pkg-config` fails. Additionally,
+  frameworks (OSX only) and [library-specific fallback detection
+  logic](Dependencies.md#dependencies-with-custom-lookup-functionality)
+  are also supported.
+
+  *Since 0.60.0* more than one name can be provided, they will be tried in order
+  and the first name to be found will be used. The fallback subproject will be
+  used only if none of the names are found on the system. Once one of the name has
+  been found, all other names are added into the cache so subsequent calls for any
+  of those name will return the same value. This is useful in case a dependency
+  could have different names, such as `png` and `libpng`.
+
+  * Since *0.64.0* a dependency fallback can be provided by WrapDB. Simply download
+  the database locally using `meson wrap update-db` command and Meson will
+  automatically fallback to subprojects provided by WrapDB if the dependency is
+  not found on the system and the project does not ship their own `.wrap` file.
+
+  Dependencies can also be resolved in two other ways:
+
+  * if the same name was used in a `meson.override_dependency` prior to
+    the call to `dependency`, the overriding dependency will be returned
+    unconditionally; that is, the overriding dependency will be used
+    independent of whether an external dependency is installed in the system.
+    Typically, `meson.override_dependency` will have been used by a
+    subproject.
+
+  * by a fallback subproject which, if needed, will be brought into the current
+    build specification as if [`subproject()`](#subproject) had been called.
+    The subproject can be specified with the `fallback` argument.  Alternatively,
+    if the `fallback` argument is absent, *since 0.55.0* Meson can
+    automatically identify a subproject as a fallback if a wrap file
+    [provides](Wrap-dependency-system-manual.md#provide-section) the
+    dependency, or if a subproject has the same name as the dependency.
+    In the latter case, the subproject must use `meson.override_dependency` to
+    specify the replacement, or Meson will report a hard error.  See the
+    [Wrap documentation](Wrap-dependency-system-manual.md#provide-section)
+    for more details.  This automatic search can be controlled using the
+    `allow_fallback` keyword argument.
+
+  If `dependency_name` is `''`, the dependency is always not found. So
+  with `required: false`, this always returns a dependency object for
+  which the `found()` method returns `false`, and which can be passed
+  like any other dependency to the `dependencies:` keyword argument of a
+  `build_target`. This can be used to implement a dependency which is
+  sometimes not required e.g. in some branches of a conditional, or with
+  a `fallback:` kwarg, can be used to declare an optional dependency
+  that only looks in the specified subproject, and only if that's
+  allowed by `--wrap-mode`.
+
+  The returned object [[@dep]] also has additional methods.
+
+notes:
+  - This function supports additional [library-specific](Dependencies.md#dependencies-with-custom-lookup-functionality)
+    keyword arguments that may also be accepted (e.g. `modules` specifies submodules to use for
+    dependencies such as Qt5 or Boost. `components` allows the user to manually
+    add CMake `COMPONENTS` for the `find_package` lookup)
+
+varargs:
+  name: names
+  type: str
+  since: 0.60.0
+  min_varargs: 1
+  description: |
+    The names of the dependency to look up. The dependencies are looked up in
+    the order they are provided here. The first found dependency will then be
+    used. The fallback subproject will be used only if none of the names are
+    found on the system. Once one of the name has been found, all other names
+    are added into the cache so subsequent calls for any of those name will
+    return the same value. This is useful in case a dependency could have
+    different names, such as `png` and `libpng`.
+
+    **NOTE:** Before *0.60.0* only a single dependency name was allowed.
+
+kwargs:
+  default_options:
+    type: list[str] | dict[str | bool | int | list[str]]
+    since: 0.38.0
+    description: |
+      An array of default option values
+      that override those set in the subproject's `meson.options`
+      (like `default_options` in [[project]], they only have
+      effect when Meson is run for the first time, and command line
+      arguments override any default options in build files)
+      *(since 1.2.0)*: A dictionary may now be passed.
+
+  allow_fallback:
+    type: bool
+    since: 0.56.0
+    description: |
+      Specifies whether Meson should automatically pick a fallback subproject
+      in case the dependency
+      is not found in the system.  If `true` and the dependency is not found
+      on the system, Meson will fallback to a subproject that provides this
+      dependency. If `false`, Meson will not fallback even if a subproject
+      provides this dependency.  By default, Meson will do so if `required`
+      is `true` or  [`enabled`](Build-options.md#features); see the [Wrap
+      documentation](Wrap-dependency-system-manual.md#provide-section)
+      for more details.
+
+  fallback:
+    type: list[str] | str
+    description: |
+      Manually specifies a subproject fallback
+      to use in case the dependency is not found in the system.
+      This is useful if the automatic search is not applicable or if you
+      want to support versions of Meson older than 0.55.0.  If the value is an
+      array `['subproj_name', 'subproj_dep']`, the first value is the name
+      of the subproject and the second is the variable name in that
+      subproject that contains a dependency object such as the return
+      value of [[declare_dependency]] or
+      [[dependency]], etc. Note that this means the
+      fallback dependency may be a not-found dependency, in which
+      case the value of the `required:` kwarg will be obeyed.
+      *Since 0.54.0* the value can be a single string, the subproject name;
+      in this case the subproject must use
+      `meson.override_dependency('dependency_name', subproj_dep)`
+      to specify the dependency object used in the superproject.
+      If the value is an empty list, it has the same effect as
+      `allow_fallback: false`.
+
+  language:
+    type: str
+    since: 0.42.0
+    description: |
+      Defines what language-specific dependency to find
+      if it's available for multiple languages.
+
+  method:
+    type: str
+    since: 0.40.0
+    default: "'auto'"
+    description: |
+      Defines the way the dependency is detected, the default is
+      `auto` but can be overridden to be e.g. `qmake` for Qt development,
+      and [different dependencies support different values](
+      Dependencies.md#dependencies-with-custom-lookup-functionality)
+      for this (though `auto` will work on all of them)
+
+  native:
+    type: bool
+    default: false
+    description: |
+      If set to `true`, causes Meson to find the dependency on
+      the build machine system rather than the host system (i.e. where the
+      cross compiled binary will run on), usually only needed if you build
+      a tool to be used during compilation.
+
+  not_found_message:
+    type: str
+    since: 0.50.0
+    description: An optional string that will be printed as a [[message]] if the dependency was not found.
+
+  required:
+    type: bool | feature
+    default: true
+    description: |
+      When set to `false`, Meson will proceed with the build
+      even if the dependency is not found.
+
+      When set to a [`feature`](Build-options.md#features) option, the feature
+      will control if it is searched and whether to fail if not found.
+
+      *(since 0.47.0)* The value of a `feature` option can also be passed.
+
+  static:
+    type: bool
+    default: false
+    description: |
+      Tells the dependency provider to try to get static
+      libraries instead of dynamic ones (note that this is not supported
+      by all dependency backends)
+
+      *Since 0.60.0* it also sets `default_library` option accordingly on the fallback
+      subproject if it was not set explicitly in `default_options` keyword argument.
+
+  version:
+    type: list[str] | str
+    since: 0.37.0
+    description: |
+      Specifies the required version,
+      a string containing a
+      comparison operator followed by the version string, examples include
+      `>1.0.0`, `<=2.3.5` or `3.1.4` for exact matching.
+      You can also specify multiple restrictions by passing a list to this
+      keyword argument, such as: `['>=3.14.0', '<=4.1.0']`.
+      These requirements are never met if the version is unknown.
+
+  include_type:
+    type: str
+    default: "'preserve'"
+    since: 0.52.0
+    description: |
+      An enum flag, marking how the dependency
+      flags should be converted. Supported values are `'preserve'`, `'system'` and
+      `'non-system'`. System dependencies may be handled differently on some
+      platforms, for instance, using `-isystem` instead of `-I`, where possible.
+      If `include_type` is set to `'preserve'`, no additional conversion will be
+      performed.
+
+  disabler:
+    type: bool
+    default: false
+    since: 0.49.0
+    description: |
+      Returns a [[disabler]] object instead of a not-found dependency
+      if this kwarg is set to `true` and the dependency couldn't be found.

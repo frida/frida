@@ -1,0 +1,3 @@
+project('master')
+
+subproject('a')

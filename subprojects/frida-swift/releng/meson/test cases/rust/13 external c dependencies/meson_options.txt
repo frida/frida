@@ -1,0 +1,2 @@
+option('static', type : 'boolean')
+option('method', type : 'string')

@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/71 link with shared module on osx/meson.build:8:4: ERROR: target prog links against shared module mymodule. This is not permitted on OSX"
+    }
+  ]
+}

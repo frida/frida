@@ -1,0 +1,7 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/lib/libsublib.so"},
+    {"type": "file", "file": "usr/lib/libsublib.so.5"},
+    {"type": "file", "file": "usr/lib/libsublib.so.2.1.0"}
+  ]
+}

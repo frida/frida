@@ -1,0 +1,34 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the intltest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: intltest\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-05-31 05:16-0500\n"
+"PO-Revision-Date: 2019-04-22 02:38+0300\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.2.1\n"
+
+#: src/intlmain.c:15
+msgid "International greeting."
+msgstr "Межнациональное приветствие."
+
+#: data/test.desktop.in:3
+msgid "Test"
+msgstr "Тест"
+
+#: data/test.desktop.in:4
+msgid "Application"
+msgstr "Приложение"
+
+#: data/test.desktop.in:5
+msgid "Test Application"
+msgstr "Тестовое приложение"

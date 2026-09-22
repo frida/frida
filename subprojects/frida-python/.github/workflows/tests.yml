@@ -1,0 +1,19 @@
+name: tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+      - name: Install build dependencies
+        run: pip install setuptools
+      - name: Build the extension
+        run: make
+      - name: Run the test suite
+        run: python3 -m unittest tests.test_bindgen -v

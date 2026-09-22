@@ -1,0 +1,3 @@
+int return_code() {
+    return 0;
+}

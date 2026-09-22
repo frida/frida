@@ -1,0 +1,16 @@
+name: error
+returns: void
+description: Print the argument string and halts the build process.
+
+arg_flattening: false
+
+posargs:
+  message:
+    type: str
+    description: The message to print
+
+varargs:
+  name: msg
+  since: 0.58.0
+  type: str
+  description: Additional parameters will be separated by spaces

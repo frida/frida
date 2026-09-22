@@ -1,0 +1,6 @@
+[submodule "releng"]
+	path = releng
+	url = https://github.com/frida/releng.git
+[submodule "frida-bindgen"]
+	path = frida-bindgen
+	url = https://github.com/frida/frida-bindgen.git

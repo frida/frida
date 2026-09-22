@@ -1,0 +1,18 @@
+[binaries]
+c = 'cl'
+cpp = 'cl'
+fc = 'false'
+ar = 'lib'
+windres = 'rc'
+
+[built-in options]
+c_args = ['-DWINAPI_FAMILY=WINAPI_FAMILY_APP']
+c_link_args = ['-APPCONTAINER', 'WindowsApp.lib']
+cpp_args = ['-DWINAPI_FAMILY=WINAPI_FAMILY_APP']
+cpp_link_args = ['-APPCONTAINER', 'WindowsApp.lib']
+
+[host_machine]
+system = 'windows'
+cpu_family = 'aarch64'
+cpu = 'armv8'
+endian = 'little'

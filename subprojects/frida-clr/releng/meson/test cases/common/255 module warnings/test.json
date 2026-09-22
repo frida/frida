@@ -1,0 +1,16 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/common/255 module warnings/meson.build:3: WARNING: Project targets '>= 0.56' but uses feature deprecated since '0.48.0': module python3."
+    },
+    {
+      "line": "test cases/common/255 module warnings/meson.build:4: WARNING: Project targets '>= 0.56' but uses feature introduced in '0.60.0': module java."
+    },
+    {
+      "line": "test cases/common/255 module warnings/meson.build:5: WARNING: Project targets '>= 0.56' but uses feature deprecated since '0.56.0': module keyval has been stabilized. drop \"unstable-\" prefix from the module name"
+    },
+    {
+      "line": "test cases/common/255 module warnings/meson.build:6: DEPRECATION: Importing unstable modules as \"unstable_simd\" instead of \"unstable-simd\""
+    }
+  ]
+}

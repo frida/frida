@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="3.0"/>
+  <template class="TestBox" parent="GtkBox">
+  </template>
+</interface>

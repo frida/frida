@@ -1,0 +1,734 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to build/test"
+        required: false
+        type: string
+
+env:
+  FRIDA_CORE_OPTIONS: '--with-devkits=core --enable-tests'
+
+jobs:
+  native:
+    strategy:
+      matrix:
+        include:
+          - { id: windows-arm64,  runner: '"windows-11-arm"', sys: CLANGARM64, pkg: 'mingw-w64-clang-aarch64-clang', opts: "'-Dfrida-gum:v8=disabled'" }
+          - { id: windows-x86_64, runner: '"windows-latest"', sys: MINGW64,    pkg: 'mingw-w64-x86_64-gcc'          }
+          - { id: windows-x86,    runner: '"windows-latest"', sys: MINGW32,    pkg: 'mingw-w64-i686-gcc'            }
+          - { id: macos-x86_64,   runner: '"macos-latest"'                                                          }
+          - { id: macos-arm64,    runner: '"macos-latest"'                                                          }
+          - { id: linux-x86_64,   runner: '"ubuntu-latest"'                                                         }
+          - { id: linux-x86,      runner: '"ubuntu-latest"'                                                         }
+      fail-fast: false
+    runs-on: ${{ fromJSON(matrix.runner) }}
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Install MinGW toolchain for cgo support
+        if: ${{ startsWith(matrix.id, 'windows-') }}
+        id: msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.sys }}
+          install: ${{ matrix.pkg }}
+      - name: Install Go toolchain
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: 'src/compiler/go.mod'
+          cache-dependency-path: 'src/compiler/go.mod'
+      - name: Set up Apple certificates
+        if: ${{ startsWith(matrix.id, 'macos-') }}
+        uses: ./.github/actions/setup-apple-certificates
+        with:
+          certificates-p12: ${{ secrets.APPLE_CERTIFICATES_P12 }}
+          certificates-password: ${{ secrets.APPLE_CERTIFICATES_PASSWORD }}
+          keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
+      - name: Relax macOS security policy to avoid prompts
+        if: ${{ startsWith(matrix.id, 'macos-') }}
+        run: sudo security authorizationdb write system.privilege.taskport allow
+      - name: Install gcc-multilib
+        if: matrix.id == 'linux-x86'
+        run: |
+          sudo apt-get update
+          sudo apt-get install gcc-multilib lib32stdc++-13-dev
+      - name: Install setuptools for distutils shim
+        if: ${{ startsWith(matrix.id, 'windows-') }}
+        run: pip install setuptools
+      - name: Build
+        if: ${{ startsWith(matrix.id, 'windows-') }}
+        run: |
+          .\configure `
+              --host=${{ matrix.id }} `
+              --enable-compiler-backend `
+              ${{ env.FRIDA_CORE_OPTIONS }} `
+              -- --force-fallback-for=openssl ${{ matrix.opts }}
+          .\make
+        env:
+          MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
+      - name: Build
+        if: ${{ !startsWith(matrix.id, 'windows-') && matrix.id != 'linux-x86' }}
+        run: |
+          ./configure \
+              --host=${{ matrix.id }} \
+              --enable-compiler-backend \
+              ${{ env.FRIDA_CORE_OPTIONS }}
+          make
+      - name: Build
+        if: matrix.id == 'linux-x86'
+        run: |
+          CC="gcc -m32" CXX="g++ -m32" STRIP="strip" \
+              ./configure \
+                --build=linux-x86 \
+                --host=linux-x86 \
+                --enable-compiler-backend \
+                ${{ env.FRIDA_CORE_OPTIONS }}
+          make
+      - name: Upload devkit
+        if: ${{ !startsWith(matrix.id, 'linux-') }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: core-devkit-${{ matrix.id }}
+          path: build/src/devkit/
+      - name: Upload GObject introspection data
+        if: ${{ matrix.id == 'linux-x86_64' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: core-gir
+          path: build/src/api/Frida-1.0.gir
+      - name: Test
+        if: ${{ matrix.id != 'windows-arm64' && !startsWith(matrix.id, 'macos-') }}
+        run: make test
+
+  publish-gir:
+    if: ${{ !cancelled() && github.ref_type == 'tag' && needs.native.result == 'success' }}
+    needs:
+      - native
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download GObject introspection data
+        uses: actions/download-artifact@v8
+        with:
+          name: core-gir
+          path: gir
+      - name: Attach to GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            gir/Frida-1.0.gir
+          prerelease: ${{ contains(github.ref_name, 'snapshot') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  cross:
+    strategy:
+      matrix:
+        include:
+          - { id: windows-x86_64-mingw, opts: '--host=x86_64-w64-mingw32 --without-prebuilds=sdk:host', pkg: g++-mingw-w64-x86-64        }
+          - { id: windows-x86-mingw,    opts: '--host=i686-w64-mingw32 --without-prebuilds=sdk:host',   pkg: g++-mingw-w64-i686          }
+          - { id: linux-mips,           opts: '--host=mips-linux-gnu',                                  pkg: g++-mips-linux-gnu          }
+          - { id: linux-mipsel,         opts: '--host=mipsel-linux-gnu',                                pkg: g++-mipsel-linux-gnu        }
+          - { id: linux-mips64,         opts: '--host=mips64-linux-gnuabi64',                           pkg: g++-mips64-linux-gnuabi64   }
+          - { id: linux-mips64el,       opts: '--host=mips64el-linux-gnuabi64',                         pkg: g++-mips64el-linux-gnuabi64 }
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install ${{ matrix.pkg }}
+      - name: Install Go toolchain
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: 'src/compiler/go.mod'
+          cache-dependency-path: 'src/compiler/go.mod'
+      - name: Build
+        run: |
+          ./configure \
+              ${{ matrix.opts }} \
+              ${{ !contains(matrix.id, 'mips') && '--enable-compiler-backend' || '' }} \
+              ${{ env.FRIDA_CORE_OPTIONS }}
+          make
+      - name: Upload devkit
+        if: ${{ !startsWith(matrix.id, 'linux-') }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: core-devkit-${{ matrix.id }}
+          path: build/src/devkit/
+
+  manylinux:
+    strategy:
+      matrix:
+        arch: [x86, x86_64, x86_64-musl, armhf, arm64, arm64-musl, mips, mipsel, mips64, mips64el]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Install Go toolchain
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: 'src/compiler/go.mod'
+          cache-dependency-path: 'src/compiler/go.mod'
+      - name: Build
+        run: |
+          ./configure \
+              --host=$XTOOLS_HOST \
+              ${{ !startsWith(matrix.arch, 'mips') && '--enable-compiler-backend' || '' }} \
+              ${{ env.FRIDA_CORE_OPTIONS }}
+          make
+      - name: Upload devkit
+        uses: actions/upload-artifact@v7
+        with:
+          name: core-devkit-linux-${{ matrix.arch }}
+          path: build/src/devkit/
+      - name: Test
+        if: matrix.arch == 'x86' || matrix.arch == 'x86_64'
+        run: make test
+
+  emulator:
+    strategy:
+      matrix:
+        arch: [armbe8, arm64be]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Build
+        run: |
+          ./configure --host=$XTOOLS_HOST --without-prebuilds=sdk:host --enable-tests
+          make
+      - name: Run custom container
+        uses: addnab/docker-run-action@v3
+        with:
+          image: docker:stable
+          options: -v ${{ github.workspace }}:/workspace:delegated
+          run: |
+            cat <<EOF > /workspace/initscript
+            #!/bin/sh
+            dmesg -n1
+            mount -t proc none /proc
+            mount -t sysfs none /sys
+            mount -t tmpfs none /tmp
+            mount -t devtmpfs none /dev
+            mount -t 9p -o rw,sync,dirsync,relatime,trans=virtio,msize=131072,version=9p2000.L host0 /workspace
+            ip link set lo up
+            ip addr add 192.168.76.20/24 dev eth0
+            ip link set eth0 up
+            ip route add default via 192.168.76.2 dev eth0
+            export LD_LIBRARY_PATH=/lib:/lib64:/libilp32
+            /sbin/entropy
+            cat /etc/motd
+            export PS1='\u@frida:\w\$ '
+            /root/tests/frida-tests
+            status=\$?
+            echo "exit status: \$status"
+            if [ \$status -eq 0 ]; then
+              echo EXIT_OK
+            elif [ \$status -gt 128 ]; then
+              signal=\$((\$status - 128))
+              echo "EXIT_FAIL (terminated by signal \$signal)"
+            else
+              echo "EXIT_FAIL (exit code \$status)"
+            fi
+            EOF
+
+            cat <<EOF > /workspace/launch.sh
+            #!/bin/sh
+            LOGFILE=/workspace/qemu.log
+            : > "\$LOGFILE"
+            timeout 120 qemu-system-aarch64 \
+                -M virt \
+                -machine virtualization=true \
+                -machine type=virt \
+                -cpu cortex-a72 \
+                -smp 4 \
+                -kernel /root/Image.gz \
+                -initrd /root/initramfs.img \
+                -append 'earlyprintk=serial,ttyAMA0 console=ttyAMA0 coredump_filter=0x3f' \
+                -m 4096M \
+                -net nic,id=eth \
+                -net user,id=mynet,net=192.168.76.0/24 \
+                -virtfs local,path=/workspace/,mount_tag=host0,security_model=passthrough,id=host0 \
+                -nographic \
+                -no-reboot \
+                >> "\$LOGFILE" 2>&1 &
+            QEMU_PID=\$!
+            echo "QEMU started with PID \$QEMU_PID"
+            tail -n 0 -f "\$LOGFILE" | while read line; do
+              echo "\$line"
+              echo "\$line" | grep "EXIT_OK" >/dev/null 2>&1
+              if [ \$? -eq 0 ]; then
+                echo "Success signal received from guest. Killing QEMU..."
+                kill -9 "\$QEMU_PID"
+                cat -n "\$LOGFILE"
+                exit 0
+              fi
+              echo "\$line" | grep "EXIT_FAIL" >/dev/null 2>&1
+              if [ \$? -eq 0 ]; then
+                echo "Failure signal received from guest. Killing QEMU..."
+                kill -9 "\$QEMU_PID"
+                cat -n "\$LOGFILE"
+                exit 1
+              fi
+              if ! kill -0 "\$QEMU_PID" 2>/dev/null; then
+                echo "QEMU process has exited."
+                cat -n "\$LOGFILE"
+                exit 1
+              fi
+            done
+            EOF
+
+            cat <<EOF > /workspace/Dockerfile.ci
+            FROM ghcr.io/frida/x-tools-linux-be-target:latest
+
+            ENV DEBIAN_FRONTEND=noninteractive
+            RUN apt-get update && \
+                apt-get install -y \
+                cpio
+
+            RUN mkdir /tmp/initramfs
+            WORKDIR /tmp/initramfs
+            RUN cpio --extract < /root/initramfs.img
+
+            RUN mkdir /tmp/initramfs/workspace
+
+            COPY initscript /tmp/initramfs/init
+            RUN chmod +x /tmp/initramfs/init
+
+            COPY build/tests /tmp/initramfs/root/tests/
+            COPY build/lib/agent/frida-agent.so /tmp/initramfs/root/lib/agent/
+            RUN find . | cpio -o --format=newc -R root:root > /root/initramfs.img
+
+            COPY launch.sh /root/launch.sh
+            RUN chmod +x /root/launch.sh
+            ENTRYPOINT ["/root/launch.sh"]
+            EOF
+
+            docker build -t ci-image -f /workspace/Dockerfile.ci /workspace
+            docker run --rm -v /workspace:/workspace ci-image
+
+  mobile:
+    strategy:
+      matrix:
+        id:
+          - ios-arm64
+          - ios-arm64-simulator
+          - android-x86
+          - android-x86_64
+          - android-arm
+          - android-arm64
+      fail-fast: false
+    runs-on: ${{ startsWith(matrix.id, 'ios-') && 'macos-latest' || 'ubuntu-latest' }}
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Install Go toolchain
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: 'src/compiler/go.mod'
+          cache-dependency-path: 'src/compiler/go.mod'
+      - name: Set up Apple certificates
+        if: startsWith(matrix.id, 'ios-')
+        uses: ./.github/actions/setup-apple-certificates
+        with:
+          certificates-p12: ${{ secrets.APPLE_CERTIFICATES_P12 }}
+          certificates-password: ${{ secrets.APPLE_CERTIFICATES_PASSWORD }}
+          keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
+      - uses: nttld/setup-ndk@v1
+        if: startsWith(matrix.id, 'android-')
+        id: setup-ndk
+        with:
+          ndk-version: r29
+      - name: Add NDK to env
+        if: startsWith(matrix.id, 'android-')
+        run: echo ANDROID_NDK_ROOT=${{ steps.setup-ndk.outputs.ndk-path }} >> $GITHUB_ENV
+      - name: Build
+        run: |
+          ./configure \
+              --host=${{ matrix.id }} \
+              --enable-compiler-backend \
+              ${{ env.FRIDA_CORE_OPTIONS }}
+          make
+      - name: Upload devkit
+        uses: actions/upload-artifact@v7
+        with:
+          name: core-devkit-${{ matrix.id }}
+          path: build/src/devkit/
+      - name: Package tests
+        if: false
+        run: |
+          mkdir -p /tmp/pkg
+          cd build
+          case ${{ matrix.id }} in
+            ios-*)
+              shlibext=.dylib
+              ;;
+            android-*)
+              shlibext=.so
+              ;;
+          esac
+          cp -a tests/frida-tests tests/labrats lib/agent/frida-agent$shlibext /tmp/pkg/
+          case ${{ matrix.id }} in
+            ios-*)
+              cp -a lib/gadget/frida-gadget.dylib ../tests/test-gadget-standalone.js /tmp/pkg/
+              ;;
+          esac
+          tar -C /tmp/pkg -czf /tmp/runner.tar.gz .
+      - name: Test on Corellium iOS device
+        if: false
+        continue-on-error: true
+        uses: frida/corellium-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          gateway: corellium.frida.re
+          device: ios-12.5.7-arm64
+          upload: /tmp/runner.tar.gz
+          run: |
+            cd /usr/local
+            rm -rf opt/frida
+            mkdir -p opt/frida
+            cd opt/frida
+            tar xf $ASSET_PATH
+            ./frida-tests
+      - name: Test on Corellium Android device
+        if: false
+        continue-on-error: true
+        uses: frida/corellium-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          gateway: corellium.frida.re
+          device: android-8.1.0-arm64
+          upload: /tmp/runner.tar.gz
+          run: |
+            cd /data/local/tmp
+            tar xf $ASSET_PATH
+            TMPDIR=/data/local/tmp ./frida-tests
+
+  qnx-armeabi:
+    runs-on: ubuntu-latest
+    container: ghcr.io/frida/qnx-tools:latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Build
+        run: |
+          CFLAGS="--sysroot=$QNX_TARGET/armle-v7" \
+              ./configure --host=arm-unknown-nto-qnx6.5.0eabi ${{ env.FRIDA_CORE_OPTIONS }}
+          make
+      - name: Upload devkit
+        uses: actions/upload-artifact@v7
+        with:
+          name: core-devkit-qnx-armeabi
+          path: build/src/devkit/
+      - name: Test
+        run: |
+          mkdir -p /tmp/pkg
+          cd build
+          cp -a tests/frida-tests tests/labrats lib/agent/frida-agent.so /tmp/pkg/
+          tar -C /tmp/pkg -cf /tmp/runner.tar .
+          /opt/sabrelite/run.sh /tmp/runner.tar /opt/frida/frida-tests
+
+  # This job is used to check that the Linux helpers are built correctly for all
+  # supported architectures. We do this because the binary artifacts are checked
+  # in, and we want to ensure that they are up-to-date with respect to the source
+  # for all architectures.
+  check-linux-helpers:
+    if: false
+    strategy:
+      matrix:
+        arch: [x86, x86_64, arm, armbe8, arm64, arm64be, arm64beilp32, mips, mipsel, mips64, mips64el]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    container: ghcr.io/frida/core-linux-helpers-${{ matrix.arch }}:latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Build
+        run: |
+          ./src/linux/helpers/rebuild.sh ${{ matrix.arch }}
+      - name: Check for unexpected changes
+        run: |
+          git config --global --add safe.directory "$(realpath .)"
+          status_output=$(git status --porcelain src/linux/helpers/artifacts)
+          if [ -n "$status_output" ]; then
+            echo "Unexpected changes detected:"
+            echo "$status_output"
+            echo "Diff:"
+            git diff
+            exit 1
+          else
+            echo "No unexpected changes detected."
+          fi
+
+  # This job is used to check that the Linux labrats are built correctly for all
+  # supported architectures. We do this because the binary artifacts are checked
+  # in, and we want to ensure that they are up-to-date with respect to the source
+  # for all architectures.
+  check-labrats:
+    if: false
+    strategy:
+      matrix:
+        arch: [x86, x86_64, arm, armbe8, arm64, arm64be, arm64beilp32, mips, mipsel, mips64, mips64el]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    container: ghcr.io/frida/core-linux-helpers-${{ matrix.arch }}:latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Build
+        run: |
+          ./tests/labrats/rebuild.sh ${{ matrix.arch }}
+      - name: Check for unexpected changes
+        run: |
+          git config --global --add safe.directory "$(realpath .)"
+          status_output=$(git status --porcelain tests/labrats/{resident-agent,simple-agent}-linux-${{ matrix.arch }}.so tests/labrats/{forker,sleeper,spawner}-linux-${{ matrix.arch }})
+          if [ -n "$status_output" ]; then
+            echo "Unexpected changes detected:"
+            echo "$status_output"
+            echo "Diff:"
+            git diff
+            exit 1
+          else
+            echo "No unexpected changes detected."
+          fi
+
+  xcframework:
+    name: Build FridaCore.xcframework
+    if: ${{ !cancelled() }}
+    runs-on: macos-latest
+    needs:
+      - native
+      - mobile
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+      - name: Download macOS/x86_64 devkit
+        uses: actions/download-artifact@v8
+        with:
+          name: core-devkit-macos-x86_64
+          path: devkits/macos-x86_64
+      - name: Download macOS/arm64 devkit
+        uses: actions/download-artifact@v8
+        with:
+          name: core-devkit-macos-arm64
+          path: devkits/macos-arm64
+      - name: Download iOS/arm64 devkit
+        uses: actions/download-artifact@v8
+        with:
+          name: core-devkit-ios-arm64
+          path: devkits/ios-arm64
+      - name: Download iOS/arm64-simulator devkit
+        uses: actions/download-artifact@v8
+        with:
+          name: core-devkit-ios-arm64-simulator
+          path: devkits/ios-arm64-simulator
+      - name: Create FridaCore.xcframework
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p devkits/macos-universal
+          lipo -create \
+              devkits/macos-x86_64/libfrida-core.a \
+              devkits/macos-arm64/libfrida-core.a \
+              -output devkits/macos-universal/libfrida-core.a
+
+          platforms=(
+            "macos-universal"
+            "ios-arm64"
+            "ios-arm64-simulator"
+          )
+
+          for platform in "${platforms[@]}"; do
+            mkdir -p "xcframework_headers/${platform}/FridaCore"
+          done
+
+          cp devkits/macos-x86_64/frida-core.h \
+              xcframework_headers/macos-universal/frida-core-x86_64.h
+          cp devkits/macos-arm64/frida-core.h \
+              xcframework_headers/macos-universal/frida-core-arm64.h
+
+          cat > xcframework_headers/macos-universal/frida-core.h <<'EOF'
+          #if defined (__x86_64__)
+          # include "frida-core-x86_64.h"
+          #elif defined (__arm64__)
+          # include "frida-core-arm64.h"
+          #else
+          # error "Unsupported macOS architecture for FridaCore"
+          #endif
+          EOF
+
+          cp devkits/ios-arm64/frida-core.h \
+              xcframework_headers/ios-arm64/frida-core.h
+          cp devkits/ios-arm64-simulator/frida-core.h \
+              xcframework_headers/ios-arm64-simulator/frida-core.h
+
+          for platform in "${platforms[@]}"; do
+            cat > "xcframework_headers/${platform}/FridaCore/module.modulemap" <<'EOF'
+          module FridaCore [extern_c] {
+            header "../frida-core.h"
+            export *
+          }
+          EOF
+          done
+
+          xcodebuild -create-xcframework \
+              -library devkits/macos-universal/libfrida-core.a \
+              -headers xcframework_headers/macos-universal \
+              -library devkits/ios-arm64/libfrida-core.a \
+              -headers xcframework_headers/ios-arm64 \
+              -library devkits/ios-arm64-simulator/libfrida-core.a \
+              -headers xcframework_headers/ios-arm64-simulator \
+              -output FridaCore.xcframework
+      - name: Upload FridaCore.xcframework
+        uses: actions/upload-artifact@v7
+        with:
+          name: FridaCore.xcframework
+          path: FridaCore.xcframework
+
+  publish-xcframework:
+    if: ${{ !cancelled() && github.ref_type == 'tag' && needs.xcframework.result == 'success' }}
+    runs-on: macos-latest
+    needs:
+      - xcframework
+    steps:
+      - name: Download FridaCore.xcframework artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: FridaCore.xcframework
+          path: dist
+      - name: Rewrap into FridaCore.xcframework directory
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd dist
+
+          mkdir -p FridaCore.xcframework
+
+          shopt -s dotglob
+          for f in *; do
+            if [[ "$f" != "FridaCore.xcframework" ]]; then
+              mv "$f" FridaCore.xcframework/
+            fi
+          done
+      - name: Zip FridaCore.xcframework
+        run: |
+          cd dist
+          zip -r FridaCore.xcframework.zip FridaCore.xcframework
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            dist/FridaCore.xcframework.zip
+          prerelease: ${{ contains(github.ref_name, 'snapshot') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  windows-shared:
+    strategy:
+      matrix:
+        include:
+          - { arch: x86_64, runner: windows-latest, msvc-arch: amd64, vcpkg-triplet: x64-windows-release }
+          - { arch: arm64, runner: windows-11-arm, msvc-arch: arm64, vcpkg-triplet: arm64-windows-release, opts: "'-Dfrida-gum:v8=disabled'" }
+      fail-fast: false
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 120
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.msvc-arch }}
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install build tools
+        run: |
+          pip install meson ninja setuptools
+          choco install pkgconfiglite -y
+
+      - name: Restore vcpkg cache
+        id: vcpkg-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: C:\vcpkg\installed
+          key: vcpkg-${{ matrix.vcpkg-triplet }}-v5
+
+      - name: Install dependencies via vcpkg
+        if: steps.vcpkg-cache.outputs.cache-hit != 'true'
+        run: >-
+          vcpkg install
+          --overlay-triplets=${{ github.workspace }}/.github/vcpkg-triplets
+          --triplet ${{ matrix.vcpkg-triplet }}
+          glib json-glib libsoup
+
+      - name: Save vcpkg cache
+        if: steps.vcpkg-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: C:\vcpkg\installed
+          key: vcpkg-${{ matrix.vcpkg-triplet }}-v5
+
+      - name: Set up vcpkg environment
+        shell: bash
+        run: |
+          TRIPLET="${{ matrix.vcpkg-triplet }}"
+          VCPKG_PREFIX="C:/vcpkg/installed/$TRIPLET"
+          echo "$VCPKG_PREFIX/tools/pkgconf" >> $GITHUB_PATH
+          echo "$VCPKG_PREFIX/bin" >> $GITHUB_PATH
+          echo "$VCPKG_PREFIX/tools" >> $GITHUB_PATH
+          echo "PKG_CONFIG_PATH=$VCPKG_PREFIX/lib/pkgconfig" >> $GITHUB_ENV
+
+      - name: Configure
+        run: |
+          python -c "import sys; sys.path.insert(0, '.'); from releng.meson_configure import main; main()" `
+              . `
+              --host=windows-${{ matrix.arch }} `
+              --enable-shared `
+              --without-prebuilds=sdk `
+              "--prefix=$env:RUNNER_TEMP\frida-prefix" `
+              -- --force-fallback-for=openssl,libnghttp2 -Dcompiler_backend=disabled -Dtests=disabled ${{ matrix.opts }}
+
+      - name: Compile
+        run: python releng/meson/meson.py compile -C build
+
+      - name: Install
+        run: python releng/meson/meson.py install -C build --no-rebuild --skip-subprojects
+
+      - name: List installed files
+        shell: bash
+        run: find "$RUNNER_TEMP/frida-prefix" -type f | sort

@@ -1,0 +1,25 @@
+[run]
+branch      = True
+parallel    = True
+concurrency = multiprocessing
+data_file   = @ROOT@/.coverage/coverage
+source      = @ROOT@/mesonbuild/
+
+[report]
+exclude_lines =
+  if T.TYPE_CHECKING:
+
+[paths]
+mesonbuild =
+    mesonbuild/
+    __w/meson/meson/mesonbuild/
+    @ROOT@/mesonbuild/
+
+[html]
+directory = @ROOT@/.coverage/html
+
+[xml]
+output    = @ROOT@/.coverage/coverage.xml
+
+[json]
+output    = @ROOT@/.coverage/coverage.json

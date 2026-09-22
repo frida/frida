@@ -1,0 +1,12 @@
+[
+  {
+    "type": "target",
+    "target": "exe1",
+    "operation": "info"
+  },
+  {
+    "type": "target",
+    "target": "exe2",
+    "operation": "info"
+  }
+]

@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/10 out of bounds/meson.build:4:6: ERROR: Index 0 out of bounds of array of size 0."
+    }
+  ]
+}

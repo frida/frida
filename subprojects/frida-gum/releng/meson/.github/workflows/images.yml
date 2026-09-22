@@ -1,0 +1,67 @@
+name: CI image builder
+
+concurrency:
+  group: img_builder-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+    paths:
+      - 'ci/ciimage/**'
+      - '.github/workflows/images.yml'
+
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'ci/ciimage/**'
+      - '.github/workflows/images.yml'
+
+  # Rebuild the images every week (Sunday)
+  schedule:
+    - cron: '0 0 * * 0'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    # do not run the weekly scheduled job in a fork
+    if: github.event_name != 'schedule' || github.repository == 'mesonbuild/meson'
+    env:
+      HAS_DOCKER_CREDENTIALS: ${{ secrets.DOCKER_PASSWORD != '' }}
+    name: ${{ matrix.cfg.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cfg:
+          - { name: Arch Linux,       id: arch     }
+          - { name: CUDA (on Arch),   id: cuda     }
+          - { name: Fedora,           id: fedora   }
+          - { name: Gentoo,           id: gentoo   }
+          - { name: OpenSUSE,         id: opensuse }
+          - { name: Ubuntu Bionic,    id: bionic   }
+          - { name: Ubuntu Rolling,   id: ubuntu-rolling  }
+    steps:
+      - uses: actions/checkout@v3
+
+      # Login to dockerhub
+      - name: Docker login
+        if:   (github.event_name == 'push' || github.event_name == 'schedule') && env.HAS_DOCKER_CREDENTIALS == 'true'
+        uses: azure/docker-login@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Build and test
+      - name: Building the ${{ matrix.cfg.id }} image
+        run:  ./ci/ciimage/build.py -t build ${{ matrix.cfg.id }}
+      - name: Testing the ${{ matrix.cfg.id }} image
+        run:  ./ci/ciimage/build.py -t test  ${{ matrix.cfg.id }}
+
+      # Publish
+      - name: Push the ${{ matrix.cfg.id }} image
+        run:  docker push mesonbuild/${{ matrix.cfg.id }}
+        if:   (github.event_name == 'push' || github.event_name == 'schedule') && env.HAS_DOCKER_CREDENTIALS == 'true'

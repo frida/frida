@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/32 exe static shared/meson.build:9:9: ERROR: Can't link non-PIC static library 'stat' into shared library 'shr2'. Use the 'pic' option to static_library to build with PIC."
+    }
+  ]
+}

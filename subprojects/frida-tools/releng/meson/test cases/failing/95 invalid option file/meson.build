@@ -1,0 +1,1 @@
+project('invalid option file')

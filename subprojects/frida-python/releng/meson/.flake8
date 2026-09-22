@@ -1,0 +1,33 @@
+[flake8]
+extend-ignore =
+    # E241: multiple spaces after ':'
+    E241,
+    # E251: unexpected spaces around keyword / parameter equals
+    E251,
+    # E261: at least two spaces before inline comment
+    E261,
+    # E265: block comment should start with '# '
+    E265,
+    # E501: line too long
+    E501,
+    # E302: expected 2 blank lines, found 1
+    E302,
+    # E305: expected 2 blank lines after class or function definition, found 1
+    E305,
+    # E401: multiple imports on one line
+    E401,
+    # E266: too many leading '#' for block comment
+    E266,
+    # E402: module level import not at top of file
+    E402,
+    # E731: do not assign a lambda expression, use a def (too many false positives)
+    E731,
+    # E741: ambiguous variable name 'l'
+    E741,
+    # W504: line break after binary operator
+    W504,
+    # A003: builtin class attribute
+    A003
+per-file-ignores =
+    mesonbuild/mesonlib.py:F401,F403
+max-line-length = 120

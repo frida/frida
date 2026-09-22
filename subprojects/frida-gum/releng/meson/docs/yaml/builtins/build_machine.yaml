@@ -1,0 +1,37 @@
+name: build_machine
+long_name: Build machine information
+description: |
+  Provides information about the build machine -- the machine that is doing the actual compilation.
+  See [Cross-compilation](Cross-compilation.md).
+
+  Currently, these values are populated using
+  [`platform.system()`](https://docs.python.org/3.7/library/platform.html#platform.system) and
+  [`platform.machine()`](https://docs.python.org/3.7/library/platform.html#platform.machine).
+  If you think the returned values for any of these are incorrect for
+  your system or CPU, or if your OS is not in the linked table, please
+  [file a bug](https://github.com/mesonbuild/meson/issues/new) report
+  with details and we'll look into it.
+
+methods:
+- name: cpu_family
+  returns: str
+  description: |
+    Returns the CPU family name.
+    [This table](Reference-tables.md#cpu-families) contains
+    all known CPU families. These are guaranteed to continue working.
+
+- name: cpu
+  returns: str
+  description: Returns a more specific CPU name, such as `i686`, `amd64`, etc.
+
+- name: system
+  returns: str
+  description: |
+    Returns the operating system name.
+    [This table](Reference-tables.md#operating-system-names) Lists
+    all of the currently known Operating System names, these are
+    guaranteed to continue working.
+
+- name: endian
+  returns: str
+  description: returns `'big'` on big-endian systems and `'little'` on little-endian systems.

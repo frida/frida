@@ -1,0 +1,5 @@
+option(
+    'expect',
+    type : 'boolean',
+    value : false,
+)

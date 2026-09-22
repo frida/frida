@@ -1,0 +1,13 @@
+[
+  {
+    "type": "target",
+    "target": "something",
+    "operation": "src_add",
+    "sources": ["third.c"]
+  },
+  {
+    "type": "target",
+    "target": "something",
+    "operation": "info"
+  }
+]

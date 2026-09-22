@@ -1,0 +1,16 @@
+name: linting
+on: [push, pull_request]
+jobs:
+  pyflakes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: pip install pyflakes
+      - run: pyflakes $(git ls-files '*.py' | grep -v '^frida/frida_bindgen/assets/')
+  mypy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: jpetrucciani/mypy-check@master
+        with:
+          mypy_flags: '--exclude examples --exclude setup --exclude frida/frida_bindgen/assets'

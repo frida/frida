@@ -1,0 +1,16 @@
+{
+  "name": "frida-barebone-script-runtime",
+  "version": "1.0.0",
+  "description": "Script runtime used by Frida's Barebone backend",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild script-runtime/entrypoint.ts --outfile=script-runtime.js --bundle --platform=node --target=es2022 --minify",
+    "check": "tsc",
+    "watch": "tsc -w"
+  },
+  "devDependencies": {
+    "@types/frida-gum": "^19.10.0",
+    "esbuild": "^0.25.5",
+    "typescript": "^5.8.3"
+  }
+}

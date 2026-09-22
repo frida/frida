@@ -1,0 +1,9 @@
+name: is_variable
+returns: bool
+since: 0.52.0
+description: Returns true if a variable of the given name exists and false otherwise.
+
+posargs:
+  var:
+    type: str
+    description: The variable to test

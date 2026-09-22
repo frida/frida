@@ -1,0 +1,7 @@
+prefix=/
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: totally_made_up_dep
+Description: completely and totally made up for a test case
+Version: 4.5.6

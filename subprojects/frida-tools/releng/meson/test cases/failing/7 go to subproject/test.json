@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/7 go to subproject/meson.build:3:0: ERROR: Must not go into subprojects dir with subdir(), use subproject() instead."
+    }
+  ]
+}

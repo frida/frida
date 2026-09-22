@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/58 grab subproj/meson.build:7:0: ERROR: Sandbox violation: Tried to grab file sub.c from a nested subproject."
+    }
+  ]
+}

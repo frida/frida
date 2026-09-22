@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/61 dependency not-found and required/meson.build:2:6: ERROR: Dependency is required but has no candidates."
+    }
+  ]
+}

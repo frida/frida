@@ -1,0 +1,10 @@
+[wrap-file]
+directory = libpng-1.6.34
+
+source_url = ftp://ftp-osl.osuosl.org/pub/libpng/src/libpng16/libpng-1.6.34.tar.xz
+source_filename = libpng-1.6.34.tar.xz
+source_hash = 2f1e960d92ce3b3abd03d06dfec9637dfbd22febf107a536b44f7a47c60659f6
+
+patch_url = https://wrapdb.mesonbuild.com/v1/projects/libpng/1.6.34/1/get_zip
+patch_filename = libpng-1.6.34-1-wrap.zip
+patch_hash = 2123806eba8180c164e33a210f2892bbeb2473b69e56aecc786574e9221e6f20

@@ -1,0 +1,23 @@
+# This file assumes that the path to your Metrowerks toolchain
+# of choice is added to the environment(PATH) variable, so that
+# Meson can find the binaries while building.
+
+[binaries]
+c = 'mwcceppc'
+c_ld = 'mwldeppc'
+cpp = 'mwcceppc'
+cpp_ld = 'mwldeppc'
+ar = 'mwldeppc'
+as = 'mwasmeppc'
+
+[built-in options]
+c_args = ['-lang', 'c99', '-nosyspath']
+c_link_args = '@DIRNAME@' / 'metrowerks.lcf'
+cpp_args = ['-lang', 'c++', '-nosyspath']
+cpp_link_args = '@DIRNAME@' / 'metrowerks.lcf'
+
+[host_machine]
+system = 'bare metal'
+cpu = 'ppc'
+cpu_family = 'ppc'
+endian = 'little'

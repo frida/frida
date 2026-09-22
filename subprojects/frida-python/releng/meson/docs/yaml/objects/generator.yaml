@@ -1,0 +1,45 @@
+name: generator
+long_name: Generator object
+description: |
+  This object is returned by [[generator]] and contains a
+  generator that is used to transform files from one type to another by
+  an executable (e.g. `idl` files into source code and headers).
+
+methods:
+  - name: process
+    returns: generated_list
+    description: |
+      Takes a list of files, causes them to be processed and returns an object containing the result
+      which can then, for example, be passed into a build target definition.
+
+    varargs:
+      name: source
+      min_varargs: 1
+      type: str | file | custom_tgt | custom_idx | generated_list
+      description: List of sources to process.
+
+    kwargs:
+      extra_args:
+        type: list[str]
+        description: |
+          If present, will be used to replace an entry `@EXTRA_ARGS@` in the argument list.
+
+      preserve_path_from:
+        type: str
+        since: 0.45.0
+        description: |
+          If given, specifies that the output files need to maintain their directory structure
+          inside the target temporary directory. The most common value for this is
+          `meson.current_source_dir()`. With this value when a file called
+          `subdir/one.input` is processed it generates a file `{target private
+          directory}/subdir/one.out` as opposed to `{target private
+          directory}/one.out`.
+
+      env:
+        type: env | list[str] | dict[str]
+        since: 1.3.0
+        description: |
+          environment variables to set, such as
+          `{'NAME1': 'value1', 'NAME2': 'value2'}` or `['NAME1=value1', 'NAME2=value2']`,
+          or an [[@env]] object which allows more
+          sophisticated environment juggling.

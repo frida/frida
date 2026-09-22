@@ -1,0 +1,7 @@
+[
+  {
+    "type": "target",
+    "target": "something",
+    "operation": "target_rm"
+  }
+]

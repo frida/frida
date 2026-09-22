@@ -1,0 +1,6 @@
+{
+  "installed": [
+    {"type": "dir", "file": "usr/share/doc/spede/html"}
+  ],
+  "expect_skip_on_jobname": ["azure", "cygwin", "macos", "msys2"]
+}

@@ -1,0 +1,44 @@
+name: range
+returns: range
+since: 0.58.0
+description: |
+  Return an opaque object that can be only be used in `foreach` statements.
+
+  <pre><code class="language-meson">[[@range]] range([[@int]] <b>stop</b>)
+  [[@range]] range([[@int]] <b>start</b>, [[@int]] <b>stop</b>[, [[@int]] <b>step</b>])</code></pre>
+
+  - `start` must be integer greater or equal to 0. Defaults to 0.
+  - `stop` must be integer greater or equal to `start`.
+  - `step` must be integer greater or equal to 1. Defaults to 1.
+
+  It cause the `foreach` loop to be called with the value from `start` included
+  to `stop` excluded with an increment of `step` after each loop.
+
+example: |
+  ```meson
+  # Loop 15 times with i from 0 to 14 included.
+  foreach i : range(15)
+    ...
+  endforeach
+  ```
+
+  The range object can also be assigned to a variable and indexed.
+  ```meson
+  r = range(5, 10, 2)
+  assert(r[2] == 9)
+  ```
+
+optargs:
+  start:
+    type: int
+    default: 0
+    description: The start of the range
+
+  stop:
+    type: int
+    description: The end of the range
+
+  step:
+    type: int
+    default: 1
+    description: The loop increment

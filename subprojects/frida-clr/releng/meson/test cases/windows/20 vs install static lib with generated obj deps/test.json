@@ -1,0 +1,13 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/lib/libboth_lib.a"},
+
+    {"type": "shared_lib", "platform": "msvc", "file": "usr/bin/both_lib"},
+    {"type": "implib", "platform": "msvc", "file": "usr/lib/both_lib"},
+    {"type": "pdb", "platform": "msvc", "file": "usr/bin/both_lib"},
+
+    {"type": "expr", "platform": "gcc", "file": "usr/lib/?libboth_lib.dll"},
+    {"type": "implib", "platform": "gcc", "file": "usr/lib/libboth_lib"},
+    {"type": "pdb", "platform": "gcc", "file": "usr/bin/libboth_lib"}
+  ]
+}

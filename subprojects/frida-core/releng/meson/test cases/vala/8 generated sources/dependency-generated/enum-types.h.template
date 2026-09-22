@@ -1,0 +1,26 @@
+/*** BEGIN file-header ***/
+
+#ifndef __EXAMPLE_ENUMS_TYPES_H__
+#define __EXAMPLE_ENUMS_TYPES_H__
+
+#include <glib-object.h>
+#include "enums.h"
+
+G_BEGIN_DECLS
+/*** END file-header ***/
+
+/*** BEGIN file-production ***/
+
+/* enumerations from "@filename@" */
+/*** END file-production ***/
+
+/*** BEGIN value-header ***/
+GType @enum_name@_get_type (void) G_GNUC_CONST;
+#define EXAMPLE_TYPE_@ENUMSHORT@ (@enum_name@_get_type ())
+/*** END value-header ***/
+
+/*** BEGIN file-tail ***/
+G_END_DECLS
+
+#endif /* __EXAMPLE_ENUMS_TYPES_H__ */
+/*** END file-tail ***/

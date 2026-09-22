@@ -1,0 +1,6 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/share/result"},
+    {"type": "file", "file": "usr/share/result2"}
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/29 nested ternary/meson.build:3:12: ERROR: Nested ternary operators are not allowed."
+    }
+  ]
+}

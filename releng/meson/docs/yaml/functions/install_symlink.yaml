@@ -1,0 +1,34 @@
+name: install_symlink
+returns: void
+since: 0.61.0
+description: |
+  Installs a symbolic link to `pointing_to` target under install_dir.
+
+posargs:
+  link_name:
+    type: str
+    description: |
+      Name of the created link under `install_dir`.
+      It cannot contain path separators. Those should go in `install_dir`.
+
+kwargs:
+  pointing_to:
+    type: str
+    required: true
+    description: |
+      Target to point the link to.
+      Can be absolute or relative and that will be respected when creating the link.
+
+  install_dir:
+    type: str
+    required: true
+    description: |
+      The absolute or relative path to the installation directory for the links.
+      If this is a relative path, it is assumed to be relative to the prefix.
+
+  install_tag:
+    type: str
+    description: |
+      A string used by the `meson install --tags` command
+      to install only a subset of the files. By default these files have no install
+      tag which means they are not being installed when `--tags` argument is specified.

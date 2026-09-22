@@ -1,0 +1,92 @@
+{
+  "installed": [
+    {"type": "exe", "file": "usr/bin/prog-stuff_clib_both_libraries"},
+    {"type": "pdb", "file": "usr/bin/prog-stuff_clib_both_libraries"},
+    {"type": "pdb",  "file": "usr/bin/stuff_clib_both_libraries.pdb"},
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libstuff_clib_both_libraries.so"},
+    {"type": "file", "platform": "msvc", "file": "usr/bin/stuff_clib_both_libraries.dll"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/stuff_clib_both_libraries.dll.lib"},
+    {"type": "file", "file": "usr/lib/libstuff_clib_both_libraries.a"},
+
+    {"type": "exe", "file": "usr/bin/prog-stuff_clib_shared_library"},
+    {"type": "pdb", "file": "usr/bin/prog-stuff_clib_shared_library"},
+    {"type": "pdb",  "file": "usr/bin/stuff_clib_shared_library.pdb"},
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libstuff_clib_shared_library.so"},
+    {"type": "file", "platform": "msvc", "file": "usr/bin/stuff_clib_shared_library.dll"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/stuff_clib_shared_library.dll.lib"},
+
+    {"type": "exe", "file": "usr/bin/prog-stuff_clib_static_library"},
+    {"type": "pdb", "file": "usr/bin/prog-stuff_clib_static_library"},
+    {"type": "file", "file": "usr/lib/libstuff_clib_static_library.a"},
+
+    {"type": "exe", "file": "usr/bin/prog-stuff_cdylib_shared_library"},
+    {"type": "pdb", "file": "usr/bin/prog-stuff_cdylib_shared_library"},
+    {"type": "pdb",  "file": "usr/bin/stuff_cdylib_shared_library.pdb"},
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libstuff_cdylib_shared_library.so"},
+    {"type": "file", "platform": "msvc", "file": "usr/bin/stuff_cdylib_shared_library.dll"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/stuff_cdylib_shared_library.dll.lib"},
+
+    {"type": "exe", "file": "usr/bin/prog-stuff_staticlib_static_library"},
+    {"type": "pdb", "file": "usr/bin/prog-stuff_staticlib_static_library"},
+    {"type": "file", "file": "usr/lib/libstuff_staticlib_static_library.a"},
+
+    {"type": "pdb",  "file": "usr/bin/stuff__both_libraries.pdb"},
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libstuff__both_libraries.so"},
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libstuff__both_libraries.rlib"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/libstuff__both_libraries.rlib"},
+    {"type": "file", "platform": "msvc", "file": "usr/bin/stuff__both_libraries.dll"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/stuff__both_libraries.dll.lib"},
+
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libstuff__static_library.rlib"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/libstuff__static_library.rlib"},
+
+    {"type": "pdb",  "file": "usr/bin/stuff_proc_macro_shared_library.pdb"},
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libstuff_proc_macro_shared_library.so"},
+    {"type": "file", "platform": "msvc", "file": "usr/bin/stuff_proc_macro_shared_library.dll"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/stuff_proc_macro_shared_library.dll.lib"},
+
+    {"type": "pdb",  "file": "usr/bin/stuff_lib_both_libraries.pdb"},
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libstuff_lib_both_libraries.rlib"},
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libstuff_lib_both_libraries.so"},
+    {"type": "file", "platform": "msvc", "file": "usr/bin/stuff_lib_both_libraries.dll"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/libstuff_lib_both_libraries.rlib"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/stuff_lib_both_libraries.dll.lib"},
+
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libstuff_rlib_static_library.rlib"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/libstuff_rlib_static_library.rlib"},
+
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libstuff_lib_static_library.rlib"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/libstuff_lib_static_library.rlib"},
+
+    {"type": "pdb",  "file": "usr/bin/stuff__shared_library.pdb"},
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libstuff__shared_library.so"},
+    {"type": "file", "platform": "msvc", "file": "usr/bin/stuff__shared_library.dll"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/stuff__shared_library.dll.lib"},
+
+    {"type": "pdb",  "file": "usr/bin/stuff_lib_shared_library.pdb"},
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libstuff_lib_shared_library.so"},
+    {"type": "file", "platform": "msvc", "file": "usr/bin/stuff_lib_shared_library.dll"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/stuff_lib_shared_library.dll.lib"},
+
+    {"type": "pdb",  "file": "usr/bin/stuff_dylib_shared_library.pdb"},
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libstuff_dylib_shared_library.so"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/stuff_dylib_shared_library.dll.lib"},
+    {"type": "file", "platform": "msvc", "file": "usr/bin/stuff_dylib_shared_library.dll"},
+
+    {"type": "pdb",  "file": "usr/bin/stuff_cdylib_both_libraries.pdb"},
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libstuff_cdylib_both_libraries.so"},
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libstuff_cdylib_both_libraries.so"},
+    {"type": "file", "platform": "msvc", "file": "usr/bin/stuff_cdylib_both_libraries.dll"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/stuff_cdylib_both_libraries.dll.lib"},
+
+    {"type": "pdb",  "file": "usr/bin/stuff_proc_macro_both_libraries.pdb"},
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libstuff_proc_macro_both_libraries.so"},
+    {"type": "file", "platform": "msvc", "file": "usr/bin/stuff_proc_macro_both_libraries.dll"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/stuff_proc_macro_both_libraries.dll.lib"},
+
+    {"type": "pdb",  "file": "usr/bin/stuff_dylib_both_libraries.pdb"},
+    {"type": "file", "platform": "gcc", "file": "usr/lib/libstuff_dylib_both_libraries.so"},
+    {"type": "file", "platform": "msvc", "file": "usr/bin/stuff_dylib_both_libraries.dll"},
+    {"type": "file", "platform": "msvc", "file": "usr/lib/stuff_dylib_both_libraries.dll.lib"}
+  ]
+}

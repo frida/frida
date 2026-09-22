@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/60 string as link target/meson.build:2:0: ERROR: '' is not a target."
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+name: unset_variable
+returns: void
+since: 0.60.0
+description: |
+  Unsets a variable.
+  Referencing a variable which has been unset is an error until it has been set again.
+
+posargs:
+  varname:
+    type: str
+    description: The variable to unset.

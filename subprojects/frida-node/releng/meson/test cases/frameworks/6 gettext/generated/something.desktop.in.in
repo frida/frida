@@ -1,0 +1,15 @@
+[Desktop Entry]
+Name=Something doer
+Comment=Do something
+# Translators: Search terms to find this application. Do NOT translate or localize the semicolons! The list MUST also end with a semicolon!
+Keywords=zip;tar;extract;unpack;
+TryExec=file-roller
+Exec=file-roller %U
+StartupNotify=true
+Terminal=false
+Type=Application
+# Translators: Do NOT translate or transliterate this text (this is an icon file name)!
+Icon=something
+Categories=GTK;GNOME;Utility
+X-GNOME-DocPath=file-roller/file-roller.xml
+X-GNOME-UsesNotifications=true

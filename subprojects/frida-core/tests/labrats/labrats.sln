@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2005
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sleeper", "sleeper.vcxproj", "{DEC3A521-4AD8-4A55-BE8E-A1919C10061F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cycler", "cycler.vcxproj", "{EAB7D2AE-DF45-4EF2-B71A-2F7F92F75D8E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "simple-agent", "simple-agent.vcxproj", "{CFFE07E6-1919-4A65-84EA-5E7BC68ED847}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "resident-agent", "resident-agent.vcxproj", "{1A16B991-DE8D-403D-9FE6-BD1696E12045}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "spawner", "spawner.vcxproj", "{067C47F1-0950-4F0A-9419-02AAAA413C81}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Labrat|Win32 = Labrat|Win32
+		Labrat|x64 = Labrat|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DEC3A521-4AD8-4A55-BE8E-A1919C10061F}.Labrat|Win32.ActiveCfg = Labrat|Win32
+		{DEC3A521-4AD8-4A55-BE8E-A1919C10061F}.Labrat|Win32.Build.0 = Labrat|Win32
+		{DEC3A521-4AD8-4A55-BE8E-A1919C10061F}.Labrat|x64.ActiveCfg = Labrat|x64
+		{DEC3A521-4AD8-4A55-BE8E-A1919C10061F}.Labrat|x64.Build.0 = Labrat|x64
+		{EAB7D2AE-DF45-4EF2-B71A-2F7F92F75D8E}.Labrat|Win32.ActiveCfg = Labrat|Win32
+		{EAB7D2AE-DF45-4EF2-B71A-2F7F92F75D8E}.Labrat|Win32.Build.0 = Labrat|Win32
+		{EAB7D2AE-DF45-4EF2-B71A-2F7F92F75D8E}.Labrat|x64.ActiveCfg = Labrat|x64
+		{EAB7D2AE-DF45-4EF2-B71A-2F7F92F75D8E}.Labrat|x64.Build.0 = Labrat|x64
+		{CFFE07E6-1919-4A65-84EA-5E7BC68ED847}.Labrat|Win32.ActiveCfg = Labrat|Win32
+		{CFFE07E6-1919-4A65-84EA-5E7BC68ED847}.Labrat|Win32.Build.0 = Labrat|Win32
+		{CFFE07E6-1919-4A65-84EA-5E7BC68ED847}.Labrat|x64.ActiveCfg = Labrat|x64
+		{CFFE07E6-1919-4A65-84EA-5E7BC68ED847}.Labrat|x64.Build.0 = Labrat|x64
+		{1A16B991-DE8D-403D-9FE6-BD1696E12045}.Labrat|Win32.ActiveCfg = Labrat|Win32
+		{1A16B991-DE8D-403D-9FE6-BD1696E12045}.Labrat|Win32.Build.0 = Labrat|Win32
+		{1A16B991-DE8D-403D-9FE6-BD1696E12045}.Labrat|x64.ActiveCfg = Labrat|x64
+		{1A16B991-DE8D-403D-9FE6-BD1696E12045}.Labrat|x64.Build.0 = Labrat|x64
+		{067C47F1-0950-4F0A-9419-02AAAA413C81}.Labrat|Win32.ActiveCfg = Labrat|Win32
+		{067C47F1-0950-4F0A-9419-02AAAA413C81}.Labrat|Win32.Build.0 = Labrat|Win32
+		{067C47F1-0950-4F0A-9419-02AAAA413C81}.Labrat|x64.ActiveCfg = Labrat|x64
+		{067C47F1-0950-4F0A-9419-02AAAA413C81}.Labrat|x64.Build.0 = Labrat|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8E77DB02-DEB4-48F1-A2FF-04AADA237FEE}
+	EndGlobalSection
+EndGlobal

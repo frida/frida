@@ -1,0 +1,15 @@
+{
+  "installed": [
+    {"type": "exe", "file": "usr/bin/prog"},
+    {"type": "pdb", "file": "usr/bin/prog"},
+    {"type": "file", "file": "usr/diiba/daaba/file.dat"},
+    {"type": "file", "file": "usr/this/should/also-work.dat"},
+    {"type": "file", "file": "usr/this/does/something-different.dat.in"},
+    {"type": "file", "file": "usr/dir/a file.txt"},
+    {"type": "file", "file": "usr/dir/conf.txt"},
+    {"type": "file", "file": "usr/otherdir/a file.txt"},
+    {"type": "file", "file": "usr/customtarget/1.txt"},
+    {"type": "file", "file": "usr/customtarget/2.txt"},
+    {"type": "file", "file": "usr/customtargetindex/1.txt"}
+  ]
+}

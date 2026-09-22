@@ -1,0 +1,24 @@
+[
+  {
+    "type": "default_options",
+    "operation": "set",
+    "options": {
+      "cpp_std": "c++14"
+    }
+  },
+  {
+    "type": "default_options",
+    "operation": "set",
+    "options": {
+      "buildtype": "release",
+      "debug": true
+    }
+  },
+  {
+    "type": "default_options",
+    "operation": "set",
+    "options": {
+      "cpp_std": "c++11"
+    }
+  }
+]

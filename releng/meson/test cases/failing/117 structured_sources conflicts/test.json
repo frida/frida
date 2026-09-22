@@ -1,0 +1,7 @@
+{
+    "stdout": [
+        {
+            "line": "test cases/failing/117 structured_sources conflicts/meson.build:7:0: ERROR: Conflicting sources in structured sources: main.rs"
+        }
+    ]
+}

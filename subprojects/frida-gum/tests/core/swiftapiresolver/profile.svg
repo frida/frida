@@ -1,0 +1,3217 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" width="1200" height="934" onload="init(evt)" viewBox="0 0 1200 934" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- Flame graph stack visualization. See https://github.com/brendangregg/FlameGraph for latest version, and http://www.brendangregg.com/flamegraphs.html for examples. -->
+<!-- NOTES:  -->
+<defs>
+	<linearGradient id="background" y1="0" y2="1" x1="0" x2="0" >
+		<stop stop-color="#eeeeee" offset="5%" />
+		<stop stop-color="#eeeeb0" offset="95%" />
+	</linearGradient>
+</defs>
+<style type="text/css">
+	text { font-family:Verdana; font-size:12px; fill:rgb(0,0,0); }
+	#search, #ignorecase { opacity:0.1; cursor:pointer; }
+	#search:hover, #search.show, #ignorecase:hover, #ignorecase.show { opacity:1; }
+	#subtitle { text-anchor:middle; font-color:rgb(160,160,160); }
+	#title { text-anchor:middle; font-size:17px}
+	#unzoom { cursor:pointer; }
+	#frames > *:hover { stroke:black; stroke-width:0.5; cursor:pointer; }
+	.hide { display:none; }
+	.parent { opacity:0.5; }
+</style>
+<script type="text/ecmascript">
+<![CDATA[
+	"use strict";
+	var details, searchbtn, unzoombtn, matchedtxt, svg, searching, currentSearchTerm, ignorecase, ignorecaseBtn;
+	function init(evt) {
+		details = document.getElementById("details").firstChild;
+		searchbtn = document.getElementById("search");
+		ignorecaseBtn = document.getElementById("ignorecase");
+		unzoombtn = document.getElementById("unzoom");
+		matchedtxt = document.getElementById("matched");
+		svg = document.getElementsByTagName("svg")[0];
+		searching = 0;
+		currentSearchTerm = null;
+
+		// use GET parameters to restore a flamegraphs state.
+		var params = get_params();
+		if (params.x && params.y)
+			zoom(find_group(document.querySelector('[x="' + params.x + '"][y="' + params.y + '"]')));
+                if (params.s) search(params.s);
+	}
+
+	// event listeners
+	window.addEventListener("click", function(e) {
+		var target = find_group(e.target);
+		if (target) {
+			if (target.nodeName == "a") {
+				if (e.ctrlKey === false) return;
+				e.preventDefault();
+			}
+			if (target.classList.contains("parent")) unzoom(true);
+			zoom(target);
+			if (!document.querySelector('.parent')) {
+				// we have basically done a clearzoom so clear the url
+				var params = get_params();
+				if (params.x) delete params.x;
+				if (params.y) delete params.y;
+				history.replaceState(null, null, parse_params(params));
+				unzoombtn.classList.add("hide");
+				return;
+			}
+
+			// set parameters for zoom state
+			var el = target.querySelector("rect");
+			if (el && el.attributes && el.attributes.y && el.attributes._orig_x) {
+				var params = get_params()
+				params.x = el.attributes._orig_x.value;
+				params.y = el.attributes.y.value;
+				history.replaceState(null, null, parse_params(params));
+			}
+		}
+		else if (e.target.id == "unzoom") clearzoom();
+		else if (e.target.id == "search") search_prompt();
+		else if (e.target.id == "ignorecase") toggle_ignorecase();
+	}, false)
+
+	// mouse-over for info
+	// show
+	window.addEventListener("mouseover", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = "Function: " + g_to_text(target);
+	}, false)
+
+	// clear
+	window.addEventListener("mouseout", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = ' ';
+	}, false)
+
+	// ctrl-F for search
+	// ctrl-I to toggle case-sensitive search
+	window.addEventListener("keydown",function (e) {
+		if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) {
+			e.preventDefault();
+			search_prompt();
+		}
+		else if (e.ctrlKey && e.keyCode === 73) {
+			e.preventDefault();
+			toggle_ignorecase();
+		}
+	}, false)
+
+	// functions
+	function get_params() {
+		var params = {};
+		var paramsarr = window.location.search.substr(1).split('&');
+		for (var i = 0; i < paramsarr.length; ++i) {
+			var tmp = paramsarr[i].split("=");
+			if (!tmp[0] || !tmp[1]) continue;
+			params[tmp[0]]  = decodeURIComponent(tmp[1]);
+		}
+		return params;
+	}
+	function parse_params(params) {
+		var uri = "?";
+		for (var key in params) {
+			uri += key + '=' + encodeURIComponent(params[key]) + '&';
+		}
+		if (uri.slice(-1) == "&")
+			uri = uri.substring(0, uri.length - 1);
+		if (uri == '?')
+			uri = window.location.href.split('?')[0];
+		return uri;
+	}
+	function find_child(node, selector) {
+		var children = node.querySelectorAll(selector);
+		if (children.length) return children[0];
+	}
+	function find_group(node) {
+		var parent = node.parentElement;
+		if (!parent) return;
+		if (parent.id == "frames") return node;
+		return find_group(parent);
+	}
+	function orig_save(e, attr, val) {
+		if (e.attributes["_orig_" + attr] != undefined) return;
+		if (e.attributes[attr] == undefined) return;
+		if (val == undefined) val = e.attributes[attr].value;
+		e.setAttribute("_orig_" + attr, val);
+	}
+	function orig_load(e, attr) {
+		if (e.attributes["_orig_"+attr] == undefined) return;
+		e.attributes[attr].value = e.attributes["_orig_" + attr].value;
+		e.removeAttribute("_orig_"+attr);
+	}
+	function g_to_text(e) {
+		var text = find_child(e, "title").firstChild.nodeValue;
+		return (text)
+	}
+	function g_to_func(e) {
+		var func = g_to_text(e);
+		// if there's any manipulation we want to do to the function
+		// name before it's searched, do it here before returning.
+		return (func);
+	}
+	function update_text(e) {
+		var r = find_child(e, "rect");
+		var t = find_child(e, "text");
+		var w = parseFloat(r.attributes.width.value) -3;
+		var txt = find_child(e, "title").textContent.replace(/\([^(]*\)$/,"");
+		t.attributes.x.value = parseFloat(r.attributes.x.value) + 3;
+
+		// Smaller than this size won't fit anything
+		if (w < 2 * 12 * 0.59) {
+			t.textContent = "";
+			return;
+		}
+
+		t.textContent = txt;
+		var sl = t.getSubStringLength(0, txt.length);
+		// check if only whitespace or if we can fit the entire string into width w
+		if (/^ *$/.test(txt) || sl < w)
+			return;
+
+		// this isn't perfect, but gives a good starting point
+		// and avoids calling getSubStringLength too often
+		var start = Math.floor((w/sl) * txt.length);
+		for (var x = start; x > 0; x = x-2) {
+			if (t.getSubStringLength(0, x + 2) <= w) {
+				t.textContent = txt.substring(0, x) + "..";
+				return;
+			}
+		}
+		t.textContent = "";
+	}
+
+	// zoom
+	function zoom_reset(e) {
+		if (e.attributes != undefined) {
+			orig_load(e, "x");
+			orig_load(e, "width");
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_reset(c[i]);
+		}
+	}
+	function zoom_child(e, x, ratio) {
+		if (e.attributes != undefined) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = (parseFloat(e.attributes.x.value) - x - 10) * ratio + 10;
+				if (e.tagName == "text")
+					e.attributes.x.value = find_child(e.parentNode, "rect[x]").attributes.x.value + 3;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseFloat(e.attributes.width.value) * ratio;
+			}
+		}
+
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_child(c[i], x - 10, ratio);
+		}
+	}
+	function zoom_parent(e) {
+		if (e.attributes) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = 10;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseInt(svg.width.baseVal.value) - (10 * 2);
+			}
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_parent(c[i]);
+		}
+	}
+	function zoom(node) {
+		var attr = find_child(node, "rect").attributes;
+		var width = parseFloat(attr.width.value);
+		var xmin = parseFloat(attr.x.value);
+		var xmax = parseFloat(xmin + width);
+		var ymin = parseFloat(attr.y.value);
+		var ratio = (svg.width.baseVal.value - 2 * 10) / width;
+
+		// XXX: Workaround for JavaScript float issues (fix me)
+		var fudge = 0.0001;
+
+		unzoombtn.classList.remove("hide");
+
+		var el = document.getElementById("frames").children;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var a = find_child(e, "rect").attributes;
+			var ex = parseFloat(a.x.value);
+			var ew = parseFloat(a.width.value);
+			var upstack;
+			// Is it an ancestor
+			if (0 == 0) {
+				upstack = parseFloat(a.y.value) > ymin;
+			} else {
+				upstack = parseFloat(a.y.value) < ymin;
+			}
+			if (upstack) {
+				// Direct ancestor
+				if (ex <= xmin && (ex+ew+fudge) >= xmax) {
+					e.classList.add("parent");
+					zoom_parent(e);
+					update_text(e);
+				}
+				// not in current path
+				else
+					e.classList.add("hide");
+			}
+			// Children maybe
+			else {
+				// no common path
+				if (ex < xmin || ex + fudge >= xmax) {
+					e.classList.add("hide");
+				}
+				else {
+					zoom_child(e, xmin, ratio);
+					update_text(e);
+				}
+			}
+		}
+		search();
+	}
+	function unzoom(dont_update_text) {
+		unzoombtn.classList.add("hide");
+		var el = document.getElementById("frames").children;
+		for(var i = 0; i < el.length; i++) {
+			el[i].classList.remove("parent");
+			el[i].classList.remove("hide");
+			zoom_reset(el[i]);
+			if(!dont_update_text) update_text(el[i]);
+		}
+		search();
+	}
+	function clearzoom() {
+		unzoom();
+
+		// remove zoom state
+		var params = get_params();
+		if (params.x) delete params.x;
+		if (params.y) delete params.y;
+		history.replaceState(null, null, parse_params(params));
+	}
+
+	// search
+	function toggle_ignorecase() {
+		ignorecase = !ignorecase;
+		if (ignorecase) {
+			ignorecaseBtn.classList.add("show");
+		} else {
+			ignorecaseBtn.classList.remove("show");
+		}
+		reset_search();
+		search();
+	}
+	function reset_search() {
+		var el = document.querySelectorAll("#frames rect");
+		for (var i = 0; i < el.length; i++) {
+			orig_load(el[i], "fill")
+		}
+		var params = get_params();
+		delete params.s;
+		history.replaceState(null, null, parse_params(params));
+	}
+	function search_prompt() {
+		if (!searching) {
+			var term = prompt("Enter a search term (regexp " +
+			    "allowed, eg: ^ext4_)"
+			    + (ignorecase ? ", ignoring case" : "")
+			    + "\nPress Ctrl-i to toggle case sensitivity", "");
+			if (term != null) search(term);
+		} else {
+			reset_search();
+			searching = 0;
+			currentSearchTerm = null;
+			searchbtn.classList.remove("show");
+			searchbtn.firstChild.nodeValue = "Search"
+			matchedtxt.classList.add("hide");
+			matchedtxt.firstChild.nodeValue = ""
+		}
+	}
+	function search(term) {
+		if (term) currentSearchTerm = term;
+
+		var re = new RegExp(currentSearchTerm, ignorecase ? 'i' : '');
+		var el = document.getElementById("frames").children;
+		var matches = new Object();
+		var maxwidth = 0;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var func = g_to_func(e);
+			var rect = find_child(e, "rect");
+			if (func == null || rect == null)
+				continue;
+
+			// Save max width. Only works as we have a root frame
+			var w = parseFloat(rect.attributes.width.value);
+			if (w > maxwidth)
+				maxwidth = w;
+
+			if (func.match(re)) {
+				// highlight
+				var x = parseFloat(rect.attributes.x.value);
+				orig_save(rect, "fill");
+				rect.attributes.fill.value = "rgb(230,0,230)";
+
+				// remember matches
+				if (matches[x] == undefined) {
+					matches[x] = w;
+				} else {
+					if (w > matches[x]) {
+						// overwrite with parent
+						matches[x] = w;
+					}
+				}
+				searching = 1;
+			}
+		}
+		if (!searching)
+			return;
+		var params = get_params();
+		params.s = currentSearchTerm;
+		history.replaceState(null, null, parse_params(params));
+
+		searchbtn.classList.add("show");
+		searchbtn.firstChild.nodeValue = "Reset Search";
+
+		// calculate percent matched, excluding vertical overlap
+		var count = 0;
+		var lastx = -1;
+		var lastw = 0;
+		var keys = Array();
+		for (k in matches) {
+			if (matches.hasOwnProperty(k))
+				keys.push(k);
+		}
+		// sort the matched frames by their x location
+		// ascending, then width descending
+		keys.sort(function(a, b){
+			return a - b;
+		});
+		// Step through frames saving only the biggest bottom-up frames
+		// thanks to the sort order. This relies on the tree property
+		// where children are always smaller than their parents.
+		var fudge = 0.0001;	// JavaScript floating point
+		for (var k in keys) {
+			var x = parseFloat(keys[k]);
+			var w = matches[keys[k]];
+			if (x >= lastx + lastw - fudge) {
+				count += w;
+				lastx = x;
+				lastw = w;
+			}
+		}
+		// display matched percent
+		matchedtxt.classList.remove("hide");
+		var pct = 100 * count / maxwidth;
+		if (pct != 100) pct = pct.toFixed(1)
+		matchedtxt.firstChild.nodeValue = "Matched: " + pct + "%";
+	}
+]]>
+</script>
+<rect x="0.0" y="0" width="1200.0" height="934.0" fill="url(#background)"  />
+<text id="title" x="600.00" y="24" >Flame Graph</text>
+<text id="details" x="10.00" y="917" > </text>
+<text id="unzoom" x="10.00" y="24" class="hide">Reset Zoom</text>
+<text id="search" x="1090.00" y="24" >Search</text>
+<text id="ignorecase" x="1174.00" y="24" >ic</text>
+<text id="matched" x="1090.00" y="917" > </text>
+<g id="frames">
+<g >
+<title>snprintf (1 samples, 0.05%)</title><rect x="1091.9" y="181" width="0.6" height="15.0" fill="rgb(237,202,39)" rx="2" ry="2" />
+<text  x="1094.90" y="191.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (2 samples, 0.10%)</title><rect x="772.4" y="357" width="1.1" height="15.0" fill="rgb(249,33,30)" rx="2" ry="2" />
+<text  x="775.38" y="367.5" ></text>
+</g>
+<g >
+<title>g_ptr_array_set_size (in libtestswiftapiresolver.dylib) (garray.c) (1 samples, 0.05%)</title><rect x="708.5" y="421" width="0.5" height="15.0" fill="rgb(228,209,37)" rx="2" ry="2" />
+<text  x="711.47" y="431.5" ></text>
+</g>
+<g >
+<title>JS_Call (in libfrida-agent-modulated.dylib) (quickjs.c) (2,105 samples, 100.00%)</title><rect x="10.0" y="613" width="1180.0" height="15.0" fill="rgb(230,175,2)" rx="2" ry="2" />
+<text  x="13.00" y="623.5" >JS_Call (in libfrida-agent-modulated.dylib) (quickjs.c)</text>
+</g>
+<g >
+<title>gum_darwin_export_details_init_from_node (in libtestswiftapiresolver.dylib) (gumdarwinmodule.c) (3 samples, 0.14%)</title><rect x="110.3" y="437" width="1.7" height="15.0" fill="rgb(254,141,44)" rx="2" ry="2" />
+<text  x="113.34" y="447.5" ></text>
+</g>
+<g >
+<title>gum_vsnprintf (in libtestswiftapiresolver.dylib) (gumprintf.c) (1 samples, 0.05%)</title><rect x="654.1" y="373" width="0.6" height="15.0" fill="rgb(232,194,14)" rx="2" ry="2" />
+<text  x="657.10" y="383.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Node::addChild(swift::Demangle::Node*, swift::Demangle::NodeFactory&amp;) (2 samples, 0.10%)</title><rect x="983.7" y="309" width="1.1" height="15.0" fill="rgb(226,106,36)" rx="2" ry="2" />
+<text  x="986.71" y="319.5" ></text>
+</g>
+<g >
+<title>nanov2_malloc (1 samples, 0.05%)</title><rect x="1130.0" y="181" width="0.6" height="15.0" fill="rgb(206,136,26)" rx="2" ry="2" />
+<text  x="1133.02" y="191.5" ></text>
+</g>
+<g >
+<title>free (1 samples, 0.05%)</title><rect x="1084.6" y="85" width="0.6" height="15.0" fill="rgb(252,16,25)" rx="2" ry="2" />
+<text  x="1087.61" y="95.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printBoundGeneric(swift::Demangle::Node*, unsigned int) (1 samples, 0.05%)</title><rect x="1123.9" y="149" width="0.5" height="15.0" fill="rgb(227,123,14)" rx="2" ry="2" />
+<text  x="1126.85" y="159.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1095.3" y="213" width="0.5" height="15.0" fill="rgb(230,147,22)" rx="2" ry="2" />
+<text  x="1098.26" y="223.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1006.1" y="149" width="0.6" height="15.0" fill="rgb(225,202,11)" rx="2" ry="2" />
+<text  x="1009.13" y="159.5" ></text>
+</g>
+<g >
+<title>nanov2_malloc (1 samples, 0.05%)</title><rect x="1113.8" y="101" width="0.5" height="15.0" fill="rgb(227,46,24)" rx="2" ry="2" />
+<text  x="1116.76" y="111.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printBoundGeneric(swift::Demangle::Node*, unsigned int) (5 samples, 0.24%)</title><rect x="1081.2" y="213" width="2.9" height="15.0" fill="rgb(227,184,34)" rx="2" ry="2" />
+<text  x="1084.25" y="223.5" ></text>
+</g>
+<g >
+<title>free (1 samples, 0.05%)</title><rect x="1122.7" y="149" width="0.6" height="15.0" fill="rgb(247,7,19)" rx="2" ry="2" />
+<text  x="1125.73" y="159.5" ></text>
+</g>
+<g >
+<title>_malloc_zone_malloc (1 samples, 0.05%)</title><rect x="1042.0" y="213" width="0.6" height="15.0" fill="rgb(208,4,15)" rx="2" ry="2" />
+<text  x="1045.01" y="223.5" ></text>
+</g>
+<g >
+<title>OUTLINED_FUNCTION_2 (in libtestswiftapiresolver.dylib) + (1 samples, 0.05%; +0.05%)</title><rect x="1181.6" y="421" width="0.6" height="15.0" fill="rgb(255,198,198)" rx="2" ry="2" />
+<text  x="1184.59" y="431.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (1 samples, 0.05%)</title><rect x="1095.3" y="165" width="0.5" height="15.0" fill="rgb(213,131,28)" rx="2" ry="2" />
+<text  x="1098.26" y="175.5" ></text>
+</g>
+<g >
+<title>gum_resolve_method_implementation (in libtestswiftapiresolver.dylib) (gumswiftapiresolver.c) (1 samples, 0.05%)</title><rect x="1188.3" y="453" width="0.6" height="15.0" fill="rgb(254,146,1)" rx="2" ry="2" />
+<text  x="1191.32" y="463.5" ></text>
+</g>
+<g >
+<title>gum_vsnprintf (in libtestswiftapiresolver.dylib) (gumprintf.c) (1 samples, 0.05%)</title><rect x="661.4" y="357" width="0.5" height="15.0" fill="rgb(251,75,40)" rx="2" ry="2" />
+<text  x="664.38" y="367.5" ></text>
+</g>
+<g >
+<title>all (2,105 samples, 100%)</title><rect x="10.0" y="885" width="1180.0" height="15.0" fill="rgb(251,32,22)" rx="2" ry="2" />
+<text  x="13.00" y="895.5" ></text>
+</g>
+<g >
+<title>OUTLINED_FUNCTION_3 (in libtestswiftapiresolver.dylib) + (1 samples, 0.05%; -0.52%)</title><rect x="655.8" y="373" width="0.5" height="15.0" fill="rgb(88,88,255)" rx="2" ry="2" />
+<text  x="658.78" y="383.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntityType(swift::Demangle::Node*, swift::Demangle::Node*, swift::Demangle::Node*, unsigned int) (12 samples, 0.57%)</title><rect x="1068.9" y="277" width="6.7" height="15.0" fill="rgb(227,126,54)" rx="2" ry="2" />
+<text  x="1071.92" y="287.5" ></text>
+</g>
+<g >
+<title>SStream_concat0 (in libtestswiftapiresolver.dylib) (SStream.c) (6 samples, 0.29%)</title><rect x="685.5" y="373" width="3.4" height="15.0" fill="rgb(243,96,15)" rx="2" ry="2" />
+<text  x="688.49" y="383.5" ></text>
+</g>
+<g >
+<title>g_strdup_vprintf (in libtestswiftapiresolver.dylib) (gstrfuncs.c) (24 samples, 1.14%)</title><rect x="1168.1" y="421" width="13.5" height="15.0" fill="rgb(231,92,2)" rx="2" ry="2" />
+<text  x="1171.14" y="431.5" ></text>
+</g>
+<g >
+<title>_platform_strlen (4 samples, 0.19%)</title><rect x="686.6" y="357" width="2.3" height="15.0" fill="rgb(227,227,34)" rx="2" ry="2" />
+<text  x="689.61" y="367.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1084.1" y="149" width="0.5" height="15.0" fill="rgb(242,85,6)" rx="2" ry="2" />
+<text  x="1087.05" y="159.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::push_back(char) (2 samples, 0.10%)</title><rect x="1043.1" y="261" width="1.2" height="15.0" fill="rgb(215,33,25)" rx="2" ry="2" />
+<text  x="1046.13" y="271.5" ></text>
+</g>
+<g >
+<title>g_vasprintf (in libtestswiftapiresolver.dylib) (gprintf.c) (9 samples, 0.43%)</title><rect x="46.4" y="389" width="5.1" height="15.0" fill="rgb(205,69,48)" rx="2" ry="2" />
+<text  x="49.44" y="399.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::demangleSymbol(llvm::StringRef, std::__1::function&lt;swift::Demangle::Node* (swift::Demangle::SymbolicReferenceKind, swift::Demangle::Directness, int, void const*)&gt;) (303 samples, 14.39%)</title><rect x="820.0" y="357" width="169.9" height="15.0" fill="rgb(253,66,24)" rx="2" ry="2" />
+<text  x="823.02" y="367.5" >swift::Demangle::Dema..</text>
+</g>
+<g >
+<title>nanov2_malloc (1 samples, 0.05%)</title><rect x="1020.1" y="133" width="0.6" height="15.0" fill="rgb(224,97,9)" rx="2" ry="2" />
+<text  x="1023.15" y="143.5" ></text>
+</g>
+<g >
+<title>gum_darwin_module_resolver_resolve_export (in libtestswiftapiresolver.dylib) (gumdarwinmoduleresolver.c) (22 samples, 1.05%)</title><rect x="712.4" y="421" width="12.3" height="15.0" fill="rgb(244,63,41)" rx="2" ry="2" />
+<text  x="715.39" y="431.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (6 samples, 0.29%)</title><rect x="1017.3" y="197" width="3.4" height="15.0" fill="rgb(219,118,10)" rx="2" ry="2" />
+<text  x="1020.34" y="207.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (1 samples, 0.05%)</title><rect x="1089.1" y="117" width="0.6" height="15.0" fill="rgb(211,35,20)" rx="2" ry="2" />
+<text  x="1092.10" y="127.5" ></text>
+</g>
+<g >
+<title>swift_demangle_getDemangledName_Options(char const*, char*, unsigned long, swift::Demangle::DemangleOptions) (680 samples, 32.30%)</title><rect x="755.6" y="389" width="381.1" height="15.0" fill="rgb(251,65,44)" rx="2" ry="2" />
+<text  x="758.56" y="399.5" >swift_demangle_getDemangledName_Options(char const*..</text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::push_back(char) (2 samples, 0.10%)</title><rect x="1130.6" y="245" width="1.1" height="15.0" fill="rgb(213,145,52)" rx="2" ry="2" />
+<text  x="1133.58" y="255.5" ></text>
+</g>
+<g >
+<title>g_slice_free1 (in libtestswiftapiresolver.dylib) (gslice.c) (1 samples, 0.05%)</title><rect x="44.2" y="437" width="0.6" height="15.0" fill="rgb(247,46,23)" rx="2" ry="2" />
+<text  x="47.19" y="447.5" ></text>
+</g>
+<g >
+<title>mspace_malloc (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="1139.5" y="421" width="0.6" height="15.0" fill="rgb(231,110,54)" rx="2" ry="2" />
+<text  x="1142.55" y="431.5" ></text>
+</g>
+<g >
+<title>_platform_strlcpy (3 samples, 0.14%)</title><rect x="1165.3" y="437" width="1.7" height="15.0" fill="rgb(231,191,6)" rx="2" ry="2" />
+<text  x="1168.33" y="447.5" ></text>
+</g>
+<g >
+<title>swift_demangle_getDemangledName (690 samples, 32.78%)</title><rect x="750.0" y="405" width="386.7" height="15.0" fill="rgb(252,8,37)" rx="2" ry="2" />
+<text  x="752.95" y="415.5" >swift_demangle_getDemangledName</text>
+</g>
+<g >
+<title>decodeToMCInst_4 (in libtestswiftapiresolver.dylib) (AArch64GenDisassemblerTables.inc) (2 samples, 0.10%)</title><rect x="153.5" y="373" width="1.1" height="15.0" fill="rgb(239,117,1)" rx="2" ry="2" />
+<text  x="156.51" y="383.5" ></text>
+</g>
+<g >
+<title>AArch64_printInst (in libtestswiftapiresolver.dylib) (AArch64InstPrinter.c) (388 samples, 18.43%)</title><rect x="451.7" y="405" width="217.5" height="15.0" fill="rgb(230,61,24)" rx="2" ry="2" />
+<text  x="454.73" y="415.5" >AArch64_printInst (in libtes..</text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::demangleEntity(swift::Demangle::Node::Kind) (6 samples, 0.29%)</title><rect x="953.4" y="325" width="3.4" height="15.0" fill="rgb(210,173,14)" rx="2" ry="2" />
+<text  x="956.44" y="335.5" ></text>
+</g>
+<g >
+<title>operator new(unsigned long) (1 samples, 0.05%)</title><rect x="1119.4" y="117" width="0.5" height="15.0" fill="rgb(224,58,5)" rx="2" ry="2" />
+<text  x="1122.37" y="127.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (2 samples, 0.10%)</title><rect x="1055.5" y="213" width="1.1" height="15.0" fill="rgb(209,6,10)" rx="2" ry="2" />
+<text  x="1058.46" y="223.5" ></text>
+</g>
+<g >
+<title>__mmap (1 samples, 0.05%)</title><rect x="709.6" y="357" width="0.6" height="15.0" fill="rgb(235,101,48)" rx="2" ry="2" />
+<text  x="712.59" y="367.5" ></text>
+</g>
+<g >
+<title>setParentForOpaqueReturnTypeNodes(swift::Demangle::Demangler&amp;, swift::Demangle::Node*, swift::Demangle::Node*) (19 samples, 0.90%)</title><rect x="831.2" y="341" width="10.7" height="15.0" fill="rgb(241,88,3)" rx="2" ry="2" />
+<text  x="834.24" y="351.5" ></text>
+</g>
+<g >
+<title>cs_close (in libtestswiftapiresolver.dylib) (cs.c) (1 samples, 0.05%)</title><rect x="127.7" y="421" width="0.6" height="15.0" fill="rgb(207,70,48)" rx="2" ry="2" />
+<text  x="130.72" y="431.5" ></text>
+</g>
+<g >
+<title>printUInt64Bang (in libtestswiftapiresolver.dylib) (SStream.c) (2 samples, 0.10%)</title><rect x="691.1" y="389" width="1.1" height="15.0" fill="rgb(250,87,6)" rx="2" ry="2" />
+<text  x="694.09" y="399.5" ></text>
+</g>
+<g >
+<title>g_strdup (in libtestswiftapiresolver.dylib) (gstrfuncs.c) (2 samples, 0.10%)</title><rect x="709.0" y="421" width="1.2" height="15.0" fill="rgb(212,30,35)" rx="2" ry="2" />
+<text  x="712.03" y="431.5" ></text>
+</g>
+<g >
+<title>OUTLINED_FUNCTION_0 (in libtestswiftapiresolver.dylib) + (1 samples, 0.05%; +0.05%)</title><rect x="1164.8" y="453" width="0.5" height="15.0" fill="rgb(255,198,198)" rx="2" ry="2" />
+<text  x="1167.77" y="463.5" ></text>
+</g>
+<g >
+<title>_platform_memcmp (2 samples, 0.10%)</title><rect x="121.6" y="421" width="1.1" height="15.0" fill="rgb(245,69,27)" rx="2" ry="2" />
+<text  x="124.55" y="431.5" ></text>
+</g>
+<g >
+<title>SStream_concat (in libtestswiftapiresolver.dylib) (SStream.c) (1 samples, 0.05%)</title><rect x="654.1" y="389" width="0.6" height="15.0" fill="rgb(212,220,4)" rx="2" ry="2" />
+<text  x="657.10" y="399.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (3 samples, 0.14%)</title><rect x="1054.9" y="229" width="1.7" height="15.0" fill="rgb(209,213,21)" rx="2" ry="2" />
+<text  x="1057.90" y="239.5" ></text>
+</g>
+<g >
+<title>gum_read_uleb128 (in libtestswiftapiresolver.dylib) (gumleb.c) (38 samples, 1.81%)</title><rect x="1142.9" y="437" width="21.3" height="15.0" fill="rgb(235,156,30)" rx="2" ry="2" />
+<text  x="1145.91" y="447.5" >g..</text>
+</g>
+<g >
+<title>free_small (3 samples, 0.14%)</title><rect x="1135.1" y="357" width="1.6" height="15.0" fill="rgb(240,225,42)" rx="2" ry="2" />
+<text  x="1138.06" y="367.5" ></text>
+</g>
+<g >
+<title>mspace_free (in libtestswiftapiresolver.dylib) (dlmalloc.c) (4 samples, 0.19%)</title><rect x="1137.3" y="421" width="2.2" height="15.0" fill="rgb(216,4,43)" rx="2" ry="2" />
+<text  x="1140.31" y="431.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (3 samples, 0.14%)</title><rect x="1183.8" y="389" width="1.7" height="15.0" fill="rgb(218,75,16)" rx="2" ry="2" />
+<text  x="1186.83" y="399.5" ></text>
+</g>
+<g >
+<title>_szone_free (2 samples, 0.10%)</title><rect x="1133.4" y="357" width="1.1" height="15.0" fill="rgb(213,98,5)" rx="2" ry="2" />
+<text  x="1136.38" y="367.5" ></text>
+</g>
+<g >
+<title>DYLD-STUB$$strlen (in libtestswiftapiresolver.dylib) + (1 samples, 0.05%; -0.14%)</title><rect x="11.1" y="469" width="0.6" height="15.0" fill="rgb(176,176,255)" rx="2" ry="2" />
+<text  x="14.12" y="479.5" ></text>
+</g>
+<g >
+<title>gum_memset (in libtestswiftapiresolver.dylib) (gumlibc.c) (4 samples, 0.19%)</title><rect x="696.1" y="405" width="2.3" height="15.0" fill="rgb(242,77,13)" rx="2" ry="2" />
+<text  x="699.14" y="415.5" ></text>
+</g>
+<g >
+<title>g_strlcpy (in libtestswiftapiresolver.dylib) (gstrfuncs.c) (3 samples, 0.14%)</title><rect x="1165.3" y="453" width="1.7" height="15.0" fill="rgb(212,219,53)" rx="2" ry="2" />
+<text  x="1168.33" y="463.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (1 samples, 0.05%)</title><rect x="1056.0" y="197" width="0.6" height="15.0" fill="rgb(238,229,6)" rx="2" ry="2" />
+<text  x="1059.02" y="207.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::DemangleInitRAII::DemangleInitRAII(swift::Demangle::Demangler&amp;, llvm::StringRef, std::__1::function&lt;swift::Demangle::Node* (swift::Demangle::SymbolicReferenceKind, swift::Demangle::Directness, int, void const*)&gt;) (7 samples, 0.33%)</title><rect x="841.9" y="341" width="3.9" height="15.0" fill="rgb(217,58,38)" rx="2" ry="2" />
+<text  x="844.89" y="351.5" ></text>
+</g>
+<g >
+<title>_vsnprintf (1 samples, 0.05%)</title><rect x="1091.9" y="165" width="0.6" height="15.0" fill="rgb(225,71,33)" rx="2" ry="2" />
+<text  x="1094.90" y="175.5" ></text>
+</g>
+<g >
+<title>mspace_calloc (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="698.4" y="405" width="0.5" height="15.0" fill="rgb(232,18,42)" rx="2" ry="2" />
+<text  x="701.38" y="415.5" ></text>
+</g>
+<g >
+<title>g_strndup (in libtestswiftapiresolver.dylib) (gstrfuncs.c) (2 samples, 0.10%)</title><rect x="710.2" y="421" width="1.1" height="15.0" fill="rgb(210,91,30)" rx="2" ry="2" />
+<text  x="713.15" y="431.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1095.3" y="181" width="0.5" height="15.0" fill="rgb(236,88,10)" rx="2" ry="2" />
+<text  x="1098.26" y="191.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1006.1" y="117" width="0.6" height="15.0" fill="rgb(238,154,49)" rx="2" ry="2" />
+<text  x="1009.13" y="127.5" ></text>
+</g>
+<g >
+<title>nanov2_malloc (1 samples, 0.05%)</title><rect x="1123.3" y="133" width="0.6" height="15.0" fill="rgb(206,63,46)" rx="2" ry="2" />
+<text  x="1126.29" y="143.5" ></text>
+</g>
+<g >
+<title>_platform_strlen (9 samples, 0.43%)</title><rect x="36.9" y="453" width="5.1" height="15.0" fill="rgb(214,146,16)" rx="2" ry="2" />
+<text  x="39.91" y="463.5" ></text>
+</g>
+<g >
+<title>OUTLINED_FUNCTION_23 (in libtestswiftapiresolver.dylib) + (1 samples, 0.05%; +0.05%)</title><rect x="120.4" y="421" width="0.6" height="15.0" fill="rgb(255,198,198)" rx="2" ry="2" />
+<text  x="123.43" y="431.5" ></text>
+</g>
+<g >
+<title>gum_free (in libtestswiftapiresolver.dylib) (gummemory.c) (1 samples, 0.05%)</title><rect x="10.0" y="485" width="0.6" height="15.0" fill="rgb(235,158,46)" rx="2" ry="2" />
+<text  x="13.00" y="495.5" ></text>
+</g>
+<g >
+<title>_malloc_zone_malloc (1 samples, 0.05%)</title><rect x="1034.2" y="197" width="0.5" height="15.0" fill="rgb(219,16,33)" rx="2" ry="2" />
+<text  x="1037.16" y="207.5" ></text>
+</g>
+<g >
+<title>_gum_quick_scope_call (in libfrida-agent-modulated.dylib) (gumquickcore.c) (2,105 samples, 100.00%)</title><rect x="10.0" y="693" width="1180.0" height="15.0" fill="rgb(237,137,12)" rx="2" ry="2" />
+<text  x="13.00" y="703.5" >_gum_quick_scope_call (in libfrida-agent-modulated.dylib) (gumquickcore.c)</text>
+</g>
+<g >
+<title>DYLD-STUB$$std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (1 samples, 0.05%)</title><rect x="1055.5" y="197" width="0.5" height="15.0" fill="rgb(219,32,49)" rx="2" ry="2" />
+<text  x="1058.46" y="207.5" ></text>
+</g>
+<g >
+<title>g_string_insert_len (in libtestswiftapiresolver.dylib) (gstring.c) (6 samples, 0.29%)</title><rect x="1183.3" y="405" width="3.3" height="15.0" fill="rgb(212,193,0)" rx="2" ry="2" />
+<text  x="1186.27" y="415.5" ></text>
+</g>
+<g >
+<title>__v2printf (1 samples, 0.05%)</title><rect x="1177.1" y="341" width="0.6" height="15.0" fill="rgb(244,66,9)" rx="2" ry="2" />
+<text  x="1180.11" y="351.5" ></text>
+</g>
+<g >
+<title>fmtint (in libtestswiftapiresolver.dylib) (gumprintf.c) (1 samples, 0.05%)</title><rect x="679.3" y="341" width="0.6" height="15.0" fill="rgb(250,214,32)" rx="2" ry="2" />
+<text  x="682.32" y="351.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printGenericSignature(swift::Demangle::Node*, unsigned int) (12 samples, 0.57%)</title><rect x="1068.9" y="245" width="6.7" height="15.0" fill="rgb(215,226,40)" rx="2" ry="2" />
+<text  x="1071.92" y="255.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (6 samples, 0.29%)</title><rect x="663.1" y="357" width="3.3" height="15.0" fill="rgb(223,181,18)" rx="2" ry="2" />
+<text  x="666.06" y="367.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (2 samples, 0.10%)</title><rect x="1118.8" y="165" width="1.1" height="15.0" fill="rgb(226,182,15)" rx="2" ry="2" />
+<text  x="1121.81" y="175.5" ></text>
+</g>
+<g >
+<title>g_ptr_array_maybe_expand (in libtestswiftapiresolver.dylib) (garray.c) (5 samples, 0.24%)</title><rect x="1140.1" y="405" width="2.8" height="15.0" fill="rgb(246,6,11)" rx="2" ry="2" />
+<text  x="1143.11" y="415.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printFunctionParameters(swift::Demangle::Node*, swift::Demangle::Node*, unsigned int, bool)::'lambda'(swift::Demangle::Node*)::operator()(swift::Demangle::Node*) const (1 samples, 0.05%)</title><rect x="1123.9" y="181" width="0.5" height="15.0" fill="rgb(241,207,49)" rx="2" ry="2" />
+<text  x="1126.85" y="191.5" ></text>
+</g>
+<g >
+<title>cs_strdup (in libtestswiftapiresolver.dylib) (utils.c) (7 samples, 0.33%)</title><rect x="655.8" y="389" width="3.9" height="15.0" fill="rgb(245,216,4)" rx="2" ry="2" />
+<text  x="658.78" y="399.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (3 samples, 0.14%)</title><rect x="1092.5" y="245" width="1.6" height="15.0" fill="rgb(205,2,22)" rx="2" ry="2" />
+<text  x="1095.46" y="255.5" ></text>
+</g>
+<g >
+<title>printOperand (in libtestswiftapiresolver.dylib) (AArch64InstPrinter.c) (10 samples, 0.48%)</title><rect x="661.9" y="389" width="5.6" height="15.0" fill="rgb(228,128,32)" rx="2" ry="2" />
+<text  x="664.94" y="399.5" ></text>
+</g>
+<g >
+<title>snprintf (1 samples, 0.05%)</title><rect x="1109.3" y="149" width="0.5" height="15.0" fill="rgb(214,51,25)" rx="2" ry="2" />
+<text  x="1112.28" y="159.5" ></text>
+</g>
+<g >
+<title>g_strdup_printf (in libtestswiftapiresolver.dylib) (gstrfuncs.c) (24 samples, 1.14%)</title><rect x="1168.1" y="437" width="13.5" height="15.0" fill="rgb(217,175,53)" rx="2" ry="2" />
+<text  x="1171.14" y="447.5" ></text>
+</g>
+<g >
+<title>mspace_malloc (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="710.7" y="405" width="0.6" height="15.0" fill="rgb(230,177,12)" rx="2" ry="2" />
+<text  x="713.71" y="415.5" ></text>
+</g>
+<g >
+<title>operator new(unsigned long) (1 samples, 0.05%)</title><rect x="1075.1" y="197" width="0.5" height="15.0" fill="rgb(208,132,40)" rx="2" ry="2" />
+<text  x="1078.08" y="207.5" ></text>
+</g>
+<g >
+<title>_tiny_check_and_zero_inline_meta_from_freelist (1 samples, 0.05%)</title><rect x="816.1" y="309" width="0.6" height="15.0" fill="rgb(218,72,5)" rx="2" ry="2" />
+<text  x="819.10" y="319.5" ></text>
+</g>
+<g >
+<title>OUTLINED_FUNCTION_0 (in libtestswiftapiresolver.dylib) + (2 samples, 0.10%; +0.10%)</title><rect x="119.3" y="421" width="1.1" height="15.0" fill="rgb(255,187,187)" rx="2" ry="2" />
+<text  x="122.31" y="431.5" ></text>
+</g>
+<g >
+<title>nanov2_malloc (1 samples, 0.05%)</title><rect x="1007.3" y="133" width="0.5" height="15.0" fill="rgb(240,217,11)" rx="2" ry="2" />
+<text  x="1010.25" y="143.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Node::addChild(swift::Demangle::Node*, swift::Demangle::NodeFactory&amp;) (2 samples, 0.10%)</title><rect x="957.4" y="309" width="1.1" height="15.0" fill="rgb(245,53,38)" rx="2" ry="2" />
+<text  x="960.36" y="319.5" ></text>
+</g>
+<g >
+<title>SStream_concat0 (in libtestswiftapiresolver.dylib) (SStream.c) (8 samples, 0.38%)</title><rect x="663.1" y="373" width="4.4" height="15.0" fill="rgb(213,56,20)" rx="2" ry="2" />
+<text  x="666.06" y="383.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printChildren(swift::Demangle::Node*, unsigned int, char const*) (24 samples, 1.14%)</title><rect x="1079.0" y="245" width="13.5" height="15.0" fill="rgb(247,83,27)" rx="2" ry="2" />
+<text  x="1082.01" y="255.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printFunctionType(swift::Demangle::Node*, swift::Demangle::Node*, unsigned int) (100 samples, 4.75%)</title><rect x="1075.6" y="277" width="56.1" height="15.0" fill="rgb(217,227,21)" rx="2" ry="2" />
+<text  x="1078.64" y="287.5" >(anon..</text>
+</g>
+<g >
+<title>JS_Call (in libfrida-agent-modulated.dylib) (quickjs.c) (2,105 samples, 100.00%)</title><rect x="10.0" y="677" width="1180.0" height="15.0" fill="rgb(228,54,52)" rx="2" ry="2" />
+<text  x="13.00" y="687.5" >JS_Call (in libfrida-agent-modulated.dylib) (quickjs.c)</text>
+</g>
+<g >
+<title>cs_disasm_iter (in libtestswiftapiresolver.dylib) (cs.c) (1,013 samples, 48.12%)</title><rect x="128.3" y="421" width="567.8" height="15.0" fill="rgb(249,21,24)" rx="2" ry="2" />
+<text  x="131.28" y="431.5" >cs_disasm_iter (in libtestswiftapiresolver.dylib) (cs.c)</text>
+</g>
+<g >
+<title>mspace_free (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="1164.2" y="437" width="0.6" height="15.0" fill="rgb(220,120,14)" rx="2" ry="2" />
+<text  x="1167.21" y="447.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1107.6" y="85" width="0.6" height="15.0" fill="rgb(249,28,51)" rx="2" ry="2" />
+<text  x="1110.60" y="95.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::getDependentGenericParamType(int, int) (3 samples, 0.14%)</title><rect x="956.8" y="325" width="1.7" height="15.0" fill="rgb(246,124,24)" rx="2" ry="2" />
+<text  x="959.80" y="335.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (38 samples, 1.81%)</title><rect x="1008.4" y="245" width="21.3" height="15.0" fill="rgb(214,185,10)" rx="2" ry="2" />
+<text  x="1011.38" y="255.5" >(..</text>
+</g>
+<g >
+<title>mspace_realloc (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="47.6" y="341" width="0.5" height="15.0" fill="rgb(214,66,42)" rx="2" ry="2" />
+<text  x="50.56" y="351.5" ></text>
+</g>
+<g >
+<title>AArch64_get_op_access (in libtestswiftapiresolver.dylib) (AArch64Mapping.c) (1 samples, 0.05%)</title><rect x="688.9" y="357" width="0.5" height="15.0" fill="rgb(247,25,1)" rx="2" ry="2" />
+<text  x="691.85" y="367.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1006.1" y="165" width="0.6" height="15.0" fill="rgb(207,201,5)" rx="2" ry="2" />
+<text  x="1009.13" y="175.5" ></text>
+</g>
+<g >
+<title>gum_vsnprintf (in libtestswiftapiresolver.dylib) (gumprintf.c) (2 samples, 0.10%)</title><rect x="691.1" y="357" width="1.1" height="15.0" fill="rgb(238,26,44)" rx="2" ry="2" />
+<text  x="694.09" y="367.5" ></text>
+</g>
+<g >
+<title>operator new(unsigned long) (2 samples, 0.10%)</title><rect x="1067.8" y="229" width="1.1" height="15.0" fill="rgb(228,93,6)" rx="2" ry="2" />
+<text  x="1070.80" y="239.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (4 samples, 0.19%)</title><rect x="1112.1" y="149" width="2.2" height="15.0" fill="rgb(245,115,4)" rx="2" ry="2" />
+<text  x="1115.08" y="159.5" ></text>
+</g>
+<g >
+<title>fmtstr (in libtestswiftapiresolver.dylib) (gumprintf.c) (1 samples, 0.05%)</title><rect x="694.5" y="373" width="0.5" height="15.0" fill="rgb(243,2,31)" rx="2" ry="2" />
+<text  x="697.46" y="383.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::genericParameterName(unsigned long long, unsigned long long) (1 samples, 0.05%)</title><rect x="1109.3" y="165" width="0.5" height="15.0" fill="rgb(254,197,48)" rx="2" ry="2" />
+<text  x="1112.28" y="175.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::demangleOperator() (53 samples, 2.52%)</title><rect x="929.9" y="341" width="29.7" height="15.0" fill="rgb(234,182,41)" rx="2" ry="2" />
+<text  x="932.90" y="351.5" >sw..</text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (2 samples, 0.10%)</title><rect x="1107.6" y="149" width="1.1" height="15.0" fill="rgb(208,156,53)" rx="2" ry="2" />
+<text  x="1110.60" y="159.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (1 samples, 0.05%)</title><rect x="1035.8" y="149" width="0.6" height="15.0" fill="rgb(216,189,35)" rx="2" ry="2" />
+<text  x="1038.84" y="159.5" ></text>
+</g>
+<g >
+<title>free (1 samples, 0.05%)</title><rect x="1129.5" y="197" width="0.5" height="15.0" fill="rgb(246,170,34)" rx="2" ry="2" />
+<text  x="1132.46" y="207.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (3 samples, 0.14%)</title><rect x="1107.6" y="165" width="1.7" height="15.0" fill="rgb(248,22,12)" rx="2" ry="2" />
+<text  x="1110.60" y="175.5" ></text>
+</g>
+<g >
+<title>mspace_malloc (in libtestswiftapiresolver.dylib) (dlmalloc.c) (12 samples, 0.57%)</title><rect x="743.2" y="389" width="6.8" height="15.0" fill="rgb(219,112,32)" rx="2" ry="2" />
+<text  x="746.23" y="399.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (6 samples, 0.29%)</title><rect x="1057.1" y="229" width="3.4" height="15.0" fill="rgb(215,210,34)" rx="2" ry="2" />
+<text  x="1060.14" y="239.5" ></text>
+</g>
+<g >
+<title>operator new(unsigned long) (3 samples, 0.14%)</title><rect x="1041.4" y="229" width="1.7" height="15.0" fill="rgb(221,142,36)" rx="2" ry="2" />
+<text  x="1044.45" y="239.5" ></text>
+</g>
+<g >
+<title>convert (in libtestswiftapiresolver.dylib) (gumprintf.c) (1 samples, 0.05%)</title><rect x="678.8" y="341" width="0.5" height="15.0" fill="rgb(245,55,42)" rx="2" ry="2" />
+<text  x="681.76" y="351.5" ></text>
+</g>
+<g >
+<title>szone_malloc (1 samples, 0.05%)</title><rect x="844.1" y="325" width="0.6" height="15.0" fill="rgb(228,170,46)" rx="2" ry="2" />
+<text  x="847.13" y="335.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printBoundGenericNoSugar(swift::Demangle::Node*, unsigned int) (1 samples, 0.05%)</title><rect x="1007.8" y="245" width="0.6" height="15.0" fill="rgb(218,178,41)" rx="2" ry="2" />
+<text  x="1010.81" y="255.5" ></text>
+</g>
+<g >
+<title>setParentForOpaqueReturnTypeNodes(swift::Demangle::Demangler&amp;, swift::Demangle::Node*, swift::Demangle::Node*) (1 samples, 0.05%)</title><rect x="981.5" y="325" width="0.5" height="15.0" fill="rgb(232,109,33)" rx="2" ry="2" />
+<text  x="984.47" y="335.5" ></text>
+</g>
+<g >
+<title>mspace_realloc (in libtestswiftapiresolver.dylib) (dlmalloc.c) (3 samples, 0.14%)</title><rect x="1175.4" y="357" width="1.7" height="15.0" fill="rgb(250,153,0)" rx="2" ry="2" />
+<text  x="1178.43" y="367.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::isFunctionAttr(swift::Demangle::Node::Kind) (1 samples, 0.05%)</title><rect x="989.3" y="341" width="0.6" height="15.0" fill="rgb(238,198,31)" rx="2" ry="2" />
+<text  x="992.32" y="351.5" ></text>
+</g>
+<g >
+<title>g_strdup (in libtestswiftapiresolver.dylib) (gstrfuncs.c) (33 samples, 1.57%)</title><rect x="731.5" y="405" width="18.5" height="15.0" fill="rgb(249,28,21)" rx="2" ry="2" />
+<text  x="734.45" y="415.5" ></text>
+</g>
+<g >
+<title>szone_malloc (1 samples, 0.05%)</title><rect x="1119.4" y="101" width="0.5" height="15.0" fill="rgb(249,184,17)" rx="2" ry="2" />
+<text  x="1122.37" y="111.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (3 samples, 0.14%)</title><rect x="1019.0" y="181" width="1.7" height="15.0" fill="rgb(214,93,25)" rx="2" ry="2" />
+<text  x="1022.03" y="191.5" ></text>
+</g>
+<g >
+<title>g_str_hash (in libtestswiftapiresolver.dylib) (ghash.c) (3 samples, 0.14%)</title><rect x="706.2" y="405" width="1.7" height="15.0" fill="rgb(253,188,23)" rx="2" ry="2" />
+<text  x="709.23" y="415.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1089.1" y="133" width="0.6" height="15.0" fill="rgb(209,44,25)" rx="2" ry="2" />
+<text  x="1092.10" y="143.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (1 samples, 0.05%)</title><rect x="1122.2" y="149" width="0.5" height="15.0" fill="rgb(222,160,5)" rx="2" ry="2" />
+<text  x="1125.17" y="159.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1061.6" y="165" width="0.6" height="15.0" fill="rgb(250,211,43)" rx="2" ry="2" />
+<text  x="1064.63" y="175.5" ></text>
+</g>
+<g >
+<title>_nanov2_free (2 samples, 0.10%)</title><rect x="1040.3" y="229" width="1.1" height="15.0" fill="rgb(222,132,19)" rx="2" ry="2" />
+<text  x="1043.33" y="239.5" ></text>
+</g>
+<g >
+<title>g_hash_table_lookup (in libtestswiftapiresolver.dylib) (ghash.c) (2 samples, 0.10%)</title><rect x="723.6" y="389" width="1.1" height="15.0" fill="rgb(215,200,32)" rx="2" ry="2" />
+<text  x="726.61" y="399.5" ></text>
+</g>
+<g >
+<title>g_hash_table_insert_node (in libtestswiftapiresolver.dylib) (ghash.c) (1 samples, 0.05%)</title><rect x="704.0" y="421" width="0.5" height="15.0" fill="rgb(241,157,42)" rx="2" ry="2" />
+<text  x="706.99" y="431.5" ></text>
+</g>
+<g >
+<title>_g_gnulib_vasprintf (in libtestswiftapiresolver.dylib) (printf.c) (9 samples, 0.43%)</title><rect x="46.4" y="373" width="5.1" height="15.0" fill="rgb(205,15,14)" rx="2" ry="2" />
+<text  x="49.44" y="383.5" ></text>
+</g>
+<g >
+<title>AArch64_get_op_access (in libtestswiftapiresolver.dylib) (AArch64Mapping.c) (1 samples, 0.05%)</title><rect x="692.2" y="357" width="0.6" height="15.0" fill="rgb(240,165,26)" rx="2" ry="2" />
+<text  x="695.21" y="367.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::getChildIf(swift::Demangle::Node*, swift::Demangle::Node::Kind) (5 samples, 0.24%)</title><rect x="1104.2" y="213" width="2.8" height="15.0" fill="rgb(227,152,23)" rx="2" ry="2" />
+<text  x="1107.23" y="223.5" ></text>
+</g>
+<g >
+<title>std::__1::function&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt; (unsigned long long, unsigned long long)&gt;::operator()(unsigned long long, unsigned long long) const (1 samples, 0.05%)</title><rect x="1083.5" y="181" width="0.6" height="15.0" fill="rgb(248,172,45)" rx="2" ry="2" />
+<text  x="1086.49" y="191.5" ></text>
+</g>
+<g >
+<title>mspace_realloc (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="45.9" y="389" width="0.5" height="15.0" fill="rgb(234,149,47)" rx="2" ry="2" />
+<text  x="48.88" y="399.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::demangleAnyGenericType(swift::Demangle::Node::Kind) (28 samples, 1.33%)</title><rect x="848.6" y="341" width="15.7" height="15.0" fill="rgb(214,211,49)" rx="2" ry="2" />
+<text  x="851.61" y="351.5" ></text>
+</g>
+<g >
+<title>g_str_hash (in libtestswiftapiresolver.dylib) (ghash.c) (1 samples, 0.05%)</title><rect x="724.2" y="373" width="0.5" height="15.0" fill="rgb(214,85,44)" rx="2" ry="2" />
+<text  x="727.17" y="383.5" ></text>
+</g>
+<g >
+<title>std::__1::function&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt; (unsigned long long, unsigned long long)&gt;::operator()(unsigned long long, unsigned long long) const (1 samples, 0.05%)</title><rect x="1091.9" y="213" width="0.6" height="15.0" fill="rgb(254,5,49)" rx="2" ry="2" />
+<text  x="1094.90" y="223.5" ></text>
+</g>
+<g >
+<title>unixmmap (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="709.6" y="389" width="0.6" height="15.0" fill="rgb(219,122,31)" rx="2" ry="2" />
+<text  x="712.59" y="399.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Context::demangleSymbolAsString(llvm::StringRef, swift::Demangle::DemangleOptions const&amp;) (560 samples, 26.60%)</title><rect x="818.9" y="373" width="313.9" height="15.0" fill="rgb(231,74,17)" rx="2" ry="2" />
+<text  x="821.90" y="383.5" >swift::Demangle::Context::demangleSymbolAs..</text>
+</g>
+<g >
+<title>_malloc_zone_malloc (1 samples, 0.05%)</title><rect x="843.0" y="325" width="0.6" height="15.0" fill="rgb(218,36,17)" rx="2" ry="2" />
+<text  x="846.01" y="335.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (1 samples, 0.05%)</title><rect x="1096.4" y="197" width="0.5" height="15.0" fill="rgb(226,117,2)" rx="2" ry="2" />
+<text  x="1099.38" y="207.5" ></text>
+</g>
+<g >
+<title>gum_darwin_module_resolver_find_module (in libtestswiftapiresolver.dylib) (gumdarwinmoduleresolver.c) (2 samples, 0.10%)</title><rect x="723.6" y="405" width="1.1" height="15.0" fill="rgb(219,171,39)" rx="2" ry="2" />
+<text  x="726.61" y="415.5" ></text>
+</g>
+<g >
+<title>AArch64_post_printer (in libtestswiftapiresolver.dylib) (AArch64InstPrinter.c) (1 samples, 0.05%)</title><rect x="451.2" y="405" width="0.5" height="15.0" fill="rgb(208,70,34)" rx="2" ry="2" />
+<text  x="454.17" y="415.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::popFunctionParamLabels(swift::Demangle::Node*) (6 samples, 0.29%)</title><rect x="961.8" y="325" width="3.4" height="15.0" fill="rgb(231,194,36)" rx="2" ry="2" />
+<text  x="964.85" y="335.5" ></text>
+</g>
+<g >
+<title>gum_vsnprintf (in libtestswiftapiresolver.dylib) (gumprintf.c) (2 samples, 0.10%)</title><rect x="678.8" y="357" width="1.1" height="15.0" fill="rgb(223,91,27)" rx="2" ry="2" />
+<text  x="681.76" y="367.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1072.8" y="197" width="0.6" height="15.0" fill="rgb(222,93,36)" rx="2" ry="2" />
+<text  x="1075.84" y="207.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1084.6" y="181" width="0.6" height="15.0" fill="rgb(224,36,48)" rx="2" ry="2" />
+<text  x="1087.61" y="191.5" ></text>
+</g>
+<g >
+<title>AArch64_get_insn_id (in libtestswiftapiresolver.dylib) (AArch64Mapping.c) (526 samples, 24.99%)</title><rect x="156.3" y="405" width="294.9" height="15.0" fill="rgb(229,102,41)" rx="2" ry="2" />
+<text  x="159.31" y="415.5" >AArch64_get_insn_id (in libtestswiftapi..</text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1006.1" y="133" width="0.6" height="15.0" fill="rgb(220,197,16)" rx="2" ry="2" />
+<text  x="1009.13" y="143.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (2 samples, 0.10%)</title><rect x="1019.6" y="165" width="1.1" height="15.0" fill="rgb(206,226,44)" rx="2" ry="2" />
+<text  x="1022.59" y="175.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::isContext(swift::Demangle::Node::Kind) (2 samples, 0.10%)</title><rect x="958.5" y="325" width="1.1" height="15.0" fill="rgb(205,161,25)" rx="2" ry="2" />
+<text  x="961.48" y="335.5" ></text>
+</g>
+<g >
+<title>SStream_concat0 (in libtestswiftapiresolver.dylib) (SStream.c) (8 samples, 0.38%)</title><rect x="680.4" y="389" width="4.5" height="15.0" fill="rgb(234,122,1)" rx="2" ry="2" />
+<text  x="683.44" y="399.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1062.2" y="181" width="0.6" height="15.0" fill="rgb(216,89,35)" rx="2" ry="2" />
+<text  x="1065.19" y="191.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::popFunctionParamLabels(swift::Demangle::Node*) (4 samples, 0.19%)</title><rect x="870.5" y="325" width="2.2" height="15.0" fill="rgb(243,90,22)" rx="2" ry="2" />
+<text  x="873.48" y="335.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1035.8" y="197" width="0.6" height="15.0" fill="rgb(230,214,52)" rx="2" ry="2" />
+<text  x="1038.84" y="207.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="819.5" y="357" width="0.5" height="15.0" fill="rgb(217,28,7)" rx="2" ry="2" />
+<text  x="822.46" y="367.5" ></text>
+</g>
+<g >
+<title>g_strdup_printf (in libtestswiftapiresolver.dylib) (gstrfuncs.c) (9 samples, 0.43%)</title><rect x="46.4" y="421" width="5.1" height="15.0" fill="rgb(229,85,41)" rx="2" ry="2" />
+<text  x="49.44" y="431.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (1 samples, 0.05%)</title><rect x="1119.4" y="149" width="0.5" height="15.0" fill="rgb(248,31,12)" rx="2" ry="2" />
+<text  x="1122.37" y="159.5" ></text>
+</g>
+<g >
+<title>gum_demangle (in libtestswiftapiresolver.dylib) (gumswiftapiresolver.c) (735 samples, 34.92%)</title><rect x="724.7" y="421" width="412.0" height="15.0" fill="rgb(221,20,13)" rx="2" ry="2" />
+<text  x="727.73" y="431.5" >gum_demangle (in libtestswiftapiresolver.dylib) (gumswif..</text>
+</g>
+<g >
+<title>gum_quick_ffi_function_invoke (in libfrida-agent-modulated.dylib) (gumquickcore.c) (2,105 samples, 100.00%)</title><rect x="10.0" y="549" width="1180.0" height="15.0" fill="rgb(226,222,30)" rx="2" ry="2" />
+<text  x="13.00" y="559.5" >gum_quick_ffi_function_invoke (in libfrida-agent-modulated.dylib) (gumquickcore.c)</text>
+</g>
+<g >
+<title>g_vasprintf (in libtestswiftapiresolver.dylib) (gprintf.c) (24 samples, 1.14%)</title><rect x="1168.1" y="405" width="13.5" height="15.0" fill="rgb(214,17,2)" rx="2" ry="2" />
+<text  x="1171.14" y="415.5" ></text>
+</g>
+<g >
+<title>stpcpy (22 samples, 1.05%)</title><rect x="24.6" y="437" width="12.3" height="15.0" fill="rgb(215,222,44)" rx="2" ry="2" />
+<text  x="27.57" y="447.5" ></text>
+</g>
+<g >
+<title>g_hash_table_maybe_resize (in libtestswiftapiresolver.dylib) (ghash.c) (1 samples, 0.05%)</title><rect x="704.0" y="405" width="0.5" height="15.0" fill="rgb(218,147,50)" rx="2" ry="2" />
+<text  x="706.99" y="415.5" ></text>
+</g>
+<g >
+<title>g_hash_table_contains (in libtestswiftapiresolver.dylib) (ghash.c) (1 samples, 0.05%)</title><rect x="11.7" y="469" width="0.5" height="15.0" fill="rgb(207,137,25)" rx="2" ry="2" />
+<text  x="14.68" y="479.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (2 samples, 0.10%)</title><rect x="1107.6" y="133" width="1.1" height="15.0" fill="rgb(240,94,45)" rx="2" ry="2" />
+<text  x="1110.60" y="143.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (1 samples, 0.05%)</title><rect x="1093.6" y="229" width="0.5" height="15.0" fill="rgb(215,133,22)" rx="2" ry="2" />
+<text  x="1096.58" y="239.5" ></text>
+</g>
+<g >
+<title>js_call_c_function (in libfrida-agent-modulated.dylib) (quickjs.c) (2,105 samples, 100.00%)</title><rect x="10.0" y="645" width="1180.0" height="15.0" fill="rgb(205,196,30)" rx="2" ry="2" />
+<text  x="13.00" y="655.5" >js_call_c_function (in libfrida-agent-modulated.dylib) (quickjs.c)</text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1035.8" y="181" width="0.6" height="15.0" fill="rgb(248,27,4)" rx="2" ry="2" />
+<text  x="1038.84" y="191.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::demangleSubscript() (1 samples, 0.05%)</title><rect x="981.5" y="341" width="0.5" height="15.0" fill="rgb(239,68,48)" rx="2" ry="2" />
+<text  x="984.47" y="351.5" ></text>
+</g>
+<g >
+<title>snprintf (1 samples, 0.05%)</title><rect x="1074.0" y="181" width="0.5" height="15.0" fill="rgb(249,61,6)" rx="2" ry="2" />
+<text  x="1076.96" y="191.5" ></text>
+</g>
+<g >
+<title>szone_malloc_should_clear (1 samples, 0.05%)</title><rect x="1108.2" y="69" width="0.5" height="15.0" fill="rgb(243,197,5)" rx="2" ry="2" />
+<text  x="1111.16" y="79.5" ></text>
+</g>
+<g >
+<title>printInt32BangDec (in libtestswiftapiresolver.dylib) (SStream.c) (1 samples, 0.05%)</title><rect x="695.0" y="389" width="0.6" height="15.0" fill="rgb(244,4,27)" rx="2" ry="2" />
+<text  x="698.02" y="399.5" ></text>
+</g>
+<g >
+<title>nanov2_malloc (1 samples, 0.05%)</title><rect x="1075.1" y="181" width="0.5" height="15.0" fill="rgb(243,210,36)" rx="2" ry="2" />
+<text  x="1078.08" y="191.5" ></text>
+</g>
+<g >
+<title>_platform_memset (1 samples, 0.05%)</title><rect x="1033.0" y="197" width="0.6" height="15.0" fill="rgb(229,38,23)" rx="2" ry="2" />
+<text  x="1036.04" y="207.5" ></text>
+</g>
+<g >
+<title>insn_find (in libtestswiftapiresolver.dylib) (utils.c) (1 samples, 0.05%)</title><rect x="688.9" y="341" width="0.5" height="15.0" fill="rgb(210,0,22)" rx="2" ry="2" />
+<text  x="691.85" y="351.5" ></text>
+</g>
+<g >
+<title>gum_skip_leb128 (in libtestswiftapiresolver.dylib) (gumleb.c) (1 samples, 0.05%)</title><rect x="711.8" y="405" width="0.6" height="15.0" fill="rgb(241,38,38)" rx="2" ry="2" />
+<text  x="714.83" y="415.5" ></text>
+</g>
+<g >
+<title>JS_CallInternal (in libfrida-agent-modulated.dylib) (quickjs.c) (2,105 samples, 100.00%)</title><rect x="10.0" y="597" width="1180.0" height="15.0" fill="rgb(218,111,38)" rx="2" ry="2" />
+<text  x="13.00" y="607.5" >JS_CallInternal (in libfrida-agent-modulated.dylib) (quickjs.c)</text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printBoundGeneric(swift::Demangle::Node*, unsigned int) (1 samples, 0.05%)</title><rect x="1123.9" y="117" width="0.5" height="15.0" fill="rgb(218,99,22)" rx="2" ry="2" />
+<text  x="1126.85" y="127.5" ></text>
+</g>
+<g >
+<title>operator new(unsigned long) (1 samples, 0.05%)</title><rect x="1132.3" y="261" width="0.5" height="15.0" fill="rgb(239,204,25)" rx="2" ry="2" />
+<text  x="1135.26" y="271.5" ></text>
+</g>
+<g >
+<title>mspace_free (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="127.7" y="405" width="0.6" height="15.0" fill="rgb(215,112,0)" rx="2" ry="2" />
+<text  x="130.72" y="415.5" ></text>
+</g>
+<g >
+<title>mspace_realloc (in libtestswiftapiresolver.dylib) (dlmalloc.c) (4 samples, 0.19%)</title><rect x="701.7" y="389" width="2.3" height="15.0" fill="rgb(229,30,19)" rx="2" ry="2" />
+<text  x="704.74" y="399.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::demangleFunctionEntity() (8 samples, 0.38%)</title><rect x="868.2" y="341" width="4.5" height="15.0" fill="rgb(208,184,39)" rx="2" ry="2" />
+<text  x="871.23" y="351.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (21 samples, 1.00%)</title><rect x="1049.3" y="261" width="11.8" height="15.0" fill="rgb(219,82,36)" rx="2" ry="2" />
+<text  x="1052.30" y="271.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (2 samples, 0.10%)</title><rect x="1088.5" y="181" width="1.2" height="15.0" fill="rgb(239,126,29)" rx="2" ry="2" />
+<text  x="1091.54" y="191.5" ></text>
+</g>
+<g >
+<title>tiny_free_list_add_ptr (2 samples, 0.10%)</title><rect x="817.8" y="309" width="1.1" height="15.0" fill="rgb(213,206,18)" rx="2" ry="2" />
+<text  x="820.78" y="319.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::popContext() (4 samples, 0.19%)</title><rect x="855.3" y="325" width="2.3" height="15.0" fill="rgb(235,12,53)" rx="2" ry="2" />
+<text  x="858.34" y="335.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1118.8" y="149" width="0.6" height="15.0" fill="rgb(228,68,30)" rx="2" ry="2" />
+<text  x="1121.81" y="159.5" ></text>
+</g>
+<g >
+<title>realloc_arrays (in libtestswiftapiresolver.dylib) (ghash.c) (1 samples, 0.05%)</title><rect x="704.0" y="389" width="0.5" height="15.0" fill="rgb(254,215,45)" rx="2" ry="2" />
+<text  x="706.99" y="399.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (15 samples, 0.71%)</title><rect x="1052.7" y="245" width="8.4" height="15.0" fill="rgb(239,197,54)" rx="2" ry="2" />
+<text  x="1055.66" y="255.5" ></text>
+</g>
+<g >
+<title>g_slice_free1 (in libtestswiftapiresolver.dylib) (gslice.c) (1 samples, 0.05%)</title><rect x="1182.2" y="405" width="0.5" height="15.0" fill="rgb(219,115,52)" rx="2" ry="2" />
+<text  x="1185.15" y="415.5" ></text>
+</g>
+<g >
+<title>_nanov2_free (1 samples, 0.05%)</title><rect x="1095.3" y="133" width="0.5" height="15.0" fill="rgb(238,120,24)" rx="2" ry="2" />
+<text  x="1098.26" y="143.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (1 samples, 0.05%)</title><rect x="1036.4" y="181" width="0.6" height="15.0" fill="rgb(239,68,41)" rx="2" ry="2" />
+<text  x="1039.40" y="191.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printFunctionParameters(swift::Demangle::Node*, swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1123.9" y="197" width="0.5" height="15.0" fill="rgb(210,171,39)" rx="2" ry="2" />
+<text  x="1126.85" y="207.5" ></text>
+</g>
+<g >
+<title>init_top (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="701.7" y="373" width="0.6" height="15.0" fill="rgb(215,92,37)" rx="2" ry="2" />
+<text  x="704.74" y="383.5" ></text>
+</g>
+<g >
+<title>_nanov2_free (1 samples, 0.05%)</title><rect x="1043.7" y="229" width="0.6" height="15.0" fill="rgb(233,206,30)" rx="2" ry="2" />
+<text  x="1046.69" y="239.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (2 samples, 0.10%)</title><rect x="685.5" y="357" width="1.1" height="15.0" fill="rgb(249,204,25)" rx="2" ry="2" />
+<text  x="688.49" y="367.5" ></text>
+</g>
+<g >
+<title>vsprintf_l (7 samples, 0.33%)</title><rect x="1177.7" y="341" width="3.9" height="15.0" fill="rgb(249,1,21)" rx="2" ry="2" />
+<text  x="1180.67" y="351.5" ></text>
+</g>
+<g >
+<title>_szone_free (3 samples, 0.14%)</title><rect x="778.0" y="373" width="1.7" height="15.0" fill="rgb(224,86,49)" rx="2" ry="2" />
+<text  x="780.98" y="383.5" ></text>
+</g>
+<g >
+<title>__bzero (2 samples, 0.10%)</title><rect x="133.3" y="389" width="1.1" height="15.0" fill="rgb(231,70,54)" rx="2" ry="2" />
+<text  x="136.33" y="399.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1036.4" y="213" width="0.6" height="15.0" fill="rgb(222,60,28)" rx="2" ry="2" />
+<text  x="1039.40" y="223.5" ></text>
+</g>
+<g >
+<title>AArch64_get_insn_id (in libtestswiftapiresolver.dylib) (AArch64Mapping.c) (1 samples, 0.05%)</title><rect x="118.2" y="421" width="0.6" height="15.0" fill="rgb(210,208,38)" rx="2" ry="2" />
+<text  x="121.19" y="431.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (22 samples, 1.05%)</title><rect x="913.1" y="325" width="12.3" height="15.0" fill="rgb(228,51,4)" rx="2" ry="2" />
+<text  x="916.08" y="335.5" ></text>
+</g>
+<g >
+<title>unixmmap (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="703.4" y="357" width="0.6" height="15.0" fill="rgb(220,1,32)" rx="2" ry="2" />
+<text  x="706.43" y="367.5" ></text>
+</g>
+<g >
+<title>ffi_call_int (in libfrida-agent-modulated.dylib) (ffi.c) (2,105 samples, 100.00%)</title><rect x="10.0" y="533" width="1180.0" height="15.0" fill="rgb(240,175,38)" rx="2" ry="2" />
+<text  x="13.00" y="543.5" >ffi_call_int (in libfrida-agent-modulated.dylib) (ffi.c)</text>
+</g>
+<g >
+<title>_nanov2_free (2 samples, 0.10%)</title><rect x="1032.5" y="213" width="1.1" height="15.0" fill="rgb(227,151,16)" rx="2" ry="2" />
+<text  x="1035.48" y="223.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::genericParameterName(unsigned long long, unsigned long long) (1 samples, 0.05%)</title><rect x="1091.9" y="197" width="0.6" height="15.0" fill="rgb(239,85,53)" rx="2" ry="2" />
+<text  x="1094.90" y="207.5" ></text>
+</g>
+<g >
+<title>__vfprintf (5 samples, 0.24%)</title><rect x="1178.8" y="325" width="2.8" height="15.0" fill="rgb(220,179,26)" rx="2" ry="2" />
+<text  x="1181.79" y="335.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (246 samples, 11.69%)</title><rect x="994.9" y="309" width="137.9" height="15.0" fill="rgb(235,98,36)" rx="2" ry="2" />
+<text  x="997.92" y="319.5" >(anonymous namesp..</text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (16 samples, 0.76%)</title><rect x="1020.7" y="213" width="9.0" height="15.0" fill="rgb(221,158,5)" rx="2" ry="2" />
+<text  x="1023.71" y="223.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::popRetroactiveConformances() (2 samples, 0.10%)</title><rect x="867.1" y="309" width="1.1" height="15.0" fill="rgb(241,228,25)" rx="2" ry="2" />
+<text  x="870.11" y="319.5" ></text>
+</g>
+<g >
+<title>g_string_free (in libtestswiftapiresolver.dylib) (gstring.c) (1 samples, 0.05%)</title><rect x="44.2" y="453" width="0.6" height="15.0" fill="rgb(228,195,39)" rx="2" ry="2" />
+<text  x="47.19" y="463.5" ></text>
+</g>
+<g >
+<title>DYLD-STUB$$strlen (in libtestswiftapiresolver.dylib) + (1 samples, 0.05%; +0.05%)</title><rect x="653.5" y="389" width="0.6" height="15.0" fill="rgb(255,198,198)" rx="2" ry="2" />
+<text  x="656.53" y="399.5" ></text>
+</g>
+<g >
+<title>_platform_strlen (1 samples, 0.05%)</title><rect x="709.0" y="405" width="0.6" height="15.0" fill="rgb(243,155,20)" rx="2" ry="2" />
+<text  x="712.03" y="415.5" ></text>
+</g>
+<g >
+<title>szone_malloc_should_clear (1 samples, 0.05%)</title><rect x="1029.1" y="165" width="0.6" height="15.0" fill="rgb(224,75,23)" rx="2" ry="2" />
+<text  x="1032.12" y="175.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1095.8" y="197" width="0.6" height="15.0" fill="rgb(205,9,14)" rx="2" ry="2" />
+<text  x="1098.82" y="207.5" ></text>
+</g>
+<g >
+<title>g_malloc (in libtestswiftapiresolver.dylib) (gmem.c) (1 samples, 0.05%)</title><rect x="707.9" y="421" width="0.6" height="15.0" fill="rgb(240,133,13)" rx="2" ry="2" />
+<text  x="710.91" y="431.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (1 samples, 0.05%)</title><rect x="1120.5" y="165" width="0.5" height="15.0" fill="rgb(224,135,6)" rx="2" ry="2" />
+<text  x="1123.49" y="175.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::demangleStandardSubstitution() (21 samples, 1.00%)</title><rect x="969.7" y="341" width="11.8" height="15.0" fill="rgb(249,111,1)" rx="2" ry="2" />
+<text  x="972.70" y="351.5" ></text>
+</g>
+<g >
+<title>operator new(unsigned long) (5 samples, 0.24%)</title><rect x="1026.9" y="181" width="2.8" height="15.0" fill="rgb(237,133,34)" rx="2" ry="2" />
+<text  x="1029.87" y="191.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::popFunctionParams(swift::Demangle::Node::Kind) (4 samples, 0.19%)</title><rect x="965.2" y="309" width="2.3" height="15.0" fill="rgb(220,112,34)" rx="2" ry="2" />
+<text  x="968.21" y="319.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1123.9" y="133" width="0.5" height="15.0" fill="rgb(224,122,48)" rx="2" ry="2" />
+<text  x="1126.85" y="143.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1054.3" y="213" width="0.6" height="15.0" fill="rgb(209,144,38)" rx="2" ry="2" />
+<text  x="1057.34" y="223.5" ></text>
+</g>
+<g >
+<title>OUTLINED_FUNCTION_3 (in libtestswiftapiresolver.dylib) + (1 samples, 0.05%; +0.05%)</title><rect x="106.4" y="437" width="0.6" height="15.0" fill="rgb(255,198,198)" rx="2" ry="2" />
+<text  x="109.42" y="447.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (58 samples, 2.76%)</title><rect x="1002.2" y="261" width="32.5" height="15.0" fill="rgb(223,6,18)" rx="2" ry="2" />
+<text  x="1005.21" y="271.5" >(a..</text>
+</g>
+<g >
+<title>OUTLINED_FUNCTION_10 (in libtestswiftapiresolver.dylib) + (1 samples, 0.05%; +0.05%)</title><rect x="105.9" y="437" width="0.5" height="15.0" fill="rgb(255,198,198)" rx="2" ry="2" />
+<text  x="108.86" y="447.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (1 samples, 0.05%)</title><rect x="1062.2" y="149" width="0.6" height="15.0" fill="rgb(238,58,46)" rx="2" ry="2" />
+<text  x="1065.19" y="159.5" ></text>
+</g>
+<g >
+<title>cs_open (in libtestswiftapiresolver.dylib) (cs.c) (5 samples, 0.24%)</title><rect x="696.1" y="421" width="2.8" height="15.0" fill="rgb(241,188,6)" rx="2" ry="2" />
+<text  x="699.14" y="431.5" ></text>
+</g>
+<g >
+<title>nanov2_malloc (1 samples, 0.05%)</title><rect x="1068.4" y="213" width="0.5" height="15.0" fill="rgb(213,75,41)" rx="2" ry="2" />
+<text  x="1071.36" y="223.5" ></text>
+</g>
+<g >
+<title>szone_malloc_should_clear (27 samples, 1.28%)</title><rect x="803.8" y="357" width="15.1" height="15.0" fill="rgb(251,33,28)" rx="2" ry="2" />
+<text  x="806.77" y="367.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (3 samples, 0.14%)</title><rect x="1095.3" y="245" width="1.6" height="15.0" fill="rgb(224,112,37)" rx="2" ry="2" />
+<text  x="1098.26" y="255.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printBoundGeneric(swift::Demangle::Node*, unsigned int) (7 samples, 0.33%)</title><rect x="1107.0" y="213" width="4.0" height="15.0" fill="rgb(222,1,16)" rx="2" ry="2" />
+<text  x="1110.04" y="223.5" ></text>
+</g>
+<g >
+<title>snprintf (1 samples, 0.05%)</title><rect x="1083.5" y="149" width="0.6" height="15.0" fill="rgb(234,65,42)" rx="2" ry="2" />
+<text  x="1086.49" y="159.5" ></text>
+</g>
+<g >
+<title>gum_darwin_module_ensure_image_loaded (in libtestswiftapiresolver.dylib) (gumdarwinmodule.c) (1 samples, 0.05%)</title><rect x="716.9" y="405" width="0.5" height="15.0" fill="rgb(215,69,49)" rx="2" ry="2" />
+<text  x="719.88" y="415.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (5 samples, 0.24%)</title><rect x="1005.0" y="229" width="2.8" height="15.0" fill="rgb(240,157,38)" rx="2" ry="2" />
+<text  x="1008.01" y="239.5" ></text>
+</g>
+<g >
+<title>_platform_strlen (2 samples, 0.10%)</title><rect x="658.0" y="373" width="1.1" height="15.0" fill="rgb(251,107,40)" rx="2" ry="2" />
+<text  x="661.02" y="383.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::createStandardSubstitution(char, bool) (4 samples, 0.19%)</title><rect x="972.5" y="325" width="2.2" height="15.0" fill="rgb(226,151,16)" rx="2" ry="2" />
+<text  x="975.50" y="335.5" ></text>
+</g>
+<g >
+<title>tiny_free_no_lock (19 samples, 0.90%)</title><rect x="788.6" y="357" width="10.7" height="15.0" fill="rgb(221,89,2)" rx="2" ry="2" />
+<text  x="791.63" y="367.5" ></text>
+</g>
+<g >
+<title>_nanov2_free (1 samples, 0.05%)</title><rect x="1132.8" y="357" width="0.6" height="15.0" fill="rgb(211,118,37)" rx="2" ry="2" />
+<text  x="1135.82" y="367.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1084.1" y="165" width="0.5" height="15.0" fill="rgb(246,56,8)" rx="2" ry="2" />
+<text  x="1087.05" y="175.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1084.6" y="149" width="0.6" height="15.0" fill="rgb(205,36,18)" rx="2" ry="2" />
+<text  x="1087.61" y="159.5" ></text>
+</g>
+<g >
+<title>js_function_apply (in libfrida-agent-modulated.dylib) (quickjs.c) (2,105 samples, 100.00%)</title><rect x="10.0" y="629" width="1180.0" height="15.0" fill="rgb(220,136,24)" rx="2" ry="2" />
+<text  x="13.00" y="639.5" >js_function_apply (in libfrida-agent-modulated.dylib) (quickjs.c)</text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1061.6" y="181" width="0.6" height="15.0" fill="rgb(218,80,52)" rx="2" ry="2" />
+<text  x="1064.63" y="191.5" ></text>
+</g>
+<g >
+<title>g_malloc (in libtestswiftapiresolver.dylib) (gmem.c) (2 samples, 0.10%)</title><rect x="730.3" y="405" width="1.2" height="15.0" fill="rgb(229,46,12)" rx="2" ry="2" />
+<text  x="733.33" y="415.5" ></text>
+</g>
+<g >
+<title>insn_find (in libtestswiftapiresolver.dylib) (utils.c) (1 samples, 0.05%)</title><rect x="692.2" y="341" width="0.6" height="15.0" fill="rgb(235,9,38)" rx="2" ry="2" />
+<text  x="695.21" y="351.5" ></text>
+</g>
+<g >
+<title>_nanov2_free (1 samples, 0.05%)</title><rect x="1006.7" y="149" width="0.6" height="15.0" fill="rgb(207,178,45)" rx="2" ry="2" />
+<text  x="1009.69" y="159.5" ></text>
+</g>
+<g >
+<title>g_main_context_dispatch (in libfrida-agent-modulated.dylib) (gmain.c) (2,105 samples, 100.00%)</title><rect x="10.0" y="757" width="1180.0" height="15.0" fill="rgb(229,189,26)" rx="2" ry="2" />
+<text  x="13.00" y="767.5" >g_main_context_dispatch (in libfrida-agent-modulated.dylib) (gmain.c)</text>
+</g>
+<g >
+<title>_platform_memmove (1 samples, 0.05%)</title><rect x="1058.3" y="213" width="0.5" height="15.0" fill="rgb(232,82,3)" rx="2" ry="2" />
+<text  x="1061.27" y="223.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (3 samples, 0.14%)</title><rect x="1124.4" y="229" width="1.7" height="15.0" fill="rgb(232,183,54)" rx="2" ry="2" />
+<text  x="1127.41" y="239.5" ></text>
+</g>
+<g >
+<title>OUTLINED_FUNCTION_0 (in libtestswiftapiresolver.dylib) + (1 samples, 0.05%; +0.05%)</title><rect x="668.7" y="357" width="0.5" height="15.0" fill="rgb(255,198,198)" rx="2" ry="2" />
+<text  x="671.67" y="367.5" ></text>
+</g>
+<g >
+<title>init_top (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="704.0" y="357" width="0.5" height="15.0" fill="rgb(246,154,37)" rx="2" ry="2" />
+<text  x="706.99" y="367.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1089.1" y="165" width="0.6" height="15.0" fill="rgb(237,47,12)" rx="2" ry="2" />
+<text  x="1092.10" y="175.5" ></text>
+</g>
+<g >
+<title>free (1 samples, 0.05%)</title><rect x="1026.3" y="181" width="0.6" height="15.0" fill="rgb(219,59,42)" rx="2" ry="2" />
+<text  x="1029.31" y="191.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (3 samples, 0.14%)</title><rect x="1006.1" y="197" width="1.7" height="15.0" fill="rgb(242,59,12)" rx="2" ry="2" />
+<text  x="1009.13" y="207.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (9 samples, 0.43%)</title><rect x="1038.1" y="261" width="5.0" height="15.0" fill="rgb(219,167,32)" rx="2" ry="2" />
+<text  x="1041.09" y="271.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printBoundGeneric(swift::Demangle::Node*, unsigned int) (2 samples, 0.10%)</title><rect x="1061.1" y="197" width="1.1" height="15.0" fill="rgb(223,11,6)" rx="2" ry="2" />
+<text  x="1064.07" y="207.5" ></text>
+</g>
+<g >
+<title>_platform_memset (1 samples, 0.05%)</title><rect x="1035.8" y="101" width="0.6" height="15.0" fill="rgb(226,92,48)" rx="2" ry="2" />
+<text  x="1038.84" y="111.5" ></text>
+</g>
+<g >
+<title>set_tiny_meta_header_in_use (2 samples, 0.10%)</title><rect x="816.7" y="309" width="1.1" height="15.0" fill="rgb(211,222,13)" rx="2" ry="2" />
+<text  x="819.66" y="319.5" ></text>
+</g>
+<g >
+<title>run (in libtestswiftapiresolver.dylib) (runner.c) (2,105 samples, 100.00%)</title><rect x="10.0" y="501" width="1180.0" height="15.0" fill="rgb(225,109,18)" rx="2" ry="2" />
+<text  x="13.00" y="511.5" >run (in libtestswiftapiresolver.dylib) (runner.c)</text>
+</g>
+<g >
+<title>_pthread_start (2,105 samples, 100.00%)</title><rect x="10.0" y="837" width="1180.0" height="15.0" fill="rgb(252,86,39)" rx="2" ry="2" />
+<text  x="13.00" y="847.5" >_pthread_start</text>
+</g>
+<g >
+<title>gum_darwin_module_ensure_image_loaded (in libtestswiftapiresolver.dylib) (gumdarwinmodule.c) (12 samples, 0.57%)</title><rect x="44.8" y="453" width="6.7" height="15.0" fill="rgb(237,65,6)" rx="2" ry="2" />
+<text  x="47.76" y="463.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (40 samples, 1.90%)</title><rect x="1102.0" y="229" width="22.4" height="15.0" fill="rgb(243,110,3)" rx="2" ry="2" />
+<text  x="1104.99" y="239.5" >(..</text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (5 samples, 0.24%)</title><rect x="1121.0" y="165" width="2.9" height="15.0" fill="rgb(252,73,18)" rx="2" ry="2" />
+<text  x="1124.05" y="175.5" ></text>
+</g>
+<g >
+<title>small_malloc_should_clear (2 samples, 0.10%)</title><rect x="844.7" y="309" width="1.1" height="15.0" fill="rgb(212,73,31)" rx="2" ry="2" />
+<text  x="847.69" y="319.5" ></text>
+</g>
+<g >
+<title>operator new(unsigned long) (1 samples, 0.05%)</title><rect x="1059.9" y="197" width="0.6" height="15.0" fill="rgb(241,79,12)" rx="2" ry="2" />
+<text  x="1062.95" y="207.5" ></text>
+</g>
+<g >
+<title>SStream_concat (in libtestswiftapiresolver.dylib) (SStream.c) (1 samples, 0.05%)</title><rect x="690.5" y="357" width="0.6" height="15.0" fill="rgb(233,164,43)" rx="2" ry="2" />
+<text  x="693.53" y="367.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (1 samples, 0.05%)</title><rect x="1118.8" y="85" width="0.6" height="15.0" fill="rgb(242,78,51)" rx="2" ry="2" />
+<text  x="1121.81" y="95.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Vector&lt;swift::Demangle::Node*&gt;::push_back(swift::Demangle::Node* const&amp;, swift::Demangle::NodeFactory&amp;) (7 samples, 0.33%)</title><rect x="925.4" y="325" width="3.9" height="15.0" fill="rgb(228,116,45)" rx="2" ry="2" />
+<text  x="928.41" y="335.5" ></text>
+</g>
+<g >
+<title>_vsnprintf (1 samples, 0.05%)</title><rect x="1083.5" y="133" width="0.6" height="15.0" fill="rgb(231,64,37)" rx="2" ry="2" />
+<text  x="1086.49" y="143.5" ></text>
+</g>
+<g >
+<title>mspace_free (in libtestswiftapiresolver.dylib) (dlmalloc.c) (2 samples, 0.10%)</title><rect x="1187.2" y="437" width="1.1" height="15.0" fill="rgb(229,91,41)" rx="2" ry="2" />
+<text  x="1190.20" y="447.5" ></text>
+</g>
+<g >
+<title>std::__1::function&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt; (unsigned long long, unsigned long long)&gt;::operator()(unsigned long long, unsigned long long) const (1 samples, 0.05%)</title><rect x="1109.3" y="181" width="0.5" height="15.0" fill="rgb(223,23,49)" rx="2" ry="2" />
+<text  x="1112.28" y="191.5" ></text>
+</g>
+<g >
+<title>SStream_concat (in libtestswiftapiresolver.dylib) (SStream.c) (1 samples, 0.05%)</title><rect x="695.0" y="373" width="0.6" height="15.0" fill="rgb(208,178,13)" rx="2" ry="2" />
+<text  x="698.02" y="383.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (1 samples, 0.05%)</title><rect x="1090.2" y="165" width="0.6" height="15.0" fill="rgb(210,117,9)" rx="2" ry="2" />
+<text  x="1093.22" y="175.5" ></text>
+</g>
+<g >
+<title>DYLD-STUB$$operator new(unsigned long) (1 samples, 0.05%)</title><rect x="1024.1" y="181" width="0.5" height="15.0" fill="rgb(248,127,51)" rx="2" ry="2" />
+<text  x="1027.07" y="191.5" ></text>
+</g>
+<g >
+<title>_nanov2_free (1 samples, 0.05%)</title><rect x="1062.2" y="133" width="0.6" height="15.0" fill="rgb(227,169,50)" rx="2" ry="2" />
+<text  x="1065.19" y="143.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printFunctionParameters(swift::Demangle::Node*, swift::Demangle::Node*, unsigned int, bool) (2 samples, 0.10%)</title><rect x="1035.8" y="245" width="1.2" height="15.0" fill="rgb(230,173,52)" rx="2" ry="2" />
+<text  x="1038.84" y="255.5" ></text>
+</g>
+<g >
+<title>g_hash_table_lookup (in libtestswiftapiresolver.dylib) (ghash.c) (1 samples, 0.05%)</title><rect x="1167.0" y="437" width="0.6" height="15.0" fill="rgb(214,171,14)" rx="2" ry="2" />
+<text  x="1170.02" y="447.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (2 samples, 0.10%)</title><rect x="1089.7" y="181" width="1.1" height="15.0" fill="rgb(216,109,7)" rx="2" ry="2" />
+<text  x="1092.66" y="191.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (1 samples, 0.05%)</title><rect x="1035.8" y="133" width="0.6" height="15.0" fill="rgb(235,71,5)" rx="2" ry="2" />
+<text  x="1038.84" y="143.5" ></text>
+</g>
+<g >
+<title>operator new(unsigned long) (1 samples, 0.05%)</title><rect x="1130.0" y="197" width="0.6" height="15.0" fill="rgb(251,206,11)" rx="2" ry="2" />
+<text  x="1133.02" y="207.5" ></text>
+</g>
+<g >
+<title>mspace_malloc (in libtestswiftapiresolver.dylib) (dlmalloc.c) (4 samples, 0.19%)</title><rect x="1140.7" y="389" width="2.2" height="15.0" fill="rgb(218,29,5)" rx="2" ry="2" />
+<text  x="1143.67" y="399.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::genericParameterName(unsigned long long, unsigned long long) (1 samples, 0.05%)</title><rect x="1007.8" y="197" width="0.6" height="15.0" fill="rgb(225,149,12)" rx="2" ry="2" />
+<text  x="1010.81" y="207.5" ></text>
+</g>
+<g >
+<title>gum_memset (in libtestswiftapiresolver.dylib) (gumlibc.c) (211 samples, 10.02%)</title><rect x="332.9" y="373" width="118.3" height="15.0" fill="rgb(230,40,9)" rx="2" ry="2" />
+<text  x="335.89" y="383.5" >gum_memset (in..</text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (2 samples, 0.10%)</title><rect x="1035.8" y="229" width="1.2" height="15.0" fill="rgb(219,166,51)" rx="2" ry="2" />
+<text  x="1038.84" y="239.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1035.3" y="245" width="0.5" height="15.0" fill="rgb(242,188,33)" rx="2" ry="2" />
+<text  x="1038.28" y="255.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (2 samples, 0.10%)</title><rect x="1006.7" y="181" width="1.1" height="15.0" fill="rgb(247,207,9)" rx="2" ry="2" />
+<text  x="1009.69" y="191.5" ></text>
+</g>
+<g >
+<title>__v2printf (2 samples, 0.10%)</title><rect x="1177.7" y="325" width="1.1" height="15.0" fill="rgb(222,168,1)" rx="2" ry="2" />
+<text  x="1180.67" y="335.5" ></text>
+</g>
+<g >
+<title>g_str_hash (in libtestswiftapiresolver.dylib) (ghash.c) (1 samples, 0.05%)</title><rect x="1167.0" y="421" width="0.6" height="15.0" fill="rgb(215,180,19)" rx="2" ry="2" />
+<text  x="1170.02" y="431.5" ></text>
+</g>
+<g >
+<title>nanov2_malloc (1 samples, 0.05%)</title><rect x="1132.3" y="245" width="0.5" height="15.0" fill="rgb(207,61,46)" rx="2" ry="2" />
+<text  x="1135.26" y="255.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (1 samples, 0.05%)</title><rect x="1084.6" y="117" width="0.6" height="15.0" fill="rgb(211,61,17)" rx="2" ry="2" />
+<text  x="1087.61" y="127.5" ></text>
+</g>
+<g >
+<title>gum_find_character_backwards (in libtestswiftapiresolver.dylib) (gumswiftapiresolver.c) (2 samples, 0.10%)</title><rect x="112.0" y="437" width="1.1" height="15.0" fill="rgb(231,12,17)" rx="2" ry="2" />
+<text  x="115.02" y="447.5" ></text>
+</g>
+<g >
+<title>g_main_loop_run (in libfrida-agent-modulated.dylib) (gmain.c) (2,105 samples, 100.00%)</title><rect x="10.0" y="789" width="1180.0" height="15.0" fill="rgb(226,124,9)" rx="2" ry="2" />
+<text  x="13.00" y="799.5" >g_main_loop_run (in libfrida-agent-modulated.dylib) (gmain.c)</text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::popFunctionParams(swift::Demangle::Node::Kind) (3 samples, 0.14%)</title><rect x="983.1" y="325" width="1.7" height="15.0" fill="rgb(252,10,6)" rx="2" ry="2" />
+<text  x="986.15" y="335.5" ></text>
+</g>
+<g >
+<title>_vsnprintf (1 samples, 0.05%)</title><rect x="1109.3" y="133" width="0.5" height="15.0" fill="rgb(218,85,35)" rx="2" ry="2" />
+<text  x="1112.28" y="143.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (2 samples, 0.10%)</title><rect x="1031.4" y="229" width="1.1" height="15.0" fill="rgb(253,229,2)" rx="2" ry="2" />
+<text  x="1034.36" y="239.5" ></text>
+</g>
+<g >
+<title>gum_darwin_module_enumerate_sections (in libtestswiftapiresolver.dylib) (gumdarwinmodule.c) (43 samples, 2.04%)</title><rect x="1164.8" y="469" width="24.1" height="15.0" fill="rgb(214,115,26)" rx="2" ry="2" />
+<text  x="1167.77" y="479.5" >g..</text>
+</g>
+<g >
+<title>gum_swift_api_resolver_enumerate_matches (in libtestswiftapiresolver.dylib) (gumswiftapiresolver.c) (2,104 samples, 99.95%)</title><rect x="10.6" y="485" width="1179.4" height="15.0" fill="rgb(206,183,22)" rx="2" ry="2" />
+<text  x="13.56" y="495.5" >gum_swift_api_resolver_enumerate_matches (in libtestswiftapiresolver.dylib) (gumswiftapiresolver.c)</text>
+</g>
+<g >
+<title>g_hash_table_lookup_node (in libtestswiftapiresolver.dylib) (ghash.c) (1 samples, 0.05%)</title><rect x="11.7" y="453" width="0.5" height="15.0" fill="rgb(248,216,22)" rx="2" ry="2" />
+<text  x="14.68" y="463.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (2 samples, 0.10%)</title><rect x="1095.8" y="229" width="1.1" height="15.0" fill="rgb(218,83,41)" rx="2" ry="2" />
+<text  x="1098.82" y="239.5" ></text>
+</g>
+<g >
+<title>MCOperand_CreateReg0 (in libtestswiftapiresolver.dylib) (MCInst.c) (1 samples, 0.05%)</title><rect x="154.1" y="357" width="0.5" height="15.0" fill="rgb(243,36,4)" rx="2" ry="2" />
+<text  x="157.07" y="367.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (1 samples, 0.05%)</title><rect x="1107.6" y="37" width="0.6" height="15.0" fill="rgb(229,163,43)" rx="2" ry="2" />
+<text  x="1110.60" y="47.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (2 samples, 0.10%)</title><rect x="1085.2" y="197" width="1.1" height="15.0" fill="rgb(232,56,35)" rx="2" ry="2" />
+<text  x="1088.17" y="207.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printBoundGenericNoSugar(swift::Demangle::Node*, unsigned int) (1 samples, 0.05%)</title><rect x="1095.3" y="229" width="0.5" height="15.0" fill="rgb(220,15,48)" rx="2" ry="2" />
+<text  x="1098.26" y="239.5" ></text>
+</g>
+<g >
+<title>_platform_strlen (9 samples, 0.43%)</title><rect x="764.5" y="373" width="5.1" height="15.0" fill="rgb(219,38,19)" rx="2" ry="2" />
+<text  x="767.53" y="383.5" ></text>
+</g>
+<g >
+<title>std::__1::function&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt; (unsigned long long, unsigned long long)&gt;::operator()(unsigned long long, unsigned long long) const (2 samples, 0.10%)</title><rect x="1073.4" y="213" width="1.1" height="15.0" fill="rgb(234,58,35)" rx="2" ry="2" />
+<text  x="1076.40" y="223.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::demangleGenericRequirement() (1 samples, 0.05%)</title><rect x="872.7" y="341" width="0.6" height="15.0" fill="rgb(206,151,33)" rx="2" ry="2" />
+<text  x="875.72" y="351.5" ></text>
+</g>
+<g >
+<title>_platform_strstr (5 samples, 0.24%)</title><rect x="124.9" y="421" width="2.8" height="15.0" fill="rgb(243,49,51)" rx="2" ry="2" />
+<text  x="127.92" y="431.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::changeKind(swift::Demangle::Node*, swift::Demangle::Node::Kind) (4 samples, 0.19%)</title><rect x="855.3" y="309" width="2.3" height="15.0" fill="rgb(243,139,46)" rx="2" ry="2" />
+<text  x="858.34" y="319.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printChildren(swift::Demangle::Node*, unsigned int, char const*) (248 samples, 11.78%)</title><rect x="993.8" y="325" width="139.0" height="15.0" fill="rgb(207,193,17)" rx="2" ry="2" />
+<text  x="996.80" y="335.5" >(anonymous namesp..</text>
+</g>
+<g >
+<title>try_realloc_chunk (in libtestswiftapiresolver.dylib) (dlmalloc.c) (2 samples, 0.10%)</title><rect x="1176.0" y="341" width="1.1" height="15.0" fill="rgb(209,128,9)" rx="2" ry="2" />
+<text  x="1178.99" y="351.5" ></text>
+</g>
+<g >
+<title>cs_option (in libtestswiftapiresolver.dylib) (cs.c) (1 samples, 0.05%)</title><rect x="698.9" y="421" width="0.6" height="15.0" fill="rgb(232,43,40)" rx="2" ry="2" />
+<text  x="701.94" y="431.5" ></text>
+</g>
+<g >
+<title>operator new(unsigned long) (1 samples, 0.05%)</title><rect x="1123.3" y="149" width="0.6" height="15.0" fill="rgb(236,221,35)" rx="2" ry="2" />
+<text  x="1126.29" y="159.5" ></text>
+</g>
+<g >
+<title>_platform_strlen (5 samples, 0.24%)</title><rect x="12.2" y="453" width="2.8" height="15.0" fill="rgb(212,40,23)" rx="2" ry="2" />
+<text  x="15.24" y="463.5" ></text>
+</g>
+<g >
+<title>printAlignedLabel (in libtestswiftapiresolver.dylib) (AArch64InstPrinter.c) (2 samples, 0.10%)</title><rect x="678.8" y="405" width="1.1" height="15.0" fill="rgb(214,139,12)" rx="2" ry="2" />
+<text  x="681.76" y="415.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (4 samples, 0.19%)</title><rect x="1061.1" y="245" width="2.2" height="15.0" fill="rgb(227,65,21)" rx="2" ry="2" />
+<text  x="1064.07" y="255.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (4 samples, 0.19%)</title><rect x="1128.3" y="213" width="2.3" height="15.0" fill="rgb(223,135,15)" rx="2" ry="2" />
+<text  x="1131.34" y="223.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1118.8" y="117" width="0.6" height="15.0" fill="rgb(217,179,29)" rx="2" ry="2" />
+<text  x="1121.81" y="127.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printChildren(swift::Demangle::Node*, unsigned int, char const*) (1 samples, 0.05%)</title><rect x="1035.3" y="229" width="0.5" height="15.0" fill="rgb(224,202,27)" rx="2" ry="2" />
+<text  x="1038.28" y="239.5" ></text>
+</g>
+<g >
+<title>thread_start (2,105 samples, 100.00%)</title><rect x="10.0" y="853" width="1180.0" height="15.0" fill="rgb(233,80,37)" rx="2" ry="2" />
+<text  x="13.00" y="863.5" >thread_start</text>
+</g>
+<g >
+<title>OUTLINED_FUNCTION_31 (in libtestswiftapiresolver.dylib) + (1 samples, 0.05%; +0.05%)</title><rect x="107.0" y="437" width="0.5" height="15.0" fill="rgb(255,198,198)" rx="2" ry="2" />
+<text  x="109.98" y="447.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::getManglingPrefixLength(llvm::StringRef) (3 samples, 0.14%)</title><rect x="989.9" y="357" width="1.7" height="15.0" fill="rgb(217,121,19)" rx="2" ry="2" />
+<text  x="992.88" y="367.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (1 samples, 0.05%)</title><rect x="1091.3" y="197" width="0.6" height="15.0" fill="rgb(213,60,25)" rx="2" ry="2" />
+<text  x="1094.34" y="207.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (13 samples, 0.62%)</title><rect x="1116.6" y="197" width="7.3" height="15.0" fill="rgb(229,7,22)" rx="2" ry="2" />
+<text  x="1119.57" y="207.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1123.9" y="101" width="0.5" height="15.0" fill="rgb(235,57,31)" rx="2" ry="2" />
+<text  x="1126.85" y="111.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printGenericSignature(swift::Demangle::Node*, unsigned int) (1 samples, 0.05%)</title><rect x="1056.6" y="229" width="0.5" height="15.0" fill="rgb(220,223,52)" rx="2" ry="2" />
+<text  x="1059.58" y="239.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printGenericSignature(swift::Demangle::Node*, unsigned int) (2 samples, 0.10%)</title><rect x="1063.3" y="261" width="1.1" height="15.0" fill="rgb(220,193,17)" rx="2" ry="2" />
+<text  x="1066.31" y="271.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printChildren(swift::Demangle::Node*, unsigned int, char const*) (3 samples, 0.14%)</title><rect x="1061.1" y="229" width="1.7" height="15.0" fill="rgb(237,27,16)" rx="2" ry="2" />
+<text  x="1064.07" y="239.5" ></text>
+</g>
+<g >
+<title>_platform_strlen (7 samples, 0.33%)</title><rect x="738.2" y="389" width="3.9" height="15.0" fill="rgb(241,195,45)" rx="2" ry="2" />
+<text  x="741.18" y="399.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (9 samples, 0.43%)</title><rect x="1069.5" y="229" width="5.0" height="15.0" fill="rgb(208,107,40)" rx="2" ry="2" />
+<text  x="1072.48" y="239.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (4 samples, 0.19%)</title><rect x="1112.1" y="165" width="2.2" height="15.0" fill="rgb(223,172,1)" rx="2" ry="2" />
+<text  x="1115.08" y="175.5" ></text>
+</g>
+<g >
+<title>sprintf (8 samples, 0.38%)</title><rect x="1177.1" y="357" width="4.5" height="15.0" fill="rgb(224,70,32)" rx="2" ry="2" />
+<text  x="1180.11" y="367.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1017.9" y="149" width="0.6" height="15.0" fill="rgb(236,65,37)" rx="2" ry="2" />
+<text  x="1020.90" y="159.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (1 samples, 0.05%)</title><rect x="1127.8" y="213" width="0.5" height="15.0" fill="rgb(248,36,52)" rx="2" ry="2" />
+<text  x="1130.78" y="223.5" ></text>
+</g>
+<g >
+<title>gumjs_native_function_invoke (in libfrida-agent-modulated.dylib) (gumquickcore.c) (2,105 samples, 100.00%)</title><rect x="10.0" y="581" width="1180.0" height="15.0" fill="rgb(217,161,30)" rx="2" ry="2" />
+<text  x="13.00" y="591.5" >gumjs_native_function_invoke (in libfrida-agent-modulated.dylib) (gumquickcore.c)</text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1007.8" y="229" width="0.6" height="15.0" fill="rgb(242,17,50)" rx="2" ry="2" />
+<text  x="1010.81" y="239.5" ></text>
+</g>
+<g >
+<title>__vfprintf (1 samples, 0.05%)</title><rect x="1083.5" y="117" width="0.6" height="15.0" fill="rgb(233,80,16)" rx="2" ry="2" />
+<text  x="1086.49" y="127.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printFunctionParameters(swift::Demangle::Node*, swift::Demangle::Node*, unsigned int, bool)::'lambda'(swift::Demangle::Node*)::operator()(swift::Demangle::Node*) const (1 samples, 0.05%)</title><rect x="1094.7" y="261" width="0.6" height="15.0" fill="rgb(247,150,30)" rx="2" ry="2" />
+<text  x="1097.70" y="271.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (2 samples, 0.10%)</title><rect x="1095.8" y="213" width="1.1" height="15.0" fill="rgb(214,143,22)" rx="2" ry="2" />
+<text  x="1098.82" y="223.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1035.8" y="165" width="0.6" height="15.0" fill="rgb(214,85,11)" rx="2" ry="2" />
+<text  x="1038.84" y="175.5" ></text>
+</g>
+<g >
+<title>free (1 samples, 0.05%)</title><rect x="1019.6" y="149" width="0.5" height="15.0" fill="rgb(220,152,30)" rx="2" ry="2" />
+<text  x="1022.59" y="159.5" ></text>
+</g>
+<g >
+<title>g_main_context_iterate (in libfrida-agent-modulated.dylib) (gmain.c) (2,105 samples, 100.00%)</title><rect x="10.0" y="773" width="1180.0" height="15.0" fill="rgb(249,55,29)" rx="2" ry="2" />
+<text  x="13.00" y="783.5" >g_main_context_iterate (in libfrida-agent-modulated.dylib) (gmain.c)</text>
+</g>
+<g >
+<title>__vfprintf (1 samples, 0.05%)</title><rect x="1091.9" y="149" width="0.6" height="15.0" fill="rgb(223,88,29)" rx="2" ry="2" />
+<text  x="1094.90" y="159.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (1 samples, 0.05%)</title><rect x="1018.5" y="133" width="0.5" height="15.0" fill="rgb(237,212,41)" rx="2" ry="2" />
+<text  x="1021.47" y="143.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (12 samples, 0.57%)</title><rect x="25.7" y="421" width="6.7" height="15.0" fill="rgb(245,14,1)" rx="2" ry="2" />
+<text  x="28.70" y="431.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (1 samples, 0.05%)</title><rect x="1095.3" y="149" width="0.5" height="15.0" fill="rgb(251,195,28)" rx="2" ry="2" />
+<text  x="1098.26" y="159.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1118.8" y="101" width="0.6" height="15.0" fill="rgb(229,189,12)" rx="2" ry="2" />
+<text  x="1121.81" y="111.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1084.1" y="133" width="0.5" height="15.0" fill="rgb(239,132,18)" rx="2" ry="2" />
+<text  x="1087.05" y="143.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::demangleProtocolList() (1 samples, 0.05%)</title><rect x="969.1" y="325" width="0.6" height="15.0" fill="rgb(241,109,5)" rx="2" ry="2" />
+<text  x="972.14" y="335.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (7 samples, 0.33%)</title><rect x="1119.9" y="181" width="4.0" height="15.0" fill="rgb(216,189,54)" rx="2" ry="2" />
+<text  x="1122.93" y="191.5" ></text>
+</g>
+<g >
+<title>fmtint (in libtestswiftapiresolver.dylib) (gumprintf.c) (2 samples, 0.10%)</title><rect x="689.4" y="325" width="1.1" height="15.0" fill="rgb(205,24,44)" rx="2" ry="2" />
+<text  x="692.41" y="335.5" ></text>
+</g>
+<g >
+<title>gum_script_scheduler_perform_js_job (in libfrida-agent-modulated.dylib) (gumscriptscheduler.c) (2,105 samples, 100.00%)</title><rect x="10.0" y="741" width="1180.0" height="15.0" fill="rgb(223,133,19)" rx="2" ry="2" />
+<text  x="13.00" y="751.5" >gum_script_scheduler_perform_js_job (in libfrida-agent-modulated.dylib) (gumscriptscheduler.c)</text>
+</g>
+<g >
+<title>__ultoa (1 samples, 0.05%)</title><rect x="50.9" y="293" width="0.6" height="15.0" fill="rgb(233,144,30)" rx="2" ry="2" />
+<text  x="53.92" y="303.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (3 samples, 0.14%)</title><rect x="1071.7" y="213" width="1.7" height="15.0" fill="rgb(246,210,14)" rx="2" ry="2" />
+<text  x="1074.72" y="223.5" ></text>
+</g>
+<g >
+<title>get_op_access (in libtestswiftapiresolver.dylib) (AArch64InstPrinter.c) (1 samples, 0.05%)</title><rect x="692.2" y="373" width="0.6" height="15.0" fill="rgb(253,44,0)" rx="2" ry="2" />
+<text  x="695.21" y="383.5" ></text>
+</g>
+<g >
+<title>gum_class_parse (in libtestswiftapiresolver.dylib) (gumswiftapiresolver.c) (10 samples, 0.48%)</title><rect x="1181.6" y="437" width="5.6" height="15.0" fill="rgb(211,11,51)" rx="2" ry="2" />
+<text  x="1184.59" y="447.5" ></text>
+</g>
+<g >
+<title>printInstruction (in libtestswiftapiresolver.dylib) (AArch64InstPrinter.c) (3 samples, 0.14%)</title><rect x="692.8" y="405" width="1.7" height="15.0" fill="rgb(249,75,9)" rx="2" ry="2" />
+<text  x="695.77" y="415.5" ></text>
+</g>
+<g >
+<title>AArch64_getInstruction (in libtestswiftapiresolver.dylib) (AArch64Disassembler.c) (50 samples, 2.38%)</title><rect x="128.3" y="405" width="28.0" height="15.0" fill="rgb(218,24,15)" rx="2" ry="2" />
+<text  x="131.28" y="415.5" >A..</text>
+</g>
+<g >
+<title>setParentForOpaqueReturnTypeNodes(swift::Demangle::Demangler&amp;, swift::Demangle::Node*, swift::Demangle::Node*) (10 samples, 0.48%)</title><rect x="947.8" y="325" width="5.6" height="15.0" fill="rgb(242,16,1)" rx="2" ry="2" />
+<text  x="950.83" y="335.5" ></text>
+</g>
+<g >
+<title>gum_script_scheduler_run_js_loop (in libfrida-agent-modulated.dylib) (gumscriptscheduler.c) (2,105 samples, 100.00%)</title><rect x="10.0" y="805" width="1180.0" height="15.0" fill="rgb(245,124,49)" rx="2" ry="2" />
+<text  x="13.00" y="815.5" >gum_script_scheduler_run_js_loop (in libfrida-agent-modulated.dylib) (gumscriptscheduler.c)</text>
+</g>
+<g >
+<title>g_array_maybe_expand (in libtestswiftapiresolver.dylib) (garray.c) (2 samples, 0.10%)</title><rect x="45.3" y="405" width="1.1" height="15.0" fill="rgb(206,98,54)" rx="2" ry="2" />
+<text  x="48.32" y="415.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (2 samples, 0.10%)</title><rect x="1017.9" y="165" width="1.1" height="15.0" fill="rgb(230,107,4)" rx="2" ry="2" />
+<text  x="1020.90" y="175.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (1 samples, 0.05%)</title><rect x="674.8" y="389" width="0.6" height="15.0" fill="rgb(241,2,4)" rx="2" ry="2" />
+<text  x="677.84" y="399.5" ></text>
+</g>
+<g >
+<title>gum_darwin_module_ensure_image_loaded (in libtestswiftapiresolver.dylib) (gumdarwinmodule.c) (1 samples, 0.05%)</title><rect x="723.0" y="389" width="0.6" height="15.0" fill="rgb(250,215,48)" rx="2" ry="2" />
+<text  x="726.05" y="399.5" ></text>
+</g>
+<g >
+<title>_platform_memchr (2 samples, 0.10%)</title><rect x="1037.0" y="261" width="1.1" height="15.0" fill="rgb(219,177,31)" rx="2" ry="2" />
+<text  x="1039.96" y="271.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::popTuple() (5 samples, 0.24%)</title><rect x="984.8" y="341" width="2.8" height="15.0" fill="rgb(212,113,46)" rx="2" ry="2" />
+<text  x="987.83" y="351.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printFunctionParameters(swift::Demangle::Node*, swift::Demangle::Node*, unsigned int, bool)::'lambda'(swift::Demangle::Node*)::operator()(swift::Demangle::Node*) const (60 samples, 2.85%)</title><rect x="1096.9" y="245" width="33.7" height="15.0" fill="rgb(253,219,23)" rx="2" ry="2" />
+<text  x="1099.95" y="255.5" >(a..</text>
+</g>
+<g >
+<title>swift::Demangle::genericParameterName(unsigned long long, unsigned long long) (1 samples, 0.05%)</title><rect x="1083.5" y="165" width="0.6" height="15.0" fill="rgb(233,172,8)" rx="2" ry="2" />
+<text  x="1086.49" y="175.5" ></text>
+</g>
+<g >
+<title>mspace_free (in libtestswiftapiresolver.dylib) (dlmalloc.c) (2 samples, 0.10%)</title><rect x="1188.9" y="469" width="1.1" height="15.0" fill="rgb(252,188,36)" rx="2" ry="2" />
+<text  x="1191.88" y="479.5" ></text>
+</g>
+<g >
+<title>__v2printf (1 samples, 0.05%)</title><rect x="48.7" y="309" width="0.5" height="15.0" fill="rgb(218,16,9)" rx="2" ry="2" />
+<text  x="51.68" y="319.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (1 samples, 0.05%)</title><rect x="1108.2" y="117" width="0.5" height="15.0" fill="rgb(227,182,50)" rx="2" ry="2" />
+<text  x="1111.16" y="127.5" ></text>
+</g>
+<g >
+<title>SStream_concat (in libtestswiftapiresolver.dylib) (SStream.c) (1 samples, 0.05%)</title><rect x="694.5" y="389" width="0.5" height="15.0" fill="rgb(235,1,13)" rx="2" ry="2" />
+<text  x="697.46" y="399.5" ></text>
+</g>
+<g >
+<title>g_string_sized_new (in libtestswiftapiresolver.dylib) (gstring.c) (1 samples, 0.05%)</title><rect x="1186.6" y="405" width="0.6" height="15.0" fill="rgb(238,15,18)" rx="2" ry="2" />
+<text  x="1189.64" y="415.5" ></text>
+</g>
+<g >
+<title>ffi_call_SYSV (in libfrida-agent-modulated.dylib) (sysv.S) (2,105 samples, 100.00%)</title><rect x="10.0" y="517" width="1180.0" height="15.0" fill="rgb(246,63,35)" rx="2" ry="2" />
+<text  x="13.00" y="527.5" >ffi_call_SYSV (in libfrida-agent-modulated.dylib) (sysv.S)</text>
+</g>
+<g >
+<title>g_string_maybe_expand (in libtestswiftapiresolver.dylib) (gstring.c) (1 samples, 0.05%)</title><rect x="1186.6" y="389" width="0.6" height="15.0" fill="rgb(205,52,31)" rx="2" ry="2" />
+<text  x="1189.64" y="399.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1107.6" y="117" width="0.6" height="15.0" fill="rgb(219,181,7)" rx="2" ry="2" />
+<text  x="1110.60" y="127.5" ></text>
+</g>
+<g >
+<title>g_hash_table_lookup_node (in libtestswiftapiresolver.dylib) (ghash.c) (1 samples, 0.05%)</title><rect x="723.6" y="373" width="0.6" height="15.0" fill="rgb(211,4,11)" rx="2" ry="2" />
+<text  x="726.61" y="383.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (3 samples, 0.14%)</title><rect x="1081.8" y="181" width="1.7" height="15.0" fill="rgb(249,119,3)" rx="2" ry="2" />
+<text  x="1084.81" y="191.5" ></text>
+</g>
+<g >
+<title>_platform_strlen (4 samples, 0.19%)</title><rect x="122.7" y="421" width="2.2" height="15.0" fill="rgb(220,163,45)" rx="2" ry="2" />
+<text  x="125.67" y="431.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::createSwiftType(swift::Demangle::Node::Kind, char const*) (9 samples, 0.43%)</title><rect x="974.7" y="325" width="5.1" height="15.0" fill="rgb(253,140,51)" rx="2" ry="2" />
+<text  x="977.74" y="335.5" ></text>
+</g>
+<g >
+<title>operator new(unsigned long) (1 samples, 0.05%)</title><rect x="1034.2" y="213" width="0.5" height="15.0" fill="rgb(236,167,48)" rx="2" ry="2" />
+<text  x="1037.16" y="223.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::createWithChildren(swift::Demangle::Node::Kind, swift::Demangle::Node*, swift::Demangle::Node*, swift::Demangle::Node*) (2 samples, 0.10%)</title><rect x="955.7" y="309" width="1.1" height="15.0" fill="rgb(206,97,16)" rx="2" ry="2" />
+<text  x="958.68" y="319.5" ></text>
+</g>
+<g >
+<title>__vfprintf (1 samples, 0.05%)</title><rect x="1109.3" y="117" width="0.5" height="15.0" fill="rgb(238,122,48)" rx="2" ry="2" />
+<text  x="1112.28" y="127.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (2 samples, 0.10%)</title><rect x="1082.4" y="165" width="1.1" height="15.0" fill="rgb(223,228,21)" rx="2" ry="2" />
+<text  x="1085.37" y="175.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::demangleAccessor(swift::Demangle::Node*) (5 samples, 0.24%)</title><rect x="845.8" y="341" width="2.8" height="15.0" fill="rgb(221,212,17)" rx="2" ry="2" />
+<text  x="848.81" y="351.5" ></text>
+</g>
+<g >
+<title>_gum_quick_core_post (in libfrida-agent-modulated.dylib) (gumquickcore.c) (2,105 samples, 100.00%)</title><rect x="10.0" y="725" width="1180.0" height="15.0" fill="rgb(242,136,6)" rx="2" ry="2" />
+<text  x="13.00" y="735.5" >_gum_quick_core_post (in libfrida-agent-modulated.dylib) (gumquickcore.c)</text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1063.3" y="229" width="0.6" height="15.0" fill="rgb(207,73,2)" rx="2" ry="2" />
+<text  x="1066.31" y="239.5" ></text>
+</g>
+<g >
+<title>gum_exports_trie_traverse (in libtestswiftapiresolver.dylib) (gumdarwinmodule.c) (1,986 samples, 94.35%)</title><rect x="51.5" y="453" width="1113.3" height="15.0" fill="rgb(217,63,42)" rx="2" ry="2" />
+<text  x="54.48" y="463.5" >gum_exports_trie_traverse (in libtestswiftapiresolver.dylib) (gumdarwinmodule.c)</text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (2 samples, 0.10%)</title><rect x="1006.7" y="165" width="1.1" height="15.0" fill="rgb(240,218,30)" rx="2" ry="2" />
+<text  x="1009.69" y="175.5" ></text>
+</g>
+<g >
+<title>mspace_malloc (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="45.9" y="373" width="0.5" height="15.0" fill="rgb(228,102,0)" rx="2" ry="2" />
+<text  x="48.88" y="383.5" ></text>
+</g>
+<g >
+<title>OUTLINED_FUNCTION_18 (in libtestswiftapiresolver.dylib) + (2 samples, 0.10%; +0.10%)</title><rect x="733.7" y="389" width="1.1" height="15.0" fill="rgb(255,187,187)" rx="2" ry="2" />
+<text  x="736.70" y="399.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1107.6" y="101" width="0.6" height="15.0" fill="rgb(227,14,31)" rx="2" ry="2" />
+<text  x="1110.60" y="111.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1036.4" y="197" width="0.6" height="15.0" fill="rgb(218,192,12)" rx="2" ry="2" />
+<text  x="1039.40" y="207.5" ></text>
+</g>
+<g >
+<title>_platform_strncpy (6 samples, 0.29%)</title><rect x="675.4" y="389" width="3.4" height="15.0" fill="rgb(227,107,46)" rx="2" ry="2" />
+<text  x="678.40" y="399.5" ></text>
+</g>
+<g >
+<title>decodeToMCInst_4 (in libtestswiftapiresolver.dylib) (AArch64Disassembler.c) (2 samples, 0.10%)</title><rect x="152.4" y="373" width="1.1" height="15.0" fill="rgb(211,200,3)" rx="2" ry="2" />
+<text  x="155.38" y="383.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (3 samples, 0.14%)</title><rect x="1017.3" y="181" width="1.7" height="15.0" fill="rgb(219,38,45)" rx="2" ry="2" />
+<text  x="1020.34" y="191.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Node::addChild(swift::Demangle::Node*, swift::Demangle::NodeFactory&amp;) (2 samples, 0.10%)</title><rect x="966.3" y="293" width="1.2" height="15.0" fill="rgb(215,210,15)" rx="2" ry="2" />
+<text  x="969.33" y="303.5" ></text>
+</g>
+<g >
+<title>g_strdup_vprintf (in libtestswiftapiresolver.dylib) (gstrfuncs.c) (9 samples, 0.43%)</title><rect x="46.4" y="405" width="5.1" height="15.0" fill="rgb(211,218,0)" rx="2" ry="2" />
+<text  x="49.44" y="415.5" ></text>
+</g>
+<g >
+<title>_g_gnulib_printf_parse (in libtestswiftapiresolver.dylib) (printf-parse.c) (1 samples, 0.05%)</title><rect x="1173.2" y="357" width="0.5" height="15.0" fill="rgb(219,101,23)" rx="2" ry="2" />
+<text  x="1176.18" y="367.5" ></text>
+</g>
+<g >
+<title>vsprintf_l (5 samples, 0.24%)</title><rect x="48.7" y="325" width="2.8" height="15.0" fill="rgb(251,135,54)" rx="2" ry="2" />
+<text  x="51.68" y="335.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printChildren(swift::Demangle::Node*, unsigned int, char const*) (6 samples, 0.29%)</title><rect x="1111.0" y="213" width="3.3" height="15.0" fill="rgb(207,138,16)" rx="2" ry="2" />
+<text  x="1113.96" y="223.5" ></text>
+</g>
+<g >
+<title>gum_module_metadata_collect_darwin_section (in libtestswiftapiresolver.dylib) (gumswiftapiresolver.c) (38 samples, 1.81%)</title><rect x="1167.0" y="453" width="21.3" height="15.0" fill="rgb(252,126,26)" rx="2" ry="2" />
+<text  x="1170.02" y="463.5" >g..</text>
+</g>
+<g >
+<title>DYLD-STUB$$strcmp (in libtestswiftapiresolver.dylib) + (15 samples, 0.71%; +0.52%)</title><rect x="645.1" y="389" width="8.4" height="15.0" fill="rgb(255,88,88)" rx="2" ry="2" />
+<text  x="648.13" y="399.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (2 samples, 0.10%)</title><rect x="1109.8" y="197" width="1.2" height="15.0" fill="rgb(234,150,37)" rx="2" ry="2" />
+<text  x="1112.84" y="207.5" ></text>
+</g>
+<g >
+<title>free (1 samples, 0.05%)</title><rect x="1113.2" y="117" width="0.6" height="15.0" fill="rgb(251,189,32)" rx="2" ry="2" />
+<text  x="1116.20" y="127.5" ></text>
+</g>
+<g >
+<title>gum_compute_context_descriptor_name (in libtestswiftapiresolver.dylib) (gumswiftapiresolver.c) (8 samples, 0.38%)</title><rect x="1182.7" y="421" width="4.5" height="15.0" fill="rgb(227,19,25)" rx="2" ry="2" />
+<text  x="1185.71" y="431.5" ></text>
+</g>
+<g >
+<title>gum_darwin_module_resolver_find_export_by_mangled_name (in libtestswiftapiresolver.dylib) (gumdarwinmoduleresolver.c) (2 samples, 0.10%)</title><rect x="711.3" y="421" width="1.1" height="15.0" fill="rgb(218,182,42)" rx="2" ry="2" />
+<text  x="714.27" y="431.5" ></text>
+</g>
+<g >
+<title>g_realloc (in libtestswiftapiresolver.dylib) (gmem.c) (1 samples, 0.05%)</title><rect x="1186.6" y="373" width="0.6" height="15.0" fill="rgb(206,14,37)" rx="2" ry="2" />
+<text  x="1189.64" y="383.5" ></text>
+</g>
+<g >
+<title>g_string_free (in libtestswiftapiresolver.dylib) (gstring.c) (1 samples, 0.05%)</title><rect x="1182.2" y="421" width="0.5" height="15.0" fill="rgb(226,171,53)" rx="2" ry="2" />
+<text  x="1185.15" y="431.5" ></text>
+</g>
+<g >
+<title>Xcode-beta (98089) (2,105 samples, 100.00%)</title><rect x="10.0" y="869" width="1180.0" height="15.0" fill="rgb(238,30,27)" rx="2" ry="2" />
+<text  x="13.00" y="879.5" >Xcode-beta (98089)</text>
+</g>
+<g >
+<title>swift::Demangle::Node::addChild(swift::Demangle::Node*, swift::Demangle::NodeFactory&amp;) (2 samples, 0.10%)</title><rect x="986.5" y="325" width="1.1" height="15.0" fill="rgb(220,173,17)" rx="2" ry="2" />
+<text  x="989.51" y="335.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printFunctionType(swift::Demangle::Node*, swift::Demangle::Node*, unsigned int) (4 samples, 0.19%)</title><rect x="1061.1" y="261" width="2.2" height="15.0" fill="rgb(209,206,28)" rx="2" ry="2" />
+<text  x="1064.07" y="271.5" ></text>
+</g>
+<g >
+<title>nanov2_malloc (3 samples, 0.14%)</title><rect x="1027.4" y="165" width="1.7" height="15.0" fill="rgb(227,46,41)" rx="2" ry="2" />
+<text  x="1030.43" y="175.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::popContext() (1 samples, 0.05%)</title><rect x="869.9" y="325" width="0.6" height="15.0" fill="rgb(210,150,8)" rx="2" ry="2" />
+<text  x="872.91" y="335.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (2 samples, 0.10%)</title><rect x="1063.3" y="245" width="1.1" height="15.0" fill="rgb(247,17,0)" rx="2" ry="2" />
+<text  x="1066.31" y="255.5" ></text>
+</g>
+<g >
+<title>init_top (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="1140.1" y="389" width="0.6" height="15.0" fill="rgb(208,7,51)" rx="2" ry="2" />
+<text  x="1143.11" y="399.5" ></text>
+</g>
+<g >
+<title>DYLD-STUB$$malloc (1 samples, 0.05%)</title><rect x="1041.4" y="213" width="0.6" height="15.0" fill="rgb(214,107,7)" rx="2" ry="2" />
+<text  x="1044.45" y="223.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::demangleBoundGenericType() (7 samples, 0.33%)</title><rect x="864.3" y="341" width="3.9" height="15.0" fill="rgb(238,90,20)" rx="2" ry="2" />
+<text  x="867.31" y="351.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (1 samples, 0.05%)</title><rect x="1018.5" y="149" width="0.5" height="15.0" fill="rgb(206,129,31)" rx="2" ry="2" />
+<text  x="1021.47" y="159.5" ></text>
+</g>
+<g >
+<title>insn_find (in libtestswiftapiresolver.dylib) (utils.c) (521 samples, 24.75%)</title><rect x="159.1" y="389" width="292.1" height="15.0" fill="rgb(254,95,44)" rx="2" ry="2" />
+<text  x="162.11" y="399.5" >insn_find (in libtestswiftapiresolver.d..</text>
+</g>
+<g >
+<title>MCInst_Init (in libtestswiftapiresolver.dylib) (MCInst.c) (1 samples, 0.05%)</title><rect x="118.8" y="421" width="0.5" height="15.0" fill="rgb(245,47,48)" rx="2" ry="2" />
+<text  x="121.75" y="431.5" ></text>
+</g>
+<g >
+<title>gum_module_metadata_collect_darwin_export (in libtestswiftapiresolver.dylib) (gumswiftapiresolver.c) (1,837 samples, 87.27%)</title><rect x="113.1" y="437" width="1029.8" height="15.0" fill="rgb(227,203,41)" rx="2" ry="2" />
+<text  x="116.14" y="447.5" >gum_module_metadata_collect_darwin_export (in libtestswiftapiresolver.dylib) (gumswiftapiresolver.c)</text>
+</g>
+<g >
+<title>thread_memory_from_self (in libtestswiftapiresolver.dylib) (gslice.c) (1 samples, 0.05%)</title><rect x="44.2" y="421" width="0.6" height="15.0" fill="rgb(250,107,15)" rx="2" ry="2" />
+<text  x="47.19" y="431.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (3 samples, 0.14%)</title><rect x="1061.1" y="213" width="1.7" height="15.0" fill="rgb(206,6,49)" rx="2" ry="2" />
+<text  x="1064.07" y="223.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long) (1 samples, 0.05%)</title><rect x="1075.1" y="213" width="0.5" height="15.0" fill="rgb(247,190,25)" rx="2" ry="2" />
+<text  x="1078.08" y="223.5" ></text>
+</g>
+<g >
+<title>printInt64Bang (in libtestswiftapiresolver.dylib) (SStream.c) (1 samples, 0.05%)</title><rect x="690.5" y="373" width="0.6" height="15.0" fill="rgb(236,140,18)" rx="2" ry="2" />
+<text  x="693.53" y="383.5" ></text>
+</g>
+<g >
+<title>fill_insn (in libtestswiftapiresolver.dylib) (cs.c) (16 samples, 0.76%)</title><rect x="669.8" y="405" width="9.0" height="15.0" fill="rgb(215,188,44)" rx="2" ry="2" />
+<text  x="672.79" y="415.5" ></text>
+</g>
+<g >
+<title>OUTLINED_FUNCTION_19 (in libtestswiftapiresolver.dylib) + (1 samples, 0.05%; -0.90%)</title><rect x="1175.4" y="341" width="0.6" height="15.0" fill="rgb(0,0,255)" rx="2" ry="2" />
+<text  x="1178.43" y="351.5" ></text>
+</g>
+<g >
+<title>_platform_strlen (6 samples, 0.29%)</title><rect x="681.6" y="373" width="3.3" height="15.0" fill="rgb(248,197,31)" rx="2" ry="2" />
+<text  x="684.56" y="383.5" ></text>
+</g>
+<g >
+<title>count_positive (in libtestswiftapiresolver.dylib) (utils.c) (1 samples, 0.05%)</title><rect x="669.2" y="405" width="0.6" height="15.0" fill="rgb(207,196,50)" rx="2" ry="2" />
+<text  x="672.23" y="415.5" ></text>
+</g>
+<g >
+<title>set_mem_access (in libtestswiftapiresolver.dylib) (AArch64InstPrinter.c) (1 samples, 0.05%)</title><rect x="692.2" y="389" width="0.6" height="15.0" fill="rgb(233,225,41)" rx="2" ry="2" />
+<text  x="695.21" y="399.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (1 samples, 0.05%)</title><rect x="1132.3" y="277" width="0.5" height="15.0" fill="rgb(212,150,53)" rx="2" ry="2" />
+<text  x="1135.26" y="287.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (1 samples, 0.05%)</title><rect x="1118.8" y="69" width="0.6" height="15.0" fill="rgb(205,109,49)" rx="2" ry="2" />
+<text  x="1121.81" y="79.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printChildren(swift::Demangle::Node*, unsigned int, char const*) (1 samples, 0.05%)</title><rect x="1035.8" y="213" width="0.6" height="15.0" fill="rgb(251,50,37)" rx="2" ry="2" />
+<text  x="1038.84" y="223.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::demangleIdentifier() (98 samples, 4.66%)</title><rect x="874.4" y="341" width="54.9" height="15.0" fill="rgb(216,156,39)" rx="2" ry="2" />
+<text  x="877.40" y="351.5" >swift..</text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (1 samples, 0.05%)</title><rect x="1132.3" y="293" width="0.5" height="15.0" fill="rgb(253,153,35)" rx="2" ry="2" />
+<text  x="1135.26" y="303.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Node::addChild(swift::Demangle::Node*, swift::Demangle::NodeFactory&amp;) (2 samples, 0.10%)</title><rect x="960.2" y="309" width="1.1" height="15.0" fill="rgb(208,61,51)" rx="2" ry="2" />
+<text  x="963.17" y="319.5" ></text>
+</g>
+<g >
+<title>operator new(unsigned long) (1 samples, 0.05%)</title><rect x="1113.8" y="117" width="0.5" height="15.0" fill="rgb(235,88,31)" rx="2" ry="2" />
+<text  x="1116.76" y="127.5" ></text>
+</g>
+<g >
+<title>get_op_access (in libtestswiftapiresolver.dylib) (AArch64InstPrinter.c) (1 samples, 0.05%)</title><rect x="668.7" y="373" width="0.5" height="15.0" fill="rgb(247,9,6)" rx="2" ry="2" />
+<text  x="671.67" y="383.5" ></text>
+</g>
+<g >
+<title>szone_malloc (5 samples, 0.24%)</title><rect x="801.0" y="357" width="2.8" height="15.0" fill="rgb(247,222,52)" rx="2" ry="2" />
+<text  x="803.96" y="367.5" ></text>
+</g>
+<g >
+<title>g_hash_table_lookup_node (in libtestswiftapiresolver.dylib) (ghash.c) (3 samples, 0.14%)</title><rect x="704.5" y="405" width="1.7" height="15.0" fill="rgb(211,136,6)" rx="2" ry="2" />
+<text  x="707.55" y="415.5" ></text>
+</g>
+<g >
+<title>tiny_malloc_from_free_list (1 samples, 0.05%)</title><rect x="1108.2" y="37" width="0.5" height="15.0" fill="rgb(241,150,23)" rx="2" ry="2" />
+<text  x="1111.16" y="47.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1123.9" y="85" width="0.5" height="15.0" fill="rgb(232,218,39)" rx="2" ry="2" />
+<text  x="1126.85" y="95.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (1 samples, 0.05%)</title><rect x="1063.9" y="229" width="0.5" height="15.0" fill="rgb(223,21,9)" rx="2" ry="2" />
+<text  x="1066.87" y="239.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1084.6" y="133" width="0.6" height="15.0" fill="rgb(251,180,18)" rx="2" ry="2" />
+<text  x="1087.61" y="143.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntityType(swift::Demangle::Node*, swift::Demangle::Node*, swift::Demangle::Node*, unsigned int) (1 samples, 0.05%)</title><rect x="1034.7" y="261" width="0.6" height="15.0" fill="rgb(228,92,34)" rx="2" ry="2" />
+<text  x="1037.72" y="271.5" ></text>
+</g>
+<g >
+<title>mspace_malloc (in libtestswiftapiresolver.dylib) (dlmalloc.c) (4 samples, 0.19%)</title><rect x="42.0" y="453" width="2.2" height="15.0" fill="rgb(251,139,6)" rx="2" ry="2" />
+<text  x="44.95" y="463.5" ></text>
+</g>
+<g >
+<title>ptr_array_new (in libtestswiftapiresolver.dylib) (garray.c) (5 samples, 0.24%)</title><rect x="1140.1" y="421" width="2.8" height="15.0" fill="rgb(218,92,24)" rx="2" ry="2" />
+<text  x="1143.11" y="431.5" ></text>
+</g>
+<g >
+<title>malloc (1 samples, 0.05%)</title><rect x="1059.9" y="181" width="0.6" height="15.0" fill="rgb(226,95,30)" rx="2" ry="2" />
+<text  x="1062.95" y="191.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1118.8" y="133" width="0.6" height="15.0" fill="rgb(242,17,52)" rx="2" ry="2" />
+<text  x="1121.81" y="143.5" ></text>
+</g>
+<g >
+<title>__mmap (2 samples, 0.10%)</title><rect x="1141.8" y="341" width="1.1" height="15.0" fill="rgb(212,119,22)" rx="2" ry="2" />
+<text  x="1144.79" y="351.5" ></text>
+</g>
+<g >
+<title>tiny_malloc_from_free_list (20 samples, 0.95%)</title><rect x="807.7" y="325" width="11.2" height="15.0" fill="rgb(236,173,46)" rx="2" ry="2" />
+<text  x="810.69" y="335.5" ></text>
+</g>
+<g >
+<title>_platform_strlen (1 samples, 0.05%)</title><rect x="977.5" y="309" width="0.6" height="15.0" fill="rgb(253,26,26)" rx="2" ry="2" />
+<text  x="980.54" y="319.5" ></text>
+</g>
+<g >
+<title>gum_darwin_module_is_address_in_text_section (in libtestswiftapiresolver.dylib) (gumdarwinmodule.c) (11 samples, 0.52%)</title><rect x="717.4" y="405" width="6.2" height="15.0" fill="rgb(248,25,52)" rx="2" ry="2" />
+<text  x="720.44" y="415.5" ></text>
+</g>
+<g >
+<title>AArch64_post_printer (in libtestswiftapiresolver.dylib) (AArch64InstPrinter.c) (1 samples, 0.05%)</title><rect x="674.3" y="389" width="0.5" height="15.0" fill="rgb(218,7,23)" rx="2" ry="2" />
+<text  x="677.28" y="399.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (1 samples, 0.05%)</title><rect x="1119.4" y="133" width="0.5" height="15.0" fill="rgb(232,74,37)" rx="2" ry="2" />
+<text  x="1122.37" y="143.5" ></text>
+</g>
+<g >
+<title>_malloc_zone_malloc (1 samples, 0.05%)</title><rect x="1067.8" y="213" width="0.6" height="15.0" fill="rgb(207,19,15)" rx="2" ry="2" />
+<text  x="1070.80" y="223.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (7 samples, 0.33%)</title><rect x="1126.7" y="229" width="3.9" height="15.0" fill="rgb(234,182,17)" rx="2" ry="2" />
+<text  x="1129.66" y="239.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::demangleBoundGenerics(swift::Demangle::Vector&lt;swift::Demangle::Node*&gt;&amp;, swift::Demangle::Node*&amp;) (2 samples, 0.10%)</title><rect x="867.1" y="325" width="1.1" height="15.0" fill="rgb(216,181,28)" rx="2" ry="2" />
+<text  x="870.11" y="335.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (4 samples, 0.19%)</title><rect x="1032.5" y="229" width="2.2" height="15.0" fill="rgb(226,104,41)" rx="2" ry="2" />
+<text  x="1035.48" y="239.5" ></text>
+</g>
+<g >
+<title>_platform_strlen (2 samples, 0.10%)</title><rect x="1185.5" y="389" width="1.1" height="15.0" fill="rgb(219,216,36)" rx="2" ry="2" />
+<text  x="1188.52" y="399.5" ></text>
+</g>
+<g >
+<title>_platform_memset (3 samples, 0.14%)</title><rect x="773.5" y="357" width="1.7" height="15.0" fill="rgb(210,111,10)" rx="2" ry="2" />
+<text  x="776.50" y="367.5" ></text>
+</g>
+<g >
+<title>free_small (1 samples, 0.05%)</title><rect x="784.7" y="373" width="0.6" height="15.0" fill="rgb(216,74,3)" rx="2" ry="2" />
+<text  x="787.71" y="383.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1123.9" y="165" width="0.5" height="15.0" fill="rgb(250,152,43)" rx="2" ry="2" />
+<text  x="1126.85" y="175.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Node::addChild(swift::Demangle::Node*, swift::Demangle::NodeFactory&amp;) (1 samples, 0.05%)</title><rect x="929.3" y="325" width="0.6" height="15.0" fill="rgb(210,157,33)" rx="2" ry="2" />
+<text  x="932.33" y="335.5" ></text>
+</g>
+<g >
+<title>try_realloc_chunk (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="47.6" y="325" width="0.5" height="15.0" fill="rgb(233,192,31)" rx="2" ry="2" />
+<text  x="50.56" y="335.5" ></text>
+</g>
+<g >
+<title>__stpcpy_chk (32 samples, 1.52%)</title><rect x="19.0" y="453" width="17.9" height="15.0" fill="rgb(212,57,43)" rx="2" ry="2" />
+<text  x="21.97" y="463.5" ></text>
+</g>
+<g >
+<title>g_thread_proxy (in libfrida-agent-modulated.dylib) (gthread.c) (2,105 samples, 100.00%)</title><rect x="10.0" y="821" width="1180.0" height="15.0" fill="rgb(210,41,11)" rx="2" ry="2" />
+<text  x="13.00" y="831.5" >g_thread_proxy (in libfrida-agent-modulated.dylib) (gthread.c)</text>
+</g>
+<g >
+<title>mmap (1 samples, 0.05%)</title><rect x="703.4" y="341" width="0.6" height="15.0" fill="rgb(230,208,38)" rx="2" ry="2" />
+<text  x="706.43" y="351.5" ></text>
+</g>
+<g >
+<title>__chk_overlap (3 samples, 0.14%)</title><rect x="22.9" y="437" width="1.7" height="15.0" fill="rgb(250,161,11)" rx="2" ry="2" />
+<text  x="25.89" y="447.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1082.9" y="149" width="0.6" height="15.0" fill="rgb(226,91,5)" rx="2" ry="2" />
+<text  x="1085.93" y="159.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (24 samples, 1.14%)</title><rect x="1079.0" y="229" width="13.5" height="15.0" fill="rgb(207,188,24)" rx="2" ry="2" />
+<text  x="1082.01" y="239.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::push_back(char) (1 samples, 0.05%)</title><rect x="1063.3" y="213" width="0.6" height="15.0" fill="rgb(206,59,34)" rx="2" ry="2" />
+<text  x="1066.31" y="223.5" ></text>
+</g>
+<g >
+<title>free (1 samples, 0.05%)</title><rect x="1018.5" y="117" width="0.5" height="15.0" fill="rgb(220,125,39)" rx="2" ry="2" />
+<text  x="1021.47" y="127.5" ></text>
+</g>
+<g >
+<title>__vfprintf (4 samples, 0.19%)</title><rect x="49.2" y="309" width="2.3" height="15.0" fill="rgb(246,49,35)" rx="2" ry="2" />
+<text  x="52.24" y="319.5" ></text>
+</g>
+<g >
+<title>OUTLINED_FUNCTION_21 (in libtestswiftapiresolver.dylib) + (1 samples, 0.05%; -0.52%)</title><rect x="1172.1" y="357" width="0.5" height="15.0" fill="rgb(88,88,255)" rx="2" ry="2" />
+<text  x="1175.06" y="367.5" ></text>
+</g>
+<g >
+<title>set_mem_access (in libtestswiftapiresolver.dylib) (AArch64InstPrinter.c) (1 samples, 0.05%)</title><rect x="695.6" y="405" width="0.5" height="15.0" fill="rgb(213,81,11)" rx="2" ry="2" />
+<text  x="698.58" y="415.5" ></text>
+</g>
+<g >
+<title>get_op_access (in libtestswiftapiresolver.dylib) (AArch64InstPrinter.c) (1 samples, 0.05%)</title><rect x="688.9" y="373" width="0.5" height="15.0" fill="rgb(223,78,29)" rx="2" ry="2" />
+<text  x="691.85" y="383.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Node::addChild(swift::Demangle::Node*, swift::Demangle::NodeFactory&amp;) (3 samples, 0.14%)</title><rect x="979.8" y="325" width="1.7" height="15.0" fill="rgb(215,97,51)" rx="2" ry="2" />
+<text  x="982.79" y="335.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (26 samples, 1.24%)</title><rect x="1015.1" y="229" width="14.6" height="15.0" fill="rgb(233,48,11)" rx="2" ry="2" />
+<text  x="1018.10" y="239.5" ></text>
+</g>
+<g >
+<title>_platform_strlen (1 samples, 0.05%)</title><rect x="1166.5" y="421" width="0.5" height="15.0" fill="rgb(215,5,53)" rx="2" ry="2" />
+<text  x="1169.46" y="431.5" ></text>
+</g>
+<g >
+<title>_g_gnulib_vasnprintf (in libtestswiftapiresolver.dylib) (vasnprintf.c) (9 samples, 0.43%)</title><rect x="46.4" y="357" width="5.1" height="15.0" fill="rgb(238,45,18)" rx="2" ry="2" />
+<text  x="49.44" y="367.5" ></text>
+</g>
+<g >
+<title>_nanov2_free (1 samples, 0.05%)</title><rect x="1056.0" y="165" width="0.6" height="15.0" fill="rgb(207,206,35)" rx="2" ry="2" />
+<text  x="1059.02" y="175.5" ></text>
+</g>
+<g >
+<title>OUTLINED_FUNCTION_9 (in libtestswiftapiresolver.dylib) + (1 samples, 0.05%; +0.05%)</title><rect x="121.0" y="421" width="0.6" height="15.0" fill="rgb(255,198,198)" rx="2" ry="2" />
+<text  x="123.99" y="431.5" ></text>
+</g>
+<g >
+<title>_platform_strncmp (3 samples, 0.14%)</title><rect x="126.0" y="405" width="1.7" height="15.0" fill="rgb(248,174,50)" rx="2" ry="2" />
+<text  x="129.04" y="415.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1017.9" y="133" width="0.6" height="15.0" fill="rgb(238,45,30)" rx="2" ry="2" />
+<text  x="1020.90" y="143.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (12 samples, 0.57%)</title><rect x="1068.9" y="261" width="6.7" height="15.0" fill="rgb(212,220,0)" rx="2" ry="2" />
+<text  x="1071.92" y="271.5" ></text>
+</g>
+<g >
+<title>g_pattern_spec_match_string (in libtestswiftapiresolver.dylib) (gpattern.c) (5 samples, 0.24%)</title><rect x="12.2" y="469" width="2.8" height="15.0" fill="rgb(235,100,44)" rx="2" ry="2" />
+<text  x="15.24" y="479.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (1 samples, 0.05%)</title><rect x="1063.9" y="213" width="0.5" height="15.0" fill="rgb(251,184,39)" rx="2" ry="2" />
+<text  x="1066.87" y="223.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (37 samples, 1.76%)</title><rect x="1048.2" y="277" width="20.7" height="15.0" fill="rgb(209,32,34)" rx="2" ry="2" />
+<text  x="1051.18" y="287.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printBoundGeneric(swift::Demangle::Node*, unsigned int) (1 samples, 0.05%)</title><rect x="1054.3" y="229" width="0.6" height="15.0" fill="rgb(214,75,34)" rx="2" ry="2" />
+<text  x="1057.34" y="239.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (1 samples, 0.05%)</title><rect x="1062.2" y="165" width="0.6" height="15.0" fill="rgb(237,12,0)" rx="2" ry="2" />
+<text  x="1065.19" y="175.5" ></text>
+</g>
+<g >
+<title>OUTLINED_FUNCTION_3 (in libtestswiftapiresolver.dylib) + (1 samples, 0.05%; -0.52%)</title><rect x="18.4" y="453" width="0.6" height="15.0" fill="rgb(88,88,255)" rx="2" ry="2" />
+<text  x="21.41" y="463.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::createWithChildren(swift::Demangle::Node::Kind, swift::Demangle::Node*, swift::Demangle::Node*) (2 samples, 0.10%)</title><rect x="865.4" y="325" width="1.2" height="15.0" fill="rgb(240,214,36)" rx="2" ry="2" />
+<text  x="868.43" y="335.5" ></text>
+</g>
+<g >
+<title>printOperand (in libtestswiftapiresolver.dylib) (AArch64InstPrinter.c) (2 samples, 0.10%)</title><rect x="693.3" y="389" width="1.2" height="15.0" fill="rgb(248,4,26)" rx="2" ry="2" />
+<text  x="696.33" y="399.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::demanglePlainFunction() (16 samples, 0.76%)</title><rect x="959.6" y="341" width="9.0" height="15.0" fill="rgb(225,189,17)" rx="2" ry="2" />
+<text  x="962.61" y="351.5" ></text>
+</g>
+<g >
+<title>operator new(unsigned long) (35 samples, 1.66%)</title><rect x="799.3" y="373" width="19.6" height="15.0" fill="rgb(217,195,4)" rx="2" ry="2" />
+<text  x="802.28" y="383.5" ></text>
+</g>
+<g >
+<title>mspace_free (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="702.3" y="373" width="0.6" height="15.0" fill="rgb(225,220,13)" rx="2" ry="2" />
+<text  x="705.30" y="383.5" ></text>
+</g>
+<g >
+<title>SStream_concat0 (in libtestswiftapiresolver.dylib) (SStream.c) (2 samples, 0.10%)</title><rect x="654.7" y="389" width="1.1" height="15.0" fill="rgb(242,110,28)" rx="2" ry="2" />
+<text  x="657.66" y="399.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (1 samples, 0.05%)</title><rect x="1033.6" y="213" width="0.6" height="15.0" fill="rgb(210,50,20)" rx="2" ry="2" />
+<text  x="1036.60" y="223.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::popFunctionType(swift::Demangle::Node::Kind, bool) (5 samples, 0.24%)</title><rect x="982.0" y="341" width="2.8" height="15.0" fill="rgb(223,24,40)" rx="2" ry="2" />
+<text  x="985.03" y="351.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printBoundGenericNoSugar(swift::Demangle::Node*, unsigned int) (4 samples, 0.19%)</title><rect x="1084.1" y="213" width="2.2" height="15.0" fill="rgb(254,7,46)" rx="2" ry="2" />
+<text  x="1087.05" y="223.5" ></text>
+</g>
+<g >
+<title>sprintf (6 samples, 0.29%)</title><rect x="48.1" y="341" width="3.4" height="15.0" fill="rgb(246,58,0)" rx="2" ry="2" />
+<text  x="51.12" y="351.5" ></text>
+</g>
+<g >
+<title>mspace_malloc (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="709.6" y="405" width="0.6" height="15.0" fill="rgb(218,194,43)" rx="2" ry="2" />
+<text  x="712.59" y="415.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Node::addChild(swift::Demangle::Node*, swift::Demangle::NodeFactory&amp;) (1 samples, 0.05%)</title><rect x="848.1" y="325" width="0.5" height="15.0" fill="rgb(247,82,42)" rx="2" ry="2" />
+<text  x="851.05" y="335.5" ></text>
+</g>
+<g >
+<title>_gum_quick_scope_call_void (in libfrida-agent-modulated.dylib) (gumquickcore.c) (2,105 samples, 100.00%)</title><rect x="10.0" y="709" width="1180.0" height="15.0" fill="rgb(233,202,52)" rx="2" ry="2" />
+<text  x="13.00" y="719.5" >_gum_quick_scope_call_void (in libfrida-agent-modulated.dylib) (gumquickcore.c)</text>
+</g>
+<g >
+<title>_platform_memset (2 samples, 0.10%)</title><rect x="134.4" y="389" width="1.2" height="15.0" fill="rgb(218,82,21)" rx="2" ry="2" />
+<text  x="137.45" y="399.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (1 samples, 0.05%)</title><rect x="1062.8" y="229" width="0.5" height="15.0" fill="rgb(212,14,47)" rx="2" ry="2" />
+<text  x="1065.75" y="239.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printBoundGeneric(swift::Demangle::Node*, unsigned int) (6 samples, 0.29%)</title><rect x="1004.5" y="245" width="3.3" height="15.0" fill="rgb(227,155,24)" rx="2" ry="2" />
+<text  x="1007.45" y="255.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (3 samples, 0.14%)</title><rect x="1058.8" y="213" width="1.7" height="15.0" fill="rgb(253,206,15)" rx="2" ry="2" />
+<text  x="1061.83" y="223.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (4 samples, 0.19%)</title><rect x="1081.8" y="197" width="2.3" height="15.0" fill="rgb(238,2,12)" rx="2" ry="2" />
+<text  x="1084.81" y="207.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::demangleGenericSignature(bool) (2 samples, 0.10%)</title><rect x="873.3" y="341" width="1.1" height="15.0" fill="rgb(219,164,41)" rx="2" ry="2" />
+<text  x="876.28" y="351.5" ></text>
+</g>
+<g >
+<title>tiny_free_list_remove_ptr (2 samples, 0.10%)</title><rect x="798.2" y="341" width="1.1" height="15.0" fill="rgb(215,61,37)" rx="2" ry="2" />
+<text  x="801.16" y="351.5" ></text>
+</g>
+<g >
+<title>_nanov2_free (1 samples, 0.05%)</title><rect x="1035.8" y="117" width="0.6" height="15.0" fill="rgb(217,57,41)" rx="2" ry="2" />
+<text  x="1038.84" y="127.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (249 samples, 11.83%)</title><rect x="993.2" y="341" width="139.6" height="15.0" fill="rgb(221,122,26)" rx="2" ry="2" />
+<text  x="996.24" y="351.5" >(anonymous namesp..</text>
+</g>
+<g >
+<title>mmap (2 samples, 0.10%)</title><rect x="1141.8" y="357" width="1.1" height="15.0" fill="rgb(251,92,0)" rx="2" ry="2" />
+<text  x="1144.79" y="367.5" ></text>
+</g>
+<g >
+<title>_platform_strnlen (5 samples, 0.24%)</title><rect x="775.2" y="357" width="2.8" height="15.0" fill="rgb(227,146,38)" rx="2" ry="2" />
+<text  x="778.18" y="367.5" ></text>
+</g>
+<g >
+<title>std::__1::function&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt; (unsigned long long, unsigned long long)&gt;::operator()(unsigned long long, unsigned long long) const (1 samples, 0.05%)</title><rect x="1007.8" y="213" width="0.6" height="15.0" fill="rgb(218,193,14)" rx="2" ry="2" />
+<text  x="1010.81" y="223.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::demangleBoundGenericArgs(swift::Demangle::Node*, swift::Demangle::Vector&lt;swift::Demangle::Node*&gt; const&amp;, unsigned long) (1 samples, 0.05%)</title><rect x="866.6" y="325" width="0.5" height="15.0" fill="rgb(242,204,32)" rx="2" ry="2" />
+<text  x="869.55" y="335.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printFunctionType(swift::Demangle::Node*, swift::Demangle::Node*, unsigned int) (3 samples, 0.14%)</title><rect x="1035.3" y="261" width="1.7" height="15.0" fill="rgb(253,189,45)" rx="2" ry="2" />
+<text  x="1038.28" y="271.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (1 samples, 0.05%)</title><rect x="1062.8" y="213" width="0.5" height="15.0" fill="rgb(237,166,0)" rx="2" ry="2" />
+<text  x="1065.75" y="223.5" ></text>
+</g>
+<g >
+<title>mspace_malloc (in libtestswiftapiresolver.dylib) (dlmalloc.c) (2 samples, 0.10%)</title><rect x="702.9" y="373" width="1.1" height="15.0" fill="rgb(238,195,48)" rx="2" ry="2" />
+<text  x="705.86" y="383.5" ></text>
+</g>
+<g >
+<title>operator new(unsigned long) (1 samples, 0.05%)</title><rect x="1007.3" y="149" width="0.5" height="15.0" fill="rgb(248,208,10)" rx="2" ry="2" />
+<text  x="1010.25" y="159.5" ></text>
+</g>
+<g >
+<title>AArch64_getInstruction (in libtestswiftapiresolver.dylib) (AArch64Disassembler.c) (1 samples, 0.05%)</title><rect x="117.6" y="421" width="0.6" height="15.0" fill="rgb(253,100,39)" rx="2" ry="2" />
+<text  x="120.63" y="431.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (1 samples, 0.05%)</title><rect x="1108.2" y="101" width="0.5" height="15.0" fill="rgb(220,126,20)" rx="2" ry="2" />
+<text  x="1111.16" y="111.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (4 samples, 0.19%)</title><rect x="1112.1" y="133" width="2.2" height="15.0" fill="rgb(244,86,26)" rx="2" ry="2" />
+<text  x="1115.08" y="143.5" ></text>
+</g>
+<g >
+<title>mspace_realloc (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="704.0" y="373" width="0.5" height="15.0" fill="rgb(246,119,22)" rx="2" ry="2" />
+<text  x="706.99" y="383.5" ></text>
+</g>
+<g >
+<title>gum_darwin_module_enumerate_exports (in libtestswiftapiresolver.dylib) (gumdarwinmodule.c) (1,999 samples, 94.96%)</title><rect x="44.2" y="469" width="1120.6" height="15.0" fill="rgb(236,26,26)" rx="2" ry="2" />
+<text  x="47.19" y="479.5" >gum_darwin_module_enumerate_exports (in libtestswiftapiresolver.dylib) (gumdarwinmodule.c)</text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (3 samples, 0.14%)</title><rect x="1107.6" y="181" width="1.7" height="15.0" fill="rgb(254,43,38)" rx="2" ry="2" />
+<text  x="1110.60" y="191.5" ></text>
+</g>
+<g >
+<title>__error (1 samples, 0.05%)</title><rect x="1172.6" y="357" width="0.6" height="15.0" fill="rgb(213,24,27)" rx="2" ry="2" />
+<text  x="1175.62" y="367.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (2 samples, 0.10%)</title><rect x="1084.1" y="197" width="1.1" height="15.0" fill="rgb(251,30,41)" rx="2" ry="2" />
+<text  x="1087.05" y="207.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Node::addChild(swift::Demangle::Node*, swift::Demangle::NodeFactory&amp;) (1 samples, 0.05%)</title><rect x="987.6" y="341" width="0.6" height="15.0" fill="rgb(211,66,14)" rx="2" ry="2" />
+<text  x="990.63" y="351.5" ></text>
+</g>
+<g >
+<title>decodeULEB128 (in libtestswiftapiresolver.dylib) (LEB128.h) (3 samples, 0.14%)</title><rect x="154.6" y="389" width="1.7" height="15.0" fill="rgb(246,115,47)" rx="2" ry="2" />
+<text  x="157.63" y="399.5" ></text>
+</g>
+<g >
+<title>nanov2_malloc (1 samples, 0.05%)</title><rect x="843.6" y="325" width="0.5" height="15.0" fill="rgb(205,164,34)" rx="2" ry="2" />
+<text  x="846.57" y="335.5" ></text>
+</g>
+<g >
+<title>mspace_malloc (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="47.0" y="341" width="0.6" height="15.0" fill="rgb(217,95,31)" rx="2" ry="2" />
+<text  x="50.00" y="351.5" ></text>
+</g>
+<g >
+<title>g_array_append_vals (in libtestswiftapiresolver.dylib) (garray.c) (1 samples, 0.05%)</title><rect x="108.1" y="437" width="0.6" height="15.0" fill="rgb(243,19,43)" rx="2" ry="2" />
+<text  x="111.10" y="447.5" ></text>
+</g>
+<g >
+<title>_platform_strncpy (15 samples, 0.71%)</title><rect x="769.6" y="373" width="8.4" height="15.0" fill="rgb(238,86,7)" rx="2" ry="2" />
+<text  x="772.57" y="383.5" ></text>
+</g>
+<g >
+<title>_platform_strncpy (1 samples, 0.05%)</title><rect x="710.2" y="405" width="0.5" height="15.0" fill="rgb(212,217,45)" rx="2" ry="2" />
+<text  x="713.15" y="415.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (1 samples, 0.05%)</title><rect x="1180.5" y="293" width="0.5" height="15.0" fill="rgb(237,221,54)" rx="2" ry="2" />
+<text  x="1183.47" y="303.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (6 samples, 0.29%)</title><rect x="1087.4" y="197" width="3.4" height="15.0" fill="rgb(212,169,40)" rx="2" ry="2" />
+<text  x="1090.42" y="207.5" ></text>
+</g>
+<g >
+<title>_nanov2_free (1 samples, 0.05%)</title><rect x="1112.6" y="117" width="0.6" height="15.0" fill="rgb(224,117,15)" rx="2" ry="2" />
+<text  x="1115.64" y="127.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1107.6" y="69" width="0.6" height="15.0" fill="rgb(228,148,45)" rx="2" ry="2" />
+<text  x="1110.60" y="79.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Node::addChild(swift::Demangle::Node*, swift::Demangle::NodeFactory&amp;) (12 samples, 0.57%)</title><rect x="857.6" y="325" width="6.7" height="15.0" fill="rgb(245,51,5)" rx="2" ry="2" />
+<text  x="860.58" y="335.5" ></text>
+</g>
+<g >
+<title>mspace_free (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="659.7" y="389" width="0.6" height="15.0" fill="rgb(216,54,14)" rx="2" ry="2" />
+<text  x="662.70" y="399.5" ></text>
+</g>
+<g >
+<title>_platform_strncpy (1 samples, 0.05%)</title><rect x="751.6" y="389" width="0.6" height="15.0" fill="rgb(230,211,7)" rx="2" ry="2" />
+<text  x="754.63" y="399.5" ></text>
+</g>
+<g >
+<title>_g_gnulib_vasprintf (in libtestswiftapiresolver.dylib) (printf.c) (24 samples, 1.14%)</title><rect x="1168.1" y="389" width="13.5" height="15.0" fill="rgb(244,131,44)" rx="2" ry="2" />
+<text  x="1171.14" y="399.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (8 samples, 0.38%)</title><rect x="1086.3" y="213" width="4.5" height="15.0" fill="rgb(251,93,14)" rx="2" ry="2" />
+<text  x="1089.29" y="223.5" ></text>
+</g>
+<g >
+<title>printUImm12Offset (in libtestswiftapiresolver.dylib) (AArch64InstPrinter.c) (1 samples, 0.05%)</title><rect x="690.5" y="389" width="0.6" height="15.0" fill="rgb(248,64,11)" rx="2" ry="2" />
+<text  x="693.53" y="399.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (2 samples, 0.10%)</title><rect x="1066.7" y="229" width="1.1" height="15.0" fill="rgb(230,121,52)" rx="2" ry="2" />
+<text  x="1069.67" y="239.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (1 samples, 0.05%)</title><rect x="1131.7" y="277" width="0.6" height="15.0" fill="rgb(253,118,54)" rx="2" ry="2" />
+<text  x="1134.70" y="287.5" ></text>
+</g>
+<g >
+<title>SStream_concat0 (in libtestswiftapiresolver.dylib) (SStream.c) (1 samples, 0.05%)</title><rect x="693.9" y="373" width="0.6" height="15.0" fill="rgb(224,146,52)" rx="2" ry="2" />
+<text  x="696.90" y="383.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (3 samples, 0.14%)</title><rect x="656.3" y="373" width="1.7" height="15.0" fill="rgb(214,76,2)" rx="2" ry="2" />
+<text  x="659.34" y="383.5" ></text>
+</g>
+<g >
+<title>__sfvwrite (1 samples, 0.05%)</title><rect x="1180.5" y="309" width="0.5" height="15.0" fill="rgb(237,162,38)" rx="2" ry="2" />
+<text  x="1183.47" y="319.5" ></text>
+</g>
+<g >
+<title>free (1 samples, 0.05%)</title><rect x="1062.8" y="197" width="0.5" height="15.0" fill="rgb(208,51,27)" rx="2" ry="2" />
+<text  x="1065.75" y="207.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (10 samples, 0.48%)</title><rect x="1024.1" y="197" width="5.6" height="15.0" fill="rgb(221,194,22)" rx="2" ry="2" />
+<text  x="1027.07" y="207.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::isContext(swift::Demangle::Node::Kind) (1 samples, 0.05%)</title><rect x="961.3" y="309" width="0.5" height="15.0" fill="rgb(222,38,31)" rx="2" ry="2" />
+<text  x="964.29" y="319.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (1 samples, 0.05%)</title><rect x="701.2" y="405" width="0.5" height="15.0" fill="rgb(221,189,23)" rx="2" ry="2" />
+<text  x="704.18" y="415.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::~Demangler() (7 samples, 0.33%)</title><rect x="1132.8" y="373" width="3.9" height="15.0" fill="rgb(249,190,46)" rx="2" ry="2" />
+<text  x="1135.82" y="383.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (4 samples, 0.19%)</title><rect x="1112.1" y="181" width="2.2" height="15.0" fill="rgb(235,128,27)" rx="2" ry="2" />
+<text  x="1115.08" y="191.5" ></text>
+</g>
+<g >
+<title>nanov2_malloc (1 samples, 0.05%)</title><rect x="1042.6" y="213" width="0.5" height="15.0" fill="rgb(208,96,10)" rx="2" ry="2" />
+<text  x="1045.57" y="223.5" ></text>
+</g>
+<g >
+<title>_platform_strlen (1 samples, 0.05%)</title><rect x="693.9" y="357" width="0.6" height="15.0" fill="rgb(216,40,36)" rx="2" ry="2" />
+<text  x="696.90" y="367.5" ></text>
+</g>
+<g >
+<title>operator new(unsigned long) (1 samples, 0.05%)</title><rect x="1023.5" y="197" width="0.6" height="15.0" fill="rgb(252,52,33)" rx="2" ry="2" />
+<text  x="1026.51" y="207.5" ></text>
+</g>
+<g >
+<title>g_array_append_vals (in libtestswiftapiresolver.dylib) (garray.c) (2 samples, 0.10%)</title><rect x="45.3" y="421" width="1.1" height="15.0" fill="rgb(222,108,38)" rx="2" ry="2" />
+<text  x="48.32" y="431.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (2 samples, 0.10%)</title><rect x="1090.8" y="213" width="1.1" height="15.0" fill="rgb(227,42,11)" rx="2" ry="2" />
+<text  x="1093.78" y="223.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (6 samples, 0.29%)</title><rect x="1017.3" y="213" width="3.4" height="15.0" fill="rgb(225,179,12)" rx="2" ry="2" />
+<text  x="1020.34" y="223.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (1 samples, 0.05%)</title><rect x="1173.7" y="357" width="0.6" height="15.0" fill="rgb(229,49,1)" rx="2" ry="2" />
+<text  x="1176.74" y="367.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (9 samples, 0.43%)</title><rect x="1029.7" y="245" width="5.0" height="15.0" fill="rgb(218,61,47)" rx="2" ry="2" />
+<text  x="1032.68" y="255.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (5 samples, 0.24%)</title><rect x="1005.0" y="213" width="2.8" height="15.0" fill="rgb(246,107,7)" rx="2" ry="2" />
+<text  x="1008.01" y="223.5" ></text>
+</g>
+<g >
+<title>gum_vsnprintf (in libtestswiftapiresolver.dylib) (gumprintf.c) (1 samples, 0.05%)</title><rect x="690.5" y="341" width="0.6" height="15.0" fill="rgb(240,22,25)" rx="2" ry="2" />
+<text  x="693.53" y="351.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (1 samples, 0.05%)</title><rect x="1023.0" y="197" width="0.5" height="15.0" fill="rgb(253,63,6)" rx="2" ry="2" />
+<text  x="1025.95" y="207.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (1 samples, 0.05%)</title><rect x="1084.6" y="101" width="0.6" height="15.0" fill="rgb(215,90,3)" rx="2" ry="2" />
+<text  x="1087.61" y="111.5" ></text>
+</g>
+<g >
+<title>_nanov2_free (5 samples, 0.24%)</title><rect x="761.7" y="373" width="2.8" height="15.0" fill="rgb(247,57,4)" rx="2" ry="2" />
+<text  x="764.72" y="383.5" ></text>
+</g>
+<g >
+<title>g_strndup (in libtestswiftapiresolver.dylib) (gstrfuncs.c) (1 samples, 0.05%)</title><rect x="109.8" y="437" width="0.5" height="15.0" fill="rgb(234,103,10)" rx="2" ry="2" />
+<text  x="112.78" y="447.5" ></text>
+</g>
+<g >
+<title>_platform_strnlen (2 samples, 0.10%)</title><rect x="677.6" y="373" width="1.2" height="15.0" fill="rgb(251,138,24)" rx="2" ry="2" />
+<text  x="680.64" y="383.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printChildren(swift::Demangle::Node*, unsigned int, char const*) (1 samples, 0.05%)</title><rect x="1084.1" y="181" width="0.5" height="15.0" fill="rgb(206,158,31)" rx="2" ry="2" />
+<text  x="1087.05" y="191.5" ></text>
+</g>
+<g >
+<title>AArch64_map_insn (in libtestswiftapiresolver.dylib) (AArch64Mapping.c) (213 samples, 10.12%)</title><rect x="525.7" y="389" width="119.4" height="15.0" fill="rgb(241,166,47)" rx="2" ry="2" />
+<text  x="528.72" y="399.5" >AArch64_map_in..</text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::demangleSpecialType() (2 samples, 0.10%)</title><rect x="968.6" y="341" width="1.1" height="15.0" fill="rgb(233,22,9)" rx="2" ry="2" />
+<text  x="971.57" y="351.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::popFunctionType(swift::Demangle::Node::Kind, bool) (6 samples, 0.29%)</title><rect x="965.2" y="325" width="3.4" height="15.0" fill="rgb(216,93,12)" rx="2" ry="2" />
+<text  x="968.21" y="335.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (8 samples, 0.38%)</title><rect x="1064.4" y="261" width="4.5" height="15.0" fill="rgb(252,207,36)" rx="2" ry="2" />
+<text  x="1067.43" y="271.5" ></text>
+</g>
+<g >
+<title>gum_darwin_module_take_image (in libtestswiftapiresolver.dylib) (gumdarwinmodule.c) (12 samples, 0.57%)</title><rect x="44.8" y="437" width="6.7" height="15.0" fill="rgb(216,207,10)" rx="2" ry="2" />
+<text  x="47.76" y="447.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1062.2" y="197" width="0.6" height="15.0" fill="rgb(228,193,53)" rx="2" ry="2" />
+<text  x="1065.19" y="207.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (79 samples, 3.75%)</title><rect x="1000.0" y="277" width="44.3" height="15.0" fill="rgb(227,177,51)" rx="2" ry="2" />
+<text  x="1002.97" y="287.5" >(ano..</text>
+</g>
+<g >
+<title>_platform_memset (2 samples, 0.10%)</title><rect x="676.5" y="373" width="1.1" height="15.0" fill="rgb(226,186,52)" rx="2" ry="2" />
+<text  x="679.52" y="383.5" ></text>
+</g>
+<g >
+<title>dispose_chunk (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="1176.5" y="325" width="0.6" height="15.0" fill="rgb(236,85,46)" rx="2" ry="2" />
+<text  x="1179.55" y="335.5" ></text>
+</g>
+<g >
+<title>_platform_strlen (2 samples, 0.10%)</title><rect x="1174.3" y="357" width="1.1" height="15.0" fill="rgb(252,206,7)" rx="2" ry="2" />
+<text  x="1177.30" y="367.5" ></text>
+</g>
+<g >
+<title>printOperand (in libtestswiftapiresolver.dylib) (AArch64InstPrinter.c) (10 samples, 0.48%)</title><rect x="684.9" y="389" width="5.6" height="15.0" fill="rgb(210,204,33)" rx="2" ry="2" />
+<text  x="687.93" y="399.5" ></text>
+</g>
+<g >
+<title>nanov2_malloc (3 samples, 0.14%)</title><rect x="799.3" y="357" width="1.7" height="15.0" fill="rgb(216,94,49)" rx="2" ry="2" />
+<text  x="802.28" y="367.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printFunctionParameters(swift::Demangle::Node*, swift::Demangle::Node*, unsigned int, bool) (65 samples, 3.09%)</title><rect x="1095.3" y="261" width="36.4" height="15.0" fill="rgb(216,150,52)" rx="2" ry="2" />
+<text  x="1098.26" y="271.5" >(an..</text>
+</g>
+<g >
+<title>_platform_strcmp (60 samples, 2.85%)</title><rect x="611.5" y="373" width="33.6" height="15.0" fill="rgb(250,154,3)" rx="2" ry="2" />
+<text  x="614.49" y="383.5" >_p..</text>
+</g>
+<g >
+<title>_platform_strlen (2 samples, 0.10%)</title><rect x="666.4" y="357" width="1.1" height="15.0" fill="rgb(251,174,5)" rx="2" ry="2" />
+<text  x="669.43" y="367.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1054.3" y="181" width="0.6" height="15.0" fill="rgb(217,149,12)" rx="2" ry="2" />
+<text  x="1057.34" y="191.5" ></text>
+</g>
+<g >
+<title>gumjs_ffi_function_invoke (in libfrida-agent-modulated.dylib) (gumquickcore.c) (2,105 samples, 100.00%)</title><rect x="10.0" y="565" width="1180.0" height="15.0" fill="rgb(248,49,52)" rx="2" ry="2" />
+<text  x="13.00" y="575.5" >gumjs_ffi_function_invoke (in libfrida-agent-modulated.dylib) (gumquickcore.c)</text>
+</g>
+<g >
+<title>tiny_free_list_add_ptr (3 samples, 0.14%)</title><rect x="796.5" y="341" width="1.7" height="15.0" fill="rgb(212,74,20)" rx="2" ry="2" />
+<text  x="799.48" y="351.5" ></text>
+</g>
+<g >
+<title>SStream_concat (in libtestswiftapiresolver.dylib) (SStream.c) (2 samples, 0.10%)</title><rect x="689.4" y="357" width="1.1" height="15.0" fill="rgb(243,8,42)" rx="2" ry="2" />
+<text  x="692.41" y="367.5" ></text>
+</g>
+<g >
+<title>operator new(unsigned long) (1 samples, 0.05%)</title><rect x="1108.2" y="85" width="0.5" height="15.0" fill="rgb(224,120,40)" rx="2" ry="2" />
+<text  x="1111.16" y="95.5" ></text>
+</g>
+<g >
+<title>tiny_malloc_should_clear (23 samples, 1.09%)</title><rect x="806.0" y="341" width="12.9" height="15.0" fill="rgb(219,192,46)" rx="2" ry="2" />
+<text  x="809.01" y="351.5" ></text>
+</g>
+<g >
+<title>printInstruction (in libtestswiftapiresolver.dylib) (AArch64GenAsmWriter.inc) (23 samples, 1.09%)</title><rect x="679.9" y="405" width="12.9" height="15.0" fill="rgb(219,88,54)" rx="2" ry="2" />
+<text  x="682.88" y="415.5" ></text>
+</g>
+<g >
+<title>init_top (in libtestswiftapiresolver.dylib) (dlmalloc.c) (2 samples, 0.10%)</title><rect x="742.1" y="389" width="1.1" height="15.0" fill="rgb(227,39,22)" rx="2" ry="2" />
+<text  x="745.10" y="399.5" ></text>
+</g>
+<g >
+<title>decodeInstruction_4 (in libtestswiftapiresolver.dylib) (AArch64GenDisassemblerTables.inc) (34 samples, 1.62%)</title><rect x="135.6" y="389" width="19.0" height="15.0" fill="rgb(217,24,12)" rx="2" ry="2" />
+<text  x="138.57" y="399.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::genericParameterName(unsigned long long, unsigned long long) (2 samples, 0.10%)</title><rect x="1073.4" y="197" width="1.1" height="15.0" fill="rgb(222,11,46)" rx="2" ry="2" />
+<text  x="1076.40" y="207.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1095.3" y="197" width="0.5" height="15.0" fill="rgb(234,87,53)" rx="2" ry="2" />
+<text  x="1098.26" y="207.5" ></text>
+</g>
+<g >
+<title>nanov2_malloc (1 samples, 0.05%)</title><rect x="1126.1" y="213" width="0.6" height="15.0" fill="rgb(237,164,10)" rx="2" ry="2" />
+<text  x="1129.10" y="223.5" ></text>
+</g>
+<g >
+<title>DYLD-STUB$$operator new(unsigned long) (1 samples, 0.05%)</title><rect x="1090.2" y="149" width="0.6" height="15.0" fill="rgb(217,151,3)" rx="2" ry="2" />
+<text  x="1093.22" y="159.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::getManglingPrefixLength(llvm::StringRef) (2 samples, 0.10%)</title><rect x="988.2" y="341" width="1.1" height="15.0" fill="rgb(232,53,45)" rx="2" ry="2" />
+<text  x="991.19" y="351.5" ></text>
+</g>
+<g >
+<title>g_malloc (in libtestswiftapiresolver.dylib) (gmem.c) (1 samples, 0.05%)</title><rect x="1167.6" y="437" width="0.5" height="15.0" fill="rgb(219,85,12)" rx="2" ry="2" />
+<text  x="1170.58" y="447.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (1 samples, 0.05%)</title><rect x="1065.6" y="245" width="0.5" height="15.0" fill="rgb(212,188,46)" rx="2" ry="2" />
+<text  x="1068.55" y="255.5" ></text>
+</g>
+<g >
+<title>printShifter (in libtestswiftapiresolver.dylib) (AArch64InstPrinter.c) (2 samples, 0.10%)</title><rect x="694.5" y="405" width="1.1" height="15.0" fill="rgb(222,68,34)" rx="2" ry="2" />
+<text  x="697.46" y="415.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1054.3" y="165" width="0.6" height="15.0" fill="rgb(210,84,44)" rx="2" ry="2" />
+<text  x="1057.34" y="175.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::createWithChildren(swift::Demangle::Node::Kind, swift::Demangle::Node*, swift::Demangle::Node*, swift::Demangle::Node*, swift::Demangle::Node*) (2 samples, 0.10%)</title><rect x="960.2" y="325" width="1.1" height="15.0" fill="rgb(233,45,52)" rx="2" ry="2" />
+<text  x="963.17" y="335.5" ></text>
+</g>
+<g >
+<title>free_tiny (25 samples, 1.19%)</title><rect x="785.3" y="373" width="14.0" height="15.0" fill="rgb(221,121,54)" rx="2" ry="2" />
+<text  x="788.27" y="383.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::demangleMetatype() (1 samples, 0.05%)</title><rect x="929.3" y="341" width="0.6" height="15.0" fill="rgb(232,162,31)" rx="2" ry="2" />
+<text  x="932.33" y="351.5" ></text>
+</g>
+<g >
+<title>g_string_truncate (in libtestswiftapiresolver.dylib) (gstring.c) (2 samples, 0.10%)</title><rect x="108.7" y="437" width="1.1" height="15.0" fill="rgb(214,14,37)" rx="2" ry="2" />
+<text  x="111.66" y="447.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (3 samples, 0.14%)</title><rect x="1024.6" y="181" width="1.7" height="15.0" fill="rgb(210,226,22)" rx="2" ry="2" />
+<text  x="1027.63" y="191.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long) (1 samples, 0.05%)</title><rect x="1043.7" y="245" width="0.6" height="15.0" fill="rgb(210,2,37)" rx="2" ry="2" />
+<text  x="1046.69" y="255.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1089.1" y="149" width="0.6" height="15.0" fill="rgb(247,171,24)" rx="2" ry="2" />
+<text  x="1092.10" y="159.5" ></text>
+</g>
+<g >
+<title>g_array_append_vals (in libtestswiftapiresolver.dylib) (garray.c) (8 samples, 0.38%)</title><rect x="699.5" y="421" width="4.5" height="15.0" fill="rgb(218,150,4)" rx="2" ry="2" />
+<text  x="702.50" y="431.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Node::addChild(swift::Demangle::Node*, swift::Demangle::NodeFactory&amp;) (2 samples, 0.10%)</title><rect x="955.7" y="293" width="1.1" height="15.0" fill="rgb(229,57,45)" rx="2" ry="2" />
+<text  x="958.68" y="303.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1084.6" y="165" width="0.6" height="15.0" fill="rgb(217,104,47)" rx="2" ry="2" />
+<text  x="1087.61" y="175.5" ></text>
+</g>
+<g >
+<title>gum_vsnprintf (in libtestswiftapiresolver.dylib) (gumprintf.c) (2 samples, 0.10%)</title><rect x="689.4" y="341" width="1.1" height="15.0" fill="rgb(239,215,41)" rx="2" ry="2" />
+<text  x="692.41" y="351.5" ></text>
+</g>
+<g >
+<title>set_mem_access (in libtestswiftapiresolver.dylib) (AArch64InstPrinter.c) (3 samples, 0.14%)</title><rect x="667.5" y="389" width="1.7" height="15.0" fill="rgb(211,79,51)" rx="2" ry="2" />
+<text  x="670.55" y="399.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printFunctionType(swift::Demangle::Node*, swift::Demangle::Node*, unsigned int) (1 samples, 0.05%)</title><rect x="1123.9" y="213" width="0.5" height="15.0" fill="rgb(254,80,4)" rx="2" ry="2" />
+<text  x="1126.85" y="223.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Node::addChild(swift::Demangle::Node*, swift::Demangle::NodeFactory&amp;) (2 samples, 0.10%)</title><rect x="967.5" y="309" width="1.1" height="15.0" fill="rgb(206,55,36)" rx="2" ry="2" />
+<text  x="970.45" y="319.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (1 samples, 0.05%)</title><rect x="1072.8" y="181" width="0.6" height="15.0" fill="rgb(232,32,54)" rx="2" ry="2" />
+<text  x="1075.84" y="191.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (1 samples, 0.05%)</title><rect x="1108.7" y="149" width="0.6" height="15.0" fill="rgb(213,31,3)" rx="2" ry="2" />
+<text  x="1111.72" y="159.5" ></text>
+</g>
+<g >
+<title>printInt64Bang (in libtestswiftapiresolver.dylib) (SStream.c) (2 samples, 0.10%)</title><rect x="689.4" y="373" width="1.1" height="15.0" fill="rgb(241,71,17)" rx="2" ry="2" />
+<text  x="692.41" y="383.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (1 samples, 0.05%)</title><rect x="654.7" y="373" width="0.5" height="15.0" fill="rgb(219,33,54)" rx="2" ry="2" />
+<text  x="657.66" y="383.5" ></text>
+</g>
+<g >
+<title>mspace_malloc (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="659.1" y="373" width="0.6" height="15.0" fill="rgb(212,71,15)" rx="2" ry="2" />
+<text  x="662.14" y="383.5" ></text>
+</g>
+<g >
+<title>DecodeGPR64spRegisterClass (in libtestswiftapiresolver.dylib) (AArch64Disassembler.c) (1 samples, 0.05%)</title><rect x="151.8" y="373" width="0.6" height="15.0" fill="rgb(212,96,11)" rx="2" ry="2" />
+<text  x="154.82" y="383.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::push_back(char) (1 samples, 0.05%)</title><rect x="1060.5" y="229" width="0.6" height="15.0" fill="rgb(216,29,52)" rx="2" ry="2" />
+<text  x="1063.51" y="239.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (4 samples, 0.19%)</title><rect x="1107.6" y="197" width="2.2" height="15.0" fill="rgb(229,52,13)" rx="2" ry="2" />
+<text  x="1110.60" y="207.5" ></text>
+</g>
+<g >
+<title>SStream_concat (in libtestswiftapiresolver.dylib) (SStream.c) (2 samples, 0.10%)</title><rect x="678.8" y="373" width="1.1" height="15.0" fill="rgb(243,11,22)" rx="2" ry="2" />
+<text  x="681.76" y="383.5" ></text>
+</g>
+<g >
+<title>JS_CallInternal (in libfrida-agent-modulated.dylib) (quickjs.c) (2,105 samples, 100.00%)</title><rect x="10.0" y="661" width="1180.0" height="15.0" fill="rgb(206,38,41)" rx="2" ry="2" />
+<text  x="13.00" y="671.5" >JS_CallInternal (in libfrida-agent-modulated.dylib) (quickjs.c)</text>
+</g>
+<g >
+<title>AArch64_get_op_access (in libtestswiftapiresolver.dylib) (AArch64Mapping.c) (1 samples, 0.05%)</title><rect x="668.1" y="373" width="0.6" height="15.0" fill="rgb(247,133,43)" rx="2" ry="2" />
+<text  x="671.11" y="383.5" ></text>
+</g>
+<g >
+<title>unixmmap (in libtestswiftapiresolver.dylib) (dlmalloc.c) (2 samples, 0.10%)</title><rect x="1141.8" y="373" width="1.1" height="15.0" fill="rgb(225,32,41)" rx="2" ry="2" />
+<text  x="1144.79" y="383.5" ></text>
+</g>
+<g >
+<title>g_hash_table_lookup (in libtestswiftapiresolver.dylib) (ghash.c) (6 samples, 0.29%)</title><rect x="704.5" y="421" width="3.4" height="15.0" fill="rgb(243,67,7)" rx="2" ry="2" />
+<text  x="707.55" y="431.5" ></text>
+</g>
+<g >
+<title>_g_gnulib_vasnprintf (in libtestswiftapiresolver.dylib) (vasnprintf.c) (24 samples, 1.14%)</title><rect x="1168.1" y="373" width="13.5" height="15.0" fill="rgb(234,189,37)" rx="2" ry="2" />
+<text  x="1171.14" y="383.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Node::addChild(swift::Demangle::Node*, swift::Demangle::NodeFactory&amp;) (1 samples, 0.05%)</title><rect x="872.7" y="325" width="0.6" height="15.0" fill="rgb(220,78,5)" rx="2" ry="2" />
+<text  x="875.72" y="335.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::~Demangler() (1 samples, 0.05%)</title><rect x="755.0" y="389" width="0.6" height="15.0" fill="rgb(238,195,38)" rx="2" ry="2" />
+<text  x="758.00" y="399.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::push_back(char) (2 samples, 0.10%)</title><rect x="1074.5" y="229" width="1.1" height="15.0" fill="rgb(212,38,16)" rx="2" ry="2" />
+<text  x="1077.52" y="239.5" ></text>
+</g>
+<g >
+<title>mspace_malloc (in libtestswiftapiresolver.dylib) (dlmalloc.c) (2 samples, 0.10%)</title><rect x="660.3" y="389" width="1.1" height="15.0" fill="rgb(242,169,15)" rx="2" ry="2" />
+<text  x="663.26" y="399.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printAbstractStorage(swift::Demangle::Node*, unsigned int, bool, llvm::StringRef) (79 samples, 3.75%)</title><rect x="1000.0" y="293" width="44.3" height="15.0" fill="rgb(233,204,53)" rx="2" ry="2" />
+<text  x="1002.97" y="303.5" >(ano..</text>
+</g>
+<g >
+<title>SStream_concat (in libtestswiftapiresolver.dylib) (SStream.c) (2 samples, 0.10%)</title><rect x="691.1" y="373" width="1.1" height="15.0" fill="rgb(218,166,43)" rx="2" ry="2" />
+<text  x="694.09" y="383.5" ></text>
+</g>
+<g >
+<title>free (9 samples, 0.43%)</title><rect x="779.7" y="373" width="5.0" height="15.0" fill="rgb(251,199,19)" rx="2" ry="2" />
+<text  x="782.66" y="383.5" ></text>
+</g>
+<g >
+<title>g_array_maybe_expand (in libtestswiftapiresolver.dylib) (garray.c) (4 samples, 0.19%)</title><rect x="701.7" y="405" width="2.3" height="15.0" fill="rgb(216,219,24)" rx="2" ry="2" />
+<text  x="704.74" y="415.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::isContext(swift::Demangle::Node::Kind) (1 samples, 0.05%)</title><rect x="869.9" y="309" width="0.6" height="15.0" fill="rgb(228,169,36)" rx="2" ry="2" />
+<text  x="872.91" y="319.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printFunctionParameters(swift::Demangle::Node*, swift::Demangle::Node*, unsigned int, bool) (1 samples, 0.05%)</title><rect x="1094.1" y="261" width="0.6" height="15.0" fill="rgb(213,181,3)" rx="2" ry="2" />
+<text  x="1097.14" y="271.5" ></text>
+</g>
+<g >
+<title>operator new(unsigned long) (1 samples, 0.05%)</title><rect x="1020.1" y="149" width="0.6" height="15.0" fill="rgb(217,93,38)" rx="2" ry="2" />
+<text  x="1023.15" y="159.5" ></text>
+</g>
+<g >
+<title>SStream_concat (in libtestswiftapiresolver.dylib) (SStream.c) (1 samples, 0.05%)</title><rect x="661.4" y="373" width="0.5" height="15.0" fill="rgb(242,160,9)" rx="2" ry="2" />
+<text  x="664.38" y="383.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::Demangler::popContext() (1 samples, 0.05%)</title><rect x="961.3" y="325" width="0.5" height="15.0" fill="rgb(236,79,28)" rx="2" ry="2" />
+<text  x="964.29" y="335.5" ></text>
+</g>
+<g >
+<title>get_tiny_previous_free_msize (3 samples, 0.14%)</title><rect x="794.8" y="341" width="1.7" height="15.0" fill="rgb(210,125,2)" rx="2" ry="2" />
+<text  x="797.80" y="351.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (5 samples, 0.24%)</title><rect x="1040.3" y="245" width="2.8" height="15.0" fill="rgb(225,92,5)" rx="2" ry="2" />
+<text  x="1043.33" y="255.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (1 samples, 0.05%)</title><rect x="710.2" y="389" width="0.5" height="15.0" fill="rgb(247,25,35)" rx="2" ry="2" />
+<text  x="713.15" y="399.5" ></text>
+</g>
+<g >
+<title>DYLD-STUB$$mkdtempat_np (1 samples, 0.05%)</title><rect x="25.1" y="421" width="0.6" height="15.0" fill="rgb(216,169,49)" rx="2" ry="2" />
+<text  x="28.14" y="431.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::push_back(char) (1 samples, 0.05%)</title><rect x="1056.6" y="213" width="0.5" height="15.0" fill="rgb(228,143,15)" rx="2" ry="2" />
+<text  x="1059.58" y="223.5" ></text>
+</g>
+<g >
+<title>OUTLINED_FUNCTION_30 (in libtestswiftapiresolver.dylib) + (1 samples, 0.05%; +0.05%)</title><rect x="46.4" y="341" width="0.6" height="15.0" fill="rgb(255,198,198)" rx="2" ry="2" />
+<text  x="49.44" y="351.5" ></text>
+</g>
+<g >
+<title>_platform_strlen (8 samples, 0.38%)</title><rect x="32.4" y="421" width="4.5" height="15.0" fill="rgb(238,46,25)" rx="2" ry="2" />
+<text  x="35.42" y="431.5" ></text>
+</g>
+<g >
+<title>mspace_malloc (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="698.4" y="389" width="0.5" height="15.0" fill="rgb(249,16,14)" rx="2" ry="2" />
+<text  x="701.38" y="399.5" ></text>
+</g>
+<g >
+<title>OUTLINED_FUNCTION_6 (in libtestswiftapiresolver.dylib) + (1 samples, 0.05%; +0.05%)</title><rect x="107.5" y="437" width="0.6" height="15.0" fill="rgb(255,198,198)" rx="2" ry="2" />
+<text  x="110.54" y="447.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printBoundGeneric(swift::Demangle::Node*, unsigned int) (1 samples, 0.05%)</title><rect x="1054.3" y="197" width="0.6" height="15.0" fill="rgb(238,172,30)" rx="2" ry="2" />
+<text  x="1057.34" y="207.5" ></text>
+</g>
+<g >
+<title>_szone_free (5 samples, 0.24%)</title><rect x="752.2" y="389" width="2.8" height="15.0" fill="rgb(229,170,51)" rx="2" ry="2" />
+<text  x="755.19" y="399.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (1 samples, 0.05%)</title><rect x="1056.0" y="181" width="0.6" height="15.0" fill="rgb(252,174,5)" rx="2" ry="2" />
+<text  x="1059.02" y="191.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (6 samples, 0.29%)</title><rect x="1111.0" y="197" width="3.3" height="15.0" fill="rgb(236,110,52)" rx="2" ry="2" />
+<text  x="1113.96" y="207.5" ></text>
+</g>
+<g >
+<title>operator new(unsigned long) (1 samples, 0.05%)</title><rect x="1126.1" y="229" width="0.6" height="15.0" fill="rgb(206,189,25)" rx="2" ry="2" />
+<text  x="1129.10" y="239.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (2 samples, 0.10%)</title><rect x="680.4" y="373" width="1.2" height="15.0" fill="rgb(215,125,12)" rx="2" ry="2" />
+<text  x="683.44" y="383.5" ></text>
+</g>
+<g >
+<title>szone_malloc_should_clear (2 samples, 0.10%)</title><rect x="844.7" y="325" width="1.1" height="15.0" fill="rgb(243,15,32)" rx="2" ry="2" />
+<text  x="847.69" y="335.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (1 samples, 0.05%)</title><rect x="1006.1" y="181" width="0.6" height="15.0" fill="rgb(213,171,7)" rx="2" ry="2" />
+<text  x="1009.13" y="191.5" ></text>
+</g>
+<g >
+<title>free (1 samples, 0.05%)</title><rect x="1134.5" y="357" width="0.6" height="15.0" fill="rgb(243,191,35)" rx="2" ry="2" />
+<text  x="1137.50" y="367.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (17 samples, 0.81%)</title><rect x="1114.3" y="213" width="9.6" height="15.0" fill="rgb(254,175,16)" rx="2" ry="2" />
+<text  x="1117.32" y="223.5" ></text>
+</g>
+<g >
+<title>_platform_strlen (1 samples, 0.05%)</title><rect x="655.2" y="373" width="0.6" height="15.0" fill="rgb(218,126,34)" rx="2" ry="2" />
+<text  x="658.22" y="383.5" ></text>
+</g>
+<g >
+<title>_vsnprintf (1 samples, 0.05%)</title><rect x="1074.0" y="165" width="0.5" height="15.0" fill="rgb(221,97,0)" rx="2" ry="2" />
+<text  x="1076.96" y="175.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::print(swift::Demangle::Node*, unsigned int, bool) (29 samples, 1.38%)</title><rect x="1077.9" y="261" width="16.2" height="15.0" fill="rgb(213,22,22)" rx="2" ry="2" />
+<text  x="1080.89" y="271.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (1 samples, 0.05%)</title><rect x="1128.9" y="197" width="0.6" height="15.0" fill="rgb(228,208,42)" rx="2" ry="2" />
+<text  x="1131.90" y="207.5" ></text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::append(char const*, unsigned long) (1 samples, 0.05%)</title><rect x="1107.6" y="53" width="0.6" height="15.0" fill="rgb(225,109,53)" rx="2" ry="2" />
+<text  x="1110.60" y="63.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (6 samples, 0.29%)</title><rect x="734.8" y="389" width="3.4" height="15.0" fill="rgb(205,87,12)" rx="2" ry="2" />
+<text  x="737.82" y="399.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (157 samples, 7.46%)</title><rect x="1044.3" y="293" width="88.0" height="15.0" fill="rgb(220,206,31)" rx="2" ry="2" />
+<text  x="1047.25" y="303.5" >(anonymous..</text>
+</g>
+<g >
+<title>swift::Demangle::Node::addChild(swift::Demangle::Node*, swift::Demangle::NodeFactory&amp;) (3 samples, 0.14%)</title><rect x="978.1" y="309" width="1.7" height="15.0" fill="rgb(250,14,38)" rx="2" ry="2" />
+<text  x="981.10" y="319.5" ></text>
+</g>
+<g >
+<title>g_strconcat (in libtestswiftapiresolver.dylib) (gstrfuncs.c) (52 samples, 2.47%)</title><rect x="15.0" y="469" width="29.2" height="15.0" fill="rgb(214,106,31)" rx="2" ry="2" />
+<text  x="18.05" y="479.5" >g_..</text>
+</g>
+<g >
+<title>std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*) (5 samples, 0.24%)</title><rect x="1066.1" y="245" width="2.8" height="15.0" fill="rgb(254,26,41)" rx="2" ry="2" />
+<text  x="1069.11" y="255.5" ></text>
+</g>
+<g >
+<title>mmap (1 samples, 0.05%)</title><rect x="709.6" y="373" width="0.6" height="15.0" fill="rgb(254,12,19)" rx="2" ry="2" />
+<text  x="712.59" y="383.5" ></text>
+</g>
+<g >
+<title>printInt32Bang (in libtestswiftapiresolver.dylib) (SStream.c) (1 samples, 0.05%)</title><rect x="661.4" y="389" width="0.5" height="15.0" fill="rgb(212,111,4)" rx="2" ry="2" />
+<text  x="664.38" y="399.5" ></text>
+</g>
+<g >
+<title>printUInt64Bang (in libtestswiftapiresolver.dylib) (SStream.c) (2 samples, 0.10%)</title><rect x="678.8" y="389" width="1.1" height="15.0" fill="rgb(232,166,14)" rx="2" ry="2" />
+<text  x="681.76" y="399.5" ></text>
+</g>
+<g >
+<title>mspace_calloc (in libtestswiftapiresolver.dylib) (dlmalloc.c) (1 samples, 0.05%)</title><rect x="1136.7" y="421" width="0.6" height="15.0" fill="rgb(212,190,17)" rx="2" ry="2" />
+<text  x="1139.75" y="431.5" ></text>
+</g>
+<g >
+<title>tiny_malloc_should_clear (1 samples, 0.05%)</title><rect x="1108.2" y="53" width="0.5" height="15.0" fill="rgb(216,151,0)" rx="2" ry="2" />
+<text  x="1111.16" y="63.5" ></text>
+</g>
+<g >
+<title>gum_vsnprintf (in libtestswiftapiresolver.dylib) (gumprintf.c) (1 samples, 0.05%)</title><rect x="695.0" y="357" width="0.6" height="15.0" fill="rgb(220,101,15)" rx="2" ry="2" />
+<text  x="698.02" y="367.5" ></text>
+</g>
+<g >
+<title>_nanov2_free (1 samples, 0.05%)</title><rect x="1066.1" y="229" width="0.6" height="15.0" fill="rgb(222,207,50)" rx="2" ry="2" />
+<text  x="1069.11" y="239.5" ></text>
+</g>
+<g >
+<title>__mmap (1 samples, 0.05%)</title><rect x="703.4" y="325" width="0.6" height="15.0" fill="rgb(219,3,12)" rx="2" ry="2" />
+<text  x="706.43" y="335.5" ></text>
+</g>
+<g >
+<title>_platform_memmove (1 samples, 0.05%)</title><rect x="1059.4" y="197" width="0.5" height="15.0" fill="rgb(219,229,29)" rx="2" ry="2" />
+<text  x="1062.39" y="207.5" ></text>
+</g>
+<g >
+<title>(anonymous namespace)::NodePrinter::printEntity(swift::Demangle::Node*, unsigned int, bool, (anonymous namespace)::NodePrinter::TypePrinting, bool, llvm::StringRef, int, llvm::StringRef) (3 samples, 0.14%)</title><rect x="1118.2" y="181" width="1.7" height="15.0" fill="rgb(221,142,41)" rx="2" ry="2" />
+<text  x="1121.25" y="191.5" ></text>
+</g>
+<g >
+<title>__ultoa (1 samples, 0.05%)</title><rect x="1181.0" y="309" width="0.6" height="15.0" fill="rgb(244,88,14)" rx="2" ry="2" />
+<text  x="1184.03" y="319.5" ></text>
+</g>
+<g >
+<title>_platform_memset (2 samples, 0.10%)</title><rect x="787.5" y="357" width="1.1" height="15.0" fill="rgb(211,142,23)" rx="2" ry="2" />
+<text  x="790.51" y="367.5" ></text>
+</g>
+<g >
+<title>swift::Demangle::nodeToString(swift::Demangle::Node*, swift::Demangle::DemangleOptions const&amp;) (252 samples, 11.97%)</title><rect x="991.6" y="357" width="141.2" height="15.0" fill="rgb(242,201,16)" rx="2" ry="2" />
+<text  x="994.56" y="367.5" >swift::Demangle::..</text>
+</g>
+</g>
+</svg>

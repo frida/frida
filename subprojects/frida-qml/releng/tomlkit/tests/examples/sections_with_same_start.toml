@@ -1,0 +1,8 @@
+[section]
+key = "value"
+
+[section2]
+"key2" = 12.34
+
+  [section2.sub-section]
+  "key3" = "something"

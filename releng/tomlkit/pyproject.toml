@@ -1,0 +1,64 @@
+[tool.poetry]
+name = "tomlkit"
+version = "0.12.4"
+description = "Style preserving TOML library"
+authors = [
+    "Sébastien Eustace <sebastien@eustace.io>",
+    "Frost Ming <me@frostming.com>"
+]
+license = "MIT"
+
+readme = "README.md"
+
+homepage = "https://github.com/sdispater/tomlkit"
+repository = "https://github.com/sdispater/tomlkit"
+
+include = [
+  { path = "tomlkit/py.typed" },
+  { path = "tests", format = "sdist" },
+  { path = "docs", format = "sdist" },
+  { path = "CHANGELOG.md", format = "sdist" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.7"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.2.0"
+pytest-cov = "^4.0.0"
+PyYAML = "^6.0"
+pre-commit = "^2.20.0"
+mypy = "^0.990"
+Sphinx = "^4.3.2"
+furo = "^2022.9.29"
+
+[tool.black]
+line-length = 88
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | build
+  | dist
+  | tests/toml-test
+)/
+'''
+
+[tool.isort]
+profile = "black"
+force_single_line = true
+atomic = true
+lines_after_imports = 2
+lines_between_types = 1
+
+known_first_party = ["tomlkit"]
+known_third_party = ["pytest"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0a9"]
+build-backend = "poetry.core.masonry.api"

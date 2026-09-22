@@ -1,0 +1,5 @@
+#include "cpyNext.hpp"
+
+std::string getStrNext() {
+  return "Hello Copied File -- now even more convoluted!";
+}

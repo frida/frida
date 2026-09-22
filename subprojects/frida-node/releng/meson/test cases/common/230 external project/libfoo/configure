@@ -1,0 +1,44 @@
+#! /bin/sh
+
+srcdir=$(dirname "$0")
+
+for i in "$@"
+do
+case $i in
+    --prefix=*)
+    PREFIX="${i#*=}"
+    shift
+    ;;
+    --libdir=*)
+    LIBDIR="${i#*=}"
+    shift
+    ;;
+    --includedir=*)
+    INCDIR="${i#*=}"
+    shift
+    ;;
+    --libext=*)
+    LIBEXT="${i#*=}"
+    shift
+    ;;
+    *)
+    shift
+    ;;
+esac
+done
+
+DEP_ARGS=$(pkg-config --cflags --libs somelib)
+
+cat > Makefile << EOL
+all: libfoo.$LIBEXT
+
+libfoo.$LIBEXT:
+	$CC "$srcdir/libfoo.c" -shared -fPIC $DEP_ARGS -o \$@
+
+install: libfoo.$LIBEXT
+	mkdir -p "\$(DESTDIR)$LIBDIR";
+	mkdir -p "\$(DESTDIR)$LIBDIR/pkgconfig";
+	mkdir -p "\$(DESTDIR)$INCDIR";
+	cp \$< "\$(DESTDIR)$LIBDIR";
+	cp "$srcdir/libfoo.h" "\$(DESTDIR)$INCDIR";
+EOL

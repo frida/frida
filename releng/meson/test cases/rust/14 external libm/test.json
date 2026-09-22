@@ -1,0 +1,10 @@
+{
+  "matrix": {
+    "options": {
+      "static": [
+        { "val": true },
+        { "val": false }
+      ]
+    }
+  }
+}

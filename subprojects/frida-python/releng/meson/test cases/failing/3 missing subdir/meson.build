@@ -1,0 +1,3 @@
+project('subdir')
+
+subdir('missing')

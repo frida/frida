@@ -1,0 +1,22 @@
+/*
+ * Regenerate with:
+ *
+ * $(xcrun --sdk macosx -f mig) \
+ *     -isysroot $(xcrun --sdk macosx --show-sdk-path) \
+ *     -sheader substituted2-server.h \
+ *     -server substituted2-server.c \
+ *     -header substituted2-client.h \
+ *     -user substituted2-client.c \
+ *     substituted2.defs
+ */
+
+subsystem substitute2_daemon 31338;
+
+#include <mach/std_types.defs>
+#include <mach/mach_types.defs>
+
+routine substitute2_setup_process(
+		server		: mach_port_t;
+	in	target_pid	: int32_t;
+	in	set_exec	: boolean_t;
+	in	should_resume	: boolean_t);

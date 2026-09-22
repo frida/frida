@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/44 abspath to srcdir/meson.build:3:0: ERROR: Tried to form an absolute path to a dir in the source tree."
+    }
+  ]
+}

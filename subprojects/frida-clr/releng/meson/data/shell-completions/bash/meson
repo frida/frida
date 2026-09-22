@@ -1,0 +1,1504 @@
+# shellcheck shell=bash
+
+_get_subprojects_dir() {
+  # TODO: meson-info/intro-projectinfo.json has the info for the subproject
+  # directory, but we can't know what the build directory is in these contexts.
+  # Let's default to subprojects.
+
+  # Get subprojects directory. All subprojects subcommands support --sourcedir,
+  # so if that argument was passed, use it to find subprojects.
+  subprojects_dir="subprojects"
+  for (( i=${#COMP_WORDS[@]} - 1; i >= 0; i-- )); do
+    # Exit early if we have made our way back to the command
+    if [[ "${COMP_WORDS[$i]}" = "subprojects" ]]; then
+      break
+    fi
+
+    prev=$((i - 1))
+    if [[ $prev -gt 0 ]] && [[ "${COMP_WORDS[$prev]}" = "--sourcedir" ]]; then
+      subprojects_dir="${COMP_WORDS[$i]}"
+      break
+    fi
+  done
+
+  echo "$subprojects_dir"
+}
+
+_subprojects() {
+  subprojects_dir=$(_get_subprojects_dir)
+  pushd "$subprojects_dir" &>/dev/null || return
+    local COMPREPLY=()
+    _filedir
+    # _filedir for whatever reason can't reason about symlinks, so -d will them.
+    # Filter out wrap files with this expresion.
+    IFS=$'\n' echo "${COMPREPLY[*]}" | grep -vE '\.wrap$' | xargs
+  popd &>/dev/null
+}
+
+_wraps() {
+  subprojects_dir=$(_get_subprojects_dir)
+  db="$subprojects_dir/wrapdb.json"
+  if [[ ! -f "$db" ]]; then
+    return
+  fi
+
+  document=$(cat "$db")
+  wraps=($(python3 -c 'import sys, json
+for wrap in json.load(sys.stdin).keys():
+  print(wrap)
+' <<< "$document"))
+  echo "${wraps[@]}"
+}
+
+_meson() {
+  command="${COMP_WORDS[1]}"
+  subcommands=(
+      setup
+      configure
+      dist
+      install
+      introspect
+      init
+      test
+      wrap
+      subprojects
+      help
+      rewrite
+      compile
+      devenv
+      env2mfile
+  )
+
+  if [[ " ${subcommands[*]} " =~ " ${command} " ]]; then
+      "_meson-$command" "${COMP_WORDS[@]:1}"
+  else
+      _meson-setup "${COMP_WORDS[@]}"
+  fi
+} &&
+complete -F _meson meson
+
+_meson_complete_option() {
+  option_string=$1
+
+  if [[ $# -eq 2 ]] && ! [[ "$option_string" == *=* ]]; then
+    option_string="$option_string=$2"
+  fi
+
+  if [[ "$option_string" == *=* ]]; then
+    _meson_complete_option_value "$option_string"
+  else
+    _meson_complete_option_name "$option_string"
+  fi
+}
+
+_meson_complete_option_name() {
+  option=$1
+  options=($(python3 -c 'import sys, json
+for option in json.load(sys.stdin):
+  print(option["name"])
+' <<< "$(_meson_get_options)"))
+  compopt -o nospace
+  COMPREPLY=($(compgen -W '${options[@]}' -S= -- "$option"))
+}
+
+_meson_complete_option_value() {
+  cur=$1
+  option_name=${cur%%=*}
+  option_value=${cur#*=}
+
+  if _meson_complete_filedir "$option_name" "$option_value"; then
+    return
+  fi
+
+  options=($(python3 -c 'import sys, json
+for option in json.load(sys.stdin):
+  if option["name"] != "'$option_name'":
+    continue
+  choices = []
+  if option["type"] == "boolean":
+    choices.append("true")
+    choices.append("false")
+  elif option["type"] == "combo":
+    for choice in option["choices"]:
+      choices.append(choice)
+  elif option["type"] == "feature":
+    choices.append("auto")
+    choices.append("enabled")
+    choices.append("disabled")
+  for choice in choices:
+    if choice.startswith("'$cur'"):
+      print(choice)
+' <<< "$(_meson_get_options)"))
+  COMPREPLY=("${options[@]}")
+}
+
+_meson_get_options() {
+  local options
+  for builddir in "${COMP_WORDS[@]}"; do
+    if [[ -d "$builddir" ]]; then
+      break
+    fi
+    builddir=.
+  done
+  options=$(meson introspect "$builddir" --buildoptions 2>/dev/null) &&
+  echo "$options" ||
+  echo '[]'
+}
+
+_meson_complete_filedir() {
+  _filedir_in() {
+    pushd "$1" &>/dev/null
+      local COMPREPLY=()
+      _filedir
+      echo "${COMPREPLY[@]}"
+    popd &>/dev/null
+  }
+
+  option=$1
+  cur=$2
+  case $option in
+    prefix |\
+    bindir |\
+    datadir |\
+    includedir |\
+    infodir |\
+    libdir |\
+    licensedir |\
+    libexecdir |\
+    localedir |\
+    localstatedir |\
+    mandir |\
+    sbindir |\
+    sharedstatedir |\
+    sysconfdir |\
+    python.platlibdir |\
+    python.purelibdir |\
+    pkg-config-path |\
+    build.pkg-config-path |\
+    cmake-prefix-path |\
+    build.cmake-prefix-path)
+      _filedir -d
+      ;;
+
+    cross-file)
+      _filedir
+      COMPREPLY+=($(_filedir_in "$XDG_DATA_DIRS"/meson/cross))
+      COMPREPLY+=($(_filedir_in /usr/local/share/meson/cross))
+      COMPREPLY+=($(_filedir_in /usr/share/meson/cross))
+      COMPREPLY+=($(_filedir_in "$XDG_DATA_HOME"/meson/cross))
+      COMPREPLY+=($(_filedir_in ~/.local/share/meson/cross))
+      ;;
+
+    native-file)
+      _filedir
+      COMPREPLY+=($(_filedir_in "$XDG_DATA_DIRS"/meson/native))
+      COMPREPLY+=($(_filedir_in /usr/local/share/meson/native))
+      COMPREPLY+=($(_filedir_in /usr/share/meson/native))
+      COMPREPLY+=($(_filedir_in "$XDG_DATA_HOME"/meson/native))
+      COMPREPLY+=($(_filedir_in ~/.local/share/meson/native))
+      ;;
+
+    *)
+      return 1;;
+  esac
+  return 0
+}
+
+_meson_compgen_options() {
+  local -r cur=$1
+
+  if [[ ${cur:0:2} == -- ]]; then
+    COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}' -- "${cur:2}"))
+  elif [[ ${cur:0:1} == - ]]; then
+    if [[ ${#cur} == 1 ]]; then
+      # Only add longopts if cur not "-something"
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}' -- ""))
+    fi
+
+    COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}' -- "${cur:1}"))
+  else
+    return 1
+  fi
+
+  return 0
+}
+
+_meson_common_setup_configure_longopts=(
+  help
+  prefix
+  bindir
+  datadir
+  includedir
+  infodir
+  libdir
+  licensedir
+  libexecdir
+  localedir
+  localstatedir
+  mandir
+  sbindir
+  sharedstatedir
+  sysconfdir
+  auto-features
+  backend
+  genvslite
+  buildtype
+  debug
+  default-library
+  errorlogs
+  install-umask
+  layout
+  optimization
+  prefer-static
+  stdsplit
+  strip
+  unity
+  unity-size
+  warnlevel
+  werror
+  wrap-mode
+  force-fallback-for
+  vsenv
+  pkgconfig.relocatable
+  python.bytecompile
+  python.install-env
+  python.platlibdir
+  python.purelibdir
+  python.allow-limited-api
+  pkg-config-path
+  build.pkg-config-path
+  cmake-prefix-path
+  build.cmake-prefix-path
+  clearcache
+)
+
+_meson-setup() {
+  shortopts=(
+    h
+    D
+    v
+  )
+
+  longopts=(
+    ${_meson_common_setup_configure_longopts[@]}
+    native-file
+    cross-file
+    version
+    fatal-meson-warnings
+    reconfigure
+    wipe
+  )
+
+  local cur prev
+  if _get_comp_words_by_ref cur prev &>/dev/null; then
+    if [[ ${prev:0:2} == -- ]] && _meson_complete_option "${prev:2}" "$cur"; then
+      return
+    elif [[ ${prev:0:1} == - ]] && [[ ${prev:1:2} != - ]] && _meson_complete_option "${prev:1}"; then
+      return
+    fi
+  fi
+
+  if _get_comp_words_by_ref -n '=' cur prev &>/dev/null; then
+    if [[ $prev == -D ]]; then
+      _meson_complete_option "$cur"
+      return
+    fi
+  else
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    _filedir -d
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+
+    if [[ $COMP_CWORD == 1 ]]; then
+      COMPREPLY+=($(compgen -W '${subcommands[*]}' -- "$cur"))
+    fi
+  fi
+}
+
+_meson-configure() {
+  shortopts=(
+    h
+    D
+  )
+
+  longopts=(
+    ${_meson_common_setup_configure_longopts[@]}
+    no-pager
+  )
+
+  local cur prev
+  if _get_comp_words_by_ref -n '=' cur prev &>/dev/null; then
+    if [[ $prev == -D ]]; then
+      _meson_complete_option "$cur"
+      return
+    fi
+  else
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    for dir in "${COMP_WORDS[@]}"; do
+      if [[ -d "$dir" ]]; then
+        break
+      fi
+      dir=.
+    done
+    if [[ ! -d "$dir/meson-private" ]]; then
+      _filedir -d
+    fi
+
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+}
+
+_meson-dist() {
+  shortopts=(
+    h
+    C
+  )
+
+  longopts=(
+    allow-dirty
+    help
+    formats
+    include-subprojects
+    no-tests
+  )
+
+  local cur prev
+  if _get_comp_words_by_ref -n ':' cur prev &>/dev/null; then
+    case $prev in
+      -C)
+        _filedir -d
+        return
+        ;;
+
+      --formats)
+        formats=(
+          xztar
+          gztar
+          zip
+        )
+
+        COMPREPLY+=($(compgen -W '${formats[*]}' -- "$cur"))
+        return
+        ;;
+    esac
+  else
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+}
+
+_meson-install() {
+  shortopts=(
+    h
+    n
+    C
+  )
+
+  longopts=(
+    help
+    no-rebuild
+    only-changed
+    quiet
+    destdir
+    dry-run
+    skip-subprojects
+    tags
+    strip
+  )
+
+  local cur prev
+  if _get_comp_words_by_ref -n ':' cur prev &>/dev/null; then
+    for i in "${!COMP_WORDS[@]}"; do
+      opt="${COMP_WORDS[i]}"
+      dir="${COMP_WORDS[i+1]}"
+      case "$opt" in
+        -C)
+          break
+          ;;
+      esac
+      dir=.
+    done
+
+    case $prev in
+      -C | --destdir)
+        _filedir -d
+        return
+        ;;
+
+      --tags)
+        tags=$(meson introspect "$dir" --install-plan | python3 -c 'import sys, json
+targets = json.load(sys.stdin)["targets"]
+for target, attributes in targets.items():
+  print(attributes["tag"])
+' 2> /dev/null)
+
+        if [[ $? == 0 ]]; then
+          COMPREPLY+=($(compgen -W '${tags[*]}' -- "$cur"))
+        fi
+        return
+        ;;
+    esac
+  else
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+}
+
+_meson-introspect() {
+  shortopts=(
+    h
+    a
+    i
+    f
+  )
+
+  longopts=(
+    ast
+    benchmarks
+    buildoptions
+    buildsystem-files
+    dependencies
+    scan-dependencies
+    installed
+    install-plan
+    projectinfo
+    targets
+    tests
+    backend
+    all
+    indent
+    force-object-output
+  )
+
+  local cur prev
+  if ! _get_comp_words_by_ref cur prev &>/dev/null; then
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    for dir in "${COMP_WORDS[@]}"; do
+      if [[ -d "$dir" ]]; then
+        break
+      fi
+      dir=.
+    done
+    if [[ ! -d "$dir/meson-private" ]]; then
+      _filedir -d
+    fi
+
+    if [ -z "$cur" ]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+}
+
+_meson-init() {
+  shortopts=(
+    h
+    C
+    n
+    e
+    d
+    l
+    b
+    f
+  )
+
+  longopts=(
+    help
+    name
+    executable
+    deps
+    language
+    build
+    builddir
+    force
+    type
+    version
+  )
+
+  if ! _meson_compgen_options "$cur"; then
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+}
+
+_meson-test() {
+  shortopts=(
+    h
+    j
+    q
+    v
+    t
+    C
+  )
+
+  longopts=(
+    help
+    maxfail
+    repeat
+    no-rebuild
+    gdb
+    gdb-path
+    list
+    wrapper
+    suite
+    no-suite
+    no-stdsplit
+    print-errorlogs
+    benchmark
+    logbase
+    num-processes
+    verbose
+    quiet
+    timeout-multiplier
+    setup
+    test-args
+  )
+
+  local cur prev
+  if _get_comp_words_by_ref -n ':' cur prev &>/dev/null; then
+    case $prev in
+      --maxfail | --repeat)
+        # number, can't be completed
+        return
+        ;;
+
+      --wrapper)
+        _command_offset "$COMP_CWORD"
+        return
+        ;;
+
+      --gdb-path)
+        _filedir
+        return
+        ;;
+
+      -C)
+        _filedir -d
+        return
+        ;;
+
+      --suite | --no-suite)
+        for i in "${!COMP_WORDS[@]}"; do
+          opt="${COMP_WORDS[i]}"
+          dir="${COMP_WORDS[i+1]}"
+          case "$opt" in
+            -C)
+              break
+              ;;
+          esac
+          dir=.
+        done
+
+        suites=$(meson introspect "$dir" --tests | python3 -c 'import sys, json;
+for test in json.load(sys.stdin):
+  for suite in test["suite"]:
+    print(suite)
+' 2> /dev/null)
+
+        if [[ $? == 0 ]]; then
+          COMPREPLY+=($(compgen -W '${suites[*]}' -- "$cur"))
+          __ltrim_colon_completions "$cur"
+        fi
+        return
+        ;;
+
+      --logbase)
+        # free string, can't be completed
+        return
+        ;;
+
+      -j | --num-processes)
+        # number, can't be completed
+        return
+        ;;
+
+      -t | --timeout-multiplier)
+        # number, can't be completed
+        return
+        ;;
+
+      --setup)
+        # TODO
+        return
+        ;;
+
+      --test-args)
+        return
+        ;;
+    esac
+  else
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    for dir in "${COMP_WORDS[@]}"; do
+      if [[ -d "$dir" ]]; then
+        break
+      fi
+      dir=.
+    done
+
+    if [[ ! -d "$dir/meson-private" ]]; then
+      _filedir -d
+    fi
+
+    for i in "${!COMP_WORDS[@]}"; do
+      opt="${COMP_WORDS[i]}"
+      dir="${COMP_WORDS[i+1]}"
+      case "$opt" in
+        -C)
+          break
+          ;;
+      esac
+      dir=.
+    done
+
+    tests=$(meson introspect "$dir" --tests | python3 -c 'import sys, json;
+for test in json.load(sys.stdin):
+  print(test["name"])
+' 2> /dev/null)
+
+    if [[ $? == 0 ]]; then
+      COMPREPLY+=($(compgen -W '${tests[*]}' -- "$cur"))
+    fi
+
+    if [ -z "$cur" ]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}' -- "${cur:2}"))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}' -- "${cur:1}"))
+    fi
+  fi
+}
+
+_meson-wrap() {
+  shortopts=(
+    h
+  )
+
+  longopts=(
+    help
+  )
+
+  subcommands=(
+    info
+    install
+    list
+    promote
+    search
+    status
+    update
+    update-db
+  )
+
+  for i in "$@"; do
+    if [[ " ${subcommands[*]} " =~ " $i " ]]; then
+      "_meson-wrap-$i" "${COMP_WORDS[i]:1}"
+      return
+    fi
+  done
+
+  local cur prev
+  if ! _get_comp_words_by_ref cur prev &>/dev/null; then
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    COMPREPLY+=($(compgen -W '${subcommands[*]}' -- "$cur"))
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+}
+
+_meson-wrap-info() {
+  shortopts=(
+    h
+  )
+
+  longopts=(
+    allow-insecure
+    help
+  )
+
+  local cur prev
+  if ! _get_comp_words_by_ref cur prev &>/dev/null; then
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+
+  read -ra wraps < <(_wraps)
+  COMPREPLY+=($(compgen -W '${wraps[*]}' -- "$cur"))
+}
+
+_meson-wrap-install() {
+  shortopts=(
+    h
+  )
+
+  longopts=(
+    allow-insecure
+    help
+  )
+
+  local cur prev
+  if ! _get_comp_words_by_ref cur prev &>/dev/null; then
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+
+  read -ra wraps < <(_wraps)
+  COMPREPLY+=($(compgen -W '${wraps[*]}' -- "$cur"))
+}
+
+_meson-wrap-list() {
+  shortopts=(
+    h
+  )
+
+  longopts=(
+    allow-insecure
+    help
+  )
+
+  local cur prev
+  if ! _get_comp_words_by_ref cur prev &>/dev/null; then
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+}
+
+_meson-wrap-promote() {
+  shortopts=(
+    h
+  )
+
+  longopts=(
+    help
+  )
+
+  local cur prev
+  if ! _get_comp_words_by_ref cur prev &>/dev/null; then
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    if [[ -z $cur ]]; then
+      _filedir
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+}
+
+_meson-wrap-search() {
+  shortopts=(
+    h
+  )
+
+  longopts=(
+    allow-insecure
+    help
+  )
+
+  local cur prev
+  if ! _get_comp_words_by_ref cur prev &>/dev/null; then
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+
+  read -ra wraps < <(_wraps)
+  COMPREPLY+=($(compgen -W '${wraps[*]}' -- "$cur"))
+}
+
+_meson-wrap-status() {
+  shortopts=(
+    h
+  )
+
+  longopts=(
+    allow-insecure
+    help
+  )
+
+  local cur prev
+  if ! _get_comp_words_by_ref cur prev &>/dev/null; then
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+}
+
+_meson-wrap-update() {
+  shortopts=(
+    h
+  )
+
+  longopts=(
+    allow-insecure
+    force
+    help
+    sourcedir
+    types
+  )
+
+  local cur prev
+  if _get_comp_words_by_ref cur prev &>/dev/null; then
+    case $prev in
+      --sourcedir)
+        _filedir -d
+        return
+        ;;
+
+      --types)
+        types=(
+          file
+          git
+          hg
+          svn
+        )
+
+        COMPREPLY+=($(compgen -W '${types[*]}' -- "$cur"))
+        return
+        ;;
+
+      -j | --num-processes)
+        # number, can't be completed
+        return
+        ;;
+    esac
+  else
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+
+  COMPREPLY+=($(_subprojects))
+}
+
+_meson-wrap-update-db() {
+  shortopts=(
+    h
+  )
+
+  longopts=(
+    allow-insecure
+    help
+  )
+
+  local cur prev
+  if ! _get_comp_words_by_ref cur prev &>/dev/null; then
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+}
+
+_meson-subprojects() {
+  shortopts=(
+    h
+  )
+
+  longopts=(
+    help
+  )
+
+  subcommands=(
+    checkout
+    download
+    foreach
+    packagefiles
+    purge
+    update
+  )
+
+  for i in "$@"; do
+    if [[ " ${subcommands[*]} " =~ " $i " ]]; then
+      "_meson-subprojects-$i" "${COMP_WORDS[i]:1}"
+      return
+    fi
+  done
+
+  local cur prev
+  if ! _get_comp_words_by_ref cur prev &>/dev/null; then
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    COMPREPLY+=($(compgen -W '${subcommands[*]}' -- "$cur"))
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+}
+
+_meson-subprojects-checkout() {
+  shortopts=(
+    b
+    h
+    j
+  )
+
+  longopts=(
+    allow-insecure
+    help
+    num-processes
+    sourcedir
+    types
+  )
+
+  local cur prev
+  if _get_comp_words_by_ref cur prev &>/dev/null; then
+    case $prev in
+      --sourcedir)
+        _filedir -d
+        return
+        ;;
+
+      --types)
+        types=(
+          file
+          git
+          hg
+          svn
+        )
+
+        COMPREPLY+=($(compgen -W '${types[*]}' -- "$cur"))
+        return
+        ;;
+
+      -j | --num-processes)
+        # number, can't be completed
+        return
+        ;;
+    esac
+  else
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+
+  COMPREPLY+=($(_subprojects))
+}
+
+_meson-subprojects-download() {
+  shortopts=(
+    h
+    j
+  )
+
+  longopts=(
+    allow-insecure
+    help
+    num-processes
+    sourcedir
+    types
+  )
+
+  local cur prev
+  if _get_comp_words_by_ref cur prev &>/dev/null; then
+    case $prev in
+      --sourcedir)
+        _filedir -d
+        return
+        ;;
+
+      --types)
+        types=(
+          file
+          git
+          hg
+          svn
+        )
+
+        COMPREPLY+=($(compgen -W '${types[*]}' -- "$cur"))
+        return
+        ;;
+
+      -j | --num-processes)
+        # number, can't be completed
+        return
+        ;;
+    esac
+  else
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+
+  COMPREPLY+=($(_subprojects))
+}
+
+_meson-subprojects-foreach() {
+  shortopts=(
+    h
+    j
+  )
+
+  longopts=(
+    allow-insecure
+    help
+    num-processes
+    sourcedir
+    types
+  )
+
+  local cur prev
+  if _get_comp_words_by_ref cur prev &>/dev/null; then
+    case $prev in
+      --sourcedir)
+        _filedir -d
+        return
+        ;;
+
+      --types)
+        types=(
+          file
+          git
+          hg
+          svn
+        )
+
+        COMPREPLY+=($(compgen -W '${types[*]}' -- "$cur"))
+        return
+        ;;
+
+      -j | --num-processes)
+        # number, can't be completed
+        return
+        ;;
+    esac
+  else
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+
+  COMPREPLY+=($(_subprojects))
+}
+
+_meson-subprojects-packagefiles() {
+  shortopts=(
+    h
+    j
+  )
+
+  longopts=(
+    allow-insecure
+    apply
+    help
+    num-processes
+    save
+    sourcedir
+    types
+  )
+
+  local cur prev
+  if _get_comp_words_by_ref cur prev &>/dev/null; then
+    case $prev in
+      --sourcedir)
+        _filedir -d
+        return
+        ;;
+
+      --types)
+        types=(
+          file
+          git
+          hg
+          svn
+        )
+
+        COMPREPLY+=($(compgen -W '${types[*]}' -- "$cur"))
+        return
+        ;;
+
+      -j | --num-processes)
+        # number, can't be completed
+        return
+        ;;
+
+      --apply | --save)
+        return
+        ;;
+    esac
+  else
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+
+  COMPREPLY+=($(_subprojects))
+}
+
+_meson-subprojects-purge() {
+  shortopts=(
+    h
+    j
+  )
+
+  longopts=(
+    allow-insecure
+    confirm
+    help
+    include-cache
+    num-processes
+    sourcedir
+    types
+  )
+
+  local cur prev
+  if _get_comp_words_by_ref cur prev &>/dev/null; then
+    case $prev in
+      --sourcedir)
+        _filedir -d
+        return
+        ;;
+
+      --types)
+        types=(
+          file
+          git
+          hg
+          svn
+        )
+
+        COMPREPLY+=($(compgen -W '${types[*]}' -- "$cur"))
+        return
+        ;;
+
+      -j | --num-processes)
+        # number, can't be completed
+        return
+        ;;
+
+      --apply | --save)
+        return
+        ;;
+    esac
+  else
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+
+  COMPREPLY+=($(_subprojects))
+}
+
+_meson-subprojects-update() {
+  shortopts=(
+    h
+    j
+  )
+
+  longopts=(
+    allow-insecure
+    help
+    num-processes
+    rebase
+    reset
+    sourcedir
+    types
+  )
+
+  local cur prev
+  if _get_comp_words_by_ref cur prev &>/dev/null; then
+    case $prev in
+      --sourcedir)
+        _filedir -d
+        return
+        ;;
+
+      --types)
+        types=(
+          file
+          git
+          hg
+          svn
+        )
+
+        COMPREPLY+=($(compgen -W '${types[*]}' -- "$cur"))
+        return
+        ;;
+
+      -j | --num-processes)
+        # number, can't be completed
+        return
+        ;;
+
+      --rebase | --reset)
+        return
+        ;;
+    esac
+  else
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+
+  COMPREPLY+=($(_subprojects))
+}
+
+_meson-help() {
+  longopts=(
+    setup
+    configure
+    dist
+    install
+    introspect
+    init
+    test
+    wrap
+    subprojects
+    rewrite
+    compile
+    devenv
+    env2mfile
+  )
+
+  local cur prev
+  if _get_comp_words_by_ref cur prev &>/dev/null; then
+    COMPREPLY+=($(compgen -W '${longopts[*]}' -- "$cur"))
+  fi
+}
+
+_meson-rewrite() {
+  : TODO
+}
+
+_meson-compile() {
+  shortopts=(
+    h
+    C
+    j
+    l
+    v
+  )
+
+  longopts=(
+    help
+    clean
+    jobs
+    load-average
+    verbose
+    ninja-args
+    vs-args
+    xcode-args
+  )
+
+  local cur prev
+  if _get_comp_words_by_ref cur prev &>/dev/null; then
+    if [[ ${prev:0:2} == -- ]] && _meson_complete_option "${prev:2}" "$cur"; then
+      return
+    elif [[ ${prev:0:1} == - ]] && [[ ${prev:1:2} != - ]] && _meson_complete_option "${prev:1}"; then
+      return
+    fi
+  else
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    _filedir -d
+
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+}
+
+_meson-devenv() {
+  shortopts=(
+    h
+    w
+  )
+
+  longopts=(
+    dump
+    dump-format
+    help
+    workdir
+  )
+
+  local cur prev
+  if _get_comp_words_by_ref -n ':' cur prev &>/dev/null; then
+    case $prev in
+      -C | -w | --workdir)
+        _filedir -d
+        return
+        ;;
+
+      --dump)
+        _filedir
+        return
+        ;;
+
+      --dump-format)
+        dump_formats=(
+          sh
+          export
+          vscode
+        )
+
+        COMPREPLY+=($(compgen -W '${dump_formats[*]}' -- "$cur"))
+        return
+        ;;
+    esac
+  else
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+}
+
+_meson-env2mfile() {
+  shortopts=(
+    h
+    o
+  )
+
+  longopts=(
+    cpu
+    cpu-family
+    cross
+    debarch
+    endian
+    gccsuffix
+    help
+    kernel
+    native
+    subsystem
+    system
+  )
+
+  local cur prev
+  if _get_comp_words_by_ref -n ':' cur prev &>/dev/null; then
+    case $prev in
+      --endian)
+        endianness=(
+          big
+          little
+        )
+
+        COMPREPLY+=($(compgen -W '${endianness[*]}' -- "$cur"))
+        return
+        ;;
+
+      -o)
+        _filedir
+        return
+        ;;
+    esac
+  else
+    cur="${COMP_WORDS[COMP_CWORD]}"
+  fi
+
+  if ! _meson_compgen_options "$cur"; then
+    if [[ -z $cur ]]; then
+      COMPREPLY+=($(compgen -P '--' -W '${longopts[*]}'))
+      COMPREPLY+=($(compgen -P '-' -W '${shortopts[*]}'))
+    fi
+  fi
+}

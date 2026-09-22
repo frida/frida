@@ -1,0 +1,19 @@
+include meson.build
+include frida/meson.build
+include frida/extension.version
+recursive-include frida/frida_bindgen *.py *.c *.h
+recursive-include frida-bindgen *.py
+include subprojects/frida-core.wrap
+
+include BSDmakefile
+include Makefile
+include configure
+include configure.bat
+include make.bat
+include releng/*.py
+include releng/*.toml
+graft releng/devkit-assets/
+graft releng/meson-scripts/
+include releng/meson/meson.py
+graft releng/meson/mesonbuild/
+graft releng/tomlkit/tomlkit/

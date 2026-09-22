@@ -1,0 +1,52 @@
+name: Publish to npm
+
+on:
+  repository_dispatch:
+    types: [publish-prod-started]
+
+  workflow_dispatch:
+    inputs:
+      frida_version:
+        description: "version to publish (e.g. 17.0.0)"
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-publish-frida-${{ github.event.client_payload.frida_version || inputs.frida_version || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Build & publish
+    runs-on: ubuntu-latest
+    env:
+      FRIDA_VERSION: ${{ github.event.client_payload.frida_version || inputs.frida_version }}
+    steps:
+      - name: Validate inputs
+        shell: bash
+        run: |
+          if [[ -z "${FRIDA_VERSION}" ]]; then
+            echo "FRIDA_VERSION is required."
+            exit 1
+          fi
+          echo "FRIDA_VERSION=${FRIDA_VERSION}"
+      - name: Check out repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.FRIDA_VERSION }}
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Build
+        run: |
+          npm version "${FRIDA_VERSION}" --no-git-tag-version
+          ./configure -- -Dfrida-core:compat=disabled
+          make
+          npm ci
+      - name: Publish to npm with provenance
+        run: npm publish --provenance

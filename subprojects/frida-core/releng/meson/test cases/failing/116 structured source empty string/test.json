@@ -1,0 +1,7 @@
+{
+    "stdout": [
+        {
+            "line": "test cases/failing/116 structured source empty string/meson.build:9:2: ERROR: structured_sources: keys to dictionary argument may not be an empty string."
+        }
+    ]
+}

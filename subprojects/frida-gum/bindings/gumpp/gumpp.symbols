@@ -1,0 +1,15 @@
+_Interceptor_obtain
+_Backtracer_make_accurate
+_Backtracer_make_fuzzy
+_ReturnAddressDetails_from_address
+_SanityChecker_new
+_SanityChecker_new_with_heap_api
+_BusyCycleSampler_new
+_CycleSampler_new
+_MallocCountSampler_new
+_WallClockSampler_new
+_CallCountSampler_new
+_CallCountSampler_new_by_name
+_Profiler_new
+_find_function_ptr
+_find_matching_functions_array

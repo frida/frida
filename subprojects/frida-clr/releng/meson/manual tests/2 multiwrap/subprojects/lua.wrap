@@ -1,0 +1,11 @@
+[wrap-file]
+directory = lua-5.3.0
+
+source_url = http://www.lua.org/ftp/lua-5.3.0.tar.gz
+source_filename = lua-5.3.0.tar.gz
+source_hash = ae4a5eb2d660515eb191bfe3e061f2b8ffe94dce73d32cfd0de090ddcc0ddb01
+
+
+patch_url = https://wrapdb.mesonbuild.com/v1/projects/lua/5.3.0/5/get_zip
+patch_filename = lua-5.3.0-5-wrap.zip
+patch_hash = 439038309a0700adfb67d764b3fe935ed8601b31f819fc369e1438c6e79334dd

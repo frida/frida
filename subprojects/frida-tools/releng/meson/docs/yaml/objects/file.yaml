@@ -1,0 +1,13 @@
+name: file
+long_name: File
+description: Object that stores the path to an existing file
+
+methods:
+- name: full_path
+  returns: str
+  since: 1.4.0
+  description: |
+    Returns a full path pointing to the file. This is useful for printing the
+    path with e.g [[message]] function for debugging purpose.
+    **NOTE:** In most cases using the object itself will do the same job
+    as this and will also allow Meson to setup dependencies correctly.

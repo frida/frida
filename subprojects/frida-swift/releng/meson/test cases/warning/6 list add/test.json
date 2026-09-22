@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/warning/6 list add/meson.build:4: WARNING: Project targets '>=0.59.0' but uses feature introduced in '0.60.0': list.<plus>. The right hand operand was not a list."
+    }
+  ]
+}

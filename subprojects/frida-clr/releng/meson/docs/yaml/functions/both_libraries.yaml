@@ -1,0 +1,15 @@
+name: both_libraries
+returns: both_libs
+since: 0.46.0
+description: |
+  Builds both a static and shared library with the given sources.
+  Positional and keyword arguments are otherwise the same as for
+  [[library]]. Source files will be compiled only once and
+  object files will be reused to build both shared and static libraries,
+  unless `b_staticpic` user option or `pic` argument are set to false in
+  which case sources will be compiled twice.
+
+
+posargs_inherit: library
+varargs_inherit: library
+kwargs_inherit: library

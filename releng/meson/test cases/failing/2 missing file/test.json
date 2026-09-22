@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/2 missing file/meson.build:3:0: ERROR: File missing.c does not exist."
+    }
+  ]
+}

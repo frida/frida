@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/30 invalid man extension/meson.build:2:5: ERROR: Man file must have a file extension of a number between 1 and 9"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "nest": [
+    [
+      {
+        "type": "string",
+        "value": "a"
+      }
+    ],
+    [
+      {
+        "type": "string",
+        "value": "b"
+      }
+    ]
+  ]
+}

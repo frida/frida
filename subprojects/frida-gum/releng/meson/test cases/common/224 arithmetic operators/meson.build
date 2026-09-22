@@ -1,0 +1,8 @@
+project('arithmetic operators')
+assert(5 - 3 - 1 == 1)
+assert(5 - (3 - 1) == 3)
+assert(5 - 1 * 3 - 3 == -1)
+assert(420 - 300 - 51 == 69)
+assert(1000 / 2 / 2 / 2 == 125)
+assert(4 * 9 / 3 % 8 - 3 - 10 / 2 == -4)
+assert(94 - 30 + (2 - (40 - 6 + 7) - 9) - 10 == 6)

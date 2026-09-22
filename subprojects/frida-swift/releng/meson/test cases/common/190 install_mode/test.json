@@ -1,0 +1,22 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/bin/runscript.sh"},
+    {"type": "exe", "file": "usr/bin/trivialprog"},
+    {"type": "pdb", "file": "usr/bin/trivialprog"},
+    {"type": "file", "file": "usr/include/config.h"},
+    {"type": "file", "file": "usr/include/rootdir.h"},
+    {"type": "file", "file": "usr/libtest/libstat.a"},
+    {"type": "file", "file": "usr/share/man/man1/foo.1"},
+    {"type": "file", "file": "usr/share/sub1/second.dat"},
+    {"type": "file", "file": "usr/share/sub2/stub"},
+    {"type": "file", "file": "usr/subdir/data.dat"}
+  ],
+  "do_not_set_opts": ["libdir"],
+  "stdout": [
+    {
+      "line": ".* DEPRECATION: install_mode with the sticky bit on a file",
+      "match": "re",
+      "count": 3
+    }
+  ]
+}

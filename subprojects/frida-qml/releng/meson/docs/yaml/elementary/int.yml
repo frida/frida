@@ -1,0 +1,28 @@
+name: int
+long_name: Integer
+description: All integer numbers. See [Numbers](Syntax.md#numbers) for more information.
+
+methods:
+- name: is_even
+  returns: bool
+  description: Returns true if the number is even.
+
+- name: is_odd
+  returns: bool
+  description: Returns true if the number is odd
+
+- name: to_string
+  returns: str
+  description: Returns the value of the number as a string.
+
+  optargs:
+    fill:
+      type: int
+      description: |
+        Left fill the string with zeros until it reaches the length
+        specified by this argument. A leading negative sign counts towards
+        the length, and is handled by inserting the padding after the `-`
+        character rather than before. The original string is returned if the
+        value provided is less than or equal to the former's length.
+
+

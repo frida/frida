@@ -1,0 +1,21 @@
+name: structured_sources
+returns: structured_src
+since: 0.62.0
+description: |
+  Create a StructuredSource object, which is opaque and may be passed as a source
+  to any build_target (including static_library, shared_library, executable,
+  etc.). This is useful for languages like Rust, which use the filesystem layout
+  to determine import names. This is only allowed in Rust targets, and cannot be
+  mixed with non structured inputs.
+
+posargs:
+  root:
+    type: list[str | file | custom_tgt | custom_idx | generated_list]
+    description: Sources to put at the root of the generated structure
+
+optargs:
+  additional:
+    type: dict[str | file | custom_tgt | custom_idx | generated_list]
+    description: |
+      Additional sources, where the key is the directory under the root to place
+      the values

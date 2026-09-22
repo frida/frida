@@ -1,0 +1,7 @@
+project('install umask', 'c')
+executable('prog', 'prog.c', install : true)
+install_headers('sample.h')
+install_man('prog.1')
+install_data('datafile.cat', install_dir : get_option('prefix') + '/share')
+install_subdir('subdir', install_dir : get_option('prefix') + '/share')
+meson.add_install_script('myinstall.py', 'share', 'file.dat')

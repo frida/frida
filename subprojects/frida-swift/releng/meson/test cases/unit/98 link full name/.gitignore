@@ -1,0 +1,5 @@
+*.a
+*.o
+a.out
+libtestprovider.a
+build

@@ -1,0 +1,10 @@
+{
+    "stdout": [
+        {
+            "line": "test cases/failing/109 cmake executable dependency/meson.build:9:14: ERROR: main is an executable and does not support the dependency() method. Use target() instead."
+        }
+    ],
+    "tools": {
+        "cmake": ">=3.14"
+    }
+}

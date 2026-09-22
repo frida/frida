@@ -1,0 +1,8 @@
+{
+    "stdout": [
+        {
+            "match": "re",
+            "line": "test cases/failing/108 empty fallback/meson.build:6:0: ERROR: Dependency \"foo\" not found.*"
+        }
+    ]
+}

@@ -1,0 +1,5 @@
+/build/
+/deps/
+/subprojects/*
+/.build/
+__pycache__/

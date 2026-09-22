@@ -1,0 +1,9 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/share/appdir/config2.h"},
+    {"type": "file", "file": "usr/share/appdir/config2b.h"},
+    {"type": "file", "file": "usr/share/appdireh/config2-1.h"},
+    {"type": "file", "file": "usr/share/appdirok/config2-2.h"},
+    {"type": "file", "file": "usr/share/configure file test/invalid-utf8-1.bin"}
+  ]
+}

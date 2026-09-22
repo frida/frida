@@ -1,0 +1,39 @@
+name: Set up Apple codesigning certificates
+description: Set up certificates needed for codesigning when building for Apple OSes
+inputs:
+  certificates-p12:
+    required: true
+    description: The certificates to use for codesigning, as a base64-encoded .p12
+  certificates-password:
+    required: true
+    description: The password for the .p12
+  keychain-password:
+    required: true
+    description: The keychain password to use
+runs:
+  using: composite
+  steps:
+    - name: Install the Apple certificates
+      env:
+        CERTIFICATES_P12: ${{ inputs.certificates-p12 }}
+        CERTIFICATES_PASSWORD: ${{ inputs.certificates-password }}
+        KEYCHAIN_PASSWORD: ${{ inputs.keychain-password }}
+      run: |
+        CERTIFICATE_PATH=$RUNNER_TEMP/apple-certificates.p12
+        KEYCHAIN_PATH=$RUNNER_TEMP/frida-signing.keychain-db
+        echo -n "$CERTIFICATES_P12" | base64 -d -o $CERTIFICATE_PATH
+        security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+        security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+        security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+        security import $CERTIFICATE_PATH -P "$CERTIFICATES_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+        security list-keychain -d user -s $KEYCHAIN_PATH
+        rm $CERTIFICATE_PATH
+        (
+          MACOS_CERTID=$(security find-identity -v -p codesigning | grep "Developer ID Application: " | awk '{ print $2 }')
+          IOS_CERTID=$(security find-identity -v -p codesigning | grep "Apple Development: " | awk '{ print $2 }')
+          echo MACOS_CERTID=$MACOS_CERTID
+          echo IOS_CERTID=$IOS_CERTID
+          echo WATCHOS_CERTID=$IOS_CERTID
+          echo TVOS_CERTID=$IOS_CERTID
+        ) >> $GITHUB_ENV
+      shell: bash

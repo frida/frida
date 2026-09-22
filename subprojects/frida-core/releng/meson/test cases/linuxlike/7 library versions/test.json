@@ -1,0 +1,14 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/lib/libsome.so"},
+    {"type": "file", "file": "usr/lib/libsome.so.0"},
+    {"type": "file", "file": "usr/lib/libsome.so.1.2.3"},
+    {"type": "file", "file": "usr/lib/libnoversion.so"},
+    {"type": "file", "file": "usr/lib/libonlyversion.so"},
+    {"type": "file", "file": "usr/lib/libonlyversion.so.1"},
+    {"type": "file", "file": "usr/lib/libonlyversion.so.1.4.5"},
+    {"type": "file", "file": "usr/lib/libonlysoversion.so"},
+    {"type": "file", "file": "usr/lib/libonlysoversion.so.5"},
+    {"type": "file", "file": "usr/lib/libmodule.so"}
+  ]
+}

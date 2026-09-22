@@ -1,0 +1,40 @@
+<dict ID="0">
+  <key>IOPlatformInterruptController</key>
+  <string ID="1">IOCPUInterruptController is not serializable</string>
+
+  <key>IOInterruptController0000001A</key>
+  <string ID="2">AppleInterruptController is not serializable</string>
+
+  <key>IOInterruptController00000048</key>
+  <string ID="3">AppleS5L8960XGPIOIC is not serializable</string>
+
+  <key>IOInterruptController00000047</key>
+  <string ID="4">AppleS5L8960XGPIOIC is not serializable</string>
+
+  <key>IOInterruptController00000023</key>
+  <string ID="5">AppleS5L8960XGPIOIC is not serializable</string>
+
+  <key>IOInterruptController00000049</key>
+  <string ID="6">AppleS5L8960XGPIOIC is not serializable</string>
+
+  <key>IOInterruptController0000008B</key>
+  <string ID="7">AppleT8015SPMIController is not serializable</string>
+
+  <key>IOInterruptController00000084</key>
+  <string ID="8">AppleT8015SPMIController is not serializable</string>
+
+  <key>ApplePCIEMSIController-apcie</key>
+  <string ID="9">ApplePCIEMSIController is not serializable</string>
+
+  <key>AppleEmbeddedPCIEPort2</key>
+  <string ID="10">AppleT8030PCIePort is not serializable</string>
+
+  <key>AppleEmbeddedPCIEPort3</key>
+  <string ID="11">AppleT8030PCIePort is not serializable</string>
+
+  <key>IOInterruptController00000087</key>
+  <string ID="12">AppleT8015SPMIController is not serializable</string>
+
+  <key>IOInterruptController0000005F</key>
+  <string ID="13">AppleSMCPMU is not serializable</string>
+</dict>

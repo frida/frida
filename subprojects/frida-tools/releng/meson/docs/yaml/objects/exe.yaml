@@ -1,0 +1,4 @@
+name: exe
+long_name: Executable target
+description: An executable
+extends: build_tgt

@@ -1,0 +1,7 @@
+{
+    "stdout": [
+        {
+            "line": "test cases/failing/109 invalid fstring/meson.build:4:0: ERROR: Identifier \"dict\" does not name a formattable variable (has to be an integer, a string, a floating point number or a boolean)."
+        }
+    ]
+}

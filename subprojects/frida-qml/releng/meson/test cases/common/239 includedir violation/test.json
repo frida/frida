@@ -1,0 +1,9 @@
+{
+  "stdout": [
+    {
+      "line": ".*WARNING: include_directories sandbox violation!",
+      "match": "re",
+      "count": 1
+    }
+  ]
+}

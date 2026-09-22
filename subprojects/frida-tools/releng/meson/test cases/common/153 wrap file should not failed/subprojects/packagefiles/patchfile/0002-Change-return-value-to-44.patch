@@ -1,0 +1,21 @@
+From c2da2e490b09f2e251c7f4ef7c1240acee215fec Mon Sep 17 00:00:00 2001
+From: Xavier Claessens <xavier.claessens@collabora.com>
+Date: Fri, 30 Nov 2018 10:15:47 -0500
+Subject: [PATCH 2/2] Change return value to 44
+
+---
+ foo.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/foo.c b/foo.c
+index e4577b8..54f9119 100644
+--- a/foo.c
++++ b/foo.c
+@@ -1,3 +1,3 @@
+ int dummy_func(void) {
+-    return 43;
++    return 44;
+ }
+-- 
+2.17.1
+

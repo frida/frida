@@ -1,0 +1,20 @@
+[binaries]
+c = '/usr/bin/x86_64-w64-mingw32-gcc'
+cpp = '/usr/bin/x86_64-w64-mingw32-g++'
+ar = '/usr/bin/x86_64-w64-mingw32-ar'
+strip = '/usr/bin/x86_64-w64-mingw32-strip'
+pkg-config = '/usr/bin/x86_64-w64-mingw32-pkg-config'
+windres = '/usr/bin/x86_64-w64-mingw32-windres'
+exe_wrapper = 'broken'
+
+[properties]
+# Directory that contains 'bin', 'lib', etc
+root = '/usr/x86_64-w64-mingw32'
+# Directory that contains 'bin', 'lib', etc for the toolchain and system libraries
+sys_root = '/usr/x86_64-w64-mingw32/sys-root/mingw'
+
+[host_machine]
+system = 'windows'
+cpu_family = 'x86_64'
+cpu = 'x86_64'
+endian = 'little'

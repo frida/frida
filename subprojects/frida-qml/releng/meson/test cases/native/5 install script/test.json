@@ -1,0 +1,8 @@
+{
+  "installed": [
+    {"type": "file", "file": "usr/file.txt"},
+    {"type": "file", "file": "usr/generated.txt"},
+    {"type": "file", "file": "usr/wrapped.txt"},
+    {"type": "file", "file": "usr/wrapped2.txt"}
+  ]
+}

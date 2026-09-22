@@ -1,0 +1,28 @@
+.memory-view {
+    overflow: auto;
+    font-size: 10px;
+}
+
+.memory-view-toolbar {
+    display: flex;
+    background-color: white;
+    padding: 5px 7px;
+    border: 1px solid;
+}
+
+.memory-view-data {
+    padding: 5px 7px;
+    user-select: text;
+}
+
+.memory-view .bp5-control-group .bp5-input {
+    font-size: 12px;
+}
+
+.memory-view .bp5-segmented-control {
+    margin-left: 20px;
+}
+
+.memory-view .bp5-segmented-control .bp5-button {
+    font-size: 12px;
+}

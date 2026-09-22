@@ -1,0 +1,8 @@
+*.pyc
+*.abi3.so
+/*.egg-info/
+/.cache/
+/build/
+/deps/
+/dist/
+/subprojects/*

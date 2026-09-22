@@ -1,0 +1,7 @@
+{
+  "stdout": [
+    {
+      "line": "test cases/failing/13 array arithmetic/meson.build:3:19: ERROR: Object <[ArrayHolder] holds [list]: ['a', 'b']> of type array does not support the `*` operator."
+    }
+  ]
+}
