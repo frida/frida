@@ -1,0 +1,35 @@
+name: Set up PS5 payload SDK
+description: Install the PS5 payload SDK and point the toolchain environment at it
+inputs:
+  version:
+    required: true
+    description: The ps5-payload-dev/sdk release to install
+runs:
+  using: composite
+  steps:
+    - name: Install SDK
+      shell: bash
+      run: |
+        curl -sSLf -o ps5-payload-sdk.zip \
+            "https://github.com/ps5-payload-dev/sdk/releases/download/$VERSION/ps5-payload-sdk.zip"
+        sudo unzip -q ps5-payload-sdk.zip -d /opt
+        rm ps5-payload-sdk.zip
+      env:
+        VERSION: ${{ inputs.version }}
+    - name: Add toolchain to environment
+      shell: bash
+      run: |
+        sdk=/opt/ps5-payload-sdk
+        (
+          echo "PS5_PAYLOAD_SDK=$sdk"
+          echo "LLVM_CONFIG=$(command -v llvm-config)"
+          echo "CC=$sdk/bin/prospero-clang"
+          echo "CXX=$sdk/bin/prospero-clang++"
+          echo "AR=$sdk/bin/prospero-ar"
+          echo "NM=$sdk/bin/prospero-nm"
+          echo "RANLIB=$sdk/bin/prospero-ranlib"
+          echo "STRIP=$sdk/bin/prospero-strip"
+          echo "OBJCOPY=$sdk/bin/prospero-objcopy"
+          echo "READELF=$(command -v llvm-readelf)"
+          echo "LDFLAGS=-lunwind -lresolv"
+        ) >> $GITHUB_ENV

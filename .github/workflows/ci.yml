@@ -5,6 +5,7 @@ on: push
 env:
   FRIDA_COMPILER_MOD: subprojects/frida-core/src/compiler/go.mod
   ANDROID_NDK_VERSION: r29
+  PS5_PAYLOAD_SDK_VERSION: v0.43
 
 jobs:
   publish-prod:
@@ -20,6 +21,7 @@ jobs:
       - package-tvos
       - package-android
       - package-qnx
+      - package-prospero
       - package-apple-universal
       - package-none
       - package-barebone-agent
@@ -759,6 +761,42 @@ jobs:
         uses: ./.github/actions/package-artifact-file
         with:
           name: frida-inject-qnx-${{ matrix.arch }}
+
+  package-prospero:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: frida-prospero
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+      - name: Package Gum devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-gum-devkit-prospero-x86_64
+      - name: Package GumJS devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-gumjs-devkit-prospero-x86_64
+      - name: Package Core devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-core-devkit-prospero-x86_64
+      - name: Package frida-server
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-server-prospero-x86_64
+      - name: Package frida-portal
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-portal-prospero-x86_64
+      - name: Package frida-gadget
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-gadget-prospero-x86_64
+      - name: Package frida-inject
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-inject-prospero-x86_64
 
   package-none:
     if: startsWith(github.ref, 'refs/tags/')
@@ -1868,6 +1906,83 @@ jobs:
           name: frida-gadget-qnx-armeabi
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/32/frida-gadget.so
 
+  frida-prospero:
+    runs-on: ubuntu-latest
+    needs: sdk-prospero
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Set up environment
+        uses: ./.github/actions/setup-linux-env
+        with:
+          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
+          cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Grab frida-core
+        run: python tools/ensure-submodules.py frida-core
+      - name: Install Go toolchain
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ env.FRIDA_COMPILER_MOD }}
+          cache-dependency-path: ${{ env.FRIDA_COMPILER_MOD }}
+      - name: Set up C toolchain
+        uses: ./.github/actions/setup-llvm
+      - name: Set up PS5 payload SDK
+        uses: ./.github/actions/setup-prospero-sdk
+        with:
+          version: ${{ env.PS5_PAYLOAD_SDK_VERSION }}
+      - name: Configure
+        run: >-
+          ./configure
+          "--prefix=$FRIDA_PREFIX"
+          --host=freebsd-x86_64-prospero
+          --enable-portal
+          --
+          -Dfrida-gum:devkits=gum,gumjs
+          -Dfrida-core:devkits=core
+      - name: Compile
+        run: make
+      - name: Install
+        run: make install
+      - name: Upload Gum devkit
+        uses: actions/upload-artifact@v7
+        with:
+          name: frida-gum-devkit-prospero-x86_64
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gum/
+      - name: Upload GumJS devkit
+        uses: actions/upload-artifact@v7
+        with:
+          name: frida-gumjs-devkit-prospero-x86_64
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gumjs/
+      - name: Upload Core devkit
+        uses: actions/upload-artifact@v7
+        with:
+          name: frida-core-devkit-prospero-x86_64
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/core/
+      - name: Upload frida-server
+        uses: actions/upload-artifact@v7
+        with:
+          name: frida-server-prospero-x86_64
+          path: ${{ env.FRIDA_PREFIX }}/bin/frida-server
+      - name: Upload frida-portal
+        uses: actions/upload-artifact@v7
+        with:
+          name: frida-portal-prospero-x86_64
+          path: ${{ env.FRIDA_PREFIX }}/bin/frida-portal
+      - name: Upload frida-inject
+        uses: actions/upload-artifact@v7
+        with:
+          name: frida-inject-prospero-x86_64
+          path: ${{ env.FRIDA_PREFIX }}/bin/frida-inject
+      - name: Upload frida-gadget
+        uses: actions/upload-artifact@v7
+        with:
+          name: frida-gadget-prospero-x86_64
+          path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/64/frida-gadget.so
+
   frida-gum-none:
     needs: sdk-none
     strategy:
@@ -2534,3 +2649,36 @@ jobs:
         env:
           CC: clang
           CXX: clang++
+
+  sdk-prospero:
+    needs: toolchain-linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+      - name: Set up environment
+        uses: ./.github/actions/setup-linux-env
+        with:
+          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
+          cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Check whether the SDK is already published
+        id: sdk
+        run: echo "published=$(releng/deps.py published sdk freebsd-x86_64-prospero)" >> $GITHUB_OUTPUT
+      - name: Set up build prerequisites
+        if: steps.sdk.outputs.published == 'false'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gperf
+          sudo npm install -g cloudflare-cli@5.0.5
+      - name: Set up C toolchain
+        if: steps.sdk.outputs.published == 'false'
+        uses: ./.github/actions/setup-llvm
+      - name: Set up PS5 payload SDK
+        if: steps.sdk.outputs.published == 'false'
+        uses: ./.github/actions/setup-prospero-sdk
+        with:
+          version: ${{ env.PS5_PAYLOAD_SDK_VERSION }}
+      - name: Roll SDK
+        run: releng/deps.py roll sdk freebsd-x86_64-prospero --activate
