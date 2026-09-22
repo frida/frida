@@ -31,5 +31,4 @@ runs:
           echo "STRIP=$sdk/bin/prospero-strip"
           echo "OBJCOPY=$sdk/bin/prospero-objcopy"
           echo "READELF=$(command -v llvm-readelf)"
-          echo "LDFLAGS=-lunwind -lresolv"
         ) >> $GITHUB_ENV
