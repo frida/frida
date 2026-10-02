@@ -861,7 +861,7 @@ jobs:
       matrix:
         include:
           - { arch: x86,    sys: MINGW32,    pkg: 'mingw-w64-i686-gcc'            }
-          - { arch: x86_64, sys: MINGW64,    pkg: 'mingw-w64-x86_64-gcc'          }
+          - { arch: x86_64, sys: UCRT64,     pkg: 'mingw-w64-ucrt-x86_64-gcc'     }
       fail-fast: false
     runs-on: windows-latest
     steps:
