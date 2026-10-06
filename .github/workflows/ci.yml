@@ -1332,7 +1332,7 @@ jobs:
         arch: [x86, x86_64, x86_64-musl, armhf, armhf-musl, armbe8, arm64, arm64be, arm64-musl, mips, mipsel, mips64, mips64el]
       fail-fast: false
     runs-on: ubuntu-latest
-    container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
+    container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:${{ (startsWith(matrix.arch, 'mips') || matrix.arch == 'arm64beilp32') && 'latest' || 'bump-gcc' }}
     steps:
       - name: Check out repo
         uses: actions/checkout@v7
@@ -2508,7 +2508,7 @@ jobs:
         arch: [x86, x86_64, x86_64-musl, armhf, armhf-musl, armbe8, arm64, arm64be, arm64beilp32, arm64-musl]
       fail-fast: false
     runs-on: ubuntu-latest
-    container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
+    container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:${{ (startsWith(matrix.arch, 'mips') || matrix.arch == 'arm64beilp32') && 'latest' || 'bump-gcc' }}
     steps:
       - name: Check out repo
         uses: actions/checkout@v7
@@ -2529,7 +2529,7 @@ jobs:
         arch: [x86, x86_64, x86_64-musl, armhf, armhf-musl, armbe8, arm64, arm64be, arm64beilp32, arm64-musl, mips, mipsel, mips64, mips64el]
       fail-fast: false
     runs-on: ubuntu-latest
-    container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
+    container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:${{ (startsWith(matrix.arch, 'mips') || matrix.arch == 'arm64beilp32') && 'latest' || 'bump-gcc' }}
     steps:
       - name: Check out repo
         uses: actions/checkout@v7
@@ -2556,7 +2556,7 @@ jobs:
         arch: [x86, arm]
       fail-fast: false
     runs-on: ubuntu-latest
-    container: ghcr.io/frida/x-tools-linux-x86:latest
+    container: ghcr.io/frida/x-tools-linux-x86:bump-gcc
     steps:
       - name: Check out repo
         uses: actions/checkout@v7
@@ -2585,7 +2585,7 @@ jobs:
         arch: [x86_64, arm64]
       fail-fast: false
     runs-on: ubuntu-latest
-    container: ghcr.io/frida/x-tools-linux-x86_64:latest
+    container: ghcr.io/frida/x-tools-linux-x86_64:bump-gcc
     steps:
       - name: Check out repo
         uses: actions/checkout@v7
