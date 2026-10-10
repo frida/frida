@@ -1886,7 +1886,7 @@ jobs:
 
   frida-prospero:
     runs-on: ubuntu-latest
-    needs: sdk-prospero
+    needs: [sdk-linux, sdk-prospero]
     steps:
       - name: Check out repo
         uses: actions/checkout@v7
@@ -1962,7 +1962,7 @@ jobs:
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/64/frida-gadget.so
 
   frida-gum-none:
-    needs: sdk-none
+    needs: [sdk-linux, sdk-none]
     strategy:
       matrix:
         machine:
@@ -2039,7 +2039,7 @@ jobs:
         run: releng/deps.py roll sdk macos-arm64e-kernel --activate
 
   frida-gum-macos-kernel:
-    needs: sdk-macos-kernel
+    needs: [sdk-macos, sdk-macos-kernel]
     runs-on: macos-latest
     steps:
       - name: Check out repo
