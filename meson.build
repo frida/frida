@@ -29,20 +29,15 @@ subproject('frida-core', default_options: core_options)
 
 ensure_submodules = [python, files('tools' / 'ensure-submodules.py')]
 
-if get_option('frida_clr') \
+if get_option('frida_net') \
     .disable_auto_if(is_cross_build) \
-    .disable_auto_if(build_machine.system() != 'windows') \
-    .disable_auto_if(get_option('b_vscrt').startswith('mt')) \
     .allowed()
-  run_command(ensure_submodules, 'frida-clr', check: true)
-  if get_option('frida_clr').auto()
-    detect_result = run_command(python, 'subprojects' / 'frida-clr' / 'detect-netfx.py', check: false)
-    build_clr_bindings = detect_result.returncode() == 0
-  else
-    build_clr_bindings = true
-  endif
-  if build_clr_bindings
-    subproject('frida-clr')
+  dotnet = find_program('dotnet', required: false)
+  if get_option('frida_net') \
+      .disable_auto_if(not dotnet.found()) \
+      .allowed()
+    run_command(ensure_submodules, 'frida-net', check: true)
+    subproject('frida-net')
   endif
 endif
 

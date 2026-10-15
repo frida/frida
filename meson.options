@@ -34,7 +34,7 @@ option('inject',
   description: 'Build frida-inject',
 )
 
-option('frida_clr',
+option('frida_net',
   type: 'feature',
   value: 'disabled',
   description: 'Build .NET bindings',

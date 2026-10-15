@@ -13,9 +13,9 @@
 [submodule "frida-swift"]
 	path = subprojects/frida-swift
 	url = https://github.com/frida/frida-swift.git
-[submodule "frida-clr"]
-	path = subprojects/frida-clr
-	url = https://github.com/frida/frida-clr.git
+[submodule "frida-net"]
+	path = subprojects/frida-net
+	url = https://github.com/frida/frida-net.git
 [submodule "frida-qml"]
 	path = subprojects/frida-qml
 	url = https://github.com/frida/frida-qml.git

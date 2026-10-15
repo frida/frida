@@ -19,7 +19,7 @@ from releng.deps import load_dependency_parameters, query_repo_commits
 PROJECT_NAMES_IN_RELEASE_CYCLE = [
     "frida-gum",
     "frida-core",
-    "frida-clr",
+    "frida-net",
     "frida-node",
     "frida-python",
     "frida-qml",
