@@ -155,7 +155,7 @@ def bump_releng(releng: Path):
 
 
 def sync_wrappers(repo: Path):
-    wrappers = sorted((repo / "releng" / "wrappers").iterdir())
+    wrappers = sorted((repo / "releng" / "meson-scripts").iterdir())
     for wrapper in wrappers:
         shutil.copy2(wrapper, repo / wrapper.name)
     run(["git", "add", *[wrapper.name for wrapper in wrappers]], cwd=repo)
