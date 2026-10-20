@@ -28,3 +28,9 @@
 [submodule "releng"]
 	path = releng
 	url = https://github.com/frida/releng.git
+[submodule "efni"]
+	path = subprojects/efni
+	url = https://github.com/frida/efni.git
+[submodule "idun"]
+	path = subprojects/idun
+	url = https://github.com/frida/idun.git
