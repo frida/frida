@@ -3,6 +3,7 @@
 import argparse
 from configparser import ConfigParser
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 from typing import Iterator
@@ -99,6 +100,8 @@ def bump_subproject(name: str, repo: Path):
     else:
         print("\treleng: up-to-date")
 
+    sync_wrappers(repo)
+
     bumped_files: list[Path] = []
     dep_packages = load_dependency_parameters().packages
     for identifier, config, wrapfile in enumerate_git_wraps_in_repo(repo):
@@ -143,6 +146,18 @@ def bump_releng(releng: Path):
         run(["git", "submodule", "update", "--init", "--depth", "1", "--recursive", "releng"], cwd=releng.parent)
     run(["git", "checkout", "main"], cwd=releng)
     run(["git", "pull"], cwd=releng)
+
+
+def sync_wrappers(repo: Path):
+    wrappers = sorted((repo / "releng" / "wrappers").iterdir())
+    for wrapper in wrappers:
+        shutil.copy2(wrapper, repo / wrapper.name)
+    run(["git", "add", *[wrapper.name for wrapper in wrappers]], cwd=repo)
+    if run(["git", "diff", "--cached", "--name-only"], cwd=repo).stdout.strip():
+        run(["git", "commit", "-m", "build: Sync wrappers with releng"], cwd=repo)
+        print("\twrappers: synced")
+    else:
+        print("\twrappers: up-to-date")
 
 
 def bump_submodules() -> list[str]:
