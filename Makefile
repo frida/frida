@@ -1,4 +1,4 @@
-PYTHON ?= $(shell which python3 >/dev/null && echo python3 || echo python)
+PYTHON ?= $(shell command -v python3 >/dev/null && echo python3 || echo python)
 
 all $(MAKECMDGOALS):
 	@$(PYTHON) \
