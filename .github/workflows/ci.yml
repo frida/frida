@@ -1,11 +1,22 @@
 name: CI
 
-on: push
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      deps-rebuild:
+        description: Dependencies to build when rolling, e.g. v8,vala, or empty for all
+        required: false
+      deps-base:
+        description: Take all other dependencies from this version, e.g. 20261019
+        required: false
 
 env:
   FRIDA_COMPILER_MOD: subprojects/frida-core/src/compiler/go.mod
   ANDROID_NDK_VERSION: r29
   PS5_PAYLOAD_SDK_VERSION: v0.43
+  FRIDA_DEPS_REBUILD: ${{ inputs.deps-rebuild }}
+  FRIDA_DEPS_BASE: ${{ inputs.deps-base }}
 
 jobs:
   publish-prod:
