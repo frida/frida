@@ -17,6 +17,11 @@ sys.path.insert(0, str(ROOT_DIR))
 from releng.deps import load_dependency_parameters, query_repo_commits
 
 
+LIBRARY_NAMES = [
+    "efni",
+    "idun",
+]
+
 PROJECT_NAMES_IN_RELEASE_CYCLE = [
     "frida-gum",
     "frida-core",
@@ -61,7 +66,8 @@ def main(argv: list[str]):
 
 
 def bump():
-    projects = list(enumerate_projects_in_release_cycle())
+    projects = [(name, ROOT_DIR / "subprojects" / name) for name in LIBRARY_NAMES]
+    projects += enumerate_projects_in_release_cycle()
     projects.append(("frida-tools", ROOT_DIR / "subprojects" / "frida-tools"))
 
     assert_no_local_changes(ROOT_DIR)
